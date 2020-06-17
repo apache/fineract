@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class OfficeHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(OfficeHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OfficeHelper.class);
     private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;

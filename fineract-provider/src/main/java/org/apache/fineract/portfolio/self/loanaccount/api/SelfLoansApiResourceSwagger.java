@@ -31,7 +31,7 @@ final class SelfLoansApiResourceSwagger {
     private SelfLoansApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfLoansLoanIdResponse")
-    public final static class GetSelfLoansLoanIdResponse {
+    public static final class GetSelfLoansLoanIdResponse {
 
         private GetSelfLoansLoanIdResponse() {}
 
@@ -469,7 +469,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
+    public static final class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
 
         private GetSelfLoansLoanIdTransactionsTransactionIdResponse() {}
 
@@ -516,7 +516,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdChargesResponse")
-    public final static class GetSelfLoansLoanIdChargesResponse {
+    public static final class GetSelfLoansLoanIdChargesResponse {
 
         private GetSelfLoansLoanIdChargesResponse() {}
 
@@ -574,7 +574,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansTemplateResponse")
-    public final static class GetSelfLoansTemplateResponse {
+    public static final class GetSelfLoansTemplateResponse {
 
         private GetSelfLoansTemplateResponse() {}
 
@@ -607,7 +607,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansRequest")
-    public final static class PostSelfLoansRequest {
+    public static final class PostSelfLoansRequest {
 
         private PostSelfLoansRequest() {}
 
@@ -691,7 +691,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansResponse")
-    public final static class PostSelfLoansResponse {
+    public static final class PostSelfLoansResponse {
 
         private PostSelfLoansResponse() {}
 
@@ -706,7 +706,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdRequest")
-    public final static class PutSelfLoansLoanIdRequest {
+    public static final class PutSelfLoansLoanIdRequest {
 
         private PutSelfLoansLoanIdRequest() {}
 
@@ -743,7 +743,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdResponse")
-    public final static class PutSelfLoansLoanIdResponse {
+    public static final class PutSelfLoansLoanIdResponse {
 
         private PutSelfLoansLoanIdResponse() {}
 
@@ -769,7 +769,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdRequest")
-    public final static class PostSelfLoansLoanIdRequest {
+    public static final class PostSelfLoansLoanIdRequest {
 
         private PostSelfLoansLoanIdRequest() {}
 
@@ -784,7 +784,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdResponse")
-    public final static class PostSelfLoansLoanIdResponse {
+    public static final class PostSelfLoansLoanIdResponse {
 
         private PostSelfLoansLoanIdResponse() {}
 

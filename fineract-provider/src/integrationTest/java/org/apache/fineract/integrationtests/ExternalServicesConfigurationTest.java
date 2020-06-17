@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExternalServicesConfigurationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ExternalServicesConfigurationHelper externalServicesConfigurationHelper;

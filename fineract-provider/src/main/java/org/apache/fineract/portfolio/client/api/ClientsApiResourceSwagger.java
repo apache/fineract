@@ -32,7 +32,7 @@ final class ClientsApiResourceSwagger {
     private ClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsTemplateResponse")
-    public final static class GetClientsTemplateResponse {
+    public static final class GetClientsTemplateResponse {
 
         private GetClientsTemplateResponse() {}
 
@@ -126,7 +126,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsResponse")
-    public final static class GetClientsResponse {
+    public static final class GetClientsResponse {
 
         private GetClientsResponse() {}
 
@@ -169,7 +169,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdResponse")
-    public final static class GetClientsClientIdResponse {
+    public static final class GetClientsClientIdResponse {
 
         private GetClientsClientIdResponse() {}
 
@@ -237,7 +237,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsRequest")
-    public final static class PostClientsRequest {
+    public static final class PostClientsRequest {
 
         private PostClientsRequest() {}
 
@@ -258,7 +258,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsResponse")
-    public final static class PostClientsResponse {
+    public static final class PostClientsResponse {
 
         private PostClientsResponse() {}
 
@@ -273,7 +273,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdRequest")
-    public final static class PutClientsClientIdRequest {
+    public static final class PutClientsClientIdRequest {
 
         private PutClientsClientIdRequest() {}
 
@@ -282,7 +282,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdResponse")
-    public final static class PutClientsClientIdResponse {
+    public static final class PutClientsClientIdResponse {
 
         private PutClientsClientIdResponse() {}
 
@@ -296,13 +296,13 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteClientsClientIdRequest")
-    public final static class DeleteClientsClientIdRequest {
+    public static final class DeleteClientsClientIdRequest {
 
         private DeleteClientsClientIdRequest() {}
     }
 
     @ApiModel(value = "DeleteClientsClientIdResponse")
-    public final static class DeleteClientsClientIdResponse {
+    public static final class DeleteClientsClientIdResponse {
 
         private DeleteClientsClientIdResponse() {}
 
@@ -315,7 +315,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdRequest")
-    public final static class PostClientsClientIdRequest {
+    public static final class PostClientsClientIdRequest {
 
         private PostClientsClientIdRequest() {}
 
@@ -324,7 +324,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdResponse")
-    public final static class PostClientsClientIdResponse {
+    public static final class PostClientsClientIdResponse {
 
         private PostClientsClientIdResponse() {}
 
@@ -335,7 +335,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdAccountsResponse")
-    public final static class GetClientsClientIdAccountsResponse {
+    public static final class GetClientsClientIdAccountsResponse {
 
         private GetClientsClientIdAccountsResponse() {}
 

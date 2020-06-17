@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class SavingsStatusChecker {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsStatusChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsStatusChecker.class);
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
 
     public static void verifySavingsIsApproved(final HashMap savingsStatusHashMap) {

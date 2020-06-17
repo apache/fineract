@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FundWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FundWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer;

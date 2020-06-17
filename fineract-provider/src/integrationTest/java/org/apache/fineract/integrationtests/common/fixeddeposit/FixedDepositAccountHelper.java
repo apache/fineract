@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes" })
 public class FixedDepositAccountHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositAccountHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositAccountHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -71,7 +71,7 @@ public class FixedDepositAccountHelper {
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
-    public final static String DEPOSIT_AMOUNT = "100000";
+    public static final String DEPOSIT_AMOUNT = "100000";
     private String newDepositAmount = null;
 
     private String interestCompoundingPeriodType = MONTHLY;

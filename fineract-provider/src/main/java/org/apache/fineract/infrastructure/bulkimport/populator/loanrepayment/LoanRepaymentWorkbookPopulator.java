@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanRepaymentWorkbookPopulator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentWorkbookPopulator.class);
     private OfficeSheetPopulator officeSheetPopulator;
     private ClientSheetPopulator clientSheetPopulator;
     private ExtrasSheetPopulator extrasSheetPopulator;

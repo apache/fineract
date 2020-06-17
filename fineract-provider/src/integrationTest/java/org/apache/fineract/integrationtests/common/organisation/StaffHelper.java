@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class StaffHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(StaffHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StaffHelper.class);
     private static final String TRANSFER_STAFF_URL = "/fineract-provider/api/v1/groups";
 
     private static final String CREATE_STAFF_URL = "/fineract-provider/api/v1/staff";

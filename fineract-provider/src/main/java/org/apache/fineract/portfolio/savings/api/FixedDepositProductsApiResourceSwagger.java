@@ -31,7 +31,7 @@ final class FixedDepositProductsApiResourceSwagger {
     private FixedDepositProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostFixedDepositProductsRequest")
-    public final static class PostFixedDepositProductsRequest {
+    public static final class PostFixedDepositProductsRequest {
 
         private PostFixedDepositProductsRequest() {}
 
@@ -106,7 +106,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositProductsResponse")
-    public final static class PostFixedDepositProductsResponse {
+    public static final class PostFixedDepositProductsResponse {
 
         private PostFixedDepositProductsResponse() {}
 
@@ -115,7 +115,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositProductsProductIdRequest")
-    public final static class PutFixedDepositProductsProductIdRequest {
+    public static final class PutFixedDepositProductsProductIdRequest {
 
         private PutFixedDepositProductsProductIdRequest() {}
 
@@ -130,7 +130,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositProductsProductIdResponse")
-    public final static class PutFixedDepositProductsProductIdResponse {
+    public static final class PutFixedDepositProductsProductIdResponse {
 
         private PutFixedDepositProductsProductIdResponse() {}
 
@@ -150,7 +150,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositProductsResponse")
-    public final static class GetFixedDepositProductsResponse {
+    public static final class GetFixedDepositProductsResponse {
 
         private GetFixedDepositProductsResponse() {}
 
@@ -285,7 +285,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositProductsProductIdResponse")
-    public final static class GetFixedDepositProductsProductIdResponse {
+    public static final class GetFixedDepositProductsProductIdResponse {
 
         private GetFixedDepositProductsProductIdResponse() {}
 
@@ -572,7 +572,7 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteFixedDepositProductsProductIdResponse")
-    public final static class DeleteFixedDepositProductsProductIdResponse {
+    public static final class DeleteFixedDepositProductsProductIdResponse {
 
         private DeleteFixedDepositProductsProductIdResponse() {}
 

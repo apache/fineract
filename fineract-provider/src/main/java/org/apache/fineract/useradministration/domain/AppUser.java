@@ -61,7 +61,7 @@ import org.springframework.security.core.userdetails.User;
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AppUser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppUser.class);
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;

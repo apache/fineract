@@ -32,7 +32,7 @@ final class AccountsApiResourceSwagger {
     private AccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountsTypeTemplateResponse")
-    public final static class GetAccountsTypeTemplateResponse {
+    public static final class GetAccountsTypeTemplateResponse {
 
         private GetAccountsTypeTemplateResponse() {}
 
@@ -58,7 +58,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountsTypeAccountIdResponse")
-    public final static class GetAccountsTypeAccountIdResponse {
+    public static final class GetAccountsTypeAccountIdResponse {
 
         private GetAccountsTypeAccountIdResponse() {}
 
@@ -323,7 +323,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountsTypeResponse")
-    public final static class GetAccountsTypeResponse {
+    public static final class GetAccountsTypeResponse {
 
         private GetAccountsTypeResponse() {}
 
@@ -407,7 +407,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeRequest")
-    public final static class PostAccountsTypeRequest {
+    public static final class PostAccountsTypeRequest {
 
         private PostAccountsTypeRequest() {}
 
@@ -453,7 +453,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeResponse")
-    public final static class PostAccountsTypeResponse {
+    public static final class PostAccountsTypeResponse {
 
         private PostAccountsTypeResponse() {}
 
@@ -462,7 +462,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeAccountIdRequest")
-    public final static class PostAccountsTypeAccountIdRequest {
+    public static final class PostAccountsTypeAccountIdRequest {
 
         private PostAccountsTypeAccountIdRequest() {}
 
@@ -478,7 +478,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeAccountIdResponse")
-    public final static class PostAccountsTypeAccountIdResponse {
+    public static final class PostAccountsTypeAccountIdResponse {
 
         private PostAccountsTypeAccountIdResponse() {}
 
@@ -487,7 +487,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutAccountsTypeAccountIdRequest")
-    public final static class PutAccountsTypeAccountIdRequest {
+    public static final class PutAccountsTypeAccountIdRequest {
 
         private PutAccountsTypeAccountIdRequest() {}
 
@@ -502,7 +502,7 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutAccountsTypeAccountIdResponse")
-    public final static class PutAccountsTypeAccountIdResponse {
+    public static final class PutAccountsTypeAccountIdResponse {
 
         private PutAccountsTypeAccountIdResponse() {}
 

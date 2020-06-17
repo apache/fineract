@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoanApplicationTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
     private static final String DAYS = "0";
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";

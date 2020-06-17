@@ -31,7 +31,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     private FixedDepositAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetFixedDepositAccountsTemplateResponse")
-    public final static class GetFixedDepositAccountsTemplateResponse {
+    public static final class GetFixedDepositAccountsTemplateResponse {
 
         private GetFixedDepositAccountsTemplateResponse() {}
 
@@ -53,7 +53,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositAccountsResponse")
-    public final static class GetFixedDepositAccountsResponse {
+    public static final class GetFixedDepositAccountsResponse {
 
         private GetFixedDepositAccountsResponse() {}
 
@@ -258,7 +258,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsRequest")
-    public final static class PostFixedDepositAccountsRequest {
+    public static final class PostFixedDepositAccountsRequest {
 
         private PostFixedDepositAccountsRequest() {}
 
@@ -281,7 +281,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsResponse")
-    public final static class PostFixedDepositAccountsResponse {
+    public static final class PostFixedDepositAccountsResponse {
 
         private PostFixedDepositAccountsResponse() {}
 
@@ -296,7 +296,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositAccountsAccountIdResponse")
-    public final static class GetFixedDepositAccountsAccountIdResponse {
+    public static final class GetFixedDepositAccountsAccountIdResponse {
 
         private GetFixedDepositAccountsAccountIdResponse() {}
 
@@ -450,7 +450,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositAccountsAccountIdRequest")
-    public final static class PutFixedDepositAccountsAccountIdRequest {
+    public static final class PutFixedDepositAccountsAccountIdRequest {
 
         private PutFixedDepositAccountsAccountIdRequest() {}
 
@@ -461,7 +461,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositAccountsAccountIdResponse")
-    public final static class PutFixedDepositAccountsAccountIdResponse {
+    public static final class PutFixedDepositAccountsAccountIdResponse {
 
         private PutFixedDepositAccountsAccountIdResponse() {}
 
@@ -487,13 +487,13 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsAccountIdRequest")
-    public final static class PostFixedDepositAccountsAccountIdRequest {
+    public static final class PostFixedDepositAccountsAccountIdRequest {
 
         private PostFixedDepositAccountsAccountIdRequest() {}
     }
 
     @ApiModel(value = "PostFixedDepositAccountsAccountIdResponse")
-    public final static class PostFixedDepositAccountsAccountIdResponse {
+    public static final class PostFixedDepositAccountsAccountIdResponse {
 
         private PostFixedDepositAccountsAccountIdResponse() {}
 
@@ -508,7 +508,7 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteFixedDepositAccountsAccountIdResponse")
-    public final static class DeleteFixedDepositAccountsAccountIdResponse {
+    public static final class DeleteFixedDepositAccountsAccountIdResponse {
 
         private DeleteFixedDepositAccountsAccountIdResponse() {}
 

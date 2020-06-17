@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class VariableInstallmentsFlatHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(VariableInstallmentsFlatHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VariableInstallmentsFlatHelper.class);
 
     public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule,
             final Account... accounts) {

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
 
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?username=mifos&password=password&"

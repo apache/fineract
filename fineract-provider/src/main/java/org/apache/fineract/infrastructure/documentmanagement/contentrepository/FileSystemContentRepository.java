@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileSystemContentRepository implements ContentRepository {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FileSystemContentRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
     public static final String FINERACT_BASE_DIR = System.getProperty("user.home") + File.separator + ".fineract";
 

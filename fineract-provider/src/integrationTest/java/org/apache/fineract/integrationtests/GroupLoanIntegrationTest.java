@@ -53,7 +53,7 @@ public class GroupLoanIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
-    private final static Logger LOG = LoggerFactory.getLogger(GroupLoanIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupLoanIntegrationTest.class);
 
     @BeforeEach
     public void setup() {

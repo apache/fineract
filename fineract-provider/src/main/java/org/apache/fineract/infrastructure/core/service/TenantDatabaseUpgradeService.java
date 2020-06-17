@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TenantDatabaseUpgradeService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TenantDatabaseUpgradeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TenantDatabaseUpgradeService.class);
 
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;

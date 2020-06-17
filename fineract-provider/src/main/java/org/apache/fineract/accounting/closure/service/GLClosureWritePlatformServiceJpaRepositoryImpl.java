@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosureWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;

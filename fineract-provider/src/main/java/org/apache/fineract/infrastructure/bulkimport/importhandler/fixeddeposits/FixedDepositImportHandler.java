@@ -56,7 +56,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FixedDepositImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositImportHandler.class);
     private Workbook workbook;
 
     private List<FixedDepositAccountData> savings;

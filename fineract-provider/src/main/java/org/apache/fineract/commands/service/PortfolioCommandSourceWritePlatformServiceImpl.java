@@ -50,7 +50,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final FromJsonHelper fromApiJsonHelper;
     private final CommandProcessingService processAndLogCommandService;
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
-    private final static Logger LOG = LoggerFactory.getLogger(PortfolioCommandSourceWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PortfolioCommandSourceWritePlatformServiceImpl.class);
 
     @Autowired
     public PortfolioCommandSourceWritePlatformServiceImpl(final PlatformSecurityContext context,

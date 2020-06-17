@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClientLoanIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
 
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";

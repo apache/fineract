@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class LoanDisbursalDateValidationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanDisbursalDateValidationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanDisbursalDateValidationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClientStatusChecker {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientStatusChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientStatusChecker.class);
 
     public static void verifyClientIsActive(final HashMap<String, Object> clientStatusHashMap) {
         assertEquals(300, (int) clientStatusHashMap.get("id"));

@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FloatingRateWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FloatingRateWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final FloatingRateDataValidator fromApiJsonDeserializer;
     private final FloatingRateRepositoryWrapper floatingRateRepository;

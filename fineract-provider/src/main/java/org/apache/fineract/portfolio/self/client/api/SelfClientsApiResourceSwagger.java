@@ -33,7 +33,7 @@ final class SelfClientsApiResourceSwagger {
     private SelfClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfClientsResponse")
-    public final static class GetSelfClientsResponse {
+    public static final class GetSelfClientsResponse {
 
         private GetSelfClientsResponse() {}
 
@@ -78,7 +78,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdResponse")
-    public final static class GetSelfClientsClientIdResponse {
+    public static final class GetSelfClientsClientIdResponse {
 
         private GetSelfClientsClientIdResponse() {}
 
@@ -134,7 +134,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdAccountsResponse")
-    public final static class GetSelfClientsClientIdAccountsResponse {
+    public static final class GetSelfClientsClientIdAccountsResponse {
 
         private GetSelfClientsClientIdAccountsResponse() {}
 
@@ -261,7 +261,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdChargesResponse")
-    public final static class GetSelfClientsClientIdChargesResponse {
+    public static final class GetSelfClientsClientIdChargesResponse {
 
         private GetSelfClientsClientIdChargesResponse() {}
 
@@ -332,7 +332,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdChargesChargeIdResponse")
-    public final static class GetSelfClientsClientIdChargesChargeIdResponse {
+    public static final class GetSelfClientsClientIdChargesChargeIdResponse {
 
         private GetSelfClientsClientIdChargesChargeIdResponse() {}
 
@@ -370,7 +370,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsResponse")
-    public final static class GetSelfClientsClientIdTransactionsResponse {
+    public static final class GetSelfClientsClientIdTransactionsResponse {
 
         private GetSelfClientsClientIdTransactionsResponse() {}
 
@@ -414,7 +414,7 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsTransactionIdResponse")
-    public final static class GetSelfClientsClientIdTransactionsTransactionIdResponse {
+    public static final class GetSelfClientsClientIdTransactionsTransactionIdResponse {
 
         private GetSelfClientsClientIdTransactionsTransactionIdResponse() {}
 

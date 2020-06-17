@@ -50,7 +50,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JournalEntriesImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JournalEntriesImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalEntriesImportHandler.class);
     private Workbook workbook;
     private List<JournalEntryData> gltransaction;
     private LocalDate transactionDate;

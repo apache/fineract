@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRolesWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GroupRolesWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupRolesWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final GroupRepositoryWrapper groupRepository;

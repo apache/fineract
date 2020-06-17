@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class RecurringDepositAccountStatusChecker {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositAccountStatusChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositAccountStatusChecker.class);
     private static final String RECURRING_DEPOSIT_ACCOUNT_URL = "/fineract-provider/api/v1/recurringdepositaccounts";
 
     public static void verifyRecurringDepositIsApproved(final HashMap recurringDepositStatusHashMap) {

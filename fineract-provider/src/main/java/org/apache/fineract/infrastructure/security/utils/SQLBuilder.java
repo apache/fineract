@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public class SQLBuilder {
 
-    private final static Pattern ATOZ = Pattern.compile("([a-zA-Z_][a-zA-Z0-9_-]*\\.)?[a-zA-Z_-][a-zA-Z0-9_-]*");
+    private static final Pattern ATOZ = Pattern.compile("([a-zA-Z_][a-zA-Z0-9_-]*\\.)?[a-zA-Z_-][a-zA-Z0-9_-]*");
 
     // This holds the query string, with the '?' placeholders, but no argument
     // values

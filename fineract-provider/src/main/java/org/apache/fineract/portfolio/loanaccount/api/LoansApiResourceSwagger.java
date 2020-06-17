@@ -31,7 +31,7 @@ final class LoansApiResourceSwagger {
     private LoansApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansTemplateResponse")
-    public final static class GetLoansTemplateResponse {
+    public static final class GetLoansTemplateResponse {
 
         private GetLoansTemplateResponse() {}
 
@@ -64,7 +64,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansLoanIdResponse")
-    public final static class GetLoansLoanIdResponse {
+    public static final class GetLoansLoanIdResponse {
 
         private GetLoansLoanIdResponse() {}
 
@@ -472,7 +472,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansResponse")
-    public final static class GetLoansResponse {
+    public static final class GetLoansResponse {
 
         private GetLoansResponse() {}
 
@@ -580,7 +580,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoansLoanIdRequest")
-    public final static class PutLoansLoanIdRequest {
+    public static final class PutLoansLoanIdRequest {
 
         private PutLoansLoanIdRequest() {}
 
@@ -617,7 +617,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoansLoanIdResponse")
-    public final static class PutLoansLoanIdResponse {
+    public static final class PutLoansLoanIdResponse {
 
         private PutLoansLoanIdResponse() {}
 
@@ -658,7 +658,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdRequest")
-    public final static class PostLoansLoanIdRequest {
+    public static final class PostLoansLoanIdRequest {
 
         private PostLoansLoanIdRequest() {}
 

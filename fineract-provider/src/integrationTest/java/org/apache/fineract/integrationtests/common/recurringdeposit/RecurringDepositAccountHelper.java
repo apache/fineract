@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes" })
 public class RecurringDepositAccountHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositAccountHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositAccountHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

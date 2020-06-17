@@ -99,7 +99,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampaignWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
 
     private final PlatformSecurityContext context;
 

@@ -210,9 +210,38 @@ spotless {
     eclipse().configFile '../config/fineractdev-formatter.xml'
     endWithNewline()
     trimTrailingWhitespace()
+
+    // Enforce style modifier order
+      custom 'Modifier ordering', {
+        def modifierRanking = [
+                public      : 1,
+                protected   : 2,
+                private     : 3,
+                abstract    : 4,
+                default     : 5,
+                static      : 6,
+                final       : 7,
+                transient   : 8,
+                volatile    : 9,
+                synchronized: 10,
+                native      : 11,
+                strictfp    : 12]
+        // Find any instance of multiple modifiers. Lead with a non-word character to avoid
+        // accidental matching against for instance, "an alternative default value"
+        it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+          // Do not replace the leading non-word character.  Identify the modifiers
+          it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+            // Sort the modifiers according to the ranking above
+            it.split().sort({ modifierRanking[it] }).join(' ') + ' '
+          }
+          )
+        }
+        )
+      }
+
   }
 
-  lineEndings 'UNIX'
+    lineEndings 'UNIX'
 }
 
 rat {

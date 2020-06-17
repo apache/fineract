@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class LoanApplicationApprovalTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationApprovalTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationApprovalTest.class);
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForStatusCode403;
     private ResponseSpecification responseSpecForStatusCode400;

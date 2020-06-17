@@ -65,7 +65,7 @@ public class GroupSavingsIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
-    private final static Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
 
     @BeforeEach
     public void setup() {

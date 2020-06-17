@@ -31,7 +31,7 @@ final class SelfUserDetailsApiResourceSwagger {
     private SelfUserDetailsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfUserDetailsResponse")
-    public final static class GetSelfUserDetailsResponse {
+    public static final class GetSelfUserDetailsResponse {
 
         private GetSelfUserDetailsResponse() {}
 

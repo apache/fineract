@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class VariableInstallmentsIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(VariableInstallmentsIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VariableInstallmentsIntegrationTest.class);
     private static final String NONE = "1";
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

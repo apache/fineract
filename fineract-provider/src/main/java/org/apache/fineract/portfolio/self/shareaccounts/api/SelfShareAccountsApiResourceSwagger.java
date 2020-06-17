@@ -34,7 +34,7 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetShareAccountsClientIdResponse")
-    public final static class GetShareAccountsClientIdResponse {
+    public static final class GetShareAccountsClientIdResponse {
 
         private GetShareAccountsClientIdResponse() {}
 
@@ -148,7 +148,7 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetShareAccountsClientIdProductIdResponse")
-    public final static class GetShareAccountsClientIdProductIdResponse {
+    public static final class GetShareAccountsClientIdProductIdResponse {
 
         private GetShareAccountsClientIdProductIdResponse() {}
 
@@ -596,7 +596,7 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewShareApplicationRequest")
-    public final static class PostNewShareApplicationRequest {
+    public static final class PostNewShareApplicationRequest {
 
         private PostNewShareApplicationRequest() {}
 
@@ -632,7 +632,7 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewShareApplicationResponse")
-    public final static class PostNewShareApplicationResponse {
+    public static final class PostNewShareApplicationResponse {
 
         private PostNewShareApplicationResponse() {}
 

@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implements ProvisioningCategoryWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCategoryRepository provisioningCategoryRepository;
 

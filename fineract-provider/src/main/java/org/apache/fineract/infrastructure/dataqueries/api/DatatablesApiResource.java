@@ -74,7 +74,7 @@ public class DatatablesApiResource {
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(DatatablesApiResource.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DatatablesApiResource.class);
 
     @Autowired
     public DatatablesApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,

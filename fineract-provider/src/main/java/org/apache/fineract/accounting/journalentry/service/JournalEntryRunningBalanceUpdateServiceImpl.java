@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntryRunningBalanceUpdateService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
 

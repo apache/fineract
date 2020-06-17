@@ -40,7 +40,7 @@ import retrofit.client.Response;
 @SuppressWarnings("unused")
 public class ProcessorHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProcessorHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorHelper.class);
 
     @SuppressWarnings("null")
     public static OkHttpClient configureClient(final OkHttpClient client) {

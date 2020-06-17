@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class TaxComponentHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createTaxComponent(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

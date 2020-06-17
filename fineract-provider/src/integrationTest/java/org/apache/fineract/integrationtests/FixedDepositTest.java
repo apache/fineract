@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
 public class FixedDepositTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private FixedDepositProductHelper fixedDepositProductHelper;

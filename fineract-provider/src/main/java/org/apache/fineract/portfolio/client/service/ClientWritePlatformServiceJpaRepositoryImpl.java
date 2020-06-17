@@ -96,7 +96,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ClientRepositoryWrapper clientRepository;

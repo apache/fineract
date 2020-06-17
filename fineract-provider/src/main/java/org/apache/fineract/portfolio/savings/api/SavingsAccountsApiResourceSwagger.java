@@ -31,7 +31,7 @@ final class SavingsAccountsApiResourceSwagger {
     private SavingsAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSavingsAccountsTemplateResponse")
-    public final static class GetSavingsAccountsTemplateResponse {
+    public static final class GetSavingsAccountsTemplateResponse {
 
         private GetSavingsAccountsTemplateResponse() {}
 
@@ -53,7 +53,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsResponse")
-    public final static class GetSavingsAccountsResponse {
+    public static final class GetSavingsAccountsResponse {
 
         private GetSavingsAccountsResponse() {}
 
@@ -201,7 +201,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsRequest")
-    public final static class PostSavingsAccountsRequest {
+    public static final class PostSavingsAccountsRequest {
 
         private PostSavingsAccountsRequest() {}
 
@@ -218,7 +218,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsResponse")
-    public final static class PostSavingsAccountsResponse {
+    public static final class PostSavingsAccountsResponse {
 
         private PostSavingsAccountsResponse() {}
 
@@ -233,7 +233,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsAccountIdResponse")
-    public final static class GetSavingsAccountsAccountIdResponse {
+    public static final class GetSavingsAccountsAccountIdResponse {
 
         private GetSavingsAccountsAccountIdResponse() {}
 
@@ -275,7 +275,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsAccountIdRequest")
-    public final static class PutSavingsAccountsAccountIdRequest {
+    public static final class PutSavingsAccountsAccountIdRequest {
 
         private PutSavingsAccountsAccountIdRequest() {}
 
@@ -286,7 +286,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsAccountIdResponse")
-    public final static class PutSavingsAccountsAccountIdResponse {
+    public static final class PutSavingsAccountsAccountIdResponse {
 
         private PutSavingsAccountsAccountIdResponse() {}
 
@@ -312,7 +312,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsAccountIdRequest")
-    public final static class PostSavingsAccountsAccountIdRequest {
+    public static final class PostSavingsAccountsAccountIdRequest {
 
         private PostSavingsAccountsAccountIdRequest() {}
 
@@ -325,7 +325,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsAccountIdResponse")
-    public final static class PostSavingsAccountsAccountIdResponse {
+    public static final class PostSavingsAccountsAccountIdResponse {
 
         private PostSavingsAccountsAccountIdResponse() {}
 
@@ -344,7 +344,7 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSavingsAccountsAccountIdResponse")
-    public final static class DeleteSavingsAccountsAccountIdResponse {
+    public static final class DeleteSavingsAccountsAccountIdResponse {
 
         private DeleteSavingsAccountsAccountIdResponse() {}
 

@@ -73,7 +73,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final ColumnValidator columnValidator;
 
-    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
+    private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,

@@ -30,7 +30,7 @@ final class SelfSavingsApiResourceSwagger {
     private SelfSavingsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfSavingsAccountsResponse")
-    public final static class GetSelfSavingsAccountsResponse {
+    public static final class GetSelfSavingsAccountsResponse {
 
         private GetSelfSavingsAccountsResponse() {}
 
@@ -169,7 +169,7 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
+    public static final class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
 
         private GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse() {}
 
@@ -262,7 +262,7 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesResponse {
+    public static final class GetSelfSavingsAccountsAccountIdChargesResponse {
 
         private GetSelfSavingsAccountsAccountIdChargesResponse() {}
 
@@ -322,7 +322,7 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse() {}
 

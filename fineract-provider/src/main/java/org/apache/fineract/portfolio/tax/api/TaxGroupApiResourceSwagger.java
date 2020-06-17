@@ -32,7 +32,7 @@ final class TaxGroupApiResourceSwagger {
     private TaxGroupApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesGroupResponse")
-    public final static class GetTaxesGroupResponse {
+    public static final class GetTaxesGroupResponse {
 
         private GetTaxesGroupResponse() {}
 
@@ -65,7 +65,7 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesGroupRequest")
-    public final static class PostTaxesGroupRequest {
+    public static final class PostTaxesGroupRequest {
 
         private PostTaxesGroupRequest() {}
 
@@ -98,7 +98,7 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdRequest")
-    public final static class PutTaxesGroupTaxGroupIdRequest {
+    public static final class PutTaxesGroupTaxGroupIdRequest {
 
         private PutTaxesGroupTaxGroupIdRequest() {}
 
@@ -124,7 +124,7 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdResponse")
-    public final static class PutTaxesGroupTaxGroupIdResponse {
+    public static final class PutTaxesGroupTaxGroupIdResponse {
 
         private PutTaxesGroupTaxGroupIdResponse() {}
 

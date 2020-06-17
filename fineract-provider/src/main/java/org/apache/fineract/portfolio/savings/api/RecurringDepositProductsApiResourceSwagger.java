@@ -31,7 +31,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     private RecurringDepositProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostRecurringDepositProductsRequest")
-    public final static class PostRecurringDepositProductsRequest {
+    public static final class PostRecurringDepositProductsRequest {
 
         private PostRecurringDepositProductsRequest() {}
 
@@ -116,7 +116,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositProductsResponse")
-    public final static class PostRecurringDepositProductsResponse {
+    public static final class PostRecurringDepositProductsResponse {
 
         private PostRecurringDepositProductsResponse() {}
 
@@ -125,7 +125,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositProductsRequest")
-    public final static class PutRecurringDepositProductsRequest {
+    public static final class PutRecurringDepositProductsRequest {
 
         private PutRecurringDepositProductsRequest() {}
 
@@ -140,7 +140,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositProductsResponse")
-    public final static class PutRecurringDepositProductsResponse {
+    public static final class PutRecurringDepositProductsResponse {
 
         private PutRecurringDepositProductsResponse() {}
 
@@ -160,7 +160,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositProductsResponse")
-    public final static class GetRecurringDepositProductsResponse {
+    public static final class GetRecurringDepositProductsResponse {
 
         private GetRecurringDepositProductsResponse() {}
 
@@ -310,7 +310,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositProductsProductIdResponse")
-    public final static class GetRecurringDepositProductsProductIdResponse {
+    public static final class GetRecurringDepositProductsProductIdResponse {
 
         private GetRecurringDepositProductsProductIdResponse() {}
 
@@ -600,7 +600,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteRecurringDepositProductsProductIdResponse")
-    public final static class DeleteRecurringDepositProductsProductIdResponse {
+    public static final class DeleteRecurringDepositProductsProductIdResponse {
 
         private DeleteRecurringDepositProductsProductIdResponse() {}
 

@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes" })
 public class ClientSavingsIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
     public static final String DEPOSIT_AMOUNT = "2000";
     public static final String WITHDRAW_AMOUNT = "1000";
     public static final String WITHDRAW_AMOUNT_ADJUSTED = "500";

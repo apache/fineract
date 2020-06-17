@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 

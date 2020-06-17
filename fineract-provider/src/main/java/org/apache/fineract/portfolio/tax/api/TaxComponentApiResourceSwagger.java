@@ -31,7 +31,7 @@ final class TaxComponentApiResourceSwagger {
     private TaxComponentApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesComponentsResponse")
-    public final static class GetTaxesComponentsResponse {
+    public static final class GetTaxesComponentsResponse {
 
         private GetTaxesComponentsResponse() {}
 
@@ -78,7 +78,7 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesComponentsRequest")
-    public final static class PostTaxesComponentsRequest {
+    public static final class PostTaxesComponentsRequest {
 
         private PostTaxesComponentsRequest() {}
 
@@ -99,7 +99,7 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesComponentsResponse")
-    public final static class PostTaxesComponentsResponse {
+    public static final class PostTaxesComponentsResponse {
 
         private PostTaxesComponentsResponse() {}
 
@@ -108,7 +108,7 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdRequest")
-    public final static class PutTaxesComponentsTaxComponentIdRequest {
+    public static final class PutTaxesComponentsTaxComponentIdRequest {
 
         private PutTaxesComponentsTaxComponentIdRequest() {}
 
@@ -125,7 +125,7 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdResponse")
-    public final static class PutTaxesComponentsTaxComponentIdResponse {
+    public static final class PutTaxesComponentsTaxComponentIdResponse {
 
         private PutTaxesComponentsTaxComponentIdResponse() {}
 

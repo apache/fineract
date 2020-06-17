@@ -66,7 +66,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
     // MIFOSX-1184: This class cannot use constructor injection, because one of
     // its dependencies (SchedulerStopListener) has a circular dependency to

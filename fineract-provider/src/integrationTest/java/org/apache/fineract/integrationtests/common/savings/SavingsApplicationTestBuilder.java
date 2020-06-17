@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class SavingsApplicationTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsApplicationTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsApplicationTestBuilder.class);
     private static final String LOCALE = "en_GB";
 
     private String submittedOnDate = "";

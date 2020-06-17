@@ -31,7 +31,7 @@ final class InterestRateChartsApiResourceSwagger {
     private InterestRateChartsApiResourceSwagger() {}
 
     @ApiModel(value = "GetInterestRateChartsTemplateResponse")
-    public final static class GetInterestRateChartsTemplateResponse {
+    public static final class GetInterestRateChartsTemplateResponse {
 
         private GetInterestRateChartsTemplateResponse() {}
 

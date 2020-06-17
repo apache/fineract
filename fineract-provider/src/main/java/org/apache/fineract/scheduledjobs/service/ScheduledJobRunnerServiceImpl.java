@@ -62,7 +62,7 @@ import org.springframework.util.CollectionUtils;
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");

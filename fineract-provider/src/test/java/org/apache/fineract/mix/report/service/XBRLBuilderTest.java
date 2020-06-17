@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
 @ExtendWith(MockitoExtension.class)
 public class XBRLBuilderTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
 

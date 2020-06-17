@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 public class OfficeImportHandlerTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(OfficeImportHandlerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandlerTest.class);
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

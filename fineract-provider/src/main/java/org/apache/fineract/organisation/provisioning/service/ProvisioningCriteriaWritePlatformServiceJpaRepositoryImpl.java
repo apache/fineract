@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implements ProvisioningCriteriaWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final ProvisioningCriteriaAssembler provisioningCriteriaAssembler;

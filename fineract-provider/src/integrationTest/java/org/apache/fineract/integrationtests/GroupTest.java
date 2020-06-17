@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GroupTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GroupTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;

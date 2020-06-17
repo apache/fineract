@@ -49,7 +49,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplateMergeService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;

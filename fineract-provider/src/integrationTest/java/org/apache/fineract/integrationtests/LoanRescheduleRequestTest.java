@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes" })
 public class LoanRescheduleRequestTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;

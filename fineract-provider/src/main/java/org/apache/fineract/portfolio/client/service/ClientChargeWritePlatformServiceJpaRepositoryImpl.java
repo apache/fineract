@@ -65,7 +65,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements ClientChargeWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ChargeRepositoryWrapper chargeRepository;

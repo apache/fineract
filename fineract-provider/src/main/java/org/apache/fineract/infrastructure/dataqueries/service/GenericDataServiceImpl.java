@@ -44,7 +44,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-    private final static Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
     public GenericDataServiceImpl(final RoutingDataSource dataSource) {

@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ChartOfAccountsWorkbook.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ChartOfAccountsWorkbook.class);
     private List<GLAccountData> glAccounts;
     private Map<String, List<String>> accountTypeToAccountNameAndTag;
     private Map<Integer, Integer[]> accountTypeToBeginEndIndexesofAccountNames;
