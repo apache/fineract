@@ -31,7 +31,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 
-public class ShareProductData implements ProductData {
+public final class ShareProductData implements ProductData {
 
     private final Long id;
     private final String name;

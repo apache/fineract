@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 public class OfficeDomain {
 
-    public static class Builder {
+    public final static class Builder {
 
         private int id;
         private String name;

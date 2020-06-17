@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSla
 /**
  * Immutable data object representing deposit accounts Interest rate Slabs.
  */
-public class DepositAccountInterestRateChartSlabData {
+public final class DepositAccountInterestRateChartSlabData {
 
     private final Long id;
     private final String description;

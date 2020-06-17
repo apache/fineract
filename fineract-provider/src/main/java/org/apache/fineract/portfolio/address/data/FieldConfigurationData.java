@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.address.data;
 
-public class FieldConfigurationData {
+public final class FieldConfigurationData {
 
     private final long fieldConfigurationId;
 

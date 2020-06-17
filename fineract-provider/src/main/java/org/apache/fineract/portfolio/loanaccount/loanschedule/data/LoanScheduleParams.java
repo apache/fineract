@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.RecalculationDetail;
 import org.joda.time.LocalDate;
 
-public class LoanScheduleParams {
+public final class LoanScheduleParams {
 
     // Actual period Number as per the schedule
     private int periodNumber;

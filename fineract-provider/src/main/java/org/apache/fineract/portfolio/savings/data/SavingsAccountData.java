@@ -38,7 +38,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a savings account.
  */
-public class SavingsAccountData implements Serializable {
+public final class SavingsAccountData implements Serializable {
 
     private final Long id;
     private final String accountNo;

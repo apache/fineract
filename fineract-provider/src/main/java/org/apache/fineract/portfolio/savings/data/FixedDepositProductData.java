@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a Fixed Deposit product.
  */
-public class FixedDepositProductData extends DepositProductData {
+public final class FixedDepositProductData extends DepositProductData {
 
     // additional fields
     private boolean preClosurePenalApplicable;

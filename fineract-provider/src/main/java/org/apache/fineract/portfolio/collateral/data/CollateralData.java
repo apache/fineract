@@ -26,7 +26,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 /**
  * Immutable data object for Collateral data.
  */
-public class CollateralData {
+public final class CollateralData {
 
     private final Long id;
     private final CodeValueData type;

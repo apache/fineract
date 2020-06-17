@@ -31,7 +31,7 @@ import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.exception.SurveyResponseNotAvailableException;
 import org.apache.fineract.useradministration.domain.AppUser;
 
-public class ScorecardMapper {
+public final class ScorecardMapper {
 
     private ScorecardMapper() {
         super();

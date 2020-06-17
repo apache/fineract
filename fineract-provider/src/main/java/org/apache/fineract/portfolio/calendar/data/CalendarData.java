@@ -36,7 +36,7 @@ import org.joda.time.LocalTime;
 /**
  * Immutable data object representing a Calendar.
  */
-public class CalendarData implements Serializable {
+public final class CalendarData implements Serializable {
 
     private final Long id;
     private final Long calendarInstanceId;

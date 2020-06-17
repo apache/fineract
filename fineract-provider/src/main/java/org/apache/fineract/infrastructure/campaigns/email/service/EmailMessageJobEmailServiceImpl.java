@@ -35,7 +35,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
+public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
 
     private final static Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
     private EmailConfigurationRepository emailConfigurationRepository;

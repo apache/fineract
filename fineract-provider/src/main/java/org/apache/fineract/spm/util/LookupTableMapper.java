@@ -27,7 +27,7 @@ import org.apache.fineract.spm.data.LookupTableEntry;
 import org.apache.fineract.spm.domain.LookupTable;
 import org.apache.fineract.spm.domain.Survey;
 
-public class LookupTableMapper {
+public final class LookupTableMapper {
 
     private LookupTableMapper() {
         super();

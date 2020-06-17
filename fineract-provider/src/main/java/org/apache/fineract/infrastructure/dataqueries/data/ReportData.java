@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-final public class ReportData {
+public final class ReportData {
 
     @SuppressWarnings("unused")
     private final Long id;

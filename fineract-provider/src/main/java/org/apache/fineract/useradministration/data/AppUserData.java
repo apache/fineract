@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 /**
  * Immutable data object for application user data.
  */
-public class AppUserData {
+public final class AppUserData {
 
     private final Long id;
     private final String username;

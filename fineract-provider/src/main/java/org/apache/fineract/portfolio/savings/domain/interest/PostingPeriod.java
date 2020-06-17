@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
-public class PostingPeriod {
+public final class PostingPeriod {
 
     private final LocalDateInterval periodInterval;
     private final MonetaryCurrency currency;

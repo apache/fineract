@@ -29,7 +29,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object for join liability group's collection sheet.
  */
-public class JLGCollectionSheetData {
+public final class JLGCollectionSheetData {
 
     private final LocalDate dueDate;
     private final Collection<LoanProductData> loanProducts;

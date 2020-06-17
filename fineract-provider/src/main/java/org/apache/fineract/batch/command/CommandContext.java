@@ -28,14 +28,14 @@ package org.apache.fineract.batch.command;
  *
  * @see org.apache.fineract.batch.service.BatchApiService
  */
-public class CommandContext {
+public final class CommandContext {
 
     /**
      * Static Builder class to provide a Build method for CommandContext.
      *
      * @author Rishabh Shukla
      */
-    public static class Builder {
+    public final static class Builder {
 
         private String resource;
         private String method;

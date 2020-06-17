@@ -28,7 +28,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
 
-    public static class Builder {
+    public final static class Builder {
 
         private final Integer id;
         private final String accountNo;

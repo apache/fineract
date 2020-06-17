@@ -36,7 +36,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a Fixed Deposit account.
  */
-public class FixedDepositAccountData extends DepositAccountData {
+public final class FixedDepositAccountData extends DepositAccountData {
 
     private boolean preClosurePenalApplicable;
     private BigDecimal preClosurePenalInterest;

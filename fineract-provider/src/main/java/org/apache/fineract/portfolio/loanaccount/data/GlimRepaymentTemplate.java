@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 
-public class GlimRepaymentTemplate {
+public final class GlimRepaymentTemplate {
 
     private final BigDecimal glimId;
 

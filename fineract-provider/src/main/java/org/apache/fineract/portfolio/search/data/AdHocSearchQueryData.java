@@ -23,7 +23,7 @@ import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
-public class AdHocSearchQueryData {
+public final class AdHocSearchQueryData {
 
     @SuppressWarnings("unused")
     private final String officeName;

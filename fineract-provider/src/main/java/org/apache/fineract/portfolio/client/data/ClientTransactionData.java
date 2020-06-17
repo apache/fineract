@@ -27,7 +27,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class ClientTransactionData {
+public final class ClientTransactionData {
 
     private final Long id;
     private final Long officeId;

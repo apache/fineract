@@ -27,7 +27,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a InterestRateChart.
  */
-public class InterestRateChartData {
+public final class InterestRateChartData {
 
     private final Long id;
     private final String name;

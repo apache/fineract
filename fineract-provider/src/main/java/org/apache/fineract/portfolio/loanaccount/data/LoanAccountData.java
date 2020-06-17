@@ -58,7 +58,7 @@ import org.springframework.util.CollectionUtils;
  * Immutable data object representing loan account data.
  */
 @SuppressWarnings("unused")
-public class LoanAccountData {
+public final class LoanAccountData {
 
     // basic loan details
 

@@ -20,7 +20,7 @@ package org.apache.fineract.organisation.teller.domain;
 
 import java.io.Serializable;
 
-public class CashierTxnType implements Serializable {
+public final class CashierTxnType implements Serializable {
 
     private Integer id;
     private String value;

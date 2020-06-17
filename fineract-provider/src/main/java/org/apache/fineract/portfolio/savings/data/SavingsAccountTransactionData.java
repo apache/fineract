@@ -35,7 +35,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing a savings account transaction.
  */
 @SuppressWarnings("unused")
-public class SavingsAccountTransactionData implements Serializable {
+public final class SavingsAccountTransactionData implements Serializable {
 
     private final Long id;
     private final SavingsAccountTransactionEnumData transactionType;

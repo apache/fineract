@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.entityaccess.data;
 import java.io.Serializable;
 import java.util.Date;
 
-public class FineractEntityToEntityMappingData implements Serializable {
+public final class FineractEntityToEntityMappingData implements Serializable {
 
     @SuppressWarnings("unused")
     private Long mapId;

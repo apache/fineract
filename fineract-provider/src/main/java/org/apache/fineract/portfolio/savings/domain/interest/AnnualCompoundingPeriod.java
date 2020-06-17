@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodTyp
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.joda.time.LocalDate;
 
-public class AnnualCompoundingPeriod implements CompoundingPeriod {
+public final class AnnualCompoundingPeriod implements CompoundingPeriod {
 
     @SuppressWarnings("unused")
     private final LocalDateInterval periodInterval;
