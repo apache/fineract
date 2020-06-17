@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 
 public class FundsHelper {
 
-    public static class Builder {
+    final public static class Builder {
 
         private String name;
         private String externalId;

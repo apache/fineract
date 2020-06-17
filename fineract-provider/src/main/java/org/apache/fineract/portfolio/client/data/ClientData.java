@@ -40,7 +40,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing client data.
  */
 @SuppressWarnings("unused")
-final public class ClientData implements Comparable<ClientData>, Serializable {
+public final class ClientData implements Comparable<ClientData>, Serializable {
 
     private final Long id;
     private final String accountNo;

@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class SmsCampaignData {
+public final class SmsCampaignData {
 
     private Long id;
     private final String campaignName;

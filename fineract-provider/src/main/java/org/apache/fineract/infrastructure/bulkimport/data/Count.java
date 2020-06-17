@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.data;
 
-public class Count {
+public final class Count {
 
     private Integer successCount;
     private Integer errorCount;

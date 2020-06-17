@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 /**
  * Immutable data object representing report mailing job configuration data.
  **/
-public class ReportMailingJobConfigurationData {
+public final class ReportMailingJobConfigurationData {
 
     private final int id;
     private final String name;

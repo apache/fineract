@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.interestratechart.data.InterestIncentiveData;
 
-public class DepositAccountInterestIncentiveData {
+public final class DepositAccountInterestIncentiveData {
 
     @SuppressWarnings("unused")
     private final Long id;

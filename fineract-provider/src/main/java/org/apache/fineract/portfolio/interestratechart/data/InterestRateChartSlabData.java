@@ -29,7 +29,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 /**
  * Immutable data object representing a InterestRateChartSlab.
  */
-public class InterestRateChartSlabData {
+public final class InterestRateChartSlabData {
 
     private final Long id;
     private final String description;

@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.bulkimport.data;
 
 import org.joda.time.LocalDate;
 
-public class ImportData {
+public final class ImportData {
 
     @SuppressWarnings("unused")
     private Long importId;

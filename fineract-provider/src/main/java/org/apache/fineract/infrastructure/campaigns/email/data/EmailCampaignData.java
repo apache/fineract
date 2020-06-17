@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
-public class EmailCampaignData {
+public final class EmailCampaignData {
 
     @SuppressWarnings("unused")
     private Long id;

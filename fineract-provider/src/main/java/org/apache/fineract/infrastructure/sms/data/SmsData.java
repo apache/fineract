@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Immutable data object representing a SMS message.
  */
-public class SmsData {
+public final class SmsData {
 
     private final Long id;
     private final Long groupId;

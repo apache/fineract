@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ClientFamilyMemberCommandFromApiJsonDeserializer {
+public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",

@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.gcm.domain;
 import java.util.Date;
 import org.apache.fineract.portfolio.client.data.ClientData;
 
-public class DeviceRegistrationData {
+public final class DeviceRegistrationData {
 
     public Long id;
     public ClientData clientData;

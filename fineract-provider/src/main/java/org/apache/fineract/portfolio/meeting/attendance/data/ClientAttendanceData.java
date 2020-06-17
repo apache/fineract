@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Immutable data object representing a ClientAttendance.
  */
-public class ClientAttendanceData {
+public final class ClientAttendanceData {
 
     @SuppressWarnings("unused")
     private final Long id;

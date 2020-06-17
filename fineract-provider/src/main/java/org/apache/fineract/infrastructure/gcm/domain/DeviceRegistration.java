@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "client_device_registration")
-public class DeviceRegistration extends AbstractPersistableCustom {
+public final class DeviceRegistration extends AbstractPersistableCustom {
 
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false, unique = true)

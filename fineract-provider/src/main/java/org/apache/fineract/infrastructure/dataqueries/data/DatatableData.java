@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Immutable data object representing datatable data.
  */
-public class DatatableData implements Serializable {
+public final class DatatableData implements Serializable {
 
     @SuppressWarnings("unused")
     private final String applicationTableName;

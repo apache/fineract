@@ -29,7 +29,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a deposit account interest rate chart.
  */
-public class DepositAccountInterestRateChartData {
+public final class DepositAccountInterestRateChartData {
 
     private final Long id;
     private final String name;

@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
 @Entity
 @Table(name = "m_adhoc")
-public class AdHoc extends AbstractAuditableCustom {
+public final class AdHoc extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

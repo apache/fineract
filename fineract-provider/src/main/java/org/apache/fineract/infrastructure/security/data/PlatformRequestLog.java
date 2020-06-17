@@ -28,7 +28,7 @@ import org.apache.commons.lang3.time.StopWatch;
  * Immutable data object representing platform API request used for
  * logging/debugging.
  */
-public class PlatformRequestLog {
+public final class PlatformRequestLog {
 
     @SuppressWarnings("unused")
     private final long startTime;

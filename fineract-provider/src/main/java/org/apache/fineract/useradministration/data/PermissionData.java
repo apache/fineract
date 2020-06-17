@@ -21,7 +21,7 @@ package org.apache.fineract.useradministration.data;
 /**
  * Immutable representation of permissions
  */
-public class PermissionData {
+public final class PermissionData {
 
     @SuppressWarnings("unused")
     private final String grouping;

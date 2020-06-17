@@ -57,6 +57,7 @@
             <property name="ignoreComments" value="false" />
         </module>
         <module name="EqualsHashCode"/>
+        <module name="FinalClass"/>
         <module name="SeparatorWrap">
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
@@ -177,7 +178,7 @@
             <property name="ignoreSetter" value="true" />
             <property name="setterCanReturnItsClass" value="true" />
         </module>
-        <module name="FinalClass"/>
+
         <module name="HideUtilityClassConstructor"/>
 
         < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
