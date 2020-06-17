@@ -89,20 +89,7 @@ public class ClasspathHellDuplicatesChecker {
     private boolean skipJAR(String jarPath) {
         // ./gradlew test finds classes from the Gradle Wrapper (which don't
         // show up in-IDE), exclude those
-        return jarPath.contains("/.gradle/wrapper/dists/") || jarPath.contains("/io.rest-assured/"); // TODO
-                                                                                                     // FINERACT-884
-                                                                                                     // remove
-                                                                                                     // when
-                                                                                                     // RestAssured
-                                                                                                     // was
-                                                                                                     // bumped
-                                                                                                     // from
-                                                                                                     // 3.3.0
-                                                                                                     // to
-                                                                                                     // 4.3.0
-                                                                                                     // in
-                                                                                                     // Spring
-                                                                                                     // BOM
+        return jarPath.contains("/.gradle/wrapper/dists/");
     }
 
     protected boolean isHarmlessDuplicate(String resourcePath) {
@@ -121,6 +108,9 @@ public class ClasspathHellDuplicatesChecker {
                 || resourcePath.startsWith("org/opendaylight/blueprint/") || resourcePath.endsWith("reference.conf") // in
                                                                                                                      // Akka's
                                                                                                                      // JARs
+                // json-schema-core and json-schema-validator depend on each
+                // other and include these files
+                || resourcePath.equals("draftv4/schema") || resourcePath.equals("draftv3/schema") //
                 || resourcePath.equals("WEB-INF/web.xml") || resourcePath.equals("META-INF/web-fragment.xml")
                 || resourcePath.equals("META-INF/eclipse.inf") || resourcePath.equals("META-INF/ECLIPSE_.SF")
                 || resourcePath.equals("META-INF/ECLIPSE_.RSA") || resourcePath.equals("META-INF/BC2048KE.DSA")

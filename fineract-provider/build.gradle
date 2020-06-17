@@ -114,6 +114,7 @@ dependencyManagement {
         dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
         dependency 'javax.cache:cache-api:1.1.1'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.10'
 
         // If this is upgraded, you need to change path in WebFrontEndConfiguration
         dependency 'org.webjars.npm:swagger-ui-dist:3.27.0'

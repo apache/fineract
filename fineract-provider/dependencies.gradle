@@ -124,6 +124,10 @@ dependencies {
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
     )
+    testImplementation('org.mock-server:mockserver-junit-jupiter') {
+        exclude group: 'com.sun.mail', module: 'mailapi'
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+    }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
