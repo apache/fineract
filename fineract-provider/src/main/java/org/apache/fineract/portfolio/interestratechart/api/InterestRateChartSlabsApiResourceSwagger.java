@@ -34,11 +34,11 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
         private GetInterestRateChartsChartIdChartSlabsResponse() {}
 
-        final class GetInterestRateChartsChartIdChartSlabsIncentives {
+        static final class GetInterestRateChartsChartIdChartSlabsIncentives {
 
             private GetInterestRateChartsChartIdChartSlabsIncentives() {}
 
-            final class GetInterestRateChartsChartIdChartSlabsEntityType {
+            static final class GetInterestRateChartsChartIdChartSlabsEntityType {
 
                 private GetInterestRateChartsChartIdChartSlabsEntityType() {}
 
@@ -50,7 +50,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 public Integer value;
             }
 
-            final class GetInterestRateChartsChartIdChartSlabsAttributeName {
+            static final class GetInterestRateChartsChartIdChartSlabsAttributeName {
 
                 private GetInterestRateChartsChartIdChartSlabsAttributeName() {}
 
@@ -62,7 +62,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 public Integer value;
             }
 
-            final class GetInterestRateChartsChartIdChartSlabsConditionType {
+            static final class GetInterestRateChartsChartIdChartSlabsConditionType {
 
                 private GetInterestRateChartsChartIdChartSlabsConditionType() {}
 
@@ -74,7 +74,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
                 public Integer value;
             }
 
-            final class GetInterestRateChartsChartIdChartSlabsIncentiveType {
+            static final class GetInterestRateChartsChartIdChartSlabsIncentiveType {
 
                 private GetInterestRateChartsChartIdChartSlabsIncentiveType() {}
 
@@ -120,7 +120,7 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
         private PostInterestRateChartsChartIdChartSlabsRequest() {}
 
-        final class PostInterestRateChartsChartIdChartSlabsIncentives {
+        static final class PostInterestRateChartsChartIdChartSlabsIncentives {
 
             private PostInterestRateChartsChartIdChartSlabsIncentives() {}
 

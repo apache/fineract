@@ -142,7 +142,7 @@ final class HookApiResourceSwagger {
 
         }
 
-        final class PutHookResponseChangesSwagger {
+        static final class PutHookResponseChangesSwagger {
 
             private PutHookResponseChangesSwagger() {}
 

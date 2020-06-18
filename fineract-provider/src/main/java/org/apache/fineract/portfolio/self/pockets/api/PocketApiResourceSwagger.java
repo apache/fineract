@@ -35,7 +35,7 @@ final class PocketApiResourceSwagger {
 
         private PostLinkDelinkAccountsToFromPocketRequest() {}
 
-        final class GetPocketAccountDetail {
+        static final class GetPocketAccountDetail {
 
             private GetPocketAccountDetail() {}
 
@@ -62,7 +62,7 @@ final class PocketApiResourceSwagger {
 
         private GetAccountsLinkedToPocketResponse() {}
 
-        final class GetPocketLoanAccounts {
+        static final class GetPocketLoanAccounts {
 
             private GetPocketLoanAccounts() {}
 
@@ -78,7 +78,7 @@ final class PocketApiResourceSwagger {
             public Integer id;
         }
 
-        final class GetPocketSavingAccounts {
+        static final class GetPocketSavingAccounts {
 
             private GetPocketSavingAccounts() {}
 
@@ -94,7 +94,7 @@ final class PocketApiResourceSwagger {
             public Integer id;
         }
 
-        final class GetPocketShareAccounts {
+        static final class GetPocketShareAccounts {
 
             private GetPocketShareAccounts() {}
 

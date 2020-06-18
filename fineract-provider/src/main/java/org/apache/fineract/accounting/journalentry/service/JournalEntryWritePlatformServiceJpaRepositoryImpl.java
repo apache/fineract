@@ -782,7 +782,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         accountingProcessorForClientTransactions.createJournalEntriesForClientTransaction(clientTransactionDTO);
     }
 
-    private class OfficeCurrencyKey {
+    private static class OfficeCurrencyKey {
 
         Office office;
         String currency;

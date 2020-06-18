@@ -34,7 +34,7 @@ final class FloatingRatesApiResourceSwagger {
 
         private PostFloatingRatesRequest() {}
 
-        final class PostFloatingRatesRatePeriods {
+        static final class PostFloatingRatesRatePeriods {
 
             private PostFloatingRatesRatePeriods() {}
 
@@ -94,7 +94,7 @@ final class FloatingRatesApiResourceSwagger {
 
         private GetFloatingRatesFloatingRateIdResponse() {}
 
-        final class GetFloatingRatesRatePeriods {
+        static final class GetFloatingRatesRatePeriods {
 
             private GetFloatingRatesRatePeriods() {}
 
@@ -156,7 +156,7 @@ final class FloatingRatesApiResourceSwagger {
 
         private PutFloatingRatesFloatingRateIdResponse() {}
 
-        final class PutFloatingRatesChanges {
+        static final class PutFloatingRatesChanges {
 
             private PutFloatingRatesChanges() {}
 

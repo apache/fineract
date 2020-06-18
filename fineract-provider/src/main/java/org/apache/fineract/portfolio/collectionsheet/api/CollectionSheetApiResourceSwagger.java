@@ -34,7 +34,7 @@ final class CollectionSheetApiResourceSwagger {
 
         private PostCollectionSheetRequest() {}
 
-        final class PostCollectionSheetBulkRepaymentTransactions {
+        static final class PostCollectionSheetBulkRepaymentTransactions {
 
             private PostCollectionSheetBulkRepaymentTransactions() {}
 
@@ -66,7 +66,7 @@ final class CollectionSheetApiResourceSwagger {
 
         private PostCollectionSheetResponse() {}
 
-        final class PostCollectionSheetChanges {
+        static final class PostCollectionSheetChanges {
 
             private PostCollectionSheetChanges() {}
 

@@ -34,7 +34,7 @@ final class LoanChargesApiResourceSwagger {
 
         private GetLoansLoanIdChargesChargeIdResponse() {}
 
-        final class GetLoanChargeTimeType {
+        static final class GetLoanChargeTimeType {
 
             private GetLoanChargeTimeType() {}
 
@@ -46,7 +46,7 @@ final class LoanChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanChargeCalculationType {
+        static final class GetLoanChargeCalculationType {
 
             private GetLoanChargeCalculationType() {}
 
@@ -58,7 +58,7 @@ final class LoanChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanChargeCurrency {
+        static final class GetLoanChargeCurrency {
 
             private GetLoanChargeCurrency() {}
 
@@ -110,11 +110,11 @@ final class LoanChargesApiResourceSwagger {
 
         private GetLoansLoanIdChargesTemplateResponse() {}
 
-        final class GetLoanChargeTemplateChargeOptions {
+        static final class GetLoanChargeTemplateChargeOptions {
 
             private GetLoanChargeTemplateChargeOptions() {}
 
-            final class GetLoanChargeTemplateChargeTimeType {
+            static final class GetLoanChargeTemplateChargeTimeType {
 
                 private GetLoanChargeTemplateChargeTimeType() {}
 
@@ -126,7 +126,7 @@ final class LoanChargesApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanChargeTemplateChargeAppliesTo {
+            static final class GetLoanChargeTemplateChargeAppliesTo {
 
                 private GetLoanChargeTemplateChargeAppliesTo() {}
 

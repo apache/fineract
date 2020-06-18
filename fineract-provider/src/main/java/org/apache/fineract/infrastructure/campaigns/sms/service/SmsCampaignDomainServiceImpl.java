@@ -384,7 +384,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         return smsParams;
     }
 
-    private abstract class SmsBusinessEventAdapter implements BusinessEventListner {
+    private abstract static class SmsBusinessEventAdapter implements BusinessEventListner {
 
         @Override
         public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {

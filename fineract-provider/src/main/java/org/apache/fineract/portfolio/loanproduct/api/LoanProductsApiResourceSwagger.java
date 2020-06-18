@@ -112,7 +112,7 @@ final class LoanProductsApiResourceSwagger {
 
         private GetLoanProductsResponse() {}
 
-        final class GetLoanProductsCurrency {
+        static final class GetLoanProductsCurrency {
 
             private GetLoanProductsCurrency() {}
 
@@ -132,7 +132,7 @@ final class LoanProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoanProductsRepaymentFrequencyType {
+        static final class GetLoanProductsRepaymentFrequencyType {
 
             private GetLoanProductsRepaymentFrequencyType() {}
 
@@ -144,7 +144,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestRateFrequencyType {
+        static final class GetLoanProductsInterestRateFrequencyType {
 
             private GetLoanProductsInterestRateFrequencyType() {}
 
@@ -156,7 +156,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsAmortizationType {
+        static final class GetLoanProductsAmortizationType {
 
             private GetLoanProductsAmortizationType() {}
 
@@ -168,7 +168,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestType {
+        static final class GetLoanProductsInterestType {
 
             private GetLoanProductsInterestType() {}
 
@@ -180,7 +180,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansProductsInterestCalculationPeriodType {
+        static final class GetLoansProductsInterestCalculationPeriodType {
 
             private GetLoansProductsInterestCalculationPeriodType() {}
 
@@ -192,7 +192,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansProductsDaysInMonthType {
+        static final class GetLoansProductsDaysInMonthType {
 
             private GetLoansProductsDaysInMonthType() {}
 
@@ -204,7 +204,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansProductsDaysInYearType {
+        static final class GetLoansProductsDaysInYearType {
 
             private GetLoansProductsDaysInYearType() {}
 
@@ -216,11 +216,11 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestRecalculationData {
+        static final class GetLoanProductsInterestRecalculationData {
 
             private GetLoanProductsInterestRecalculationData() {}
 
-            final class GetLoanProductsInterestRecalculationCompoundingType {
+            static final class GetLoanProductsInterestRecalculationCompoundingType {
 
                 private GetLoanProductsInterestRecalculationCompoundingType() {}
 
@@ -232,7 +232,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsInterestRecalculationCompoundingFrequencyType {
+            static final class GetLoanProductsInterestRecalculationCompoundingFrequencyType {
 
                 private GetLoanProductsInterestRecalculationCompoundingFrequencyType() {}
 
@@ -244,7 +244,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsRescheduleStrategyType {
+            static final class GetLoanProductsRescheduleStrategyType {
 
                 private GetLoanProductsRescheduleStrategyType() {}
 
@@ -256,7 +256,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsPreClosureInterestCalculationStrategy {
+            static final class GetLoanProductsPreClosureInterestCalculationStrategy {
 
                 private GetLoanProductsPreClosureInterestCalculationStrategy() {}
 
@@ -281,7 +281,7 @@ final class LoanProductsApiResourceSwagger {
             public Boolean isArrearsBasedOnOriginalSchedule;
         }
 
-        final class GetLoanProductsAccountingRule {
+        static final class GetLoanProductsAccountingRule {
 
             private GetLoanProductsAccountingRule() {}
 
@@ -358,7 +358,7 @@ final class LoanProductsApiResourceSwagger {
 
         private GetLoanProductsTemplateResponse() {}
 
-        final class GetLoanProductsTemplateCurrency {
+        static final class GetLoanProductsTemplateCurrency {
 
             private GetLoanProductsTemplateCurrency() {}
 
@@ -378,7 +378,7 @@ final class LoanProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoanProductsRepaymentTemplateFrequencyType {
+        static final class GetLoanProductsRepaymentTemplateFrequencyType {
 
             private GetLoanProductsRepaymentTemplateFrequencyType() {}
 
@@ -390,7 +390,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestRateTemplateFrequencyType {
+        static final class GetLoanProductsInterestRateTemplateFrequencyType {
 
             private GetLoanProductsInterestRateTemplateFrequencyType() {}
 
@@ -402,7 +402,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestTemplateType {
+        static final class GetLoanProductsInterestTemplateType {
 
             private GetLoanProductsInterestTemplateType() {}
 
@@ -414,7 +414,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsAccountingRule {
+        static final class GetLoanProductsAccountingRule {
 
             private GetLoanProductsAccountingRule() {}
 
@@ -426,7 +426,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansProductsDaysInMonthTemplateType {
+        static final class GetLoansProductsDaysInMonthTemplateType {
 
             private GetLoansProductsDaysInMonthTemplateType() {}
 
@@ -438,7 +438,7 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsDaysInYearTemplateType {
+        static final class GetLoanProductsDaysInYearTemplateType {
 
             private GetLoanProductsDaysInYearTemplateType() {}
 
@@ -450,11 +450,11 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsInterestRecalculationTemplateData {
+        static final class GetLoanProductsInterestRecalculationTemplateData {
 
             private GetLoanProductsInterestRecalculationTemplateData() {}
 
-            final class GetLoanProductsInterestRecalculationCompoundingType {
+            static final class GetLoanProductsInterestRecalculationCompoundingType {
 
                 private GetLoanProductsInterestRecalculationCompoundingType() {}
 
@@ -466,7 +466,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsRescheduleStrategyType {
+            static final class GetLoanProductsRescheduleStrategyType {
 
                 private GetLoanProductsRescheduleStrategyType() {}
 
@@ -483,7 +483,7 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
         }
 
-        final class GetLoanProductsPaymentTypeOptions {
+        static final class GetLoanProductsPaymentTypeOptions {
 
             private GetLoanProductsPaymentTypeOptions() {}
 
@@ -495,7 +495,7 @@ final class LoanProductsApiResourceSwagger {
             public Integer position;
         }
 
-        final class GetLoanProductsCurrencyOptions {
+        static final class GetLoanProductsCurrencyOptions {
 
             private GetLoanProductsCurrencyOptions() {}
 
@@ -513,7 +513,7 @@ final class LoanProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoanProductsTransactionProcessingStrategyOptions {
+        static final class GetLoanProductsTransactionProcessingStrategyOptions {
 
             private GetLoanProductsTransactionProcessingStrategyOptions() {}
 
@@ -525,11 +525,11 @@ final class LoanProductsApiResourceSwagger {
             public String name;
         }
 
-        final class GetLoanProductsChargeOptions {
+        static final class GetLoanProductsChargeOptions {
 
             private GetLoanProductsChargeOptions() {}
 
-            final class GetLoanChargeTimeType {
+            static final class GetLoanChargeTimeType {
 
                 private GetLoanChargeTimeType() {}
 
@@ -541,7 +541,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsChargeAppliesTo {
+            static final class GetLoanProductsChargeAppliesTo {
 
                 private GetLoanProductsChargeAppliesTo() {}
 
@@ -553,7 +553,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanChargeCalculationType {
+            static final class GetLoanChargeCalculationType {
 
                 private GetLoanChargeCalculationType() {}
 
@@ -565,7 +565,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoansChargePaymentMode {
+            static final class GetLoansChargePaymentMode {
 
                 private GetLoansChargePaymentMode() {}
 
@@ -594,15 +594,15 @@ final class LoanProductsApiResourceSwagger {
             public GetLoansChargePaymentMode chargePaymentMode;
         }
 
-        final class GetLoanProductsAccountingMappingOptions {
+        static final class GetLoanProductsAccountingMappingOptions {
 
             private GetLoanProductsAccountingMappingOptions() {}
 
-            final class GetLoanProductsLiabilityAccountOptions {
+            static final class GetLoanProductsLiabilityAccountOptions {
 
                 private GetLoanProductsLiabilityAccountOptions() {}
 
-                final class GetLoanProductsLiabilityType {
+                static final class GetLoanProductsLiabilityType {
 
                     private GetLoanProductsLiabilityType() {}
 
@@ -614,7 +614,7 @@ final class LoanProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoanProductsLiabilityUsage {
+                static final class GetLoanProductsLiabilityUsage {
 
                     private GetLoanProductsLiabilityUsage() {}
 
@@ -626,7 +626,7 @@ final class LoanProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoanProductsLiabilityTagId {
+                static final class GetLoanProductsLiabilityTagId {
 
                     private GetLoanProductsLiabilityTagId() {}
 
@@ -653,7 +653,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer organizationRunningBalance;
             }
 
-            final class GetLoanProductsAssetAccountOptions {
+            static final class GetLoanProductsAssetAccountOptions {
 
                 private GetLoanProductsAssetAccountOptions() {}
 
@@ -676,11 +676,11 @@ final class LoanProductsApiResourceSwagger {
                 public Integer organizationRunningBalance;
             }
 
-            final class GetLoanProductsExpenseAccountOptions {
+            static final class GetLoanProductsExpenseAccountOptions {
 
                 private GetLoanProductsExpenseAccountOptions() {}
 
-                final class GetLoanProductsExpenseType {
+                static final class GetLoanProductsExpenseType {
 
                     private GetLoanProductsExpenseType() {}
 
@@ -711,11 +711,11 @@ final class LoanProductsApiResourceSwagger {
                 public Integer organizationRunningBalance;
             }
 
-            final class GetLoanProductsIncomeAccountOptions {
+            static final class GetLoanProductsIncomeAccountOptions {
 
                 private GetLoanProductsIncomeAccountOptions() {}
 
-                final class GetLoanProductsIncomeType {
+                static final class GetLoanProductsIncomeType {
 
                     private GetLoanProductsIncomeType() {}
 
@@ -752,7 +752,7 @@ final class LoanProductsApiResourceSwagger {
             public Set<GetLoanProductsIncomeAccountOptions> incomeAccountOptions;
         }
 
-        final class GetLoanProductsValueConditionTypeOptions {
+        static final class GetLoanProductsValueConditionTypeOptions {
 
             private GetLoanProductsValueConditionTypeOptions() {}
 
@@ -811,7 +811,7 @@ final class LoanProductsApiResourceSwagger {
 
         private GetLoanProductsProductIdResponse() {}
 
-        final class GetLoanProductsInterestRateFrequencyType {
+        static final class GetLoanProductsInterestRateFrequencyType {
 
             private GetLoanProductsInterestRateFrequencyType() {}
 
@@ -823,11 +823,11 @@ final class LoanProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoanProductsPrincipalVariationsForBorrowerCycle {
+        static final class GetLoanProductsPrincipalVariationsForBorrowerCycle {
 
             private GetLoanProductsPrincipalVariationsForBorrowerCycle() {}
 
-            final class GetLoanProductsParamType {
+            static final class GetLoanProductsParamType {
 
                 private GetLoanProductsParamType() {}
 
@@ -839,7 +839,7 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetLoanProductsValueConditionType {
+            static final class GetLoanProductsValueConditionType {
 
                 private GetLoanProductsValueConditionType() {}
 
@@ -865,11 +865,11 @@ final class LoanProductsApiResourceSwagger {
             public Float defaultValue;
         }
 
-        final class GetLoanAccountingMappings {
+        static final class GetLoanAccountingMappings {
 
             private GetLoanAccountingMappings() {}
 
-            final class GetLoanFundSourceAccount {
+            static final class GetLoanFundSourceAccount {
 
                 private GetLoanFundSourceAccount() {}
 
@@ -881,7 +881,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanPortfolioAccount {
+            static final class GetLoanPortfolioAccount {
 
                 private GetLoanPortfolioAccount() {}
 
@@ -893,7 +893,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanTransfersInSuspenseAccount {
+            static final class GetLoanTransfersInSuspenseAccount {
 
                 private GetLoanTransfersInSuspenseAccount() {}
 
@@ -905,7 +905,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanInterestOnLoanAccount {
+            static final class GetLoanInterestOnLoanAccount {
 
                 private GetLoanInterestOnLoanAccount() {}
 
@@ -917,7 +917,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanIncomeFromFeeAccount {
+            static final class GetLoanIncomeFromFeeAccount {
 
                 private GetLoanIncomeFromFeeAccount() {}
 
@@ -929,7 +929,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanIncomeFromPenaltyAccount {
+            static final class GetLoanIncomeFromPenaltyAccount {
 
                 private GetLoanIncomeFromPenaltyAccount() {}
 
@@ -941,7 +941,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanWriteOffAccount {
+            static final class GetLoanWriteOffAccount {
 
                 private GetLoanWriteOffAccount() {}
 
@@ -953,7 +953,7 @@ final class LoanProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetLoanOverpaymentLiabilityAccount {
+            static final class GetLoanOverpaymentLiabilityAccount {
 
                 private GetLoanOverpaymentLiabilityAccount() {}
 
@@ -975,11 +975,11 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanOverpaymentLiabilityAccount overpaymentLiabilityAccount;
         }
 
-        final class GetLoanPaymentChannelToFundSourceMappings {
+        static final class GetLoanPaymentChannelToFundSourceMappings {
 
             private GetLoanPaymentChannelToFundSourceMappings() {}
 
-            final class GetLoanPaymentType {
+            static final class GetLoanPaymentType {
 
                 private GetLoanPaymentType() {}
 
@@ -993,11 +993,11 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanAccountingMappings.GetLoanFundSourceAccount fundSourceAccount;
         }
 
-        final class GetLoanFeeToIncomeAccountMappings {
+        static final class GetLoanFeeToIncomeAccountMappings {
 
             private GetLoanFeeToIncomeAccountMappings() {}
 
-            final class GetLoanCharge {
+            static final class GetLoanCharge {
 
                 private GetLoanCharge() {}
 
@@ -1090,7 +1090,7 @@ final class LoanProductsApiResourceSwagger {
 
         private PutLoanProductsProductIdResponse() {}
 
-        final class PutLoanChanges {
+        static final class PutLoanChanges {
 
             private PutLoanChanges() {}
 

@@ -34,7 +34,7 @@ final class CollateralsApiResourceSwagger {
 
         private GetLoansLoanIdCollateralsResponse() {}
 
-        final class GetCollateralTypeResponse {
+        static final class GetCollateralTypeResponse {
 
             private GetCollateralTypeResponse() {}
 
@@ -44,7 +44,7 @@ final class CollateralsApiResourceSwagger {
             public String name;
         }
 
-        final class GetCollateralCurrencyResponse {
+        static final class GetCollateralCurrencyResponse {
 
             private GetCollateralCurrencyResponse() {}
 
@@ -118,7 +118,7 @@ final class CollateralsApiResourceSwagger {
 
         private GetLoansLoanIdCollateralsTemplateResponse() {}
 
-        final class GetCollateralsTemplateAllowedTypes {
+        static final class GetCollateralsTemplateAllowedTypes {
 
             private GetCollateralsTemplateAllowedTypes() {}
 

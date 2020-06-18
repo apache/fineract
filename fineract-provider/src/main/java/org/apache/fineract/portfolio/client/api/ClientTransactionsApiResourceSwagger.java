@@ -36,11 +36,11 @@ final class ClientTransactionsApiResourceSwagger {
 
         private GetClientsClientIdTransactionsResponse() {}
 
-        final class GetClientsPageItems {
+        static final class GetClientsPageItems {
 
             private GetClientsPageItems() {}
 
-            final class GetClientsClientIdTransactionsType {
+            static final class GetClientsClientIdTransactionsType {
 
                 private GetClientsClientIdTransactionsType() {}
 
@@ -52,7 +52,7 @@ final class ClientTransactionsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetClientTransactionsCurrency {
+            static final class GetClientTransactionsCurrency {
 
                 private GetClientTransactionsCurrency() {}
 

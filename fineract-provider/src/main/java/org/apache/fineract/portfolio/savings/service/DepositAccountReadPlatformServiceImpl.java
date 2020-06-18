@@ -1473,7 +1473,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
     }
 
-    private class AccountTransferMapper implements RowMapper<AccountTransferDTO> {
+    private static class AccountTransferMapper implements RowMapper<AccountTransferDTO> {
 
         private final String schemaSql;
 

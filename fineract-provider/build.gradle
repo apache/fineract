@@ -335,7 +335,6 @@ tasks.withType(JavaCompile) {
         //Todo Remove necessary checks from this list
         disable(
                 "UnusedVariable",
-                "ClassCanBeStatic",
                 "SameNameButDifferent",
                 "StringSplitter",
                 "ImmutableEnumChecker",
@@ -379,6 +378,7 @@ tasks.withType(JavaCompile) {
                 "WildcardImport",
                 "FutureReturnValueIgnored",
                 "PrivateConstructorForNoninstantiableModule",
+                "ClassCanBeStatic",
                 "ClassNewInstance",
                 "UnsafeFinalization",
                 "JodaPlusMinusLong",

@@ -34,7 +34,7 @@ final class ProductsApiResourceSwagger {
 
         private GetProductsTypeProductIdResponse() {}
 
-        final class GetProductsCurrency {
+        static final class GetProductsCurrency {
 
             private GetProductsCurrency() {}
 
@@ -54,7 +54,7 @@ final class ProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetProductsMarketPrice {
+        static final class GetProductsMarketPrice {
 
             private GetProductsMarketPrice() {}
 
@@ -66,11 +66,11 @@ final class ProductsApiResourceSwagger {
             public Integer shareValue;
         }
 
-        final class GetProductsCharges {
+        static final class GetProductsCharges {
 
             private GetProductsCharges() {}
 
-            final class GetChargesCurrency {
+            static final class GetChargesCurrency {
 
                 private GetChargesCurrency() {}
 
@@ -88,7 +88,7 @@ final class ProductsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetChargeTimeType {
+            static final class GetChargeTimeType {
 
                 private GetChargeTimeType() {}
 
@@ -100,7 +100,7 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargeAppliesTo {
+            static final class GetChargeAppliesTo {
 
                 private GetChargeAppliesTo() {}
 
@@ -112,7 +112,7 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargeCalculationType {
+            static final class GetChargeCalculationType {
 
                 private GetChargeCalculationType() {}
 
@@ -124,7 +124,7 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargePaymentMode {
+            static final class GetChargePaymentMode {
 
                 private GetChargePaymentMode() {}
 
@@ -153,7 +153,7 @@ final class ProductsApiResourceSwagger {
             public GetChargePaymentMode chargePaymentMode;
         }
 
-        final class GetLockPeriodTypeEnum {
+        static final class GetLockPeriodTypeEnum {
 
             private GetLockPeriodTypeEnum() {}
 
@@ -163,7 +163,7 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingRule {
+        static final class GetProductsAccountingRule {
 
             private GetProductsAccountingRule() {}
 
@@ -175,11 +175,11 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingMappings {
+        static final class GetProductsAccountingMappings {
 
             private GetProductsAccountingMappings() {}
 
-            final class GetShareReferenceId {
+            static final class GetShareReferenceId {
 
                 private GetShareReferenceId() {}
 
@@ -191,7 +191,7 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetIncomeFromFeeAccountId {
+            static final class GetIncomeFromFeeAccountId {
 
                 private GetIncomeFromFeeAccountId() {}
 
@@ -203,7 +203,7 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetShareEquityId {
+            static final class GetShareEquityId {
 
                 private GetShareEquityId() {}
 
@@ -215,7 +215,7 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetShareSuspenseId {
+            static final class GetShareSuspenseId {
 
                 private GetShareSuspenseId() {}
 
@@ -233,7 +233,7 @@ final class ProductsApiResourceSwagger {
             public GetShareSuspenseId shareSuspenseId;
         }
 
-        final class GetProductsMinimumActivePeriodFrequencyTypeOptions {
+        static final class GetProductsMinimumActivePeriodFrequencyTypeOptions {
 
             private GetProductsMinimumActivePeriodFrequencyTypeOptions() {}
 
@@ -245,15 +245,15 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingMappingOptions {
+        static final class GetProductsAccountingMappingOptions {
 
             private GetProductsAccountingMappingOptions() {}
 
-            final class GetProductsLiabilityAccountOptions {
+            static final class GetProductsLiabilityAccountOptions {
 
                 private GetProductsLiabilityAccountOptions() {}
 
-                final class GetProductsLiabilityType {
+                static final class GetProductsLiabilityType {
 
                     private GetProductsLiabilityType() {}
 
@@ -265,7 +265,7 @@ final class ProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetProductsLiabilityUsage {
+                static final class GetProductsLiabilityUsage {
 
                     private GetProductsLiabilityUsage() {}
 
@@ -277,7 +277,7 @@ final class ProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetProductsTagId {
+                static final class GetProductsTagId {
 
                     private GetProductsTagId() {}
 
@@ -306,11 +306,11 @@ final class ProductsApiResourceSwagger {
                 public GetProductsTagId tagId;
             }
 
-            final class GetProductsAssetAccountOptions {
+            static final class GetProductsAssetAccountOptions {
 
                 private GetProductsAssetAccountOptions() {}
 
-                final class GetAssetType {
+                static final class GetAssetType {
 
                     private GetAssetType() {}
 
@@ -341,11 +341,11 @@ final class ProductsApiResourceSwagger {
                 public GetProductsLiabilityAccountOptions.GetProductsTagId tagId;
             }
 
-            final class GetProductsIncomeAccountOptions {
+            static final class GetProductsIncomeAccountOptions {
 
                 private GetProductsIncomeAccountOptions() {}
 
-                final class GetIncomeType {
+                static final class GetIncomeType {
 
                     private GetIncomeType() {}
 
@@ -376,11 +376,11 @@ final class ProductsApiResourceSwagger {
                 public GetProductsLiabilityAccountOptions.GetProductsTagId tagId;
             }
 
-            final class GetProductsEquityAccountOptions {
+            static final class GetProductsEquityAccountOptions {
 
                 private GetProductsEquityAccountOptions() {}
 
-                final class GetEquityType {
+                static final class GetEquityType {
 
                     private GetEquityType() {}
 
@@ -462,7 +462,7 @@ final class ProductsApiResourceSwagger {
 
         private GetProductsTypeResponse() {}
 
-        final class GetProductsPageItems {
+        static final class GetProductsPageItems {
 
             private GetProductsPageItems() {}
 
@@ -486,7 +486,7 @@ final class ProductsApiResourceSwagger {
 
         private PostProductsTypeRequest() {}
 
-        final class PostProductsMarketPricePeriods {
+        static final class PostProductsMarketPricePeriods {
 
             private PostProductsMarketPricePeriods() {}
 
@@ -500,7 +500,7 @@ final class ProductsApiResourceSwagger {
             public Integer shareValue;
         }
 
-        final class PostProductsChargesSelected {
+        static final class PostProductsChargesSelected {
 
             private PostProductsChargesSelected() {}
 
@@ -577,7 +577,7 @@ final class ProductsApiResourceSwagger {
 
         private PutProductsTypeProductIdResponse() {}
 
-        final class PutProductsChanges {
+        static final class PutProductsChanges {
 
             private PutProductsChanges() {}
 

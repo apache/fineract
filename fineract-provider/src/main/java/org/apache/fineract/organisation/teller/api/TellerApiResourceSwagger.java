@@ -136,7 +136,7 @@ final class TellerApiResourceSwagger {
 
         }
 
-        final class PutTellersResponseChanges {
+        static final class PutTellersResponseChanges {
 
             private PutTellersResponseChanges() {}
 
@@ -280,7 +280,7 @@ final class TellerApiResourceSwagger {
 
         }
 
-        final class PutTellersTellerIdCashiersCashierIdResponseChanges {
+        static final class PutTellersTellerIdCashiersCashierIdResponseChanges {
 
             private PutTellersTellerIdCashiersCashierIdResponseChanges() {}
 

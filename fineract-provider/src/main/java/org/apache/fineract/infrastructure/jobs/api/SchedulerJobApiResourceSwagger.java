@@ -80,7 +80,7 @@ final class SchedulerJobApiResourceSwagger {
 
         }
 
-        final class JobDetailHistoryDataSwagger {
+        static final class JobDetailHistoryDataSwagger {
 
             private JobDetailHistoryDataSwagger() {}
 

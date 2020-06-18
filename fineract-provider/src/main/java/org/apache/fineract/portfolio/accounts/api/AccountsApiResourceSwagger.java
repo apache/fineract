@@ -36,7 +36,7 @@ final class AccountsApiResourceSwagger {
 
         private GetAccountsTypeTemplateResponse() {}
 
-        final class GetAccountsTypeProductOptions {
+        static final class GetAccountsTypeProductOptions {
 
             private GetAccountsTypeProductOptions() {}
 
@@ -62,7 +62,7 @@ final class AccountsApiResourceSwagger {
 
         private GetAccountsTypeAccountIdResponse() {}
 
-        final class GetAccountsStatus {
+        static final class GetAccountsStatus {
 
             private GetAccountsStatus() {}
 
@@ -84,7 +84,7 @@ final class AccountsApiResourceSwagger {
             public Boolean closed;
         }
 
-        final class GetAccountsTimeline {
+        static final class GetAccountsTimeline {
 
             private GetAccountsTimeline() {}
 
@@ -108,7 +108,7 @@ final class AccountsApiResourceSwagger {
             public LocalDate activatedDate;
         }
 
-        final class GetAccountsCurrency {
+        static final class GetAccountsCurrency {
 
             private GetAccountsCurrency() {}
 
@@ -128,7 +128,7 @@ final class AccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetAccountsSummary {
+        static final class GetAccountsSummary {
 
             private GetAccountsSummary() {}
 
@@ -149,11 +149,11 @@ final class AccountsApiResourceSwagger {
             public GetAccountsCurrency currency;
         }
 
-        final class GetAccountsPurchasedShares {
+        static final class GetAccountsPurchasedShares {
 
             private GetAccountsPurchasedShares() {}
 
-            final class GetAccountsPurchasedSharesStatus {
+            static final class GetAccountsPurchasedSharesStatus {
 
                 private GetAccountsPurchasedSharesStatus() {}
 
@@ -165,7 +165,7 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsPurchasedSharesType {
+            static final class GetAccountsPurchasedSharesType {
 
                 private GetAccountsPurchasedSharesType() {}
 
@@ -197,7 +197,7 @@ final class AccountsApiResourceSwagger {
             public Double amountPaid;
         }
 
-        final class GetAccountsLockPeriodTypeEnum {
+        static final class GetAccountsLockPeriodTypeEnum {
 
             private GetAccountsLockPeriodTypeEnum() {}
 
@@ -209,11 +209,11 @@ final class AccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetAccountsCharges {
+        static final class GetAccountsCharges {
 
             private GetAccountsCharges() {}
 
-            final class GetAccountsChargeTimeType {
+            static final class GetAccountsChargeTimeType {
 
                 private GetAccountsChargeTimeType() {}
 
@@ -225,7 +225,7 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsChargeCalculationType {
+            static final class GetAccountsChargeCalculationType {
 
                 private GetAccountsChargeCalculationType() {}
 
@@ -237,7 +237,7 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsChargesCurrency {
+            static final class GetAccountsChargesCurrency {
 
                 private GetAccountsChargesCurrency() {}
 
@@ -327,11 +327,11 @@ final class AccountsApiResourceSwagger {
 
         private GetAccountsTypeResponse() {}
 
-        final class GetAccountsPageItems {
+        static final class GetAccountsPageItems {
 
             private GetAccountsPageItems() {}
 
-            final class GetAccountsTypeStatus {
+            static final class GetAccountsTypeStatus {
 
                 private GetAccountsTypeStatus() {}
 
@@ -353,7 +353,7 @@ final class AccountsApiResourceSwagger {
                 public Boolean closed;
             }
 
-            final class GetAccountsTypeTimeline {
+            static final class GetAccountsTypeTimeline {
 
                 private GetAccountsTypeTimeline() {}
 
@@ -361,7 +361,7 @@ final class AccountsApiResourceSwagger {
                 public LocalDate submittedOnDate;
             }
 
-            final class GetAccountsTypePurchasedShares {
+            static final class GetAccountsTypePurchasedShares {
 
                 private GetAccountsTypePurchasedShares() {}
 
@@ -375,7 +375,7 @@ final class AccountsApiResourceSwagger {
                 public Integer purchasedPrice;
             }
 
-            final class GetAccountsTypeSummary {
+            static final class GetAccountsTypeSummary {
 
                 private GetAccountsTypeSummary() {}
 
@@ -411,7 +411,7 @@ final class AccountsApiResourceSwagger {
 
         private PostAccountsTypeRequest() {}
 
-        final class PostAccountsCharges {
+        static final class PostAccountsCharges {
 
             private PostAccountsCharges() {}
 
@@ -466,7 +466,7 @@ final class AccountsApiResourceSwagger {
 
         private PostAccountsTypeAccountIdRequest() {}
 
-        final class PostAccountsRequestedShares {
+        static final class PostAccountsRequestedShares {
 
             private PostAccountsRequestedShares() {}
 
@@ -506,7 +506,7 @@ final class AccountsApiResourceSwagger {
 
         private PutAccountsTypeAccountIdResponse() {}
 
-        final class PutAccountsChanges {
+        static final class PutAccountsChanges {
 
             private PutAccountsChanges() {}
 

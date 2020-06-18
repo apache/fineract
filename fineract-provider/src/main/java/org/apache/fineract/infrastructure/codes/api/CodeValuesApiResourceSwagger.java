@@ -95,7 +95,7 @@ final class CodeValuesApiResourceSwagger {
 
         }
 
-        private final class PutCodeValuechangesSwagger {
+        private static final class PutCodeValuechangesSwagger {
 
             private PutCodeValuechangesSwagger() {}
 

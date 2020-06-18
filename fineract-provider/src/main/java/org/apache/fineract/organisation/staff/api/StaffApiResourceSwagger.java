@@ -126,7 +126,7 @@ final class StaffApiResourceSwagger {
 
         }
 
-        final class PutStaffResponseChanges {
+        static final class PutStaffResponseChanges {
 
             private PutStaffResponseChanges() {}
 

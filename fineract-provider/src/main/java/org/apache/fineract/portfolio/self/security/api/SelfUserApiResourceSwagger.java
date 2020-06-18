@@ -44,7 +44,7 @@ final class SelfUserApiResourceSwagger {
 
         private PutSelfUserResponse() {}
 
-        final class PutSelfUserChanges {
+        static final class PutSelfUserChanges {
 
             private PutSelfUserChanges() {}
 

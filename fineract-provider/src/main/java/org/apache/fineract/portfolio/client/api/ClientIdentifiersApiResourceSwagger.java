@@ -34,7 +34,7 @@ final class ClientIdentifiersApiResourceSwagger {
 
         private GetClientsClientIdIdentifiersResponse() {}
 
-        final class GetClientsDocumentType {
+        static final class GetClientsDocumentType {
 
             private GetClientsDocumentType() {}
 
@@ -60,7 +60,7 @@ final class ClientIdentifiersApiResourceSwagger {
 
         private GetClientsClientIdIdentifiersTemplateResponse() {}
 
-        final class GetClientsAllowedDocumentTypes {
+        static final class GetClientsAllowedDocumentTypes {
 
             private GetClientsAllowedDocumentTypes() {}
 

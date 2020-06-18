@@ -35,7 +35,7 @@ final class InterestRateChartsApiResourceSwagger {
 
         private GetInterestRateChartsTemplateResponse() {}
 
-        final class GetInterestRateChartsTemplatePeriodTypes {
+        static final class GetInterestRateChartsTemplatePeriodTypes {
 
             private GetInterestRateChartsTemplatePeriodTypes() {}
 
@@ -55,7 +55,7 @@ final class InterestRateChartsApiResourceSwagger {
 
         private GetInterestRateChartsResponse() {}
 
-        final class GetInterestRateChartsChartSlabs {
+        static final class GetInterestRateChartsChartSlabs {
 
             private GetInterestRateChartsChartSlabs() {}
 
@@ -69,7 +69,7 @@ final class InterestRateChartsApiResourceSwagger {
             public GetInterestRateChartsCurrency currency;
         }
 
-        final class GetInterestRateChartsCurrency {
+        static final class GetInterestRateChartsCurrency {
 
             private GetInterestRateChartsCurrency() {}
 

@@ -35,7 +35,7 @@ final class TaxComponentApiResourceSwagger {
 
         private GetTaxesComponentsResponse() {}
 
-        final class GetTaxesComponentsCreditAccountType {
+        static final class GetTaxesComponentsCreditAccountType {
 
             private GetTaxesComponentsCreditAccountType() {}
 
@@ -47,7 +47,7 @@ final class TaxComponentApiResourceSwagger {
             public String value;
         }
 
-        final class GetTaxesComponentsCreditAccount {
+        static final class GetTaxesComponentsCreditAccount {
 
             private GetTaxesComponentsCreditAccount() {}
 
@@ -59,7 +59,7 @@ final class TaxComponentApiResourceSwagger {
             public String glCode;
         }
 
-        final class GetTaxesComponentsHistories {
+        static final class GetTaxesComponentsHistories {
 
             private GetTaxesComponentsHistories() {}
         }
@@ -129,7 +129,7 @@ final class TaxComponentApiResourceSwagger {
 
         private PutTaxesComponentsTaxComponentIdResponse() {}
 
-        final class PutTaxesComponentsChanges {
+        static final class PutTaxesComponentsChanges {
 
             private PutTaxesComponentsChanges() {}
 

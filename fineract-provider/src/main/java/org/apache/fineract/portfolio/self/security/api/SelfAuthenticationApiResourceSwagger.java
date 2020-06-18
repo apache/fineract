@@ -35,7 +35,7 @@ final class SelfAuthenticationApiResourceSwagger {
 
         private PostSelfAuthenticationResponse() {}
 
-        final class GetSelfUserDetailsOrganisationalRole {
+        static final class GetSelfUserDetailsOrganisationalRole {
 
             private GetSelfUserDetailsOrganisationalRole() {}
 
@@ -47,7 +47,7 @@ final class SelfAuthenticationApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfUserDetailsRoles {
+        static final class GetSelfUserDetailsRoles {
 
             private GetSelfUserDetailsRoles() {}
 

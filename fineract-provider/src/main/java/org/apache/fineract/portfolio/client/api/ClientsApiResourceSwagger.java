@@ -36,7 +36,7 @@ final class ClientsApiResourceSwagger {
 
         private GetClientsTemplateResponse() {}
 
-        final class GetClientsOfficeOptions {
+        static final class GetClientsOfficeOptions {
 
             private GetClientsOfficeOptions() {}
 
@@ -48,7 +48,7 @@ final class ClientsApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetClientsStaffOptions {
+        static final class GetClientsStaffOptions {
 
             private GetClientsStaffOptions() {}
 
@@ -70,7 +70,7 @@ final class ClientsApiResourceSwagger {
             public Boolean isActive;
         }
 
-        final class GetClientsSavingProductOptions {
+        static final class GetClientsSavingProductOptions {
 
             private GetClientsSavingProductOptions() {}
 
@@ -84,11 +84,11 @@ final class ClientsApiResourceSwagger {
             public Boolean allowOverdraft;
         }
 
-        final class GetClientsDataTables {
+        static final class GetClientsDataTables {
 
             private GetClientsDataTables() {}
 
-            final class GetClientsColumnHeaderData {
+            static final class GetClientsColumnHeaderData {
 
                 private GetClientsColumnHeaderData() {}
 
@@ -130,11 +130,11 @@ final class ClientsApiResourceSwagger {
 
         private GetClientsResponse() {}
 
-        final class GetClientsPageItemsResponse {
+        static final class GetClientsPageItemsResponse {
 
             private GetClientsPageItemsResponse() {}
 
-            final class GetClientStatus {
+            static final class GetClientStatus {
 
                 private GetClientStatus() {}
 
@@ -173,7 +173,7 @@ final class ClientsApiResourceSwagger {
 
         private GetClientsClientIdResponse() {}
 
-        final class GetClientsClientIdStatus {
+        static final class GetClientsClientIdStatus {
 
             private GetClientsClientIdStatus() {}
 
@@ -185,7 +185,7 @@ final class ClientsApiResourceSwagger {
             public String value;
         }
 
-        final class GetClientsTimeline {
+        static final class GetClientsTimeline {
 
             private GetClientsTimeline() {}
 
@@ -339,11 +339,11 @@ final class ClientsApiResourceSwagger {
 
         private GetClientsClientIdAccountsResponse() {}
 
-        final class GetClientsLoanAccounts {
+        static final class GetClientsLoanAccounts {
 
             private GetClientsLoanAccounts() {}
 
-            final class GetClientsLoanAccountsStatus {
+            static final class GetClientsLoanAccountsStatus {
 
                 private GetClientsLoanAccountsStatus() {}
 
@@ -371,7 +371,7 @@ final class ClientsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetClientsLoanAccountsType {
+            static final class GetClientsLoanAccountsType {
 
                 private GetClientsLoanAccountsType() {}
 
@@ -399,11 +399,11 @@ final class ClientsApiResourceSwagger {
             public Integer loanCycle;
         }
 
-        final class GetClientsSavingsAccounts {
+        static final class GetClientsSavingsAccounts {
 
             private GetClientsSavingsAccounts() {}
 
-            final class GetClientsSavingsAccountsCurrency {
+            static final class GetClientsSavingsAccountsCurrency {
 
                 private GetClientsSavingsAccountsCurrency() {}
 
@@ -421,7 +421,7 @@ final class ClientsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetClientsSavingsAccountsStatus {
+            static final class GetClientsSavingsAccountsStatus {
 
                 private GetClientsSavingsAccountsStatus() {}
 
