@@ -88,7 +88,7 @@ final class FinancialActivityAccountsApiResourceSwagger {
 
         }
 
-        public final class PutFinancialActivityAccountscommentsSwagger {
+        public static final class PutFinancialActivityAccountscommentsSwagger {
 
             private PutFinancialActivityAccountscommentsSwagger() {}
 

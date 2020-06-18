@@ -35,7 +35,7 @@ final class SelfRunReportApiResourceSwagger {
 
         private GetRunReportResponse() {}
 
-        final class GetRunReportColumnHeaders {
+        static final class GetRunReportColumnHeaders {
 
             private GetRunReportColumnHeaders() {}
 
@@ -52,7 +52,7 @@ final class SelfRunReportApiResourceSwagger {
 
         }
 
-        final class GetPocketData {
+        static final class GetPocketData {
 
             private GetPocketData() {}
 

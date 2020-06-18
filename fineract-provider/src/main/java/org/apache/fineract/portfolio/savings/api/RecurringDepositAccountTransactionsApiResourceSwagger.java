@@ -36,7 +36,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
 
-        final class GetRecurringTransactionType {
+        static final class GetRecurringTransactionType {
 
             private GetRecurringTransactionType() {}
 
@@ -70,7 +70,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean overdraftFee;
         }
 
-        final class GetRecurringCurrency {
+        static final class GetRecurringCurrency {
 
             private GetRecurringCurrency() {}
 
@@ -113,7 +113,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
-        final class GetRecurringTransactionsCurrency {
+        static final class GetRecurringTransactionsCurrency {
 
             private GetRecurringTransactionsCurrency() {}
 
@@ -133,7 +133,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringTransactionsTransactionType {
+        static final class GetRecurringTransactionsTransactionType {
 
             private GetRecurringTransactionsTransactionType() {}
 
@@ -153,11 +153,11 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean feeDeduction;
         }
 
-        final class GetRecurringPaymentDetailData {
+        static final class GetRecurringPaymentDetailData {
 
             private GetRecurringPaymentDetailData() {}
 
-            final class GetRecurringPaymentType {
+            static final class GetRecurringPaymentType {
 
                 private GetRecurringPaymentType() {}
 
@@ -233,7 +233,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
 
-        final class PostRecurringChanges {
+        static final class PostRecurringChanges {
 
             private PostRecurringChanges() {}
 

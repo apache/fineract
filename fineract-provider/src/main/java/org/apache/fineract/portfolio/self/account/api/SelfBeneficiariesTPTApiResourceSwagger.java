@@ -34,7 +34,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
         private GetSelfBeneficiariesTPTTemplateResponse() {}
 
-        final class GetSelfBeneficiariesAccountOptions {
+        static final class GetSelfBeneficiariesAccountOptions {
 
             private GetSelfBeneficiariesAccountOptions() {}
 
@@ -93,7 +93,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
         private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
-        final class PutSelfBeneficiariesChanges {
+        static final class PutSelfBeneficiariesChanges {
 
             private PutSelfBeneficiariesChanges() {}
 

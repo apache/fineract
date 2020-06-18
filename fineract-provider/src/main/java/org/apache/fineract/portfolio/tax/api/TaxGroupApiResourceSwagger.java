@@ -36,11 +36,11 @@ final class TaxGroupApiResourceSwagger {
 
         private GetTaxesGroupResponse() {}
 
-        final class GetTaxesGroupTaxAssociations {
+        static final class GetTaxesGroupTaxAssociations {
 
             private GetTaxesGroupTaxAssociations() {}
 
-            final class GetTaxesGroupTaxComponent {
+            static final class GetTaxesGroupTaxComponent {
 
                 private GetTaxesGroupTaxComponent() {}
 
@@ -69,7 +69,7 @@ final class TaxGroupApiResourceSwagger {
 
         private PostTaxesGroupRequest() {}
 
-        final class PostTaxesGroupTaxComponents {
+        static final class PostTaxesGroupTaxComponents {
 
             private PostTaxesGroupTaxComponents() {}
 
@@ -102,7 +102,7 @@ final class TaxGroupApiResourceSwagger {
 
         private PutTaxesGroupTaxGroupIdRequest() {}
 
-        final class PutTaxesGroupTaxComponents {
+        static final class PutTaxesGroupTaxComponents {
 
             private PutTaxesGroupTaxComponents() {}
 
@@ -128,11 +128,11 @@ final class TaxGroupApiResourceSwagger {
 
         private PutTaxesGroupTaxGroupIdResponse() {}
 
-        final class PutTaxesGroupChanges {
+        static final class PutTaxesGroupChanges {
 
             private PutTaxesGroupChanges() {}
 
-            final class PutTaxesGroupModifiedComponents {
+            static final class PutTaxesGroupModifiedComponents {
 
                 private PutTaxesGroupModifiedComponents() {}
 

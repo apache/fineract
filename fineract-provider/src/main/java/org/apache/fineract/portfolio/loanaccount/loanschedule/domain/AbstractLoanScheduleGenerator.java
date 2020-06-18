@@ -2639,7 +2639,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
     }
 
-    private final class LoanTermVariationParams {
+    private static final class LoanTermVariationParams {
 
         private final boolean skipPeriod;
         private final boolean recalculateAmounts;
@@ -2672,7 +2672,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     }
 
-    private final class ScheduleCurrentPeriodParams {
+    private static final class ScheduleCurrentPeriodParams {
 
         Money earlyPaidAmount;
         LoanScheduleModelPeriod lastInstallment;

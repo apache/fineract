@@ -32,7 +32,7 @@ final class ChargesApiResourceSwagger {
 
         private GetChargesResponse() {}
 
-        final class GetChargesCurrencyResponse {
+        static final class GetChargesCurrencyResponse {
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -48,7 +48,7 @@ final class ChargesApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetChargesTimeTypeResponse {
+        static final class GetChargesTimeTypeResponse {
 
             private GetChargesTimeTypeResponse() {}
 
@@ -60,7 +60,7 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesAppliesToResponse {
+        static final class GetChargesAppliesToResponse {
 
             private GetChargesAppliesToResponse() {}
 
@@ -72,7 +72,7 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesCalculationTypeResponse {
+        static final class GetChargesCalculationTypeResponse {
 
             private GetChargesCalculationTypeResponse() {}
 
@@ -84,7 +84,7 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesPaymentModeResponse {
+        static final class GetChargesPaymentModeResponse {
 
             private GetChargesPaymentModeResponse() {}
 
@@ -180,7 +180,7 @@ final class ChargesApiResourceSwagger {
 
         private GetChargesTemplateResponse() {}
 
-        final class GetChargesTemplateLoanChargeCalculationTypeOptions {
+        static final class GetChargesTemplateLoanChargeCalculationTypeOptions {
 
             private GetChargesTemplateLoanChargeCalculationTypeOptions() {}
 
@@ -192,7 +192,7 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesTemplateLoanChargeTimeTypeOptions {
+        static final class GetChargesTemplateLoanChargeTimeTypeOptions {
 
             private GetChargesTemplateLoanChargeTimeTypeOptions() {}
 
@@ -204,7 +204,7 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesTemplateFeeFrequencyOptions {
+        static final class GetChargesTemplateFeeFrequencyOptions {
 
             private GetChargesTemplateFeeFrequencyOptions() {}
 

@@ -34,7 +34,7 @@ final class LoanTransactionsApiResourceSwagger {
 
         private GetLoansLoanIdTransactionsTemplateResponse() {}
 
-        final class GetLoansTransactionType {
+        static final class GetLoansTransactionType {
 
             private GetLoansTransactionType() {}
 
@@ -46,7 +46,7 @@ final class LoanTransactionsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansTotal {
+        static final class GetLoansTotal {
 
             private GetLoansTotal() {}
 
@@ -83,7 +83,7 @@ final class LoanTransactionsApiResourceSwagger {
 
         private GetLoansLoanIdTransactionsTransactionIdResponse() {}
 
-        final class GetLoansType {
+        static final class GetLoansType {
 
             private GetLoansType() {}
 
@@ -111,7 +111,7 @@ final class LoanTransactionsApiResourceSwagger {
             public Boolean recoveryRepayment;
         }
 
-        final class GetLoansCurrency {
+        static final class GetLoansCurrency {
 
             private GetLoansCurrency() {}
 

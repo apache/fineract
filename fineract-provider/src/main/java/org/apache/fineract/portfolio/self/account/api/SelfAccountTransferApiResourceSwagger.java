@@ -35,7 +35,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
         private GetAccountTransferTemplateResponse() {}
 
-        final class GetAccountOptions {
+        static final class GetAccountOptions {
 
             private GetAccountOptions() {}
 
@@ -49,7 +49,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetAccountOptions> accountTypeOptions;
 
-        final class GetFromAccountOptions {
+        static final class GetFromAccountOptions {
 
             private GetFromAccountOptions() {}
 
@@ -71,7 +71,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetFromAccountOptions> fromAccountTypeOptions;
 
-        final class GetToAccountOptions {
+        static final class GetToAccountOptions {
 
             private GetToAccountOptions() {}
 

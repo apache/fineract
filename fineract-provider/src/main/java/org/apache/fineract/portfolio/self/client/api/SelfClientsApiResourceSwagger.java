@@ -37,11 +37,11 @@ final class SelfClientsApiResourceSwagger {
 
         private GetSelfClientsResponse() {}
 
-        final class GetSelfClientsPageItems {
+        static final class GetSelfClientsPageItems {
 
             private GetSelfClientsPageItems() {}
 
-            final class GetSelfClientsStatus {
+            static final class GetSelfClientsStatus {
 
                 private GetSelfClientsStatus() {}
 
@@ -82,7 +82,7 @@ final class SelfClientsApiResourceSwagger {
 
         private GetSelfClientsClientIdResponse() {}
 
-        final class GetSelfClientsTimeline {
+        static final class GetSelfClientsTimeline {
 
             private GetSelfClientsTimeline() {}
 
@@ -138,11 +138,11 @@ final class SelfClientsApiResourceSwagger {
 
         private GetSelfClientsClientIdAccountsResponse() {}
 
-        final class GetSelfClientsLoanAccounts {
+        static final class GetSelfClientsLoanAccounts {
 
             private GetSelfClientsLoanAccounts() {}
 
-            final class GetSelfClientsLoanAccountsStatus {
+            static final class GetSelfClientsLoanAccountsStatus {
 
                 private GetSelfClientsLoanAccountsStatus() {}
 
@@ -170,7 +170,7 @@ final class SelfClientsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetSelfClientsLoanAccountsType {
+            static final class GetSelfClientsLoanAccountsType {
 
                 private GetSelfClientsLoanAccountsType() {}
 
@@ -198,11 +198,11 @@ final class SelfClientsApiResourceSwagger {
             public Integer loanCycle;
         }
 
-        final class GetSelfClientsSavingsAccounts {
+        static final class GetSelfClientsSavingsAccounts {
 
             private GetSelfClientsSavingsAccounts() {}
 
-            final class GetSelfClientsSavingsAccountsCurrency {
+            static final class GetSelfClientsSavingsAccountsCurrency {
 
                 private GetSelfClientsSavingsAccountsCurrency() {}
 
@@ -220,7 +220,7 @@ final class SelfClientsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetSelfClientsSavingsAccountsStatus {
+            static final class GetSelfClientsSavingsAccountsStatus {
 
                 private GetSelfClientsSavingsAccountsStatus() {}
 
@@ -265,11 +265,11 @@ final class SelfClientsApiResourceSwagger {
 
         private GetSelfClientsClientIdChargesResponse() {}
 
-        final class GetSelfClientsChargesPageItems {
+        static final class GetSelfClientsChargesPageItems {
 
             private GetSelfClientsChargesPageItems() {}
 
-            final class GetSelfClientsChargeTimeType {
+            static final class GetSelfClientsChargeTimeType {
 
                 private GetSelfClientsChargeTimeType() {}
 
@@ -281,7 +281,7 @@ final class SelfClientsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSelfClientsChargeCalculationType {
+            static final class GetSelfClientsChargeCalculationType {
 
                 private GetSelfClientsChargeCalculationType() {}
 
@@ -374,11 +374,11 @@ final class SelfClientsApiResourceSwagger {
 
         private GetSelfClientsClientIdTransactionsResponse() {}
 
-        final class GetSelfClientsClientIdTransactionsPageItems {
+        static final class GetSelfClientsClientIdTransactionsPageItems {
 
             private GetSelfClientsClientIdTransactionsPageItems() {}
 
-            final class GetSelfClientsClientIdTransactionsType {
+            static final class GetSelfClientsClientIdTransactionsType {
 
                 private GetSelfClientsClientIdTransactionsType() {}
 

@@ -34,7 +34,7 @@ final class NotesApiResourceSwagger {
 
         private GetResourceTypeResourceIdNotesResponse() {}
 
-        final class GetNotesNoteType {
+        static final class GetNotesNoteType {
 
             private GetNotesNoteType() {}
 
@@ -129,7 +129,7 @@ final class NotesApiResourceSwagger {
 
         private PutResourceTypeResourceIdNotesNoteIdResponse() {}
 
-        final class PutNotesChanges {
+        static final class PutNotesChanges {
 
             private PutNotesChanges() {}
 

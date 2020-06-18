@@ -38,7 +38,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
         private GetShareAccountsClientIdResponse() {}
 
-        final class GetShareAccountsProductOptions {
+        static final class GetShareAccountsProductOptions {
 
             private GetShareAccountsProductOptions() {}
 
@@ -52,11 +52,11 @@ final class SelfShareAccountsApiResourceSwagger {
             public Integer totalShares;
         }
 
-        final class GetShareAccountsChargeOptions {
+        static final class GetShareAccountsChargeOptions {
 
             private GetShareAccountsChargeOptions() {}
 
-            final class GetShareAccountsCurrency {
+            static final class GetShareAccountsCurrency {
 
                 private GetShareAccountsCurrency() {}
 
@@ -75,7 +75,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsChargeTimeType {
+            static final class GetShareAccountsChargeTimeType {
 
                 private GetShareAccountsChargeTimeType() {}
 
@@ -87,7 +87,7 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargeAppliesTo {
+            static final class GetShareAccountsChargeAppliesTo {
 
                 private GetShareAccountsChargeAppliesTo() {}
 
@@ -99,7 +99,7 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargeCalculationType {
+            static final class GetShareAccountsChargeCalculationType {
 
                 private GetShareAccountsChargeCalculationType() {}
 
@@ -111,7 +111,7 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargePaymentMode {
+            static final class GetShareAccountsChargePaymentMode {
 
                 private GetShareAccountsChargePaymentMode() {}
 
@@ -152,11 +152,11 @@ final class SelfShareAccountsApiResourceSwagger {
 
         private GetShareAccountsClientIdProductIdResponse() {}
 
-        final class GetClientIdProductIdProductOptions {
+        static final class GetClientIdProductIdProductOptions {
 
             private GetClientIdProductIdProductOptions() {}
 
-            final class GetShareAccountsClientIdProductIdLockPeriodTypeEnum {
+            static final class GetShareAccountsClientIdProductIdLockPeriodTypeEnum {
 
                 private GetShareAccountsClientIdProductIdLockPeriodTypeEnum() {}
 
@@ -169,7 +169,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum {
+            static final class GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum {
 
                 private GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum() {}
 
@@ -182,7 +182,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsClientIdProductIdAccountingRule {
+            static final class GetShareAccountsClientIdProductIdAccountingRule {
 
                 private GetShareAccountsClientIdProductIdAccountingRule() {}
 
@@ -195,11 +195,11 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetClientIdProductIdAccountingMappings {
+            static final class GetClientIdProductIdAccountingMappings {
 
                 private GetClientIdProductIdAccountingMappings() {}
 
-                final class GetShareAccountsShareReferenceId {
+                static final class GetShareAccountsShareReferenceId {
 
                     private GetShareAccountsShareReferenceId() {}
 
@@ -212,7 +212,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsIncomeFromFeeAccountId {
+                static final class GetShareAccountsIncomeFromFeeAccountId {
 
                     private GetShareAccountsIncomeFromFeeAccountId() {}
 
@@ -225,7 +225,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsShareEquityId {
+                static final class GetShareAccountsShareEquityId {
 
                     private GetShareAccountsShareEquityId() {}
 
@@ -238,7 +238,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsShareSuspenseId {
+                static final class GetShareAccountsShareSuspenseId {
 
                     private GetShareAccountsShareSuspenseId() {}
 
@@ -257,7 +257,7 @@ final class SelfShareAccountsApiResourceSwagger {
                 public GetShareAccountsShareSuspenseId shareSuspenseId;
             }
 
-            final class GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions {
+            static final class GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions {
 
                 private GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions() {}
 
@@ -270,7 +270,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetClientIdProductIdLockinPeriodFrequencyTypeOptions {
+            static final class GetClientIdProductIdLockinPeriodFrequencyTypeOptions {
 
                 private GetClientIdProductIdLockinPeriodFrequencyTypeOptions() {}
 
@@ -283,15 +283,15 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetAccountingMappingOptions {
+            static final class GetAccountingMappingOptions {
 
                 private GetAccountingMappingOptions() {}
 
-                final class GetAccountingMappingLiabilityAccountOptions {
+                static final class GetAccountingMappingLiabilityAccountOptions {
 
                     private GetAccountingMappingLiabilityAccountOptions() {}
 
-                    final class GetLiabilityAccountType {
+                    static final class GetLiabilityAccountType {
 
                         private GetLiabilityAccountType() {}
 
@@ -304,7 +304,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetLiabilityAccountUsage {
+                    static final class GetLiabilityAccountUsage {
 
                         private GetLiabilityAccountUsage() {}
 
@@ -317,7 +317,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetLiabilityAccountTagId {
+                    static final class GetLiabilityAccountTagId {
 
                         private GetLiabilityAccountTagId() {}
 
@@ -350,11 +350,11 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetAccountingMappingAssetAccountOptions {
+                static final class GetAccountingMappingAssetAccountOptions {
 
                     private GetAccountingMappingAssetAccountOptions() {}
 
-                    final class GetAssetAccountType {
+                    static final class GetAssetAccountType {
 
                         private GetAssetAccountType() {}
 
@@ -367,7 +367,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetAssetAccountUsage {
+                    static final class GetAssetAccountUsage {
 
                         private GetAssetAccountUsage() {}
 
@@ -380,7 +380,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetAssetAccountTagId {
+                    static final class GetAssetAccountTagId {
 
                         private GetAssetAccountTagId() {}
 
@@ -413,11 +413,11 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetAccountingMappingIncomeAccountOptions {
+                static final class GetAccountingMappingIncomeAccountOptions {
 
                     private GetAccountingMappingIncomeAccountOptions() {}
 
-                    final class GetIncomeAccountType {
+                    static final class GetIncomeAccountType {
 
                         private GetIncomeAccountType() {}
 
@@ -430,7 +430,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetIncomeAccountUsage {
+                    static final class GetIncomeAccountUsage {
 
                         private GetIncomeAccountUsage() {}
 
@@ -443,7 +443,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetIncomeAccountTagId {
+                    static final class GetIncomeAccountTagId {
 
                         private GetIncomeAccountTagId() {}
 
@@ -475,11 +475,11 @@ final class SelfShareAccountsApiResourceSwagger {
                     public GetIncomeAccountTagId tagId;
                 }
 
-                final class GetShareAccountAccountingMappingEquityAccountOptions {
+                static final class GetShareAccountAccountingMappingEquityAccountOptions {
 
                     private GetShareAccountAccountingMappingEquityAccountOptions() {}
 
-                    final class GetShareAccountsEquityAccountType {
+                    static final class GetShareAccountsEquityAccountType {
 
                         private GetShareAccountsEquityAccountType() {}
 
@@ -492,7 +492,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetShareAccountsEquityAccountUsage {
+                    static final class GetShareAccountsEquityAccountUsage {
 
                         private GetShareAccountsEquityAccountUsage() {}
 
@@ -505,7 +505,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetShareAccountsEquityAccountTagId {
+                    static final class GetShareAccountsEquityAccountTagId {
 
                         private GetShareAccountsEquityAccountTagId() {}
 
@@ -584,7 +584,7 @@ final class SelfShareAccountsApiResourceSwagger {
             public GetAccountingMappingOptions accountingMappingOptions;
         }
 
-        final class GetClientIdProductIdChargeOptions {
+        static final class GetClientIdProductIdChargeOptions {
 
             private GetClientIdProductIdChargeOptions() {}
 
@@ -600,7 +600,7 @@ final class SelfShareAccountsApiResourceSwagger {
 
         private PostNewShareApplicationRequest() {}
 
-        final class GetShareAccountsCharges {
+        static final class GetShareAccountsCharges {
 
             private GetShareAccountsCharges() {}
 

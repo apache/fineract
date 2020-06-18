@@ -35,11 +35,11 @@ final class FixedDepositProductsApiResourceSwagger {
 
         private PostFixedDepositProductsRequest() {}
 
-        final class PostFixedDepositProductsCharts {
+        static final class PostFixedDepositProductsCharts {
 
             private PostFixedDepositProductsCharts() {}
 
-            final class PostFixedDepositProductsChartSlabs {
+            static final class PostFixedDepositProductsChartSlabs {
 
                 private PostFixedDepositProductsChartSlabs() {}
 
@@ -134,7 +134,7 @@ final class FixedDepositProductsApiResourceSwagger {
 
         private PutFixedDepositProductsProductIdResponse() {}
 
-        final class PutFixedDepositProductsChanges {
+        static final class PutFixedDepositProductsChanges {
 
             private PutFixedDepositProductsChanges() {}
 
@@ -154,7 +154,7 @@ final class FixedDepositProductsApiResourceSwagger {
 
         private GetFixedDepositProductsResponse() {}
 
-        final class GetFixedDepositProductsCurrency {
+        static final class GetFixedDepositProductsCurrency {
 
             private GetFixedDepositProductsCurrency() {}
 
@@ -174,7 +174,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositProductsMinDepositTermType {
+        static final class GetFixedDepositProductsMinDepositTermType {
 
             private GetFixedDepositProductsMinDepositTermType() {}
 
@@ -186,7 +186,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsMaxDepositTermType {
+        static final class GetFixedDepositProductsMaxDepositTermType {
 
             private GetFixedDepositProductsMaxDepositTermType() {}
 
@@ -198,7 +198,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCompoundingPeriodType {
+        static final class GetFixedDepositProductsInterestCompoundingPeriodType {
 
             private GetFixedDepositProductsInterestCompoundingPeriodType() {}
 
@@ -210,7 +210,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestPostingPeriodType {
+        static final class GetFixedDepositProductsInterestPostingPeriodType {
 
             private GetFixedDepositProductsInterestPostingPeriodType() {}
 
@@ -222,7 +222,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCalculationType {
+        static final class GetFixedDepositProductsInterestCalculationType {
 
             private GetFixedDepositProductsInterestCalculationType() {}
 
@@ -234,7 +234,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCalculationDaysInYearType {
+        static final class GetFixedDepositProductsInterestCalculationDaysInYearType {
 
             private GetFixedDepositProductsInterestCalculationDaysInYearType() {}
 
@@ -246,7 +246,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsAccountingRule {
+        static final class GetFixedDepositProductsAccountingRule {
 
             private GetFixedDepositProductsAccountingRule() {}
 
@@ -289,7 +289,7 @@ final class FixedDepositProductsApiResourceSwagger {
 
         private GetFixedDepositProductsProductIdResponse() {}
 
-        final class GetFixedDepositProductsProductIdCurrency {
+        static final class GetFixedDepositProductsProductIdCurrency {
 
             private GetFixedDepositProductsProductIdCurrency() {}
 
@@ -307,7 +307,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositProductsProductIdInterestCompoundingPeriodType {
+        static final class GetFixedDepositProductsProductIdInterestCompoundingPeriodType {
 
             private GetFixedDepositProductsProductIdInterestCompoundingPeriodType() {}
 
@@ -319,11 +319,11 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdAccountingMappings {
+        static final class GetFixedDepositProductsProductIdAccountingMappings {
 
             private GetFixedDepositProductsProductIdAccountingMappings() {}
 
-            final class GetFixedDepositProductsProductIdSavingsReferenceAccount {
+            static final class GetFixedDepositProductsProductIdSavingsReferenceAccount {
 
                 private GetFixedDepositProductsProductIdSavingsReferenceAccount() {}
 
@@ -335,7 +335,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
+            static final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
 
                 private GetFixedDepositProductsProductIdIncomeFromFeeAccount() {}
 
@@ -347,7 +347,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
+            static final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
 
                 private GetFixedDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
@@ -359,7 +359,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
+            static final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
 
                 private GetFixedDepositProductsProductIdInterestOnSavingsAccount() {}
 
@@ -371,7 +371,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdSavingsControlAccount {
+            static final class GetFixedDepositProductsProductIdSavingsControlAccount {
 
                 private GetFixedDepositProductsProductIdSavingsControlAccount() {}
 
@@ -383,7 +383,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
+            static final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
 
                 private GetFixedDepositProductsProductIdTransfersInSuspenseAccount() {}
 
@@ -403,11 +403,11 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdTransfersInSuspenseAccount transfersInSuspenseAccount;
         }
 
-        final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
+        static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
 
             private GetFixedDepositProductsProductIdFeeToIncomeAccountMappings() {}
 
-            final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
+            static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
 
                 private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
@@ -421,7 +421,7 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Boolean penalty;
             }
 
-            final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
+            static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
 
                 private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
@@ -437,11 +437,11 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
         }
 
-        final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {
+        static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {
 
             private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings() {}
 
-            final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
+            static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
 
                 private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
@@ -459,7 +459,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdAccountingMappings.GetFixedDepositProductsProductIdIncomeFromPenaltyAccount incomeAccount;
         }
 
-        final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {
+        static final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {
 
             private GetFixedDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
@@ -471,7 +471,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdMinDepositTermType {
+        static final class GetFixedDepositProductsProductIdMinDepositTermType {
 
             private GetFixedDepositProductsProductIdMinDepositTermType() {}
 
@@ -483,7 +483,7 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdMaxDepositTermType {
+        static final class GetFixedDepositProductsProductIdMaxDepositTermType {
 
             private GetFixedDepositProductsProductIdMaxDepositTermType() {}
 
@@ -495,15 +495,15 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdActiveChart {
+        static final class GetFixedDepositProductsProductIdActiveChart {
 
             private GetFixedDepositProductsProductIdActiveChart() {}
 
-            final class GetFixedDepositProductsProductIdChartSlabs {
+            static final class GetFixedDepositProductsProductIdChartSlabs {
 
                 private GetFixedDepositProductsProductIdChartSlabs() {}
 
-                final class GetFixedDepositProductsProductIdPeriodType {
+                static final class GetFixedDepositProductsProductIdPeriodType {
 
                     private GetFixedDepositProductsProductIdPeriodType() {}
 

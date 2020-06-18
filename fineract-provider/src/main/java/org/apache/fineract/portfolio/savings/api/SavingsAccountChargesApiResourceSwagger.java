@@ -34,7 +34,7 @@ final class SavingsAccountChargesApiResourceSwagger {
 
         private GetSavingsAccountsSavingsAccountIdChargesResponse() {}
 
-        final class GetChargesCurrencyResponse {
+        static final class GetChargesCurrencyResponse {
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -50,7 +50,7 @@ final class SavingsAccountChargesApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetChargesChargeCalculationType {
+        static final class GetChargesChargeCalculationType {
 
             private GetChargesChargeCalculationType() {}
 
@@ -62,7 +62,7 @@ final class SavingsAccountChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesChargeTimeType {
+        static final class GetChargesChargeTimeType {
 
             private GetChargesChargeTimeType() {}
 
@@ -110,11 +110,11 @@ final class SavingsAccountChargesApiResourceSwagger {
 
         private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {}
 
-        final class GetSavingsChargesOptions {
+        static final class GetSavingsChargesOptions {
 
             private GetSavingsChargesOptions() {}
 
-            final class GetSavingsChargesChargeTimeType {
+            static final class GetSavingsChargesChargeTimeType {
 
                 private GetSavingsChargesChargeTimeType() {}
 
@@ -126,7 +126,7 @@ final class SavingsAccountChargesApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargesAppliesTo {
+            static final class GetChargesAppliesTo {
 
                 private GetChargesAppliesTo() {}
 
@@ -251,7 +251,7 @@ final class SavingsAccountChargesApiResourceSwagger {
 
         private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
-        final class PutSavingsChanges {
+        static final class PutSavingsChanges {
 
             private PutSavingsChanges() {}
 

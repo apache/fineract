@@ -165,7 +165,7 @@ final class UsersApiResourceSwagger {
 
         }
 
-        final class PutUsersUserIdResponseChanges {
+        static final class PutUsersUserIdResponseChanges {
 
             private PutUsersUserIdResponseChanges() {
 
@@ -191,7 +191,7 @@ final class UsersApiResourceSwagger {
 
         }
 
-        final class DeleteUsersUserIdResponseChanges {
+        static final class DeleteUsersUserIdResponseChanges {
 
             private DeleteUsersUserIdResponseChanges() {
 

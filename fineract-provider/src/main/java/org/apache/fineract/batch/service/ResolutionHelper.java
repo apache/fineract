@@ -49,7 +49,7 @@ public class ResolutionHelper {
      * @author Rishabh shukla
      *
      */
-    public class BatchRequestNode {
+    public static class BatchRequestNode {
 
         private BatchRequest request;
         private final List<BatchRequestNode> childRequests = new ArrayList<>();

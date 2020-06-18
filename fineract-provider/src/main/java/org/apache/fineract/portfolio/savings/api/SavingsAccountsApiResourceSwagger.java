@@ -35,7 +35,7 @@ final class SavingsAccountsApiResourceSwagger {
 
         private GetSavingsAccountsTemplateResponse() {}
 
-        final class GetSavingsProductOptions {
+        static final class GetSavingsProductOptions {
 
             private GetSavingsProductOptions() {}
 
@@ -57,11 +57,11 @@ final class SavingsAccountsApiResourceSwagger {
 
         private GetSavingsAccountsResponse() {}
 
-        final class GetSavingsPageItems {
+        static final class GetSavingsPageItems {
 
             private GetSavingsPageItems() {}
 
-            final class GetSavingsStatus {
+            static final class GetSavingsStatus {
 
                 private GetSavingsStatus() {}
 
@@ -86,7 +86,7 @@ final class SavingsAccountsApiResourceSwagger {
 
             }
 
-            final class GetSavingsTimeline {
+            static final class GetSavingsTimeline {
 
                 private GetSavingsTimeline() {}
 
@@ -94,7 +94,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public LocalDate submittedOnDate;
             }
 
-            final class GetSavingsCurrency {
+            static final class GetSavingsCurrency {
 
                 private GetSavingsCurrency() {}
 
@@ -112,7 +112,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetSavingsInterestCompoundingPeriodType {
+            static final class GetSavingsInterestCompoundingPeriodType {
 
                 private GetSavingsInterestCompoundingPeriodType() {}
 
@@ -124,7 +124,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestPostingPeriodType {
+            static final class GetSavingsInterestPostingPeriodType {
 
                 private GetSavingsInterestPostingPeriodType() {}
 
@@ -136,7 +136,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestCalculationType {
+            static final class GetSavingsInterestCalculationType {
 
                 private GetSavingsInterestCalculationType() {}
 
@@ -148,7 +148,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestCalculationDaysInYearType {
+            static final class GetSavingsInterestCalculationDaysInYearType {
 
                 private GetSavingsInterestCalculationDaysInYearType() {}
 
@@ -160,7 +160,7 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsSummary {
+            static final class GetSavingsSummary {
 
                 private GetSavingsSummary() {}
 
@@ -237,7 +237,7 @@ final class SavingsAccountsApiResourceSwagger {
 
         private GetSavingsAccountsAccountIdResponse() {}
 
-        final class GetSavingsAccountsSummary {
+        static final class GetSavingsAccountsSummary {
 
             private GetSavingsAccountsSummary() {}
 
@@ -290,7 +290,7 @@ final class SavingsAccountsApiResourceSwagger {
 
         private PutSavingsAccountsAccountIdResponse() {}
 
-        final class PutSavingsAccountsChanges {
+        static final class PutSavingsAccountsChanges {
 
             private PutSavingsAccountsChanges() {}
 
@@ -329,7 +329,7 @@ final class SavingsAccountsApiResourceSwagger {
 
         private PostSavingsAccountsAccountIdResponse() {}
 
-        final class PostSavingsAccountsAccountIdChanges {
+        static final class PostSavingsAccountsAccountIdChanges {
 
             private PostSavingsAccountsAccountIdChanges() {}
         }

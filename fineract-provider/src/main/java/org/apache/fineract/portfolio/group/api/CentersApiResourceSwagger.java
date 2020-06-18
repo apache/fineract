@@ -35,7 +35,7 @@ final class CentersApiResourceSwagger {
 
         private GetCentersTemplateResponse() {}
 
-        final class GetCentersOfficeOptions {
+        static final class GetCentersOfficeOptions {
 
             private GetCentersOfficeOptions() {}
 
@@ -47,7 +47,7 @@ final class CentersApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetCentersStaffOptions {
+        static final class GetCentersStaffOptions {
 
             private GetCentersStaffOptions() {}
 
@@ -72,11 +72,11 @@ final class CentersApiResourceSwagger {
 
         private GetCentersResponse() {}
 
-        final class GetCentersPageItems {
+        static final class GetCentersPageItems {
 
             private GetCentersPageItems() {}
 
-            final class GetCentersStatus {
+            static final class GetCentersStatus {
 
                 private GetCentersStatus() {}
 
@@ -168,7 +168,7 @@ final class CentersApiResourceSwagger {
 
         private PutCentersCenterIdResponse() {}
 
-        final class PutCentersChanges {
+        static final class PutCentersChanges {
 
             private PutCentersChanges() {}
 
@@ -190,7 +190,7 @@ final class CentersApiResourceSwagger {
 
         private DeleteCentersCenterIdResponse() {}
 
-        final class DeleteCentersChanges {
+        static final class DeleteCentersChanges {
 
             private DeleteCentersChanges() {}
         }
@@ -229,11 +229,11 @@ final class CentersApiResourceSwagger {
 
         private GetCentersCenterIdAccountsResponse() {}
 
-        final class GetCentersSavingsAccounts {
+        static final class GetCentersSavingsAccounts {
 
             private GetCentersSavingsAccounts() {}
 
-            final class GetCentersCenterIdStatus {
+            static final class GetCentersCenterIdStatus {
 
                 private GetCentersCenterIdStatus() {}
 
@@ -263,7 +263,7 @@ final class CentersApiResourceSwagger {
                 public Boolean transferOnHold;
             }
 
-            final class GetCentersCenterIdCurrency {
+            static final class GetCentersCenterIdCurrency {
 
                 private GetCentersCenterIdCurrency() {}
 
@@ -283,7 +283,7 @@ final class CentersApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetCentersAccountType {
+            static final class GetCentersAccountType {
 
                 private GetCentersAccountType() {}
 
@@ -295,7 +295,7 @@ final class CentersApiResourceSwagger {
                 public String value;
             }
 
-            final class GetCentersTimeline {
+            static final class GetCentersTimeline {
 
                 private GetCentersTimeline() {}
 
@@ -309,7 +309,7 @@ final class CentersApiResourceSwagger {
                 public String submittedByLastname;
             }
 
-            final class GetCentersDepositType {
+            static final class GetCentersDepositType {
 
                 private GetCentersDepositType() {}
 

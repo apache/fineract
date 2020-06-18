@@ -35,7 +35,7 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private GetFixedDepositAccountsTemplateResponse() {}
 
-        final class GetFixedDepositAccountsProductOptions {
+        static final class GetFixedDepositAccountsProductOptions {
 
             private GetFixedDepositAccountsProductOptions() {}
 
@@ -57,7 +57,7 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private GetFixedDepositAccountsResponse() {}
 
-        final class GetFixedDepositAccountsStatus {
+        static final class GetFixedDepositAccountsStatus {
 
             private GetFixedDepositAccountsStatus() {}
 
@@ -87,7 +87,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Boolean transferOnHold;
         }
 
-        final class GetFixedDepositAccountsTimeline {
+        static final class GetFixedDepositAccountsTimeline {
 
             private GetFixedDepositAccountsTimeline() {}
 
@@ -101,7 +101,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String submittedByLastname;
         }
 
-        final class GetFixedDepositAccountsCurrency {
+        static final class GetFixedDepositAccountsCurrency {
 
             private GetFixedDepositAccountsCurrency() {}
 
@@ -121,7 +121,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositAccountsInterestCompoundingPeriodType {
+        static final class GetFixedDepositAccountsInterestCompoundingPeriodType {
 
             private GetFixedDepositAccountsInterestCompoundingPeriodType() {}
 
@@ -133,7 +133,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestPostingPeriodType {
+        static final class GetFixedDepositAccountsInterestPostingPeriodType {
 
             private GetFixedDepositAccountsInterestPostingPeriodType() {}
 
@@ -145,7 +145,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestCalculationType {
+        static final class GetFixedDepositAccountsInterestCalculationType {
 
             private GetFixedDepositAccountsInterestCalculationType() {}
 
@@ -157,7 +157,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestCalculationDaysInYearType {
+        static final class GetFixedDepositAccountsInterestCalculationDaysInYearType {
 
             private GetFixedDepositAccountsInterestCalculationDaysInYearType() {}
 
@@ -169,7 +169,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsSummary {
+        static final class GetFixedDepositAccountsSummary {
 
             private GetFixedDepositAccountsSummary() {}
 
@@ -178,7 +178,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Float accountBalance;
         }
 
-        final class GetFixedDepositAccountsMinDepositTermType {
+        static final class GetFixedDepositAccountsMinDepositTermType {
 
             private GetFixedDepositAccountsMinDepositTermType() {}
 
@@ -190,7 +190,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsMaxDepositTermType {
+        static final class GetFixedDepositAccountsMaxDepositTermType {
 
             private GetFixedDepositAccountsMaxDepositTermType() {}
 
@@ -202,7 +202,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsDepositPeriodFrequency {
+        static final class GetFixedDepositAccountsDepositPeriodFrequency {
 
             private GetFixedDepositAccountsDepositPeriodFrequency() {}
 
@@ -300,15 +300,15 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private GetFixedDepositAccountsAccountIdResponse() {}
 
-        final class GetFixedDepositAccountsAccountChart {
+        static final class GetFixedDepositAccountsAccountChart {
 
             private GetFixedDepositAccountsAccountChart() {}
 
-            final class GetFixedDepositAccountsChartSlabs {
+            static final class GetFixedDepositAccountsChartSlabs {
 
                 private GetFixedDepositAccountsChartSlabs() {}
 
-                final class GetFixedDepositAccountsPeriodType {
+                static final class GetFixedDepositAccountsPeriodType {
 
                     private GetFixedDepositAccountsPeriodType() {}
 
@@ -320,7 +320,7 @@ final class FixedDepositAccountsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetFixedDepositAccountsAccountChartCurrency {
+                static final class GetFixedDepositAccountsAccountChartCurrency {
 
                     private GetFixedDepositAccountsAccountChartCurrency() {}
 
@@ -350,7 +350,7 @@ final class FixedDepositAccountsApiResourceSwagger {
                 public GetFixedDepositAccountsAccountChartCurrency currency;
             }
 
-            final class GetFixedDepositAccountsPeriodTypes {
+            static final class GetFixedDepositAccountsPeriodTypes {
 
                 private GetFixedDepositAccountsPeriodTypes() {}
 
@@ -374,7 +374,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Set<GetFixedDepositAccountsPeriodTypes> periodTypes;
         }
 
-        final class GetFixedDepositAccountsAccountIdCurrency {
+        static final class GetFixedDepositAccountsAccountIdCurrency {
 
             private GetFixedDepositAccountsAccountIdCurrency() {}
 
@@ -394,7 +394,7 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositAccountsAccountIdSummary {
+        static final class GetFixedDepositAccountsAccountIdSummary {
 
             private GetFixedDepositAccountsAccountIdSummary() {}
 
@@ -465,7 +465,7 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         private PutFixedDepositAccountsAccountIdResponse() {}
 
-        final class PutFixedDepositAccountsChanges {
+        static final class PutFixedDepositAccountsChanges {
 
             private PutFixedDepositAccountsChanges() {}
 

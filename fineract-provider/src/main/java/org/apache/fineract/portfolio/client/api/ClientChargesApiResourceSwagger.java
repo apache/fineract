@@ -36,11 +36,11 @@ final class ClientChargesApiResourceSwagger {
 
         private GetClientsClientIdChargesResponse() {}
 
-        final class GetClientsChargesPageItems {
+        static final class GetClientsChargesPageItems {
 
             private GetClientsChargesPageItems() {}
 
-            final class GetClientChargeTimeType {
+            static final class GetClientChargeTimeType {
 
                 private GetClientChargeTimeType() {}
 
@@ -52,7 +52,7 @@ final class ClientChargesApiResourceSwagger {
                 public String value;
             }
 
-            final class GetClientChargeCalculationType {
+            static final class GetClientChargeCalculationType {
 
                 private GetClientChargeCalculationType() {}
 
@@ -64,7 +64,7 @@ final class ClientChargesApiResourceSwagger {
                 public String value;
             }
 
-            final class GetClientChargeCurrency {
+            static final class GetClientChargeCurrency {
 
                 private GetClientChargeCurrency() {}
 

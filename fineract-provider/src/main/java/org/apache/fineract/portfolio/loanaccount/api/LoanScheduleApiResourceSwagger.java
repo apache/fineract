@@ -40,7 +40,7 @@ final class LoanScheduleApiResourceSwagger {
 
         private PostLoansLoanIdScheduleResponse() {}
 
-        final class PostLoanChanges {
+        static final class PostLoanChanges {
 
             private PostLoanChanges() {}
 

@@ -418,7 +418,7 @@ public class TellerApiResource {
         return this.jsonSerializer.serialize(journals);
     }
 
-    private class CashiersForTeller {
+    private static class CashiersForTeller {
 
         public Long tellerId;
         public String tellerName;

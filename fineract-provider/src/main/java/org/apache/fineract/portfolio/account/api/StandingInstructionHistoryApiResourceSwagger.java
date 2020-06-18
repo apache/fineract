@@ -35,9 +35,9 @@ final class StandingInstructionHistoryApiResourceSwagger {
 
         private GetStandingInstructionRunHistoryResponse() {}
 
-        final class GetStandingInstructionHistoryPageItemsResponse {
+        static final class GetStandingInstructionHistoryPageItemsResponse {
 
-            final class GetStandingInstructionHistoryPageItemsFromClient {
+            static final class GetStandingInstructionHistoryPageItemsFromClient {
 
                 private GetStandingInstructionHistoryPageItemsFromClient() {}
 
@@ -51,7 +51,7 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String officeName;
             }
 
-            final class GetStandingInstructionHistoryFromAccount {
+            static final class GetStandingInstructionHistoryFromAccount {
 
                 private GetStandingInstructionHistoryFromAccount() {}
 
@@ -65,7 +65,7 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetStandingInstructionHistoryToAccount {
+            static final class GetStandingInstructionHistoryToAccount {
 
                 private GetStandingInstructionHistoryToAccount() {}
 
@@ -79,7 +79,7 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetStandingInstructionHistoryToClient {
+            static final class GetStandingInstructionHistoryToClient {
 
                 private GetStandingInstructionHistoryToClient() {}
 

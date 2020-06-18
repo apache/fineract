@@ -35,7 +35,7 @@ final class SelfUserDetailsApiResourceSwagger {
 
         private GetSelfUserDetailsResponse() {}
 
-        final class GetSelfUserDetailsOrganisationalRole {
+        static final class GetSelfUserDetailsOrganisationalRole {
 
             private GetSelfUserDetailsOrganisationalRole() {}
 
@@ -47,7 +47,7 @@ final class SelfUserDetailsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfUserDetailsRoles {
+        static final class GetSelfUserDetailsRoles {
 
             private GetSelfUserDetailsRoles() {}
 

@@ -126,7 +126,7 @@ final class ReportsApiResourceSwagger {
 
         }
 
-        final class PutReportResponseChanges {
+        static final class PutReportResponseChanges {
 
             private PutReportResponseChanges() {
 
