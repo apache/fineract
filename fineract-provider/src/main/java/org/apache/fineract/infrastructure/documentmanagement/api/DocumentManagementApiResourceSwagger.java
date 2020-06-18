@@ -90,7 +90,7 @@ final class DocumentManagementApiResourceSwagger {
 
         @ApiModelProperty(example = "3")
         public Long resourceId;
-        public PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
+        public PutEntityTypeEntityIdDocumentsResponse.PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
         @ApiModelProperty(example = "3")
         public String resourceIdentifier;
     }
@@ -112,7 +112,7 @@ final class DocumentManagementApiResourceSwagger {
 
         @ApiModelProperty(example = "3")
         public Long resourceId;
-        public PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
+        public DeleteEntityTypeEntityIdDocumentsResponse.PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
         @ApiModelProperty(example = "3")
         public String resourceIdentifier;
     }
