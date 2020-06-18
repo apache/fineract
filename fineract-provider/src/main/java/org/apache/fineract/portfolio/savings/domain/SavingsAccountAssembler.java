@@ -158,7 +158,6 @@ public class SavingsAccountAssembler {
         }
 
         if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isGSIM") != null) {
-            LOG.info("setting system to gsim");
             if (command.booleanPrimitiveValueOfParameterNamed("isGSIM")) {
                 accountType = AccountType.GSIM;
             }
