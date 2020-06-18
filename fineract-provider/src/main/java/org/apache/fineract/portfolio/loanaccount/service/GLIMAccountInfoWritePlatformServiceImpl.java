@@ -48,7 +48,7 @@ public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoW
     @Override
     public void addGLIMAccountInfo(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,
             Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
-        childAccountsCount = 2L;
+
         GroupLoanIndividualMonitoringAccount glimAccountInfo = GroupLoanIndividualMonitoringAccount.getInstance(accountNumber, group,
                 principalAmount, childAccountsCount, isAcceptingChild, loanStatus, applicationId);
 
