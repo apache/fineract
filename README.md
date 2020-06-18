@@ -219,5 +219,5 @@ More details of the project can be found at <https://cwiki.apache.org/confluence
 Docker Build & Push
 ===================
 
-docker build -t registry.dev.redbee.io/fineract-server:{version} .
-docker push registry.dev.redbee.io/fineract-server:{version}
+    docker build -t registry.dev.redbee.io/fineract-server:{version} .
+    docker push registry.dev.redbee.io/fineract-server:{version}
