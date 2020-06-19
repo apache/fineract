@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 
 public class CurrencyDomain implements Comparable<CurrencyDomain> {
 
-    public final static class Builder {
+    public static final class Builder {
 
         private String code;
         private String name;

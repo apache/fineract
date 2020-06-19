@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.fineract.mix.data.ContextData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.NamespaceData;
@@ -72,7 +71,7 @@ public class XBRLBuilder {
         this.startDate = startDate;
         this.endDate = endDate;
 
-        for (final Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
+        for (final Map.Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
             final MixTaxonomyData taxonomy = entry.getKey();
             final BigDecimal value = entry.getValue();
             addTaxonomy(this.root, taxonomy, value);
@@ -175,7 +174,7 @@ public class XBRLBuilder {
 
     public void addContexts() {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        for (final Entry<ContextData, String> entry : this.contextMap.entrySet()) {
+        for (final Map.Entry<ContextData, String> entry : this.contextMap.entrySet()) {
             final ContextData context = entry.getKey();
             final Element contextElement = this.root.addElement("context");
             contextElement.addAttribute("id", entry.getValue());

@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -63,11 +62,11 @@ public class EventResultSetExtractor implements ResultSetExtractor<List<Grouping
             groupToEntityMapping.put(groupingName, entities);
         }
 
-        for (final Entry<String, Map<String, List<String>>> groupingEntry : groupToEntityMapping.entrySet()) {
+        for (final Map.Entry<String, Map<String, List<String>>> groupingEntry : groupToEntityMapping.entrySet()) {
             final List<Entity> entities = new ArrayList<>();
             final Grouping group = new Grouping();
             group.setName(groupingEntry.getKey());
-            for (final Entry<String, List<String>> entityEntry : groupingEntry.getValue().entrySet()) {
+            for (final Map.Entry<String, List<String>> entityEntry : groupingEntry.getValue().entrySet()) {
                 final List<String> actions = new ArrayList<>();
                 final Entity entity = new Entity();
                 entity.setName(entityEntry.getKey());

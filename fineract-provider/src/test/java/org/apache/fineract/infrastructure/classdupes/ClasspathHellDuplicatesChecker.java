@@ -24,7 +24,6 @@ import io.github.classgraph.ScanResult;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +47,7 @@ public class ClasspathHellDuplicatesChecker {
 
     public String toString(Map<String, List<String>> map) {
         StringBuilder sb = new StringBuilder();
-        for (Entry<String, List<String>> entry : map.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
             sb.append(entry.getKey());
             sb.append('\n');
             for (String location : entry.getValue()) {
@@ -66,7 +65,7 @@ public class ClasspathHellDuplicatesChecker {
         // We intentionally do not use .classFilesOnly(), or
         // .nonClassFilesOnly(), to check both
         try (ScanResult scanResult = new ClassGraph().scan()) {
-            for (Entry<String, ResourceList> dupe : scanResult.getAllResources().findDuplicatePaths()) {
+            for (Map.Entry<String, ResourceList> dupe : scanResult.getAllResources().findDuplicatePaths()) {
                 String resourceName = dupe.getKey();
                 if (!isHarmlessDuplicate(resourceName)) {
                     boolean addIt = true;
