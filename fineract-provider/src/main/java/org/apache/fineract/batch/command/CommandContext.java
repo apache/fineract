@@ -35,7 +35,7 @@ public final class CommandContext {
      *
      * @author Rishabh Shukla
      */
-    public final static class Builder {
+    public static final class Builder {
 
         private String resource;
         private String method;

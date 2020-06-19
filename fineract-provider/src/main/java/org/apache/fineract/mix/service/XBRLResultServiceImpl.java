@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
@@ -87,7 +87,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             // <taxonomyId, value>
             final HashMap<MixTaxonomyData, BigDecimal> resultMap = new HashMap<>();
             setupBalanceMap(getAccountSql(startDate, endDate));
-            for (final Entry<String, String> entry : configMap.entrySet()) {
+            for (final Map.Entry<String, String> entry : configMap.entrySet()) {
                 final BigDecimal value = processMappingString(entry.getValue());
                 if (value != null) {
                     final MixTaxonomyData taxonomy = this.readTaxonomyService.retrieveOne(Long.parseLong(entry.getKey()));

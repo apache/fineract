@@ -26,7 +26,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -145,7 +145,7 @@ public class ResolutionHelper {
 
         // Iterate through each element in the requestBody to find dependent
         // parameter
-        for (Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
+        for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
             final String key = element.getKey();
             final JsonElement value = resolveDependentVariables(element, responseCtx);
             jsonResultBody.add(key, value);
@@ -179,7 +179,7 @@ public class ResolutionHelper {
         return br;
     }
 
-    private JsonElement resolveDependentVariables(final Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
+    private JsonElement resolveDependentVariables(final Map.Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
         JsonElement value = null;
 
         final JsonElement element = entryElement.getValue();
@@ -198,7 +198,7 @@ public class ResolutionHelper {
 
     private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
         JsonObject valueObj = new JsonObject();
-        for (Entry<String, JsonElement> element : jsObject.entrySet()) {
+        for (Map.Entry<String, JsonElement> element : jsObject.entrySet()) {
             final String key = element.getKey();
             final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
             valueObj.add(key, value);

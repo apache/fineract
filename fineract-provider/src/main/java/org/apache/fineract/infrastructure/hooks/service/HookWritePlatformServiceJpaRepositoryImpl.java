@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -223,7 +222,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
         final Set<HookConfiguration> configuration = new HashSet<>();
         final Set<Schema> fields = template.getSchema();
 
-        for (final Entry<String, String> configEntry : hookConfig.entrySet()) {
+        for (final Map.Entry<String, String> configEntry : hookConfig.entrySet()) {
             for (final Schema field : fields) {
                 final String fieldName = field.getFieldName();
                 if (fieldName.equalsIgnoreCase(configEntry.getKey())) {
