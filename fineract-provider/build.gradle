@@ -66,6 +66,11 @@ apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
 // apply plugin: 'pmd'
 
+
+dependencies {
+    compile 'net.logstash.logback:logstash-logback-encoder:4.11'
+}
+
 dependencyManagement {
   imports {
     mavenBom 'org.springframework:spring-framework-bom:5.2.3.RELEASE'
