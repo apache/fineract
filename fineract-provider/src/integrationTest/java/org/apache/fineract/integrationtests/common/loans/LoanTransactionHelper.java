@@ -237,7 +237,6 @@ public class LoanTransactionHelper {
                 undoLastDisburseJson);
     }
 
-    // glimtesting
     public HashMap approveGlimAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final List<Map<String, Object>> approvalFormData, final Integer glimID) {
         String approvalForm = new LoanApplicationTestBuilder() //
