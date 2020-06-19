@@ -97,7 +97,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
 
             // allows for Cross-Origin
             // Requests (CORs) to be performed against the platform API.
-            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Origin", "Fineract-Platform-TenantId");
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             final String reqHead = request.getHeader("Access-Control-Request-Headers");
 
