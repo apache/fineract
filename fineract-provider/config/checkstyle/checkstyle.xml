@@ -115,6 +115,7 @@
             <!-- No PACKAGE_DEF token, as we like our license header to be glue to "package" statement, to save 1 line screen space -->
             <property name="tokens" value="IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
         </module>
+        <module name="MultipleVariableDeclarations"/>
         <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
             <message key="name.invalidPattern"
@@ -200,7 +201,7 @@
 
 
 
-        <module name="MultipleVariableDeclarations"/>
+
 
         <module name="MissingSwitchDefault"/>
 
