@@ -79,7 +79,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsAccountAssembler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
@@ -158,7 +158,6 @@ public class SavingsAccountAssembler {
         }
 
         if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isGSIM") != null) {
-            LOG.info("setting system to gsim");
             if (command.booleanPrimitiveValueOfParameterNamed("isGSIM")) {
                 accountType = AccountType.GSIM;
             }

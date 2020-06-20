@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TenantDatabaseUpgradeService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TenantDatabaseUpgradeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TenantDatabaseUpgradeService.class);
 
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;
@@ -105,8 +105,8 @@ public class TenantDatabaseUpgradeService {
         LOG.info("upgradeTenantDB: FINERACT_DEFAULT_TENANTDB_HOSTNAME = {}, FINERACT_DEFAULT_TENANTDB_PORT = {}", dbHostname, dbPort);
 
         final Flyway flyway = Flyway.configure().dataSource(tenantDataSource).locations("sql/migrations/list_db").outOfOrder(true)
-                .placeholders(Map.of( // FINERACT-773
-                        "fineract_default_tenantdb_hostname", dbHostname, "fineract_default_tenantdb_port", dbPort,
+                // FINERACT-773
+                .placeholders(Map.of("fineract_default_tenantdb_hostname", dbHostname, "fineract_default_tenantdb_port", dbPort,
                         "fineract_default_tenantdb_uid", dbUid, "fineract_default_tenantdb_pwd", dbPwd))
                 .configuration(Map.of("flyway.table", "schema_version")) // FINERACT-979
                 .load();

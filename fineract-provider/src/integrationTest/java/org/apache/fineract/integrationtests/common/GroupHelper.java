@@ -36,7 +36,7 @@ public class GroupHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
-    private final static Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
 
     private static final String CREATE_GROUP_URL = "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";

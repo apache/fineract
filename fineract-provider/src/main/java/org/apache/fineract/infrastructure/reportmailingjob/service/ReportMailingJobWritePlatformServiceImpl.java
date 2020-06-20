@@ -74,7 +74,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJobWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReportMailingJobWritePlatformServiceImpl.class);
     private final ReportRepositoryWrapper reportRepositoryWrapper;
     private final ReportMailingJobValidator reportMailingJobValidator;
     private final ReportMailingJobRepositoryWrapper reportMailingJobRepositoryWrapper;
@@ -84,7 +84,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     private final ReadReportingService readReportingService;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
     private final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository;
-    private final static String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Autowired
     public ReportMailingJobWritePlatformServiceImpl(final ReportRepositoryWrapper reportRepositoryWrapper,

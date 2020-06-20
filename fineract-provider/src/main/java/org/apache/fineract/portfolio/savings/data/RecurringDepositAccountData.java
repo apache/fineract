@@ -35,7 +35,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a Recurring Deposit account.
  */
-public class RecurringDepositAccountData extends DepositAccountData {
+public final class RecurringDepositAccountData extends DepositAccountData {
 
     // additional fields
     private final boolean preClosurePenalApplicable;

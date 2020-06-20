@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamilyMembersWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientFamilyMembersWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientFamilyMembersWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final CodeValueRepository codeValueRepository;
     private final ClientFamilyMembersRepository clientFamilyRepository;

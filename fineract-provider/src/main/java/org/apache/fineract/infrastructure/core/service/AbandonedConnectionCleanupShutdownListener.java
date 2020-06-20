@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
     /**
      * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc

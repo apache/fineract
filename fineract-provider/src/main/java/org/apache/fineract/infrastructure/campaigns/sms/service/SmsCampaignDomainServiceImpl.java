@@ -66,7 +66,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmsCampaignDomainServiceImpl.class);
 
-    // private final static int POOL_SIZE = 5 ;
+    // private static final int POOL_SIZE = 5 ;
 
     private final SmsCampaignRepository smsCampaignRepository;
     private final SmsMessageRepository smsMessageRepository;
@@ -384,7 +384,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         return smsParams;
     }
 
-    private abstract class SmsBusinessEventAdapter implements BusinessEventListner {
+    private abstract static class SmsBusinessEventAdapter implements BusinessEventListner {
 
         @Override
         public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {

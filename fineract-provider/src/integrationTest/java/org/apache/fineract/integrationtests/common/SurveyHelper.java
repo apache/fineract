@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class SurveyHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SurveyHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SurveyHelper.class);
     private static final String FULFIL_SURVEY_URL = "/fineract-provider/api/v1/survey/ppi_kenya_2009/clientId?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer fulfilSurvey(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {

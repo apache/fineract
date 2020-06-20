@@ -30,11 +30,11 @@ final class ClientIdentifiersApiResourceSwagger {
     private ClientIdentifiersApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdIdentifiersResponse")
-    public final static class GetClientsClientIdIdentifiersResponse {
+    public static final class GetClientsClientIdIdentifiersResponse {
 
         private GetClientsClientIdIdentifiersResponse() {}
 
-        final class GetClientsDocumentType {
+        static final class GetClientsDocumentType {
 
             private GetClientsDocumentType() {}
 
@@ -56,11 +56,11 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdIdentifiersTemplateResponse")
-    public final static class GetClientsClientIdIdentifiersTemplateResponse {
+    public static final class GetClientsClientIdIdentifiersTemplateResponse {
 
         private GetClientsClientIdIdentifiersTemplateResponse() {}
 
-        final class GetClientsAllowedDocumentTypes {
+        static final class GetClientsAllowedDocumentTypes {
 
             private GetClientsAllowedDocumentTypes() {}
 
@@ -76,7 +76,7 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdIdentifiersRequest")
-    public final static class PostClientsClientIdIdentifiersRequest {
+    public static final class PostClientsClientIdIdentifiersRequest {
 
         private PostClientsClientIdIdentifiersRequest() {}
 
@@ -89,7 +89,7 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
-    public final static class PutClientsClientIdIdentifiersIdentifierIdRequest {
+    public static final class PutClientsClientIdIdentifiersIdentifierIdRequest {
 
         private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
 
@@ -102,7 +102,7 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
-    public final static class PutClientsClientIdIdentifiersIdentifierIdResponse {
+    public static final class PutClientsClientIdIdentifiersIdentifierIdResponse {
 
         private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
@@ -116,7 +116,7 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdIdentifiersResponse")
-    public final static class PostClientsClientIdIdentifiersResponse {
+    public static final class PostClientsClientIdIdentifiersResponse {
 
         private PostClientsClientIdIdentifiersResponse() {}
 
@@ -129,7 +129,7 @@ final class ClientIdentifiersApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
-    public final static class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
+    public static final class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
 
         private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
 

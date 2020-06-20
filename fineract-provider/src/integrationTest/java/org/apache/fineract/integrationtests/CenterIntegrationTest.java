@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public class CenterIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 

@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.fineract.interoperation.domain.InteropActionState;
 import org.joda.time.LocalDateTime;
 
-public class InteropTransactionRequestResponseData extends InteropResponseData {
+public final class InteropTransactionRequestResponseData extends InteropResponseData {
 
     @NotNull
     private final String requestCode;

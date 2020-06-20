@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 

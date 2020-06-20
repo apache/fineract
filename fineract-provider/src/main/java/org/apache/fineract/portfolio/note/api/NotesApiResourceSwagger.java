@@ -30,11 +30,11 @@ final class NotesApiResourceSwagger {
     private NotesApiResourceSwagger() {}
 
     @ApiModel(value = "GetResourceTypeResourceIdNotesResponse")
-    public final static class GetResourceTypeResourceIdNotesResponse {
+    public static final class GetResourceTypeResourceIdNotesResponse {
 
         private GetResourceTypeResourceIdNotesResponse() {}
 
-        final class GetNotesNoteType {
+        static final class GetNotesNoteType {
 
             private GetNotesNoteType() {}
 
@@ -68,7 +68,7 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class GetResourceTypeResourceIdNotesNoteIdResponse {
+    public static final class GetResourceTypeResourceIdNotesNoteIdResponse {
 
         private GetResourceTypeResourceIdNotesNoteIdResponse() {}
 
@@ -94,7 +94,7 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostResourceTypeResourceIdNotesRequest")
-    public final static class PostResourceTypeResourceIdNotesRequest {
+    public static final class PostResourceTypeResourceIdNotesRequest {
 
         private PostResourceTypeResourceIdNotesRequest() {}
 
@@ -103,7 +103,7 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostResourceTypeResourceIdNotesResponse")
-    public final static class PostResourceTypeResourceIdNotesResponse {
+    public static final class PostResourceTypeResourceIdNotesResponse {
 
         private PostResourceTypeResourceIdNotesResponse() {}
 
@@ -116,7 +116,7 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdRequest")
-    public final static class PutResourceTypeResourceIdNotesNoteIdRequest {
+    public static final class PutResourceTypeResourceIdNotesNoteIdRequest {
 
         private PutResourceTypeResourceIdNotesNoteIdRequest() {}
 
@@ -125,11 +125,11 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class PutResourceTypeResourceIdNotesNoteIdResponse {
+    public static final class PutResourceTypeResourceIdNotesNoteIdResponse {
 
         private PutResourceTypeResourceIdNotesNoteIdResponse() {}
 
-        final class PutNotesChanges {
+        static final class PutNotesChanges {
 
             private PutNotesChanges() {}
 
@@ -147,7 +147,7 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class DeleteResourceTypeResourceIdNotesNoteIdResponse {
+    public static final class DeleteResourceTypeResourceIdNotesNoteIdResponse {
 
         private DeleteResourceTypeResourceIdNotesNoteIdResponse() {}
 

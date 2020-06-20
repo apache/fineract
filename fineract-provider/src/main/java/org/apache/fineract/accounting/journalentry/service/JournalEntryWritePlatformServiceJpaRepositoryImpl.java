@@ -88,7 +88,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements JournalEntryWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final GLAccountRepository glAccountRepository;
@@ -782,7 +782,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         accountingProcessorForClientTransactions.createJournalEntriesForClientTransaction(clientTransactionDTO);
     }
 
-    private class OfficeCurrencyKey {
+    private static class OfficeCurrencyKey {
 
         Office office;
         String currency;

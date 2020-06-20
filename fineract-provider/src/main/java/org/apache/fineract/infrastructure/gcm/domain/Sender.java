@@ -603,7 +603,7 @@ public class Sender {
         return (Number) value;
     }
 
-    class CustomParserException extends RuntimeException {
+    static class CustomParserException extends RuntimeException {
 
         CustomParserException(String message) {
             super(message);

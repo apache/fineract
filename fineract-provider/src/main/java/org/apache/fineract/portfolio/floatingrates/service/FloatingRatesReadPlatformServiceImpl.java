@@ -140,7 +140,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         }
     }
 
-    private final class FloatingRatePeriodRowMapper implements RowMapper<FloatingRatePeriodData> {
+    private static final class FloatingRatePeriodRowMapper implements RowMapper<FloatingRatePeriodData> {
 
         private final StringBuilder sqlQuery = new StringBuilder().append("period.id as id, ").append("period.from_date as fromDate, ")
                 .append("period.interest_rate as interestRate, ")
@@ -171,7 +171,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         }
     }
 
-    private final class FloatingRateLookupMapper implements RowMapper<FloatingRateData> {
+    private static final class FloatingRateLookupMapper implements RowMapper<FloatingRateData> {
 
         private final StringBuilder sqlQuery = new StringBuilder().append("rate.id as id, ").append("rate.name as name, ")
                 .append("rate.is_base_lending_rate as isBaseLendingRate ").append("FROM m_floating_rates as rate ");
@@ -189,7 +189,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         }
     }
 
-    private final class FloatingInterestRatePeriodRowMapper implements RowMapper<InterestRatePeriodData> {
+    private static final class FloatingInterestRatePeriodRowMapper implements RowMapper<InterestRatePeriodData> {
 
         private final StringBuilder sqlQuery = new StringBuilder().append("select ")
                 .append("    linkedrateperiods.from_date as linkedrateperiods_from_date, ")

@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ColumnValidator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -122,6 +122,7 @@ public class ColumnValidator {
         return tableColumnMap;
     }
 
+    @SuppressWarnings("StringSplitter")
     private static Map<String, Set<String>> getTableColumnAliasMap(Set<String> operands) {
         Map<String, Set<String>> tableColumnMap = new HashMap<>();
         for (String operand : operands) {

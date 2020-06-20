@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.guarantor;
 
+import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
@@ -48,7 +49,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GuarantorImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
     private Workbook workbook;
     private List<GuarantorData> guarantors;
     private Long loanAccountId;
@@ -84,8 +85,8 @@ public class GuarantorImportHandler implements ImportHandler {
     private GuarantorData readGuarantor(Row row, String locale, String dateFormat) {
         String loanaccountInfo = ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo != null) {
-            String[] loanAccountAr = loanaccountInfo.split("-");
-            loanAccountId = Long.parseLong(loanAccountAr[0]);
+            List<String> loanAccountAr = Splitter.on('-').splitToList(loanaccountInfo);
+            loanAccountId = Long.parseLong(loanAccountAr.get(0));
         }
         String guarantorType = ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
 
@@ -102,8 +103,8 @@ public class GuarantorImportHandler implements ImportHandler {
         String clientRelationshipTypeInfo = ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
         Integer clientRelationshipTypeId = null;
         if (clientRelationshipTypeInfo != null) {
-            String[] clientRelationshipTypeAr = clientRelationshipTypeInfo.split("-");
-            clientRelationshipTypeId = Integer.parseInt(clientRelationshipTypeAr[1]);
+            List<String> clientRelationshipTypeAr = Splitter.on('-').splitToList(clientRelationshipTypeInfo);
+            clientRelationshipTypeId = Integer.parseInt(clientRelationshipTypeAr.get(1));
         }
         String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);
         String lastname = ImportHandlerUtils.readAsString(GuarantorConstants.LAST_NAME_COL, row);

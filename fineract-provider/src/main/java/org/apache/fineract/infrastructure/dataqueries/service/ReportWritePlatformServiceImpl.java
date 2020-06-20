@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportWritePlatformServiceImpl implements ReportWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
 
     private final PlatformSecurityContext context;
     private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;

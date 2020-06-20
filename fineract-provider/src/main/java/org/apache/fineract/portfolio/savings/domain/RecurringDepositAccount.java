@@ -1255,7 +1255,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         return this.recurringDetail;
     }
 
-    class RecurringDepositScheduleInstallmentComparator implements Comparator<RecurringDepositScheduleInstallment> {
+    static class RecurringDepositScheduleInstallmentComparator implements Comparator<RecurringDepositScheduleInstallment> {
 
         @Override
         public int compare(final RecurringDepositScheduleInstallment o1, final RecurringDepositScheduleInstallment o2) {

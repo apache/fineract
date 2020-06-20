@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  * Immutable data object representing pagination parameter values.
  * </p>
  */
-public class PaginationParameters {
+public final class PaginationParameters {
 
     private final boolean paged;
     private final Integer offset;

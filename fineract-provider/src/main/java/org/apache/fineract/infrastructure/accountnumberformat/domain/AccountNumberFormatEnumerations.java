@@ -30,19 +30,19 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class AccountNumberFormatEnumerations {
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = Collections
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.CLIENT_TYPE)));
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForLoanAccounts = Collections.unmodifiableSet(
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForLoanAccounts = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME)));
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForSavingsAccounts = Collections.unmodifiableSet(
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForSavingsAccounts = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.SAVINGS_PRODUCT_SHORT_NAME)));
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForCenters = Collections
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForCenters = Collections
             .unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = Collections
+    public static final Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = Collections
             .unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
     public enum AccountNumberPrefixType {

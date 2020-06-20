@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class FinancialActivityAccountInvalidException extends AbstractPlatformDomainRuleException {
 
-    private final static String errorCode = "error.msg.financialActivityAccount.invalid";
+    private static final String errorCode = "error.msg.financialActivityAccount.invalid";
 
     public FinancialActivityAccountInvalidException(final FinancialActivity financialActivity, final GLAccount glAccount) {
         super(errorCode,

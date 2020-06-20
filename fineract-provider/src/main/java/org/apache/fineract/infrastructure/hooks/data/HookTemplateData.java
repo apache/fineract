@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class HookTemplateData implements Serializable {
+public final class HookTemplateData implements Serializable {
 
     private final Long id;
     private final String name;

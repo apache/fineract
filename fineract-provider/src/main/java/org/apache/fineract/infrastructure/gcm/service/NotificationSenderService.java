@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationRepositoryWrapper;
 import org.apache.fineract.infrastructure.gcm.domain.Message;
-import org.apache.fineract.infrastructure.gcm.domain.Message.Builder;
 import org.apache.fineract.infrastructure.gcm.domain.Message.Priority;
 import org.apache.fineract.infrastructure.gcm.domain.Notification;
 import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
@@ -94,7 +93,7 @@ public class NotificationSenderService {
             try {
                 Notification notification = new Notification.Builder(GcmConstants.defaultIcon).title(GcmConstants.title)
                         .body(smsMessage.getMessage()).build();
-                Builder b = new Builder();
+                Message.Builder b = new Message.Builder();
                 b.notification(notification);
                 b.dryRun(false);
                 b.contentAvailable(true);

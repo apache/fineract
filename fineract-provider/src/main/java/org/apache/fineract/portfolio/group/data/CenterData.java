@@ -34,7 +34,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing groups.
  */
-public class CenterData implements Serializable {
+public final class CenterData implements Serializable {
 
     private final Long id;
     private String accountNo;

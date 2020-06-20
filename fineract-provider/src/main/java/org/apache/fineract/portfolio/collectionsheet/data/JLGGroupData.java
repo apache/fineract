@@ -24,7 +24,7 @@ import java.util.Collection;
  * Immutable data object for groups with clients due for disbursement or
  * collection.
  */
-public class JLGGroupData {
+public final class JLGGroupData {
 
     private final Long groupId;
     private final String groupName;

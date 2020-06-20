@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 
-public class GroupLoanIndividualMonitoringAccountData {
+public final class GroupLoanIndividualMonitoringAccountData {
 
     private final BigDecimal glimId;
 

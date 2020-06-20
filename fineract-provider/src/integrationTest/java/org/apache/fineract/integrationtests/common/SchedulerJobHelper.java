@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerJobHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification response200Spec;
     private final ResponseSpecification response202Spec;

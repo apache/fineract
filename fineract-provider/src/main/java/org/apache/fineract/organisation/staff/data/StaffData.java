@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing staff data.
  */
-public class StaffData implements Serializable {
+public final class StaffData implements Serializable {
 
     private final Long id;
     private final String externalId;

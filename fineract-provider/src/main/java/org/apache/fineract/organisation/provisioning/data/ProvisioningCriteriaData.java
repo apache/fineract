@@ -25,7 +25,7 @@ import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
 @SuppressWarnings("unused")
-public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteriaData>, Serializable {
+public final class ProvisioningCriteriaData implements Comparable<ProvisioningCriteriaData>, Serializable {
 
     private final Long criteriaId;
     private final String criteriaName;

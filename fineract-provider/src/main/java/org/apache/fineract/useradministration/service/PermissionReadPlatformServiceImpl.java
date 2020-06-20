@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PermissionReadPlatformServiceImpl implements PermissionReadPlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PermissionReadPlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PermissionReadPlatformServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;

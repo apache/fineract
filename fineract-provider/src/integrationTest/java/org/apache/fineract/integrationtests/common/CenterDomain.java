@@ -21,15 +21,14 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CenterDomain implements Comparable<CenterDomain> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
 
-    public static class Builder {
+    public static final class Builder {
 
         private final Integer id;
         private final String accountNo;
@@ -154,7 +153,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         } else {
             map.put("active", "false");
             if (submittedDate == null) {
-                map.put("submittedOnDate", DateUtils.getDateOfTenant());
+                map.put("submittedOnDate", Utils.getLocalDateOfTenant().toDate());
             } else {
                 map.put("submittedOnDate", submittedDate);
             }

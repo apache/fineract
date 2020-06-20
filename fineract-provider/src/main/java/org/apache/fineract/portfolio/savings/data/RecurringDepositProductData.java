@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object represent a Recurring Deposit product.
  */
-public class RecurringDepositProductData extends DepositProductData {
+public final class RecurringDepositProductData extends DepositProductData {
 
     private boolean preClosurePenalApplicable;
     private BigDecimal preClosurePenalInterest;

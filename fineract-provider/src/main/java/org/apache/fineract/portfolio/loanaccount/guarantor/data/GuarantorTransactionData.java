@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 
-public class GuarantorTransactionData {
+public final class GuarantorTransactionData {
 
     @SuppressWarnings("unused")
     private final Long id;

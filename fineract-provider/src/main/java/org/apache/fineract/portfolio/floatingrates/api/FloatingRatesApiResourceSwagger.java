@@ -30,11 +30,11 @@ final class FloatingRatesApiResourceSwagger {
     private FloatingRatesApiResourceSwagger() {}
 
     @ApiModel(value = "PostFloatingRatesRequest")
-    public final static class PostFloatingRatesRequest {
+    public static final class PostFloatingRatesRequest {
 
         private PostFloatingRatesRequest() {}
 
-        final class PostFloatingRatesRatePeriods {
+        static final class PostFloatingRatesRatePeriods {
 
             private PostFloatingRatesRatePeriods() {}
 
@@ -58,7 +58,7 @@ final class FloatingRatesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFloatingRatesResponse")
-    public final static class PostFloatingRatesResponse {
+    public static final class PostFloatingRatesResponse {
 
         private PostFloatingRatesResponse() {}
 
@@ -67,7 +67,7 @@ final class FloatingRatesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFloatingRatesResponse")
-    public final static class GetFloatingRatesResponse {
+    public static final class GetFloatingRatesResponse {
 
         private GetFloatingRatesResponse() {}
 
@@ -90,11 +90,11 @@ final class FloatingRatesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFloatingRatesFloatingRateIdResponse")
-    public final static class GetFloatingRatesFloatingRateIdResponse {
+    public static final class GetFloatingRatesFloatingRateIdResponse {
 
         private GetFloatingRatesFloatingRateIdResponse() {}
 
-        final class GetFloatingRatesRatePeriods {
+        static final class GetFloatingRatesRatePeriods {
 
             private GetFloatingRatesRatePeriods() {}
 
@@ -138,7 +138,7 @@ final class FloatingRatesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFloatingRatesFloatingRateIdRequest")
-    public final static class PutFloatingRatesFloatingRateIdRequest {
+    public static final class PutFloatingRatesFloatingRateIdRequest {
 
         private PutFloatingRatesFloatingRateIdRequest() {}
 
@@ -152,11 +152,11 @@ final class FloatingRatesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFloatingRatesFloatingRateIdResponse")
-    public final static class PutFloatingRatesFloatingRateIdResponse {
+    public static final class PutFloatingRatesFloatingRateIdResponse {
 
         private PutFloatingRatesFloatingRateIdResponse() {}
 
-        final class PutFloatingRatesChanges {
+        static final class PutFloatingRatesChanges {
 
             private PutFloatingRatesChanges() {}
 

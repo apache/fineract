@@ -57,7 +57,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandler.class);
     private Workbook workbook;
     private List<LoanAccountData> loans;
     private List<LoanApprovalData> approvalDates;

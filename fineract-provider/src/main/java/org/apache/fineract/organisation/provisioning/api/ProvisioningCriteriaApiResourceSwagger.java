@@ -109,7 +109,7 @@ final class ProvisioningCriteriaApiResourceSwagger {
 
         }
 
-        final class PutProvisioningCriteriaResponseChanges {
+        static final class PutProvisioningCriteriaResponseChanges {
 
             private PutProvisioningCriteriaResponseChanges() {}
 

@@ -29,7 +29,7 @@ final class PaymentTypeApiResourceSwagger {
     private PaymentTypeApiResourceSwagger() {}
 
     @ApiModel(value = "GetPaymentTypesResponse")
-    public final static class GetPaymentTypesResponse {
+    public static final class GetPaymentTypesResponse {
 
         private GetPaymentTypesResponse() {}
 
@@ -46,7 +46,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "GetPaymentTypesPaymentTypeIdResponse")
-    public final static class GetPaymentTypesPaymentTypeIdResponse {
+    public static final class GetPaymentTypesPaymentTypeIdResponse {
 
         private GetPaymentTypesPaymentTypeIdResponse() {}
 
@@ -63,7 +63,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PostPaymentTypesRequest")
-    public final static class PostPaymentTypesRequest {
+    public static final class PostPaymentTypesRequest {
 
         private PostPaymentTypesRequest() {}
 
@@ -78,7 +78,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PostPaymentTypesResponse")
-    public final static class PostPaymentTypesResponse {
+    public static final class PostPaymentTypesResponse {
 
         private PostPaymentTypesResponse() {}
 
@@ -87,7 +87,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PutPaymentTypesPaymentTypeIdRequest")
-    public final static class PutPaymentTypesPaymentTypeIdRequest {
+    public static final class PutPaymentTypesPaymentTypeIdRequest {
 
         private PutPaymentTypesPaymentTypeIdRequest() {}
 
@@ -102,7 +102,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PutPaymentTypesPaymentTypeIdResponse")
-    public final static class PutPaymentTypesPaymentTypeIdResponse {
+    public static final class PutPaymentTypesPaymentTypeIdResponse {
 
         private PutPaymentTypesPaymentTypeIdResponse() {}
 
@@ -111,7 +111,7 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "DeletePaymentTypesPaymentTypeIdResponse")
-    public final static class DeletePaymentTypesPaymentTypeIdResponse {
+    public static final class DeletePaymentTypesPaymentTypeIdResponse {
 
         private DeletePaymentTypesPaymentTypeIdResponse() {}
 

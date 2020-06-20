@@ -37,7 +37,7 @@ final class StandingInstructionApiResourceSwagger {
 
         private GetStandingInstructionsTemplateResponse() {}
 
-        final class GetFromOfficeResponseStandingInstructionSwagger {
+        static final class GetFromOfficeResponseStandingInstructionSwagger {
 
             private GetFromOfficeResponseStandingInstructionSwagger() {}
 
@@ -55,7 +55,7 @@ final class StandingInstructionApiResourceSwagger {
             public String hierarchy;
         }
 
-        final class GetFromAccountTypeResponseStandingInstructionSwagger {
+        static final class GetFromAccountTypeResponseStandingInstructionSwagger {
 
             private GetFromAccountTypeResponseStandingInstructionSwagger() {}
 
@@ -67,7 +67,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
+        static final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
 
             private GetFromOfficeOptionsResponseStandingInstructionSwagger() {}
 
@@ -79,7 +79,7 @@ final class StandingInstructionApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetFromClientOptionsResponseStandingInstructionSwagger {
+        static final class GetFromClientOptionsResponseStandingInstructionSwagger {
 
             private GetFromClientOptionsResponseStandingInstructionSwagger() {}
 
@@ -93,7 +93,7 @@ final class StandingInstructionApiResourceSwagger {
             public String officeName;
         }
 
-        final class GetFromAccountTypeOptionsResponseStandingInstructionSwagger {
+        static final class GetFromAccountTypeOptionsResponseStandingInstructionSwagger {
 
             private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
@@ -105,7 +105,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetToOfficeOptionsResponseStandingInstructionSwagger {
+        static final class GetToOfficeOptionsResponseStandingInstructionSwagger {
 
             private GetToOfficeOptionsResponseStandingInstructionSwagger() {}
 
@@ -117,7 +117,7 @@ final class StandingInstructionApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetToAccountTypeOptionsResponseStandingInstructionSwagger {
+        static final class GetToAccountTypeOptionsResponseStandingInstructionSwagger {
 
             private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
@@ -129,7 +129,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
+        static final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
 
             private GetTransferTypeOptionsResponseStandingInstructionSwagger() {}
 
@@ -141,7 +141,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetStatusOptionsResponseStandingInstructionSwagger {
+        static final class GetStatusOptionsResponseStandingInstructionSwagger {
 
             private GetStatusOptionsResponseStandingInstructionSwagger() {}
 
@@ -153,7 +153,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
+        static final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
 
             private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {}
 
@@ -165,7 +165,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetPriorityOptionsResponseStandingInstructionSwagger {
+        static final class GetPriorityOptionsResponseStandingInstructionSwagger {
 
             private GetPriorityOptionsResponseStandingInstructionSwagger() {}
 
@@ -177,7 +177,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
+        static final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
 
             private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {}
 
@@ -189,7 +189,7 @@ final class StandingInstructionApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
+        static final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
 
             private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {}
 
@@ -232,9 +232,9 @@ final class StandingInstructionApiResourceSwagger {
 
         private GetStandingInstructionsResponse() {}
 
-        final class GetPageItemsStandingInstructionSwagger {
+        static final class GetPageItemsStandingInstructionSwagger {
 
-            final class GetFromOfficeStandingInstructionSwagger {
+            static final class GetFromOfficeStandingInstructionSwagger {
 
                 private GetFromOfficeStandingInstructionSwagger() {}
 
@@ -244,7 +244,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String name;
             }
 
-            final class GetFromClientStandingInstructionSwagger {
+            static final class GetFromClientStandingInstructionSwagger {
 
                 private GetFromClientStandingInstructionSwagger() {}
 
@@ -258,7 +258,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String officeName;
             }
 
-            final class GetFromAccountTypeStandingInstructionSwagger {
+            static final class GetFromAccountTypeStandingInstructionSwagger {
 
                 private GetFromAccountTypeStandingInstructionSwagger() {}
 
@@ -270,7 +270,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetFromAccountStandingInstructionSwagger {
+            static final class GetFromAccountStandingInstructionSwagger {
 
                 private GetFromAccountStandingInstructionSwagger() {}
 
@@ -284,7 +284,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetToOfficeStandingInstructionSwagger {
+            static final class GetToOfficeStandingInstructionSwagger {
 
                 private GetToOfficeStandingInstructionSwagger() {}
 
@@ -294,7 +294,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String name;
             }
 
-            final class GetToClientStandingInstructionSwagger {
+            static final class GetToClientStandingInstructionSwagger {
 
                 private GetToClientStandingInstructionSwagger() {}
 
@@ -308,7 +308,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String officeName;
             }
 
-            final class GetToAccountTypeStandingInstructionSwagger {
+            static final class GetToAccountTypeStandingInstructionSwagger {
 
                 private GetToAccountTypeStandingInstructionSwagger() {}
 
@@ -320,7 +320,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetToAccountStandingInstructionSwagger {
+            static final class GetToAccountStandingInstructionSwagger {
 
                 private GetToAccountStandingInstructionSwagger() {}
 
@@ -334,7 +334,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetTransferTypeStandingInstructionSwagger {
+            static final class GetTransferTypeStandingInstructionSwagger {
 
                 private GetTransferTypeStandingInstructionSwagger() {}
 
@@ -346,7 +346,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetPriorityStandingInstructionSwagger {
+            static final class GetPriorityStandingInstructionSwagger {
 
                 private GetPriorityStandingInstructionSwagger() {}
 
@@ -358,7 +358,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetInstructionTypeStandingInstructionSwagger {
+            static final class GetInstructionTypeStandingInstructionSwagger {
 
                 private GetInstructionTypeStandingInstructionSwagger() {}
 
@@ -370,7 +370,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetStatusStandingInstructionSwagger {
+            static final class GetStatusStandingInstructionSwagger {
 
                 private GetStatusStandingInstructionSwagger() {}
 
@@ -382,7 +382,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetRecurrenceTypeStandingInstructionSwagger {
+            static final class GetRecurrenceTypeStandingInstructionSwagger {
 
                 private GetRecurrenceTypeStandingInstructionSwagger() {}
 
@@ -394,7 +394,7 @@ final class StandingInstructionApiResourceSwagger {
                 public String value;
             }
 
-            final class GetRecurrenceFrequencyStandingInstructionSwagger {
+            static final class GetRecurrenceFrequencyStandingInstructionSwagger {
 
                 private GetRecurrenceFrequencyStandingInstructionSwagger() {}
 
@@ -532,7 +532,7 @@ final class StandingInstructionApiResourceSwagger {
 
         private PutStandingInstructionsStandingInstructionIdResponse() {}
 
-        final class PutUpdateStandingInstructionChanges {
+        static final class PutUpdateStandingInstructionChanges {
 
             @ApiModelProperty(example = "2")
             public Integer recurrenceInterval;

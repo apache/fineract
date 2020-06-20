@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
 
-public class ResultsetRowData {
+public final class ResultsetRowData {
 
     private final List<String> row;
 

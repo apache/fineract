@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class StandingInstructionsHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(StandingInstructionsHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StandingInstructionsHelper.class);
     private static final String STANDING_INSTRUCTIONS_URL = "/fineract-provider/api/v1/standinginstructions";
     private static final String STANDING_INSTRUCTIONS_RUNHISTORY_URL = "/fineract-provider/api/v1/standinginstructionrunhistory";
     private static final String LOCALE = "en_GB";

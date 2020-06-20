@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class ShareProductHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ShareProductHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShareProductHelper.class);
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String LOCALE = "en_GB";

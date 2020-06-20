@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SharedAccountImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SharedAccountImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SharedAccountImportHandler.class);
     private Workbook workbook;
     private List<ShareAccountData> shareAccountDataList;
     private List<String> statuses;

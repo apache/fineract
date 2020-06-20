@@ -40,7 +40,7 @@ final class SurveyApiResourceSwagger {
 
         }
 
-        final class GetSurveyResponseDatatableData {
+        static final class GetSurveyResponseDatatableData {
 
             private GetSurveyResponseDatatableData() {
 

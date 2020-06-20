@@ -19,11 +19,11 @@
 package org.apache.fineract.integrationtests.common.organisation;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 
 public class CampaignsHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CampaignsHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CampaignsHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -178,7 +178,7 @@ public class CampaignsHelper {
                 .asString();
         Assert.notNull(json, "json");
         ArrayList<ReportData> reportsList = new ArrayList<>();
-        String reportsString = new Gson().toJson(from(json).get(jsonAttributeToGetBack));
+        String reportsString = new Gson().toJson(JsonPath.from(json).get(jsonAttributeToGetBack));
         Assert.notNull(reportsString, "reportsString");
         final Gson gson = new Gson();
         final Type typeOfHashMap = new TypeToken<List<ReportData>>() {}.getType();

@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
     private final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService;
     private Collection<ReportMailingJobConfigurationData> reportMailingJobConfigurationDataCollection;
 

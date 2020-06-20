@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-public class RateData implements Serializable {
+public final class RateData implements Serializable {
 
     private Long id;
 

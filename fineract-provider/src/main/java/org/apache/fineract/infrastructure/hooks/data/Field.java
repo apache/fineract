@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.hooks.data;
 import java.io.Serializable;
 
 @SuppressWarnings("unused")
-public class Field implements Serializable {
+public final class Field implements Serializable {
 
     private final String fieldName;
     private final String fieldValue;

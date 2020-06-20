@@ -32,11 +32,11 @@ final class ClientsApiResourceSwagger {
     private ClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsTemplateResponse")
-    public final static class GetClientsTemplateResponse {
+    public static final class GetClientsTemplateResponse {
 
         private GetClientsTemplateResponse() {}
 
-        final class GetClientsOfficeOptions {
+        static final class GetClientsOfficeOptions {
 
             private GetClientsOfficeOptions() {}
 
@@ -48,7 +48,7 @@ final class ClientsApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetClientsStaffOptions {
+        static final class GetClientsStaffOptions {
 
             private GetClientsStaffOptions() {}
 
@@ -70,7 +70,7 @@ final class ClientsApiResourceSwagger {
             public Boolean isActive;
         }
 
-        final class GetClientsSavingProductOptions {
+        static final class GetClientsSavingProductOptions {
 
             private GetClientsSavingProductOptions() {}
 
@@ -84,11 +84,11 @@ final class ClientsApiResourceSwagger {
             public Boolean allowOverdraft;
         }
 
-        final class GetClientsDataTables {
+        static final class GetClientsDataTables {
 
             private GetClientsDataTables() {}
 
-            final class GetClientsColumnHeaderData {
+            static final class GetClientsColumnHeaderData {
 
                 private GetClientsColumnHeaderData() {}
 
@@ -126,15 +126,15 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsResponse")
-    public final static class GetClientsResponse {
+    public static final class GetClientsResponse {
 
         private GetClientsResponse() {}
 
-        final class GetClientsPageItemsResponse {
+        static final class GetClientsPageItemsResponse {
 
             private GetClientsPageItemsResponse() {}
 
-            final class GetClientStatus {
+            static final class GetClientStatus {
 
                 private GetClientStatus() {}
 
@@ -169,11 +169,11 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdResponse")
-    public final static class GetClientsClientIdResponse {
+    public static final class GetClientsClientIdResponse {
 
         private GetClientsClientIdResponse() {}
 
-        final class GetClientsClientIdStatus {
+        static final class GetClientsClientIdStatus {
 
             private GetClientsClientIdStatus() {}
 
@@ -185,7 +185,7 @@ final class ClientsApiResourceSwagger {
             public String value;
         }
 
-        final class GetClientsTimeline {
+        static final class GetClientsTimeline {
 
             private GetClientsTimeline() {}
 
@@ -237,7 +237,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsRequest")
-    public final static class PostClientsRequest {
+    public static final class PostClientsRequest {
 
         private PostClientsRequest() {}
 
@@ -258,7 +258,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsResponse")
-    public final static class PostClientsResponse {
+    public static final class PostClientsResponse {
 
         private PostClientsResponse() {}
 
@@ -273,7 +273,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdRequest")
-    public final static class PutClientsClientIdRequest {
+    public static final class PutClientsClientIdRequest {
 
         private PutClientsClientIdRequest() {}
 
@@ -282,7 +282,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdResponse")
-    public final static class PutClientsClientIdResponse {
+    public static final class PutClientsClientIdResponse {
 
         private PutClientsClientIdResponse() {}
 
@@ -296,13 +296,13 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteClientsClientIdRequest")
-    public final static class DeleteClientsClientIdRequest {
+    public static final class DeleteClientsClientIdRequest {
 
         private DeleteClientsClientIdRequest() {}
     }
 
     @ApiModel(value = "DeleteClientsClientIdResponse")
-    public final static class DeleteClientsClientIdResponse {
+    public static final class DeleteClientsClientIdResponse {
 
         private DeleteClientsClientIdResponse() {}
 
@@ -315,7 +315,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdRequest")
-    public final static class PostClientsClientIdRequest {
+    public static final class PostClientsClientIdRequest {
 
         private PostClientsClientIdRequest() {}
 
@@ -324,7 +324,7 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdResponse")
-    public final static class PostClientsClientIdResponse {
+    public static final class PostClientsClientIdResponse {
 
         private PostClientsClientIdResponse() {}
 
@@ -335,15 +335,15 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdAccountsResponse")
-    public final static class GetClientsClientIdAccountsResponse {
+    public static final class GetClientsClientIdAccountsResponse {
 
         private GetClientsClientIdAccountsResponse() {}
 
-        final class GetClientsLoanAccounts {
+        static final class GetClientsLoanAccounts {
 
             private GetClientsLoanAccounts() {}
 
-            final class GetClientsLoanAccountsStatus {
+            static final class GetClientsLoanAccountsStatus {
 
                 private GetClientsLoanAccountsStatus() {}
 
@@ -371,7 +371,7 @@ final class ClientsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetClientsLoanAccountsType {
+            static final class GetClientsLoanAccountsType {
 
                 private GetClientsLoanAccountsType() {}
 
@@ -399,11 +399,11 @@ final class ClientsApiResourceSwagger {
             public Integer loanCycle;
         }
 
-        final class GetClientsSavingsAccounts {
+        static final class GetClientsSavingsAccounts {
 
             private GetClientsSavingsAccounts() {}
 
-            final class GetClientsSavingsAccountsCurrency {
+            static final class GetClientsSavingsAccountsCurrency {
 
                 private GetClientsSavingsAccountsCurrency() {}
 
@@ -421,7 +421,7 @@ final class ClientsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetClientsSavingsAccountsStatus {
+            static final class GetClientsSavingsAccountsStatus {
 
                 private GetClientsSavingsAccountsStatus() {}
 

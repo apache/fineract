@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
-public class FineractEntityType {
+public final class FineractEntityType {
 
     private String type;
     private String description;

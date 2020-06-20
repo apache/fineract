@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 public class AccountNumberPreferencesTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseValidationError;

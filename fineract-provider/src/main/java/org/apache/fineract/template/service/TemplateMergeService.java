@@ -37,7 +37,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateFunctions;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -49,7 +48,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplateMergeService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -179,7 +178,7 @@ public class TemplateMergeService {
             Map<String, Object> valueAsMap = (Map<String, Object>) value;
             // Map<String, Object> newValue = null;
             Map<String, Object> valueAsMap_second = new HashMap<>();
-            for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
+            for (Map.Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
                 Object valueAsMapEntryValue = valueAsMapEntry.getValue();
                 if (valueAsMapEntryValue instanceof Map) { // JSON Object
                     expandMapArrays(valueAsMapEntryValue);

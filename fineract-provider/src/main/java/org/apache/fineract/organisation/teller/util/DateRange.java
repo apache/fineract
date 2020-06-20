@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class DateRange {
 
-    private final static Logger LOG = LoggerFactory.getLogger(DateRange.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DateRange.class);
     private static final String ISO_8601_DATE_PATTERN = "yyy-MM-dd";
     private static final String RANGE_DELIMITER = "..";
 

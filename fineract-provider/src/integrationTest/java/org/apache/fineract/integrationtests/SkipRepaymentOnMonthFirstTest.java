@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class SkipRepaymentOnMonthFirstTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SkipRepaymentOnMonthFirstTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SkipRepaymentOnMonthFirstTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private GlobalConfigurationHelper globalConfigurationHelper;

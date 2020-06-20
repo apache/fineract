@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RecurringDepositImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositImportHandler.class);
     private Workbook workbook;
     private List<RecurringDepositAccountData> savings;
     private List<SavingsApproval> approvalDates;

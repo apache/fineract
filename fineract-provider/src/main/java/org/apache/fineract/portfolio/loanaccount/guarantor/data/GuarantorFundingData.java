@@ -23,7 +23,7 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 
-public class GuarantorFundingData {
+public final class GuarantorFundingData {
 
     @SuppressWarnings("unused")
     private final Long id;

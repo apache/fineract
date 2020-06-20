@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerTriggerListener implements TriggerListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
 
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;

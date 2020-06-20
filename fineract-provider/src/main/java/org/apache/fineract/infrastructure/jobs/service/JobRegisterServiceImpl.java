@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import com.google.common.base.Splitter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,7 +66,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
     // MIFOSX-1184: This class cannot use constructor injection, because one of
     // its dependencies (SchedulerStopListener) has a circular dependency to
@@ -435,8 +436,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     private JobKey constructJobKey(final String Key) {
-        final String[] keyParams = Key.split(SchedulerServiceConstants.JOB_KEY_SEPERATOR);
-        final JobKey jobKey = new JobKey(keyParams[0], keyParams[1]);
+        final List<String> keyParams = Splitter.onPattern(SchedulerServiceConstants.JOB_KEY_SEPERATOR).splitToList(Key);
+        final JobKey jobKey = new JobKey(keyParams.get(0), keyParams.get(1));
         return jobKey;
     }
 }

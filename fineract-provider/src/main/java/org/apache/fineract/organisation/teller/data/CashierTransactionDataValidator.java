@@ -45,7 +45,7 @@ public class CashierTransactionDataValidator {
 
     private final TellerManagementReadPlatformService tellerManagementReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    private final static Logger LOG = LoggerFactory.getLogger(CashierTransactionDataValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CashierTransactionDataValidator.class);
 
     @Autowired
     public CashierTransactionDataValidator(final TellerManagementReadPlatformService tellerManagementReadPlatformService,

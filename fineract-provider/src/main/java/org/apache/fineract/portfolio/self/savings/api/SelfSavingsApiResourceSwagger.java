@@ -30,11 +30,11 @@ final class SelfSavingsApiResourceSwagger {
     private SelfSavingsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfSavingsAccountsResponse")
-    public final static class GetSelfSavingsAccountsResponse {
+    public static final class GetSelfSavingsAccountsResponse {
 
         private GetSelfSavingsAccountsResponse() {}
 
-        final class GetSelfSavingsStatus {
+        static final class GetSelfSavingsStatus {
 
             private GetSelfSavingsStatus() {}
 
@@ -59,7 +59,7 @@ final class SelfSavingsApiResourceSwagger {
 
         }
 
-        final class GetSelfSavingsTimeline {
+        static final class GetSelfSavingsTimeline {
 
             private GetSelfSavingsTimeline() {}
 
@@ -67,7 +67,7 @@ final class SelfSavingsApiResourceSwagger {
             public LocalDate submittedOnDate;
         }
 
-        final class GetSelfSavingsCurrency {
+        static final class GetSelfSavingsCurrency {
 
             private GetSelfSavingsCurrency() {}
 
@@ -85,7 +85,7 @@ final class SelfSavingsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetSelfSavingsInterestCompoundingPeriodType {
+        static final class GetSelfSavingsInterestCompoundingPeriodType {
 
             private GetSelfSavingsInterestCompoundingPeriodType() {}
 
@@ -97,7 +97,7 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestPostingPeriodType {
+        static final class GetSelfSavingsInterestPostingPeriodType {
 
             private GetSelfSavingsInterestPostingPeriodType() {}
 
@@ -109,7 +109,7 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestCalculationType {
+        static final class GetSelfSavingsInterestCalculationType {
 
             private GetSelfSavingsInterestCalculationType() {}
 
@@ -121,7 +121,7 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestCalculationDaysInYearType {
+        static final class GetSelfSavingsInterestCalculationDaysInYearType {
 
             private GetSelfSavingsInterestCalculationDaysInYearType() {}
 
@@ -133,7 +133,7 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsSummary {
+        static final class GetSelfSavingsSummary {
 
             private GetSelfSavingsSummary() {}
 
@@ -169,11 +169,11 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
+    public static final class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
 
         private GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse() {}
 
-        final class GetSelfSavingsTransactionType {
+        static final class GetSelfSavingsTransactionType {
 
             private GetSelfSavingsTransactionType() {}
 
@@ -193,7 +193,7 @@ final class SelfSavingsApiResourceSwagger {
             public Boolean feeDeduction;
         }
 
-        final class GetSelfSavingsTransactionCurrency {
+        static final class GetSelfSavingsTransactionCurrency {
 
             private GetSelfSavingsTransactionCurrency() {}
 
@@ -213,11 +213,11 @@ final class SelfSavingsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetSelfSavingsPaymentDetailData {
+        static final class GetSelfSavingsPaymentDetailData {
 
             private GetSelfSavingsPaymentDetailData() {}
 
-            final class GetSelfSavingsPaymentType {
+            static final class GetSelfSavingsPaymentType {
 
                 private GetSelfSavingsPaymentType() {}
 
@@ -262,11 +262,11 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesResponse {
+    public static final class GetSelfSavingsAccountsAccountIdChargesResponse {
 
         private GetSelfSavingsAccountsAccountIdChargesResponse() {}
 
-        final class GetSelfSavingsChargeTimeType {
+        static final class GetSelfSavingsChargeTimeType {
 
             private GetSelfSavingsChargeTimeType() {}
 
@@ -278,7 +278,7 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsChargeCalculationType {
+        static final class GetSelfSavingsChargeCalculationType {
 
             private GetSelfSavingsChargeCalculationType() {}
 
@@ -322,7 +322,7 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse() {}
 

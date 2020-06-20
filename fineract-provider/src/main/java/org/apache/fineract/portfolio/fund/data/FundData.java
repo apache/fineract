@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * Immutable data object to represent fund data.
  */
-public class FundData implements Serializable {
+public final class FundData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;

@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoanReschedulingWithinCenterTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private LoanTransactionHelper loanTransactionHelper;

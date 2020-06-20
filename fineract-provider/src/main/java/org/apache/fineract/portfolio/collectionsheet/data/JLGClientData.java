@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Immutable data object for clients with loans due for disbursement or
  * collection.
  */
-public class JLGClientData {
+public final class JLGClientData {
 
     private final Long clientId;
     private final String clientName;

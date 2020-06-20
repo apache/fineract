@@ -27,7 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 public class FlexibleSavingsInterestPostingIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
     private ResponseSpecification responseSpec;
@@ -85,7 +85,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
-        for (Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
             LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
         }
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily

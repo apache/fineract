@@ -46,7 +46,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final static Logger LOG = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
     @Autowired

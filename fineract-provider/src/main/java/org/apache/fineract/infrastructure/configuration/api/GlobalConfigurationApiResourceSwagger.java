@@ -56,7 +56,7 @@ final class GlobalConfigurationApiResourceSwagger {
 
         private PutGlobalConfigurationsResponse() {}
 
-        final class PutGlobalConfigurationsResponsechangesSwagger {
+        static final class PutGlobalConfigurationsResponsechangesSwagger {
 
             private PutGlobalConfigurationsResponsechangesSwagger() {}
 

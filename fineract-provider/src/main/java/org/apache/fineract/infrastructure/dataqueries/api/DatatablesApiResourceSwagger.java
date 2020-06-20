@@ -81,7 +81,7 @@ final class DatatablesApiResourceSwagger {
 
         }
 
-        final class PutDataTablesRequestDropColumns {
+        static final class PutDataTablesRequestDropColumns {
 
             private PutDataTablesRequestDropColumns() {}
 
@@ -89,7 +89,7 @@ final class DatatablesApiResourceSwagger {
             public String name;
         }
 
-        final class PutDataTablesRequestAddColumns {
+        static final class PutDataTablesRequestAddColumns {
 
             private PutDataTablesRequestAddColumns() {}
 
@@ -103,7 +103,7 @@ final class DatatablesApiResourceSwagger {
             public boolean mandatory;
         }
 
-        final class PutDataTablesRequestChangeColumns {
+        static final class PutDataTablesRequestChangeColumns {
 
             private PutDataTablesRequestChangeColumns() {}
 
@@ -221,7 +221,7 @@ final class DatatablesApiResourceSwagger {
 
         }
 
-        final class PutDataTablesAppTableIdResponseChanges {
+        static final class PutDataTablesAppTableIdResponseChanges {
 
             private PutDataTablesAppTableIdResponseChanges() {}
 

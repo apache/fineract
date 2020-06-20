@@ -38,7 +38,7 @@ import org.joda.time.MonthDay;
  * Immutable data object representing a savings account.
  */
 @SuppressWarnings("unused")
-public class StandingInstructionData {
+public final class StandingInstructionData {
 
     private final Long id;
     private final Long accountDetailId;

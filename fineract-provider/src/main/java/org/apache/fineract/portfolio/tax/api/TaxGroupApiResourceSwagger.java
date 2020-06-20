@@ -32,15 +32,15 @@ final class TaxGroupApiResourceSwagger {
     private TaxGroupApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesGroupResponse")
-    public final static class GetTaxesGroupResponse {
+    public static final class GetTaxesGroupResponse {
 
         private GetTaxesGroupResponse() {}
 
-        final class GetTaxesGroupTaxAssociations {
+        static final class GetTaxesGroupTaxAssociations {
 
             private GetTaxesGroupTaxAssociations() {}
 
-            final class GetTaxesGroupTaxComponent {
+            static final class GetTaxesGroupTaxComponent {
 
                 private GetTaxesGroupTaxComponent() {}
 
@@ -65,11 +65,11 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesGroupRequest")
-    public final static class PostTaxesGroupRequest {
+    public static final class PostTaxesGroupRequest {
 
         private PostTaxesGroupRequest() {}
 
-        final class PostTaxesGroupTaxComponents {
+        static final class PostTaxesGroupTaxComponents {
 
             private PostTaxesGroupTaxComponents() {}
 
@@ -98,11 +98,11 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdRequest")
-    public final static class PutTaxesGroupTaxGroupIdRequest {
+    public static final class PutTaxesGroupTaxGroupIdRequest {
 
         private PutTaxesGroupTaxGroupIdRequest() {}
 
-        final class PutTaxesGroupTaxComponents {
+        static final class PutTaxesGroupTaxComponents {
 
             private PutTaxesGroupTaxComponents() {}
 
@@ -124,15 +124,15 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdResponse")
-    public final static class PutTaxesGroupTaxGroupIdResponse {
+    public static final class PutTaxesGroupTaxGroupIdResponse {
 
         private PutTaxesGroupTaxGroupIdResponse() {}
 
-        final class PutTaxesGroupChanges {
+        static final class PutTaxesGroupChanges {
 
             private PutTaxesGroupChanges() {}
 
-            final class PutTaxesGroupModifiedComponents {
+            static final class PutTaxesGroupModifiedComponents {
 
                 private PutTaxesGroupModifiedComponents() {}
 

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoanApplicationTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
     private static final String DAYS = "0";
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";
@@ -43,6 +43,7 @@ public class LoanApplicationTestBuilder {
     public static final String RBI_INDIA_STRATEGY = "4";
 
     private String principal = "10,000";
+    private String glimPrincipal = "1000";
     private String loanTermFrequency = "";
     private String loanTermFrequencyType = "";
     private String numberOfRepayment = "0";
@@ -115,6 +116,11 @@ public class LoanApplicationTestBuilder {
         if (this.approvalFormData != null) {
             map.put("approvalFormData", this.approvalFormData);
         }
+
+        if (this.glimPrincipal != null) {
+            map.put("glimPrincipal", this.glimPrincipal);
+        }
+        map.put("locale", "en_GB");
 
         String approvalFormData = new Gson().toJson(map);
         LOG.info("approvalFormData: {} ", approvalFormData);

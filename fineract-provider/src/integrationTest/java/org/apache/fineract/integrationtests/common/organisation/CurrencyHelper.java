@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 
 public class CurrencyHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CurrencyHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CurrencyHelper.class);
     private static final String CURRENCY_URL = "/fineract-provider/api/v1/currencies?" + Utils.TENANT_IDENTIFIER;
     private static final String CURRENCY_URL_SELECTED = CURRENCY_URL + "&fields=selectedCurrencyOptions";
 

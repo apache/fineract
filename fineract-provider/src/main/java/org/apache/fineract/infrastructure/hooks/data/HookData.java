@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import org.joda.time.LocalDate;
 
-public class HookData implements Serializable {
+public final class HookData implements Serializable {
 
     private final Long id;
     private final String name;

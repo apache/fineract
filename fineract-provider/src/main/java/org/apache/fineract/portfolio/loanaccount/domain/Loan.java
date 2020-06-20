@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -1812,7 +1813,7 @@ public class Loan extends AbstractPersistableCustom {
                     chargeIds = (String) parsedDisbursementData.get(LoanApiConstants.loanChargeIdParameterName);
                     if (chargeIds != null) {
                         if (chargeIds.indexOf(",") != -1) {
-                            String[] chargeId = chargeIds.split(",");
+                            Iterable<String> chargeId = Splitter.on(',').split(chargeIds);
                             for (String loanChargeId : chargeId) {
                                 loanChargeIds.remove(Long.parseLong(loanChargeId));
                             }

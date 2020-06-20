@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -951,7 +952,7 @@ public class DataValidatorBuilder {
         if (this.value == null && this.ignoreNullValue) {
             return this;
         }
-        final String[] inputs = validInputs.split(VALID_INPUT_SEPERATOR);
+        final Iterable<String> inputs = Splitter.onPattern(VALID_INPUT_SEPERATOR).split(validInputs);
         boolean validationErr = true;
         for (final String input : inputs) {
             if (input.equalsIgnoreCase(this.value.toString().trim())) {

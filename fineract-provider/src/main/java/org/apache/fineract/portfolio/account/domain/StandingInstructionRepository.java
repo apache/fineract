@@ -29,13 +29,13 @@ import org.springframework.data.repository.query.Param;
 public interface StandingInstructionRepository
         extends JpaRepository<AccountTransferStandingInstruction, Long>, JpaSpecificationExecutor<AccountTransferStandingInstruction> {
 
-    public final static String FIND_BY_LOAN_AND_STATUS_QUERY = "select accountTransferStandingInstruction "
+    public static final String FIND_BY_LOAN_AND_STATUS_QUERY = "select accountTransferStandingInstruction "
             + "from AccountTransferStandingInstruction accountTransferStandingInstruction "
             + "where accountTransferStandingInstruction.status = :status "
             + "and (accountTransferStandingInstruction.accountTransferDetails.toLoanAccount = :loan "
             + "or accountTransferStandingInstruction.accountTransferDetails.fromLoanAccount = :loan)";
 
-    public final static String FIND_BY_SAVINGS_AND_STATUS_QUERY = "select accountTransferStandingInstruction "
+    public static final String FIND_BY_SAVINGS_AND_STATUS_QUERY = "select accountTransferStandingInstruction "
             + "from AccountTransferStandingInstruction accountTransferStandingInstruction "
             + "where accountTransferStandingInstruction.status = :status "
             + "and (accountTransferStandingInstruction.accountTransferDetails.toSavingsAccount = :savingsAccount "

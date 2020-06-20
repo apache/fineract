@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired

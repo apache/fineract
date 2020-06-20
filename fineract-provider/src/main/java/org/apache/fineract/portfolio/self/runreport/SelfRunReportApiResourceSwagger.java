@@ -31,11 +31,11 @@ final class SelfRunReportApiResourceSwagger {
     private SelfRunReportApiResourceSwagger() {}
 
     @ApiModel(value = "GetRunReportResponse")
-    public final static class GetRunReportResponse {
+    public static final class GetRunReportResponse {
 
         private GetRunReportResponse() {}
 
-        final class GetRunReportColumnHeaders {
+        static final class GetRunReportColumnHeaders {
 
             private GetRunReportColumnHeaders() {}
 
@@ -52,7 +52,7 @@ final class SelfRunReportApiResourceSwagger {
 
         }
 
-        final class GetPocketData {
+        static final class GetPocketData {
 
             private GetPocketData() {}
 

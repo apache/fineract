@@ -32,11 +32,11 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     private RecurringDepositAccountTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
 
-        final class GetRecurringTransactionType {
+        static final class GetRecurringTransactionType {
 
             private GetRecurringTransactionType() {}
 
@@ -70,7 +70,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean overdraftFee;
         }
 
-        final class GetRecurringCurrency {
+        static final class GetRecurringCurrency {
 
             private GetRecurringCurrency() {}
 
@@ -109,11 +109,11 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
-        final class GetRecurringTransactionsCurrency {
+        static final class GetRecurringTransactionsCurrency {
 
             private GetRecurringTransactionsCurrency() {}
 
@@ -133,7 +133,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringTransactionsTransactionType {
+        static final class GetRecurringTransactionsTransactionType {
 
             private GetRecurringTransactionsTransactionType() {}
 
@@ -153,11 +153,11 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean feeDeduction;
         }
 
-        final class GetRecurringPaymentDetailData {
+        static final class GetRecurringPaymentDetailData {
 
             private GetRecurringPaymentDetailData() {}
 
-            final class GetRecurringPaymentType {
+            static final class GetRecurringPaymentType {
 
                 private GetRecurringPaymentType() {}
 
@@ -202,7 +202,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
 
@@ -229,11 +229,11 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
 
-        final class PostRecurringChanges {
+        static final class PostRecurringChanges {
 
             private PostRecurringChanges() {}
 
@@ -261,7 +261,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 

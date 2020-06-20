@@ -26,7 +26,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class ClientChargeData {
+public final class ClientChargeData {
 
     private final Long id;
 

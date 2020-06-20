@@ -19,7 +19,6 @@
 package org.apache.fineract.integrationtests.common;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -138,7 +137,7 @@ public class Utils {
         if (jsonAttributeToGetBack == null) {
             return (T) json;
         }
-        return (T) from(json).get(jsonAttributeToGetBack);
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
     public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -158,28 +157,28 @@ public class Utils {
         if (jsonAttributeToGetBack == null) {
             return (T) json;
         }
-        return (T) from(json).get(jsonAttributeToGetBack);
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
     public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
-        return (T) from(json).get(jsonAttributeToGetBack);
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
     public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String deleteURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
                 .asString();
-        return (T) from(json).get(jsonAttributeToGetBack);
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
     public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
                 .delete(deleteURL).andReturn().asString();
-        return (T) (jsonAttributeToGetBack == null ? json : from(json).get(jsonAttributeToGetBack));
+        return (T) (jsonAttributeToGetBack == null ? json : JsonPath.from(json).get(jsonAttributeToGetBack));
     }
 
     public static String convertDateToURLFormat(final String dateToBeConvert) throws ParseException {

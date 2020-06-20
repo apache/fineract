@@ -218,7 +218,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         return this.jdbcTemplate.query(sql, rm, inputs);
     }
 
-    private final static class ShareAccountSummaryDataMapper implements RowMapper<ShareAccountSummaryData> {
+    private static final class ShareAccountSummaryDataMapper implements RowMapper<ShareAccountSummaryData> {
 
         private final String schema;
 

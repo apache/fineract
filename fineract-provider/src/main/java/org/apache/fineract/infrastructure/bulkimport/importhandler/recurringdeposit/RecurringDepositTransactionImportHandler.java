@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RecurringDepositTransactionImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
     private Workbook workbook;
     private List<SavingsAccountTransactionData> savingsTransactions;
     private String savingsAccountId = "";

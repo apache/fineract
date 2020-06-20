@@ -31,11 +31,11 @@ final class SelfAccountTransferApiResourceSwagger {
     private SelfAccountTransferApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountTransferTemplateResponse")
-    public final static class GetAccountTransferTemplateResponse {
+    public static final class GetAccountTransferTemplateResponse {
 
         private GetAccountTransferTemplateResponse() {}
 
-        final class GetAccountOptions {
+        static final class GetAccountOptions {
 
             private GetAccountOptions() {}
 
@@ -49,7 +49,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetAccountOptions> accountTypeOptions;
 
-        final class GetFromAccountOptions {
+        static final class GetFromAccountOptions {
 
             private GetFromAccountOptions() {}
 
@@ -71,7 +71,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetFromAccountOptions> fromAccountTypeOptions;
 
-        final class GetToAccountOptions {
+        static final class GetToAccountOptions {
 
             private GetToAccountOptions() {}
 
@@ -95,7 +95,7 @@ final class SelfAccountTransferApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewTransferRequest")
-    public final static class PostNewTransferRequest {
+    public static final class PostNewTransferRequest {
 
         private PostNewTransferRequest() {}
 
@@ -129,7 +129,7 @@ final class SelfAccountTransferApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewTransferResponse")
-    public final static class PostNewTransferResponse {
+    public static final class PostNewTransferResponse {
 
         private PostNewTransferResponse() {}
 

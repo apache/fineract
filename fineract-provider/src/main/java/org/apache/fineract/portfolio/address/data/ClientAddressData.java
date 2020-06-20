@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.address.data;
 
-public class ClientAddressData {
+public final class ClientAddressData {
 
     private final long clientAddressId;
 

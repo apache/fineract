@@ -62,7 +62,7 @@ final class HolidaysApiResourceSwagger {
 
         }
 
-        final class PostHolidaysRequestOffices {
+        static final class PostHolidaysRequestOffices {
 
             private PostHolidaysRequestOffices() {
 
@@ -139,7 +139,7 @@ final class HolidaysApiResourceSwagger {
 
         }
 
-        final class PutHolidaysHolidayIdResponseChanges {
+        static final class PutHolidaysHolidayIdResponseChanges {
 
             private PutHolidaysHolidayIdResponseChanges() {}
 

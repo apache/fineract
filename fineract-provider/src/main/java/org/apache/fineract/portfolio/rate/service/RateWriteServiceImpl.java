@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RateWriteServiceImpl implements RateWriteService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RateWriteServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RateWriteServiceImpl.class);
 
     private final RateRepository rateRepository;
     private final AppUserRepository appUserRepository;
