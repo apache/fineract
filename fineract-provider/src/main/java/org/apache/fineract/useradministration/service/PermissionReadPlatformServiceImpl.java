@@ -101,9 +101,8 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         public String makerCheckerablePermissionSchema() {
             /*
-             * get all 'Maker-Checkerable' permissions - Maintenance permissions
-             * (i.e. exclude the 'special' grouping, the READ permissions and
-             * the CHECKER permissions
+             * get all 'Maker-Checkerable' permissions - Maintenance permissions (i.e. exclude the 'special' grouping,
+             * the READ permissions and the CHECKER permissions
              */
 
             return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, p.can_maker_checker as selected"

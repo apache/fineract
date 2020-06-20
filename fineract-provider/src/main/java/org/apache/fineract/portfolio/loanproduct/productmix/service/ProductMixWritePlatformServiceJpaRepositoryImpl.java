@@ -150,8 +150,8 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             }
 
             /*
-             * if restrictedProducts array is not empty delete the duplicate ids
-             * which are already exists and update existedProductMixes
+             * if restrictedProducts array is not empty delete the duplicate ids which are already exists and update
+             * existedProductMixes
              */
             final List<ProductMix> productMixesToRemove = updateRestrictedIds(restrictedIds, existedProductMixes);
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);

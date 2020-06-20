@@ -60,8 +60,7 @@ import org.springframework.stereotype.Component;
 public class AdHocApiResource {
 
     /**
-     * The set of parameters that are supported in response for
-     * {@link AdhocData}
+     * The set of parameters that are supported in response for {@link AdhocData}
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName", "tableField",
             "isActive", "createdBy", "createdOn", "createdById", "updatedById", "updatedOn", "email"));

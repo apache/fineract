@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.glaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when a GL Account with a given GL Code of
- * the particular type is already present
+ * A {@link RuntimeException} thrown when a GL Account with a given GL Code of the particular type is already present
  */
 public class GLAccountDuplicateException extends AbstractPlatformDomainRuleException {
 

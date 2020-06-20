@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when valid api request end up violating
- * some domain rule.
+ * A {@link RuntimeException} thrown when valid api request end up violating some domain rule.
  */
 public abstract class AbstractPlatformDomainRuleException extends RuntimeException {
 

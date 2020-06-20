@@ -31,8 +31,8 @@ import org.joda.time.LocalTime;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Support for retrieving possibly null values from jdbc recordset delegating to
- * springs {@link JdbcUtils} where possible.
+ * Support for retrieving possibly null values from jdbc recordset delegating to springs {@link JdbcUtils} where
+ * possible.
  */
 public class JdbcSupport {
 

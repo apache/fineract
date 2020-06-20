@@ -318,8 +318,7 @@ public class ReportMailingJobValidator {
     }
 
     /**
-     * throw a PlatformApiDataValidationException exception if there are
-     * validation errors
+     * throw a PlatformApiDataValidationException exception if there are validation errors
      *
      * @param dataValidationErrors
      *            -- list of ApiParameterError objects

@@ -49,9 +49,8 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
                     constitutionIdParamName, mainBusinessLineIdParamName));
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link ClientData}. Where possible, we try to get response parameters to
-     * match those of request parameters.
+     * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
+     * response parameters to match those of request parameters.
      */
 
     protected static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(

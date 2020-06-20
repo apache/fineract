@@ -357,11 +357,9 @@ public class Charge extends AbstractPersistableCustom {
         final String chargeAppliesToParamName = "chargeAppliesTo";
         if (command.isChangeInIntegerParameterNamed(chargeAppliesToParamName, this.chargeAppliesTo)) {
             /*
-             * final Integer newValue =
-             * command.integerValueOfParameterNamed(chargeAppliesToParamName);
-             * actualChanges.put(chargeAppliesToParamName, newValue);
-             * actualChanges.put("locale", localeAsInput); this.chargeAppliesTo
-             * = ChargeAppliesTo.fromInt(newValue).getValue();
+             * final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
+             * actualChanges.put(chargeAppliesToParamName, newValue); actualChanges.put("locale", localeAsInput);
+             * this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();
              */
 
             // AA: Do not allow to change chargeAppliesTo.
@@ -506,8 +504,7 @@ public class Charge extends AbstractPersistableCustom {
     }
 
     /**
-     * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear
-     * in query/report results.
+     * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear in query/report results.
      *
      * Any fields with unique constraints and prepended with id of record.
      */

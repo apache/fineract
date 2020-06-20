@@ -65,8 +65,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             }
 
             /***
-             * Handle repayments, repayments at disbursement and reversal of
-             * Repayments and Repayments at disbursement
+             * Handle repayments, repayments at disbursement and reversal of Repayments and Repayments at disbursement
              ***/
             else if (loanTransactionDTO.getTransactionType().isRepayment()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()
@@ -144,35 +143,27 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * <br/>
      * <br/>
      *
-     * <b>Principal Repayment</b>: Debits "Fund Source" and Credits "Loan
-     * Portfolio"<br/>
+     * <b>Principal Repayment</b>: Debits "Fund Source" and Credits "Loan Portfolio"<br/>
      *
-     * <b>Interest Repayment</b>:Debits "Fund Source" and and Credits
-     * "Receivable Interest" <br/>
+     * <b>Interest Repayment</b>:Debits "Fund Source" and and Credits "Receivable Interest" <br/>
      *
-     * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case
-     * of repayment at disbursement) and and Credits "Receivable Fees" <br/>
+     * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case of repayment at disbursement) and and
+     * Credits "Receivable Fees" <br/>
      *
-     * <b>Penalty Repayment</b>: Debits "Fund Source" and and Credits
-     * "Receivable Penalties" <br/>
+     * <b>Penalty Repayment</b>: Debits "Fund Source" and and Credits "Receivable Penalties" <br/>
      * <br/>
      * Handles write offs using the following posting rules <br/>
      * <br/>
-     * <b>Principal Write off</b>: Debits "Losses Written Off" and Credits "Loan
-     * Portfolio"<br/>
+     * <b>Principal Write off</b>: Debits "Losses Written Off" and Credits "Loan Portfolio"<br/>
      *
-     * <b>Interest Write off</b>:Debits "Losses Written off" and and Credits
-     * "Receivable Interest" <br/>
+     * <b>Interest Write off</b>:Debits "Losses Written off" and and Credits "Receivable Interest" <br/>
      *
-     * <b>Fee Write off</b>:Debits "Losses Written off" and and Credits
-     * "Receivable Fees" <br/>
+     * <b>Fee Write off</b>:Debits "Losses Written off" and and Credits "Receivable Fees" <br/>
      *
-     * <b>Penalty Write off</b>: Debits "Losses Written off" and and Credits
-     * "Receivable Penalties" <br/>
+     * <b>Penalty Write off</b>: Debits "Losses Written off" and and Credits "Receivable Penalties" <br/>
      * <br/>
      * <br/>
-     * In case the loan transaction has been reversed, all debits are turned
-     * into credits and vice versa
+     * In case the loan transaction has been reversed, all debits are turned into credits and vice versa
      *
      * @param loanTransactionDTO
      * @param loanDTO
@@ -289,8 +280,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         }
 
         /**
-         * Single DEBIT transaction for write-offs or Repayments (and their
-         * reversals)
+         * Single DEBIT transaction for write-offs or Repayments (and their reversals)
          ***/
         if (!(totalDebitAmount.compareTo(BigDecimal.ZERO) == 0)) {
             if (writeOff) {
@@ -315,11 +305,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     /**
-     * Create a single Debit to fund source and a single credit to "Income from
-     * Recovery"
+     * Create a single Debit to fund source and a single credit to "Income from Recovery"
      *
-     * In case the loan transaction is a reversal, all debits are turned into
-     * credits and vice versa
+     * In case the loan transaction is a reversal, all debits are turned into credits and vice versa
      */
     private void createJournalEntriesForRecoveryRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
@@ -345,11 +333,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * Recognize the receivable interest <br/>
      * Debit "Interest Receivable" and Credit "Income from Interest"
      *
-     * <b>Fees:</b> Debit <i>Fees Receivable</i> and credit <i>Income from
-     * Fees</i> <br/>
+     * <b>Fees:</b> Debit <i>Fees Receivable</i> and credit <i>Income from Fees</i> <br/>
      *
-     * <b>Penalties:</b> Debit <i>Penalties Receivable</i> and credit <i>Income
-     * from Penalties</i>
+     * <b>Penalties:</b> Debit <i>Penalties Receivable</i> and credit <i>Income from Penalties</i>
      *
      * Also handles reversals for both fees and payment applications
      *

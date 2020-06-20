@@ -386,8 +386,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
             sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
             /*
-             * if (currencyCode != null) { sql += " and la.currency_code = ?";
-             * sqlParams = new Object[] {accountId , accountId,currencyCode }; }
+             * if (currencyCode != null) { sql += " and la.currency_code = ?"; sqlParams = new Object[] {accountId ,
+             * accountId,currencyCode }; }
              */
 
             accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);

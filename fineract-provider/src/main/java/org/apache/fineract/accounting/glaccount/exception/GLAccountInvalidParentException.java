@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.glaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when trying to map invalid parents to a GL
- * account
+ * A {@link RuntimeException} thrown when trying to map invalid parents to a GL account
  */
 public class GLAccountInvalidParentException extends AbstractPlatformDomainRuleException {
 

@@ -44,9 +44,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Implementation for {@link BatchApiService} to iterate through all the
- * incoming requests and obtain the appropriate CommandStrategy from
- * CommandStrategyProvider.
+ * Implementation for {@link BatchApiService} to iterate through all the incoming requests and obtain the appropriate
+ * CommandStrategy from CommandStrategyProvider.
  *
  * @author Rishabh Shukla
  *
@@ -78,10 +77,8 @@ public class BatchApiServiceImpl implements BatchApiService {
     }
 
     /**
-     * Returns the response list by getting a proper
-     * {@link org.apache.fineract.batch.command.CommandStrategy}. execute()
-     * method of acquired commandStrategy is then provided with the separate
-     * Request.
+     * Returns the response list by getting a proper {@link org.apache.fineract.batch.command.CommandStrategy}.
+     * execute() method of acquired commandStrategy is then provided with the separate Request.
      *
      * @param requestList
      * @param uriInfo

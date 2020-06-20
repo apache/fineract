@@ -24,8 +24,7 @@ import java.util.Set;
 public class CodeConstants {
 
     /***
-     * Enum of all parameters passed in while creating/updating a code and code
-     * value
+     * Enum of all parameters passed in while creating/updating a code and code value
      ***/
     public static enum CodevalueJSONinputParams {
 

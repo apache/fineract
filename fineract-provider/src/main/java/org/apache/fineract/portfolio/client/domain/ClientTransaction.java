@@ -139,8 +139,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     }
 
     /**
-     * Converts the content of this Client Transaction to a map which can be
-     * passed to the accounting module
+     * Converts the content of this Client Transaction to a map which can be passed to the accounting module
      *
      *
      *

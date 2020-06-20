@@ -26,8 +26,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.joda.time.LocalDate;
 
 /**
- * A wrapper around loan schedule related data exposing needed behaviour by
- * loan.
+ * A wrapper around loan schedule related data exposing needed behaviour by loan.
  */
 public class LoanRepaymentScheduleProcessingWrapper {
 

@@ -43,8 +43,7 @@ public class CreateTellerCommandHandler implements NewCommandSourceHandler {
      * Creates a new instance
      *
      * @param writePlatformService
-     *            the {@code TellerWritePlatformService} used to access the
-     *            backend
+     *            the {@code TellerWritePlatformService} used to access the backend
      */
     @Autowired
     public CreateTellerCommandHandler(final TellerWritePlatformService writePlatformService) {

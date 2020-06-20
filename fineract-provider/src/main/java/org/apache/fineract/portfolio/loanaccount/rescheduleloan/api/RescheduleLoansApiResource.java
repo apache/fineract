@@ -196,20 +196,16 @@ public class RescheduleLoansApiResource {
      *
      * @Consumes({ MediaType.APPLICATION_JSON })
      *
-     * @Produces({ MediaType.APPLICATION_JSON }) public String
-     * retrieveTemplate(@Context final UriInfo uriInfo) {
+     * @Produces({ MediaType.APPLICATION_JSON }) public String retrieveTemplate(@Context final UriInfo uriInfo) {
      *
      * this.platformSecurityContext.authenticatedUser().
-     * validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME); final
-     * ApiRequestJsonSerializationSettings settings =
-     * this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+     * validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME); final ApiRequestJsonSerializationSettings
+     * settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
      *
-     * LoanRescheduleRequestData loanRescheduleReasons = null;
-     * loanRescheduleReasons = this.loanRescheduleRequestReadPlatformService
-     * .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.
+     * LoanRescheduleRequestData loanRescheduleReasons = null; loanRescheduleReasons =
+     * this.loanRescheduleRequestReadPlatformService .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.
      * LOAN_RESCHEDULE_REASON);
      *
-     * return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings,
-     * loanRescheduleReasons); }
+     * return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons); }
      */
 }

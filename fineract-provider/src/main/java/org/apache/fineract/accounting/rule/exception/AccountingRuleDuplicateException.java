@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.rule.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when an Accounting rule with a given name
- * already exists
+ * A {@link RuntimeException} thrown when an Accounting rule with a given name already exists
  */
 public class AccountingRuleDuplicateException extends AbstractPlatformDomainRuleException {
 

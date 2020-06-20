@@ -23,8 +23,7 @@ import java.util.Date;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
- * {@code TellerTransactionData} represents an immutable data object for a
- * transction.
+ * {@code TellerTransactionData} represents an immutable data object for a transction.
  *
  * @version 1.0.0
  *
@@ -72,8 +71,7 @@ public final class TellerTransactionData implements Serializable {
      * @param clientId
      *            - id of the client
      * @param type
-     *            - type of transaction (eg receipt, payment, open, close,
-     *            settle)
+     *            - type of transaction (eg receipt, payment, open, close, settle)
      * @param amount
      *            - amount of the transaction
      * @param postingDate

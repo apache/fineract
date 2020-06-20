@@ -23,8 +23,7 @@ import java.util.List;
 
 /**
  * <p>
- * The compounding interest period is the span of time at the end of which
- * savings in a client's account earn interest.
+ * The compounding interest period is the span of time at the end of which savings in a client's account earn interest.
  * </p>
  */
 public enum SavingsCompoundingInterestPeriodType {

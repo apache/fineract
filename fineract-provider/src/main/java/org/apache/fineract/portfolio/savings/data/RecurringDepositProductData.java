@@ -142,9 +142,8 @@ public final class RecurringDepositProductData extends DepositProductData {
     }
 
     /**
-     * Returns a {@link RecurringDepositProductData} that contains and exist
-     * {@link RecurringDepositProductData} data with further template data for
-     * dropdowns.
+     * Returns a {@link RecurringDepositProductData} that contains and exist {@link RecurringDepositProductData} data
+     * with further template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO

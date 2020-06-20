@@ -151,8 +151,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             }
 
             /**
-             * a detail account cannot be changed to a header account if
-             * transactions are already logged against it
+             * a detail account cannot be changed to a header account if transactions are already logged against it
              **/
             if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue())) {
                 if (glAccount.isHeaderAccount()) {

@@ -153,8 +153,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      * Variables that would make sense <br>
      * <ul>
      * <li>inheritDestinationGroupLoanOfficer: Default true</li>
-     * <li>newStaffId: Optional field with Id of new Loan Officer to be linked
-     * to this client and all his JLG loans for this group</li>
+     * <li>newStaffId: Optional field with Id of new Loan Officer to be linked to this client and all his JLG loans for
+     * this group</li>
      * </ul>
      ***/
     @Transactional
@@ -171,8 +171,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /**
-         * TODO: for now we need to ensure that only one collection sheet
-         * calendar can be linked with a center or group entity <br/>
+         * TODO: for now we need to ensure that only one collection sheet calendar can be linked with a center or group
+         * entity <br/>
          **/
         final CalendarInstance sourceGroupCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                 sourceGroup.getId(), CalendarEntityType.GROUPS.getValue(), CalendarType.COLLECTION.getValue());
@@ -181,9 +181,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 .findCalendarInstancesForActiveLoansByGroupIdAndClientId(sourceGroup.getId(), client.getId());
 
         /**
-         * if a calendar is present in the source group along with loans synced
-         * with it, we should ensure that the destination group also has a
-         * collection calendar
+         * if a calendar is present in the source group along with loans synced with it, we should ensure that the
+         * destination group also has a collection calendar
          **/
         if (sourceGroupCalendarInstance != null && !activeLoanCalendarInstances.isEmpty()) {
             // get the destination calendar
@@ -200,8 +199,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final Calendar destinationGroupCalendar = destinationGroupCalendarInstance.getCalendar();
 
             /***
-             * Ensure that the recurrence pattern are same for collection
-             * meeting in both the source and the destination calendar
+             * Ensure that the recurrence pattern are same for collection meeting in both the source and the destination
+             * calendar
              ***/
             if (!(CalendarUtils.isFrequencySame(sourceGroupCalendar.getRecurrence(), destinationGroupCalendar.getRecurrence())
                     && CalendarUtils.isIntervalSame(sourceGroupCalendar.getRecurrence(), destinationGroupCalendar.getRecurrence()))) {
@@ -219,8 +218,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /**
-         * Now Change the loan officer for this client and all his active JLG
-         * loans
+         * Now Change the loan officer for this client and all his active JLG loans
          **/
         final Staff destinationGroupLoanOfficer = destinationGroup.getStaff();
 
@@ -255,8 +253,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /**
-         * change client group membership (only if source group and destination
-         * group are not the same, i.e only Loan officer Transfer)
+         * change client group membership (only if source group and destination group are not the same, i.e only Loan
+         * officer Transfer)
          **/
         if (!sourceGroup.getId().equals(destinationGroup.getId())) {
             client.getGroups().remove(sourceGroup);
@@ -265,8 +263,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /**
-     * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br>
+     * This API is meant for transferring clients between branches mainly by Organizations following an Individual
+     * lending Model <br>
      *
      * @param clientId
      * @param jsonCommand
@@ -293,11 +291,10 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /**
-     * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br>
-     * If the Client is linked to any Groups, we can optionally choose to have
-     * all the linkages broken and all JLG Loans are converted into Individual
-     * Loans
+     * This API is meant for transferring clients between branches mainly by Organizations following an Individual
+     * lending Model <br>
+     * If the Client is linked to any Groups, we can optionally choose to have all the linkages broken and all JLG Loans
+     * are converted into Individual Loans
      *
      * @param clientId
      * @param jsonCommand
@@ -326,11 +323,10 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /**
-     * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br>
-     * If the Client is linked to any Groups, we can optionally choose to have
-     * all the linkages broken and all JLG Loans are converted into Individual
-     * Loans
+     * This API is meant for transferring clients between branches mainly by Organizations following an Individual
+     * lending Model <br>
+     * If the Client is linked to any Groups, we can optionally choose to have all the linkages broken and all JLG Loans
+     * are converted into Individual Loans
      *
      * @param clientId
      * @param jsonCommand
@@ -403,8 +399,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             // get each individual loan for the client
             for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
                 /**
-                 * We need to create transactions etc only for loans which are
-                 * disbursed and not yet closed
+                 * We need to create transactions etc only for loans which are disbursed and not yet closed
                  **/
                 if (loan.isDisbursed() && !loan.isClosed()) {
                     switch (transferEventType) {
@@ -528,9 +523,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /**
-     * private void validateGroupAwaitingTransferAcceptance(final Group group) {
-     * if (!group.isTransferInProgress()) { throw new
-     * ClientNotAwaitingTransferApprovalException(group.getId()); } }
+     * private void validateGroupAwaitingTransferAcceptance(final Group group) { if (!group.isTransferInProgress()) {
+     * throw new ClientNotAwaitingTransferApprovalException(group.getId()); } }
      **/
 
     private void validateClientAwaitingTransferAcceptanceOnHold(final Client client) {
@@ -540,9 +534,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /**
-     * private void validateGroupAwaitingTransferAcceptanceOnHold(final Group
-     * group) { if (!group.isTransferInProgressOrOnHold()) { throw new
-     * ClientNotAwaitingTransferApprovalException(group.getId()); } }
+     * private void validateGroupAwaitingTransferAcceptanceOnHold(final Group group) { if
+     * (!group.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalException(group.getId()); }
+     * }
      **/
 
 }

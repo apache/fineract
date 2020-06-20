@@ -25,8 +25,7 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 public interface ReportMailingJobRunHistoryReadPlatformService {
 
     /**
-     * Retrieve all report mailing run history with similar job id to the one
-     * passed
+     * Retrieve all report mailing run history with similar job id to the one passed
      *
      * @param reportMailingJobId
      *            ReportMailingJob identifier

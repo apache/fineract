@@ -80,8 +80,8 @@ public class LoanTransactionEnumData {
     }
 
     /**
-     * Returns true if the transaction involves either a payment (disbursement)
-     * or a receipt (repayments, repayments during disbursement etc)
+     * Returns true if the transaction involves either a payment (disbursement) or a receipt (repayments, repayments
+     * during disbursement etc)
      *
      * @return
      */

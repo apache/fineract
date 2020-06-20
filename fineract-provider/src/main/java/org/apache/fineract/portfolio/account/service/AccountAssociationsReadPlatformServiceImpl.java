@@ -171,9 +171,8 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             final String loanAccountNo = rs.getString("loanAccountNo");
             final PortfolioAccountData account = PortfolioAccountData.lookup(loanAccountId, loanAccountNo);
             /*
-             * if (savingsAccountId != null) { account =
-             * PortfolioAccountData.lookup(savingsAccountId, savingsAccountNo);
-             * } else if (loanAccountId != null) { account =
+             * if (savingsAccountId != null) { account = PortfolioAccountData.lookup(savingsAccountId,
+             * savingsAccountNo); } else if (loanAccountId != null) { account =
              * PortfolioAccountData.lookup(loanAccountId, loanAccountNo); }
              */
             final Long linkSavingsAccountId = JdbcSupport.getLong(rs, "linkSavingsAccountId");
@@ -184,11 +183,9 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             // rs.getString("linkLoanAccountNo");
             final PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId, linkSavingsAccountNo);
             /*
-             * if (linkSavingsAccountId != null) { linkedAccount =
-             * PortfolioAccountData.lookup(linkSavingsAccountId,
-             * linkSavingsAccountNo); } else if (linkLoanAccountId != null) {
-             * linkedAccount = PortfolioAccountData.lookup(linkLoanAccountId,
-             * linkLoanAccountNo); }
+             * if (linkSavingsAccountId != null) { linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId,
+             * linkSavingsAccountNo); } else if (linkLoanAccountId != null) { linkedAccount =
+             * PortfolioAccountData.lookup(linkLoanAccountId, linkLoanAccountNo); }
              */
 
             return new AccountAssociationsData(id, account, linkedAccount);

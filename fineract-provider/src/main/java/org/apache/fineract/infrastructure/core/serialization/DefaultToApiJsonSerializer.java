@@ -26,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * An abstract helper implementation of {@link ToApiJsonSerializer} for
- * resources to serialize their Java data objects into JSON.
+ * An abstract helper implementation of {@link ToApiJsonSerializer} for resources to serialize their Java data objects
+ * into JSON.
  */
 @Component
 public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {

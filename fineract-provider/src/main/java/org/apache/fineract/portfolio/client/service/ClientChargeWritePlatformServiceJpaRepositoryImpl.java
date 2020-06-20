@@ -258,8 +258,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     /**
      * Validates transaction to ensure that <br>
      * charge is active <br>
-     * transaction date is valid (between client activation and todays date)
-     * <br>
+     * transaction date is valid (between client activation and todays date) <br>
      * charge is not already paid or waived <br>
      * amount is not more than total due
      *
@@ -269,8 +268,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * @param transactionDate
      * @param amountPaid
      * @param requiresTransactionDateValidation
-     *            if set to false, transaction date specific validation is
-     *            skipped
+     *            if set to false, transaction date specific validation is skipped
      * @param requiresTransactionAmountValidation
      *            if set to false transaction amount validation is skipped
      * @return
@@ -387,8 +385,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     }
 
     /**
-     * Ensures that the charge transaction date (for payments) is not on a
-     * holiday or a non working day
+     * Ensures that the charge transaction date (for payments) is not on a holiday or a non working day
      *
      * @param savingsAccountCharge
      * @param fmt

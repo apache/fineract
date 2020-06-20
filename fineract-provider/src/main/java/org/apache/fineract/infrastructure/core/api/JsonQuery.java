@@ -35,8 +35,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable representation of a query.
  *
- * Wraps the provided JSON with convenience functions for extracting parameter
- * values.
+ * Wraps the provided JSON with convenience functions for extracting parameter values.
  */
 public final class JsonQuery {
 

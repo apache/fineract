@@ -22,8 +22,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object for extracting flat data for joint liability group's
- * collection sheet.
+ * Immutable data object for extracting flat data for joint liability group's collection sheet.
  */
 public class IndividualCollectionSheetLoanFlatData {
 

@@ -74,8 +74,7 @@ import org.springframework.stereotype.Component;
 public class UsersApiResource {
 
     /**
-     * The set of parameters that are supported in response for
-     * {@link AppUserData}.
+     * The set of parameters that are supported in response for {@link AppUserData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
             "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));

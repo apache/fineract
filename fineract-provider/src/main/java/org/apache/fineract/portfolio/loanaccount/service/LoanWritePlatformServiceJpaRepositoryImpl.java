@@ -633,8 +633,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     /****
      * TODO Vishwas: Pair with Ashok and re-factor collection sheet code-base
      *
-     * May of the changes made to disburseLoan aren't being made here, should
-     * refactor to reuse disburseLoan ASAP
+     * May of the changes made to disburseLoan aren't being made here, should refactor to reuse disburseLoan ASAP
      *****/
     @Transactional
     @Override
@@ -1038,11 +1037,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a adjustment is made before the latest
-         * payment recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a adjustment is made
+         * before the latest payment recorded against the loan)
          ***/
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         if (changedTransactionDetail != null) {
@@ -1059,8 +1056,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             changes.put("note", noteText);
             Note note = null;
             /**
-             * If a new transaction is not created, associate note with the
-             * transaction to be adjusted
+             * If a new transaction is not created, associate note with the transaction to be adjusted
              **/
             if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
                 note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
@@ -1147,11 +1143,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionRepository.save(waiveInterestTransaction);
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a waiver is made before the latest payment
-         * recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a waiver is made
+         * before the latest payment recorded against the loan)
          ***/
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         if (changedTransactionDetail != null) {
@@ -1546,9 +1540,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanChargeRepository.save(loanCharge);
 
         /**
-         * we want to apply charge transactions only for those loans charges
-         * that are applied when a loan is active and the loan product uses
-         * Upfront Accruals
+         * we want to apply charge transactions only for those loans charges that are applied when a loan is active and
+         * the loan product uses Upfront Accruals
          **/
         if (loan.status().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null, currentUser);

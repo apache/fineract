@@ -307,20 +307,18 @@ public class SavingsAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     /*
-     * public String updateGsim(@PathParam("parentAccountId") final Long
-     * parentAccountId, final String apiRequestBodyAsJson,
+     * public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String
+     * apiRequestBodyAsJson,
      *
      * @QueryParam("command") final String commandParam) {
      */
     public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String apiRequestBodyAsJson) {
 
         /*
-         * if (is(commandParam, "updateWithHoldTax")) { final CommandWrapper
-         * commandRequest = new
-         * CommandWrapperBuilder().withJson(apiRequestBodyAsJson).
-         * updateWithHoldTax(accountId) .build(); final CommandProcessingResult
-         * result = this.commandsSourceWritePlatformService.logCommandSource(
-         * commandRequest); return this.toApiJsonSerializer.serialize(result); }
+         * if (is(commandParam, "updateWithHoldTax")) { final CommandWrapper commandRequest = new
+         * CommandWrapperBuilder().withJson(apiRequestBodyAsJson). updateWithHoldTax(accountId) .build(); final
+         * CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource( commandRequest);
+         * return this.toApiJsonSerializer.serialize(result); }
          */
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGSIMAccount(parentAccountId).withJson(apiRequestBodyAsJson)

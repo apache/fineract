@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when a Client is set as a
- * guarantor for his/her own loans
+ * {@link AbstractPlatformDomainRuleException} thrown when a Client is set as a guarantor for his/her own loans
  */
 public class InvalidGuarantorException extends AbstractPlatformDomainRuleException {
 

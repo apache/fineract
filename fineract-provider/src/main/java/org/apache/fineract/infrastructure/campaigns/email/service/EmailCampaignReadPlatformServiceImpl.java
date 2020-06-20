@@ -132,9 +132,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final boolean useReport = rs.getBoolean("useReport");
 
             /*
-             * final ReportData stretchyReport = new ReportData(reportId,
-             * reportName, reportType, reportSubType, reportCategory,
-             * reportDescription, reportSql, coreReport, useReport, null);
+             * final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType,
+             * reportCategory, reportDescription, reportSql, coreReport, useReport, null);
              */
 
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");

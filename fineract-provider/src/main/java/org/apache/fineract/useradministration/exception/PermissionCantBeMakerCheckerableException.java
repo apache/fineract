@@ -21,8 +21,7 @@ package org.apache.fineract.useradministration.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when permission is attempted to be set as
- * maker-checker enabled.
+ * A {@link RuntimeException} thrown when permission is attempted to be set as maker-checker enabled.
  */
 public class PermissionCantBeMakerCheckerableException extends AbstractPlatformResourceNotFoundException {
 

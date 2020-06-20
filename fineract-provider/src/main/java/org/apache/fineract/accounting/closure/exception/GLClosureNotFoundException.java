@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.closure.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when GL account closure resources are not
- * found.
+ * A {@link RuntimeException} thrown when GL account closure resources are not found.
  */
 public class GLClosureNotFoundException extends AbstractPlatformResourceNotFoundException {
 

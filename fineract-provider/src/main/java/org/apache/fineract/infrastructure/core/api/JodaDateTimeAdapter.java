@@ -26,8 +26,7 @@ import java.lang.reflect.Type;
 import org.joda.time.DateTime;
 
 /**
- * Serializer for Joda Time {@link DateTime} that returns the date as long to
- * match previous (Jackson) functionality.
+ * Serializer for Joda Time {@link DateTime} that returns the date as long to match previous (Jackson) functionality.
  */
 public class JodaDateTimeAdapter implements JsonSerializer<DateTime> {
 
