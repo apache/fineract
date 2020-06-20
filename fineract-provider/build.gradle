@@ -365,7 +365,6 @@ tasks.withType(JavaCompile) {
         disable(
                 "UnusedVariable",
                 "SameNameButDifferent",
-                "ImmutableEnumChecker",
                 "UnusedMethod",
                 "ModifiedButNotUsed",
                 "TypeParameterUnusedInFormals",
@@ -382,12 +381,10 @@ tasks.withType(JavaCompile) {
                 "ProtectedMembersInFinalClass",
                 "StaticAssignmentInConstructor",
                 "UnescapedEntity",
-                "EmptyCatch",
                 "InvalidBlockTag",
                 "ModifyCollectionInEnhancedForLoop",
                 "NonCanonicalType",
                 "InvalidInlineTag",
-                "InvalidBlockTag"
         )
         //TODO gradually enable these checks
         error(
@@ -419,6 +416,7 @@ tasks.withType(JavaCompile) {
                 "StringSplitter",
                 "AssertThrowsMultipleStatements",
                 "BoxedPrimitiveConstructor",
+                "EmptyCatch",
                 "BoxedPrimitiveEquality",
                 "SynchronizeOnNonFinalField",
                 "WildcardImport",
@@ -434,6 +432,7 @@ tasks.withType(JavaCompile) {
                 "VarTypeName",
                 "ArgumentSelectionDefectChecker",
                 "CompareToZero",
+                "InjectOnConstructorOfAbstractClass",
                 "ImmutableEnumChecker",
                 "NarrowingCompoundAssignment",
                 "MissingCasesInEnumSwitch",
@@ -444,13 +443,11 @@ tasks.withType(JavaCompile) {
                 "DoubleBraceInitialization",
                 "InconsistentCapitalization",
                 "MissingOverride",
-//                "ReturnMissingNullable",
+//                "InvalidBlockTag",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",
 //                "Var",
 //                "ConstantField",
-//                "ConstructorInvokesOverridable",
-//                "InjectOnConstructorOfAbstractClass",
 //                "UnnecessaryDefaultInEnumSwitch",
 //                "FieldCanBeFinal"
         )
