@@ -101,8 +101,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     }
 
     /**
-     * get a report mailing job configuration object by name from collection of
-     * objects
+     * get a report mailing job configuration object by name from collection of objects
      *
      * @param name
      *            -- the value of the name property

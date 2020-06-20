@@ -99,8 +99,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
                 LOG.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
                 /***
-                 * Fail if the transaction has been retired for
-                 * maxNumberOfRetries
+                 * Fail if the transaction has been retired for maxNumberOfRetries
                  **/
                 if (numberOfRetries >= maxNumberOfRetries) {
                     LOG.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
@@ -108,8 +107,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                     throw (exception);
                 }
                 /***
-                 * Else sleep for a random time (between 1 to 10 seconds) and
-                 * continue
+                 * Else sleep for a random time (between 1 to 10 seconds) and continue
                  **/
                 try {
                     Random random = new Random();

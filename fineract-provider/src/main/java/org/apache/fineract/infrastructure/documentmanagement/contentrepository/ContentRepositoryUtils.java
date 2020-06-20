@@ -150,10 +150,9 @@ public class ContentRepositoryUtils {
 
     public static void validateFileSizeWithinPermissibleRange(final Long fileSize, final String name) {
         /**
-         * Using Content-Length gives me size of the entire request, which is
-         * good enough for now for a fast fail as the length of the rest of the
-         * content i.e name and description while compared to the uploaded file
-         * size is negligible
+         * Using Content-Length gives me size of the entire request, which is good enough for now for a fast fail as the
+         * length of the rest of the content i.e name and description while compared to the uploaded file size is
+         * negligible
          **/
         if (fileSize != null && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) {
             throw new ContentManagementException(name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB);

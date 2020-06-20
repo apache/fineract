@@ -351,8 +351,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     }
 
     /**
-     * create the next recurring DateTime from recurrence pattern, start
-     * DateTime and current DateTime
+     * create the next recurring DateTime from recurrence pattern, start DateTime and current DateTime
      *
      * @param recurrencePattern
      * @param startDateTime

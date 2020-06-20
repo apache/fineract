@@ -59,16 +59,13 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
      * (non-Javadoc)
      *
      * @see org.apache.fineract.infrastructure.entityaccess.service.
-     * FineractEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess
-     * (Long, org.apache.fineract.infrastructure.entityaccess.domain.
-     * FineractEntityType,
-     * org.apache.fineract.infrastructure.entityaccess.domain.
-     * FineractEntityAccessType,
-     * org.apache.fineract.infrastructure.entityaccess.domain.
-     * FineractEntityType, boolean)
+     * FineractEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess (Long,
+     * org.apache.fineract.infrastructure.entityaccess.domain. FineractEntityType,
+     * org.apache.fineract.infrastructure.entityaccess.domain. FineractEntityAccessType,
+     * org.apache.fineract.infrastructure.entityaccess.domain. FineractEntityType, boolean)
      *
-     * This method returns the list of entity IDs as a comma separated list Or
-     * null if there is no entity restrictions or if there
+     * This method returns the list of entity IDs as a comma separated list Or null if there is no entity restrictions
+     * or if there
      */
     @Override
     public String getSQLQueryInClause_WithListOfIDsForEntityAccess(FineractEntityType firstEntityType, final Long relId,

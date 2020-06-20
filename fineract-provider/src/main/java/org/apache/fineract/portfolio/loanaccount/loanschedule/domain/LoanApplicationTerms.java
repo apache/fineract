@@ -86,30 +86,26 @@ public final class LoanApplicationTerms {
     private final LocalDate repaymentsStartingFromDate;
     private final LocalDate calculatedRepaymentsStartingFromDate;
     /**
-     * Integer representing the number of 'repayment frequencies' or
-     * installments where 'grace' should apply to the principal component of a
-     * loans repayment period (installment).
+     * Integer representing the number of 'repayment frequencies' or installments where 'grace' should apply to the
+     * principal component of a loans repayment period (installment).
      */
     private Integer principalGrace;
     private Integer recurringMoratoriumOnPrincipalPeriods;
 
     /**
-     * Integer representing the number of 'repayment frequencies' or
-     * installments where 'grace' should apply to the payment of interest in a
-     * loans repayment period (installment).
+     * Integer representing the number of 'repayment frequencies' or installments where 'grace' should apply to the
+     * payment of interest in a loans repayment period (installment).
      *
-     * <b>Note:</b> Interest is still calculated taking into account the full
-     * loan term, the interest is simply offset to a later period.
+     * <b>Note:</b> Interest is still calculated taking into account the full loan term, the interest is simply offset
+     * to a later period.
      */
     private Integer interestPaymentGrace;
 
     /**
-     * Integer representing the number of 'repayment frequencies' or
-     * installments where 'grace' should apply to the charging of interest in a
-     * loans repayment period (installment).
+     * Integer representing the number of 'repayment frequencies' or installments where 'grace' should apply to the
+     * charging of interest in a loans repayment period (installment).
      *
-     * <b>Note:</b> The loan is <i>interest-free</i> for the period of time
-     * indicated.
+     * <b>Note:</b> The loan is <i>interest-free</i> for the period of time indicated.
      */
     private final Integer interestChargingGrace;
 
@@ -117,13 +113,11 @@ public final class LoanApplicationTerms {
      * Legacy method of support 'grace' on the charging of interest on a loan.
      *
      * <p>
-     * For the typical structured loan, its reasonable to use an integer to
-     * indicate the number of 'repayment frequency' periods the 'grace' should
-     * apply to but for slightly <b>irregular</b> loans where the period between
-     * disbursement and the date of the 'first repayment period' isnt doest
-     * match the 'repayment frequency' but can be less (15days instead of 1
-     * month) or more (6 weeks instead of 1 month) - The idea was to use a date
-     * to indicate from whence interest should be charged.
+     * For the typical structured loan, its reasonable to use an integer to indicate the number of 'repayment frequency'
+     * periods the 'grace' should apply to but for slightly <b>irregular</b> loans where the period between disbursement
+     * and the date of the 'first repayment period' isnt doest match the 'repayment frequency' but can be less (15days
+     * instead of 1 month) or more (6 weeks instead of 1 month) - The idea was to use a date to indicate from whence
+     * interest should be charged.
      * </p>
      */
     private LocalDate interestChargedFromDate;
@@ -565,8 +559,7 @@ public final class LoanApplicationTerms {
     }
 
     /**
-     * Calculates the total interest to be charged on loan taking into account
-     * grace settings.
+     * Calculates the total interest to be charged on loan taking into account grace settings.
      *
      */
     public Money calculateTotalInterestCharged(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
@@ -732,8 +725,7 @@ public final class LoanApplicationTerms {
     }
 
     /**
-     * general method to calculate totalInterestDue discounting any grace
-     * settings
+     * general method to calculate totalInterestDue discounting any grace settings
      */
     private Money calculateTotalFlatInterestDueWithoutGrace(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
@@ -937,11 +929,9 @@ public final class LoanApplicationTerms {
     }
 
     /*
-     * calculates the interest that should be due for a given scheduled loan
-     * repayment period. It takes into account GRACE periods and calculates how
-     * much interest is due per period by averaging the number of periods where
-     * interest is due and should be paid against the total known interest that
-     * is due without grace.
+     * calculates the interest that should be due for a given scheduled loan repayment period. It takes into account
+     * GRACE periods and calculates how much interest is due per period by averaging the number of periods where
+     * interest is due and should be paid against the total known interest that is due without grace.
      */
     private Money calculateTotalFlatInterestForInstallmentAveragingOutGracePeriods(final PaymentPeriodsInOneYearCalculator calculator,
             final int periodNumber, final MathContext mc) {

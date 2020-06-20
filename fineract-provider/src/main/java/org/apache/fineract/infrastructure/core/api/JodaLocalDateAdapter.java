@@ -27,8 +27,8 @@ import java.lang.reflect.Type;
 import org.joda.time.LocalDate;
 
 /**
- * Serializer for Joda Time {@link LocalDate} that returns the date in array
- * format to match previous Jackson functionality.
+ * Serializer for Joda Time {@link LocalDate} that returns the date in array format to match previous Jackson
+ * functionality.
  */
 public class JodaLocalDateAdapter implements JsonSerializer<LocalDate> {
 

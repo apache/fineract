@@ -245,10 +245,9 @@ public class LoanScheduleAssembler {
         final AccountType loanType = AccountType.fromName(loanTypeStr);
 
         /*
-         * If it is JLG loan/Group Loan then make sure loan frequency is same as
-         * Group/Center meeting frequency or multiple of it. TODO: Check should
-         * be either same frequency or loan freq is multiple of center/group
-         * meeting freq multiples
+         * If it is JLG loan/Group Loan then make sure loan frequency is same as Group/Center meeting frequency or
+         * multiple of it. TODO: Check should be either same frequency or loan freq is multiple of center/group meeting
+         * freq multiples
          */
         if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendarId != null) {
             calendar = this.calendarRepository.findById(calendarId).orElseThrow(() -> new CalendarNotFoundException(calendarId));
@@ -267,8 +266,7 @@ public class LoanScheduleAssembler {
         }
 
         /*
-         * If user has not passed the first repayments date then then derive the
-         * same based on loan type.
+         * If user has not passed the first repayments date then then derive the same based on loan type.
          */
         if (calculatedRepaymentsStartingFromDate == null) {
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
@@ -276,8 +274,7 @@ public class LoanScheduleAssembler {
         }
 
         /*
-         * If it is JLG loan/Group Loan synched with a meeting, then make sure
-         * first repayment falls on meeting date
+         * If it is JLG loan/Group Loan synched with a meeting, then make sure first repayment falls on meeting date
          */
         final Long groupId = this.fromApiJsonHelper.extractLongNamed("groupId", element);
         Group group = null;
@@ -299,8 +296,7 @@ public class LoanScheduleAssembler {
                     numberOfDays);
 
             /*
-             * If disbursement is synced on meeting, make sure disbursement date
-             * is on a meeting date
+             * If disbursement is synced on meeting, make sure disbursement date is on a meeting date
              */
             if (synchDisbursement != null && synchDisbursement.booleanValue()) {
                 validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar, isSkipMeetingOnFirstDay, numberOfDays);
@@ -696,11 +692,9 @@ public class LoanScheduleAssembler {
         // Collections.sort(variations, new LoanTermVariationsComparator());
 
         /*
-         * List<LoanTermVariationsData> loanTermVariationsDatas = new
-         * ArrayList<>(); loanTermVariationsDatas.addAll(loanApplicationTerms.
-         * getLoanTermVariations ().getExceptionData()); loanApplicationTerms =
-         * LoanApplicationTerms.assembleFrom(loanApplicationTerms,
-         * loanTermVariationsDatas);
+         * List<LoanTermVariationsData> loanTermVariationsDatas = new ArrayList<>();
+         * loanTermVariationsDatas.addAll(loanApplicationTerms. getLoanTermVariations ().getExceptionData());
+         * loanApplicationTerms = LoanApplicationTerms.assembleFrom(loanApplicationTerms, loanTermVariationsDatas);
          */
 
         // date validations

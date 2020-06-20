@@ -23,33 +23,28 @@ import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.B
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 
 /**
- * Implemented class is responsible for notifying the business event to
- * registered listeners.
+ * Implemented class is responsible for notifying the business event to registered listeners.
  *
  */
 public interface BusinessEventNotifierService {
 
     /**
-     * Method should be called to notify listeners before Business event
-     * execution for any pre-processing of event
+     * Method should be called to notify listeners before Business event execution for any pre-processing of event
      */
     public void notifyBusinessEventToBeExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity);
 
     /**
-     * Method should be called to notify listeners after Business event
-     * execution for any post-processing of event
+     * Method should be called to notify listeners after Business event execution for any post-processing of event
      */
     public void notifyBusinessEventWasExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity);
 
     /**
-     * Method is to register a class as listener for pre-processing of any
-     * Business event
+     * Method is to register a class as listener for pre-processing of any Business event
      */
     public void addBusinessEventPreListners(BusinessEvents businessEvent, BusinessEventListner businessEventListner);
 
     /**
-     * Method is to register a class as listener for post-processing of any
-     * Business event
+     * Method is to register a class as listener for post-processing of any Business event
      */
     public void addBusinessEventPostListners(BusinessEvents businessEvent, BusinessEventListner businessEventListner);
 

@@ -254,8 +254,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     /*
-     * Candidate for using caching there to get allowed 'column values' from
-     * code/codevalue tables
+     * Candidate for using caching there to get allowed 'column values' from code/codevalue tables
      */
     private List<ResultsetColumnValueData> retreiveColumnValues(final String codeName) {
 

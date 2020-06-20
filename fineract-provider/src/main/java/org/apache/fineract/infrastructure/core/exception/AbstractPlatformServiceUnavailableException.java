@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when resources that are queried for are not
- * found.
+ * A {@link RuntimeException} thrown when resources that are queried for are not found.
  */
 public abstract class AbstractPlatformServiceUnavailableException extends RuntimeException {
 

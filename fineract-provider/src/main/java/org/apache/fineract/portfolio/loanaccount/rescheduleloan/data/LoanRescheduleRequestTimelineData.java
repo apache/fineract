@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the timeline events of a loan reschedule
- * request
+ * Immutable data object represent the timeline events of a loan reschedule request
  **/
 @SuppressWarnings("unused")
 public class LoanRescheduleRequestTimelineData {

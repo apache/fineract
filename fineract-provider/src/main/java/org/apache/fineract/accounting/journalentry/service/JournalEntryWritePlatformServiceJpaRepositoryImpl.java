@@ -226,8 +226,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
             final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
         /**
-         * If a glaccount is assigned for a rule the credits or debits array
-         * should have only one entry and it must be same as existing account
+         * If a glaccount is assigned for a rule the credits or debits array should have only one entry and it must be
+         * same as existing account
          */
         if (creditOrDebits.length != 1) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null);
@@ -305,8 +305,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
         /***
-         * validate that the account allows manual adjustments and is not
-         * disabled
+         * validate that the account allows manual adjustments and is not disabled
          **/
         if (creditOrDebitAccountHead.isDisabled()) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.GL_ACCOUNT_DISABLED, null,
@@ -644,8 +643,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     /**
-     * TODO: Need a better implementation with guaranteed uniqueness (but not a
-     * long UUID)...maybe something tied to system clock..
+     * TODO: Need a better implementation with guaranteed uniqueness (but not a long UUID)...maybe something tied to
+     * system clock..
      */
     private String generateTransactionId(final Long officeId) {
         final AppUser user = this.context.authenticatedUser();

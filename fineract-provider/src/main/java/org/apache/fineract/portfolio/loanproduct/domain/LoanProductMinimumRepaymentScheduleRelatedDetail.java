@@ -24,8 +24,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 /**
- * Represents the bare minimum repayment details needed for activities related
- * to generating repayment schedules.
+ * Represents the bare minimum repayment details needed for activities related to generating repayment schedules.
  */
 public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 

@@ -69,8 +69,7 @@ public class InterestRateChartSlabAssembler {
     }
 
     /**
-     * Assembles a new {@link InterestRateChartSlab} from JSON Slabs passed in
-     * request
+     * Assembles a new {@link InterestRateChartSlab} from JSON Slabs passed in request
      */
     public InterestRateChartSlab assembleFrom(final JsonCommand command) {
 

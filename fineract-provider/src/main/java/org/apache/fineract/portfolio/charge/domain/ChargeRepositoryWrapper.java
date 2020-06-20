@@ -25,14 +25,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link ChargeRepository} that is responsible for checking if
- * {@link Charge} is returned when using <code>findOne</code> repository method
- * and throwing an appropriate not found exception.
+ * Wrapper for {@link ChargeRepository} that is responsible for checking if {@link Charge} is returned when using
+ * <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link ChargeRepository} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where {@link ChargeRepository} is
+ * required.
  * </p>
  */
 @Service

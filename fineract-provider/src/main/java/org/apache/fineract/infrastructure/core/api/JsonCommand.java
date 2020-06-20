@@ -43,8 +43,8 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * Immutable representation of a command.
  *
- * Wraps the provided JSON with convenience functions for extracting parameter
- * values and checking for changes against an existing value.
+ * Wraps the provided JSON with convenience functions for extracting parameter values and checking for changes against
+ * an existing value.
  */
 public final class JsonCommand {
 

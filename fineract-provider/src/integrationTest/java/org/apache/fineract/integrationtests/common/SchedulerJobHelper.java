@@ -142,9 +142,7 @@ public class SchedulerJobHelper {
      * Launches a Job and awaits its completion.
      *
      * @param jobName
-     *            displayName (see
-     *            {@link org.apache.fineract.infrastructure.jobs.service.JobName})
-     *            of Scheduler Job
+     *            displayName (see {@link org.apache.fineract.infrastructure.jobs.service.JobName}) of Scheduler Job
      *
      * @author Michael Vorburger.ch
      */

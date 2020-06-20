@@ -22,8 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when loan charge does not
- * exist.
+ * {@link AbstractPlatformDomainRuleException} thrown when loan charge does not exist.
  */
 public class LoanChargeNotFoundException extends AbstractPlatformResourceNotFoundException {
 

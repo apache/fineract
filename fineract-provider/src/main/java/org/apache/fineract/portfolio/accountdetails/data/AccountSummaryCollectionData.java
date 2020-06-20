@@ -37,8 +37,7 @@ public class AccountSummaryCollectionData {
     private final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts;
 
     /*
-     * METHOD SIGNATURE CHANGE NOTICE: Method's signature was changed for GLIM &
-     * GSIM implementation
+     * METHOD SIGNATURE CHANGE NOTICE: Method's signature was changed for GLIM & GSIM implementation
      */
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,

@@ -99,15 +99,11 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         final Date meetingDate = command.dateValueOfParameterNamed(meetingDateParamName);
         final Boolean isTransactionDateOnNonMeetingDate = false;
         /*
-         * Boolean isSkipRepaymentOnFirstMonth = false; Integer numberOfDays =
-         * 0; boolean isSkipRepaymentOnFirstMonthEnabled =
-         * configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled(
-         * ); if(isSkipRepaymentOnFirstMonthEnabled){
-         * isSkipRepaymentOnFirstMonth =
-         * isLoanRepaymentsSyncWithMeeting(loan.group(), calendar);
-         * if(isSkipRepaymentOnFirstMonth) { numberOfDays =
-         * configurationDomainService.
-         * retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); } }
+         * Boolean isSkipRepaymentOnFirstMonth = false; Integer numberOfDays = 0; boolean
+         * isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled( );
+         * if(isSkipRepaymentOnFirstMonthEnabled){ isSkipRepaymentOnFirstMonth =
+         * isLoanRepaymentsSyncWithMeeting(loan.group(), calendar); if(isSkipRepaymentOnFirstMonth) { numberOfDays =
+         * configurationDomainService. retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); } }
          */
 
         try {
@@ -163,8 +159,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
             entityId = command.getGroupId();
             entityType = CalendarEntityType.GROUPS;
             /*
-             * If group is within a center then center entityType should be
-             * passed for retrieving CalendarInstance.
+             * If group is within a center then center entityType should be passed for retrieving CalendarInstance.
              */
             final Group group = this.groupRepository.findById(entityId).get();
             if (group.isCenter()) {

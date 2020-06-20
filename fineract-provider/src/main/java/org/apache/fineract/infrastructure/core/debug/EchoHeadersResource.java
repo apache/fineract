@@ -29,15 +29,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * Returns HTTP Request headers. Useful for debugging (e.g. for <a href=
- * "https://issues.apache.org/jira/browse/FINERACT-914">FINERACT-914</a>. Could
- * later be replaced with <a href=
+ * Returns HTTP Request headers. Useful for debugging (e.g. for
+ * <a href= "https://issues.apache.org/jira/browse/FINERACT-914">FINERACT-914</a>. Could later be replaced with <a href=
  * "https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-http-tracing">Spring
- * Boot's Actuator HTTP Tracing</a> (see also
- * <a href="https://www.baeldung.com/spring-boot-actuator-http">related tutorial
- * on Baeldung.com</a>), but that exposes a lot more than just the current
- * request out of the box, and would to be properly authenticated for a
- * dedicated new debug role.
+ * Boot's Actuator HTTP Tracing</a> (see also <a href="https://www.baeldung.com/spring-boot-actuator-http">related
+ * tutorial on Baeldung.com</a>), but that exposes a lot more than just the current request out of the box, and would to
+ * be properly authenticated for a dedicated new debug role.
  *
  * @author Michael Vorburger.ch
  */

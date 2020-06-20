@@ -338,8 +338,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     /**
-     * Delete is a <i>soft delete</i>. Updates flag so it wont appear in
-     * query/report results.
+     * Delete is a <i>soft delete</i>. Updates flag so it wont appear in query/report results.
      *
      * Any fields with unique constraints and prepended with id of record.
      */

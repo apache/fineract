@@ -25,15 +25,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link InterestRateChartSlabRepository} that is responsible for
- * checking if {@link InterestRateChartSlab} is returned when using
- * <code>findOne</code> repository method and throwing an appropriate not found
- * exception.
+ * Wrapper for {@link InterestRateChartSlabRepository} that is responsible for checking if {@link InterestRateChartSlab}
+ * is returned when using <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link InterestRateChartSlabRepository} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where
+ * {@link InterestRateChartSlabRepository} is required.
  * </p>
  */
 @Service

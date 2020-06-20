@@ -40,9 +40,8 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.joda.time.LocalDate;
 
 /**
- * Provides the base model for a cashier. Represents a row in the
- * &quot;m_cashiers&quot; database table, with each column mapped to a property
- * of this class.
+ * Provides the base model for a cashier. Represents a row in the &quot;m_cashiers&quot; database table, with each
+ * column mapped to a property of this class.
  *
  * @author Markus Geiss
  * @since 2.0.0
@@ -101,9 +100,8 @@ public class Cashier extends AbstractPersistableCustom {
         final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
         final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
         /*
-         * final String startTime =
-         * command.stringValueOfParameterNamed("startTime"); final String
-         * endTime = command.stringValueOfParameterNamed("endTime");
+         * final String startTime = command.stringValueOfParameterNamed("startTime"); final String endTime =
+         * command.stringValueOfParameterNamed("endTime");
          */
 
         return new Cashier(cashierOffice, teller, staff, description, startDate, endDate, isFullDay, startTime, endTime);
@@ -336,8 +334,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Returns the valid from date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @return the valid from date of this cashier
@@ -358,8 +355,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Sets the valid from date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @param startDate
@@ -373,8 +369,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Returns the valid to date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @return the valid to date of this cashier
@@ -395,8 +390,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Sets the valid to date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @param endDate
@@ -409,8 +403,7 @@ public class Cashier extends AbstractPersistableCustom {
     /**
      * Returns whether this cashier works part time or not.
      *
-     * @return {@code true} if this cashier works part time; {@code false}
-     *         otherwise
+     * @return {@code true} if this cashier works part time; {@code false} otherwise
      */
     public Boolean isFullDay() {
         return isFullDay;
@@ -430,8 +423,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Returns the start time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @return the start time of this cashier
@@ -444,8 +436,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Set the start time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @param startTime
@@ -459,8 +450,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Returns the end time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @return the end time of this cashier
@@ -473,8 +463,7 @@ public class Cashier extends AbstractPersistableCustom {
      * Sets the end time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @param endTime

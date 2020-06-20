@@ -1526,8 +1526,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     /**
-     * Disable all standing instructions linked to the savings account if the
-     * status is "closed"
+     * Disable all standing instructions linked to the savings account if the status is "closed"
      *
      * @param savingsAccount
      *            -- the savings account object

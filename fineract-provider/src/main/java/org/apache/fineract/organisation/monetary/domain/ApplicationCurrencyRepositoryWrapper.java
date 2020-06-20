@@ -24,15 +24,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link ApplicationCurrencyRepository} that is responsible for
- * checking if {@link ApplicationCurrency} is returned when using
- * <code>findOne</code> repository method and throwing an appropriate not found
- * exception.
+ * Wrapper for {@link ApplicationCurrencyRepository} that is responsible for checking if {@link ApplicationCurrency} is
+ * returned when using <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link ApplicationCurrencyRepository} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where
+ * {@link ApplicationCurrencyRepository} is required.
  * </p>
  */
 @Service
@@ -59,8 +57,7 @@ public class ApplicationCurrencyRepositoryWrapper {
     }
 
     /**
-     * Used when its not needed for {@link ApplicationCurrency} to inherit
-     * decimal place settings of existing currency.
+     * Used when its not needed for {@link ApplicationCurrency} to inherit decimal place settings of existing currency.
      */
     public ApplicationCurrency findOneWithNotFoundDetection(final String currencyCode) {
         final ApplicationCurrency applicationCurrency = this.repository.findOneByCode(currencyCode);

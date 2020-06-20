@@ -25,8 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.time.StopWatch;
 
 /**
- * Immutable data object representing platform API request used for
- * logging/debugging.
+ * Immutable data object representing platform API request used for logging/debugging.
  */
 public final class PlatformRequestLog {
 

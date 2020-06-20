@@ -26,26 +26,23 @@ import java.util.List;
 public class ApiParameterError {
 
     /**
-     * A developer friendly plain English description of why the HTTP error
-     * response was returned from the API.
+     * A developer friendly plain English description of why the HTTP error response was returned from the API.
      */
     private String developerMessage;
 
     /**
-     * A user friendly plain English description of why the HTTP error response
-     * was returned from the API that can be presented to end users.
+     * A user friendly plain English description of why the HTTP error response was returned from the API that can be
+     * presented to end users.
      */
     private String defaultUserMessage;
 
     /**
-     * A code that can be used for globalisation support by client applications
-     * of the API.
+     * A code that can be used for globalisation support by client applications of the API.
      */
     private String userMessageGlobalisationCode;
 
     /**
-     * The name of the field or parameter passed to the API that this error
-     * relates to.
+     * The name of the field or parameter passed to the API that this error relates to.
      */
     private String parameterName;
 

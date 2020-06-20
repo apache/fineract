@@ -571,11 +571,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
 
             /***
-             * In cases of tables storing hierarchical entities (like m_group),
-             * different entities would end up being stored in the same table.
+             * In cases of tables storing hierarchical entities (like m_group), different entities would end up being
+             * stored in the same table.
              *
-             * Ex: Centers are a specific type of group, add abstractions for
-             * the same
+             * Ex: Centers are a specific type of group, add abstractions for the same
              ***/
             final String actualAppTableName = mapToActualAppTable(apptableName);
 
@@ -850,8 +849,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     /**
-     * Update data table, set column value to empty string where current value
-     * is NULL. Run update SQL only if the "mandatory" property is set to true
+     * Update data table, set column value to empty string where current value is NULL. Run update SQL only if the
+     * "mandatory" property is set to true
      *
      * @param datatableName
      *            Name of data table
@@ -1303,18 +1302,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private String dataScopedSQL(final String appTable, final Long appTableId) {
         /*
-         * unfortunately have to, one way or another, be able to restrict data
-         * to the users office hierarchy. Here, a few key tables are done. But
-         * if additional fields are needed on other tables the same pattern
-         * applies
+         * unfortunately have to, one way or another, be able to restrict data to the users office hierarchy. Here, a
+         * few key tables are done. But if additional fields are needed on other tables the same pattern applies
          */
 
         final AppUser currentUser = this.context.authenticatedUser();
         String scopedSQL = null;
         /*
-         * m_loan and m_savings_account are connected to an m_office thru either
-         * an m_client or an m_group If both it means it relates to an m_client
-         * that is in a group (still an m_client account)
+         * m_loan and m_savings_account are connected to an m_office thru either an m_client or an m_group If both it
+         * means it relates to an m_client that is in a group (still an m_client account)
          */
         if (appTable.equalsIgnoreCase("m_loan")) {
             scopedSQL = "select  distinctrow x.* from ("
@@ -1488,8 +1484,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     /**
-     * This method is used special for ppi cases Where the score need to be
-     * computed
+     * This method is used special for ppi cases Where the score need to be computed
      *
      * @param columnHeaders
      * @param datatable

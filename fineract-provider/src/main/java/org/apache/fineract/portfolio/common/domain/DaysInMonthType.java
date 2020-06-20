@@ -23,8 +23,7 @@ import java.util.List;
 
 /**
  *
- * People typically use either of the following settings when calculating there
- * interest using the daily method:
+ * People typically use either of the following settings when calculating there interest using the daily method:
  * <ul>
  * <li>Actual or</li>
  * <li>30</li>

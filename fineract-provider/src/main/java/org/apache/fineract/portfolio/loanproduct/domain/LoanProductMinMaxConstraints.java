@@ -26,8 +26,7 @@ import javax.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
 /**
- * LoanProductMinMaxConstraints encapsulates all the Min and Max details of a
- * {@link LoanProduct}.
+ * LoanProductMinMaxConstraints encapsulates all the Min and Max details of a {@link LoanProduct}.
  */
 @Embeddable
 public class LoanProductMinMaxConstraints {

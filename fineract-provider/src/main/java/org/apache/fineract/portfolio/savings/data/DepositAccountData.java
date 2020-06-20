@@ -30,8 +30,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 
 /**
- * Immutable data object representing abstract for Fixed and Recurring Deposit
- * Accounts Accounts.
+ * Immutable data object representing abstract for Fixed and Recurring Deposit Accounts Accounts.
  */
 public class DepositAccountData {
 

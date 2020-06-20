@@ -35,9 +35,8 @@ public class AccountTransfersApiConstants {
     public static final String currencyParamName = "currency";
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link AccountTransferData}. Where possible, we try to get response
-     * parameters to match those of request parameters.
+     * These parameters will match the class level parameters of {@link AccountTransferData}. Where possible, we try to
+     * get response parameters to match those of request parameters.
      */
     protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));

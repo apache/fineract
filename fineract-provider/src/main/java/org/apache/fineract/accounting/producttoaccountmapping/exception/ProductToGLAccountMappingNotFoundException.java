@@ -22,8 +22,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioPr
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when product to GL account mapping are not
- * found.
+ * A {@link RuntimeException} thrown when product to GL account mapping are not found.
  */
 public class ProductToGLAccountMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
 

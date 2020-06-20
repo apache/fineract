@@ -22,8 +22,7 @@ import com.google.gson.Gson;
 import java.util.Collection;
 
 /**
- * Immutable data object representing the API request body sent in the POST
- * request to the "/queue" resource
+ * Immutable data object representing the API request body sent in the POST request to the "/queue" resource
  **/
 public class SmsMessageApiQueueResourceData {
 

@@ -23,8 +23,7 @@ import java.util.List;
 
 /**
  *
- * People typically use either of the following settings when calculating there
- * interest using the daily method:
+ * People typically use either of the following settings when calculating there interest using the daily method:
  * <ul>
  * <li>360 and</li>
  * <li>365</li>

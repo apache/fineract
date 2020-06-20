@@ -24,8 +24,8 @@ import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 
 /**
- * An enumeration of different options available on account closure
- * {@link FixedDepositAccount} &amp; {@link RecurringDepositAccount}.
+ * An enumeration of different options available on account closure {@link FixedDepositAccount} &amp;
+ * {@link RecurringDepositAccount}.
  */
 public enum DepositAccountOnClosureType {
 

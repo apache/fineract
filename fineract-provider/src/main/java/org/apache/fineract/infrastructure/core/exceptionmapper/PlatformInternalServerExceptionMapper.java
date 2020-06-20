@@ -29,11 +29,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link PlatformInternalServerException}
- * thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link PlatformInternalServerException} thrown by platform into a HTTP API friendly
+ * format.
  *
- * The {@link PlatformInternalServerException} is thrown when an api call
- * results in unexpected server side exceptions.
+ * The {@link PlatformInternalServerException} is thrown when an api call results in unexpected server side exceptions.
  */
 @Provider
 @Component

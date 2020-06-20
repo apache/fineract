@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.glaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when trying to fetch accounts belonging to
- * an Invalid Usage Type
+ * A {@link RuntimeException} thrown when trying to fetch accounts belonging to an Invalid Usage Type
  */
 public class GLAccountInvalidClassificationException extends AbstractPlatformDomainRuleException {
 

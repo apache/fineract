@@ -32,9 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}.
- * It takes care of creation of {@code BatchRequest} list and posting this list
- * to the server.
+ * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}. It takes care of creation of
+ * {@code BatchRequest} list and posting this list to the server.
  *
  * @author Rishabh Shukla
  *
@@ -81,9 +80,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Returns a list of BatchResponse with query parameter enclosing
-     * transaction set to false by posting the jsonified BatchRequest to the
-     * server.
+     * Returns a list of BatchResponse with query parameter enclosing transaction set to false by posting the jsonified
+     * BatchRequest to the server.
      *
      * @param requestSpec
      * @param responseSpec
@@ -97,9 +95,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Returns a list of BatchResponse with query parameter enclosing
-     * transaction set to true by posting the jsonified BatchRequest to the
-     * server.
+     * Returns a list of BatchResponse with query parameter enclosing transaction set to true by posting the jsonified
+     * BatchRequest to the server.
      *
      * @param requestSpec
      * @param responseSpec
@@ -113,8 +110,7 @@ public final class BatchHelper {
     }
 
     /**
-     * Returns a BatchResponse based on the given BatchRequest, by posting the
-     * request to the server.
+     * Returns a BatchResponse based on the given BatchRequest, by posting the request to the server.
      *
      * @param BatchRequest
      * @return List<BatchResponse>
@@ -137,9 +133,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy}
-     * Request as one of the request in Batch.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy} Request as
+     * one of the request in Batch.
      *
      * @param reqId
      * @param externalId
@@ -168,9 +163,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy}
-     * Request as one of the request in Batch.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy} Request as
+     * one of the request in Batch.
      *
      * @param reqId
      * @param externalId
@@ -200,9 +194,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy} Request with
+     * given requestId and reference.
      *
      * @param reqId
      * @param clientId
@@ -222,9 +215,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy} Request with
+     * given requestId and reference.
      *
      * @param requestId
      * @param reference
@@ -253,9 +245,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy} Request with
+     * given requestId and reference.
      *
      * @param requestId
      * @param reference
@@ -279,9 +270,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy}
-     * Request with given requestId and reference
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy} Request with
+     * given requestId and reference
      *
      * @param requestId
      * @param reference
@@ -303,9 +293,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy} Request
+     * with given requestId and reference.
      *
      * @param requestId
      * @param reference
@@ -325,9 +314,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy} Request
+     * with given requestId and reference.
      *
      *
      * @param requestId
@@ -348,9 +336,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy} Request with
+     * given requestId and reference.
      *
      *
      * @param requestId
@@ -371,9 +358,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy}
-     * Request with given requestId and reference.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy} Request with
+     * given requestId and reference.
      *
      *
      * @param requestId
@@ -393,9 +379,8 @@ public final class BatchHelper {
     }
 
     /**
-     * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy}
-     * Request with given requestId.
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy} Request with
+     * given requestId.
      *
      *
      * @param requestId
@@ -416,8 +401,7 @@ public final class BatchHelper {
     }
 
     /**
-     * Checks that the client with given externalId is not created on the
-     * server.
+     * Checks that the client with given externalId is not created on the server.
      *
      * @param requestSpec
      * @param responseSpec

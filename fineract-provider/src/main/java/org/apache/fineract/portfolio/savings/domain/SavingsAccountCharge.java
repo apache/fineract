@@ -193,8 +193,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                         defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
             }
             /**
-             * For Weekly fee feeOnDay is ISO standard day of the week.
-             * Monday=1, Tuesday=2
+             * For Weekly fee feeOnDay is ISO standard day of the week. Monday=1, Tuesday=2
              */
             this.feeOnDay = dueDate.getDayOfWeek();
         } else {
@@ -858,11 +857,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     /**
-     * This method is to identify the charges which can override the savings
-     * rules(for example if there is a minimum enforced balance of 1000 on
-     * savings account with account balance of 1000, still these charges can be
-     * collected as these charges are initiated by system and it can bring down
-     * the balance below the enforced minimum balance).
+     * This method is to identify the charges which can override the savings rules(for example if there is a minimum
+     * enforced balance of 1000 on savings account with account balance of 1000, still these charges can be collected as
+     * these charges are initiated by system and it can bring down the balance below the enforced minimum balance).
      *
      */
     public boolean canOverriteSavingAccountRules() {

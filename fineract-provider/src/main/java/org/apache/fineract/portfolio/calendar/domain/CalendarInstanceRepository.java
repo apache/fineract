@@ -37,8 +37,7 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
 
     /**
      * @param entityId
-     *            : Id of {@link Client}, {@link Group}, {@link Loan} or
-     *            {@link SavingsAccount}.
+     *            : Id of {@link Client}, {@link Group}, {@link Loan} or {@link SavingsAccount}.
      * @param entityTypeId:
      *            {@link CalendarEntityType}
      * @param calendarTypeId:

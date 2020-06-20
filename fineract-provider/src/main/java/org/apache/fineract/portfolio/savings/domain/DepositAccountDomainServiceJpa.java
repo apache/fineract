@@ -209,17 +209,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
          */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         /*
-         * final SavingsAccountTransactionDTO transactionDTO = new
-         * SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-         * paymentDetail, new Date()); final SavingsAccountTransaction deposit =
-         * account.deposit(transactionDTO); boolean isInterestTransfer = false;
-         * final MathContext mc = MathContext.DECIMAL64; if
-         * (account.isBeforeLastPostingPeriod(transactionDate)) { final
-         * LocalDate today = DateUtils.getLocalDateOfTenant();
-         * account.postInterest(mc, today, isInterestTransfer); } else { final
-         * LocalDate today = DateUtils.getLocalDateOfTenant();
-         * account.calculateInterestUsing(mc, today, isInterestTransfer);
-         * =======
+         * final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate,
+         * transactionAmount, paymentDetail, new Date()); final SavingsAccountTransaction deposit =
+         * account.deposit(transactionDTO); boolean isInterestTransfer = false; final MathContext mc =
+         * MathContext.DECIMAL64; if (account.isBeforeLastPostingPeriod(transactionDate)) { final LocalDate today =
+         * DateUtils.getLocalDateOfTenant(); account.postInterest(mc, today, isInterestTransfer); } else { final
+         * LocalDate today = DateUtils.getLocalDateOfTenant(); account.calculateInterestUsing(mc, today,
+         * isInterestTransfer); =======
          */
         final MathContext mc = MathContext.DECIMAL64;
         final Locale locale = command.extractLocale();

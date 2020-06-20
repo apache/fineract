@@ -46,8 +46,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * Creates a new {@link ReportMailingJobStretchyReportParamDateOption}
-     * object
+     * Creates a new {@link ReportMailingJobStretchyReportParamDateOption} object
      *
      * @param value
      *            value of the enum constant
@@ -68,8 +67,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * Creates a new {@link ReportMailingJobStretchyReportParamDateOption}
-     * object
+     * Creates a new {@link ReportMailingJobStretchyReportParamDateOption} object
      *
      * @param id
      *            id of the enum constant
@@ -125,8 +123,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * @return list of valid ReportMailingJobStretchyReportParamDateOption
-     *         values
+     * @return list of valid ReportMailingJobStretchyReportParamDateOption values
      **/
     public static Object[] validValues() {
         List<Object> validValues = new ArrayList<>();
@@ -141,8 +138,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * get a {@link EnumOptionData} representation of the
-     * {@link ReportMailingJobStretchyReportParamDateOption} object
+     * get a {@link EnumOptionData} representation of the {@link ReportMailingJobStretchyReportParamDateOption} object
      *
      * @return {@link EnumOptionData} object
      */
@@ -154,8 +150,8 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * get the {@link EnumOptionData} representation of all valid
-     * {@link ReportMailingJobStretchyReportParamDateOption} objects
+     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobStretchyReportParamDateOption}
+     * objects
      *
      * @return List of {@link EnumOptionData} objects
      */

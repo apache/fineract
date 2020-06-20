@@ -40,9 +40,8 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
     private Map<String, List<StaffData>> officeToPersonnel;
 
     /*
-     * Guava Multimap would make this more readable. The value Integer[]
-     * contains the beginIndex and endIndex for the staff list of each office.
-     * Required for applying names in excel.
+     * Guava Multimap would make this more readable. The value Integer[] contains the beginIndex and endIndex for the
+     * staff list of each office. Required for applying names in excel.
      */
     private Map<Integer, Integer[]> officeNameToBeginEndIndexesOfStaff;
 
@@ -61,9 +60,8 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
         setLayout(staffSheet);
 
         /*
-         * This piece of code could have been avoided by making multiple trips
-         * to the database for the staff of each office but this is more
-         * performance efficient
+         * This piece of code could have been avoided by making multiple trips to the database for the staff of each
+         * office but this is more performance efficient
          */
         setOfficeToPersonnelMap();
 

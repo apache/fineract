@@ -154,8 +154,7 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
     }
 
     /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
+     * Examines and updates each account mapping for given loan product with changes passed in from the Json element
      *
      * @param sharesProductId
      * @param changes

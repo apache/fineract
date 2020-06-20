@@ -34,9 +34,8 @@ public class AccountingProcessorForSavingsFactory {
     }
 
     /***
-     * Looks like overkill for now, but wanted to keep the savings side of
-     * accounting identical to that of Loans (would we need an Accrual based
-     * accounting in the future?)
+     * Looks like overkill for now, but wanted to keep the savings side of accounting identical to that of Loans (would
+     * we need an Accrual based accounting in the future?)
      ***/
     public AccountingProcessorForSavings determineProcessor(final SavingsDTO savingsDTO) {
 

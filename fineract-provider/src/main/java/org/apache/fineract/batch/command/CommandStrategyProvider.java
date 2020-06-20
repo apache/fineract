@@ -25,8 +25,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides an appropriate CommandStrategy using the 'method' and 'resourceUrl'.
- * CommandStrategy bean is created using Spring Application Context.
+ * Provides an appropriate CommandStrategy using the 'method' and 'resourceUrl'. CommandStrategy bean is created using
+ * Spring Application Context.
  *
  * @author Rishabh Shukla
  *
@@ -39,9 +39,8 @@ public class CommandStrategyProvider {
     private final ConcurrentHashMap<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
 
     /**
-     * Constructs a CommandStrategyProvider with argument of ApplicationContext
-     * type. It also initialize commandStrategies using init() function by
-     * filling it with available CommandStrategies in
+     * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initialize
+     * commandStrategies using init() function by filling it with available CommandStrategies in
      * {@link org.apache.fineract.batch.command.internal}.
      *
      * @param applicationContext
@@ -56,9 +55,8 @@ public class CommandStrategyProvider {
     }
 
     /**
-     * Returns an appropriate commandStrategy after determining it using the
-     * CommandContext of the request. If no such Strategy is found then a
-     * default strategy is returned back.
+     * Returns an appropriate commandStrategy after determining it using the CommandContext of the request. If no such
+     * Strategy is found then a default strategy is returned back.
      *
      * @param commandContext
      * @return CommandStrategy
@@ -80,10 +78,8 @@ public class CommandStrategyProvider {
     }
 
     /**
-     * Contains various available command strategies in
-     * {@link org.apache.fineract.batch.command.internal}. Any new command
-     * Strategy will have to be added within this function in order to initiate
-     * it within the constructor.
+     * Contains various available command strategies in {@link org.apache.fineract.batch.command.internal}. Any new
+     * command Strategy will have to be added within this function in order to initiate it within the constructor.
      */
     private void init() {
         this.commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "createClientCommandStrategy");
