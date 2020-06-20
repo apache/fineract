@@ -251,6 +251,8 @@ Apache Fineract Platform API
 
 The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").
 
+If you have your own Fineract instance running, you can find the same documentation under '(your host:port)/fineract-provider/api-docs/apiLive.htm' under your. The Swagger documentation (work in progress) can be accessed under '(your host:port)/fineract-provider/swagger-ui/index.html'
+
 
 API clients (Web UIs, Mobile, etc.)
 ============
