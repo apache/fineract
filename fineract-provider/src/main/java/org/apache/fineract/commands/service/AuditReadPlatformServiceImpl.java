@@ -75,9 +75,9 @@ import org.springframework.stereotype.Service;
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
-    private static final Set<String> supportedOrderByValues = new HashSet<>(
-            Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName",
-                    "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
+    private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+            "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo",
+            "clientId", "loanId", "maker", "checker", "processingResult"));
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
