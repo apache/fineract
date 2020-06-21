@@ -2559,7 +2559,7 @@ public class Loan extends AbstractPersistableCustom {
         Date date = null;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (disbursementDetail.actualDisbursementDate() == null) {
-                if (date == null || disbursementDetail.expectedDisbursementDate().equals(date)) {
+                if (date == null || disbursementDetail.expectedDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
                     disbursementDetails.add(disbursementDetail);
                     date = disbursementDetail.expectedDisbursementDate();
                 } else if (disbursementDetail.expectedDisbursementDate().before(date)) {
@@ -2579,7 +2579,7 @@ public class Loan extends AbstractPersistableCustom {
             for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
                     if (disbursementDetail.actualDisbursementDate().after(date)
-                            || disbursementDetail.actualDisbursementDate().equals(date)) {
+                            || disbursementDetail.actualDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
                         date = disbursementDetail.actualDisbursementDate();
                         details = disbursementDetail;
                     }
@@ -2786,7 +2786,7 @@ public class Loan extends AbstractPersistableCustom {
         if (getExpectedFirstRepaymentOnDate() != null
                 && (disbursedOn.isAfter(this.fetchRepaymentScheduleInstallment(1).getDueDate())
                         || disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()))
-                && disbursedOn.toDate().equals(this.actualDisbursementDate)) {
+                && disbursedOn.toDate().compareTo(this.actualDisbursementDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
             final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: "
                     + getExpectedFirstRepaymentOnDate().toString();
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
@@ -4006,7 +4006,8 @@ public class Loan extends AbstractPersistableCustom {
         boolean isRegenerationRequired = false;
         if (this.loanProduct.isMultiDisburseLoan()) {
             LoanDisbursementDetails details = fetchLastDisburseDetail();
-            if (details != null && !details.expectedDisbursementDate().equals(details.actualDisbursementDate())) {
+            if (details != null && details.expectedDisbursementDate().compareTo(details.actualDisbursementDate()) == 0 ? Boolean.FALSE
+                    : Boolean.TRUE) {
                 isRegenerationRequired = true;
             }
         }
@@ -6058,7 +6059,8 @@ public class Loan extends AbstractPersistableCustom {
             if ((loanTermVariations.getTermType().isDueDateVariation()
                     && loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate))
                     || (loanTermVariations.getTermType().isEMIAmountVariation()
-                            && loanTermVariations.getTermApplicableFrom().equals(actualDisbursementDate.toDate()))
+                            && loanTermVariations.getTermApplicableFrom().compareTo(actualDisbursementDate.toDate()) == 0 ? Boolean.TRUE
+                                    : Boolean.FALSE)
                     || loanTermVariations.getTermApplicableFrom().after(actualDisbursementDate.toDate())) {
                 iterator.remove();
             }

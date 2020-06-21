@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -381,14 +382,17 @@ public class GroupGeneralData implements Serializable {
                 && Objects.equals(officeName, that.officeName) && Objects.equals(centerId, that.centerId)
                 && Objects.equals(centerName, that.centerName) && Objects.equals(staffId, that.staffId)
                 && Objects.equals(staffName, that.staffName) && Objects.equals(hierarchy, that.hierarchy)
-                && Objects.equals(groupLevel, that.groupLevel) && Objects.equals(clientMembers, that.clientMembers)
-                && Objects.equals(activeClientMembers, that.activeClientMembers) && Objects.equals(groupRoles, that.groupRoles)
-                && Objects.equals(calendarsData, that.calendarsData)
+                && Objects.equals(groupLevel, that.groupLevel) && CollectionUtils.isEqualCollection(clientMembers, that.clientMembers)
+                && CollectionUtils.isEqualCollection(activeClientMembers, that.activeClientMembers)
+                && CollectionUtils.isEqualCollection(groupRoles, that.groupRoles)
+                && CollectionUtils.isEqualCollection(calendarsData, that.calendarsData)
                 && Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar)
-                && Objects.equals(centerOptions, that.centerOptions) && Objects.equals(officeOptions, that.officeOptions)
-                && Objects.equals(staffOptions, that.staffOptions) && Objects.equals(clientOptions, that.clientOptions)
-                && Objects.equals(availableRoles, that.availableRoles) && Objects.equals(selectedRole, that.selectedRole)
-                && Objects.equals(closureReasons, that.closureReasons) && Objects.equals(timeline, that.timeline)
+                && CollectionUtils.isEqualCollection(centerOptions, that.centerOptions)
+                && CollectionUtils.isEqualCollection(officeOptions, that.officeOptions)
+                && CollectionUtils.isEqualCollection(staffOptions, that.staffOptions)
+                && CollectionUtils.isEqualCollection(clientOptions, that.clientOptions)
+                && CollectionUtils.isEqualCollection(availableRoles, that.availableRoles) && Objects.equals(selectedRole, that.selectedRole)
+                && CollectionUtils.isEqualCollection(closureReasons, that.closureReasons) && Objects.equals(timeline, that.timeline)
                 && Objects.equals(datatables, that.datatables) && Objects.equals(rowIndex, that.rowIndex)
                 && Objects.equals(dateFormat, that.dateFormat) && Objects.equals(locale, that.locale)
                 && Objects.equals(submittedOnDate, that.submittedOnDate);

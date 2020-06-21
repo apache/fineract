@@ -72,7 +72,8 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         }
         final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
         if (loanDisbursementDetails.principal.equals(this.principal)
-                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) {
+                && loanDisbursementDetails.expectedDisbursementDate.compareTo(this.expectedDisbursementDate) == 0 ? Boolean.TRUE
+                        : Boolean.FALSE) {
             return true;
         }
         return false;

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -280,11 +281,12 @@ public final class CenterData implements Serializable {
                 && Objects.equals(officeName, that.officeName) && Objects.equals(staffId, that.staffId)
                 && Objects.equals(staffName, that.staffName) && Objects.equals(hierarchy, that.hierarchy)
                 && Objects.equals(status, that.status) && Objects.equals(activationDate, that.activationDate)
-                && Objects.equals(timeline, that.timeline) && Objects.equals(groupMembers, that.groupMembers)
-                && Objects.equals(groupMembersOptions, that.groupMembersOptions)
+                && Objects.equals(timeline, that.timeline) && CollectionUtils.isEqualCollection(groupMembers, that.groupMembers)
+                && CollectionUtils.isEqualCollection(groupMembersOptions, that.groupMembersOptions)
                 && Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar)
-                && Objects.equals(closureReasons, that.closureReasons) && Objects.equals(officeOptions, that.officeOptions)
-                && Objects.equals(staffOptions, that.staffOptions) && Objects.equals(totalCollected, that.totalCollected)
+                && CollectionUtils.isEqualCollection(closureReasons, that.closureReasons)
+                && CollectionUtils.isEqualCollection(officeOptions, that.officeOptions)
+                && CollectionUtils.isEqualCollection(staffOptions, that.staffOptions) && Objects.equals(totalCollected, that.totalCollected)
                 && Objects.equals(totalOverdue, that.totalOverdue) && Objects.equals(totaldue, that.totaldue)
                 && Objects.equals(installmentDue, that.installmentDue) && Objects.equals(datatables, that.datatables)
                 && Objects.equals(rowIndex, that.rowIndex) && Objects.equals(dateFormat, that.dateFormat)

@@ -133,7 +133,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private void validateForCreateJournalEntry(ProvisioningEntryData existingEntry, ProvisioningEntry requested) {
         Date existingDate = existingEntry.getCreatedDate();
         Date requestedDate = requested.getCreatedDate();
-        if (existingDate.after(requestedDate) || existingDate.equals(requestedDate)) {
+        if (existingDate.after(requestedDate) || existingDate.compareTo(requestedDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
             throw new ProvisioningJournalEntriesCannotbeCreatedException(existingEntry.getCreatedDate(), requestedDate);
         }
     }

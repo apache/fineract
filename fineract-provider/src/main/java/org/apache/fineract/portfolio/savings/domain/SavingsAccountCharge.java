@@ -707,13 +707,17 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return Objects.equals(penaltyCharge, that.penaltyCharge) && Objects.equals(paid, that.paid) && Objects.equals(waived, that.waived)
                 && Objects.equals(status, that.status) && Objects.equals(savingsAccount, that.savingsAccount)
                 && Objects.equals(charge, that.charge) && Objects.equals(chargeTime, that.chargeTime)
-                && Objects.equals(dueDate, that.dueDate) && Objects.equals(feeOnMonth, that.feeOnMonth)
-                && Objects.equals(feeOnDay, that.feeOnDay) && Objects.equals(feeInterval, that.feeInterval)
-                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
-                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) && Objects.equals(amount, that.amount)
-                && Objects.equals(amountPaid, that.amountPaid) && Objects.equals(amountWaived, that.amountWaived)
-                && Objects.equals(amountWrittenOff, that.amountWrittenOff) && Objects.equals(amountOutstanding, that.amountOutstanding)
-                && Objects.equals(inactivationDate, that.inactivationDate);
+                && dueDate.compareTo(that.dueDate) == 0
+                        ? Boolean.TRUE
+                        : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
+                                && Objects.equals(feeInterval, that.feeInterval)
+                                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
+                                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
+                                && Objects.equals(amount, that.amount) && Objects.equals(amountPaid, that.amountPaid)
+                                && Objects.equals(amountWaived, that.amountWaived)
+                                && Objects.equals(amountWrittenOff, that.amountWrittenOff)
+                                && Objects.equals(amountOutstanding, that.amountOutstanding)
+                                && inactivationDate.compareTo(that.inactivationDate) == 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override
