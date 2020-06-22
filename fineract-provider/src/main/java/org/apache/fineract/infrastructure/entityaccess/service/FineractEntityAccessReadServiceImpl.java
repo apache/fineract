@@ -23,10 +23,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntity;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
@@ -145,46 +143,6 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         str.append("and eem.from_id = ? ");
         LOG.debug("{}", str);
         return str.toString();
-    }
-
-    private static final class FineractEntityAccessDataMapper implements RowMapper<FineractEntityAccessData> {
-
-        @Override
-        public FineractEntityAccessData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final String entityType = rs.getString("entity_type");
-            final Long entityId = rs.getLong("entity_id");
-            // final String entityName = rs.getString("entity_name");
-            // final Long accessId = rs.getLong("access_id");
-            final String accessTypeDesc = rs.getString("access_type_desc");
-            // final String code = rs.getString("code");
-            final Long secondEntityId = rs.getLong("second_entity_id");
-            // final String secondEntityName =
-            // rs.getString("second_entity_name");
-            final String secondEntityType = rs.getString("second_entity_type");
-
-            FineractEntity firstEntity = null;
-            FineractEntityType etype = FineractEntityType.get(entityType);
-            if (etype != null) {
-                firstEntity = new FineractEntity(entityId, etype);
-            }
-
-            FineractEntity secondEntity = null;
-            FineractEntityType secondetype = FineractEntityType.get(secondEntityType);
-            if (etype != null) {
-                secondEntity = new FineractEntity(secondEntityId, secondetype);
-            }
-
-            FineractEntityAccessType accessType = null;
-            if (accessTypeDesc != null) {
-                accessType = FineractEntityAccessType.get(accessTypeDesc);
-            }
-
-            FineractEntityAccessData returnFineractEntityAccessData = null;
-            if (firstEntity != null && secondEntity != null && accessType != null) {
-                returnFineractEntityAccessData = new FineractEntityAccessData(firstEntity, accessType, secondEntity);
-            }
-            return returnFineractEntityAccessData;
-        }
     }
 
     @Override
