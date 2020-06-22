@@ -233,21 +233,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         return dueRepaymentPeriodDate;
     }
 
-    private LocalDate adjustToNthWeekDay(LocalDate dueRepaymentPeriodDate, int nthDay, int dayOfWeek) {
-        // adjust date to start of month
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfMonth(1);
-        // adjust date to next week if current day is past specified day of
-        // week.
-        if (dueRepaymentPeriodDate.getDayOfWeek() > dayOfWeek) {
-            dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(1);
-        }
-        // adjust date to specified date of week
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfWeek(dayOfWeek);
-        // adjust to specified nth week day
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(nthDay - 1);
-        return dueRepaymentPeriodDate;
-    }
-
     @Override
     public Boolean isDateFallsInSchedule(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate,
             final LocalDate date) {

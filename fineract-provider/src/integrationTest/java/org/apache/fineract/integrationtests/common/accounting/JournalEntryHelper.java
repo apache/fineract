@@ -66,15 +66,6 @@ public class JournalEntryHelper {
 
     }
 
-    private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
-        final HashMap map = (HashMap) entryResponse.get(entryNumber).get("entryType");
-        return (String) map.get("value");
-    }
-
-    private Float getTransactionAmountFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
-        return (Float) entryResponse.get(entryNumber).get("amount");
-    }
-
     private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, officeId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");

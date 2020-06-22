@@ -924,21 +924,6 @@ public class Loan extends AbstractPersistableCustom {
         return amount;
     }
 
-    private boolean isFirstTrancheDisbursement() {
-        if (isMultiDisburmentLoan()) {
-            int totalTranchDisbursementCount = 0;
-            for (final LoanDisbursementDetails loanDisbursementDetail : this.disbursementDetails) {
-                if (loanDisbursementDetail.actualDisbursementDate() != null) {
-                    totalTranchDisbursementCount++;
-                }
-            }
-            if (totalTranchDisbursementCount < 2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * @return
      */

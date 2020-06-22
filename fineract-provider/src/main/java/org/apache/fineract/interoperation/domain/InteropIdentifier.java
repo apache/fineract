@@ -88,16 +88,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return account;
     }
 
-    private void setAccount(SavingsAccount account) {
-        this.account = account;
-    }
-
     public InteropIdentifierType getType() {
         return type;
-    }
-
-    private void setType(InteropIdentifierType type) {
-        this.type = type;
     }
 
     public String getValue() {
@@ -120,16 +112,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return createdBy;
     }
 
-    private void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    private void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     public String geModifiedBy() {
