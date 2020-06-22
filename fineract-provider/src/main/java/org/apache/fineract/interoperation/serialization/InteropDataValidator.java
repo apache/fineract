@@ -46,6 +46,16 @@ public class InteropDataValidator {
         this.jsonHelper = fromJsonHelper;
     }
 
+    public InteropTransferRequestData validateAndParseTransferRequest(JsonCommand command) {
+        final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("interoperation.transfer");
+        JsonObject element = extractJsonObject(command);
+
+        InteropTransferRequestData result = InteropTransferRequestData.validateAndParse(dataValidator, element, jsonHelper);
+        throwExceptionIfValidationWarningsExist(dataValidator);
+
+        return result;
+    }
+
     public InteropIdentifierRequestData validateAndParseCreateIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType, JsonCommand command) {
         final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("interoperation.identifier");

@@ -71,4 +71,7 @@ public interface InteropService {
 
     @NotNull
     InteropTransferResponseData commitTransfer(@NotNull JsonCommand command);
+
+    @NotNull
+    InteropTransferResponseData releaseTransfer(@NotNull JsonCommand command);
 }
