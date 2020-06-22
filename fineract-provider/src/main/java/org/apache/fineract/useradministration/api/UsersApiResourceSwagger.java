@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.useradministration.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -34,56 +33,56 @@ final class UsersApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetUsersResponse")
+    @Schema(description = "GetUsersResponse")
     public static final class GetUsersResponse {
 
         private GetUsersResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String username;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "App")
+        @Schema(example = "App")
         public String firstname;
-        @ApiModelProperty(example = "Administrator")
+        @Schema(example = "Administrator")
         public String lastname;
-        @ApiModelProperty(example = "demomfi@mifos.org")
+        @Schema(example = "demomfi@mifos.org")
         public String email;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean passwordNeverExpires;
         public StaffData staff;
         public Collection<RoleData> selectedRoles;
 
     }
 
-    @ApiModel(value = "GetUsersUserIdResponse")
+    @Schema(description = "GetUsersUserIdResponse")
     public static final class GetUsersUserIdResponse {
 
         private GetUsersUserIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String username;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "App")
+        @Schema(example = "App")
         public String firstname;
-        @ApiModelProperty(example = "Administrator")
+        @Schema(example = "Administrator")
         public String lastname;
-        @ApiModelProperty(example = "demomfi@mifos.org")
+        @Schema(example = "demomfi@mifos.org")
         public String email;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean passwordNeverExpires;
         public StaffData staff;
         public Collection<RoleData> availableRoles;
@@ -91,7 +90,7 @@ final class UsersApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetUsersTemplateResponse")
+    @Schema(description = "GetUsersTemplateResponse")
     public static final class GetUsersTemplateResponse {
 
         private GetUsersTemplateResponse() {
@@ -103,62 +102,62 @@ final class UsersApiResourceSwagger {
         public Collection<RoleData> selfServiceRoles;
     }
 
-    @ApiModel(value = "PostUsersRequest")
+    @Schema(description = "PostUsersRequest")
     public static final class PostUsersRequest {
 
         private PostUsersRequest() {
 
         }
 
-        @ApiModelProperty(example = "newuser")
+        @Schema(example = "newuser")
         public String username;
-        @ApiModelProperty(example = "Test")
+        @Schema(example = "Test")
         public String firstname;
-        @ApiModelProperty(example = "User")
+        @Schema(example = "User")
         public String lastname;
-        @ApiModelProperty(example = "whatever@mifos.org")
+        @Schema(example = "whatever@mifos.org")
         public String email;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long staffId;
-        @ApiModelProperty(example = "[2,3]")
+        @Schema(example = "[2,3]")
         public String Roles;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean sendPasswordToEmail;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isSelfServiceUser;
     }
 
-    @ApiModel(value = "PostUsersResponse")
+    @Schema(description = "PostUsersResponse")
     public static final class PostUsersResponse {
 
         private PostUsersResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "11")
+        @Schema(example = "11")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutUsersUserIdRequest")
+    @Schema(description = "PutUsersUserIdRequest")
     public static final class PutUsersUserIdRequest {
 
         private PutUsersUserIdRequest() {
 
         }
 
-        @ApiModelProperty(example = "Test")
+        @Schema(example = "Test")
         public String firstname;
-        @ApiModelProperty(example = "window75")
+        @Schema(example = "window75")
         public String password;
-        @ApiModelProperty(example = "window75")
+        @Schema(example = "window75")
         public String repeatPassword;
     }
 
-    @ApiModel(value = "PutUsersUserIdResponse")
+    @Schema(description = "PutUsersUserIdResponse")
     public static final class PutUsersUserIdResponse {
 
         private PutUsersUserIdResponse() {
@@ -171,20 +170,20 @@ final class UsersApiResourceSwagger {
 
             }
 
-            @ApiModelProperty(example = "Test")
+            @Schema(example = "Test")
             public String firstname;
-            @ApiModelProperty(example = "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51")
+            @Schema(example = "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51")
             public String passwordEncoded;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "11")
+        @Schema(example = "11")
         public Long resourceId;
         public PutUsersUserIdResponseChanges changes;
     }
 
-    @ApiModel(value = "DeleteUsersUserIdResponse")
+    @Schema(description = "DeleteUsersUserIdResponse")
     public static final class DeleteUsersUserIdResponse {
 
         private DeleteUsersUserIdResponse() {
@@ -198,9 +197,9 @@ final class UsersApiResourceSwagger {
             }
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "11")
+        @Schema(example = "11")
         public Long resourceId;
         public DeleteUsersUserIdResponseChanges changes;
     }

@@ -29,15 +29,15 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -71,9 +71,7 @@ import org.springframework.stereotype.Component;
 @Path("/interestratecharts/{chartId}/chartslabs")
 @Component
 @Scope("singleton")
-@Api(tags = { "Interest Rate Slab (A.K.A interest bands)" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "Interest Rate Slab (A.K.A interest bands)", description = "The slabs a.k.a interest bands are associated with Interest Rate Chart. These bands allow to define different interest rates for different deposit term periods.") })
+@Tag(name = "Interest Rate Slab (A.K.A interest bands)", description = "The slabs a.k.a interest bands are associated with Interest Rate Chart. These bands allow to define different interest rates for different deposit term periods.")
 public class InterestRateChartSlabsApiResource {
 
     private final InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService;
@@ -112,11 +110,12 @@ public class InterestRateChartSlabsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve all Slabs", httpMethod = "GET", notes = "Retrieve list of slabs associated with a chart\n" + "\n"
+    @Operation(summary = "Retrieve all Slabs", description = "Retrieve list of slabs associated with a chart\n" + "\n"
             + "Example Requests:\n" + "\n" + "interestratecharts/1/chartslabs")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = InterestRateChartSlabsApiResourceSwagger.GetInterestRateChartsChartIdChartSlabsResponse.class, responseContainer = "List") })
-    public String retrieveAll(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.GetInterestRateChartsChartIdChartSlabsResponse.class)))) })
+    public String retrieveAll(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(INTERESTRATE_CHART_SLAB_RESOURCE_NAME);
         Collection<InterestRateChartSlabData> chartSlabs = this.interestRateChartSlabReadPlatformService.retrieveAll(chartId);
@@ -129,12 +128,12 @@ public class InterestRateChartSlabsApiResource {
     @Path("{chartSlabId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Slab", httpMethod = "GET", notes = "Retrieve a slab associated with an Interest rate chart\n" + "\n"
+    @Operation(summary = "Retrieve a Slab", description = "Retrieve a slab associated with an Interest rate chart\n" + "\n"
             + "Example Requests:\n" + "\n" + "interestratecharts/1/chartslabs/1\n")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = InterestRateChartSlabsApiResourceSwagger.GetInterestRateChartsChartIdChartSlabsResponse.class) })
-    public String retrieveOne(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId,
-            @PathParam("chartSlabId") @ApiParam(value = "chartSlabId") final Long chartSlabId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.GetInterestRateChartsChartIdChartSlabsResponse.class))) })
+    public String retrieveOne(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
+            @PathParam("chartSlabId") @Parameter(description = "chartSlabId") final Long chartSlabId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(INTERESTRATE_CHART_SLAB_RESOURCE_NAME);
 
@@ -150,15 +149,14 @@ public class InterestRateChartSlabsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a Slab", httpMethod = "POST", notes = "Creates a new interest rate slab for an interest rate chart.\n"
+    @Operation(summary = "Create a Slab", description = "Creates a new interest rate slab for an interest rate chart.\n"
             + "Mandatory Fields\n" + "periodType, fromPeriod, annualInterestRate\n" + "Optional Fields\n" + "toPeriod and description\n"
             + "Example Requests:\n" + "\n" + "interestratecharts/1/chartslabs")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsResponse.class) })
-    public String create(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PostInterestRateChartsChartIdChartSlabsResponse.class))) })
+    public String create(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createInterestRateChartSlab(chartId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -172,14 +170,13 @@ public class InterestRateChartSlabsApiResource {
     @Path("{chartSlabId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Slab", httpMethod = "PUT", notes = "It updates the Slab from chart")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest.class) })
+    @Operation(summary = "Update a Slab", description = "It updates the Slab from chart")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse.class) })
-    public String update(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId,
-            @PathParam("chartSlabId") @ApiParam(value = "chartSlabId") final Long chartSlabId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse.class))) })
+    public String update(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
+            @PathParam("chartSlabId") @Parameter(description = "chartSlabId") final Long chartSlabId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateInterestRateChartSlab(chartId, chartSlabId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -193,11 +190,11 @@ public class InterestRateChartSlabsApiResource {
     @Path("{chartSlabId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Slab", httpMethod = "DELETE", notes = "Delete a Slab from a chart")
+    @Operation(summary = "Delete a Slab", description = "Delete a Slab from a chart")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = InterestRateChartSlabsApiResourceSwagger.DeleteInterestRateChartsChartIdChartSlabsResponse.class) })
-    public String delete(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId,
-            @PathParam("chartSlabId") @ApiParam(value = "chartSlabId") final Long chartSlabId) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsApiResourceSwagger.DeleteInterestRateChartsChartIdChartSlabsResponse.class))) })
+    public String delete(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
+            @PathParam("chartSlabId") @Parameter(description = "chartSlabId") final Long chartSlabId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestRateChartSlab(chartId, chartSlabId).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);

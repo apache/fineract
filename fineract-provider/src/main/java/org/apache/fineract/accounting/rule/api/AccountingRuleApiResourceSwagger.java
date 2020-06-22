@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.rule.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -35,7 +34,7 @@ final class AccountingRuleApiResourceSwagger {
         // For Swagger Documentation
     }
 
-    @ApiModel(value = "GetAccountRulesResponse")
+    @Schema(description = "GetAccountRulesResponse")
     public static final class GetAccountRulesResponse {
 
         private GetAccountRulesResponse() {
@@ -54,63 +53,63 @@ final class AccountingRuleApiResourceSwagger {
         public List<AccountingTagRuleData> debitTags;
     }
 
-    @ApiModel(value = "GetAccountRulesTemplateResponse")
+    @Schema(description = "GetAccountRulesTemplateResponse")
     public static final class GetAccountRulesTemplateResponse {
 
         private GetAccountRulesTemplateResponse() {
 
         }
 
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean systemDefined;
         public List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
         public List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
     }
 
-    @ApiModel(value = "PostAccountingRulesRequest")
+    @Schema(description = "PostAccountingRulesRequest")
     public static final class PostAccountingRulesRequest {
 
         private PostAccountingRulesRequest() {
 
         }
 
-        @ApiModelProperty(example = "test")
+        @Schema(example = "test")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "21")
+        @Schema(example = "21")
         public Long accountToDebit;
-        @ApiModelProperty(example = "9")
+        @Schema(example = "9")
         public Long accountToCredit;
-        @ApiModelProperty(example = "Employee salary")
+        @Schema(example = "Employee salary")
         public String description;
     }
 
-    @ApiModel(value = "PostAccountingRulesResponse")
+    @Schema(description = "PostAccountingRulesResponse")
     public static final class PostAccountingRulesResponse {
 
         private PostAccountingRulesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutAccountingRulesRequest")
+    @Schema(description = "PutAccountingRulesRequest")
     public static final class PutAccountingRulesRequest {
 
         private PutAccountingRulesRequest() {
 
         }
 
-        @ApiModelProperty(example = "Employee Salary posting rule")
+        @Schema(example = "Employee Salary posting rule")
         public String name;
     }
 
-    @ApiModel(value = "PutAccountingRulesResponse")
+    @Schema(description = "PutAccountingRulesResponse")
     public static final class PutAccountingRulesResponse {
 
         private PutAccountingRulesResponse() {
@@ -121,23 +120,23 @@ final class AccountingRuleApiResourceSwagger {
 
             public PutAccountingRulesResponsechangesSwagger() {}
 
-            @ApiModelProperty(example = "Employee Salary posting rule")
+            @Schema(example = "Employee Salary posting rule")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
         public PutAccountingRulesResponsechangesSwagger changes;
     }
 
-    @ApiModel(value = "DeleteAccountingRulesResponse")
+    @Schema(description = "DeleteAccountingRulesResponse")
     public static final class DeleteAccountingRulesResponse {
 
         private DeleteAccountingRulesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 }

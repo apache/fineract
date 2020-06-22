@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.organisation.workingdays.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -52,11 +52,11 @@ import org.springframework.stereotype.Component;
 @Path("/workingdays")
 @Component
 @Scope("singleton")
-@Api(tags = { "Working days" })
-@SwaggerDefinition(tags = { @Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n"
+
+@Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n"
         + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations\n"
         + "\n"
-        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.") })
+        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
 public class WorkingDaysApiResource {
 
     private final DefaultToApiJsonSerializer<WorkingDaysData> toApiJsonSerializer;
@@ -80,9 +80,9 @@ public class WorkingDaysApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Working days", notes = "Example Requests:\n" + "\n" + "workingdays")
+    @Operation(summary = "List Working days", description = "Example Requests:\n" + "\n" + "workingdays")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.GetWorkingDaysResponse.class, responseContainer = "list") })
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.GetWorkingDaysResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);
         final WorkingDaysData workingDaysData = this.workingDaysReadPlatformService.retrieve();
@@ -94,12 +94,12 @@ public class WorkingDaysApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Working Day", notes = "Mandatory Fields\n"
+    @Operation(summary = "Update a Working Day", description = "Mandatory Fields\n"
             + "recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.PutWorkingDaysResponse.class) })
-    public String update(@ApiParam(hidden = true) final String jsonRequestBody) {
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysResponse.class))) })
+    public String update(@Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateWorkingDays().withJson(jsonRequestBody).build();
 
@@ -112,9 +112,10 @@ public class WorkingDaysApiResource {
     @Path("/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Working Days Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for working days.\n"
+    @Operation(summary = "Working Days Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for working days.\n"
             + "\n" + "Example Request:\n" + "\n" + "workingdays/template")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.GetWorkingDaysTemplateResponse.class) })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.GetWorkingDaysTemplateResponse.class))) })
     public String template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);
 

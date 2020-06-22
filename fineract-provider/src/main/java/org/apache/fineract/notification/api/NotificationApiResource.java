@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.notification.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -45,8 +43,8 @@ import org.springframework.stereotype.Component;
 @Path("/notifications")
 @Component
 @Scope("singleton")
-@Api(tags = { "Notification" })
-@SwaggerDefinition(tags = { @Tag(name = "Notification", description = "") })
+
+@Tag(name = "Notification", description = "")
 public class NotificationApiResource {
 
     private final PlatformSecurityContext context;

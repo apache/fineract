@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.template.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import org.apache.fineract.template.domain.TemplateMapper;
 
@@ -32,143 +31,143 @@ final class TemplatesApiResourcesSwagger {
 
     }
 
-    @ApiModel(value = "GetTemplatesResponse")
+    @Schema(description = "GetTemplatesResponse")
     public static final class GetTemplatesResponse {
 
         private GetTemplatesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Text")
+        @Schema(example = "Text")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entity;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long type;
-        @ApiModelProperty(example = "This is a loan for {{loan.clientName}}")
+        @Schema(example = "This is a loan for {{loan.clientName}}")
         public String text;
         public List<TemplateMapper> mappers;
 
     }
 
-    @ApiModel(value = "GetTemplatesTemplateResponse")
+    @Schema(description = "GetTemplatesTemplateResponse")
     public static final class GetTemplatesTemplateResponse {
 
         private GetTemplatesTemplateResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Text")
+        @Schema(example = "Text")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entity;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long type;
-        @ApiModelProperty(example = "This is a loan for {{loan.clientName}}")
+        @Schema(example = "This is a loan for {{loan.clientName}}")
         public String text;
         public List<TemplateMapper> mappers;
 
     }
 
-    @ApiModel(value = "PostTemplatesRequest")
+    @Schema(description = "PostTemplatesRequest")
     public static final class PostTemplatesRequest {
 
         private PostTemplatesRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Text")
+        @Schema(example = "Text")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entity;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long type;
-        @ApiModelProperty(example = "This is a loan for {{loan.clientName}}")
+        @Schema(example = "This is a loan for {{loan.clientName}}")
         public String text;
         public List<TemplateMapper> mappers;
 
     }
 
-    @ApiModel(value = "PostTemplatesResponse")
+    @Schema(description = "PostTemplatesResponse")
     public static final class PostTemplatesResponse {
 
         private PostTemplatesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
 
     }
 
-    @ApiModel(value = "GetTemplatesTemplateIdResponse")
+    @Schema(description = "GetTemplatesTemplateIdResponse")
     public static final class GetTemplatesTemplateIdResponse {
 
         private GetTemplatesTemplateIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Text")
+        @Schema(example = "Text")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entity;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long type;
-        @ApiModelProperty(example = "This is a loan for {{loan.clientName}}")
+        @Schema(example = "This is a loan for {{loan.clientName}}")
         public String text;
         public List<TemplateMapper> mappers;
 
     }
 
-    @ApiModel(value = "PutTemplatesTemplateIdRequest")
+    @Schema(description = "PutTemplatesTemplateIdRequest")
     public static final class PutTemplatesTemplateIdRequest {
 
         private PutTemplatesTemplateIdRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Text")
+        @Schema(example = "Text")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entity;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long type;
-        @ApiModelProperty(example = "This is a loan for {{loan.clientName}}")
+        @Schema(example = "This is a loan for {{loan.clientName}}")
         public String text;
         public List<TemplateMapper> mappers;
 
     }
 
-    @ApiModel(value = "PutTemplatesTemplateIdResponse")
+    @Schema(description = "PutTemplatesTemplateIdResponse")
     public static final class PutTemplatesTemplateIdResponse {
 
         private PutTemplatesTemplateIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
 
     }
 
-    @ApiModel(value = "DeleteTemplatesTemplateIdResponse")
+    @Schema(description = "DeleteTemplatesTemplateIdResponse")
     public static final class DeleteTemplatesTemplateIdResponse {
 
         private DeleteTemplatesTemplateIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
 
     }

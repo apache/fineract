@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.joda.time.DateTime;
 
 /**
@@ -31,26 +30,26 @@ final class ReportMailingJobRunHistoryApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetReportMailingJobRunHistoryResponse")
+    @Schema(description = "GetReportMailingJobRunHistoryResponse")
     public static final class GetReportMailingJobRunHistoryResponse {
 
         private GetReportMailingJobRunHistoryResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long reportMailingJobId;
-        @ApiModelProperty(example = "1469627093050")
+        @Schema(example = "1469627093050")
         public DateTime startDateTime;
-        @ApiModelProperty(example = "1469627093050")
+        @Schema(example = "1469627093050")
         public DateTime endDateTime;
-        @ApiModelProperty(example = "success")
+        @Schema(example = "success")
         public String status;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public String errorMessage;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public String errorLog;
     }
 }

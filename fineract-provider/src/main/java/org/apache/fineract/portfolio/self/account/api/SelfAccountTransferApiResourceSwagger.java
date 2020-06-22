@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.self.account.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -30,7 +29,7 @@ final class SelfAccountTransferApiResourceSwagger {
 
     private SelfAccountTransferApiResourceSwagger() {}
 
-    @ApiModel(value = "GetAccountTransferTemplateResponse")
+    @Schema(description = "GetAccountTransferTemplateResponse")
     public static final class GetAccountTransferTemplateResponse {
 
         private GetAccountTransferTemplateResponse() {}
@@ -39,12 +38,12 @@ final class SelfAccountTransferApiResourceSwagger {
 
             private GetAccountOptions() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "accountType.savings")
+            @Schema(example = "accountType.savings")
             public String code;
-            @ApiModelProperty(example = "Savings Account")
-            public String value;
+            @Schema(example = "Savings Account")
+            public String description;
         }
 
         public Set<GetAccountOptions> accountTypeOptions;
@@ -53,18 +52,18 @@ final class SelfAccountTransferApiResourceSwagger {
 
             private GetFromAccountOptions() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountId;
-            @ApiModelProperty(example = "00000001")
+            @Schema(example = "00000001")
             public Integer accountNo;
             public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer clientId;
-            @ApiModelProperty(example = "ABC")
+            @Schema(example = "ABC")
             public String clientName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer officeId;
-            @ApiModelProperty(example = "HEAD OFFICE")
+            @Schema(example = "HEAD OFFICE")
             public String officeName;
 
         }
@@ -75,18 +74,18 @@ final class SelfAccountTransferApiResourceSwagger {
 
             private GetToAccountOptions() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountId;
-            @ApiModelProperty(example = "00000001")
+            @Schema(example = "00000001")
             public Integer accountNo;
             public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer clientId;
-            @ApiModelProperty(example = "ABC")
+            @Schema(example = "ABC")
             public String clientName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer officeId;
-            @ApiModelProperty(example = "HEAD OFFICE")
+            @Schema(example = "HEAD OFFICE")
             public String officeName;
 
         }
@@ -94,48 +93,48 @@ final class SelfAccountTransferApiResourceSwagger {
         public Set<GetFromAccountOptions> toAccountTypeOptions;
     }
 
-    @ApiModel(value = "PostNewTransferRequest")
+    @Schema(description = "PostNewTransferRequest")
     public static final class PostNewTransferRequest {
 
         private PostNewTransferRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer fromOfficeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer fromClientId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer fromAccountType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer fromAccountId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer toOfficeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer toClientId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer toAccountType;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer toAccountId;
-        @ApiModelProperty(example = "dd  MMMM YYYY")
+        @Schema(example = "dd  MMMM YYYY")
         public String dateFormat;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "01  August 2011")
+        @Schema(example = "01  August 2011")
         public String transferDate;
-        @ApiModelProperty(example = "112.45")
+        @Schema(example = "112.45")
         public Float transferAmount;
-        @ApiModelProperty(example = "A description of the transfer")
+        @Schema(example = "A description of the transfer")
         public String transferDescription;
 
     }
 
-    @ApiModel(value = "PostNewTransferResponse")
+    @Schema(description = "PostNewTransferResponse")
     public static final class PostNewTransferResponse {
 
         private PostNewTransferResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 }

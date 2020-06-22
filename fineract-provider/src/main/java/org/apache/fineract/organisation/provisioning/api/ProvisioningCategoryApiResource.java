@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -50,8 +48,8 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningcategory")
 @Component
 @Scope("singleton")
-@Api(tags = { "Provisioning Category" })
-@SwaggerDefinition(tags = { @Tag(name = "Provisioning Category", description = "") })
+
+@Tag(name = "Provisioning Category", description = "")
 public class ProvisioningCategoryApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;

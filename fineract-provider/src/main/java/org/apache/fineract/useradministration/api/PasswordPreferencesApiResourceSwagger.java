@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.useradministration.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 22/8/17.
@@ -30,31 +29,31 @@ final class PasswordPreferencesApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetPasswordPreferencesTemplateResponse")
+    @Schema(description = "GetPasswordPreferencesTemplateResponse")
     public static final class GetPasswordPreferencesTemplateResponse {
 
         private GetPasswordPreferencesTemplateResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Password must be at least 1 character and not more that 50 characters long")
+        @Schema(example = "Password must be at least 1 character and not more that 50 characters long")
         public String description;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean active;
-        @ApiModelProperty(example = "simple")
+        @Schema(example = "simple")
         public String key;
     }
 
-    @ApiModel(value = "PutPasswordPreferencesTemplateRequest")
+    @Schema(description = "PutPasswordPreferencesTemplateRequest")
     public static final class PutPasswordPreferencesTemplateRequest {
 
         private PutPasswordPreferencesTemplateRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long validationPolicyId;
     }
 

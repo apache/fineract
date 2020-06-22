@@ -21,13 +21,13 @@ package org.apache.fineract.portfolio.self.client.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -60,8 +60,8 @@ import org.springframework.stereotype.Component;
 @Path("/self/clients")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Client" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Client", description = "") })
+
+@Tag(name = "Self Client", description = "")
 public class SelfClientsApiResource {
 
     private final PlatformSecurityContext context;
@@ -89,18 +89,19 @@ public class SelfClientsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Clients associated to the user", httpMethod = "GET", notes = "The list capability of clients can support pagination and sorting.\n\n"
+    @Operation(summary = "List Clients associated to the user", description = "The list capability of clients can support pagination and sorting.\n\n"
             + "Example Requests:\n" + "\n" + "self/clients\n" + "\n" + "self/clients?fields=displayName,officeName\n" + "\n"
             + "self/clients?offset=10&limit=50\n" + "\n" + "self/clients?orderBy=displayName&sortOrder=DESC")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsResponse.class) })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("displayName") @ApiParam(value = "displayName") final String displayName,
-            @QueryParam("firstName") @ApiParam(value = "firstName") final String firstname,
-            @QueryParam("lastName") @ApiParam(value = "lastName") final String lastname,
-            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
+            @QueryParam("displayName") @Parameter(description = "displayName") final String displayName,
+            @QueryParam("firstName") @Parameter(description = "firstName") final String firstname,
+            @QueryParam("lastName") @Parameter(description = "lastName") final String lastname,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
         final String sqlSearch = null;
         final Long officeId = null;
@@ -115,11 +116,12 @@ public class SelfClientsApiResource {
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Client", httpMethod = "GET", notes = "Retrieves a Client\n\n" + "Example Requests:\n" + "\n"
-            + "self/clients/1\n" + "\n" + "self/clients/1?fields=id,displayName,officeName")
+    @Operation(summary = "Retrieve a Client", description = "Retrieves a Client\n\n" + "Example Requests:\n" + "\n" + "self/clients/1\n"
+            + "\n" + "self/clients/1?fields=id,displayName,officeName")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdResponse.class) })
-    public String retrieveOne(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdResponse.class))) })
+    public String retrieveOne(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateRetrieveOne(uriInfo);
 
@@ -133,12 +135,12 @@ public class SelfClientsApiResource {
     @Path("{clientId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve client accounts overview", httpMethod = "GET", notes = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
+    @Operation(summary = "Retrieve client accounts overview", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n"
             + "\n" + "self/clients/1/accounts\n" + "\n" + "\n" + "self/clients/1/accounts?fields=loanAccounts,savingsAccounts")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdAccountsResponse.class) })
-    public String retrieveAssociatedAccounts(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdAccountsResponse.class))) })
+    public String retrieveAssociatedAccounts(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo) {
 
         validateAppuserClientsMapping(clientId);
@@ -150,13 +152,13 @@ public class SelfClientsApiResource {
     @Path("{clientId}/images")
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.TEXT_PLAIN })
-    @ApiOperation(value = "Retrieve Client Image", httpMethod = "GET", notes = "Optional arguments are identical to those of Get Image associated with an Entity (Binary file)\n"
+    @Operation(summary = "Retrieve Client Image", description = "Optional arguments are identical to those of Get Image associated with an Entity (Binary file)\n"
             + "\n" + "Example Requests:\n" + "\n" + "self/clients/1/images")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
-    public Response retrieveImage(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @QueryParam("maxWidth") @ApiParam(example = "maxWidth") final Integer maxWidth,
-            @QueryParam("maxHeight") @ApiParam(example = "maxHeight") final Integer maxHeight,
-            @QueryParam("output") @ApiParam(example = "output") final String output) {
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
+    public Response retrieveImage(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @QueryParam("maxWidth") @Parameter(example = "maxWidth") final Integer maxWidth,
+            @QueryParam("maxHeight") @Parameter(example = "maxHeight") final Integer maxHeight,
+            @QueryParam("output") @Parameter(example = "output") final String output) {
 
         validateAppuserClientsMapping(clientId);
 
@@ -167,15 +169,15 @@ public class SelfClientsApiResource {
     @Path("{clientId}/charges")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Client Charges", httpMethod = "GET", notes = "The list capability of client charges supports pagination.\n\n"
+    @Operation(summary = "List Client Charges", description = "The list capability of client charges supports pagination.\n\n"
             + "Example Requests:\n" + "\n" + "self/clients/1/charges\n\n" + "self/clients/1/charges?offset=0&limit=5")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesResponse.class) })
-    public String retrieveAllClientCharges(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @ApiParam(value = "chargeStatus") final String chargeStatus,
-            @QueryParam("pendingPayment") @ApiParam(value = "pendingPayment") final Boolean pendingPayment, @Context final UriInfo uriInfo,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesResponse.class))) })
+    public String retrieveAllClientCharges(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @Parameter(description = "chargeStatus") final String chargeStatus,
+            @QueryParam("pendingPayment") @Parameter(description = "pendingPayment") final Boolean pendingPayment,
+            @Context final UriInfo uriInfo, @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset) {
 
         validateAppuserClientsMapping(clientId);
 
@@ -186,12 +188,12 @@ public class SelfClientsApiResource {
     @Path("{clientId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Client Charge", httpMethod = "GET", notes = "Retrieves a Client Charge\n\n" + "Example Requests:\n"
-            + "\n" + "self/clients/1/charges/1\n" + "\n" + "\n" + "self/clients/1/charges/1?fields=name,id")
+    @Operation(summary = "Retrieve a Client Charge", description = "Retrieves a Client Charge\n\n" + "Example Requests:\n" + "\n"
+            + "self/clients/1/charges/1\n" + "\n" + "\n" + "self/clients/1/charges/1?fields=name,id")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesChargeIdResponse.class) })
-    public String retrieveClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesChargeIdResponse.class))) })
+    public String retrieveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateClientCharges(uriInfo);
 
@@ -204,13 +206,13 @@ public class SelfClientsApiResource {
     @Path("{clientId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Client Transactions", httpMethod = "GET", notes = "The list capability of client transaction can support pagination.\n\n"
+    @Operation(summary = "List Client Transactions", description = "The list capability of client transaction can support pagination.\n\n"
             + "Example Requests:\n" + "\n" + "self/clients/189/transactions\n\n" + "self/clients/189/transactions?offset=10&limit=50")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsResponse.class) })
-    public String retrieveAllClientTransactions(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @Context final UriInfo uriInfo, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsResponse.class))) })
+    public String retrieveAllClientTransactions(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
 
         validateAppuserClientsMapping(clientId);
 
@@ -221,13 +223,13 @@ public class SelfClientsApiResource {
     @Path("{clientId}/transactions/{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Client Transaction", httpMethod = "GET", notes = "Retrieves a Client Transaction"
-            + "Example Requests:\n" + "\n" + "self/clients/1/transactions/1\n" + "\n" + "\n"
-            + "self/clients/1/transactions/1?fields=id,officeName")
+    @Operation(summary = "Retrieve a Client Transaction", description = "Retrieves a Client Transaction" + "Example Requests:\n" + "\n"
+            + "self/clients/1/transactions/1\n" + "\n" + "\n" + "self/clients/1/transactions/1?fields=id,officeName")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsTransactionIdResponse.class) })
-    public String retrieveClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsTransactionIdResponse.class))) })
+    public String retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @Context final UriInfo uriInfo) {
 
         validateAppuserClientsMapping(clientId);
 

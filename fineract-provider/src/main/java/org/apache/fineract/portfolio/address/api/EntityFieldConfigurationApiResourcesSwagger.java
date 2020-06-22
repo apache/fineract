@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.address.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by Chirag Gupta on 12/01/17.
@@ -28,24 +27,24 @@ final class EntityFieldConfigurationApiResourcesSwagger {
 
     private EntityFieldConfigurationApiResourcesSwagger() {}
 
-    @ApiModel(value = "GetFieldConfigurationEntityResponse")
+    @Schema(description = "GetFieldConfigurationEntityResponse")
     public static final class GetFieldConfigurationEntityResponse {
 
         private GetFieldConfigurationEntityResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer fieldConfigurationId;
-        @ApiModelProperty(example = "ADDRESS")
+        @Schema(example = "ADDRESS")
         public String entity;
-        @ApiModelProperty(example = "CLIENT")
+        @Schema(example = "CLIENT")
         public String subentity;
-        @ApiModelProperty(example = "addressType")
+        @Schema(example = "addressType")
         public String field;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public String is_enabled;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public String is_mandatory;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String validation_regex;
     }
 }

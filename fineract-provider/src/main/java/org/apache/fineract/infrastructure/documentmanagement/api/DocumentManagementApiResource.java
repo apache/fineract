@@ -21,13 +21,14 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,12 +65,10 @@ import org.springframework.stereotype.Component;
 @Path("{entityType}/{entityId}/documents")
 @Component
 @Scope("singleton")
-@Api(tags = { "Documents" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
-                + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n"
-                + "Staff: URL Pattern as staff\n" + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n"
-                + "Client Identifiers: URL Pattern as client_identifiers\n" + "Groups: URL Pattern as groups") })
+@Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
+        + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n"
+        + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n"
+        + "Groups: URL Pattern as groups")
 public class DocumentManagementApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -97,13 +96,13 @@ public class DocumentManagementApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List documents", notes = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n"
+    @Operation(summary = "List documents", description = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n"
             + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class, responseContainer = "list") })
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
     public String retreiveAllDocuments(@Context final UriInfo uriInfo,
-            @PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId) {
+            @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.SystemEntityType);
 
@@ -116,20 +115,20 @@ public class DocumentManagementApiResource {
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a Document", notes = "Note: A document is created using a Multi-part form upload \n" + "\n"
+    @Operation(summary = "Create a Document", description = "Note: A document is created using a Multi-part form upload \n" + "\n"
             + "Body Parts\n" + "\n" + "name : \n" + "Name or summary of the document\n" + "\n" + "description : \n"
             + "Description of the document\n" + "\n" + "file : \n" + "The file to be uploaded\n" + "\n" + "Mandatory Fields : \n"
             + "file and description")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Not Shown (multi-part form data)", response = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class) })
-    public String createDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
-            @HeaderParam("Content-Length") @ApiParam(value = "Content-Length") final Long fileSize,
-            @FormDataParam("file") @ApiParam(value = "file") final InputStream inputStream,
-            @FormDataParam("file") final @ApiParam(value = "file") FormDataContentDisposition fileDetails,
-            @FormDataParam("file") @ApiParam(value = "file") final FormDataBodyPart bodyPart,
-            @FormDataParam("name") @ApiParam(value = "name") final String name,
-            @FormDataParam("description") @ApiParam(value = "description") final String description) {
+            @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class))) })
+    public String createDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
+            @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
+            @FormDataParam("file") final @Parameter(description = "file") FormDataContentDisposition fileDetails,
+            @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
+            @FormDataParam("name") @Parameter(description = "name") final String name,
+            @FormDataParam("description") @Parameter(description = "description") final String description) {
 
         /**
          * TODO: also need to have a backup and stop reading from stream after
@@ -152,20 +151,20 @@ public class DocumentManagementApiResource {
     @Path("{documentId}")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Document", notes = "Note: A document is updated using a Multi-part form upload \n" + "Body Parts\n"
+    @Operation(summary = "Update a Document", description = "Note: A document is updated using a Multi-part form upload \n" + "Body Parts\n"
             + "name\n" + "Name or summary of the document\n" + "description\n" + "Description of the document\n" + "file\n"
             + "The file to be uploaded")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Not Shown (multi-part form data)", response = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class) })
-    public String updateDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
-            @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId,
-            @HeaderParam("Content-Length") @ApiParam(value = "Content-Length") final Long fileSize,
-            @FormDataParam("file") @ApiParam(value = "file") final InputStream inputStream,
-            @FormDataParam("file") @ApiParam(value = "file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") @ApiParam(value = "file") final FormDataBodyPart bodyPart,
-            @FormDataParam("name") @ApiParam(value = "name") final String name,
-            @FormDataParam("description") @ApiParam(value = "description") final String description) {
+            @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class))) })
+    public String updateDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId,
+            @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
+            @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
+            @FormDataParam("file") @Parameter(description = "file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
+            @FormDataParam("name") @Parameter(description = "name") final String name,
+            @FormDataParam("description") @Parameter(description = "description") final String description) {
 
         final Set<String> modifiedParams = new HashSet<>();
         modifiedParams.add("name");
@@ -200,13 +199,13 @@ public class DocumentManagementApiResource {
     @Path("{documentId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Document", notes = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n"
+    @Operation(summary = "Retrieve a Document", description = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n"
             + "loans/1/documents/1\n" + "\n" + "\n" + "client_identifiers/1/documents/1?fields=name,description")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class) })
-    public String getDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
-            @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class))) })
+    public String getDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.SystemEntityType);
 
@@ -220,12 +219,12 @@ public class DocumentManagementApiResource {
     @Path("{documentId}/attachment")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    @ApiOperation(value = "Retrieve Binary File associated with Document", notes = "Request used to download the file associated with the document\n"
+    @Operation(summary = "Retrieve Binary File associated with Document", description = "Request used to download the file associated with the document\n"
             + "\n" + "Example Requests:\n" + "\n" + "clients/1/documents/1/attachment\n" + "\n" + "\n" + "loans/1/documents/1/attachment")
-    @ApiResponses({ @ApiResponse(code = 200, message = "Not Shown: The corresponding Binary file") })
-    public Response downloadFile(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
-            @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId) {
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "Not Shown: The corresponding Binary file") })
+    public Response downloadFile(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.SystemEntityType);
 
@@ -241,12 +240,12 @@ public class DocumentManagementApiResource {
     @Path("{documentId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Remove a Document", notes = "")
+    @Operation(summary = "Remove a Document", description = "")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class) })
-    public String deleteDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
-            @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
-            @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class))) })
+    public String deleteDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         final DocumentCommand documentCommand = new DocumentCommand(null, documentId, entityType, entityId, null, null, null, null, null,
                 null);

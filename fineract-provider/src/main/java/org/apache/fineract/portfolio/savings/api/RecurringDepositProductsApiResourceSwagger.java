@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     private RecurringDepositProductsApiResourceSwagger() {}
 
-    @ApiModel(value = "PostRecurringDepositProductsRequest")
+    @Schema(description = "PostRecurringDepositProductsRequest")
     public static final class PostRecurringDepositProductsRequest {
 
         private PostRecurringDepositProductsRequest() {}
@@ -43,103 +42,103 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private PostRecurringDepositProductsChartSlabs() {}
 
-                @ApiModelProperty(example = "from 0 to 90 days")
+                @Schema(example = "from 0 to 90 days")
                 public String description;
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer periodType;
-                @ApiModelProperty(example = "0")
+                @Schema(example = "0")
                 public Integer fromPeriod;
-                @ApiModelProperty(example = "90")
+                @Schema(example = "90")
                 public Integer toPeriod;
-                @ApiModelProperty(example = "4.5")
+                @Schema(example = "4.5")
                 public Double annualInterestRate;
             }
 
-            @ApiModelProperty(example = "01 Jan 2014")
+            @Schema(example = "01 Jan 2014")
             public String fromDate;
-            @ApiModelProperty(example = "en")
+            @Schema(example = "en")
             public String locale;
-            @ApiModelProperty(example = "dd MMMM yyyy")
+            @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
             public Set<PostRecurringDepositProductsChartSlabs> chartSlabs;
         }
 
-        @ApiModelProperty(example = "Recurring deposit product")
+        @Schema(example = "Recurring deposit product")
         public String name;
-        @ApiModelProperty(example = "RD01")
+        @Schema(example = "RD01")
         public String shortName;
-        @ApiModelProperty(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
+        @Schema(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
         public String description;
-        @ApiModelProperty(example = "USD")
+        @Schema(example = "USD")
         public String currencyCode;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer digitsAfterDecimal;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer inMultiplesOf;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer interestCompoundingPeriodType;
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Integer interestPostingPeriodType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer interestCalculationType;
-        @ApiModelProperty(example = "365")
+        @Schema(example = "365")
         public Integer interestCalculationDaysInYearType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer accountingRule;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurringDepositFrequency;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer recurringDepositFrequencyTypeId;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean preClosurePenalApplicable;
-        @ApiModelProperty(example = "1.75")
+        @Schema(example = "1.75")
         public Double preClosurePenalInterest;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer preClosurePenalInterestOnTypeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minDepositTerm;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minDepositTermTypeId;
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Integer maxDepositTerm;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer maxDepositTermTypeId;
-        @ApiModelProperty(example = "10000")
+        @Schema(example = "10000")
         public Long depositAmount;
-        @ApiModelProperty(example = "100")
+        @Schema(example = "100")
         public Long minDepositAmount;
-        @ApiModelProperty(example = "1000000")
+        @Schema(example = "1000000")
         public Long maxDepositAmount;
         public Set<PostRecurringDepositProductsCharts> charts;
     }
 
-    @ApiModel(value = "PostRecurringDepositProductsResponse")
+    @Schema(description = "PostRecurringDepositProductsResponse")
     public static final class PostRecurringDepositProductsResponse {
 
         private PostRecurringDepositProductsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutRecurringDepositProductsRequest")
+    @Schema(description = "PutRecurringDepositProductsRequest")
     public static final class PutRecurringDepositProductsRequest {
 
         private PutRecurringDepositProductsRequest() {}
 
-        @ApiModelProperty(example = "Recurring deposit product new offerings")
+        @Schema(example = "Recurring deposit product new offerings")
         public String description;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Integer minDepositTerm;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minDepositTermTypeId;
     }
 
-    @ApiModel(value = "PutRecurringDepositProductsResponse")
+    @Schema(description = "PutRecurringDepositProductsResponse")
     public static final class PutRecurringDepositProductsResponse {
 
         private PutRecurringDepositProductsResponse() {}
@@ -148,18 +147,18 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private PutRecurringDepositProductsChanges() {}
 
-            @ApiModelProperty(example = "Recurring deposit product new offerings")
+            @Schema(example = "Recurring deposit product new offerings")
             public String description;
-            @ApiModelProperty(example = "5")
+            @Schema(example = "5")
             public Integer minDepositTerm;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutRecurringDepositProductsChanges changes;
     }
 
-    @ApiModel(value = "GetRecurringDepositProductsResponse")
+    @Schema(description = "GetRecurringDepositProductsResponse")
     public static final class GetRecurringDepositProductsResponse {
 
         private GetRecurringDepositProductsResponse() {}
@@ -168,19 +167,19 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private GetRecurringDepositProductsCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
@@ -188,119 +187,119 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private GetRecurringDepositProductsMinDepositTermType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "deposit.term.savingsPeriodFrequencyType.months")
+            @Schema(example = "deposit.term.savingsPeriodFrequencyType.months")
             public String code;
-            @ApiModelProperty(example = "Months")
-            public String value;
+            @Schema(example = "Months")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsMaxDepositTermType {
 
             private GetRecurringDepositProductsMaxDepositTermType() {}
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "deposit.term.savingsPeriodFrequencyType.years")
+            @Schema(example = "deposit.term.savingsPeriodFrequencyType.years")
             public String code;
-            @ApiModelProperty(example = "Years")
-            public String value;
+            @Schema(example = "Years")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsInterestCompoundingPeriodType {
 
             private GetRecurringDepositProductsInterestCompoundingPeriodType() {}
 
-            @ApiModelProperty(example = "4")
+            @Schema(example = "4")
             public Integer id;
-            @ApiModelProperty(example = "savings.interest.period.savingsCompoundingInterestPeriodType.monthly")
+            @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.monthly")
             public String code;
-            @ApiModelProperty(example = "Monthly")
-            public String value;
+            @Schema(example = "Monthly")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsInterestPostingPeriodType {
 
             private GetRecurringDepositProductsInterestPostingPeriodType() {}
 
-            @ApiModelProperty(example = "4")
+            @Schema(example = "4")
             public Integer id;
-            @ApiModelProperty(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
+            @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
             public String code;
-            @ApiModelProperty(example = "Monthly")
-            public String value;
+            @Schema(example = "Monthly")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsInterestCalculationType {
 
             private GetRecurringDepositProductsInterestCalculationType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "savingsInterestCalculationType.dailybalance")
+            @Schema(example = "savingsInterestCalculationType.dailybalance")
             public String code;
-            @ApiModelProperty(example = "Daily Balance")
-            public String value;
+            @Schema(example = "Daily Balance")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsInterestCalculationDaysInYearType {
 
             private GetRecurringDepositProductsInterestCalculationDaysInYearType() {}
 
-            @ApiModelProperty(example = "365")
+            @Schema(example = "365")
             public Integer id;
-            @ApiModelProperty(example = "savingsInterestCalculationDaysInYearType.days365")
+            @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
             public String code;
-            @ApiModelProperty(example = "365 Days")
-            public String value;
+            @Schema(example = "365 Days")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsAccountingRule {
 
             private GetRecurringDepositProductsAccountingRule() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "accountingRuleType.none")
+            @Schema(example = "accountingRuleType.none")
             public String code;
-            @ApiModelProperty(example = "NONE")
-            public String value;
+            @Schema(example = "NONE")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsRecurringDepositFrequencyType {
 
             private GetRecurringDepositProductsRecurringDepositFrequencyType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "recurring.deposit.savingsPeriodFrequencyType.months")
+            @Schema(example = "recurring.deposit.savingsPeriodFrequencyType.months")
             public String code;
-            @ApiModelProperty(example = "Months")
-            public String value;
+            @Schema(example = "Months")
+            public String description;
         }
 
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer id;
-        @ApiModelProperty(example = "RD01")
+        @Schema(example = "RD01")
         public String name;
-        @ApiModelProperty(example = "RD01")
+        @Schema(example = "RD01")
         public String shortName;
-        @ApiModelProperty(example = "RD01")
+        @Schema(example = "RD01")
         public String description;
         public GetRecurringDepositProductsCurrency currency;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurringDepositFrequency;
         public GetRecurringDepositProductsRecurringDepositFrequencyType recurringDepositFrequencyType;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean preClosurePenalApplicable;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer minDepositTerm;
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Integer maxDepositTerm;
         public GetRecurringDepositProductsMinDepositTermType minDepositTermType;
         public GetRecurringDepositProductsMaxDepositTermType maxDepositTermType;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Double nominalAnnualInterestRate;
         public GetRecurringDepositProductsInterestCompoundingPeriodType interestCompoundingPeriodType;
         public GetRecurringDepositProductsInterestPostingPeriodType interestPostingPeriodType;
@@ -309,7 +308,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         public GetRecurringDepositProductsAccountingRule accountingRule;
     }
 
-    @ApiModel(value = "GetRecurringDepositProductsProductIdResponse")
+    @Schema(description = "GetRecurringDepositProductsProductIdResponse")
     public static final class GetRecurringDepositProductsProductIdResponse {
 
         private GetRecurringDepositProductsProductIdResponse() {}
@@ -318,17 +317,17 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private GetRecurringDepositProductsProductIdCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
@@ -336,12 +335,12 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private GetRecurringDepositProductsProductIdInterestCompoundingPeriodType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
+            @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
             public String code;
-            @ApiModelProperty(example = "Daily")
-            public String value;
+            @Schema(example = "Daily")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsProductIdAccountingMappings {
@@ -352,11 +351,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {}
 
-                @ApiModelProperty(example = "12")
+                @Schema(example = "12")
                 public Integer id;
-                @ApiModelProperty(example = "savings ref")
+                @Schema(example = "savings ref")
                 public String name;
-                @ApiModelProperty(example = "20")
+                @Schema(example = "20")
                 public Integer glCode;
             }
 
@@ -364,11 +363,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {}
 
-                @ApiModelProperty(example = "16")
+                @Schema(example = "16")
                 public Integer id;
-                @ApiModelProperty(example = "income from savings fee")
+                @Schema(example = "income from savings fee")
                 public String name;
-                @ApiModelProperty(example = "24")
+                @Schema(example = "24")
                 public Integer glCode;
             }
 
@@ -376,11 +375,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
-                @ApiModelProperty(example = "17")
+                @Schema(example = "17")
                 public Integer id;
-                @ApiModelProperty(example = "income from sav penalties")
+                @Schema(example = "income from sav penalties")
                 public String name;
-                @ApiModelProperty(example = "25")
+                @Schema(example = "25")
                 public Integer glCode;
             }
 
@@ -388,11 +387,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {}
 
-                @ApiModelProperty(example = "15")
+                @Schema(example = "15")
                 public Integer id;
-                @ApiModelProperty(example = "interest on savings")
+                @Schema(example = "interest on savings")
                 public String name;
-                @ApiModelProperty(example = "23")
+                @Schema(example = "23")
                 public Integer glCode;
             }
 
@@ -400,11 +399,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdSavingsControlAccount() {}
 
-                @ApiModelProperty(example = "13")
+                @Schema(example = "13")
                 public Integer id;
-                @ApiModelProperty(example = "savings ref tool kit")
+                @Schema(example = "savings ref tool kit")
                 public String name;
-                @ApiModelProperty(example = "21")
+                @Schema(example = "21")
                 public Integer glCode;
             }
 
@@ -412,11 +411,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {}
 
-                @ApiModelProperty(example = "14")
+                @Schema(example = "14")
                 public Integer id;
-                @ApiModelProperty(example = "saving transfers")
+                @Schema(example = "saving transfers")
                 public String name;
-                @ApiModelProperty(example = "22")
+                @Schema(example = "22")
                 public Integer glCode;
             }
 
@@ -436,13 +435,13 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
-                @ApiModelProperty(example = "11")
+                @Schema(example = "11")
                 public Integer id;
-                @ApiModelProperty(example = "sav charge")
+                @Schema(example = "sav charge")
                 public String name;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean penalty;
             }
 
@@ -450,11 +449,11 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
-                @ApiModelProperty(example = "16")
+                @Schema(example = "16")
                 public Integer id;
-                @ApiModelProperty(example = "income from savings fee")
+                @Schema(example = "income from savings fee")
                 public String name;
-                @ApiModelProperty(example = "24")
+                @Schema(example = "24")
                 public Integer glCode;
             }
 
@@ -470,13 +469,13 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                 private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
-                @ApiModelProperty(example = "12")
+                @Schema(example = "12")
                 public Integer id;
-                @ApiModelProperty(example = "sav 2")
+                @Schema(example = "sav 2")
                 public String name;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "true")
                 public Boolean penalty;
             }
 
@@ -488,36 +487,36 @@ final class RecurringDepositProductsApiResourceSwagger {
 
             private GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "preClosurePenalInterestOnType.wholeTerm")
+            @Schema(example = "preClosurePenalInterestOnType.wholeTerm")
             public String code;
-            @ApiModelProperty(example = "Whole term")
-            public String value;
+            @Schema(example = "Whole term")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsProductIdMinDepositTermType {
 
             private GetRecurringDepositProductsProductIdMinDepositTermType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "deposit.term.savingsPeriodFrequencyType.weeks")
+            @Schema(example = "deposit.term.savingsPeriodFrequencyType.weeks")
             public String code;
-            @ApiModelProperty(example = "Weeks")
-            public String value;
+            @Schema(example = "Weeks")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsProductIdMaxDepositTermType {
 
             private GetRecurringDepositProductsProductIdMaxDepositTermType() {}
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "deposit.term.savingsPeriodFrequencyType.years")
+            @Schema(example = "deposit.term.savingsPeriodFrequencyType.years")
             public String code;
-            @ApiModelProperty(example = "Years")
-            public String value;
+            @Schema(example = "Years")
+            public String description;
         }
 
         static final class GetRecurringDepositProductsProductIdActiveChart {
@@ -532,47 +531,47 @@ final class RecurringDepositProductsApiResourceSwagger {
 
                     private GetRecurringDepositProductsProductIdPeriodType() {}
 
-                    @ApiModelProperty(example = "1")
+                    @Schema(example = "1")
                     public Integer id;
-                    @ApiModelProperty(example = "interestChartPeriodType.weeks")
+                    @Schema(example = "interestChartPeriodType.weeks")
                     public String code;
-                    @ApiModelProperty(example = "Weeks")
-                    public String value;
+                    @Schema(example = "Weeks")
+                    public String description;
                 }
 
-                @ApiModelProperty(example = "18")
+                @Schema(example = "18")
                 public Integer id;
-                @ApiModelProperty(example = "from 0 to 90 days")
+                @Schema(example = "from 0 to 90 days")
                 public String description;
                 public GetRecurringDepositProductsProductIdPeriodType periodType;
-                @ApiModelProperty(example = "0")
+                @Schema(example = "0")
                 public Integer fromPeriod;
-                @ApiModelProperty(example = "90")
+                @Schema(example = "90")
                 public Integer toPeriod;
-                @ApiModelProperty(example = "4.5")
+                @Schema(example = "4.5")
                 public Double annualInterestRate;
                 public GetRecurringDepositProductsProductIdCurrency currency;
             }
 
-            @ApiModelProperty(example = "8")
+            @Schema(example = "8")
             public Integer id;
-            @ApiModelProperty(example = "[2014, 1, 1]")
+            @Schema(example = "[2014, 1, 1]")
             public LocalDate fromDate;
-            @ApiModelProperty(example = "8")
+            @Schema(example = "8")
             public Integer savingsProductId;
-            @ApiModelProperty(example = "Recurring deposit product")
+            @Schema(example = "Recurring deposit product")
             public String savingsProductName;
             public Set<GetRecurringDepositProductsProductIdChartSlabs> chartSlabs;
             public Set<GetRecurringDepositProductsProductIdChartSlabs.GetRecurringDepositProductsProductIdPeriodType> periodTypes;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "Recurring deposit product")
+        @Schema(example = "Recurring deposit product")
         public String name;
-        @ApiModelProperty(example = "RD01")
+        @Schema(example = "RD01")
         public String shortName;
-        @ApiModelProperty(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
+        @Schema(example = "Daily compounding using Daily Balance, 5% per year, 365 days in year")
         public String description;
         public GetRecurringDepositProductsProductIdCurrency currency;
         public GetRecurringDepositProductsProductIdInterestCompoundingPeriodType interestCompoundingPeriodType;
@@ -582,29 +581,29 @@ final class RecurringDepositProductsApiResourceSwagger {
         public GetRecurringDepositProductsProductIdAccountingMappings accountingMappings;
         public Set<GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public Set<GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings> penaltyToIncomeAccountMappings;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurringDepositFrequency;
         public GetRecurringDepositProductsResponse.GetRecurringDepositProductsRecurringDepositFrequencyType recurringDepositFrequencyType;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean preClosurePenalApplicable;
-        @ApiModelProperty(example = "1.75")
+        @Schema(example = "1.75")
         public Double preClosurePenalInterest;
         public GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType preClosurePenalInterestOnType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minDepositTerm;
         public GetRecurringDepositProductsProductIdMinDepositTermType minDepositTermType;
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Integer maxDepositTerm;
         public GetRecurringDepositProductsProductIdMaxDepositTermType maxDepositTermType;
         public GetRecurringDepositProductsProductIdActiveChart activeChart;
     }
 
-    @ApiModel(value = "DeleteRecurringDepositProductsProductIdResponse")
+    @Schema(description = "DeleteRecurringDepositProductsProductIdResponse")
     public static final class DeleteRecurringDepositProductsProductIdResponse {
 
         private DeleteRecurringDepositProductsProductIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 }

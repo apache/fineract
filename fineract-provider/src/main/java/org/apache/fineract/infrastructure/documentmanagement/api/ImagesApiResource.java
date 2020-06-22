@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-import io.swagger.annotations.Api;
 import java.io.InputStream;
 import java.util.Base64;
 import javax.ws.rs.Consumes;
@@ -56,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Path("{entity}/{entityId}/images")
 @Component
 @Scope("singleton")
-@Api(value = "DomainName//api//v1//{entity}//{entityId}//images", description = "")
+
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
