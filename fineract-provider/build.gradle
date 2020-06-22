@@ -384,7 +384,6 @@ tasks.withType(JavaCompile) {
         disable(
                 "UnusedVariable",
                 "SameNameButDifferent",
-                "UnusedMethod",
                 "ModifiedButNotUsed",
                 "TypeParameterUnusedInFormals",
                 "UndefinedEquals",
@@ -461,6 +460,7 @@ tasks.withType(JavaCompile) {
                 "DoubleBraceInitialization",
                 "UnnecessaryDefaultInEnumSwitch",
                 "UnusedNestedClass",
+                "UnusedMethod",
                 "InconsistentCapitalization",
                 "MissingOverride",
 //                "InvalidBlockTag",
