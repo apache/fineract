@@ -31,12 +31,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation that returns a new or existing connection pool datasource
- * based on the tenant details stored in a {@link ThreadLocal} variable for this
- * request.
+ * Implementation that returns a new or existing connection pool datasource based on the tenant details stored in a
+ * {@link ThreadLocal} variable for this request.
  *
- * {@link ThreadLocalContextUtil} is used to retrieve the
- * {@link FineractPlatformTenant} for the request.
+ * {@link ThreadLocalContextUtil} is used to retrieve the {@link FineractPlatformTenant} for the request.
  */
 @Service
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService {

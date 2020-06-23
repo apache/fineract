@@ -40,7 +40,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -102,8 +101,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
 
         /***
-         * TODO: Vishwas, this is probably not required, test and remove the
-         * same
+         * TODO: Vishwas, this is probably not required, test and remove the same
          **/
         final Long productId = this.fromJsonHelper.extractLongNamed("productId", query.parsedJson());
         final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
@@ -183,16 +181,6 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             totalAmount = totalAmount.plus(interestDue);
         }
         boolean isNewPaymentRequired = loanRepaymentScheduleInstallment.isInterestDue(currency) || totalPrincipal.isGreaterThanZero();
-        final List<LoanTransaction> modifiedTransactions = new ArrayList<>();
-        List<LoanTransaction> transactions = loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals();
-        for (LoanTransaction loanTransaction : transactions) {
-            modifiedTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
-        }
-        if (isNewPaymentRequired) {
-            LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, today, null,
-                    DateUtils.getLocalDateTimeOfTenant(), null);
-            modifiedTransactions.add(ondayPaymentTransaction);
-        }
 
         LoanScheduleModel model = this.loanScheduleAssembler.assembleForInterestRecalculation(loanApplicationTerms, loan.getOfficeId(),
                 loan, loanRepaymentScheduleTransactionProcessor, loan.fetchInterestRecalculateFromDate());

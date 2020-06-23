@@ -19,9 +19,8 @@
 package org.apache.fineract.batch.domain;
 
 /**
- * Provides an object to handle HTTP headers as name and value pairs for Batch
- * API. It is used in {@link BatchRequest} and {@link BatchResponse} to store
- * the information regarding the headers in incoming and outgoing JSON Strings.
+ * Provides an object to handle HTTP headers as name and value pairs for Batch API. It is used in {@link BatchRequest}
+ * and {@link BatchResponse} to store the information regarding the headers in incoming and outgoing JSON Strings.
  *
  * @author Rishabh Shukla
  *

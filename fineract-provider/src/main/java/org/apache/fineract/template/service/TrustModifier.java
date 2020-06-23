@@ -39,8 +39,7 @@ public class TrustModifier {
     private static SSLSocketFactory factory;
 
     /**
-     * Call this with any HttpURLConnection, and it will modify the trust
-     * settings if it is an HTTPS connection.
+     * Call this with any HttpURLConnection, and it will modify the trust settings if it is an HTTPS connection.
      */
     public static void relaxHostChecking(final HttpURLConnection conn)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {

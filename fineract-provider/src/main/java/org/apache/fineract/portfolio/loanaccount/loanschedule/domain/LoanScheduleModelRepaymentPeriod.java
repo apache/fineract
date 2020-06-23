@@ -27,8 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.joda.time.LocalDate;
 
 /**
- * Domain representation of a Loan Schedule Repayment Period (not used for
- * persistence)
+ * Domain representation of a Loan Schedule Repayment Period (not used for persistence)
  */
 public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModelPeriod {
 

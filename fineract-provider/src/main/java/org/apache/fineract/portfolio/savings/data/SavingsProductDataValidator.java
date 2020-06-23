@@ -204,38 +204,25 @@ public class SavingsProductDataValidator {
         }
 
         /*
-         * if
-         * (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName,
-         * element)) {
+         * if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
          *
-         * final BigDecimal withdrawalFeeAmount =
-         * this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
-         * (withdrawalFeeAmountParamName, element);
-         * baseDataValidator.reset().parameter
-         * (withdrawalFeeAmountParamName).value
-         * (withdrawalFeeAmount).zeroOrPositiveAmount();
+         * final BigDecimal withdrawalFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
+         * (withdrawalFeeAmountParamName, element); baseDataValidator.reset().parameter
+         * (withdrawalFeeAmountParamName).value (withdrawalFeeAmount).zeroOrPositiveAmount();
          *
          * if (withdrawalFeeAmount != null) { final Integer withdrawalFeeType =
-         * this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-         * withdrawalFeeTypeParamName, element);
-         * baseDataValidator.reset().parameter
-         * (withdrawalFeeTypeParamName).value(withdrawalFeeType)
+         * this.fromApiJsonHelper.extractIntegerSansLocaleNamed( withdrawalFeeTypeParamName, element);
+         * baseDataValidator.reset().parameter (withdrawalFeeTypeParamName).value(withdrawalFeeType)
          * .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues()); } }
          *
-         * if
-         * (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName,
-         * element)) { final Integer withdrawalFeeType =
-         * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
-         * (withdrawalFeeTypeParamName, element);
-         * baseDataValidator.reset().parameter
-         * (withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
-         * .isOneOfTheseValues(1, 2);
+         * if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) { final Integer
+         * withdrawalFeeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed (withdrawalFeeTypeParamName,
+         * element); baseDataValidator.reset().parameter
+         * (withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull() .isOneOfTheseValues(1, 2);
          *
-         * if (withdrawalFeeType != null) { final BigDecimal withdrawalFeeAmount
-         * = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-         * withdrawalFeeAmountParamName, element);
-         * baseDataValidator.reset().parameter
-         * (withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull()
+         * if (withdrawalFeeType != null) { final BigDecimal withdrawalFeeAmount =
+         * this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed( withdrawalFeeAmountParamName, element);
+         * baseDataValidator.reset().parameter (withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull()
          * .zeroOrPositiveAmount(); } }
          */
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {

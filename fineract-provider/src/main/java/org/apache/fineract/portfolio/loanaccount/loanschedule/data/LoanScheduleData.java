@@ -26,10 +26,9 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  * Immutable data object to represent aspects of a loan schedule such as:
  *
  * <ul>
- * <li>Totals information - the totals for each part of repayment schedule
- * monitored.</li>
- * <li>Repayment schedule - the principal due, outstanding balance and cost of
- * loan items such as interest and charges (both fees and penalties)</li>
+ * <li>Totals information - the totals for each part of repayment schedule monitored.</li>
+ * <li>Repayment schedule - the principal due, outstanding balance and cost of loan items such as interest and charges
+ * (both fees and penalties)</li>
  * </ul>
  */
 @SuppressWarnings("unused")
@@ -55,9 +54,8 @@ public class LoanScheduleData {
     private final BigDecimal totalOutstanding;
 
     /**
-     * <code>periods</code> is collection of data objects containing specific
-     * information to each period of the loan schedule including disbursement
-     * and repayment information.
+     * <code>periods</code> is collection of data objects containing specific information to each period of the loan
+     * schedule including disbursement and repayment information.
      */
     private final Collection<LoanSchedulePeriodData> periods;
 

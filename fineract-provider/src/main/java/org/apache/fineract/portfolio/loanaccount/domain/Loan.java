@@ -506,10 +506,8 @@ public class Loan extends AbstractPersistableCustom {
         this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;
 
         /*
-         * During loan origination stage and before loan is approved
-         * principal_amount, approved_principal and principal_amount_demanded
-         * will same amount and that amount is same as applicant loan demanded
-         * amount.
+         * During loan origination stage and before loan is approved principal_amount, approved_principal and
+         * principal_amount_demanded will same amount and that amount is same as applicant loan demanded amount.
          */
 
         this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
@@ -642,13 +640,11 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     /**
-     * Creates a loanTransaction for "Apply Charge Event" with transaction date
-     * set to "suppliedTransactionDate". The newly created transaction is also
-     * added to the Loan on which this method is called.
+     * Creates a loanTransaction for "Apply Charge Event" with transaction date set to "suppliedTransactionDate". The
+     * newly created transaction is also added to the Loan on which this method is called.
      *
-     * If "suppliedTransactionDate" is not passed Id, the transaction date is
-     * set to the loans due date if the due date is lesser than todays date. If
-     * not, the transaction date is set to todays date
+     * If "suppliedTransactionDate" is not passed Id, the transaction date is set to the loans due date if the due date
+     * is lesser than todays date. If not, the transaction date is set to todays date
      *
      * @param loanCharge
      * @param suppliedTransactionDate
@@ -787,12 +783,11 @@ public class Loan extends AbstractPersistableCustom {
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
             /****
-             * TODO Vishwas Currently we do not allow removing a loan charge
-             * after a loan is approved (hence there is no need to adjust any
-             * loan transactions).
+             * TODO Vishwas Currently we do not allow removing a loan charge after a loan is approved (hence there is no
+             * need to adjust any loan transactions).
              *
-             * Consider removing this block of code or logically completing it
-             * for the future by getting the list of affected Transactions
+             * Consider removing this block of code or logically completing it for the future by getting the list of
+             * affected Transactions
              ***/
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
@@ -856,12 +851,11 @@ public class Loan extends AbstractPersistableCustom {
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement()) {
             /****
-             * TODO Vishwas Currently we do not allow waiving updating loan
-             * charge after a loan is approved (hence there is no need to adjust
-             * any loan transactions).
+             * TODO Vishwas Currently we do not allow waiving updating loan charge after a loan is approved (hence there
+             * is no need to adjust any loan transactions).
              *
-             * Consider removing this block of code or logically completing it
-             * for the future by getting the list of affected Transactions
+             * Consider removing this block of code or logically completing it for the future by getting the list of
+             * affected Transactions
              ***/
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
@@ -922,21 +916,6 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return amount;
-    }
-
-    private boolean isFirstTrancheDisbursement() {
-        if (isMultiDisburmentLoan()) {
-            int totalTranchDisbursementCount = 0;
-            for (final LoanDisbursementDetails loanDisbursementDetail : this.disbursementDetails) {
-                if (loanDisbursementDetail.actualDisbursementDate() != null) {
-                    totalTranchDisbursementCount++;
-                }
-            }
-            if (totalTranchDisbursementCount < 2) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -1060,12 +1039,11 @@ public class Loan extends AbstractPersistableCustom {
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
             /****
-             * TODO Vishwas Currently we do not allow waiving fully paid loan
-             * charge and waiving partially paid loan charges only waives the
-             * remaining amount.
+             * TODO Vishwas Currently we do not allow waiving fully paid loan charge and waiving partially paid loan
+             * charges only waives the remaining amount.
              *
-             * Consider removing this block of code or logically completing it
-             * for the future by getting the list of affected Transactions
+             * Consider removing this block of code or logically completing it for the future by getting the list of
+             * affected Transactions
              ***/
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
@@ -1242,8 +1220,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     /**
-     * method updates accrual derived fields on installments and reverse the
-     * unprocessed transactions
+     * method updates accrual derived fields on installments and reverse the unprocessed transactions
      */
     private void applyAccurals(AppUser currentUser) {
         Collection<LoanTransaction> accruals = retreiveListOfAccrualTransactions();
@@ -2039,8 +2016,7 @@ public class Loan extends AbstractPersistableCustom {
         validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
 
         /**
-         * Copy interest recalculation settings if interest recalculation is
-         * enabled
+         * Copy interest recalculation settings if interest recalculation is enabled
          */
         if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
 
@@ -2171,20 +2147,16 @@ public class Loan extends AbstractPersistableCustom {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         /*
-         * statusEnum is holding the possible new status derived from
-         * loanLifecycleStateMachine.transition.
+         * statusEnum is holding the possible new status derived from loanLifecycleStateMachine.transition.
          */
 
         final LoanStatus newStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
 
         /*
-         * FIXME: There is no need to check below condition, if
-         * loanLifecycleStateMachine.transition is doing it's responsibility
-         * properly. Better implementation approach is, if code passes invalid
-         * combination of states (fromState and toState), state machine should
-         * return invalidate state and below if condition should check for not
-         * equal to invalidateState, instead of check new value is same as
-         * present value.
+         * FIXME: There is no need to check below condition, if loanLifecycleStateMachine.transition is doing it's
+         * responsibility properly. Better implementation approach is, if code passes invalid combination of states
+         * (fromState and toState), state machine should return invalidate state and below if condition should check for
+         * not equal to invalidateState, instead of check new value is same as present value.
          */
 
         if (!newStatusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -2213,9 +2185,8 @@ public class Loan extends AbstractPersistableCustom {
                     this.approvedPrincipal = approvedLoanAmount;
 
                     /*
-                     * All the calculations are done based on the principal
-                     * amount, so it is necessary to set principal amount to
-                     * approved amount
+                     * All the calculations are done based on the principal amount, so it is necessary to set principal
+                     * amount to approved amount
                      */
 
                     this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
@@ -2383,9 +2354,8 @@ public class Loan extends AbstractPersistableCustom {
         final Money interestApplied = Money.of(getCurrency(), this.summary.getTotalInterestCharged());
 
         /**
-         * Add an interest applied transaction of the interest is accrued
-         * upfront (Up front accrual), no accounting or cash based accounting is
-         * selected
+         * Add an interest applied transaction of the interest is accrued upfront (Up front accrual), no accounting or
+         * cash based accounting is selected
          **/
 
         if ((isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct() && isMultiDisburmentLoan()
@@ -2650,8 +2620,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     /*
-     * Ability to regenerate the repayment schedule based on the loans current
-     * details/state.
+     * Ability to regenerate the repayment schedule based on the loans current details/state.
      */
     public void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO, final AppUser currentUser) {
         final LoanScheduleModel loanSchedule = regenerateScheduleModel(scheduleGeneratorDTO);
@@ -2726,15 +2695,13 @@ public class Loan extends AbstractPersistableCustom {
         // for (charges due at time of disbursement)
 
         /***
-         * TODO Vishwas: do we need to be able to pass in payment type details
-         * for repayments at disbursements too?
+         * TODO Vishwas: do we need to be able to pass in payment type details for repayments at disbursements too?
          ***/
 
         final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
         /**
-         * all Charges repaid at disbursal is marked as repaid and "APPLY
-         * Charge" transactions are created for all other fees ( which are
-         * created during disbursal but not repaid)
+         * all Charges repaid at disbursal is marked as repaid and "APPLY Charge" transactions are created for all other
+         * fees ( which are created during disbursal but not repaid)
          **/
 
         Money disbursentMoney = Money.zero(getCurrency());
@@ -2759,8 +2726,7 @@ public class Loan extends AbstractPersistableCustom {
                 }
             } else if (disbursedOn.equals(new LocalDate(this.actualDisbursementDate))) {
                 /**
-                 * create a Charge applied transaction if Up front Accrual, None
-                 * or Cash based accounting is enabled
+                 * create a Charge applied transaction if Up front Accrual, None or Cash based accounting is enabled
                  **/
                 if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
                     handleChargeAppliedTransaction(charge, disbursedOn, currentUser);
@@ -3147,9 +3113,8 @@ public class Loan extends AbstractPersistableCustom {
                 mapEntry.getValue().updateLoan(this);
             }
             /***
-             * Commented since throwing exception if external id present for one
-             * of the transactions. for this need to save the reversed
-             * transactions first and then new transactions.
+             * Commented since throwing exception if external id present for one of the transactions. for this need to
+             * save the reversed transactions first and then new transactions.
              */
             this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         }
@@ -3157,8 +3122,7 @@ public class Loan extends AbstractPersistableCustom {
         updateLoanSummaryDerivedFields();
 
         /**
-         * FIXME: Vishwas, skipping post loan transaction checks for Loan
-         * recoveries
+         * FIXME: Vishwas, skipping post loan transaction checks for Loan recoveries
          **/
         if (loanTransaction.isNotRecoveryRepayment()) {
             doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
@@ -3801,8 +3765,8 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     /**
-     * Behaviour added to comply with capability of previous mifos product to
-     * support easier transition to fineract platform.
+     * Behaviour added to comply with capability of previous mifos product to support easier transition to fineract
+     * platform.
      */
     public void closeAsMarkedForReschedule(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final Map<String, Object> changes) {
@@ -4354,11 +4318,10 @@ public class Loan extends AbstractPersistableCustom {
                 receivableInterest = receivableInterest.zero();
             }
             /*
-             * if (transaction.getTransactionDate().isAfter(tillDate) &&
-             * transaction.isAccrual()) { final String errorMessage =
-             * "The date on which a loan is interest waived cannot be in after accrual transactions."
-             * ; throw new InvalidLoanStateTransitionException("waive",
-             * "cannot.be.after.accrual.date", errorMessage, tillDate); }
+             * if (transaction.getTransactionDate().isAfter(tillDate) && transaction.isAccrual()) { final String
+             * errorMessage = "The date on which a loan is interest waived cannot be in after accrual transactions." ;
+             * throw new InvalidLoanStateTransitionException("waive", "cannot.be.after.accrual.date", errorMessage,
+             * tillDate); }
              */
         }
         return receivableInterest;
@@ -4386,8 +4349,7 @@ public class Loan extends AbstractPersistableCustom {
 
         // first repayment's from date is same as disbursement date.
         /*
-         * meetingStartDate is used as seedDate Capture the seedDate from user
-         * and use the seedDate as meetingStart date
+         * meetingStartDate is used as seedDate Capture the seedDate from user and use the seedDate as meetingStart date
          */
 
         LocalDate tmpFromDate = getDisbursementDate();
@@ -5144,14 +5106,11 @@ public class Loan extends AbstractPersistableCustom {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         /*
-         * LocalDate recalculateFrom = null; List<LoanTransaction>
-         * loanTransactions =
-         * this.retreiveListOfTransactionsPostDisbursementExcludeAccruals(); for
-         * (LoanTransaction loanTransaction : loanTransactions) { if
-         * (recalculateFrom == null ||
-         * loanTransaction.getTransactionDate().isAfter(recalculateFrom)) {
-         * recalculateFrom = loanTransaction.getTransactionDate(); } }
-         * generatorDTO.setRecalculateFrom(recalculateFrom);
+         * LocalDate recalculateFrom = null; List<LoanTransaction> loanTransactions =
+         * this.retreiveListOfTransactionsPostDisbursementExcludeAccruals(); for (LoanTransaction loanTransaction :
+         * loanTransactions) { if (recalculateFrom == null ||
+         * loanTransaction.getTransactionDate().isAfter(recalculateFrom)) { recalculateFrom =
+         * loanTransaction.getTransactionDate(); } } generatorDTO.setRecalculateFrom(recalculateFrom);
          */
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             regenerateRepaymentScheduleWithInterestRecalculation(generatorDTO, currentUser);
@@ -5180,9 +5139,8 @@ public class Loan extends AbstractPersistableCustom {
             mapEntry.getValue().updateLoan(this);
         }
         /***
-         * Commented since throwing exception if external id present for one of
-         * the transactions. for this need to save the reversed transactions
-         * first and then new transactions.
+         * Commented since throwing exception if external id present for one of the transactions. for this need to save
+         * the reversed transactions first and then new transactions.
          */
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         updateLoanSummaryDerivedFields();
@@ -6074,8 +6032,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     /**
-     * Reverse only disbursement, accruals, and repayments at disbursal
-     * transactions
+     * Reverse only disbursement, accruals, and repayments at disbursal transactions
      *
      * @param actualDisbursementDate
      * @return

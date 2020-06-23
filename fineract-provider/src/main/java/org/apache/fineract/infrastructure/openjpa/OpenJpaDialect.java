@@ -37,8 +37,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache
- * OpenJPA. Developed and tested against OpenJPA 2.2.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache OpenJPA. Developed and tested against
+ * OpenJPA 2.2.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -94,8 +94,8 @@ public class OpenJpaDialect extends DefaultJpaDialect {
     }
 
     /**
-     * Transaction data Object exposed from {@code beginTransaction},
-     * implementing the {@link SavepointManager} interface.
+     * Transaction data Object exposed from {@code beginTransaction}, implementing the {@link SavepointManager}
+     * interface.
      */
     private static class OpenJpaTransactionData implements SavepointManager {
 
@@ -131,11 +131,9 @@ public class OpenJpaDialect extends DefaultJpaDialect {
     }
 
     /**
-     * {@link ConnectionHandle} implementation that fetches a new
-     * OpenJPA-provided Connection for every {@code getConnection} call and
-     * closes the Connection on {@code releaseConnection}. This is necessary
-     * because OpenJPA requires the fetched Connection to be closed before
-     * continuing EntityManager work.
+     * {@link ConnectionHandle} implementation that fetches a new OpenJPA-provided Connection for every
+     * {@code getConnection} call and closes the Connection on {@code releaseConnection}. This is necessary because
+     * OpenJPA requires the fetched Connection to be closed before continuing EntityManager work.
      *
      * @see org.apache.openjpa.persistence.OpenJPAEntityManager#getConnection()
      */

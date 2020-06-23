@@ -115,9 +115,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     }
 
     /**
-     * Recursively checking non working days and holidays and working days
-     * exemption to generate next repayment period date Base on the
-     * configuration
+     * Recursively checking non working days and holidays and working days exemption to generate next repayment period
+     * date Base on the configuration
      *
      * @param adjustedDateDetailsDTO
      * @param loanApplicationTerms
@@ -138,8 +137,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 isFirstRepayment);
 
         /**
-         * Check Changed Schedule Date is holiday or is not a working day Then
-         * re-call this method to get the non holiday and working day
+         * Check Changed Schedule Date is holiday or is not a working day Then re-call this method to get the non
+         * holiday and working day
          */
         if ((holidayDetailDTO.isHolidayEnabled() && HolidayUtil.getApplicableHoliday(adjustedDateDetailsDTO.getChangedScheduleDate(),
                 holidayDetailDTO.getHolidays()) != null)
@@ -151,8 +150,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     }
 
     /**
-     * This method to check and update the working day if repayment date is
-     * holiday
+     * This method to check and update the working day if repayment date is holiday
      *
      * @param adjustedDateDetailsDTO
      * @param holidayDetailDTO
@@ -183,8 +181,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     }
 
     /**
-     * This method to check and update the working day if repayment date is non
-     * working day
+     * This method to check and update the working day if repayment date is non working day
      *
      * @param adjustedDateDetailsDTO
      * @param holidayDetailDTO
@@ -230,21 +227,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             default:
         }
-        return dueRepaymentPeriodDate;
-    }
-
-    private LocalDate adjustToNthWeekDay(LocalDate dueRepaymentPeriodDate, int nthDay, int dayOfWeek) {
-        // adjust date to start of month
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfMonth(1);
-        // adjust date to next week if current day is past specified day of
-        // week.
-        if (dueRepaymentPeriodDate.getDayOfWeek() > dayOfWeek) {
-            dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(1);
-        }
-        // adjust date to specified date of week
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfWeek(dayOfWeek);
-        // adjust to specified nth week day
-        dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(nthDay - 1);
         return dueRepaymentPeriodDate;
     }
 

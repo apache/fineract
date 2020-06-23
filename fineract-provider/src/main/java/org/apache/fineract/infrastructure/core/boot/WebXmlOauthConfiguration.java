@@ -26,8 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * This Configuration replaces what formerly was in web.xml. Beans are loaded
- * only when "oauth" Profile is enabled.
+ * This Configuration replaces what formerly was in web.xml. Beans are loaded only when "oauth" Profile is enabled.
  *
  * @see <a href=
  *      "http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-convert-an-existing-application-to-spring-boot">#howto-convert-an-existing-application-to-spring-boot</a>

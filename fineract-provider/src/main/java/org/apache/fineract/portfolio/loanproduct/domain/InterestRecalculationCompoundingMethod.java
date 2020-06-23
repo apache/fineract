@@ -23,8 +23,7 @@ import java.util.Map;
 
 /***
  *
- * People typically use either of the following settings when defining interest
- * recalculation method:
+ * People typically use either of the following settings when defining interest recalculation method:
  * <ul>
  * <li>NONE</li>
  * <li>INTEREST</li>

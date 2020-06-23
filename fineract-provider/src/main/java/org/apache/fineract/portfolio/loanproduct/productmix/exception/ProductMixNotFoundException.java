@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.productmix.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when no product mixes found with the
- * productId.
+ * A {@link RuntimeException} thrown when no product mixes found with the productId.
  */
 public class ProductMixNotFoundException extends AbstractPlatformResourceNotFoundException {
 

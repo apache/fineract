@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.dataqueries.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link AbstractPlatformDomainRuleException} thrown when datatable resources
- * are not found.
+ * A {@link AbstractPlatformDomainRuleException} thrown when datatable resources are not found.
  */
 public class DatatableEntryRequiredException extends AbstractPlatformDomainRuleException {
 

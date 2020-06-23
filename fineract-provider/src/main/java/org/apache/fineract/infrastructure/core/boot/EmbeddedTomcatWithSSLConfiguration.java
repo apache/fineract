@@ -88,13 +88,10 @@ public class EmbeddedTomcatWithSSLConfiguration {
         try {
             URL url = resource.getURL();
             /**
-             * // If this creates filenames that are too long on Win, // then
-             * could just use resource.getFilename(), // even though not unique,
-             * real risk prob. min.bon String tempDir =
-             * System.getProperty("java.io.tmpdir"); tempDir = tempDir + "/" +
-             * getClass().getSimpleName() + "/"; String path = url.getPath();
-             * String uniqName = path.replace("file:/", "").replace('!', '_');
-             * String tempFullPath = tempDir + uniqName;
+             * // If this creates filenames that are too long on Win, // then could just use resource.getFilename(), //
+             * even though not unique, real risk prob. min.bon String tempDir = System.getProperty("java.io.tmpdir");
+             * tempDir = tempDir + "/" + getClass().getSimpleName() + "/"; String path = url.getPath(); String uniqName
+             * = path.replace("file:/", "").replace('!', '_'); String tempFullPath = tempDir + uniqName;
              **/
             // instead of File.createTempFile(prefix?, suffix?);
             File targetFile = new File(resource.getFilename());

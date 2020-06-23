@@ -36,13 +36,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * Base Spring Configuration with what's common to all Configuration subclasses.
  *
- * Notably the EnableAutoConfiguration excludes relevant for (and often adjusted
- * when upgrading versions of) Spring Boot, the "old" (pre. Spring Boot &amp;
- * MariaDB4j) fineract appContext.xml which all configurations need, and the
+ * Notably the EnableAutoConfiguration excludes relevant for (and often adjusted when upgrading versions of) Spring
+ * Boot, the "old" (pre. Spring Boot &amp; MariaDB4j) fineract appContext.xml which all configurations need, and the
  * web.xml successor WebXmlConfiguration.
  *
- * Should NOT include Configuration related to embedded Tomcat, data sources,
- * and MariaDB4j (because those differ in the subclasses).
+ * Should NOT include Configuration related to embedded Tomcat, data sources, and MariaDB4j (because those differ in the
+ * subclasses).
  */
 @Configuration
 @Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class, MessagingConfiguration.class,

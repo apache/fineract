@@ -34,9 +34,8 @@ import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 
 /**
- * DepositPreClosureDetail encapsulates all the details of a
- * {@link FixedDepositProduct} that are also used and persisted by a
- * {@link FixedDepositAccount}.
+ * DepositPreClosureDetail encapsulates all the details of a {@link FixedDepositProduct} that are also used and
+ * persisted by a {@link FixedDepositAccount}.
  */
 @Embeddable
 public class DepositPreClosureDetail {

@@ -96,11 +96,10 @@ public class Teller extends AbstractPersistableCustom {
         this.office = staffOffice;
 
         /*
-         * if (StringUtils.isNotBlank(name)) { this.name = name.trim(); } else {
-         * this.name = null; }
+         * if (StringUtils.isNotBlank(name)) { this.name = name.trim(); } else { this.name = null; }
          *
-         * if (StringUtils.isNotBlank(description)) { this.description =
-         * description.trim(); } else { this.description = null; }
+         * if (StringUtils.isNotBlank(description)) { this.description = description.trim(); } else { this.description =
+         * null; }
          */
 
     }

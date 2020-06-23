@@ -60,8 +60,7 @@ public class InterestRateChartAssembler {
     }
 
     /**
-     * Assembles a new {@link InterestRateChart} from JSON Slabs passed in
-     * request
+     * Assembles a new {@link InterestRateChart} from JSON Slabs passed in request
      */
     public InterestRateChart assembleFrom(final JsonCommand command) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

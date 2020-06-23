@@ -46,8 +46,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests loan schedule change based on group meeting changes and loan
- * rescheduling
+ * Tests loan schedule change based on group meeting changes and loan rescheduling
  **/
 @SuppressWarnings({ "rawtypes" })
 @Disabled

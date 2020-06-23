@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.client.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when client Identifier resources are not
- * found.
+ * A {@link RuntimeException} thrown when client Identifier resources are not found.
  */
 public class ClientIdentifierNotFoundException extends AbstractPlatformResourceNotFoundException {
 

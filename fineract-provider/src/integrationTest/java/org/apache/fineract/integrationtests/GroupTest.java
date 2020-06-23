@@ -41,8 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Group Test for checking Group: Creation, Activation, Client Association,
- * Updating & Deletion
+ * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
  */
 public class GroupTest {
 

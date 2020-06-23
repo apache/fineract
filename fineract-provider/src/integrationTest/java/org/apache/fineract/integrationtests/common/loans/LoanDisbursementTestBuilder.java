@@ -81,27 +81,18 @@ public class LoanDisbursementTestBuilder {
     }
 
     /*
-     * public HashMap<String, String> build(String dueDate,String
-     * totalOriginalDueForPeriod,String totalOutstandingForPeriod, String
-     * interestOutstanding, String principalOutstanding, String
-     * principalLoanBalanceOutstanding, String principalDue, String
-     * principalOriginalDue, String fromDate) { HashMap<String, String>
-     * expectedRepaymentSchedule = new HashMap<String, String>();
-     * expectedRepaymentSchedule.put("dueDate", dueDate);
-     * expectedRepaymentSchedule.put("totalOriginalDueForPeriod",
-     * totalOriginalDueForPeriod);
-     * expectedRepaymentSchedule.put("totalOutstandingForPeriod",
-     * totalOutstandingForPeriod);
-     * expectedRepaymentSchedule.put("interestOutstanding",
-     * interestOutstanding);
-     * expectedRepaymentSchedule.put("principalOutstanding",
-     * principalOutstanding);
-     * expectedRepaymentSchedule.put("principalLoanBalanceOutstanding",
-     * principalLoanBalanceOutstanding);
+     * public HashMap<String, String> build(String dueDate,String totalOriginalDueForPeriod,String
+     * totalOutstandingForPeriod, String interestOutstanding, String principalOutstanding, String
+     * principalLoanBalanceOutstanding, String principalDue, String principalOriginalDue, String fromDate) {
+     * HashMap<String, String> expectedRepaymentSchedule = new HashMap<String, String>();
+     * expectedRepaymentSchedule.put("dueDate", dueDate); expectedRepaymentSchedule.put("totalOriginalDueForPeriod",
+     * totalOriginalDueForPeriod); expectedRepaymentSchedule.put("totalOutstandingForPeriod",
+     * totalOutstandingForPeriod); expectedRepaymentSchedule.put("interestOutstanding", interestOutstanding);
+     * expectedRepaymentSchedule.put("principalOutstanding", principalOutstanding);
+     * expectedRepaymentSchedule.put("principalLoanBalanceOutstanding", principalLoanBalanceOutstanding);
      * expectedRepaymentSchedule.put("principalDue", principalDue);
-     * expectedRepaymentSchedule.put("principalOriginalDue",
-     * principalOriginalDue); expectedRepaymentSchedule.put("fromDate",
-     * fromDate);
+     * expectedRepaymentSchedule.put("principalOriginalDue", principalOriginalDue);
+     * expectedRepaymentSchedule.put("fromDate", fromDate);
      *
      * return expectedRepaymentSchedule; }
      */

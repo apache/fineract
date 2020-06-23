@@ -22,8 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Provides the domain repository for accessing, adding, modifying or deleting
- * teller transactions.
+ * Provides the domain repository for accessing, adding, modifying or deleting teller transactions.
  *
  * @see org.apache.fineract.organisation.teller.domain.TellerTransaction
  * @since 2.0.0

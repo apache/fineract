@@ -21,8 +21,8 @@ package org.apache.fineract.portfolio.charge.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when attempting to crate
- * charge of type penalty due at disbursement .
+ * {@link AbstractPlatformDomainRuleException} thrown when attempting to crate charge of type penalty due at
+ * disbursement .
  */
 public class ChargeMustBePenaltyException extends AbstractPlatformDomainRuleException {
 

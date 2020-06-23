@@ -29,8 +29,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 public class ApiGlobalErrorResponse {
 
     /**
-     * A developer friendly plain English description of why the HTTP error
-     * response was returned from the API.
+     * A developer friendly plain English description of why the HTTP error response was returned from the API.
      */
     private String developerMessage;
 
@@ -40,21 +39,19 @@ public class ApiGlobalErrorResponse {
     private String httpStatusCode;
 
     /**
-     * A user friendly plain English description of why the HTTP error response
-     * was returned from the API that can be presented to end users.
+     * A user friendly plain English description of why the HTTP error response was returned from the API that can be
+     * presented to end users.
      */
     private String defaultUserMessage;
 
     /**
-     * A code that can be used for globalisation support by client applications
-     * of the API.
+     * A code that can be used for globalisation support by client applications of the API.
      */
     private String userMessageGlobalisationCode;
 
     /**
-     * A list of zero or more of the actual reasons for the HTTP error should
-     * they be needed. Typically used to express data validation errors with
-     * parameters passed to API.
+     * A list of zero or more of the actual reasons for the HTTP error should they be needed. Typically used to express
+     * data validation errors with parameters passed to API.
      */
     private List<ApiParameterError> errors = new ArrayList<>();
 

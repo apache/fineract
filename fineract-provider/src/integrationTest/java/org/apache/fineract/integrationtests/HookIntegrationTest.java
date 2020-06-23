@@ -70,8 +70,8 @@ public class HookIntegrationTest {
         try {
 
             /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
+             * sleep for a three seconds after each failure to increase the likelihood of the previous request for
+             * creating office completing
              **/
 
             for (int i = 0; i < 6; i++) {

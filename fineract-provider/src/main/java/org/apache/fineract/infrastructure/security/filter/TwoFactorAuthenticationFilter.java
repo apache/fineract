@@ -44,19 +44,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
- * This filter is responsible for handling two-factor authentication. The filter
- * is enabled when 'twofactor' environment profile is active, otherwise
- * {@link InsecureTwoFactorAuthenticationFilter} is used.
+ * This filter is responsible for handling two-factor authentication. The filter is enabled when 'twofactor' environment
+ * profile is active, otherwise {@link InsecureTwoFactorAuthenticationFilter} is used.
  *
- * This filter validates an access-token provided as a header
- * 'Fineract-Platform-TFA-Token'. If a valid token is provided, a
- * 'TWOFACTOR_AUTHENTICATED' authority is added to the current authentication.
- * If an invalid(non-existent or invalid) token is provided, 403 response is
- * returned.
+ * This filter validates an access-token provided as a header 'Fineract-Platform-TFA-Token'. If a valid token is
+ * provided, a 'TWOFACTOR_AUTHENTICATED' authority is added to the current authentication. If an invalid(non-existent or
+ * invalid) token is provided, 403 response is returned.
  *
- * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always
- * be granted 'TWOFACTOR_AUTHENTICATED' authority regardless of the value of the
- * 'Fineract-Platform-TFA-Token' header.
+ * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always be granted 'TWOFACTOR_AUTHENTICATED'
+ * authority regardless of the value of the 'Fineract-Platform-TFA-Token' header.
  */
 @Service(value = "twoFactorAuthFilter")
 @Profile("twofactor")

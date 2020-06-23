@@ -50,9 +50,8 @@ public interface LoanAccountDomainService {
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     /**
-     * This method is to recalculate and accrue the income till the last accrued
-     * date. this method is used when the schedule changes due to interest
-     * recalculation
+     * This method is to recalculate and accrue the income till the last accrued date. this method is used when the
+     * schedule changes due to interest recalculation
      *
      * @param loan
      */

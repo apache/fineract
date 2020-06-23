@@ -125,14 +125,12 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
     }
 
     /*
-     * public Date getStartDate() { Date startDate = null; if (this.startDate !=
-     * null) { startDate = Date.fromDateFields(this.startDate); } return
-     * startDate; }
+     * public Date getStartDate() { Date startDate = null; if (this.startDate != null) { startDate =
+     * Date.fromDateFields(this.startDate); } return startDate; }
      */
 
     /*
-     * public Date getStartDate() { return (Date) ObjectUtils.defaultIfNull(new
-     * Date(this.startDate), null); }
+     * public Date getStartDate() { return (Date) ObjectUtils.defaultIfNull(new Date(this.startDate), null); }
      */
 
 }

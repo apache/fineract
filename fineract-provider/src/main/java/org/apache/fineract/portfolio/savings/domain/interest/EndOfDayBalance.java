@@ -90,9 +90,8 @@ public class EndOfDayBalance {
     /**
      * Future Value (FV) = PV x (1+r)^n
      *
-     * Interest = FV - PV PV = Principal or the Account Balance r = rate per
-     * compounding period (so for daily, r = nominalInterestRateAsFraction x
-     * 1/365 n = number of periods rate is compounded
+     * Interest = FV - PV PV = Principal or the Account Balance r = rate per compounding period (so for daily, r =
+     * nominalInterestRateAsFraction x 1/365 n = number of periods rate is compounded
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
             final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
@@ -132,9 +131,8 @@ public class EndOfDayBalance {
     /**
      * @param compoundingPeriodInterval
      * @param upToInterestCalculationDate
-     *            : For calculating maturity details in advance
-     *            upToInterestCalculationDate will be maturity date else it will
-     *            be DateUtils.getLocalDateOfTenant().
+     *            : For calculating maturity details in advance upToInterestCalculationDate will be maturity date else
+     *            it will be DateUtils.getLocalDateOfTenant().
      * @return
      */
     public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval, final LocalDate upToInterestCalculationDate) {

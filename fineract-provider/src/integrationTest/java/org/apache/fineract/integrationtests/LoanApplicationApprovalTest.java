@@ -87,8 +87,7 @@ public class LoanApplicationApprovalTest {
     }
 
     /*
-     * Negative test case: Approved amount non zero is greater than proposed
-     * amount
+     * Negative test case: Approved amount non zero is greater than proposed amount
      */
     @Test
     public void loanApplicationApprovedAmountGreaterThanProposedAmount() {
@@ -236,10 +235,8 @@ public class LoanApplicationApprovalTest {
 
         /* If tranches are not specified for a multi-disburse loan */
         /**
-         * error =
-         * this.loanTransactionHelper.approveLoanForTranches(approveDate,
-         * expectedDisbursementDate, approvalAmount5, loanID, approveTranche5,
-         * CommonConstants.RESPONSE_ERROR);
+         * error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate,
+         * approvalAmount5, loanID, approveTranche5, CommonConstants.RESPONSE_ERROR);
          * assertEquals("error.msg.disbursementData.required",
          * error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
          **/

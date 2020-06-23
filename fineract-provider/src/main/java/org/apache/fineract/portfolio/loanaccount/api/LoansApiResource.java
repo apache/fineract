@@ -324,10 +324,9 @@ public class LoansApiResource {
     }
 
     /*
-     * This template API is used for loan approval, ideally this should be
-     * invoked on loan that are pending for approval. But system does not
-     * validate the status of the loan, it returns the template irrespective of
-     * loan status
+     * This template API is used for loan approval, ideally this should be invoked on loan that are pending for
+     * approval. But system does not validate the status of the loan, it returns the template irrespective of loan
+     * status
      */
 
     @GET

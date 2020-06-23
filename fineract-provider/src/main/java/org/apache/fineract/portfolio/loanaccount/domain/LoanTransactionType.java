@@ -29,21 +29,19 @@ public enum LoanTransactionType {
     WRITEOFF(6, "loanTransactionType.writeOff"), //
     MARKED_FOR_RESCHEDULING(7, "loanTransactionType.marked.for.rescheduling"), //
     /**
-     * This type of transactions is allowed on written-off loans where mfi still
-     * attempts to recover payments from applicant after writing-off.
+     * This type of transactions is allowed on written-off loans where mfi still attempts to recover payments from
+     * applicant after writing-off.
      */
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
     WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
     /**
-     * Transaction represents an Accrual (For either interest, charge or a
-     * penalty
+     * Transaction represents an Accrual (For either interest, charge or a penalty
      **/
     ACCRUAL(10, "loanTransactionType.accrual"), //
 
     /***
-     * A Loan Transfer involves two steps, first a "initiate" Loan transfer
-     * transaction done by the Source branch followed by a "complete" loan
-     * transaction initiated by the destination branch
+     * A Loan Transfer involves two steps, first a "initiate" Loan transfer transaction done by the Source branch
+     * followed by a "complete" loan transaction initiated by the destination branch
      **/
     INITIATE_TRANSFER(12, "loanTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "loanTransactionType.approveTransfer"), //

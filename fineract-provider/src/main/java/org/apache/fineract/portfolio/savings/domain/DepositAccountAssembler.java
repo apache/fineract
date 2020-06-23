@@ -148,9 +148,8 @@ public class DepositAccountAssembler {
     }
 
     /**
-     * Assembles a new {@link SavingsAccount} from JSON details passed in
-     * request inheriting details where relevant from chosen
-     * {@link SavingsProduct}.
+     * Assembles a new {@link SavingsAccount} from JSON details passed in request inheriting details where relevant from
+     * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy, final DepositAccountType depositAccountType) {
 

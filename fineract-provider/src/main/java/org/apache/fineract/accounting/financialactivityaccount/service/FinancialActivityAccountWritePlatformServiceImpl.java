@@ -89,8 +89,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     }
 
     /**
-     * Validate that the GL Account is appropriate for the particular Financial
-     * Activity Type
+     * Validate that the GL Account is appropriate for the particular Financial Activity Type
      **/
     private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
         FinancialActivity financialActivity = FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());

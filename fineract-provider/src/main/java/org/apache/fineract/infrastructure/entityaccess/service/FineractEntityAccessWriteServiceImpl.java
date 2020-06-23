@@ -184,13 +184,11 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     /*
-     * @Override public CommandProcessingResult updateEntityAccess(Long
-     * entityAccessId, JsonCommand command) { // TODO Auto-generated method stub
-     * return null; }
+     * @Override public CommandProcessingResult updateEntityAccess(Long entityAccessId, JsonCommand command) { // TODO
+     * Auto-generated method stub return null; }
      *
-     * @Override public CommandProcessingResult removeEntityAccess(String
-     * entityType, Long entityId, Long accessType, String secondEntityType, Long
-     * secondEntityId) { // TODO Auto-generated method stub return null; }
+     * @Override public CommandProcessingResult removeEntityAccess(String entityType, Long entityId, Long accessType,
+     * String secondEntityType, Long secondEntityId) { // TODO Auto-generated method stub return null; }
      */
 
 }

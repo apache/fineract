@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.core.data;
 import java.util.Map;
 
 /**
- * Represents the successful result of an REST API call that results in
- * processing a command.
+ * Represents the successful result of an REST API call that results in processing a command.
  */
 public class CommandProcessingResultBuilder {
 

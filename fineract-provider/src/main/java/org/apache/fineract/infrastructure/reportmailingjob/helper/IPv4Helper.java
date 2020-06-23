@@ -26,8 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This utility provides methods to either convert an IPv4 address to its long
- * format or a 32bit dotted format.
+ * This utility provides methods to either convert an IPv4 address to its long format or a 32bit dotted format.
  *
  * @see http://hawkee.com/snippet/9731/
  */
@@ -151,8 +150,7 @@ public class IPv4Helper {
     /**
      * check if the java application is not running on a local machine
      *
-     * @return true if the application is not running on a local machine else
-     *         false
+     * @return true if the application is not running on a local machine else false
      **/
     public static boolean applicationIsNotRunningOnLocalMachine() {
         return !applicationIsRunningOnLocalMachine();

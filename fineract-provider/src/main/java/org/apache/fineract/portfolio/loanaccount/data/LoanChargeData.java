@@ -87,8 +87,7 @@ public class LoanChargeData {
     }
 
     /**
-     * used when populating with details from charge definition (for crud on
-     * charges)
+     * used when populating with details from charge definition (for crud on charges)
      */
     public static LoanChargeData newLoanChargeDetails(final Long chargeId, final String name, final CurrencyData currency,
             final BigDecimal amount, final BigDecimal percentage, final EnumOptionData chargeTimeType,

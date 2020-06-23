@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.util.Comparator;
 
 /**
- * Sort loan transactions by transaction date, created date and transaction type
- * placing
+ * Sort loan transactions by transaction date, created date and transaction type placing
  */
 public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 
@@ -31,9 +30,8 @@ public class LoanTransactionComparator implements Comparator<LoanTransaction> {
         int compareResult = 0;
         final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
         /**
-         * For transactions bearing the same transaction date, we sort
-         * transactions based on created date (when available) after which
-         * sorting for waivers takes place
+         * For transactions bearing the same transaction date, we sort transactions based on created date (when
+         * available) after which sorting for waivers takes place
          **/
         if (comparsion == 0) {
             int comparisonBasedOnCreatedDate = 0;

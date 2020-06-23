@@ -27,10 +27,9 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
 /**
- * REST integration tests helper. Intended to encapsulate the current
- * RestAssured-based implementation as private. May be REST integration tests
- * should instead be written using e.g. Spring's TestRestTemplate or Square's
- * Retrofit (already used in the Mifos X Android client).
+ * REST integration tests helper. Intended to encapsulate the current RestAssured-based implementation as private. May
+ * be REST integration tests should instead be written using e.g. Spring's TestRestTemplate or Square's Retrofit
+ * (already used in the Mifos X Android client).
  */
 public class RestAssuredFixture {
 
