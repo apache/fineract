@@ -27,8 +27,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link GroupRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link GroupRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service

@@ -51,19 +51,14 @@ public final class ReportParameterUsage extends AbstractPersistableCustom {
     }
 
     /*
-     * @Override public boolean equals(final Object obj) { if (obj == null) {
-     * return false; } if (obj == this) { return true; } if (obj.getClass() !=
-     * getClass()) { return false; } final ReportParameterUsage rhs =
-     * (ReportParameterUsage) obj; return new
-     * EqualsBuilder().appendSuper(super.equals(obj)) // .append(getId(),
-     * rhs.getId()) // .append(this.report.getId(), rhs.report.getId()) //
-     * .append(this.parameter.getId(), rhs.parameter.getId()) //
-     * .append(this.reportParameterName, rhs.reportParameterName) //
-     * .isEquals(); }
+     * @Override public boolean equals(final Object obj) { if (obj == null) { return false; } if (obj == this) { return
+     * true; } if (obj.getClass() != getClass()) { return false; } final ReportParameterUsage rhs =
+     * (ReportParameterUsage) obj; return new EqualsBuilder().appendSuper(super.equals(obj)) // .append(getId(),
+     * rhs.getId()) // .append(this.report.getId(), rhs.report.getId()) // .append(this.parameter.getId(),
+     * rhs.parameter.getId()) // .append(this.reportParameterName, rhs.reportParameterName) // .isEquals(); }
      *
-     * @Override public int hashCode() { return new HashCodeBuilder(3, 5) //
-     * .append(getId()) // .append(this.report.getId()) //
-     * .append(this.parameter.getId()) // .append(this.reportParameterName) //
+     * @Override public int hashCode() { return new HashCodeBuilder(3, 5) // .append(getId()) //
+     * .append(this.report.getId()) // .append(this.parameter.getId()) // .append(this.reportParameterName) //
      * .toHashCode(); }
      */
 

@@ -45,10 +45,8 @@ public class InterestIncentives extends AbstractPersistableCustom {
     }
 
     /*
-     * public InterestIncentives(final InterestRateChartSlab
-     * interestRateChartSlab, final InterestIncentivesFields
-     * interestIncentivesFields) { this.interestRateChartSlab =
-     * interestRateChartSlab; this.interestIncentivesFields =
+     * public InterestIncentives(final InterestRateChartSlab interestRateChartSlab, final InterestIncentivesFields
+     * interestIncentivesFields) { this.interestRateChartSlab = interestRateChartSlab; this.interestIncentivesFields =
      * interestIncentivesFields; }
      */
 

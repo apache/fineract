@@ -22,12 +22,9 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -166,28 +163,22 @@ public class CampaignsHelper {
         return json;
     }
 
-    public ArrayList<ReportData> getReports() {
+    public List<ReportData> getReports() {
         return getReports(BUSINESS_RULE_OPTIONS);
     }
 
-    private ArrayList<ReportData> getReports(String jsonAttributeToGetBack) {
+    private List<ReportData> getReports(String jsonAttributeToGetBack) {
         LOG.info("--------------------------------- GET REPORTS OPTIONS -------------------------------");
         Assert.notNull(jsonAttributeToGetBack, "jsonAttributeToGetBack may not be null");
         final String templateUrl = SMS_CAMPAIGNS_URL + "/template?" + Utils.TENANT_IDENTIFIER;
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(templateUrl).andReturn()
                 .asString();
         Assert.notNull(json, "json");
-        ArrayList<ReportData> reportsList = new ArrayList<>();
-        String reportsString = new Gson().toJson(JsonPath.from(json).get(jsonAttributeToGetBack));
-        Assert.notNull(reportsString, "reportsString");
-        final Gson gson = new Gson();
-        final Type typeOfHashMap = new TypeToken<List<ReportData>>() {}.getType();
-        reportsList = gson.fromJson(reportsString, typeOfHashMap);
-        return reportsList;
+        return JsonPath.from(json).getList(jsonAttributeToGetBack, ReportData.class);
     }
 
     private Long getSelectedReportId(final String reportName) {
-        ArrayList<ReportData> reports = getReports();
+        List<ReportData> reports = getReports();
 
         if (reports != null && !reports.isEmpty()) {
             for (ReportData reportData : reports) {

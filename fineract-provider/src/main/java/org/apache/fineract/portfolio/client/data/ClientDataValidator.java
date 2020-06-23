@@ -104,14 +104,11 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.savingsProductIdParamName).value(savingsProductId).ignoreIfNull()
                     .longGreaterThanZero();
             /*
-             * if (savingsProductId != null &&
-             * this.fromApiJsonHelper.parameterExists(ClientApiConstants.
-             * datatables, element)) { final JsonArray datatables =
-             * this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.
+             * if (savingsProductId != null && this.fromApiJsonHelper.parameterExists(ClientApiConstants. datatables,
+             * element)) { final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.
              * datatables, element); if (datatables.size() > 0) {
              * baseDataValidator.reset().parameter(ClientApiConstants.
-             * savingsProductIdParamName).value(savingsProductId)
-             * .failWithCodeNoParameterAddedToErrorCode(
+             * savingsProductIdParamName).value(savingsProductId) .failWithCodeNoParameterAddedToErrorCode(
              * "should.not.be.used.with.datatables.parameter"); } }
              */
         }
@@ -175,12 +172,9 @@ public final class ClientDataValidator {
                         element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
                 /*
-                 * if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.
-                 * datatables,element)){
-                 * baseDataValidator.reset().parameter(ClientApiConstants.
-                 * activeParamName).value(active)
-                 * .failWithCodeNoParameterAddedToErrorCode(
-                 * "should.not.be.used.with.datatables.parameter"); }
+                 * if(this.fromApiJsonHelper.parameterExists(ClientApiConstants. datatables,element)){
+                 * baseDataValidator.reset().parameter(ClientApiConstants. activeParamName).value(active)
+                 * .failWithCodeNoParameterAddedToErrorCode( "should.not.be.used.with.datatables.parameter"); }
                  */
             }
         } else {

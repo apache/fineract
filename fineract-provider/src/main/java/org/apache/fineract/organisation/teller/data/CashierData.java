@@ -24,8 +24,7 @@ import java.util.Date;
 import org.apache.fineract.organisation.staff.data.StaffData;
 
 /**
- * Represents a cashier, providing access to the cashier's office, staff
- * information, teller, and more.
+ * Represents a cashier, providing access to the cashier's office, staff information, teller, and more.
  *
  * @author Markus Geiss
  *
@@ -80,13 +79,11 @@ public final class CashierData implements Serializable {
      * Creates a new cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @param id
@@ -180,8 +177,7 @@ public final class CashierData implements Serializable {
      * Returns the valid from date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @return the valid from date of this cashier
@@ -194,8 +190,7 @@ public final class CashierData implements Serializable {
      * Returns the valid to date of this cashier.
      *
      * <p>
-     * The valid from/to dates may be used to define a time period in which the
-     * cashier is assignable to a teller.
+     * The valid from/to dates may be used to define a time period in which the cashier is assignable to a teller.
      * </p>
      *
      * @return the valid to date of this cashier
@@ -207,8 +202,7 @@ public final class CashierData implements Serializable {
     /**
      * Returns whether this cashier works part time or not.
      *
-     * @return {@code true} if this cashier works part time; {@code false}
-     *         otherwise
+     * @return {@code true} if this cashier works part time; {@code false} otherwise
      */
     public Boolean isFullDay() {
         return isFullDay;
@@ -218,8 +212,7 @@ public final class CashierData implements Serializable {
      * Returns the start time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @return the start time of this cashier
@@ -232,8 +225,7 @@ public final class CashierData implements Serializable {
      * Returns the end time of this cashier.
      *
      * <p>
-     * The start/end times may be used to define a time period in which the
-     * cashier works part time.
+     * The start/end times may be used to define a time period in which the cashier works part time.
      * </p>
      *
      * @return the start time of this cashier

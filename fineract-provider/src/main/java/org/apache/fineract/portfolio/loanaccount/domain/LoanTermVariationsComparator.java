@@ -30,8 +30,8 @@ public class LoanTermVariationsComparator implements Comparator<LoanTermVariatio
         int compareResult = 0;
         final int comparsion = o1.getTermApplicableFrom().compareTo(o2.getTermApplicableFrom());
         /**
-         * For Terms bearing the same effective date, we sort based on modified
-         * date (when available) and new inserted installment
+         * For Terms bearing the same effective date, we sort based on modified date (when available) and new inserted
+         * installment
          **/
         if (comparsion == 0) {
             if (o2.getTermType().isDueDateVariation() || o2.getTermType().isInsertInstallment()) {

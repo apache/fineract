@@ -67,8 +67,8 @@ public interface TellerWritePlatformService {
     public CommandProcessingResult deleteTeller(Long tellerId);
 
     /**
-     * Allocates a cashier to an existing teller. The allocation can be for a
-     * duration from a date to a date from a certain start time to an end time.
+     * Allocates a cashier to an existing teller. The allocation can be for a duration from a date to a date from a
+     * certain start time to an end time.
      *
      * @param command
      *            the command to allocate a cashier for a specific teller

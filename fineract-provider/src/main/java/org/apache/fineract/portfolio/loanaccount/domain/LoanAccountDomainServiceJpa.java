@@ -157,14 +157,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         // TODO: Is it required to validate transaction date with meeting dates
         // if repayments is synced with meeting?
         /*
-         * if(loan.isSyncDisbursementWithMeeting()){ // validate actual
-         * disbursement date against meeting date CalendarInstance
-         * calendarInstance =
-         * this.calendarInstanceRepository.findCalendarInstaneByLoanId
-         * (loan.getId(), CalendarEntityType.LOANS.getValue());
-         * this.loanEventApiJsonValidator
-         * .validateRepaymentDateWithMeetingDate(transactionDate,
-         * calendarInstance); }
+         * if(loan.isSyncDisbursementWithMeeting()){ // validate actual disbursement date against meeting date
+         * CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId
+         * (loan.getId(), CalendarEntityType.LOANS.getValue()); this.loanEventApiJsonValidator
+         * .validateRepaymentDateWithMeetingDate(transactionDate, calendarInstance); }
          */
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -195,11 +191,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a payment is made before the latest payment
-         * recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
+         * before the latest payment recorded against the loan)
          ***/
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -471,10 +465,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
-     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain.
-     * Loan)
+     * @see org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
+     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain. Loan)
      */
     @Override
     public void recalculateAccruals(Loan loan) {
@@ -696,11 +688,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 defaultLoanLifecycleStateMachine(), scheduleGeneratorDTO, appUser);
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a payment is made before the latest payment
-         * recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
+         * before the latest payment recorded against the loan)
          ***/
 
         for (LoanTransaction newTransaction : newTransactions) {

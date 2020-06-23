@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The interest posting period is the span of time at the end of which savings
- * earned but not yet credited/posted in a client's account is credited/posted.
+ * The interest posting period is the span of time at the end of which savings earned but not yet credited/posted in a
+ * client's account is credited/posted.
  */
 public enum SavingsPostingInterestPeriodType {
 

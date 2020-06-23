@@ -34,8 +34,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
- * A JDBC implementation of {@link TenantDetailsService} for loading a tenants
- * details by a <code>tenantIdentifier</code>.
+ * A JDBC implementation of {@link TenantDetailsService} for loading a tenants details by a
+ * <code>tenantIdentifier</code>.
  */
 @Service
 public class JdbcTenantDetailsService implements TenantDetailsService {

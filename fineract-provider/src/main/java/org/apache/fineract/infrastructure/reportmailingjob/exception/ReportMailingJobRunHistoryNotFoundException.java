@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.reportmailingjob.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when report mailing job run history
- * resources are not found.
+ * A {@link RuntimeException} thrown when report mailing job run history resources are not found.
  **/
 @SuppressWarnings("serial")
 public class ReportMailingJobRunHistoryNotFoundException extends AbstractPlatformResourceNotFoundException {

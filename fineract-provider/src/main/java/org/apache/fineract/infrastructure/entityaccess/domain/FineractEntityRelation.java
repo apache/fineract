@@ -44,10 +44,8 @@ public class FineractEntityRelation extends AbstractPersistableCustom {
     private String codeName;
 
     /*
-     * private FineractEntityRelation(final String fromEntityType, final String
-     * toEntityType, final String codeName) { this.fromEntityType =
-     * fromEntityType; this.toEntityType = toEntityType; this.codeName =
-     * codeName; }
+     * private FineractEntityRelation(final String fromEntityType, final String toEntityType, final String codeName) {
+     * this.fromEntityType = fromEntityType; this.toEntityType = toEntityType; this.codeName = codeName; }
      */
 
     public FineractEntityRelation() {

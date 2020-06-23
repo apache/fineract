@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link FinancialActivityAccountRepository} that adds NULL
- * checking and Error handling capabilities
+ * Wrapper for {@link FinancialActivityAccountRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service

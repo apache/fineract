@@ -322,23 +322,20 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
          *
          * public String schema() { return this.schemaSql; }
          *
-         * private DepositAccountInterestRateChartSlabsMapper() { final
-         * StringBuilder sqlBuilder = new StringBuilder(400);
+         * private DepositAccountInterestRateChartSlabsMapper() { final StringBuilder sqlBuilder = new
+         * StringBuilder(400);
          *
          * sqlBuilder .append(
-         * "ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, "
-         * ) .append(
+         * "ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, " ) .append(
          * "ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, "
-         * ) .append(
-         * "ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, "
+         * ) .append( "ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, "
          * ) .append(
          * "curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, "
          * ) .append(
          * "curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf "
-         * ) .append("from ").append(
-         * "m_savings_account_interest_rate_slab ircd ")
-         * .append("left join m_currency curr on ircd.currency_code= curr.code "
-         * ); this.schemaSql = sqlBuilder.toString(); }
+         * ) .append("from ").append( "m_savings_account_interest_rate_slab ircd ")
+         * .append("left join m_currency curr on ircd.currency_code= curr.code " ); this.schemaSql =
+         * sqlBuilder.toString(); }
          */
 
         @Override

@@ -21,10 +21,9 @@ package org.apache.fineract.batch.domain;
 import java.util.Set;
 
 /**
- * Provides an object for separate HTTP requests in the Batch Request for Batch
- * API. A requestId is also included as data field which takes care of
- * dependency issues among various requests. This class also provides getter and
- * setter functions to access Batch Request data fields.
+ * Provides an object for separate HTTP requests in the Batch Request for Batch API. A requestId is also included as
+ * data field which takes care of dependency issues among various requests. This class also provides getter and setter
+ * functions to access Batch Request data fields.
  *
  * @author Rishabh Shukla
  *
@@ -41,8 +40,8 @@ public class BatchRequest {
     private String body;
 
     /**
-     * Constructs a 'BatchRequest' with requestId, relativeUrl, method, headers,
-     * reference and body of the incoming request.
+     * Constructs a 'BatchRequest' with requestId, relativeUrl, method, headers, reference and body of the incoming
+     * request.
      *
      * @param requestId
      *            of HTTP request.
@@ -131,8 +130,7 @@ public class BatchRequest {
     }
 
     /**
-     * Returns the values of 'headers' of {@link Header} type of an object of
-     * this class.
+     * Returns the values of 'headers' of {@link Header} type of an object of this class.
      *
      * @return headers of the HTTP request.
      * @see Header
@@ -142,8 +140,7 @@ public class BatchRequest {
     }
 
     /**
-     * Sets the values of 'headers' of {@link Header} type of an object of this
-     * class.
+     * Sets the values of 'headers' of {@link Header} type of an object of this class.
      *
      * @param headers
      * @see Header

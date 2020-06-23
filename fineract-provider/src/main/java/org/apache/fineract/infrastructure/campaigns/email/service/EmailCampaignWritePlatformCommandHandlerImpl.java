@@ -313,8 +313,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         // calculate new trigger date and insert into next trigger date
 
         /**
-         * next run time has to be in the future if not calculate a new future
-         * date
+         * next run time has to be in the future if not calculate a new future date
          */
         LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
                 emailCampaign.getNextTriggerDate().toLocalDate(), nextTriggerDate.toLocalDate());
@@ -366,9 +365,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             if (emailCampaign.isSchedule()) {
 
                 /**
-                 * if recurrence start date is in the future calculate next
-                 * trigger date if not use recurrence start date us next trigger
-                 * date when activating
+                 * if recurrence start date is in the future calculate next trigger date if not use recurrence start
+                 * date us next trigger date when activating
                  */
                 LocalDate nextTriggerDate = null;
                 if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
@@ -391,8 +389,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         }
 
         /*
-         * if campaign is direct insert campaign message into email outbound
-         * table else if its a schedule create a job process for it
+         * if campaign is direct insert campaign message into email outbound table else if its a schedule create a job
+         * process for it
          */
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -515,9 +513,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         if (emailCampaign.isSchedule()) {
 
             /**
-             * if recurrence start date is in the future calculate next trigger
-             * date if not use recurrence start date us next trigger date when
-             * activating
+             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
+             * next trigger date when activating
              */
             LocalDate nextTriggerDate = null;
             if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
@@ -718,8 +715,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     /**
-     * This generates the the report and converts it to a file by passing the
-     * parameters below
+     * This generates the the report and converts it to a file by passing the parameters below
      *
      * @param emailCampaign
      * @param emailAttachmentFileFormat
@@ -763,8 +759,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     /**
-     * This matches the the actual values to the key in the report stretchy
-     * parameters map
+     * This matches the the actual values to the key in the report stretchy parameters map
      *
      * @param stretchyParams
      * @param client

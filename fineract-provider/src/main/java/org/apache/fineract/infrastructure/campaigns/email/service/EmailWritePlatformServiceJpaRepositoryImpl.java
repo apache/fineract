@@ -117,8 +117,7 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
             final DataIntegrityViolationException dve) {

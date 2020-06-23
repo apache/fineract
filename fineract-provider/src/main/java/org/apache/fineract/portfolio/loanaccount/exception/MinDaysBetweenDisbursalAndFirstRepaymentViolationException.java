@@ -22,9 +22,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.joda.time.LocalDate;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when a number of days
- * between disbursal date and firstRepayment is less than
- * minimumDaysBetweenDisbursalAndFirstRepayment
+ * {@link AbstractPlatformDomainRuleException} thrown when a number of days between disbursal date and firstRepayment is
+ * less than minimumDaysBetweenDisbursalAndFirstRepayment
  *
  */
 public class MinDaysBetweenDisbursalAndFirstRepaymentViolationException extends AbstractPlatformDomainRuleException {

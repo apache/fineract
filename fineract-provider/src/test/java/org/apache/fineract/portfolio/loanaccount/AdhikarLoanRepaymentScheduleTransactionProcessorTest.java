@@ -55,8 +55,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     }
 
     /**
-     * Scenario 1: Given no overdue installments, current interest due is paid
-     * before principal.
+     * Scenario 1: Given no overdue installments, current interest due is paid before principal.
      */
     @Test
     public void givenNoOverdueInstallmentsOnTimeRepaymentPaysOffInterestDueFirst() {

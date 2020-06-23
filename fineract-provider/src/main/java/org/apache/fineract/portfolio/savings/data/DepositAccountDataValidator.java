@@ -626,14 +626,10 @@ public class DepositAccountDataValidator {
                 baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
 
                 /*
-                 * if (CalendarFrequencyType.fromInt(frequency).isWeekly()) {
-                 * final Integer repeatsOnDay =
-                 * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
-                 * (repeatsOnDayParamName, element);
-                 * baseDataValidator.reset().parameter
-                 * (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
-                 * .inMinMaxRange(CalendarWeekDaysType.getMinValue(),
-                 * CalendarWeekDaysType.getMaxValue()); }
+                 * if (CalendarFrequencyType.fromInt(frequency).isWeekly()) { final Integer repeatsOnDay =
+                 * this.fromApiJsonHelper.extractIntegerSansLocaleNamed (repeatsOnDayParamName, element);
+                 * baseDataValidator.reset().parameter (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
+                 * .inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue()); }
                  */
             }
         }
@@ -674,16 +670,11 @@ public class DepositAccountDataValidator {
             final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyParamName, element);
             baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
             /*
-             * if (this.fromApiJsonHelper.parameterExists(repeatsOnDayParamName,
-             * element)) { if
-             * (CalendarFrequencyType.fromInt(frequency).isWeekly()) { final
-             * Integer repeatsOnDay =
-             * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
-             * (repeatsOnDayParamName, element);
-             * baseDataValidator.reset().parameter
-             * (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
-             * .inMinMaxRange(CalendarWeekDaysType.getMinValue(),
-             * CalendarWeekDaysType.getMaxValue()); } }
+             * if (this.fromApiJsonHelper.parameterExists(repeatsOnDayParamName, element)) { if
+             * (CalendarFrequencyType.fromInt(frequency).isWeekly()) { final Integer repeatsOnDay =
+             * this.fromApiJsonHelper.extractIntegerSansLocaleNamed (repeatsOnDayParamName, element);
+             * baseDataValidator.reset().parameter (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
+             * .inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue()); } }
              */
         }
     }

@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link PermissionsCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link PermissionsCommand}'s.
  */
 @Component
 public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<PermissionsCommand> {

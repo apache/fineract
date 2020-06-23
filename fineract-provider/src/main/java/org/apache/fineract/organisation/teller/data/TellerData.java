@@ -98,11 +98,9 @@ public final class TellerData implements Serializable {
      * @param status
      *            - current state of the teller, eg. active, inactive, pending
      * @param hasTransactions
-     *            - indicates that this teller already is used to perform
-     *            postings
+     *            - indicates that this teller already is used to perform postings
      * @param hasMappedCashiers
-     *            - indicates that the teller already has @code Cashier}s
-     *            assigned to it
+     *            - indicates that the teller already has @code Cashier}s assigned to it
      * @return the new created {@code TellerData}
      */
     public static TellerData instance(final Long id, final Long officeId, final Long debitAccountId, final Long creditAccountId,

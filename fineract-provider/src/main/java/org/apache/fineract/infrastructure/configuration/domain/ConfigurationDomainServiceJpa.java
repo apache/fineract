@@ -82,8 +82,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     /*
      * (non-Javadoc)
      *
-     * @see org.apache.fineract.infrastructure.configuration.domain.
-     * ConfigurationDomainService#isHolidaysEnabled()
+     * @see org.apache.fineract.infrastructure.configuration.domain. ConfigurationDomainService#isHolidaysEnabled()
      */
     @Override
     public boolean isRescheduleRepaymentsOnHolidaysEnabled() {

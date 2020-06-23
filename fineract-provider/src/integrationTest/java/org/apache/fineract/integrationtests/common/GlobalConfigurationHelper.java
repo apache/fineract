@@ -110,16 +110,13 @@ public class GlobalConfigurationHelper {
     }
 
     /**
-     * Helper method to get the current default instance data of the
-     * /configurations endpoint. Used to reset and verify that no global
-     * configuration affects state between integration tests.
+     * Helper method to get the current default instance data of the /configurations endpoint. Used to reset and verify
+     * that no global configuration affects state between integration tests.
      *
-     * @see <a href=
-     *      "https://issues.apache.org/jira/browse/FINERACT-722">FINERACT-722</a>
-     *      This is a quick, fail fast and early implementation to resolve this
-     *      issue. TODO: A more robust future solution would be isolating all
-     *      integration test state using Spring Framework's integration test
-     *      infrastructure for transaction commits and rollbacks.
+     * @see <a href= "https://issues.apache.org/jira/browse/FINERACT-722">FINERACT-722</a> This is a quick, fail fast
+     *      and early implementation to resolve this issue. TODO: A more robust future solution would be isolating all
+     *      integration test state using Spring Framework's integration test infrastructure for transaction commits and
+     *      rollbacks.
      */
     private static ArrayList<HashMap> getAllDefaultGlobalConfigurations() {
 

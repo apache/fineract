@@ -216,9 +216,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final Collection<EnumOptionData> transferTypeOptions = Arrays.asList(transferType(AccountTransferType.ACCOUNT_TRANSFER),
                 transferType(
                         AccountTransferType.LOAN_REPAYMENT)/*
-                                                            * , transferType(
-                                                            * AccountTransferType
-                                                            * . CHARGE_PAYMENT )
+                                                            * , transferType( AccountTransferType . CHARGE_PAYMENT )
                                                             */);
         final Collection<EnumOptionData> statusOptions = Arrays.asList(standingInstructionStatus(StandingInstructionStatus.ACTIVE),
                 standingInstructionStatus(StandingInstructionStatus.DISABLED));
@@ -445,16 +443,12 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             EnumOptionData transferTypeEnum = AccountTransferEnumerations.transferType(transferType);
 
             /*
-             * final String currencyCode = rs.getString("currencyCode"); final
-             * String currencyName = rs.getString("currencyName"); final String
-             * currencyNameCode = rs.getString("currencyNameCode"); final String
-             * currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-             * final Integer currencyDigits = JdbcSupport.getInteger(rs,
-             * "currencyDigits"); final Integer inMultiplesOf =
-             * JdbcSupport.getInteger(rs, "inMultiplesOf"); final CurrencyData
-             * currency = new CurrencyData(currencyCode, currencyName,
-             * currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-             * currencyNameCode);
+             * final String currencyCode = rs.getString("currencyCode"); final String currencyName =
+             * rs.getString("currencyName"); final String currencyNameCode = rs.getString("currencyNameCode"); final
+             * String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol"); final Integer currencyDigits =
+             * JdbcSupport.getInteger(rs, "currencyDigits"); final Integer inMultiplesOf = JdbcSupport.getInteger(rs,
+             * "inMultiplesOf"); final CurrencyData currency = new CurrencyData(currencyCode, currencyName,
+             * currencyDigits, inMultiplesOf, currencyDisplaySymbol, currencyNameCode);
              */
             final Long fromOfficeId = JdbcSupport.getLong(rs, "fromOfficeId");
             final String fromOfficeName = rs.getString("fromOfficeName");

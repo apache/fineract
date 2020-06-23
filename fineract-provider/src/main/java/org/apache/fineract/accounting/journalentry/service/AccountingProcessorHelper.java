@@ -338,11 +338,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Accrual Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Accrual Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      * @param accountTypeToBeDebited
@@ -372,11 +370,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Accrual Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Accrual Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      *            office
@@ -445,11 +441,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Cash Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Cash Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      * @param accountTypeToBeDebited
@@ -480,11 +474,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Cash Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Cash Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      * @param accountTypeToBeDebited
@@ -535,8 +527,7 @@ public class AccountingProcessorHelper {
      */
     public void checkForBranchClosures(final GLClosure latestGLClosure, final Date transactionDate) {
         /**
-         * check if an accounting closure has happened for this branch after the
-         * transaction Date
+         * check if an accounting closure has happened for this branch after the transaction Date
          **/
         if (latestGLClosure != null) {
             if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0
@@ -575,11 +566,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Cash Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Cash Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      * @param currencyCode
@@ -697,8 +686,7 @@ public class AccountingProcessorHelper {
             final Date transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
             final List<ChargePaymentDTO> chargePaymentDTOs) {
         /***
-         * Map to track each account and the net credit to be made for a
-         * particular account
+         * Map to track each account and the net credit to be made for a particular account
          ***/
         final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<>();
         for (final ChargePaymentDTO chargePaymentDTO : chargePaymentDTOs) {
@@ -738,11 +726,9 @@ public class AccountingProcessorHelper {
     }
 
     /**
-     * Convenience method that creates a pair of related Debits and Credits for
-     * Cash Based accounting.
+     * Convenience method that creates a pair of related Debits and Credits for Cash Based accounting.
      *
-     * The target accounts for debits and credits are switched in case of a
-     * reversal
+     * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
      *            office
@@ -777,10 +763,9 @@ public class AccountingProcessorHelper {
         // TODO Vishwas: Remove this validation, as and when appropriate Junit
         // tests are written for accounting
         /**
-         * Accounting module currently supports a single charge per transaction,
-         * throw an error if this is not the case here so any developers
-         * changing the expected portfolio behavior would also take care of
-         * modifying the accounting code appropriately
+         * Accounting module currently supports a single charge per transaction, throw an error if this is not the case
+         * here so any developers changing the expected portfolio behavior would also take care of modifying the
+         * accounting code appropriately
          **/
         if (chargePaymentDTOs.size() != 1) {
             throw new PlatformDataIntegrityException("Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code",
@@ -1126,9 +1111,8 @@ public class AccountingProcessorHelper {
                     PortfolioProductType.LOAN.getValue(), accountMappingTypeId);
 
             /****
-             * Get more specific mapping for FUND source accounts (based on
-             * payment channels). Note that fund source placeholder ID would be
-             * same for both cash and accrual accounts
+             * Get more specific mapping for FUND source accounts (based on payment channels). Note that fund source
+             * placeholder ID would be same for both cash and accrual accounts
              ***/
             if (accountMappingTypeId == CashAccountsForLoan.FUND_SOURCE.getValue()) {
                 final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
@@ -1152,10 +1136,9 @@ public class AccountingProcessorHelper {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(loanProductId,
                 PortfolioProductType.LOAN.getValue(), accountMappingTypeId);
         /*****
-         * Get more specific mappings for Charges and penalties (based on the
-         * actual charge /penalty coupled with the loan product). Note the
-         * income from fees and income from penalties placeholder ID would be
-         * the same for both cash and accrual based accounts
+         * Get more specific mappings for Charges and penalties (based on the actual charge /penalty coupled with the
+         * loan product). Note the income from fees and income from penalties placeholder ID would be the same for both
+         * cash and accrual based accounts
          *****/
 
         // Vishwas TODO: remove this condition as it should always be true
@@ -1176,10 +1159,9 @@ public class AccountingProcessorHelper {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
                 PortfolioProductType.SAVING.getValue(), accountMappingTypeId);
         /*****
-         * Get more specific mappings for Charges and penalties (based on the
-         * actual charge /penalty coupled with the loan product). Note the
-         * income from fees and income from penalties placeholder ID would be
-         * the same for both cash and accrual based accounts
+         * Get more specific mappings for Charges and penalties (based on the actual charge /penalty coupled with the
+         * loan product). Note the income from fees and income from penalties placeholder ID would be the same for both
+         * cash and accrual based accounts
          *****/
 
         // Vishwas TODO: remove this condition as it should always be true
@@ -1206,9 +1188,8 @@ public class AccountingProcessorHelper {
             ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
                     PortfolioProductType.SAVING.getValue(), accountMappingTypeId);
             /****
-             * Get more specific mapping for FUND source accounts (based on
-             * payment channels). Note that fund source placeholder ID would be
-             * same for both cash and accrual accounts
+             * Get more specific mapping for FUND source accounts (based on payment channels). Note that fund source
+             * placeholder ID would be same for both cash and accrual accounts
              ***/
             if (accountMappingTypeId == CashAccountsForSavings.SAVINGS_REFERENCE.getValue()) {
                 final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
@@ -1251,10 +1232,9 @@ public class AccountingProcessorHelper {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(shareProductId,
                 PortfolioProductType.SHARES.getValue(), accountMappingTypeId);
         /*****
-         * Get more specific mappings for Charges and penalties (based on the
-         * actual charge /penalty coupled with the loan product). Note the
-         * income from fees and income from penalties placeholder ID would be
-         * the same for both cash and accrual based accounts
+         * Get more specific mappings for Charges and penalties (based on the actual charge /penalty coupled with the
+         * loan product). Note the income from fees and income from penalties placeholder ID would be the same for both
+         * cash and accrual based accounts
          *****/
 
         final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
@@ -1278,8 +1258,7 @@ public class AccountingProcessorHelper {
             final Long clientId, final Long transactionId, final Date transactionDate, final Boolean isReversal,
             final List<ClientChargePaymentDTO> clientChargePaymentDTOs) {
         /***
-         * Map to track each account affected and the net credit to be made for
-         * a particular account
+         * Map to track each account affected and the net credit to be made for a particular account
          ***/
         final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<>();
         for (final ClientChargePaymentDTO clientChargePaymentDTO : clientChargePaymentDTOs) {

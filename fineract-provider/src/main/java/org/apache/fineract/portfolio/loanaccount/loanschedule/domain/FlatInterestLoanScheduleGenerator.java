@@ -57,12 +57,10 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
         // totalCumulativeInterest from partial schedule generation for multi
         // rescheduling
         /*
-         * if (loanApplicationTerms.getPartialTotalCumulativeInterest() != null
-         * && loanApplicationTerms.getTotalInterestDue() != null) {
-         * totalInterestDueForLoan = loanApplicationTerms.getTotalInterestDue();
-         * totalInterestDueForLoan =
-         * totalInterestDueForLoan.plus(loanApplicationTerms.
-         * getPartialTotalCumulativeInterest()); }
+         * if (loanApplicationTerms.getPartialTotalCumulativeInterest() != null &&
+         * loanApplicationTerms.getTotalInterestDue() != null) { totalInterestDueForLoan =
+         * loanApplicationTerms.getTotalInterestDue(); totalInterestDueForLoan =
+         * totalInterestDueForLoan.plus(loanApplicationTerms. getPartialTotalCumulativeInterest()); }
          */
         interestForThisInstallment = loanApplicationTerms.adjustInterestIfLastRepaymentPeriod(interestForThisInstallment,
                 totalCumulativeInterestToDate, totalInterestDueForLoan, periodNumber);

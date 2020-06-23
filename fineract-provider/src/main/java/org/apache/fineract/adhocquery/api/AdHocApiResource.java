@@ -37,7 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -60,8 +59,7 @@ import org.springframework.stereotype.Component;
 public class AdHocApiResource {
 
     /**
-     * The set of parameters that are supported in response for
-     * {@link AdhocData}
+     * The set of parameters that are supported in response for {@link AdhocData}
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName", "tableField",
             "isActive", "createdBy", "createdOn", "createdById", "updatedById", "updatedOn", "email"));
@@ -171,10 +169,6 @@ public class AdHocApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
 }

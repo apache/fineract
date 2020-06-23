@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link AbstractPlatformDomainRuleException}
- * thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link AbstractPlatformDomainRuleException} thrown by platform into a HTTP API
+ * friendly format.
  *
- * The {@link AbstractPlatformDomainRuleException} is thrown when an api call
- * results is some internal business/domain logic been violated.
+ * The {@link AbstractPlatformDomainRuleException} is thrown when an api call results is some internal business/domain
+ * logic been violated.
  */
 @Provider
 @Component

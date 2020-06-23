@@ -33,8 +33,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object representing a general group (so may or may not have a
- * parent).
+ * Immutable data object representing a general group (so may or may not have a parent).
  */
 public class GroupGeneralData implements Serializable {
 

@@ -34,20 +34,14 @@ public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdown
     }
 
     /*
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositTermTypeOptions() { return
-     * SavingsEnumerations.recurringDepositFrequencyType
-     * (SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveDepositTermTypeOptions() { return
+     * SavingsEnumerations.recurringDepositFrequencyType (SavingsPeriodFrequencyType.values()); }
      *
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositPeriodFrequencyOptions() { return
-     * SavingsEnumerations.depositPeriodFrequency
-     * (SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions() { return
+     * SavingsEnumerations.depositPeriodFrequency (SavingsPeriodFrequencyType.values()); }
      *
-     * @Override public Collection<EnumOptionData>
-     * retrieveInMultiplesOfDepositTermTypeOptions() { return
-     * SavingsEnumerations
-     * .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions() { return
+     * SavingsEnumerations .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
      */
 
     @Override

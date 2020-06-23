@@ -31,9 +31,8 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.springframework.stereotype.Component;
 
 /**
- * Example {@link AccountNumberGenerator} for clients that takes an entities
- * auto generated database id and zero fills it ensuring the identifier is
- * always of a given <code>maxLength</code>.
+ * Example {@link AccountNumberGenerator} for clients that takes an entities auto generated database id and zero fills
+ * it ensuring the identifier is always of a given <code>maxLength</code>.
  */
 @Component
 public class AccountNumberGenerator {
@@ -101,9 +100,6 @@ public class AccountNumberGenerator {
 
                 case SAVINGS_PRODUCT_SHORT_NAME:
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
-                break;
-
-                default:
                 break;
 
             }

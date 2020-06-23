@@ -52,11 +52,10 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
     }
 
     /**
-     * Create a single debit to fund source and multiple credits for the income
-     * account mapped with each charge this payment pays off
+     * Create a single debit to fund source and multiple credits for the income account mapped with each charge this
+     * payment pays off
      *
-     * In case the loan transaction is a reversal, all debits are turned into
-     * credits and vice versa
+     * In case the loan transaction is a reversal, all debits are turned into credits and vice versa
      */
     private void createJournalEntriesForChargePayments(final ClientTransactionDTO clientTransactionDTO, final Office office) {
         // client properties
@@ -74,9 +73,8 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
                     transactionId, transactionDate, isReversal, clientTransactionDTO.getChargePayments());
 
             /***
-             * create a single Debit entry (or reversal) for the entire amount
-             * that was credited (accounting is turned on at the level of for
-             * each charge that has been paid by this transaction)
+             * create a single Debit entry (or reversal) for the entire amount that was credited (accounting is turned
+             * on at the level of for each charge that has been paid by this transaction)
              **/
             this.helper.createDebitJournalEntryOrReversalForClientChargePayments(office, currencyCode, clientId, transactionId,
                     transactionDate, totalCreditedAmount, isReversal);

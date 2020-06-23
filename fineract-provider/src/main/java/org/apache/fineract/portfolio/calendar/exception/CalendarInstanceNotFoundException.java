@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.calendar.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when CalendarInstance resources are not
- * found.
+ * A {@link RuntimeException} thrown when CalendarInstance resources are not found.
  */
 public class CalendarInstanceNotFoundException extends AbstractPlatformResourceNotFoundException {
 

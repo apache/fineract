@@ -31,8 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * Wrapper for {@link LoanRepository} that adds NULL checking and Error handling
- * capabilities
+ * Wrapper for {@link LoanRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service

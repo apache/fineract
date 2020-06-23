@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link PlatformApiDataValidationException}
- * thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link PlatformApiDataValidationException} thrown by platform into a HTTP API
+ * friendly format.
  *
- * The {@link PlatformApiDataValidationException} is typically thrown in data
- * validation of the parameters passed in with an api request.
+ * The {@link PlatformApiDataValidationException} is typically thrown in data validation of the parameters passed in
+ * with an api request.
  */
 @Provider
 @Component

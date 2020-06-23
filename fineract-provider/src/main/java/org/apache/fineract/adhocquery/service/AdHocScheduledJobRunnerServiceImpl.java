@@ -55,6 +55,7 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     @Transactional
     @Override
     @CronTarget(jobName = JobName.GENERATE_ADHOCCLIENT_SCEHDULE)
+    @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
     public void generateClientSchedule() {
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
         if (adhocs.size() > 0) {
@@ -89,7 +90,6 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             default:
                                 throw new IllegalStateException();
                         }
-
                     }
                 }
 

@@ -29,15 +29,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.joda.time.LocalDate;
 
 /**
- * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the
- * payment order of Interest first, then principal, penalties and fees.
+ * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the payment order of Interest first, then
+ * principal, penalties and fees.
  */
 public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
         extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time
-     * payments, interest first, principal, penalties and charges.
+     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first, principal,
+     * penalties and charges.
      */
     @SuppressWarnings("unused")
     @Override
@@ -51,8 +51,7 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @SuppressWarnings("unused")
     @Override

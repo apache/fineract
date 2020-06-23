@@ -31,13 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} and
- * Collect Charges for a Loan. It passes the contents of the body from the
- * BatchRequest to
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource}
- * and gets back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource}
- * and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} and Collect Charges for a Loan. It passes the
+ * contents of the body from the BatchRequest to
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and gets back the response. This class
+ * will also catch any errors raised by {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and
+ * map those errors to appropriate status codes in BatchResponse.
  *
  * @author Rishabh Shukla
  *

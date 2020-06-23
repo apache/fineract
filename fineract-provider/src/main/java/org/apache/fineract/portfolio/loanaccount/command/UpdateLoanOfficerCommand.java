@@ -26,8 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object for updating relationship between loan officer and a
- * loan.
+ * Immutable data object for updating relationship between loan officer and a loan.
  */
 public class UpdateLoanOfficerCommand {
 

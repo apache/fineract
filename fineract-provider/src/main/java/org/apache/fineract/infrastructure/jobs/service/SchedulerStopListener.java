@@ -25,8 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Global job Listener class to Stop the temporary scheduler once job execution
- * completes
+ * Global job Listener class to Stop the temporary scheduler once job execution completes
  */
 @Component
 public class SchedulerStopListener implements JobListener {

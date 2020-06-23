@@ -33,8 +33,7 @@ public interface GuarantorReadPlatformService {
     List<GuarantorData> retrieveGuarantorsForValidLoan(Long loanId);
 
     /**
-     * Methods Returns all Guarantors for a Given loan Id (if the loan Id is
-     * valid and Exists)
+     * Methods Returns all Guarantors for a Given loan Id (if the loan Id is valid and Exists)
      *
      * @param loanId
      * @return

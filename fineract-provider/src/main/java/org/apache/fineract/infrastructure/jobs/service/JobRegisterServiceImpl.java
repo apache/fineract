@@ -59,9 +59,8 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class to create and load batch jobs to Scheduler using
- * {@link SchedulerFactoryBean} ,{@link MethodInvokingJobDetailFactoryBean} and
- * {@link CronTriggerFactoryBean}
+ * Service class to create and load batch jobs to Scheduler using {@link SchedulerFactoryBean}
+ * ,{@link MethodInvokingJobDetailFactoryBean} and {@link CronTriggerFactoryBean}
  */
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
@@ -255,10 +254,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     /**
-     * Need to use ContextClosedEvent instead of ContextStoppedEvent because in
-     * case Spring Boot fails to start-up (e.g. because Tomcat port is already
-     * in use) then org.springframework.boot.SpringApplication.run(String...)
-     * does a context.close(); and not a context.stop();
+     * Need to use ContextClosedEvent instead of ContextStoppedEvent because in case Spring Boot fails to start-up (e.g.
+     * because Tomcat port is already in use) then org.springframework.boot.SpringApplication.run(String...) does a
+     * context.close(); and not a context.stop();
      */
     @Override
     public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {

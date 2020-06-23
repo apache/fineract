@@ -260,8 +260,8 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     }
 
     /**
-     * change the status of the loan reschedule request to approved, also
-     * updating the approvedByUser and approvedOnDate properties
+     * change the status of the loan reschedule request to approved, also updating the approvedByUser and approvedOnDate
+     * properties
      *
      * @param approvedByUser
      *            the user who approved the request
@@ -279,8 +279,8 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     }
 
     /**
-     * change the status of the loan reschedule request to rejected, also
-     * updating the approvedByUser and approvedOnDate properties
+     * change the status of the loan reschedule request to rejected, also updating the approvedByUser and approvedOnDate
+     * properties
      *
      * @param approvedByUser
      *            the user who approved the request

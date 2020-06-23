@@ -248,24 +248,6 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
         return isMakerCheckerEnabled;
     }
 
-    private List<String> getDatatableNames(Long status, String entity, Long productId) {
-        List<String> ret = new ArrayList<>();
-        List<EntityDatatableChecks> tableRequiredBeforeAction = null;
-        if (productId != null) {
-            tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndProduct(entity, status, productId);
-        }
-
-        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.size() < 1) {
-            tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndNoProduct(entity, status);
-        }
-        if (tableRequiredBeforeAction != null && tableRequiredBeforeAction.size() > 0) {
-            for (EntityDatatableChecks t : tableRequiredBeforeAction) {
-                ret.add(t.getDatatableName());
-            }
-        }
-        return ret;
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult deleteCheck(final Long entityDatatableCheckId) {
@@ -281,8 +263,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleReportDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 

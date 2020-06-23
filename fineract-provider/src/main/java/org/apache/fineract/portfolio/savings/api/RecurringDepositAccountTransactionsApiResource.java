@@ -128,15 +128,13 @@ public class RecurringDepositAccountTransactionsApiResource {
         }
 
         /***
-         * By default get the deposit template for deposits and withdrawal
-         * transactions
+         * By default get the deposit template for deposits and withdrawal transactions
          */
         SavingsAccountTransactionData savingsAccount = this.depositAccountReadPlatformService
                 .retrieveRecurringAccountDepositTransactionTemplate(recurringDepositAccountId);
 
         /***
-         * Update transaction date and transaction type if transaction type is
-         * withdrawal
+         * Update transaction date and transaction type if transaction type is withdrawal
          */
         if (is(commandParam, "withdrawal")) {
             savingsAccount = SavingsAccountTransactionData.withWithDrawalTransactionDetails(savingsAccount);

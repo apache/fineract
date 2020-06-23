@@ -30,8 +30,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMe
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 
 /**
- * Entity for holding interest recalculation setting, details will be copied
- * from product directly
+ * Entity for holding interest recalculation setting, details will be copied from product directly
  *
  * @author conflux
  */

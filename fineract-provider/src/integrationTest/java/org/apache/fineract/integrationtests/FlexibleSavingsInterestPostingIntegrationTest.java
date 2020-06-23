@@ -78,8 +78,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
         /***
-         * Perform Post interest transaction and verify the posted transaction
-         * date
+         * Perform Post interest transaction and verify the posted transaction date
          */
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);

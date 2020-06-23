@@ -65,8 +65,7 @@ public class CronMethodParser {
     }
 
     /**
-     * method adds all the method names to map with annotation attribute value
-     * as key
+     * method adds all the method names to map with annotation attribute value as key
      */
     private static void findAnnotationMethods(final Class<? extends Annotation> annotationClass, final String attributeName)
             throws IOException {

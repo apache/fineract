@@ -308,8 +308,7 @@ public class MathUtil {
     }
 
     /**
-     * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the
-     *         parameter currency
+     * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency
      */
     public static BigDecimal normalizeAmount(BigDecimal amount, @NotNull MonetaryCurrency currency) {
         return amount == null ? null : amount.setScale(currency.getDigitsAfterDecimal(), MoneyHelper.getRoundingMode());
