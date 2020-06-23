@@ -19,6 +19,7 @@
 package org.apache.fineract.useradministration.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when role resources are not found.
@@ -31,5 +32,9 @@ public class RoleNotFoundException extends AbstractPlatformResourceNotFoundExcep
 
     public RoleNotFoundException(final String name) {
         super("error.msg.role.name.invalid", "Role with name " + name + " does not exist", name);
+    }
+
+    public RoleNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.role.id.invalid", "Role with identifier " + id + " does not exist", id, e);
     }
 }
