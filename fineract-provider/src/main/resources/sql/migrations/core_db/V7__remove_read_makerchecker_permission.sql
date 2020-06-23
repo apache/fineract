@@ -30,4 +30,3 @@ where p.id = m_role_permission.permission_id and p.code = 'READ_MAKERCHECKER');
 
 delete from m_permission
 where code = 'READ_MAKERCHECKER';
-

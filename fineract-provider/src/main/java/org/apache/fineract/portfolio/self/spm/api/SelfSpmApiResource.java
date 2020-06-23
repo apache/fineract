@@ -39,10 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/self/surveys")
 @Component
 @Scope("singleton")
-@Api(tags = {"Self Spm"})
-@SwaggerDefinition(tags = {
-  @Tag(name = "Self Spm", description = "")
-})
+@Api(tags = { "Self Spm" })
+@SwaggerDefinition(tags = { @Tag(name = "Self Spm", description = "") })
 public class SelfSpmApiResource {
 
     private final PlatformSecurityContext securityContext;

@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 import org.joda.time.LocalDate;
 
 public class EmailCampaignTimeLine {
+
     private final LocalDate submittedOnDate;
     private final String submittedByUsername;
     private final LocalDate activatedOnDate;
@@ -28,8 +29,8 @@ public class EmailCampaignTimeLine {
     private final LocalDate closedOnDate;
     private final String closedByUsername;
 
-    public EmailCampaignTimeLine(final LocalDate submittedOnDate, final String submittedByUsername,
-                                 final LocalDate activatedOnDate, final String activatedByUsername, final LocalDate closedOnDate, final String closedByUsername) {
+    public EmailCampaignTimeLine(final LocalDate submittedOnDate, final String submittedByUsername, final LocalDate activatedOnDate,
+            final String activatedByUsername, final LocalDate closedOnDate, final String closedByUsername) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.activatedOnDate = activatedOnDate;

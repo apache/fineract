@@ -25,7 +25,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object for collection sheet.
  */
-public class IndividualCollectionSheetData {
+public final class IndividualCollectionSheetData {
 
     @SuppressWarnings("unused")
     private final LocalDate dueDate;

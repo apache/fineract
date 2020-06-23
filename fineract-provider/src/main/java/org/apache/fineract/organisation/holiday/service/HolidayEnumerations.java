@@ -55,7 +55,6 @@ public class HolidayEnumerations {
         return rescheduleType(RescheduleType.fromInt(id));
     }
 
-
     public static EnumOptionData rescheduleType(final RescheduleType type) {
         EnumOptionData optionData = null;
         switch (type) {
@@ -69,8 +68,7 @@ public class HolidayEnumerations {
             break;
 
             default:
-                optionData = new EnumOptionData(RescheduleType.INVALID.getValue().longValue(),
-                        RescheduleType.INVALID.getCode(), "Invalid");
+                optionData = new EnumOptionData(RescheduleType.INVALID.getValue().longValue(), RescheduleType.INVALID.getCode(), "Invalid");
             break;
         }
         return optionData;

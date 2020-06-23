@@ -53,19 +53,19 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 @Entity
-@Table(name = "sms_campaign", uniqueConstraints = {@UniqueConstraint(columnNames = { "campaign_name" }, name = "campaign_name_UNIQUE")})
+@Table(name = "sms_campaign", uniqueConstraints = { @UniqueConstraint(columnNames = { "campaign_name" }, name = "campaign_name_UNIQUE") })
 public class SmsCampaign extends AbstractPersistableCustom {
 
     @Column(name = "campaign_name", nullable = false)
     private String campaignName;
 
     @Column(name = "campaign_type", nullable = false)
-    private Integer campaignType ; //defines email or sms, etc..
+    private Integer campaignType; // defines email or sms, etc..
 
     @Column(name = "campaign_trigger_type", nullable = false)
-    private Integer triggerType; //defines direct, scheduled, transaction
+    private Integer triggerType; // defines direct, scheduled, transaction
 
-    @Column(name = "provider_id", nullable = true)//null for notifications
+    @Column(name = "provider_id", nullable = true) // null for notifications
     private Long providerId; // defined provider details
 
     @ManyToOne
@@ -128,10 +128,9 @@ public class SmsCampaign extends AbstractPersistableCustom {
 
     public SmsCampaign() {}
 
-    private SmsCampaign(final String campaignName, final Integer campaignType,
-            final Integer triggerType, final Report businessRuleId, final Long providerId, final String paramValue,
-            final String message, final LocalDate submittedOnDate, final AppUser submittedBy, final String recurrence,
-            final LocalDateTime localDateTime, final boolean isNotification) {
+    private SmsCampaign(final String campaignName, final Integer campaignType, final Integer triggerType, final Report businessRuleId,
+            final Long providerId, final String paramValue, final String message, final LocalDate submittedOnDate,
+            final AppUser submittedBy, final String recurrence, final LocalDateTime localDateTime, final boolean isNotification) {
         this.campaignName = campaignName;
         this.campaignType = campaignType;
         this.triggerType = SmsCampaignTriggerType.fromInt(triggerType).getValue();
@@ -159,11 +158,11 @@ public class SmsCampaign extends AbstractPersistableCustom {
         final Long campaignType = command.longValueOfParameterNamed(SmsCampaignValidator.campaignType);
         final Long triggerType = command.longValueOfParameterNamed(SmsCampaignValidator.triggerType);
         boolean isNotification = false;
-        if(command.parameterExists(SmsCampaignValidator.isNotificationParamName)){
+        if (command.parameterExists(SmsCampaignValidator.isNotificationParamName)) {
             isNotification = command.booleanPrimitiveValueOfParameterNamed(SmsCampaignValidator.isNotificationParamName);
         }
         Long providerId = null;
-        if(!isNotification){
+        if (!isNotification) {
             providerId = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
         }
 
@@ -176,7 +175,6 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
         String recurrence = null;
 
-
         LocalDateTime recurrenceStartDate = new LocalDateTime();
         if (SmsCampaignTriggerType.fromInt(triggerType.intValue()).isSchedule()) {
             final Locale locale = command.extractLocale();
@@ -185,8 +183,8 @@ public class SmsCampaign extends AbstractPersistableCustom {
                 dateTimeFormat = command.stringValueOfParameterNamed(SmsCampaignValidator.dateTimeFormat);
                 final DateTimeFormatter fmt = DateTimeFormat.forPattern(dateTimeFormat).withLocale(locale);
                 if (command.hasParameter(SmsCampaignValidator.recurrenceStartDate)) {
-                    recurrenceStartDate = LocalDateTime.parse(
-                            command.stringValueOfParameterNamed(SmsCampaignValidator.recurrenceStartDate), fmt);
+                    recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(SmsCampaignValidator.recurrenceStartDate),
+                            fmt);
                 }
                 recurrence = constructRecurrence(command);
             }
@@ -194,8 +192,8 @@ public class SmsCampaign extends AbstractPersistableCustom {
             recurrenceStartDate = null;
         }
 
-        return new SmsCampaign(campaignName, campaignType.intValue(), triggerType.intValue(), report,
-                providerId, paramValue, message, submittedOnDate, submittedBy, recurrence, recurrenceStartDate, isNotification);
+        return new SmsCampaign(campaignName, campaignType.intValue(), triggerType.intValue(), report, providerId, paramValue, message,
+                submittedOnDate, submittedBy, recurrence, recurrenceStartDate, isNotification);
     }
 
     public Map<String, Object> update(JsonCommand command) {
@@ -230,7 +228,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
 
         if (command.isChangeInLongParameterNamed(SmsCampaignValidator.runReportId,
-                (this.businessRuleId != null) ? this.businessRuleId.getId() : null)) {
+                this.businessRuleId != null ? this.businessRuleId.getId() : null)) {
             final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.runReportId);
             actualChanges.put(SmsCampaignValidator.runReportId, newValue);
         }
@@ -377,19 +375,25 @@ public class SmsCampaign extends AbstractPersistableCustom {
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateActivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateReactivate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateReactivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateClosureDate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateClosureDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
@@ -462,12 +466,12 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
 
     }
 
     public LocalDate getClosureDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
     }
 
     public LocalDate getActivationLocalDate() {
@@ -503,11 +507,11 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getRecurrenceStartDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
     }
 
     public LocalDateTime getRecurrenceStartDateTime() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
     }
 
     public void setLastTriggerDate(Date lastTriggerDate) {
@@ -519,7 +523,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getNextTriggerDate() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
 
     }
 
@@ -528,7 +532,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getLastTriggerDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
     }
 
     public void updateIsVisible(boolean isVisible) {
@@ -554,7 +558,8 @@ public class SmsCampaign extends AbstractPersistableCustom {
         return constructRecurrence(frequencyType, interval, repeatsOnDay);
     }
 
-    private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay) {
+    private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval,
+            final Integer repeatsOnDay) {
         final StringBuilder recurrenceBuilder = new StringBuilder(200);
 
         recurrenceBuilder.append("FREQ=");
@@ -582,6 +587,5 @@ public class SmsCampaign extends AbstractPersistableCustom {
     public void setNotification(boolean isNotification) {
         this.isNotification = isNotification;
     }
-
 
 }

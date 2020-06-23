@@ -36,9 +36,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for
@@ -56,17 +56,13 @@ public class BatchApiTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    public BatchApiTest() {
-        super();
-    }
-
     /**
      * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@Before' annotation provided by jUnit.
+     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
+     * jUnit.
      */
-    @Before
+    @BeforeEach
     public void setup() {
-
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -92,7 +88,7 @@ public class BatchApiTest {
 
         // Verify that only 501 is returned as the status code
         for (BatchResponse resp : response) {
-            Assert.assertEquals("Verify Status code 501", (long) 501, (long) resp.getStatusCode());
+            Assertions.assertEquals((long) 501, (long) resp.getStatusCode(), "Verify Status code 501");
         }
     }
 
@@ -112,7 +108,7 @@ public class BatchApiTest {
 
         // Verify that a 200 response is returned as the status code
         for (BatchResponse resp : response) {
-            Assert.assertEquals("Verify Status code 200", (long) 200, (long) resp.getStatusCode());
+            Assertions.assertEquals((long) 200, (long) resp.getStatusCode(), "Verify Status code 200");
         }
     }
 
@@ -155,8 +151,8 @@ public class BatchApiTest {
         BatchHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
 
         // Asserts that all the transactions have been successfully rolled back
-        Assert.assertEquals(response.size(), 1);
-        Assert.assertEquals("Verify Status code 400", (long) 400, (long) response.get(0).getStatusCode());
+        Assertions.assertEquals(1, response.size());
+        Assertions.assertEquals((long) 400, (long) response.get(0).getStatusCode(), "Verify Status code 400");
     }
 
     /**
@@ -189,8 +185,8 @@ public class BatchApiTest {
         final JsonObject changes = new FromJsonHelper().parse(response.get(1).getBody()).getAsJsonObject().get("changes").getAsJsonObject();
 
         // Asserts the client information is successfully updated
-        Assert.assertEquals("Verify Firstname", "TestFirstName", changes.get("firstname").getAsString());
-        Assert.assertEquals("Verify Lastname", "TestLastName", changes.get("lastname").getAsString());
+        Assertions.assertEquals("TestFirstName", changes.get("firstname").getAsString());
+        Assertions.assertEquals("TestLastName", changes.get("lastname").getAsString());
     }
 
     /**
@@ -240,7 +236,7 @@ public class BatchApiTest {
         // Get the clientId parameter from createClient Response
         final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody()).getAsJsonObject().get("clientId");
 
-        Assert.assertEquals("Verify Status Code 200" + clientId.getAsString(), 200L, (long) response.get(1).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(1).getStatusCode(), "Verify Status Code 200" + clientId.getAsString());
     }
 
     /**
@@ -282,7 +278,7 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200", 200L, (long) response.get(1).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(1).getStatusCode(), "Verify Status Code 200");
     }
 
     /**
@@ -334,14 +330,14 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Create Loan Charge", 200L, (long) response.get(3).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Create Loan Charge");
     }
 
     /**
-     * Tests that batch repayment for loans is happening properly.
-     * Collected properly 200(OK) status was returned for successful responses.
-     * It first creates a new loan and then makes two repayments for it
-     * and then verifies that 200(OK) is returned for the repayment requests.
+     * Tests that batch repayment for loans is happening properly. Collected
+     * properly 200(OK) status was returned for successful responses. It first
+     * creates a new loan and then makes two repayments for it and then verifies
+     * that 200(OK) is returned for the repayment requests.
      *
      * @see org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy
      */
@@ -397,8 +393,8 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(5).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(6).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(5).getStatusCode(), "Verify Status Code 200 for Repayment");
+        Assertions.assertEquals(200L, (long) response.get(6).getStatusCode(), "Verify Status Code 200 for Repayment");
     }
 
     /**
@@ -427,8 +423,8 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Create Client", 200L, (long) response.get(0).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for Activate Client", 200L, (long) response.get(1).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
+        Assertions.assertEquals(200L, (long) response.get(1).getStatusCode(), "Verify Status Code 200 for Activate Client");
     }
 
     /**
@@ -482,19 +478,20 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Approve Loan", 200L, (long) response.get(3).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for Disburse Loan", 200L, (long) response.get(4).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        Assertions.assertEquals(200L, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
     }
 
     /**
-     * Test for the successful create client, apply loan,approval and disbursal of a loan using
-     * Batch API with enclosingTransaction. A '200' status code is expected on successful activation.
+     * Test for the successful create client, apply loan,approval and disbursal
+     * of a loan using Batch API with enclosingTransaction. A '200' status code
+     * is expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
-    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction(){
+    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction() {
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
@@ -520,16 +517,16 @@ public class BatchApiTest {
         // Create a disburseLoan Request
         final BatchRequest br4 = BatchHelper.disburseLoanRequest(4744L, 4743L);
 
-        final List<BatchRequest> batchRequests = Arrays.asList(br1,br2,br3,br4);
+        final List<BatchRequest> batchRequests = Arrays.asList(br1, br2, br3, br4);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for create client", 200L, (long) response.get(0).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for apply Loan", 200L, (long) response.get(1).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for approve Loan", 200L, (long) response.get(2).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for disburse Loan", 200L, (long) response.get(3).getStatusCode());
+        Assertions.assertEquals(200L, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for create client");
+        Assertions.assertEquals(200L, (long) response.get(1).getStatusCode(), "Verify Status Code 200 for apply Loan");
+        Assertions.assertEquals(200L, (long) response.get(2).getStatusCode(), "Verify Status Code 200 for approve Loan");
+        Assertions.assertEquals(200L, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for disburse Loan");
     }
 }

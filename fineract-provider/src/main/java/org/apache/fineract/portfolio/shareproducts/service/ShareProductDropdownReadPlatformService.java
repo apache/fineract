@@ -25,5 +25,5 @@ public interface ShareProductDropdownReadPlatformService {
 
     Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
 
-    Collection<EnumOptionData> retrieveMinimumActivePeriodFrequencyTypeOptions() ;
+    Collection<EnumOptionData> retrieveMinimumActivePeriodFrequencyTypeOptions();
 }

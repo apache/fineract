@@ -17,7 +17,7 @@
 -- under the License.
 --
 
-update stretchy_report_parameter 
+update stretchy_report_parameter
 set report_parameter_name='account'
 where report_id = (select stretchy_report.id from stretchy_report where report_name='GeneralLedgerReport')
 and parameter_id=(select p.id from stretchy_parameter p where parameter_name='SelectGLAccountNO');
@@ -46,6 +46,6 @@ INSERT INTO `m_permission` (
 `can_maker_checker`
 ) VALUES ('report', 'READ_General Ledger Report', 'General Ledger Report', 'READ', 0);
 
-update `stretchy_parameter` 
+update `stretchy_parameter`
 set `parameter_sql` = 'select id aid,name aname\r\nfrom acc_gl_account'
 where stretchy_parameter.parameter_name='SelectGLAccountNO';

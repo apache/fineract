@@ -35,12 +35,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerTriggerListener implements TriggerListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(SchedulerTriggerListener.class);
-
-    private final String name = "Global trigger Listner";
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
 
     private final SchedularWritePlatformService schedularService;
-
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
@@ -52,18 +49,16 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public String getName() {
-        return this.name;
+        return "Fineract Global Scheduler Trigger Listener";
     }
 
     @Override
-    public void triggerFired(@SuppressWarnings("unused") final Trigger trigger,
-            @SuppressWarnings("unused") final JobExecutionContext context) {
-
+    public void triggerFired(Trigger trigger, JobExecutionContext context) {
+        LOG.debug("triggerFired() trigger={}, context={}", trigger, context);
     }
 
     @Override
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
-
         final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
         final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
@@ -76,36 +71,41 @@ public class SchedulerTriggerListener implements TriggerListener {
         Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
         Integer numberOfRetries = 0;
-        boolean proceedJob = false;
+        boolean vetoJob = false;
         while (numberOfRetries <= maxNumberOfRetries) {
             try {
-                proceedJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
+                vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
                 numberOfRetries = maxNumberOfRetries + 1;
-            } catch (Exception exception) { //Adding generic exception as it depends on JPA provider
-                logger.debug("Not able to acquire the lock to update job running status for JobKey: {}", jobKey);
+            } catch (Exception exception) { // Adding generic exception as it
+                                            // depends on JPA provider
+                LOG.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
+                        numberOfRetries, maxNumberOfRetries, jobKey, exception);
                 try {
                     Random random = new Random();
                     int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;
                 } catch (InterruptedException e) {
-
+                    LOG.error("vetoJobExecution() caught an InterruptedException", e);
                 }
             }
         }
-        return proceedJob;
+        if (vetoJob) {
+            LOG.warn(
+                    "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
+                            + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
+                    maxNumberOfRetries, tenantIdentifier, jobKey, triggerType, trigger, context);
+        }
+        return vetoJob;
     }
 
     @Override
-    public void triggerMisfired(@SuppressWarnings("unused") final Trigger trigger) {
-
+    public void triggerMisfired(final Trigger trigger) {
+        LOG.error("triggerMisfired() trigger={}", trigger);
     }
 
     @Override
-    public void triggerComplete(@SuppressWarnings("unused") final Trigger trigger,
-            @SuppressWarnings("unused") final JobExecutionContext context,
-            @SuppressWarnings("unused") final CompletedExecutionInstruction triggerInstructionCode) {
-
+    public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {
+        LOG.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
     }
-
 }

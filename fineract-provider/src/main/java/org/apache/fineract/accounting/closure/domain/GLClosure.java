@@ -36,7 +36,8 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
-@Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
+@Table(name = "acc_gl_closure", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
 public class GLClosure extends AbstractAuditableCustom {
 
     @ManyToOne
@@ -68,7 +69,7 @@ public class GLClosure extends AbstractAuditableCustom {
     }
 
     public static GLClosure fromJson(final Office office, final JsonCommand command) {
-        final Date closingDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
+        final Date closingDate = command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
         final String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
         return new GLClosure(office, closingDate, comments);
     }

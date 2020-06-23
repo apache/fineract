@@ -77,9 +77,11 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
     public InterestRateChartSlabData retrieveOne(Long chartId, Long chartSlabId) {
         this.context.authenticatedUser();
         final String sql = "select " + this.chartSlabExtractor.schema() + " where irc.id = ? order by ircd.id asc";
-        Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor, new Object[] {
-                chartSlabId, chartId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId); }
+        Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor,
+                new Object[] { chartSlabId, chartId });
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -132,16 +134,15 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         private InterestRateChartSlabsMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
-            sqlBuilder
-                    .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
-                    .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
+            sqlBuilder.append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ").append(
+                    "ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append("iri.id as iriId, ").append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
                     .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
-                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ")
-                    .append("code.code_value as attributeValueDesc ").append("from ").append("m_interest_rate_slab ircd ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
+                    .append("from ").append("m_interest_rate_slab ircd ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
                     .append(" left join m_code_value code on code.id = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ");
@@ -153,7 +154,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "ircdId");
             // If there are not chart Slabs are associated then in
             // InterestRateChartExtractor the chart Slabs id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String description = rs.getString("ircdDescription");
             final Integer fromPeriod = JdbcSupport.getInteger(rs, "ircdFromPeriod");
@@ -172,8 +175,8 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             // currency
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return InterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
                     annualInterestRate, currency);
@@ -229,7 +232,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "iriId");
             // If there are not Incentive are associated then in
             // InterestRateChartExtractor the incentive id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String attributeValue = rs.getString("attributeValue");
             String attributeValueDesc = null;

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
-final public class ReportParameterJoinData {
+public final class ReportParameterJoinData {
 
     private final Long reportId;
     private final String reportName;

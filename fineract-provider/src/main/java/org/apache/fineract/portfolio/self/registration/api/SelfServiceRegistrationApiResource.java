@@ -38,18 +38,15 @@ import org.springframework.stereotype.Component;
 @Path("/self/registration")
 @Component
 @Scope("singleton")
-@Api(tags = {"Self Service Registration"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Self Service Registration", description = "")
-})
+@Api(tags = { "Self Service Registration" })
+@SwaggerDefinition(tags = { @Tag(name = "Self Service Registration", description = "") })
 public class SelfServiceRegistrationApiResource {
 
     private final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService;
     private final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer;
 
     @Autowired
-    public SelfServiceRegistrationApiResource(
-            final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService,
+    public SelfServiceRegistrationApiResource(final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService,
             final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer) {
         this.selfServiceRegistrationWritePlatformService = selfServiceRegistrationWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;

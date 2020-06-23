@@ -25,10 +25,9 @@ import java.util.Set;
  * Enum of all parameters passed in while creating/updating a AdHocQuery
  ***/
 public enum AdHocJsonInputParams {
-    ID("id"), NAME("name"),QUERY("query"),TABLENAME("tableName"), TABLEFIELDS("tableFields"), ISACTIVE("isActive"),
-    REPORT_RUN_FREQUENCY("reportRunFrequency"),
-    REPORT_RUN_EVERY("reportRunEvery"),
-    EMAIL("email");
+
+    ID("id"), NAME("name"), QUERY("query"), TABLENAME("tableName"), TABLEFIELDS("tableFields"), ISACTIVE("isActive"), REPORT_RUN_FREQUENCY(
+            "reportRunFrequency"), REPORT_RUN_EVERY("reportRunEvery"), EMAIL("email");
 
     private final String value;
 

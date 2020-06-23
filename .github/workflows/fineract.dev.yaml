@@ -1,0 +1,36 @@
+# This is the GitHub Action which
+# automatically updates https://www.fineract.dev
+#
+# see https://jira.apache.org/jira/browse/FINERACT-970
+# https://github.com/marketplace/actions/setup-gcloud-environment
+# and http://blog2.vorburger.ch/2020/05/fineractdev-cicd-from-github-to-google.html
+#
+# Created by Michael Vorburger.ch for Fineract in May 2020.
+#
+
+name: Deploy to https://www.fineract.dev
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  setup-build-deploy:
+    name: Deploy on Fineract.dev
+    if: github.repository == 'apache/fineract'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
+          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
+
+      - uses: actions/checkout@v2
+
+      - run: gcloud components install beta
+
+      - run: JOBS=$(gcloud beta builds list --ongoing --format="value[terminator=' '](id)") && [ ! -z "$JOBS" ] && echo "Cancelling $JOBS..." && gcloud builds cancel $JOBS --no-user-output-enabled || true
+
+      - run: gcloud beta builds triggers run deploy-demo --branch master --format=none

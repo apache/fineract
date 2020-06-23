@@ -41,8 +41,8 @@ import org.springframework.stereotype.Component;
  * {@link CollectionSheetBulkRepaymentCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
+public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
+        extends AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final PaymentDetailAssembler paymentDetailAssembler;
@@ -56,7 +56,9 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
 
     @Override
     public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final PaymentDetail paymentDetail = this.paymentDetailAssembler.fetchPaymentDetail(element.getAsJsonObject());
@@ -65,7 +67,9 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
     }
 
     public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json, final PaymentDetail paymentDetail) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -79,7 +83,8 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
         SingleRepaymentCommand[] loanRepaymentTransactions = null;
 
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has("bulkRepaymentTransactions") && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
+            if (topLevelJsonElement.has("bulkRepaymentTransactions")
+                    && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get("bulkRepaymentTransactions").getAsJsonArray();
                 loanRepaymentTransactions = new SingleRepaymentCommand[array.size()];
                 for (int i = 0; i < array.size(); i++) {
@@ -92,7 +97,7 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
                     }
-                    if(transactionAmount != null && transactionAmount.intValue() > 0){
+                    if (transactionAmount != null && transactionAmount.intValue() > 0) {
                         loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
                     }
                 }

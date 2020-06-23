@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
@@ -50,7 +50,7 @@ public class GLAccount extends AbstractPersistableCustom {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private List<GLAccount> children = new LinkedList<>();
+    private List<GLAccount> children = new ArrayList<>();
 
     @Column(name = "name", nullable = false, length = 45)
     private String name;
@@ -98,8 +98,8 @@ public class GLAccount extends AbstractPersistableCustom {
         final String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
         final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
         final boolean disabled = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED.getValue());
-        final boolean manualEntriesAllowed = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED
-                .getValue());
+        final boolean manualEntriesAllowed = command
+                .booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue());
         final Integer usage = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.USAGE.getValue());
         final Integer type = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
         final String description = command.stringValueOfParameterNamed(GLAccountJsonInputParams.DESCRIPTION.getValue());
@@ -237,8 +237,8 @@ public class GLAccount extends AbstractPersistableCustom {
         return GLAccountUsage.DETAIL.getValue().equals(this.usage);
     }
 
-    public void updateTagId(final CodeValue tagID) {
-        this.tagId = tagID;
+    public void updateTagId(final CodeValue tagId) {
+        this.tagId = tagId;
     }
 
     public void updateParentAccount(final GLAccount parentAccount) {

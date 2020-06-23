@@ -18,10 +18,10 @@
 --
 
 CREATE TABLE `m_loan_transaction_temp` (
-	`id` BIGINT(20) NOT NULL,
-	`loan_id` BIGINT(20) NOT NULL,
-	`amount` DECIMAL(19,6) NOT NULL DEFAULT '0',
-	`transaction_date` DATE NOT NULL
+    `id` BIGINT NOT NULL,
+    `loan_id` BIGINT NOT NULL,
+    `amount` DECIMAL(19,6) NOT NULL DEFAULT '0',
+    `transaction_date` DATE NOT NULL
 );
 
 INSERT INTO m_loan_transaction_temp(`id`,`loan_id`,`transaction_date`,`amount`) select lt.id, lt.loan_id,lt.transaction_date,if(lt.transaction_type_enum = 1 , IFNULL(lt.amount,0),IFNULL(-lt.principal_portion_derived,0)) from m_loan_transaction lt where lt.is_reversed=0;

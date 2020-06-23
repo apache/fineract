@@ -48,7 +48,9 @@ public class ApplicationCurrencyRepositoryWrapper {
     public ApplicationCurrency findOneWithNotFoundDetection(final MonetaryCurrency currency) {
 
         final ApplicationCurrency defaultApplicationCurrency = this.repository.findOneByCode(currency.getCode());
-        if (defaultApplicationCurrency == null) { throw new CurrencyNotFoundException(currency.getCode()); }
+        if (defaultApplicationCurrency == null) {
+            throw new CurrencyNotFoundException(currency.getCode());
+        }
 
         final ApplicationCurrency applicationCurrency = ApplicationCurrency.from(defaultApplicationCurrency,
                 currency.getDigitsAfterDecimal(), currency.getCurrencyInMultiplesOf());
@@ -62,7 +64,9 @@ public class ApplicationCurrencyRepositoryWrapper {
      */
     public ApplicationCurrency findOneWithNotFoundDetection(final String currencyCode) {
         final ApplicationCurrency applicationCurrency = this.repository.findOneByCode(currencyCode);
-        if (applicationCurrency == null) { throw new CurrencyNotFoundException(currencyCode); }
+        if (applicationCurrency == null) {
+            throw new CurrencyNotFoundException(currencyCode);
+        }
         return applicationCurrency;
     }
 }

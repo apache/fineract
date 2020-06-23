@@ -29,15 +29,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SHAREACCOUNT", action = "ACTIVATE")
-public class ActivateShareAccountCommandHandler implements NewCommandSourceHandler{
+public class ActivateShareAccountCommandHandler implements NewCommandSourceHandler {
 
-
-    private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
+    private final ShareAccountWritePlatformService shareAccountWritePlatformService;
 
     @Autowired
     public ActivateShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
-        this.shareAccountWritePlatformService = shareAccountWritePlatformService ;
+        this.shareAccountWritePlatformService = shareAccountWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {

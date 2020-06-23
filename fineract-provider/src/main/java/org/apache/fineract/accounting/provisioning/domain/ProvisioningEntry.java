@@ -42,7 +42,7 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
 
     @OneToOne
@@ -65,29 +65,32 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
 
     }
 
-    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate, Set<LoanProductProvisioningEntry> provisioningEntries ) {
-        this.provisioningEntries = provisioningEntries ;
-        this.createdBy = createdBy ;
-        this.createdDate = createdDate ;
-        this.lastModifiedBy = lastModifiedBy ;
-        this.lastModifiedDate = lastModifiedDate ;
+    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate,
+            Set<LoanProductProvisioningEntry> provisioningEntries) {
+        this.provisioningEntries = provisioningEntries;
+        this.createdBy = createdBy;
+        this.createdDate = createdDate;
+        this.lastModifiedBy = lastModifiedBy;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
     public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
-        if(this.provisioningEntries == null) this.provisioningEntries = new HashSet<>();
-        this.provisioningEntries.addAll(provisioningEntries) ;
+        if (this.provisioningEntries == null) {
+            this.provisioningEntries = new HashSet<>();
+        }
+        this.provisioningEntries.addAll(provisioningEntries);
     }
 
     public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
-        return this.provisioningEntries ;
+        return this.provisioningEntries;
     }
 
     public void setJournalEntryCreated(Boolean bool) {
-        this.isJournalEntryCreated = bool ;
+        this.isJournalEntryCreated = bool;
     }
 
     public Date getCreatedDate() {
-        return this.createdDate ;
+        return this.createdDate;
     }
 
 }

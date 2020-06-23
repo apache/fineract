@@ -23,11 +23,14 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class GlobalConfigurationHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalConfigurationHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -36,73 +39,87 @@ public class GlobalConfigurationHelper {
         this.responseSpec = responseSpec;
     }
 
-    public static ArrayList<HashMap> getAllGlobalConfigurations(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static ArrayList<HashMap> getAllGlobalConfigurations(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         final String GET_ALL_GLOBAL_CONFIG_URL = "/fineract-provider/api/v1/configurations?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
-        final HashMap<String, ArrayList<HashMap>> response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_GLOBAL_CONFIG_URL, "");
-        return (ArrayList<HashMap>) response.get("globalConfiguration");
+        LOG.info("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
+        final HashMap<String, ArrayList<HashMap>> response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_GLOBAL_CONFIG_URL,
+                "");
+        return response.get("globalConfiguration");
     }
 
     public static HashMap getGlobalConfigurationById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String configId) {
         final String GET_GLOBAL_CONFIG_BY_ID_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING GLOBAL CONFIGURATION BY ID -------------------------");
+        LOG.info("------------------------ RETRIEVING GLOBAL CONFIGURATION BY ID -------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_GLOBAL_CONFIG_BY_ID_URL, "");
     }
 
-    public static void resetAllDefaultGlobalConfigurations(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static void resetAllDefaultGlobalConfigurations(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
 
         final ArrayList<HashMap> defaults = getAllDefaultGlobalConfigurations();
         for (HashMap configDefault : defaults) {
 
             /**
              * Cannot update trapDoor global configurations because
-             * {@link  org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied}
+             * {@link org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied}
              * will be thrown.
              */
-            if ((Boolean)configDefault.get("trapDoor")) {
+            if ((Boolean) configDefault.get("trapDoor")) {
                 continue;
             }
 
-            // Currently only values and enabled flags are modified by the integration test suite.
-            // If any other column is modified by the integration test suite in the future, it needs to be reset here.
-            final Integer configDefaultId = (Integer)configDefault.get("id");
-            final Integer configDefaultValue = (Integer)configDefault.get("value");
+            // Currently only values and enabled flags are modified by the
+            // integration test suite.
+            // If any other column is modified by the integration test suite in
+            // the future, it needs to be reset here.
+            final Integer configDefaultId = (Integer) configDefault.get("id");
+            final Integer configDefaultValue = (Integer) configDefault.get("value");
             updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
-            updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), (Boolean)configDefault.get("enabled"));
+            updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
+                    (Boolean) configDefault.get("enabled"));
         }
     }
 
-    public static void verifyAllDefaultGlobalConfigurations(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static void verifyAllDefaultGlobalConfigurations(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
 
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 27 global configurations.
-        Assert.assertEquals(28, expectedGlobalConfigurations.size());
-        Assert.assertEquals(28, actualGlobalConfigurations.size());
+        Assertions.assertEquals(28, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(28, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
             HashMap expectedGlobalConfiguration = expectedGlobalConfigurations.get(i);
             HashMap actualGlobalConfiguration = actualGlobalConfigurations.get(i);
 
-            Assert.assertEquals(expectedGlobalConfiguration.get("id"), actualGlobalConfiguration.get("id"));
+            Assertions.assertEquals(expectedGlobalConfiguration.get("id"), actualGlobalConfiguration.get("id"));
             final String assertionFailedMessage = "Assertion failed for configID:<" + expectedGlobalConfiguration.get("id") + ">";
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.get("name"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.get("value"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.get("enabled"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("trapDoor"), actualGlobalConfiguration.get("trapDoor"));
+            Assertions.assertEquals(expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.get("name"), assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.get("value"),
+                    assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.get("enabled"),
+                    assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("trapDoor"), actualGlobalConfiguration.get("trapDoor"),
+                    assertionFailedMessage);
         }
     }
 
     /**
-     * Helper method to get the current default instance data of the /configurations endpoint.
-     * Used to reset and verify that no global configuration affects state between integration tests.
-     * @see <a href="https://issues.apache.org/jira/browse/FINERACT-722">FINERACT-722</a>
-     * This is a quick, fail fast and early implementation to resolve this issue.
-     * TODO: A more robust future solution would be isolating all integration test state using Spring Framework's
-     * integration test infrastructure for transaction commits and rollbacks.
+     * Helper method to get the current default instance data of the
+     * /configurations endpoint. Used to reset and verify that no global
+     * configuration affects state between integration tests.
+     *
+     * @see <a href=
+     *      "https://issues.apache.org/jira/browse/FINERACT-722">FINERACT-722</a>
+     *      This is a quick, fail fast and early implementation to resolve this
+     *      issue. TODO: A more robust future solution would be isolating all
+     *      integration test state using Spring Framework's integration test
+     *      infrastructure for transaction commits and rollbacks.
      */
     private static ArrayList<HashMap> getAllDefaultGlobalConfigurations() {
 
@@ -338,7 +355,7 @@ public class GlobalConfigurationHelper {
     public static Integer updateValueForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String configId, final String value) {
         final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
+        LOG.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, updateGlobalConfigUpdateValueAsJSON(value),
                 "resourceId");
     }
@@ -346,8 +363,7 @@ public class GlobalConfigurationHelper {
     public static Integer updateEnabledFlagForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String configId, final Boolean enabled) {
         final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out
-                .println("---------------------------------UPDATE GLOBAL CONFIG FOR ENABLED FLAG---------------------------------------------");
+        LOG.info("---------------------------------UPDATE GLOBAL CONFIG FOR ENABLED FLAG---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL,
                 updateGlobalConfigUpdateEnabledFlagAsJSON(enabled), "resourceId");
     }
@@ -355,7 +371,7 @@ public class GlobalConfigurationHelper {
     public static ArrayList getGlobalConfigurationIsCacheEnabled(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String GET_IS_CACHE_GLOBAL_CONFIG_URL = "/fineract-provider/api/v1/caches?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING IS CACHE ENABLED GLOBAL CONFIGURATION -------------------------");
+        LOG.info("------------------------ RETRIEVING IS CACHE ENABLED GLOBAL CONFIGURATION -------------------------");
         final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, GET_IS_CACHE_GLOBAL_CONFIG_URL, "");
         return response;
     }
@@ -363,47 +379,48 @@ public class GlobalConfigurationHelper {
     public static HashMap updateIsCacheEnabledForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String cacheType) {
         final String IS_CACHE_GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/caches?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------UPDATE GLOBAL CONFIG FOR IS CACHE ENABLED----------------------");
+        LOG.info("------------------UPDATE GLOBAL CONFIG FOR IS CACHE ENABLED----------------------");
         return Utils.performServerPut(requestSpec, responseSpec, IS_CACHE_GLOBAL_CONFIG_UPDATE_URL,
                 updateIsCacheEnabledGlobalConfigUpdateAsJSON(cacheType), "changes");
     }
 
     public static Object updatePasswordResetDaysForGlobalConfiguration(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer configId, final String value, final String enabled, final String jsonAttributeToGetBack) {
+            final ResponseSpecification responseSpec, final Integer configId, final String value, final String enabled,
+            final String jsonAttributeToGetBack) {
         final String UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------UPDATE GLOBAL CONFIG FOR FORCE PASSWORD RESET DAYS----------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_URL,
-                updatePasswordResetDaysGlobalConfigAsJSON(value, enabled), jsonAttributeToGetBack);
+        LOG.info("------------------UPDATE GLOBAL CONFIG FOR FORCE PASSWORD RESET DAYS----------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_URL, updatePasswordResetDaysGlobalConfigAsJSON(value, enabled),
+                jsonAttributeToGetBack);
     }
 
     public static String updateGlobalConfigUpdateValueAsJSON(final String value) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("value", value);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
     public static String updatePasswordResetDaysGlobalConfigAsJSON(final String value, final String enabled) {
         final HashMap<String, String> map = new HashMap<>();
-        if(value != null){
+        if (value != null) {
             map.put("value", value);
         }
         map.put("enabled", enabled);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
     public static String updateGlobalConfigUpdateEnabledFlagAsJSON(final Boolean enabled) {
         final HashMap<String, Boolean> map = new HashMap<String, Boolean>();
         map.put("enabled", enabled);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
     public static String updateIsCacheEnabledGlobalConfigUpdateAsJSON(final String cacheType) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("cacheType", cacheType);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 

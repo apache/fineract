@@ -27,19 +27,22 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}. It
- * takes care of creation of {@code BatchRequest} list and posting this list to
- * the server.
+ * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}.
+ * It takes care of creation of {@code BatchRequest} list and posting this list
+ * to the server.
  *
  * @author Rishabh Shukla
  *
  * @see org.apache.fineract.integrationtests.BatchApiTest
  */
-public class BatchHelper {
+public final class BatchHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
 
@@ -127,8 +130,8 @@ public class BatchHelper {
                 jsonifiedRequest);
 
         // Verifies that the response result is there
-        Assert.assertNotNull(response);
-        Assert.assertTrue(response.size() > 0);
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.size() > 0);
 
         return response;
     }
@@ -188,13 +191,13 @@ public class BatchHelper {
         }
 
         final String body = "{ \"officeId\": 1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": \"" + externalId
-                + "\",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\"," + "\"active\": true, \"activationDate\": \"04 March 2010\", \"submittedOnDate\": \"04 March 2010\"}";
+                + "\",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\","
+                + "\"active\": true, \"activationDate\": \"04 March 2010\", \"submittedOnDate\": \"04 March 2010\"}";
 
         br.setBody(body);
 
         return br;
     }
-
 
     /**
      * Creates and returns a
@@ -406,8 +409,8 @@ public class BatchHelper {
         br.setReference(reference);
         br.setRelativeUrl("loans/$.loanId/transactions?command=repayment");
         br.setMethod("POST");
-        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " +
-                "\"transactionDate\": \"15 September 2013\",  \"transactionAmount\": 500}");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                + "\"transactionDate\": \"15 September 2013\",  \"transactionAmount\": 500}");
 
         return br;
     }
@@ -422,9 +425,9 @@ public class BatchHelper {
      */
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String externalId) {
-        System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
-        Assert.assertEquals("No records found with given externalId", (long) responseRecords, (long) 0);
+        Assertions.assertEquals((long) 0, (long) responseRecords, "No records found with given externalId");
     }
 }

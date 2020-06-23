@@ -16,9 +16,9 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
- 
- -- permissions 
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES 
+
+ -- permissions
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 ('transaction_savings', 'HOLDAMOUNT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'HOLDAMOUNT', 0),
 ('transaction_savings', 'HOLDAMOUNT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'HOLDAMOUNT_CHECKER', 0),
 ('transaction_savings', 'BLOCKDEBIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'BLOCKDEBIT', 0),
@@ -36,13 +36,10 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 ('transaction_savings', 'RELEASEAMOUNT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'RELEASEAMOUNT', 0),
 ('transaction_savings', 'RELEASEAMOUNT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'RELEASEAMOUNT_CHECKER', 0);
 
---  modify `m_savings_account_transaction` 
+--  modify `m_savings_account_transaction`
 
-ALTER TABLE `m_savings_account_transaction` ADD COLUMN `release_id_of_hold_amount` BIGINT(20) NULL DEFAULT NULL;
+ALTER TABLE `m_savings_account_transaction` ADD COLUMN `release_id_of_hold_amount` BIGINT NULL DEFAULT NULL;
 
---  modify `m_savings_account` 
+--  modify `m_savings_account`
 
 ALTER TABLE `m_savings_account` ADD COLUMN `total_savings_amount_on_hold` DECIMAL(19,6) NULL DEFAULT NULL;
-
-
-

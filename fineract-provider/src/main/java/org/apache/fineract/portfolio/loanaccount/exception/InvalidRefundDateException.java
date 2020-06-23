@@ -23,11 +23,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class InvalidRefundDateException extends AbstractPlatformDomainRuleException {
 
     public InvalidRefundDateException(final String refundDateAsString) {
-        super("error.msg.loan.refund.failed", "The refund date`" + refundDateAsString + "`"
-                + "` cannot be before the smallest repayment transaction date", new Object[] { refundDateAsString});
+        super("error.msg.loan.refund.failed",
+                "The refund date`" + refundDateAsString + "`" + "` cannot be before the smallest repayment transaction date",
+                new Object[] { refundDateAsString });
     }
 
-    public InvalidRefundDateException(final String defaultUserMessage,final String entity,final Object... defaultUserMessageArgs) {
-        super("error.msg.loan." + entity , defaultUserMessage, defaultUserMessageArgs);
+    public InvalidRefundDateException(final String defaultUserMessage, final String entity, final Object... defaultUserMessageArgs) {
+        super("error.msg.loan." + entity, defaultUserMessage, defaultUserMessageArgs);
     }
 }

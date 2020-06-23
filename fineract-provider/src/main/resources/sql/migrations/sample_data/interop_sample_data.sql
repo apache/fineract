@@ -22,7 +22,7 @@
 
 -- saving product, account
 SET @last_saving_prod_id = -1;
-SELECT COALESCE(max(id), 1) into @last_saving_prod_id from m_savings_product;
+SELECT COALESCE(max(id), 1) from m_savings_product into @last_saving_prod_id;
 
 SET @saving_prod_name = concat('Saving Product', @last_saving_prod_id);
 
@@ -37,7 +37,7 @@ VALUES (@saving_prod_name, concat('SP', @last_saving_prod_id), 'Saving Product',
                            4, 1, 360, NULL, 2, NULL, NULL, 0, 0, 0.000000, 1, NULL, 0, NULL, 0);
 
 SET @saving_prod_id = -1;
-SELECT id INTO @saving_prod_id FROM m_savings_product WHERE name = @saving_prod_name;
+SELECT id FROM m_savings_product WHERE name = @saving_prod_name INTO @saving_prod_id;
 
 -- interop_identifier
 
@@ -46,7 +46,7 @@ SELECT id INTO @saving_prod_id FROM m_savings_product WHERE name = @saving_prod_
 -- ASSET-1, LIABILITY-2, EQUITY-3, INCOME-4, EXPENSE-5
 
 SET @payment_type_id = -1;
-SELECT id INTO @payment_type_id FROM m_payment_type WHERE value = 'Money Transfer';
+SELECT id FROM m_payment_type WHERE value = 'Money Transfer' INTO @payment_type_id;
 
 SET @saving_gl_name = 'Interoperation Saving';
 INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`, `account_usage`, `classification_enum`, `description`)
@@ -67,7 +67,7 @@ INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disa
 VALUES (@fee_gl_name, NULL, NULL, 'Interop_Fee', 0, 0, 1, 4, 'Interoperation Fee Income'); -- account_usage: DETAIL, classification_enum: INCOME
 
 SET @fee_gl_id = -1;
-SELECT id INTO @fee_gl_id FROM acc_gl_account WHERE name = @fee_gl_name;
+SELECT id FROM acc_gl_account WHERE name = @fee_gl_name INTO @fee_gl_id;
 
 INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`, `financial_account_type`)
 VALUES (@fee_gl_id, @saving_prod_id, 2, NULL, NULL, 4); -- product_type: SAVING, financial_account_type: INCOME
@@ -82,7 +82,7 @@ VALUES (@charge_name, 'TZS', 2, 5, 1, NULL, 1.000000, NULL, NULL, NULL, 0, 0, 0,
 -- loan product
 /*
 SET @last_ext_id = -1;
-SELECT COALESCE(max(external_id), 1) INTO @last_ext_id FROM m_product_loan;
+SELECT COALESCE(max(external_id), 1) FROM m_product_loan INTO @last_ext_id;
 
 INSERT INTO `m_product_loan`
 VALUES
@@ -92,7 +92,7 @@ VALUES
   NULL, 1, 30, 0, 0, 0.00, 0, 1, 0, 0, 0);
 
 SET @product_id = -1;
-SELECT id INTO @product_id FROM m_product_loan WHERE name = concat('Interoperation Customer Product', @last_product_id);
+SELECT id FROM m_product_loan WHERE name = concat('Interoperation Customer Product', @last_product_id) INTO @product_id;
 
 -- charge, mapping
 INSERT INTO `m_charge` VALUES (

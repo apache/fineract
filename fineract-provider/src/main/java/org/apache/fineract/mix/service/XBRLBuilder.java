@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.mix.service;
 
+import com.google.common.base.Splitter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.fineract.mix.data.ContextData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.NamespaceData;
@@ -70,7 +71,7 @@ public class XBRLBuilder {
         this.startDate = startDate;
         this.endDate = endDate;
 
-        for (final Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
+        for (final Map.Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
             final MixTaxonomyData taxonomy = entry.getKey();
             final BigDecimal value = entry.getValue();
             addTaxonomy(this.root, taxonomy, value);
@@ -89,12 +90,13 @@ public class XBRLBuilder {
     Element addTaxonomy(final Element rootElement, final MixTaxonomyData taxonomy, final BigDecimal value) {
 
         // throw an error is start / endate is null
-        if (this.startDate == null || this.endDate == null) { throw new XBRLMappingInvalidException(
-                "start date and end date should not be null"); }
+        if (this.startDate == null || this.endDate == null) {
+            throw new XBRLMappingInvalidException("start date and end date should not be null");
+        }
 
         final String prefix = taxonomy.getNamespace();
         String qname = taxonomy.getName();
-        if (prefix != null && (!prefix.isEmpty())) {
+        if (prefix != null && !prefix.isEmpty()) {
             final NamespaceData ns = this.readNamespaceService.retrieveNamespaceByPrefix(prefix);
             if (ns != null) {
 
@@ -110,15 +112,10 @@ public class XBRLBuilder {
 
         ContextData context = null;
         if (dimension != null) {
-            final String[] dims = dimension.split(":");
+            final List<String> dims = Splitter.on(':').splitToList(dimension);
 
-            if (dims.length == 2) {
-                context = new ContextData(dims[0], dims[1], taxonomy.getType());
-                if (this.contextMap.containsKey(context)) {
-
-                } else {
-
-                }
+            if (dims.size() == 2) {
+                context = new ContextData(dims.get(0), dims.get(1), taxonomy.getType());
             }
         }
 
@@ -131,8 +128,8 @@ public class XBRLBuilder {
             final String startDateStr = timeFormat.format(this.startDate);
             final String endDateStr = timeFormat.format(this.endDate);
 
-            final String contextRefID = (context.getPeriodType() == 0) ? ("As_Of_" + endDateStr + (this.instantScenarioCounter++))
-                    : ("Duration_" + startDateStr + "_To_" + endDateStr + (this.durationScenarioCounter++));
+            final String contextRefID = context.getPeriodType() == 0 ? "As_Of_" + endDateStr + this.instantScenarioCounter++
+                    : "Duration_" + startDateStr + "_To_" + endDateStr + this.durationScenarioCounter++;
 
             this.contextMap.put(context, contextRefID);
         }
@@ -177,7 +174,7 @@ public class XBRLBuilder {
 
     public void addContexts() {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        for (final Entry<ContextData, String> entry : this.contextMap.entrySet()) {
+        for (final Map.Entry<ContextData, String> entry : this.contextMap.entrySet()) {
             final ContextData context = entry.getKey();
             final Element contextElement = this.root.addElement("context");
             contextElement.addAttribute("id", entry.getValue());

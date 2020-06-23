@@ -29,9 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "PROVISIONENTRIES", action = "RECREATE")
-public class ReCreateProvisioningEntryRequestCommandHandler  implements NewCommandSourceHandler {
+public class ReCreateProvisioningEntryRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService ;
+    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
 
     @Autowired
     public ReCreateProvisioningEntryRequestCommandHandler(
@@ -42,8 +42,7 @@ public class ReCreateProvisioningEntryRequestCommandHandler  implements NewComma
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningEntriesWritePlatformService.reCreateProvisioningEntries(jsonCommand.entityId(), jsonCommand) ;
+        return this.provisioningEntriesWritePlatformService.reCreateProvisioningEntries(jsonCommand.entityId(), jsonCommand);
     }
 
 }
-

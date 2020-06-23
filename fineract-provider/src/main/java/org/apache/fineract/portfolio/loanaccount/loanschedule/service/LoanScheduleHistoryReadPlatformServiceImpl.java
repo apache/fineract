@@ -60,7 +60,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
     @Override
     public Integer fetchCurrentVersionNumber(Long loanId) {
         final String sql = "select MAX(lrs.version) from m_loan_repayment_schedule_history lrs where lrs.loan_id = ?";
-        Integer max = this.jdbcTemplate.queryForObject(sql, new Object[]{loanId}, Integer.class);
+        Integer max = this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
         return ObjectUtils.defaultIfNull(max, 0);
     }
 
@@ -71,7 +71,9 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         try {
             this.context.authenticatedUser();
             Integer versionNumber = fetchCurrentVersionNumber(loanId);
-            if (versionNumber == 0) { return null; }
+            if (versionNumber == 0) {
+                return null;
+            }
             final LoanScheduleArchiveResultSetExtractor fullResultsetExtractor = new LoanScheduleArchiveResultSetExtractor(
                     repaymentScheduleRelatedLoanData, disbursementData);
             final String sql = "select " + fullResultsetExtractor.schema()
@@ -105,8 +107,8 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         public String schema() {
             StringBuilder stringBuilder = new StringBuilder(200);
             stringBuilder.append(" ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ");
-            stringBuilder
-                    .append("ls.principal_amount as principalDue, ls.interest_amount as interestDue, ls.fee_charges_amount as feeChargesDue, ls.penalty_charges_amount as penaltyChargesDue ");
+            stringBuilder.append(
+                    "ls.principal_amount as principalDue, ls.interest_amount as interestDue, ls.fee_charges_amount as feeChargesDue, ls.penalty_charges_amount as penaltyChargesDue ");
             stringBuilder.append(" from m_loan_repayment_schedule_history ls ");
             return stringBuilder.toString();
         }
@@ -149,15 +151,15 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                     for (DisbursementData data : disbursementData) {
                         if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
                             principal = principal.add(data.amount());
-                            final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                                    data.disbursementDate(), data.amount(), this.totalFeeChargesDueAtDisbursement, data.isDisbursed());
+                            final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(),
+                                    data.amount(), this.totalFeeChargesDueAtDisbursement, data.isDisbursed());
                             periods.add(periodData);
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                         } else if (data.isDueForDisbursement(fromDate, dueDate)
-                                && this.outstandingLoanPrincipalBalance.compareTo(BigDecimal.ZERO) == 1) {
+                                && this.outstandingLoanPrincipalBalance.compareTo(BigDecimal.ZERO) > 0) {
                             principal = principal.add(data.amount());
-                            final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                                    data.disbursementDate(), data.amount(), BigDecimal.ZERO, data.isDisbursed());
+                            final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(),
+                                    data.amount(), BigDecimal.ZERO, data.isDisbursed());
                             periods.add(periodData);
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                         }
@@ -186,8 +188,8 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                 final BigDecimal penaltyChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesDue");
                 totalPenaltyChargesCharged = totalPenaltyChargesCharged.plus(penaltyChargesExpectedDue);
 
-                final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue).add(
-                        penaltyChargesExpectedDue);
+                final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue)
+                        .add(penaltyChargesExpectedDue);
 
                 final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
 
@@ -209,9 +211,9 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                 periods.add(periodData);
             }
 
-            return new LoanScheduleData(this.currency, periods, loanTermInDays, totalPrincipalDisbursed,
-                    totalPrincipalExpected.getAmount(), totalInterestCharged.getAmount(), totalFeeChargesCharged.getAmount(),
-                    totalPenaltyChargesCharged.getAmount(), totalRepaymentExpected.getAmount());
+            return new LoanScheduleData(this.currency, periods, loanTermInDays, totalPrincipalDisbursed, totalPrincipalExpected.getAmount(),
+                    totalInterestCharged.getAmount(), totalFeeChargesCharged.getAmount(), totalPenaltyChargesCharged.getAmount(),
+                    totalRepaymentExpected.getAmount());
         }
 
     }

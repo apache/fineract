@@ -34,7 +34,8 @@ public class CashierNotFoundException extends AbstractPlatformResourceNotFoundEx
     /**
      * Creates a new instance.
      *
-     * @param cashierId the primary key of the cashier
+     * @param cashierId
+     *            the primary key of the cashier
      */
     public CashierNotFoundException(Long cashierId) {
         super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, cashierId);

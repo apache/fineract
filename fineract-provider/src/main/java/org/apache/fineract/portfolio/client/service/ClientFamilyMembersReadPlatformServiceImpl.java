@@ -36,47 +36,44 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyMembersReadPlatformService
-{
+public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyMembersReadPlatformService {
+
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
-
     @Autowired
-    public ClientFamilyMembersReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource,final CodeValueReadPlatformService codeValueReadPlatformService) {
+    public ClientFamilyMembersReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.codeValueReadPlatformService=codeValueReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
 
     }
 
     private static final class ClientFamilyMembersMapper implements RowMapper<ClientFamilyMembersData> {
+
         public String schema() {
             return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.middlename AS middleName,"
-                    +"fmb.lastname AS lastName,fmb.qualification AS qualification,fmb.mobile_number as mobileNumber,fmb.age as age,fmb.is_dependent as isDependent,cv.code_value AS relationship,fmb.relationship_cv_id AS relationshipId,"
-                    +"c.code_value AS maritalStatus,fmb.marital_status_cv_id AS maritalStatusId,"
-                    +"c1.code_value AS gender, fmb.gender_cv_id AS genderId, fmb.date_of_birth AS dateOfBirth, c2.code_value AS profession, fmb.profession_cv_id AS professionId"
-                    +" FROM m_family_members fmb"
-                    +" LEFT JOIN m_code_value cv ON fmb.relationship_cv_id=cv.id"
-                    +" LEFT JOIN m_code_value c ON fmb.marital_status_cv_id=c.id"
-                    +" LEFT JOIN m_code_value c1 ON fmb.gender_cv_id=c1.id"
-                    +" LEFT JOIN m_code_value c2 ON fmb.profession_cv_id=c2.id";
+                    + "fmb.lastname AS lastName,fmb.qualification AS qualification,fmb.mobile_number as mobileNumber,fmb.age as age,fmb.is_dependent as isDependent,cv.code_value AS relationship,fmb.relationship_cv_id AS relationshipId,"
+                    + "c.code_value AS maritalStatus,fmb.marital_status_cv_id AS maritalStatusId,"
+                    + "c1.code_value AS gender, fmb.gender_cv_id AS genderId, fmb.date_of_birth AS dateOfBirth, c2.code_value AS profession, fmb.profession_cv_id AS professionId"
+                    + " FROM m_family_members fmb" + " LEFT JOIN m_code_value cv ON fmb.relationship_cv_id=cv.id"
+                    + " LEFT JOIN m_code_value c ON fmb.marital_status_cv_id=c.id" + " LEFT JOIN m_code_value c1 ON fmb.gender_cv_id=c1.id"
+                    + " LEFT JOIN m_code_value c2 ON fmb.profession_cv_id=c2.id";
         }
 
         @Override
-        public ClientFamilyMembersData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public ClientFamilyMembersData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long id = rs.getLong("id");
             final long clientId = rs.getLong("clientId");
-            final String firstName=rs.getString("firstName");
-            final String middleName=rs.getString("middleName");
-            final String lastName=rs.getString("lastName");
-            final String qualification=rs.getString("qualification");
-            final String mobileNumber=rs.getString("mobileNumber");
-            final long age=rs.getLong("age");
-            final boolean isDependent=rs.getBoolean("isDependent");
+            final String firstName = rs.getString("firstName");
+            final String middleName = rs.getString("middleName");
+            final String lastName = rs.getString("lastName");
+            final String qualification = rs.getString("qualification");
+            final String mobileNumber = rs.getString("mobileNumber");
+            final long age = rs.getLong("age");
+            final boolean isDependent = rs.getBoolean("isDependent");
             final String relationship = rs.getString("relationship");
             final long relationshipId = rs.getLong("relationshipId");
             final String maritalStatus = rs.getString("maritalStatus");
@@ -87,14 +84,12 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
             final String profession = rs.getString("profession");
             final long professionId = rs.getLong("professionId");
 
-            return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName,
-                    qualification,mobileNumber,age,isDependent,relationship,relationshipId,maritalStatus,maritalStatusId,gender,genderId,dateOfBirth,profession,professionId);
-
-
+            return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age,
+                    isDependent, relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
+                    professionId);
 
         }
     }
-
 
     @Override
     public Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId) {
@@ -106,7 +101,6 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
     }
-
 
     @Override
     public ClientFamilyMembersData getClientFamilyMember(long id) {
@@ -133,8 +127,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final List<CodeValueData> professionOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("PROFESSION"));
 
-        return ClientFamilyMembersData.templateInstance(relationshipOptions,genderOptions,
-                maritalStatusOptions, professionOptions);
+        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions);
     }
 
 }

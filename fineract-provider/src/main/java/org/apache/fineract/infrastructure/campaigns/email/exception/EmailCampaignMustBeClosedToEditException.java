@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.exception;
 
-
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class EmailCampaignMustBeClosedToEditException extends AbstractPlatformDomainRuleException {

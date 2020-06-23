@@ -61,12 +61,11 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     @Column(name = "grace_on_arrears_ageing", nullable = true)
     private Boolean graceOnArrearsAgeing;
 
-    private static final String[] supportedloanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
+    private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
-            LoanProductConstants.interestCalculationPeriodTypeParamName,
-            LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
-            LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.graceOnArrearsAgeingParameterName};
+            LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
+            LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 
@@ -93,7 +92,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 .getAsJsonPrimitive(LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName).getAsBoolean();
         final Boolean graceOnArrearsAging = command.parsedJson().getAsJsonObject()
                 .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                .getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean();
+                .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean();
 
         return new LoanProductConfigurableAttributes(amortization, interestMethod, transactionProcessingStrategy, interestCalcPeriod,
                 arrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAging);
@@ -212,25 +211,28 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (!(o instanceof LoanProductConfigurableAttributes)) return false;
+        if (!(o instanceof LoanProductConfigurableAttributes)) {
+            return false;
+        }
 
         LoanProductConfigurableAttributes that = (LoanProductConfigurableAttributes) o;
 
-        return Objects.equals(loanProduct, that.loanProduct) &&
-               Objects.equals(amortizationType, that.amortizationType) &&
-               Objects.equals(interestType, that.interestType) &&
-                Objects.equals(transactionProcessingStrategyId, that.transactionProcessingStrategyId) &&
-                Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType) &&
-                Objects.equals(inArrearsTolerance, that.inArrearsTolerance) &&
-                Objects.equals(repaymentEvery, that.repaymentEvery) &&
-                Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment) &&
-                Objects.equals(graceOnArrearsAgeing, that.graceOnArrearsAgeing);
+        return Objects.equals(loanProduct, that.loanProduct) && Objects.equals(amortizationType, that.amortizationType)
+                && Objects.equals(interestType, that.interestType)
+                && Objects.equals(transactionProcessingStrategyId, that.transactionProcessingStrategyId)
+                && Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType)
+                && Objects.equals(inArrearsTolerance, that.inArrearsTolerance) && Objects.equals(repaymentEvery, that.repaymentEvery)
+                && Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment)
+                && Objects.equals(graceOnArrearsAgeing, that.graceOnArrearsAgeing);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanProduct, amortizationType, interestType, transactionProcessingStrategyId, interestCalculationPeriodType, inArrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAgeing);
+        return Objects.hash(loanProduct, amortizationType, interestType, transactionProcessingStrategyId, interestCalculationPeriodType,
+                inArrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAgeing);
     }
 }

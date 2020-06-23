@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityAccountData;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
@@ -75,7 +75,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
     public FinancialActivityAccountData addTemplateDetails(FinancialActivityAccountData financialActivityAccountData) {
         final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
         financialActivityAccountData.setAccountingMappingOptions(accountOptions);
-        financialActivityAccountData.setFinancialActivityOptions(FINANCIAL_ACTIVITY.getAllFinancialActivities());
+        financialActivityAccountData.setFinancialActivityOptions(FinancialActivity.getAllFinancialActivities());
         return financialActivityAccountData;
     }
 
@@ -91,7 +91,8 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
 
         public FinancialActivityAccountMapper() {
             StringBuilder sb = new StringBuilder(300);
-            sb.append(" faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
+            sb.append(
+                    " faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
             sb.append(" from acc_gl_financial_activity_account faa ");
             sb.append(" join acc_gl_account glaccount on glaccount.id = faa.gl_account_id");
             sql = sb.toString();
@@ -110,7 +111,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
             final String glCode = rs.getString("glCode");
 
             final GLAccountData glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
-            final FinancialActivityData financialActivityData = FINANCIAL_ACTIVITY.toFinancialActivityData(financialActivityId);
+            final FinancialActivityData financialActivityData = FinancialActivity.toFinancialActivityData(financialActivityId);
 
             final FinancialActivityAccountData financialActivityAccountData = new FinancialActivityAccountData(id, financialActivityData,
                     glAccountData);

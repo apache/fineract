@@ -27,21 +27,26 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleException {
 
     /*** Enum of reasons for invalid delete **/
-    public static enum GL_ACCOUNT_INVALID_UPDATE_REASON {
+    public static enum GlAccountInvalidUpdateReason {
+
         TRANSANCTIONS_LOGGED;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "This Usage of this (detail) GL Account as it already has transactions logged against it"; }
+            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+                return "This Usage of this (detail) GL Account as it already has transactions logged against it";
+            }
             return name().toString();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "error.msg.glaccount.glcode.invalid.update.transactions.logged"; }
+            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+                return "error.msg.glaccount.glcode.invalid.update.transactions.logged";
+            }
             return name().toString();
         }
     }
 
-    public GLAccountInvalidUpdateException(final GL_ACCOUNT_INVALID_UPDATE_REASON reason, final Long glAccountId) {
+    public GLAccountInvalidUpdateException(final GlAccountInvalidUpdateReason reason, final Long glAccountId) {
         super(reason.errorCode(), reason.errorMessage(), glAccountId);
     }
 }

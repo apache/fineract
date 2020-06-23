@@ -54,10 +54,9 @@ import org.springframework.stereotype.Component;
 
 @Path("/clients/{clientId}/transactions")
 @Component
-@Api(tags = {"Client Transaction"})
+@Api(tags = { "Client Transaction" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Client Transaction", description = "Client Transactions refer to transactions made directly againt a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one. ")
-})
+        @Tag(name = "Client Transaction", description = "Client Transactions refer to transactions made directly againt a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one. ") })
 public class ClientTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -82,10 +81,13 @@ public class ClientTransactionsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Client Transactions", notes = "The list capability of client transaction can support pagination." + "\n\n" + "Example Requests:\n\n" + "clients/189/transactions\n\n" + "clients/189/transactions?offset=10&limit=50" )
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)})
-    public String retrieveAllClientTransactions(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @Context final UriInfo uriInfo,
-            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit) {
+    @ApiOperation(value = "List Client Transactions", notes = "The list capability of client transaction can support pagination." + "\n\n"
+            + "Example Requests:\n\n" + "clients/189/transactions\n\n" + "clients/189/transactions?offset=10&limit=50")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class) })
+    public String retrieveAllClientTransactions(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @Context final UriInfo uriInfo, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
         SearchParameters searchParameters = SearchParameters.forPagination(offset, limit);
@@ -101,8 +103,10 @@ public class ClientTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Client Transaction", notes = "Example Requests:\n" + "clients/1/transactions/1\n" + "\n" + "\n" + "clients/1/transactions/1?fields=id,officeName" )
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)})
+    @ApiOperation(value = "Retrieve a Client Transaction", notes = "Example Requests:\n" + "clients/1/transactions/1\n" + "\n" + "\n"
+            + "clients/1/transactions/1?fields=id,officeName")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class) })
     public String retrieveClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
 
@@ -121,9 +125,12 @@ public class ClientTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Undo a Client Transaction", notes = "Undoes a Client Transaction")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)})
-    public String undoClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId,
-            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class) })
+    public String undoClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         String json = "";
         if (is(commandParam, ClientApiConstants.CLIENT_TRANSACTION_COMMAND_UNDO)) {

@@ -47,7 +47,8 @@ public class WorkingDays extends AbstractPersistableCustom {
 
     }
 
-    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments, final Boolean extendTermForRepaymentsOnHolidays) {
+    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments,
+            final Boolean extendTermForRepaymentsOnHolidays) {
         this.recurrence = recurrence;
         this.repaymentReschedulingType = repaymentReschedulingType;
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
@@ -72,11 +73,13 @@ public class WorkingDays extends AbstractPersistableCustom {
         this.repaymentReschedulingType = repaymentReschedulingType;
     }
 
-    public Boolean getExtendTermForDailyRepayments(){
+    public Boolean getExtendTermForDailyRepayments() {
         return this.extendTermForDailyRepayments;
     }
 
-    public Boolean getExtendTermForRepaymentsOnHolidays() { return this.extendTermForRepaymentsOnHolidays; }
+    public Boolean getExtendTermForRepaymentsOnHolidays() {
+        return this.extendTermForRepaymentsOnHolidays;
+    }
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -90,19 +93,22 @@ public class WorkingDays extends AbstractPersistableCustom {
 
         final String repaymentRescheduleTypeParamName = "repaymentRescheduleType";
         if (command.isChangeInIntegerParameterNamed(repaymentRescheduleTypeParamName, this.repaymentReschedulingType)) {
-            final Integer newValue =command.integerValueOfParameterNamed(repaymentRescheduleTypeParamName);
-            actualChanges.put(repaymentRescheduleTypeParamName,  WorkingDaysEnumerations.workingDaysStatusType(newValue));
+            final Integer newValue = command.integerValueOfParameterNamed(repaymentRescheduleTypeParamName);
+            actualChanges.put(repaymentRescheduleTypeParamName, WorkingDaysEnumerations.workingDaysStatusType(newValue));
             this.repaymentReschedulingType = RepaymentRescheduleType.fromInt(newValue).getValue();
         }
 
-        if(command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments, this.extendTermForDailyRepayments)){
+        if (command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments,
+                this.extendTermForDailyRepayments)) {
             final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments);
             actualChanges.put(WorkingDaysApiConstants.extendTermForDailyRepayments, newValue);
             this.extendTermForDailyRepayments = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays, this.extendTermForRepaymentsOnHolidays)) {
-            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays);
+        if (command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays,
+                this.extendTermForRepaymentsOnHolidays)) {
+            final Boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays);
             actualChanges.put(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays, newValue);
             this.extendTermForRepaymentsOnHolidays = newValue;
         }

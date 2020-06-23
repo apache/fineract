@@ -37,7 +37,8 @@ public class SavingsAccountTransactionDTO {
     private final Integer depositAccountType;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate, final AppUser appUser, final Integer depositAccountType) {
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate, final AppUser appUser,
+            final Integer depositAccountType) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
@@ -101,6 +102,5 @@ public class SavingsAccountTransactionDTO {
     public Integer getAccountType() {
         return this.depositAccountType;
     }
-
 
 }

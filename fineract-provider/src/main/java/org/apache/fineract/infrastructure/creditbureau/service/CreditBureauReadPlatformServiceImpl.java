@@ -36,21 +36,20 @@ public class CreditBureauReadPlatformServiceImpl implements CreditBureauReadPlat
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource) {
+    public CreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     private static final class CBMapper implements RowMapper<CreditBureauData> {
+
         public String schema() {
             return "cb.id as creditBureauID,cb.name as creditBureauName,cb.product as creditBureauProduct,"
                     + "cb.country as country,concat(cb.product,' - ',cb.name,' - ',cb.country) as cbSummary,cb.implementationKey as implementationKey from m_creditbureau cb";
         }
 
         @Override
-        public CreditBureauData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public CreditBureauData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long id = rs.getLong("creditBureauID");
             final String name = rs.getString("creditBureauName");
             final String product = rs.getString("creditBureauProduct");
@@ -58,7 +57,7 @@ public class CreditBureauReadPlatformServiceImpl implements CreditBureauReadPlat
             final String cbSummary = rs.getString("cbSummary");
             final long implementationKey = rs.getLong("implementationKey");
 
-            return CreditBureauData.instance(id, name, product, country, cbSummary, implementationKey);
+            return CreditBureauData.instance(id, name, country, product, cbSummary, implementationKey);
 
         }
     }

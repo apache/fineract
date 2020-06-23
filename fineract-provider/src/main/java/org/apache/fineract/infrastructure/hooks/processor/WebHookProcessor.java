@@ -37,11 +37,8 @@ import retrofit.Callback;
 public class WebHookProcessor implements HookProcessor {
 
     @Override
-    public void process(final Hook hook,
-            @SuppressWarnings("unused") final AppUser appUser,
-            final String payload, final String entityName,
-            final String actionName, final String tenantIdentifier,
-            final String authToken) {
+    public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
+            final String actionName, final String tenantIdentifier, final String authToken) {
 
         final Set<HookConfiguration> config = hook.getHookConfig();
 
@@ -58,35 +55,27 @@ public class WebHookProcessor implements HookProcessor {
             }
         }
 
-        sendRequest(url, contentType, payload, entityName, actionName,
-                tenantIdentifier, authToken);
+        sendRequest(url, contentType, payload, entityName, actionName, tenantIdentifier, authToken);
 
     }
 
     @SuppressWarnings("unchecked")
-    private void sendRequest(final String url, final String contentType,
-            final String payload, final String entityName,
-            final String actionName, final String tenantIdentifier,
-            @SuppressWarnings("unused") final String authToken) {
+    private void sendRequest(final String url, final String contentType, final String payload, final String entityName,
+            final String actionName, final String tenantIdentifier, @SuppressWarnings("unused") final String authToken) {
 
         final String fineractEndpointUrl = System.getProperty("baseUrl");
-        final WebHookService service = ProcessorHelper
-                .createWebHookService(url);
+        final WebHookService service = ProcessorHelper.createWebHookService(url);
 
         @SuppressWarnings("rawtypes")
         final Callback callback = ProcessorHelper.createCallback(url);
 
-        if (contentType.equalsIgnoreCase("json")
-                || contentType.contains("json")) {
-            final JsonObject json = JsonParser.parseString(payload)
-                    .getAsJsonObject();
-            service.sendJsonRequest(entityName, actionName, tenantIdentifier,
-                    fineractEndpointUrl, json, callback);
+        if (contentType.equalsIgnoreCase("json") || contentType.contains("json")) {
+            final JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
+            service.sendJsonRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, json, callback);
         } else {
             Map<String, String> map = new HashMap<>();
             map = new Gson().fromJson(payload, map.getClass());
-            service.sendFormRequest(entityName, actionName, tenantIdentifier,
-                    fineractEndpointUrl, map, callback);
+            service.sendFormRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, map, callback);
         }
 
     }

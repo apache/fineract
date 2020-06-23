@@ -43,7 +43,7 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
     @Override
     public List<LikelihoodData> retrieveAll(final String ppiName) {
-        final SqlRowSet likelihood = this._getLikelihood(ppiName);
+        final SqlRowSet likelihood = this.getLikelihood(ppiName);
 
         List<LikelihoodData> likelihoodDatas = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
         return likelihoodDatas;
     }
 
-    private SqlRowSet _getLikelihood(final String ppiName) {
+    private SqlRowSet getLikelihood(final String ppiName) {
         String sql = "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled " + " FROM ppi_poverty_line pl "
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id "
                 + " JOIN ppi_likelihoods lkh on lkp.likelihood_id = lkh.id " + " WHERE lkp.ppi_name = ? "
@@ -70,7 +70,7 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
     @Override
     public LikelihoodData retrieve(final Long likelihoodId) {
-        final SqlRowSet likelihood = this._getLikelihood(likelihoodId);
+        final SqlRowSet likelihood = this.getLikelihood(likelihoodId);
 
         likelihood.first();
 
@@ -81,7 +81,7 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
     }
 
-    private SqlRowSet _getLikelihood(final Long likelihoodId) {
+    private SqlRowSet getLikelihood(final Long likelihoodId) {
         String sql = "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled " + " FROM ppi_likelihoods lkh "
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.likelihood_id = lkh.id " + " WHERE lkp.id = ? ";
 

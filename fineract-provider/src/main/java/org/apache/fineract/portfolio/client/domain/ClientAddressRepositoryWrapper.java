@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ClientAddressRepositoryWrapper {
+
     private final ClientAddressRepository clientAddressRepository;
 
     @Autowired
@@ -33,16 +34,15 @@ public class ClientAddressRepositoryWrapper {
 
     public ClientAddress findOneByClientIdAndAddressTypeAndIsActive(final long clientId, final CodeValue addressType,
             final boolean isActive) {
-        final ClientAddress clientAddress = this.clientAddressRepository
-                .findByClientIdAndAddressTypeAndIsActive(clientId, addressType, isActive);
+        final ClientAddress clientAddress = this.clientAddressRepository.findByClientIdAndAddressTypeAndIsActive(clientId, addressType,
+                isActive);
         // if (clientAddress == null) { throw new
         // AddressNotFoundException(clientId, addressType); }
         return clientAddress;
     }
 
     public ClientAddress findOneByClientIdAndAddressId(final long clientId, final long addressId) {
-        final ClientAddress clientAddress = this.clientAddressRepository.findByClientIdAndAddressId(clientId,
-                addressId);
+        final ClientAddress clientAddress = this.clientAddressRepository.findByClientIdAndAddressId(clientId, addressId);
 
         return clientAddress;
     }

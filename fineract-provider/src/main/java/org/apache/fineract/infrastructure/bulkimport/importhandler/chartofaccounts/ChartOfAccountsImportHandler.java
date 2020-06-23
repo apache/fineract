@@ -42,73 +42,78 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class ChartOfAccountsImportHandler implements ImportHandler {
-    private  List<GLAccountData> glAccounts;
-    private  Workbook workbook;
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChartOfAccountsImportHandler.class);
+    private List<GLAccountData> glAccounts;
+    private Workbook workbook;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public ChartOfAccountsImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+    public ChartOfAccountsImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @Override
     public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.glAccounts=new ArrayList<>();
-        this.workbook=workbook;
+        this.glAccounts = new ArrayList<>();
+        this.workbook = workbook;
         readExcelFile();
         return importEntity();
     }
 
     public void readExcelFile() {
 
-        Sheet chartOfAccountsSheet=workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
-        Integer noOfEntries= ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet,TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
-        for (int rowIndex=1;rowIndex<=noOfEntries;rowIndex++){
+        Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row=chartOfAccountsSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, ChartOfAcountsConstants.STATUS_COL)){
-                    glAccounts.add(readGlAccounts(row));
-                }
+            row = chartOfAccountsSheet.getRow(rowIndex);
+            if (ImportHandlerUtils.isNotImported(row, ChartOfAcountsConstants.STATUS_COL)) {
+                glAccounts.add(readGlAccounts(row));
+            }
         }
     }
 
     private GLAccountData readGlAccounts(Row row) {
-        String accountType=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_TYPE_COL,row);
-        EnumOptionData accountTypeEnum=GLAccountType.fromString(accountType);
-        String accountName=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_NAME_COL,row);
-        String usage=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_USAGE_COL,row);
-        Long usageId=null;
-        EnumOptionData usageEnum=null;
-        if (usage!=null&& usage.equals(GLAccountUsage.DETAIL.toString())){
-            usageId=1L;
-            usageEnum=new EnumOptionData(usageId,null,null);
-        }else if (usage!=null&&usage.equals(GLAccountUsage.HEADER.toString())){
-            usageId=2L;
-            usageEnum=new EnumOptionData(usageId,null,null);
+        String accountType = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_TYPE_COL, row);
+        EnumOptionData accountTypeEnum = GLAccountType.fromString(accountType);
+        String accountName = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_NAME_COL, row);
+        String usage = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.ACCOUNT_USAGE_COL, row);
+        Long usageId = null;
+        EnumOptionData usageEnum = null;
+        if (usage != null && usage.equals(GLAccountUsage.DETAIL.toString())) {
+            usageId = 1L;
+            usageEnum = new EnumOptionData(usageId, null, null);
+        } else if (usage != null && usage.equals(GLAccountUsage.HEADER.toString())) {
+            usageId = 2L;
+            usageEnum = new EnumOptionData(usageId, null, null);
         }
-        Boolean manualEntriesAllowed=ImportHandlerUtils.readAsBoolean(ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL,row);
-        Long parentId=null;
-        if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.PARENT_ID_COL,row)!=null) {
-            parentId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.PARENT_ID_COL,row));
+        Boolean manualEntriesAllowed = ImportHandlerUtils.readAsBoolean(ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL, row);
+        Long parentId = null;
+        if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.PARENT_ID_COL, row) != null) {
+            parentId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.PARENT_ID_COL, row));
         }
-        String glCode=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.GL_CODE_COL,row);
-        Long tagId=null;
-        if(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row)!=null)
-            tagId=Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row));
-        CodeValueData tagIdCodeValueData=new CodeValueData(tagId);
-        String description=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL,row);
-        return GLAccountData.importInstance(accountName,parentId,glCode,manualEntriesAllowed,accountTypeEnum,
-                usageEnum,description,tagIdCodeValueData,row.getRowNum());
+        String glCode = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.GL_CODE_COL, row);
+        Long tagId = null;
+        if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row) != null) {
+            tagId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row));
+        }
+        CodeValueData tagIdCodeValueData = new CodeValueData(tagId);
+        String description = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL, row);
+        return GLAccountData.importInstance(accountName, parentId, glCode, manualEntriesAllowed, accountTypeEnum, usageEnum, description,
+                tagIdCodeValueData, row.getRowNum());
     }
 
     public Count importEntity() {
-        Sheet chartOfAccountsSheet=workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
+        Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
@@ -116,9 +121,9 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         int successCount = 0;
         int errorCount = 0;
         String errorMessage = "";
-        for (GLAccountData glAccount: glAccounts) {
+        for (GLAccountData glAccount : glAccounts) {
             try {
-                String payload=gsonBuilder.create().toJson(glAccount);
+                String payload = gsonBuilder.create().toJson(glAccount);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createGLAccount() //
                         .withJson(payload) //
@@ -128,18 +133,19 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
                 Cell statusCell = chartOfAccountsSheet.getRow(glAccount.getRowIndex()).createCell(ChartOfAcountsConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+            } catch (RuntimeException ex) {
                 errorCount++;
-                ex.printStackTrace();
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(chartOfAccountsSheet,glAccount.getRowIndex(),errorMessage,ChartOfAcountsConstants.STATUS_COL);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                ImportHandlerUtils.writeErrorMessage(chartOfAccountsSheet, glAccount.getRowIndex(), errorMessage,
+                        ChartOfAcountsConstants.STATUS_COL);
             }
         }
         chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        ImportHandlerUtils.writeString(ChartOfAcountsConstants.STATUS_COL, chartOfAccountsSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
+        ImportHandlerUtils.writeString(ChartOfAcountsConstants.STATUS_COL,
+                chartOfAccountsSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
                 TemplatePopulateImportConstants.STATUS_COLUMN_HEADER);
-        return Count.instance(successCount,errorCount);
+        return Count.instance(successCount, errorCount);
     }
-
 
 }

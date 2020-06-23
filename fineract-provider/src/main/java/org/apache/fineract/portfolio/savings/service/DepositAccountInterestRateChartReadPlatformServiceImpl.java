@@ -104,7 +104,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         sql.append("END");
         Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { chartId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(chartId); }
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new DepositAccountInterestRateChartNotFoundException(chartId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -149,7 +151,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
 
         Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { accountId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(accountId); }
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new DepositAccountInterestRateChartNotFoundException(accountId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -173,8 +177,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                 clientClassificationOptions);
     }
 
-    private static final class DepositAccountInterestRateChartExtractor implements
-            ResultSetExtractor<Collection<DepositAccountInterestRateChartData>> {
+    private static final class DepositAccountInterestRateChartExtractor
+            implements ResultSetExtractor<Collection<DepositAccountInterestRateChartData>> {
 
         DepositAccountInterestRateChartMapper chartMapper = new DepositAccountInterestRateChartMapper();
         InterestRateChartSlabExtractor chartSlabsMapper = new InterestRateChartSlabExtractor();
@@ -188,8 +192,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         private DepositAccountInterestRateChartExtractor() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
-            sqlBuilder
-                    .append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
+            sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
                     .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount,")
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
@@ -197,12 +200,10 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
-                    .append("sa.id as accountId, sa.account_no as accountNumber, ")
-                    .append("iri.id as iriId, ")
+                    .append("sa.id as accountId, sa.account_no as accountNumber, ").append("iri.id as iriId, ")
                     .append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
                     .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
-                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ")
-                    .append("code.code_value as attributeValueDesc ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
                     .append("from ")
                     .append("m_savings_account_interest_rate_chart irc left join m_savings_account_interest_rate_slab ircd on irc.id=ircd.savings_account_interest_rate_chart_id ")
                     .append(" left join m_savings_interest_incentives  iri on iri.deposit_account_interest_rate_slab_id =ircd.id ")
@@ -345,7 +346,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "ircdId");
             // If there are not chart Slabs are associated then in
             // InterestRateChartExtractor the chart Slabs id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String description = rs.getString("ircdDescription");
             final Integer fromPeriod = JdbcSupport.getInteger(rs, "ircdFromPeriod");
@@ -364,8 +367,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             // currency
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return DepositAccountInterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom,
                     amountRangeTo, annualInterestRate, currency);
@@ -380,7 +383,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "iriId");
             // If there are not Incentive are associated then in
             // InterestRateChartExtractor the incentive id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String attributeValue = rs.getString("attributeValue");
             String attributeValueDesc = null;

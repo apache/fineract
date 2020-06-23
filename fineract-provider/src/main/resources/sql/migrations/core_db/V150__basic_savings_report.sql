@@ -32,7 +32,7 @@ INSERT INTO `stretchy_report_parameter` (`report_id`, `parameter_id`, `report_pa
 INSERT INTO `stretchy_report_parameter` (`report_id`, `parameter_id`, `report_parameter_name`) VALUES ((select id from stretchy_report where report_name = 'Client Savings Summary'), (select id from stretchy_parameter where parameter_name='savingsProductIdSelectAll'), 'selectProduct');
 
 ALTER TABLE `r_enum_value`
-	ADD COLUMN `enum_type` TINYINT(1) NOT NULL AFTER `enum_value`;
+    ADD COLUMN `enum_type` tinyint NOT NULL AFTER `enum_value`;
 
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`, `enum_type`) VALUES ('savings_transaction_type_enum', 1, 'deposit', 'deposit', 0);
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`, `enum_type`) VALUES ('savings_transaction_type_enum', 2, 'withdrawal', 'withdrawal', 1);

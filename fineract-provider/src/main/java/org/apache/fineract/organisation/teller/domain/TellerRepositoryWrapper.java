@@ -33,20 +33,19 @@ public class TellerRepositoryWrapper {
         this.repository = repository;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Teller findOneWithNotFoundDetection(final Long id) {
-        final Teller teller = this.repository.findById(id)
-                .orElseThrow(() -> new TellerNotFoundException(id));
+        final Teller teller = this.repository.findById(id).orElseThrow(() -> new TellerNotFoundException(id));
         teller.initializeLazyCollections();
         return teller;
     }
 
     public Teller save(final Teller teller) {
-        return this.repository.save(teller) ;
+        return this.repository.save(teller);
     }
 
     public Teller saveAndFlush(final Teller teller) {
-        return this.repository.saveAndFlush(teller) ;
+        return this.repository.saveAndFlush(teller);
     }
 
     public void delete(final Teller teller) {

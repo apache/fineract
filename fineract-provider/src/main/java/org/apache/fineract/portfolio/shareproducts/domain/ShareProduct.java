@@ -101,7 +101,7 @@ public class ShareProduct extends AbstractAuditableCustom {
     private Long maximumShares;
 
     @OrderBy(value = "fromDate,id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true, fetch = FetchType.EAGER)
     Set<ShareProductMarketPrice> marketPrice;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -248,7 +248,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setUnitPrice(BigDecimal unitPrice) {
         boolean returnValue = false;
-        if (!this.unitPrice.equals(unitPrice)) {
+        if (this.unitPrice.compareTo(unitPrice) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.unitPrice = unitPrice;
             returnValue = true;
         }
@@ -286,11 +286,11 @@ public class ShareProduct extends AbstractAuditableCustom {
         boolean update = true;
         Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
         if (marketPrice != null && marketPrice.size() > 0) {
-             for (ShareProductMarketPriceData data : marketPrice) {
-                 if (data.getId() == null) {
-                     ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
-                     entity.setShareProduct(this);
-                     marketPriceTemp.add(entity);
+            for (ShareProductMarketPriceData data : marketPrice) {
+                if (data.getId() == null) {
+                    ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
+                    entity.setShareProduct(this);
+                    marketPriceTemp.add(entity);
                 } else {
                     for (ShareProductMarketPrice priceData : this.marketPrice) {
                         if (priceData.getId().equals(data.getId())) {
@@ -314,7 +314,8 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
         boolean returnValue = false;
-        if (this.allowDividendCalculationForInactiveClients == null || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
+        if (this.allowDividendCalculationForInactiveClients == null
+                || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
             this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
             returnValue = true;
         }
@@ -363,7 +364,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
         boolean updated = false;
-        if (this.shareCapital == null || !this.shareCapital.equals(shareCapitalValue)) {
+        if (this.shareCapital == null || this.shareCapital.compareTo(shareCapitalValue) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.shareCapital = shareCapitalValue;
             updated = true;
         }
@@ -415,29 +416,29 @@ public class ShareProduct extends AbstractAuditableCustom {
     }
 
     public void addSubscribedShares(final Long subscribedShares) {
-        if(this.totalSubscribedShares == null) {
-            this.totalSubscribedShares = Long.valueOf(0) ;
+        if (this.totalSubscribedShares == null) {
+            this.totalSubscribedShares = Long.valueOf(0);
         }
-        this.totalSubscribedShares += subscribedShares ;
+        this.totalSubscribedShares += subscribedShares;
     }
 
     public void removeSubscribedShares(final Long subscribedShares) {
-        this.totalSubscribedShares -= subscribedShares ;
+        this.totalSubscribedShares -= subscribedShares;
     }
 
     public Long getSubscribedShares() {
-        return this.totalSubscribedShares ;
+        return this.totalSubscribedShares;
     }
 
     public Long getMinimumClientShares() {
-        return this.minimumShares ;
+        return this.minimumShares;
     }
 
     public Long getMaximumClientShares() {
-        return this.maximumShares ;
+        return this.maximumShares;
     }
 
     public Long getDefaultClientShares() {
-        return this.nominalShares ;
+        return this.nominalShares;
     }
 }

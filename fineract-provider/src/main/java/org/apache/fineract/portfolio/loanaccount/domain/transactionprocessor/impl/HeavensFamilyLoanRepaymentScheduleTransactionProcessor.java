@@ -72,7 +72,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         final LoanRepaymentScheduleInstallment previousInstallment = installments.get(previousInstallmentIndex);
         lastInstallmentDueDate = previousInstallment.getDueDate();
 
-        isInAdvance = !(transactionDate.isAfter(lastInstallmentDueDate) || (transactionDate.isEqual(lastInstallmentDueDate)));
+        isInAdvance = !(transactionDate.isAfter(lastInstallmentDueDate) || transactionDate.isEqual(lastInstallmentDueDate));
 
         return isInAdvance;
     }
@@ -163,8 +163,8 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

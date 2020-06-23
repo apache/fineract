@@ -34,7 +34,7 @@ public class UpdateClientSavingsAccountCommandHandler implements NewCommandSourc
     private final ClientWritePlatformService clientWritePlatformService;
 
     @Autowired
-    public UpdateClientSavingsAccountCommandHandler(final ClientWritePlatformService clientWritePlatformService){
+    public UpdateClientSavingsAccountCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
         this.clientWritePlatformService = clientWritePlatformService;
     }
 

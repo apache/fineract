@@ -30,8 +30,8 @@ import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "m_selfservice_beneficiaries_tpt", uniqueConstraints = { @UniqueConstraint(columnNames = {
-        "name", "app_user_id", "is_active" }, name = "name") })
+@Table(name = "m_selfservice_beneficiaries_tpt", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "name", "app_user_id", "is_active" }, name = "name") })
 public class SelfBeneficiariesTPT extends AbstractPersistableCustom {
 
     @Column(name = "app_user_id", nullable = false)
@@ -62,8 +62,7 @@ public class SelfBeneficiariesTPT extends AbstractPersistableCustom {
         //
     }
 
-    public SelfBeneficiariesTPT(Long appUserId, String name, Long officeId,
-            Long clientId, Long accountId, Integer accountType,
+    public SelfBeneficiariesTPT(Long appUserId, String name, Long officeId, Long clientId, Long accountId, Integer accountType,
             Long transferLimit) {
         this.appUserId = appUserId;
         this.name = name;
@@ -124,7 +123,7 @@ public class SelfBeneficiariesTPT extends AbstractPersistableCustom {
             this.name = newName;
             changes.put(NAME_PARAM_NAME, newName);
         }
-        if ((this.transferLimit !=null && !this.transferLimit.equals(newTransferLimit))
+        if ((this.transferLimit != null && !this.transferLimit.equals(newTransferLimit))
                 || (this.transferLimit == null && newTransferLimit != null)) {
             this.transferLimit = newTransferLimit;
             changes.put(TRANSFER_LIMIT_PARAM_NAME, newTransferLimit);

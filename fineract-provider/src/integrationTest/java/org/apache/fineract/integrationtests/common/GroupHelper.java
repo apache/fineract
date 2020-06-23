@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -36,7 +36,7 @@ public class GroupHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
-    private final static Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
 
     private static final String CREATE_GROUP_URL = "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -70,25 +70,25 @@ public class GroupHelper {
                 jsonAttributeToGetBack);
     }
 
-    public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String registeredTableName) {
+    public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String registeredTableName) {
         LOG.info("-------------------------- CREATING A GROUP WITH DATATABLES --------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL,
-                getTestGroupWithDatatableAsJson(registeredTableName), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupWithDatatableAsJson(registeredTableName),
+                "groupId");
     }
 
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
-                + "?command=associateClients&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
+                + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Associate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
-                + "?command=disassociateClients&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
+                + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
@@ -107,23 +107,29 @@ public class GroupHelper {
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
     }
 
-    public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId) {
+    public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
-    public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final Long staffId){
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+    public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
+            final Long staffId) {
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+                + "&command=assignStaff";
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAsJSON(staffId),"changes");
-    }
-    public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final String staffId){
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
-        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAndInheritStaffForClientAccountsAsJSON(staffId),"changes");
+        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
     }
 
+    public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String groupId, final String staffId) {
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+                + "&command=assignStaff";
+        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,
+                assignStaffAndInheritStaffForClientAccountsAsJSON(staffId), "changes");
+    }
 
     public static String getTestGroupAsJSON(final boolean active, final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
@@ -173,27 +179,28 @@ public class GroupHelper {
         LOG.debug("map : {}", map);
         return new Gson().toJson(map);
     }
+
     public static String assignStaffAsJSON(final Long staffId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("staffId", staffId);
         LOG.debug("map : {}", map);
         return new Gson().toJson(map);
     }
+
     public static String assignStaffAndInheritStaffForClientAccountsAsJSON(final String staffId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("staffId", staffId);
-        map.put("inheritStaffForClientAccounts","true");
+        map.put("inheritStaffForClientAccounts", "true");
         LOG.debug("map : {}", map);
         return new Gson().toJson(map);
     }
-
 
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
-        assertEquals("ERROR IN CREATING THE GROUP", generatedGroupID, responseGroupID);
+        assertEquals(generatedGroupID, responseGroupID, "ERROR IN CREATING THE GROUP");
     }
 
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -201,7 +208,7 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
-        assertEquals("ERROR IN CREATING THE GROUP", expectedValue, responseValue);
+        assertEquals(expectedValue, responseValue, "ERROR IN CREATING THE GROUP");
     }
 
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -209,29 +216,29 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP STATUS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
-        assertEquals("ERROR IN ACTIVATING THE GROUP", generatedGroupStatus, responseGroupStatus);
+        assertEquals(generatedGroupStatus, responseGroupStatus, "ERROR IN ACTIVATING THE GROUP");
     }
 
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
-        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
-                + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&"
+                + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         LOG.debug("the list of verifyEmptyGroupMembers : {} ", list);
-        assertTrue("ERROR IN GROUP MEMBER", list.toString().contains("id=" + groupMember.toString()));
+        assertTrue(list.toString().contains("id=" + groupMember.toString()), "ERROR IN GROUP MEMBER");
     }
 
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
-        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
-                + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&"
+                + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         LOG.debug("the list of verifyEmptyGroupMembers : {} ", list);
-        assertEquals("GROUP MEMBER LIST NOT EMPTY", list, null);
+        assertEquals(list, null, "GROUP MEMBER LIST NOT EMPTY");
     }
 
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -240,25 +247,25 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP DELETED------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
-        assertFalse("GROUP NOT DELETED", list.toString().contains("id=" + generatedGroupID.toString()));
+        assertFalse(list.toString().contains("id=" + generatedGroupID.toString()), "GROUP NOT DELETED");
     }
 
-    //Glim_Gsim_testing
-    public static List<String> verifyRetrieveGlimAccountsByGroupId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer groupID) {
+    // Glim_Gsim_testing
+    public static List<String> verifyRetrieveGlimAccountsByGroupId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer groupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
-        final String GROUP_URL = "/fineract-provider/api/v1/groups/"+groupID+"/glimaccounts?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/glimaccounts?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "glimId");
         LOG.debug("GlimId of Retrieved Account : {} ", list);
         return list;
     }
 
-    public static List<String> verifyRetrieveGlimAccountsByGlimId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer glimId) {
+    public static List<String> verifyRetrieveGlimAccountsByGlimId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer glimId) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
-        final String GROUP_URL = "/fineract-provider/api/v1/loans/glimAccount/"+glimId+"?"+ Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/loans/glimAccount/" + glimId + "?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "glimId");
         LOG.debug("GlimId of Retrieved Account: {} ", list);
         return list;
@@ -268,7 +275,7 @@ public class GroupHelper {
             final Integer groupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
-        final String GROUP_URL = "/fineract-provider/api/v1/groups/"+groupID+"/gsimaccounts?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/gsimaccounts?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "gsimId");
         LOG.debug("GsimId Retrieved Accounts: {} ", list);
         return list;

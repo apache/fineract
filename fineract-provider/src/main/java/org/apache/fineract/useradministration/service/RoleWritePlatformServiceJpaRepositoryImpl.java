@@ -50,7 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -90,8 +90,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -118,7 +118,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
@@ -137,7 +137,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
                 if (changes.containsKey("name")) {
-                    this.topicDomainService.updateTopic( previousRoleName, role, changes);
+                    this.topicDomainService.updateTopic(previousRoleName, role, changes);
                 }
             }
 
@@ -151,8 +151,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -201,7 +201,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         if (allPermissions != null) {
             for (final Permission permission : allPermissions) {
-                if (permission.hasCode(permissionCode)) { return permission; }
+                if (permission.hasCode(permissionCode)) {
+                    return permission;
+                }
             }
         }
         throw new PermissionNotFoundException(permissionCode);
@@ -224,7 +226,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Roles associated with users can't be deleted
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
-            if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId); }
+            if (count > 0) {
+                throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId);
+            }
 
             this.topicDomainService.deleteTopic(role);
 
@@ -247,13 +251,15 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Checking the role present in DB or not using role_id
              */
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
-            //if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
+            // if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
 
             /**
              * Roles associated with users can't be disable
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
-            if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.disabled", roleId); }
+            if (count > 0) {
+                throw new RoleAssociatedException("error.msg.role.associated.with.users.disabled", roleId);
+            }
 
             /**
              * Disabling the role
@@ -278,9 +284,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             /**
              * Checking the role present in DB or not using role_id
              */
-            final Role role = this.roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RoleNotFoundException(roleId));
-            //if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
+            final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            // if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
 
             role.enableRole();
             this.roleRepository.save(role);

@@ -18,11 +18,11 @@
 --
 
 ALTER TABLE `m_holiday`
-	ADD COLUMN `status_enum` INT(5) NOT NULL DEFAULT '100' AFTER `repayments_rescheduled_to`;
+    ADD COLUMN `status_enum` INT NOT NULL DEFAULT '100' AFTER `repayments_rescheduled_to`;
 
 ALTER TABLE `m_holiday`
-	DROP INDEX `holiday_name`,
-	ADD UNIQUE INDEX `holiday_name` (`name`, `from_date`);
+    DROP INDEX `holiday_name`,
+    ADD UNIQUE INDEX `holiday_name` (`name`, `from_date`);
 
 UPDATE `m_holiday` set `status_enum`=300;
 

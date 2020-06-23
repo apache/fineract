@@ -25,13 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 01/12/18.
  */
 final class ClientAddressApiResourcesSwagger {
-    private ClientAddressApiResourcesSwagger() {
-    }
+
+    private ClientAddressApiResourcesSwagger() {}
 
     @ApiModel(value = "PostClientClientIdAddressesRequest")
-    public final static class PostClientClientIdAddressesRequest {
-        private PostClientClientIdAddressesRequest() {
-        }
+    public static final class PostClientClientIdAddressesRequest {
+
+        private PostClientClientIdAddressesRequest() {}
 
         @ApiModelProperty(example = "Ipca")
         public String street;
@@ -52,18 +52,18 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PostClientClientIdAddressesResponse")
-    public final static class PostClientClientIdAddressesResponse {
-        private PostClientClientIdAddressesResponse() {
-        }
+    public static final class PostClientClientIdAddressesResponse {
+
+        private PostClientClientIdAddressesResponse() {}
 
         @ApiModelProperty(example = "15")
         public Integer resourceId;
     }
 
     @ApiModel(value = "GetClientClientIdAddressesResponse")
-    public final static class GetClientClientIdAddressesResponse {
-        private GetClientClientIdAddressesResponse() {
-        }
+    public static final class GetClientClientIdAddressesResponse {
+
+        private GetClientClientIdAddressesResponse() {}
 
         @ApiModelProperty(example = "111755")
         public Long client_id;
@@ -106,9 +106,9 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PutClientClientIdAddressesRequest")
-    public final static class PutClientClientIdAddressesRequest {
-        private PutClientClientIdAddressesRequest() {
-        }
+    public static final class PutClientClientIdAddressesRequest {
+
+        private PutClientClientIdAddressesRequest() {}
 
         @ApiModelProperty(example = "67")
         public Integer addressId;
@@ -117,9 +117,9 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PutClientClientIdAddressesResponse")
-    public final static class PutClientClientIdAddressesResponse {
-        private PutClientClientIdAddressesResponse() {
-        }
+    public static final class PutClientClientIdAddressesResponse {
+
+        private PutClientClientIdAddressesResponse() {}
 
         @ApiModelProperty(example = "67")
         public Integer resourceId;

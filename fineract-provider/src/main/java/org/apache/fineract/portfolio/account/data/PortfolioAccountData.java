@@ -49,8 +49,8 @@ public class PortfolioAccountData implements Serializable {
     }
 
     public PortfolioAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
-            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldofficerId,
-            final String fieldofficerName, final CurrencyData currency) {
+            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldOfficerId,
+            final String fieldOfficerName, final CurrencyData currency) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -60,15 +60,15 @@ public class PortfolioAccountData implements Serializable {
         this.clientName = clientName;
         this.productId = productId;
         this.productName = productName;
-        this.fieldOfficerId = fieldofficerId;
-        this.fieldOfficerName = fieldofficerName;
+        this.fieldOfficerId = fieldOfficerId;
+        this.fieldOfficerName = fieldOfficerName;
         this.currency = currency;
         this.amtForTransfer = null;
     }
 
     public PortfolioAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
-            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldofficerId,
-            final String fieldofficerName, final CurrencyData currency, final BigDecimal amtForTransfer) {
+            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldOfficerId,
+            final String fieldOfficerName, final CurrencyData currency, final BigDecimal amtForTransfer) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -78,8 +78,8 @@ public class PortfolioAccountData implements Serializable {
         this.clientName = clientName;
         this.productId = productId;
         this.productName = productName;
-        this.fieldOfficerId = fieldofficerId;
-        this.fieldOfficerName = fieldofficerName;
+        this.fieldOfficerId = fieldOfficerId;
+        this.fieldOfficerName = fieldOfficerName;
         this.currency = currency;
         this.amtForTransfer = amtForTransfer;
     }
@@ -87,9 +87,15 @@ public class PortfolioAccountData implements Serializable {
     @Override
     public boolean equals(final Object obj) {
 
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof PortfolioAccountData)) {
+            return false;
+        }
         final PortfolioAccountData rhs = (PortfolioAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).append(this.productId, rhs.productId)
                 .append(this.productName, rhs.productName).isEquals();

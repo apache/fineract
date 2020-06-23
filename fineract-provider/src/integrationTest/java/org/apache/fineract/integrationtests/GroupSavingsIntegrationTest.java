@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -44,9 +44,9 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,9 +65,9 @@ public class GroupSavingsIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
-    private final static Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -80,26 +80,26 @@ public class GroupSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(groupID, savingsProductID, savingsId, ACCOUNT_TYPE_GROUP);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -117,7 +117,7 @@ public class GroupSavingsIntegrationTest {
 
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Assert.assertFalse(summaryBefore.equals(summary));
+        Assertions.assertFalse(summaryBefore.equals(summary));
 
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
 
@@ -131,23 +131,23 @@ public class GroupSavingsIntegrationTest {
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1000.0";
         final String enforceMinRequiredBalance = "true";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -162,13 +162,13 @@ public class GroupSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
-        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.closeSavingsAccountAndGetBackRequiredField(
-                savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
+                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         withdrawBalance = "true";
-        savingsStatusHashMap =  this.savingsAccountHelper.closeSavingsAccount(savingsId, withdrawBalance);
+        savingsStatusHashMap = this.savingsAccountHelper.closeSavingsAccount(savingsId, withdrawBalance);
         SavingsStatusChecker.verifySavingsAccountIsClosed(savingsStatusHashMap);
 
     }
@@ -182,23 +182,23 @@ public class GroupSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -221,7 +221,7 @@ public class GroupSavingsIntegrationTest {
 
     }
 
-    //gsimcommands testing
+    // gsimcommands testing
     @SuppressWarnings("unchecked")
     @Test
     public void testGsimSavingsAccount_REJECT_APPLICATION() {
@@ -232,23 +232,23 @@ public class GroupSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         List<Map<String, Object>> clientArray = new ArrayList<>();
-        clientArray.add(clientArray(clientID, groupID, savingsProductID,"08 January 2013"));
+        clientArray.add(clientArray(clientID, groupID, savingsProductID, "08 January 2013"));
 
         final Integer gsimID = this.savingsAccountHelper.applyForGsimApplication(clientArray);
 
@@ -267,7 +267,8 @@ public class GroupSavingsIntegrationTest {
         assertEquals("validation.msg.savingsaccount.reject.cannot.be.a.future.date",
                 error1.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        error1 = savingsAccountHelperValidationError.rejectGsimApplicationWithErrorCode(gsimID, SavingsAccountHelper.CREATED_DATE_MINUS_ONE);
+        error1 = savingsAccountHelperValidationError.rejectGsimApplicationWithErrorCode(gsimID,
+                SavingsAccountHelper.CREATED_DATE_MINUS_ONE);
         assertEquals("validation.msg.savingsaccount.reject.cannot.be.before.submittal.date",
                 error1.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -276,33 +277,33 @@ public class GroupSavingsIntegrationTest {
 
     }
 
-   @Test
+    @Test
     public void testGsimSavingsAccount_DEPOSIT_APPLICATION() {
 
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         List<Map<String, Object>> clientArray = new ArrayList<>();
-        clientArray.add(clientArray(clientID, groupID, savingsProductID,"08 January 2013"));
+        clientArray.add(clientArray(clientID, groupID, savingsProductID, "08 January 2013"));
         LOG.info("client Array : {} ", clientArray);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
@@ -310,10 +311,10 @@ public class GroupSavingsIntegrationTest {
         Integer position = 1;
 
         Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
-        Assert.assertNotNull(paymentTypeId);
+        Assertions.assertNotNull(paymentTypeId);
 
         List<Map<String, Object>> savingsArray = new ArrayList<>();
-        final Integer transactionAmount=2500;
+        final Integer transactionAmount = 2500;
         savingsArray.add(savingsArray(paymentTypeId, savingsId, transactionAmount, "10 March 2013"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
@@ -326,9 +327,9 @@ public class GroupSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final Integer depositId = this.savingsAccountHelper.depositGsimApplication(savingsId, savingsArray);
-        Assert.assertNotNull(depositId);
+        Assertions.assertNotNull(depositId);
 
-     }
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -338,23 +339,23 @@ public class GroupSavingsIntegrationTest {
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1000.0";
         final String enforceMinRequiredBalance = "true";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         List<Map<String, Object>> clientArray = new ArrayList<>();
-        clientArray.add(clientArray(clientID, groupID, savingsProductID,"08 January 2013"));
+        clientArray.add(clientArray(clientID, groupID, savingsProductID, "08 January 2013"));
 
         final Integer gsimID = this.savingsAccountHelper.applyForGsimApplication(clientArray);
 
@@ -368,12 +369,13 @@ public class GroupSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
-        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.closeGsimSavingsAccountAndGetBackRequiredField(gsimID, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
+                .closeGsimSavingsAccountAndGetBackRequiredField(gsimID, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         withdrawBalance = "true";
-        savingsStatusHashMap =  this.savingsAccountHelper.closeGsimSavingsAccount(gsimID, withdrawBalance);
+        savingsStatusHashMap = this.savingsAccountHelper.closeGsimSavingsAccount(gsimID, withdrawBalance);
         SavingsStatusChecker.verifySavingsAccountIsClosed(savingsStatusHashMap);
 
     }
@@ -385,29 +387,29 @@ public class GroupSavingsIntegrationTest {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1000.0";
         final String enforceMinRequiredBalance = "true";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         List<Map<String, Object>> clientArray = new ArrayList<>();
-        clientArray.add(clientArray(clientID, groupID, savingsProductID,"08 January 2013"));
+        clientArray.add(clientArray(clientID, groupID, savingsProductID, "08 January 2013"));
 
         final Integer gsimID = this.savingsAccountHelper.applyForGsimApplication(clientArray);
 
         HashMap savingsStatusHashMap = this.savingsAccountHelper.updateGsimApplication(gsimID, clientID, groupID, savingsProductID);
-       LOG.info("savingsStatusHashMap: {} ",savingsStatusHashMap);
-        Assert.assertTrue(savingsStatusHashMap.containsKey("savingsId"));
+        LOG.info("savingsStatusHashMap: {} ", savingsStatusHashMap);
+        Assertions.assertTrue(savingsStatusHashMap.containsKey("savingsId"));
 
     }
 
@@ -418,28 +420,28 @@ public class GroupSavingsIntegrationTest {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1000.0";
         final String enforceMinRequiredBalance = "true";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         List<Map<String, Object>> clientArray = new ArrayList<>();
-        clientArray.add(clientArray(clientID, groupID, savingsProductID,"08 January 2013"));
+        clientArray.add(clientArray(clientID, groupID, savingsProductID, "08 January 2013"));
         final Integer gsimID = this.savingsAccountHelper.applyForGsimApplication(clientArray);
 
-        final List<String> retrievedGsimId=GroupHelper.verifyRetrieveGsimAccounts(this.requestSpec, this.responseSpec, groupID);
-        Assert.assertNotNull(retrievedGsimId.toString());
-     }
+        final List<String> retrievedGsimId = GroupHelper.verifyRetrieveGsimAccounts(this.requestSpec, this.responseSpec, groupID);
+        Assertions.assertNotNull(retrievedGsimId.toString());
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -451,23 +453,23 @@ public class GroupSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -502,23 +504,23 @@ public class GroupSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -536,23 +538,23 @@ public class GroupSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -575,39 +577,39 @@ public class GroupSavingsIntegrationTest {
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         Integer newWithdrawTransactionId = this.savingsAccountHelper.updateSavingsAccountTransaction(savingsId, withdrawTransactionId,
                 WITHDRAW_AMOUNT_ADJUSTED);
         HashMap newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, newWithdrawTransactionId);
         balance = balance + Float.valueOf(WITHDRAW_AMOUNT) - Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
-        assertEquals("Verifying adjusted Amount", Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after adjust", balance, newWithdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"), "Verifying adjusted Amount");
+        assertEquals(balance, newWithdrawTransaction.get("runningBalance"), "Verifying Balance after adjust");
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        assertEquals("Verifying Adjusted Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Adjusted Balance");
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        Assert.assertTrue((Boolean) withdrawTransaction.get("reversed"));
+        Assertions.assertTrue((Boolean) withdrawTransaction.get("reversed"));
 
         this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, newWithdrawTransactionId);
         newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        Assert.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
+        Assertions.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         balance += Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
-        assertEquals("Verifying Balance After Undo Transaction", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance After Undo Transaction");
 
         error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "5000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
@@ -640,44 +642,44 @@ public class GroupSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assert.assertNotNull(groupID);
+        Assertions.assertNotNull(groupID);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, ACCOUNT_TYPE_GROUP);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assert.assertNotNull(withdrawalChargeId);
+        Assertions.assertNotNull(withdrawalChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
         Integer savingsChargeId = (Integer) chargesPendingState.get(0).get("id");
         HashMap chargeChanges = this.savingsAccountHelper.updateCharges(savingsChargeId, savingsId);
-        Assert.assertTrue(chargeChanges.containsKey("amount"));
+        Assertions.assertTrue(chargeChanges.containsKey("amount"));
 
         Integer deletedChargeId = this.savingsAccountHelper.deleteCharge(savingsChargeId, savingsId);
         assertEquals(savingsChargeId, deletedChargeId);
 
         chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertTrue(chargesPendingState == null || chargesPendingState.size() == 0);
+        Assertions.assertTrue(chargesPendingState == null || chargesPendingState.size() == 0);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
@@ -686,17 +688,17 @@ public class GroupSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsAnnualFeeJSON());
-        Assert.assertNotNull(chargeId);
+        Assertions.assertNotNull(chargeId);
 
         ArrayList<HashMap> charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertTrue(charges == null || charges.size() == 0);
+        Assertions.assertTrue(charges == null || charges.size() == 0);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, charges.size());
+        Assertions.assertEquals(1, charges.size());
 
         HashMap savingsChargeForPay = charges.get(0);
-        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.dateFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar cal = Calendar.getInstance();
         List dates = (List) savingsChargeForPay.get("dueDate");
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
@@ -710,11 +712,11 @@ public class GroupSavingsIntegrationTest {
 
         final Integer monthlyFeechargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsMonthlyFeeJSON());
-        Assert.assertNotNull(monthlyFeechargeId);
+        Assertions.assertNotNull(monthlyFeechargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(2, charges.size());
+        Assertions.assertEquals(2, charges.size());
 
         HashMap savingsChargeForWaive = charges.get(1);
         this.savingsAccountHelper.waiveCharge((Integer) savingsChargeForWaive.get("id"), savingsId);
@@ -727,12 +729,13 @@ public class GroupSavingsIntegrationTest {
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
 
-        final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
-        Assert.assertNotNull(weeklyFeeId);
+        final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWeeklyFeeJSON());
+        Assertions.assertNotNull(weeklyFeeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(3, charges.size());
+        Assertions.assertEquals(3, charges.size());
 
         savingsChargeForPay = charges.get(2);
         cal = Calendar.getInstance();
@@ -744,7 +747,7 @@ public class GroupSavingsIntegrationTest {
         // Depositing huge amount as scheduler job deducts the fee amount
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(depositTransactionId);
+        Assertions.assertNotNull(depositTransactionId);
 
         this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
                 ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
@@ -755,9 +758,9 @@ public class GroupSavingsIntegrationTest {
         LocalDate expectedNextDueDate = new LocalDate((Integer) dates.get(0), (Integer) dates.get(1), (Integer) dates.get(2))
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
-        cal = Calendar.getInstance();
 
-        this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(cal.getTime()));
+        this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null,
+                sdf.format(Utils.getLocalDateOfTenant().toDate()));
 
     }
 
@@ -777,25 +780,27 @@ public class GroupSavingsIntegrationTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
-    private Map<String, Object> clientArray(final Integer clientId, final Integer groupId, final Integer productId, final String submittedOnDate) {
+    private Map<String, Object> clientArray(final Integer clientId, final Integer groupId, final Integer productId,
+            final String submittedOnDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("clientId", clientId);
         map.put("groupId", groupId);
         map.put("productId", productId);
         map.put("submittedOnDate", submittedOnDate);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("isParentAccount", "1");
         map.put("isGSIM", "true");
         return map;
     }
 
-    private Map<String, Object> savingsArray(final Integer paymentId, final Integer savingsId, final Integer transactionAmount,  final String transactionDate) {
+    private Map<String, Object> savingsArray(final Integer paymentId, final Integer savingsId, final Integer transactionAmount,
+            final String transactionDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("transactionDate", transactionDate);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
-        map.put("transactionAmount",transactionAmount);
+        map.put("transactionAmount", transactionAmount);
         map.put("paymentTypeId", paymentId);
         map.put("childAccountId", savingsId);
         return map;

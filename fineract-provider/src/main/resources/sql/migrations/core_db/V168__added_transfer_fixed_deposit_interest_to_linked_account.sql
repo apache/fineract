@@ -18,10 +18,10 @@
 --
 
 ALTER TABLE `job_run_history`
-	CHANGE COLUMN `error_message` `error_message` TEXT NULL DEFAULT NULL AFTER `status`;
+    CHANGE COLUMN `error_message` `error_message` TEXT NULL DEFAULT NULL AFTER `status`;
 
 ALTER TABLE `m_deposit_account_term_and_preclosure`
-	ADD COLUMN `transfer_interest_to_linked_account` TINYINT(1) NOT NULL DEFAULT '0' AFTER `expected_firstdepositon_date`;
+    ADD COLUMN `transfer_interest_to_linked_account` tinyint NOT NULL DEFAULT '0' AFTER `expected_firstdepositon_date`;
 
 UPDATE `job` SET `scheduler_group`=1 WHERE  `name`='Post Interest For Savings';
 

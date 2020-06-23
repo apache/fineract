@@ -55,11 +55,11 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
         private final StringBuilder sqlBuilder = new StringBuilder(
                 "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName, oc.code as currencyCode, ")
-                .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
-                .append(" FROM m_loan_collateral lc") //
-                .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id")//
-                .append(" JOIN m_loan loan on lc.loan_id = loan.id")//
-                .append(" JOIN m_organisation_currency oc on loan.currency_code = oc.code");
+                        .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
+                        .append(" FROM m_loan_collateral lc") //
+                        .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id")//
+                        .append(" JOIN m_loan loan on lc.loan_id = loan.id")//
+                        .append(" JOIN m_organisation_currency oc on loan.currency_code = oc.code");
 
         public String schema() {
             return this.sqlBuilder.toString();

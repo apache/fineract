@@ -33,8 +33,7 @@ public class GroupRoleRepositoryWrapper {
     }
 
     public GroupRole findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new GroupRoleNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new GroupRoleNotFoundException(id));
     }
 
     public void save(final GroupRole entity) {

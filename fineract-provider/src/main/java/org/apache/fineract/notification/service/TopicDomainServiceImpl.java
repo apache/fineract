@@ -46,8 +46,8 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     private final TopicSubscriberRepository topicSubscriberRepository;
 
     @Autowired
-    public TopicDomainServiceImpl(RoleRepository roleRepository, TopicRepository topicRepository,
-            OfficeRepository officeRepository, TopicSubscriberRepository topicSubscriberRepository) {
+    public TopicDomainServiceImpl(RoleRepository roleRepository, TopicRepository topicRepository, OfficeRepository officeRepository,
+            TopicSubscriberRepository topicSubscriberRepository) {
 
         this.roleRepository = roleRepository;
         this.topicRepository = topicRepository;
@@ -56,13 +56,13 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void createTopic( Office newOffice ) {
+    public void createTopic(Office newOffice) {
 
         Long entityId = newOffice.getId();
         String entityType = this.getEntityType(newOffice);
 
         List<Role> allRoles = roleRepository.findAll();
-        for(Role role : allRoles) {
+        for (Role role : allRoles) {
             String memberType = role.getName().toUpperCase();
             String title = role.getName() + " of " + newOffice.getName();
             Topic newTopic = new Topic(title, true, entityId, entityType, memberType);
@@ -71,11 +71,11 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void createTopic( Role newRole ) {
+    public void createTopic(Role newRole) {
 
         List<Office> offices = officeRepository.findAll();
 
-        for (Office office : offices){
+        for (Office office : offices) {
             String entityType = this.getEntityType(office);
             String title = newRole.getName() + " of " + office.getName();
             Topic newTopic = new Topic(title, true, office.getId(), entityType, newRole.getName().toUpperCase());
@@ -84,7 +84,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void updateTopic( Office updatedOffice, Map<String, Object> changes ) {
+    public void updateTopic(Office updatedOffice, Map<String, Object> changes) {
 
         List<Topic> entityTopics = topicRepository.findByEntityId(updatedOffice.getId());
 
@@ -98,7 +98,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
         }
         if (changes.containsKey("name")) {
 
-            for (Topic topic: entityTopics) {
+            for (Topic topic : entityTopics) {
                 Role role = roleRepository.getRoleByName(topic.getMemberType());
                 String title = role.getName() + " of " + updatedOffice.getName();
                 topic.setTitle(title);
@@ -108,7 +108,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes ) {
+    public void updateTopic(String previousRolename, Role updatedRole, Map<String, Object> changes) {
 
         if (changes.containsKey("name")) {
             List<Topic> entityTopics = topicRepository.findByMemberType(previousRolename);
@@ -123,7 +123,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void deleteTopic( Role role ) {
+    public void deleteTopic(Role role) {
 
         List<Topic> topics = topicRepository.findByMemberType(role.getName().toUpperCase());
         for (Topic topic : topics) {
@@ -132,7 +132,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void subscribeUserToTopic( AppUser newUser ) {
+    public void subscribeUserToTopic(AppUser newUser) {
 
         List<Topic> possibleTopics = topicRepository.findByEntityId(newUser.getOffice().getId());
 
@@ -140,7 +140,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             Set<Role> userRoles = newUser.getRoles();
             for (Role role : userRoles) {
                 for (Topic topic : possibleTopics) {
-                    if(role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
+                    if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
                         TopicSubscriber topicSubscriber = new TopicSubscriber(topic, newUser, new Date());
                         topicSubscriberRepository.save(topicSubscriber);
                     }
@@ -150,7 +150,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes ) {
+    public void updateUserSubscription(AppUser userToUpdate, Map<String, Object> changes) {
 
         List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
         if (changes.containsKey("officeId")) {
@@ -180,7 +180,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
 
         if (changes.containsKey("roles")) {
 
-            final Set<Role> oldRoles = userToUpdate.getRoles() ;
+            final Set<Role> oldRoles = userToUpdate.getRoles();
             final Set<Role> tempOldRoles = new HashSet<>(oldRoles);
 
             final String[] roleIds = (String[]) changes.get("roles");
@@ -211,7 +211,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     }
 
     @Override
-    public void unsubcribeUserFromTopic( AppUser user ) {
+    public void unsubcribeUserFromTopic(AppUser user) {
 
         List<TopicSubscriber> subscriptions = topicSubscriberRepository.findBySubscriber(user);
         for (TopicSubscriber subscription : subscriptions) {
@@ -219,8 +219,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
         }
     }
 
-
-    private String getEntityType( Office office ) {
+    private String getEntityType(Office office) {
 
         if (office.getParent() == null) {
             return "OFFICE";
@@ -236,8 +235,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
         if (!ObjectUtils.isEmpty(rolesArray)) {
             for (final String roleId : rolesArray) {
                 final Long id = Long.valueOf(roleId);
-                final Role role = this.roleRepository.findById(id)
-                        .orElseThrow(() -> new RoleNotFoundException(id));
+                final Role role = this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
                 allRoles.add(role);
             }
         }

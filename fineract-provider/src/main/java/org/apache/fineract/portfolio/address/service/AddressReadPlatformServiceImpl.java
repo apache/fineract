@@ -51,6 +51,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     private static final class AddFieldsMapper implements RowMapper<AddressData> {
+
         public String schema() {
             return "addr.id as id,client.id as client_id,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
                     + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
@@ -60,8 +61,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         }
 
         @Override
-        public AddressData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public AddressData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final long addressId = rs.getLong("id");
 
@@ -99,30 +99,28 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
             final Date updated_on = rs.getDate("updated_on");
 
-            return AddressData.instance1(addressId, street, address_line_1, address_line_2, address_line_3,
-                    town_village, city, county_district, state_province_id, country_id, postal_code, latitude,
-                    longitude, created_by, created_on, updated_by, updated_on);
+            return AddressData.instance1(addressId, street, address_line_1, address_line_2, address_line_3, town_village, city,
+                    county_district, state_province_id, country_id, postal_code, latitude, longitude, created_by, created_on, updated_by,
+                    updated_on);
 
         }
     }
 
     private static final class AddMapper implements RowMapper<AddressData> {
+
         public String schema() {
             return "cv2.code_value as addressType,ca.client_id as client_id,addr.id as id,ca.address_type_id as addresstyp,ca.is_active as is_active,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
                     + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
                     + "addr.state_province_id as state_province_id,cv.code_value as state_name, addr.country_id as country_id,c.code_value as country_name,addr.postal_code as postal_code,addr.latitude as latitude,"
                     + "addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,addr.updated_by as updated_by,"
-                    + "addr.updated_on as updated_on"
-                    + " from m_address addr left join m_code_value cv on addr.state_province_id=cv.id"
-                    + " left join  m_code_value c on addr.country_id=c.id"
-                    + " join m_client_address ca on addr.id= ca.address_id"
+                    + "addr.updated_on as updated_on" + " from m_address addr left join m_code_value cv on addr.state_province_id=cv.id"
+                    + " left join  m_code_value c on addr.country_id=c.id" + " join m_client_address ca on addr.id= ca.address_id"
                     + " join m_code_value cv2 on ca.address_type_id=cv2.id";
 
         }
 
         @Override
-        public AddressData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public AddressData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final String addressType = rs.getString("addressType");
             final long addressId = rs.getLong("id");
@@ -169,10 +167,9 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
             final Date updated_on = rs.getDate("updated_on");
 
-            return AddressData.instance(addressType, client_id, addressId, address_type_id, is_active, street,
-                    address_line_1, address_line_2, address_line_3, town_village, city, county_district,
-                    state_province_id, country_id, state_name, country_name, postal_code, latitude, longitude,
-                    created_by, created_on, updated_by, updated_on);
+            return AddressData.instance(addressType, client_id, addressId, address_type_id, is_active, street, address_line_1,
+                    address_line_2, address_line_3, town_village, city, county_district, state_province_id, country_id, state_name,
+                    country_name, postal_code, latitude, longitude, created_by, created_on, updated_by, updated_on);
 
         }
     }
@@ -206,8 +203,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid,
-            final String status) {
+    public Collection<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
         this.context.authenticatedUser();
         Boolean temp = false;
         temp = Boolean.parseBoolean(status);
@@ -232,13 +228,11 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public AddressData retrieveTemplate() {
-        final List<CodeValueData> countryoptions = new ArrayList<>(
-                this.readService.retrieveCodeValuesByCode("COUNTRY"));
+        final List<CodeValueData> countryoptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("COUNTRY"));
 
         final List<CodeValueData> StateOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("STATE"));
 
-        final List<CodeValueData> addressTypeOptions = new ArrayList<>(
-                this.readService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
+        final List<CodeValueData> addressTypeOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
 
         return AddressData.template(countryoptions, StateOptions, addressTypeOptions);
     }

@@ -43,7 +43,7 @@ public class RecurringDepositAccountApplicationApprovalCommandHandler implements
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService
-                .approveApplication(command.entityId(), command, DepositAccountType.RECURRING_DEPOSIT);
+        return this.depositAccountWritePlatformService.approveApplication(command.entityId(), command,
+                DepositAccountType.RECURRING_DEPOSIT);
     }
 }

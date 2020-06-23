@@ -33,9 +33,10 @@ public class ExternalServicesPropertiesRepositoryWrapper {
     }
 
     public ExternalServicesProperties findOneByIdAndName(Long id, String name, String externalServiceName) {
-        final ExternalServicesProperties externalServicesProperties = this.repository
-                .findOneByExternalServicePropertiesPK(name,id);
-        if (externalServicesProperties == null) throw new ExternalServiceConfigurationNotFoundException(externalServiceName, name);
+        final ExternalServicesProperties externalServicesProperties = this.repository.findOneByExternalServicePropertiesPK(name, id);
+        if (externalServicesProperties == null) {
+            throw new ExternalServiceConfigurationNotFoundException(externalServiceName, name);
+        }
         return externalServicesProperties;
     }
 }

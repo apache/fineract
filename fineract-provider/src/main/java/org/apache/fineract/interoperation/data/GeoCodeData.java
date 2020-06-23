@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 
 public class GeoCodeData {
 
-    public static final String[] PARAMS = {PARAM_LATITUDE, PARAM_LONGITUDE};
+    public static final String[] PARAMS = { PARAM_LATITUDE, PARAM_LONGITUDE };
 
     @NotNull
     private final String latitude;
@@ -50,13 +50,14 @@ public class GeoCodeData {
     }
 
     public static GeoCodeData validateAndParse(DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 
         String latitude = jsonHelper.extractStringNamed(PARAM_LATITUDE, element);
-        DataValidatorBuilder  dataValidatorCopy = dataValidator.reset().parameter(PARAM_LATITUDE).value(latitude).notBlank();
+        DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_LATITUDE).value(latitude).notBlank();
 
         String longitude = jsonHelper.extractStringNamed(PARAM_LONGITUDE, element);
         dataValidatorCopy = dataValidatorCopy.reset().parameter(PARAM_LONGITUDE).value(longitude).notBlank();

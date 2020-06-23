@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a SMS message.
  */
-public class EmailData {
+public final class EmailData {
 
     private final Long id;
     private final Long groupId;
@@ -45,21 +45,21 @@ public class EmailData {
     private final LocalDate sentDate;
     private final String errorMessage;
 
-
-    public static EmailData instance(final Long id,final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
-                                     final String emailAddress, final String emailSubject,
-                                     final String message, final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport,
-                                     final String stretchyReportParamMap, final List<EnumOptionData> emailAttachmentFileFormatOptions,
-                                     final List<EnumOptionData> stretchyReportParamDateOptions, final String campaignName, final LocalDate sentDate,final String errorMessage) {
-        return new EmailData(id, groupId, clientId, staffId, status, emailAddress, emailSubject, message,
-                emailAttachmentFileFormat,stretchyReport,stretchyReportParamMap,emailAttachmentFileFormatOptions,
-                stretchyReportParamDateOptions,campaignName,sentDate,errorMessage);
+    public static EmailData instance(final Long id, final Long groupId, final Long clientId, final Long staffId,
+            final EnumOptionData status, final String emailAddress, final String emailSubject, final String message,
+            final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
+            final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
+            final String campaignName, final LocalDate sentDate, final String errorMessage) {
+        return new EmailData(id, groupId, clientId, staffId, status, emailAddress, emailSubject, message, emailAttachmentFileFormat,
+                stretchyReport, stretchyReportParamMap, emailAttachmentFileFormatOptions, stretchyReportParamDateOptions, campaignName,
+                sentDate, errorMessage);
     }
 
-    private EmailData(final Long id,final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status, final String emailAddress, final String emailSubject, final String message,
-                      final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
-                      final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
-                      final String campaignName,final LocalDate sentDate,final String errorMessage) {
+    private EmailData(final Long id, final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
+            final String emailAddress, final String emailSubject, final String message, final EnumOptionData emailAttachmentFileFormat,
+            final ReportData stretchyReport, final String stretchyReportParamMap,
+            final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
+            final String campaignName, final LocalDate sentDate, final String errorMessage) {
         this.id = id;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -113,7 +113,9 @@ public class EmailData {
         return status;
     }
 
-    public String getErrorMessage() {return this.errorMessage;}
+    public String getErrorMessage() {
+        return this.errorMessage;
+    }
 
     /**
      * @return the emailAddress
@@ -129,9 +131,13 @@ public class EmailData {
         return emailMessage;
     }
 
-    public String getCampaignName() {return this.campaignName;}
+    public String getCampaignName() {
+        return this.campaignName;
+    }
 
-    public LocalDate getSentDate() { return this.sentDate; }
+    public LocalDate getSentDate() {
+        return this.sentDate;
+    }
 
     public String getEmailSubject() {
         return emailSubject;

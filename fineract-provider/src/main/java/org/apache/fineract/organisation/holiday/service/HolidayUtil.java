@@ -51,7 +51,9 @@ public class HolidayUtil {
     public static boolean isHoliday(final LocalDate date, final List<Holiday> holidays) {
         for (final Holiday holiday : holidays) {
             if (date.isEqual(holiday.getFromDateLocalDate()) || date.isEqual(holiday.getToDateLocalDate())
-                    || (date.isAfter(holiday.getFromDateLocalDate()) && date.isBefore(holiday.getToDateLocalDate()))) { return true; }
+                    || (date.isAfter(holiday.getFromDateLocalDate()) && date.isBefore(holiday.getToDateLocalDate()))) {
+                return true;
+            }
         }
 
         return false;
@@ -66,6 +68,7 @@ public class HolidayUtil {
         }
         return referedHoliday;
     }
+
     public static void updateRepaymentRescheduleDateToWorkingDayIfItIsHoliday(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,
             final Holiday holiday) {
         if (holiday.getReScheduleType().isRescheduleToSpecificDate()) {

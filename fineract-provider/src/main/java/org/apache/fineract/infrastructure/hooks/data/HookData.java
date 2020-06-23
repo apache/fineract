@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import org.joda.time.LocalDate;
 
-public class HookData implements Serializable {
+public final class HookData implements Serializable {
 
     private final Long id;
     private final String name;
@@ -41,38 +41,26 @@ public class HookData implements Serializable {
     private final List<HookTemplateData> templates;
     private final List<Grouping> groupings;
 
-    public static HookData instance(final Long id, final String name,
-            final String displayName, final boolean isActive,
-            final LocalDate createdAt, final LocalDate updatedAt,
-            final Long templateId, final List<Event> registeredEvents,
+    public static HookData instance(final Long id, final String name, final String displayName, final boolean isActive,
+            final LocalDate createdAt, final LocalDate updatedAt, final Long templateId, final List<Event> registeredEvents,
             final List<Field> config, final String templateName) {
-        return new HookData(id, name, displayName, isActive, createdAt,
-                updatedAt, templateId, registeredEvents, config, templateName,
-                null, null);
+        return new HookData(id, name, displayName, isActive, createdAt, updatedAt, templateId, registeredEvents, config, templateName, null,
+                null);
     }
 
-    public static HookData template(final List<HookTemplateData> templates,
-            final List<Grouping> groupings) {
-        return new HookData(null, null, null, null, null, null, null, null,
-                null, null, templates, groupings);
+    public static HookData template(final List<HookTemplateData> templates, final List<Grouping> groupings) {
+        return new HookData(null, null, null, null, null, null, null, null, null, null, templates, groupings);
     }
 
-    public static HookData templateExisting(final HookData hookData,
-            final List<HookTemplateData> templates,
+    public static HookData templateExisting(final HookData hookData, final List<HookTemplateData> templates,
             final List<Grouping> groupings) {
-        return new HookData(hookData.id, hookData.name, hookData.displayName,
-                hookData.isActive, hookData.createdAt, hookData.updatedAt,
-                hookData.templateId, hookData.events, hookData.config,
-                hookData.templateName, templates, groupings);
+        return new HookData(hookData.id, hookData.name, hookData.displayName, hookData.isActive, hookData.createdAt, hookData.updatedAt,
+                hookData.templateId, hookData.events, hookData.config, hookData.templateName, templates, groupings);
     }
 
-    private HookData(final Long id, final String name,
-            final String displayName, final Boolean isActive,
-            final LocalDate createdAt, final LocalDate updatedAt,
-            final Long templateId, final List<Event> events,
-            final List<Field> config, final String templateName,
-            final List<HookTemplateData> templates,
-            final List<Grouping> groupings) {
+    private HookData(final Long id, final String name, final String displayName, final Boolean isActive, final LocalDate createdAt,
+            final LocalDate updatedAt, final Long templateId, final List<Event> events, final List<Field> config, final String templateName,
+            final List<HookTemplateData> templates, final List<Grouping> groupings) {
         this.id = id;
         this.name = name;
         this.displayName = displayName;

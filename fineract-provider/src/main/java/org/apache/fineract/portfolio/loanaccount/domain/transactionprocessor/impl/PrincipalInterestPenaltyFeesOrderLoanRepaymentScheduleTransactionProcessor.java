@@ -32,8 +32,8 @@ import org.joda.time.LocalDate;
  * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the
  * payment order of principal first, then interest, penalties and fees.
  */
-public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor extends
-        AbstractLoanRepaymentScheduleTransactionProcessor {
+public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
+        extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
      * For early/'in advance' repayments, pay off in the same way as on-time
@@ -46,7 +46,8 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
             final LocalDate transactionDate, final Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance,
+                transactionMappings);
     }
 
     /**
@@ -84,8 +85,8 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

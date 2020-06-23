@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType.ACTIVE;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsSchedularServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsSchedularServiceImpl.class);
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -49,7 +50,8 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
     @Autowired
     public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountReadPlatformService savingAccountReadPlatformService, final SavingsAccountRepositoryWrapper savingsAccountRepository) {
+            final SavingsAccountReadPlatformService savingAccountReadPlatformService,
+            final SavingsAccountRepositoryWrapper savingsAccountRepository) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingAccountReadPlatformService = savingAccountReadPlatformService;
@@ -62,7 +64,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         int page = 0;
         Integer initialSize = 500;
         Integer totalPageSize = 0;
-        int errors = 0;
+        List<Throwable> errors = new ArrayList<>();
         do {
             PageRequest pageRequest = PageRequest.of(page, initialSize);
             Page<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByStatus(ACTIVE.getValue(), pageRequest);
@@ -74,14 +76,16 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
                     this.savingsAccountWritePlatformService.postInterest(savingsAccount, postInterestAsOn, transactionDate);
                 } catch (Exception e) {
                     LOG.error("Failed to post interest for Savings with id {}", savingsAccount.getId(), e);
-                    ++errors;
+                    errors.add(e);
                 }
             }
             page++;
             totalPageSize = savingsAccounts.getTotalPages();
         } while (page < totalPageSize);
 
-        if (errors > 0) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     @Override
@@ -90,22 +94,22 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         LocalDate tenantLocalDate = DateUtils.getLocalDateOfTenant();
 
         List<Long> savingsPendingInactive = savingAccountReadPlatformService.retrieveSavingsIdsPendingInactive(tenantLocalDate);
-        if(null != savingsPendingInactive && savingsPendingInactive.size() > 0){
-            for(Long savingsId : savingsPendingInactive){
+        if (null != savingsPendingInactive && savingsPendingInactive.size() > 0) {
+            for (Long savingsId : savingsPendingInactive) {
                 this.savingsAccountWritePlatformService.setSubStatusInactive(savingsId);
             }
         }
 
         List<Long> savingsPendingDormant = savingAccountReadPlatformService.retrieveSavingsIdsPendingDormant(tenantLocalDate);
-        if(null != savingsPendingDormant && savingsPendingDormant.size() > 0){
-            for(Long savingsId : savingsPendingDormant){
+        if (null != savingsPendingDormant && savingsPendingDormant.size() > 0) {
+            for (Long savingsId : savingsPendingDormant) {
                 this.savingsAccountWritePlatformService.setSubStatusDormant(savingsId);
             }
         }
 
         List<Long> savingsPendingEscheat = savingAccountReadPlatformService.retrieveSavingsIdsPendingEscheat(tenantLocalDate);
-        if(null != savingsPendingEscheat && savingsPendingEscheat.size() > 0){
-            for(Long savingsId : savingsPendingEscheat){
+        if (null != savingsPendingEscheat && savingsPendingEscheat.size() > 0) {
+            for (Long savingsId : savingsPendingEscheat) {
                 this.savingsAccountWritePlatformService.escheat(savingsId);
             }
         }

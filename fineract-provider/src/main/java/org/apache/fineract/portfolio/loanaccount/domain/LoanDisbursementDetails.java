@@ -59,7 +59,7 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principal;
-     }
+    }
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
@@ -67,10 +67,14 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof LoanDisbursementDetails)) {
+            return false;
+        }
         final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
         if (loanDisbursementDetails.principal.equals(this.principal)
-                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate))
-        { return true; }
+                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) {
+            return true;
+        }
         return false;
     }
 

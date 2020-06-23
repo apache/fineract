@@ -36,8 +36,8 @@ public class InteropWrapperBuilder {
     private String json = "{}";
 
     public CommandWrapper build() {
-        return new CommandWrapper(null, null, null, null, null, actionName, entityName, null, null, href, json, null, null,
-                null, null, null);
+        return new CommandWrapper(null, null, null, null, null, actionName, entityName, null, null, href, json, null, null, null, null,
+                null);
     }
 
     public InteropWrapperBuilder withJson(final String json) {

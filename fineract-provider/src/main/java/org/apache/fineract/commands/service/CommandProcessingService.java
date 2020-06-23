@@ -30,6 +30,6 @@ public interface CommandProcessingService {
 
     CommandProcessingResult logCommand(CommandSource commandSourceResult);
 
-    boolean validateCommand(final CommandWrapper commandWrapper,final AppUser user);
+    boolean validateCommand(final CommandWrapper commandWrapper, final AppUser user);
 
 }

@@ -18,37 +18,47 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
+import com.google.common.base.Splitter;
 import java.net.InetAddress;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This utility provides methods to either convert an IPv4 address to its long format or a 32bit dotted format.
+ * This utility provides methods to either convert an IPv4 address to its long
+ * format or a 32bit dotted format.
  *
  * @see http://hawkee.com/snippet/9731/
  */
 public class IPv4Helper {
+
     /**
      * Returns the long format of the provided IP address.
      *
-     * @param ipAddress the IP address
+     * @param ipAddress
+     *            the IP address
      * @return the long format of <code>ipAddress</code>
-     * @throws IllegalArgumentException if <code>ipAddress</code> is invalid
+     * @throws IllegalArgumentException
+     *             if <code>ipAddress</code> is invalid
      */
+    private static final Logger LOG = LoggerFactory.getLogger(IPv4Helper.class);
+
     public static long ipAddressToLong(String ipAddress) {
         if (ipAddress == null || ipAddress.isEmpty()) {
             throw new IllegalArgumentException("ip address cannot be null or empty");
         }
 
-        String[] octets = ipAddress.split(java.util.regex.Pattern.quote("."));
+        List<String> octets = Splitter.onPattern(java.util.regex.Pattern.quote(".")).splitToList(ipAddress);
 
-        if (octets.length != 4) {
+        if (octets.size() != 4) {
             throw new IllegalArgumentException("invalid ip address");
         }
 
         long ip = 0;
 
         for (int i = 3; i >= 0; i--) {
-            long octet = Long.parseLong(octets[3 - i]);
+            long octet = Long.parseLong(octets.get(3 - i));
 
             if (octet > 255 || octet < 0) {
                 throw new IllegalArgumentException("invalid ip address");
@@ -63,13 +73,15 @@ public class IPv4Helper {
     /**
      * Returns the 32bit dotted format of the provided long ip.
      *
-     * @param ip the long ip
+     * @param ip
+     *            the long ip
      * @return the 32bit dotted format of <code>ip</code>
-     * @throws IllegalArgumentException if <code>ip</code> is invalid
+     * @throws IllegalArgumentException
+     *             if <code>ip</code> is invalid
      */
     public static String longToIpAddress(long ip) {
         // if ip is bigger than 255.255.255.255 or smaller than 0.0.0.0
-        if (ip > 4294967295l || ip < 0) {
+        if (ip > 4294967295L || ip < 0) {
             throw new IllegalArgumentException("invalid ip");
         }
 
@@ -89,9 +101,12 @@ public class IPv4Helper {
     /**
      * check if an IP Address is within a given range of IP Addresses
      *
-     * @param ipAddress -- the IP Address to be checked
-     * @param startOfRange -- the first IP address in the range
-     * @param endOfRange -- the last IP address in the range
+     * @param ipAddress
+     *            -- the IP Address to be checked
+     * @param startOfRange
+     *            -- the first IP address in the range
+     * @param endOfRange
+     *            -- the last IP address in the range
      * @return boolean true if IP address is in the range of IP addresses
      **/
     public static boolean ipAddressIsInRange(final String ipAddress, final String startOfRange, final String endOfRange) {
@@ -126,7 +141,9 @@ public class IPv4Helper {
             }
         }
 
-        catch (Exception exception) { }
+        catch (Exception exception) {
+            LOG.error("Problem occurred in applicationIsRunningOnLocalMachine function", exception);
+        }
 
         return isRunningOnLocalMachine;
     }
@@ -134,7 +151,8 @@ public class IPv4Helper {
     /**
      * check if the java application is not running on a local machine
      *
-     * @return true if the application is not running on a local machine else false
+     * @return true if the application is not running on a local machine else
+     *         false
      **/
     public static boolean applicationIsNotRunningOnLocalMachine() {
         return !applicationIsRunningOnLocalMachine();

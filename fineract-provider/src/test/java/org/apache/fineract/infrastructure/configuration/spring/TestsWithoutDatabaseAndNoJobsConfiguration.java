@@ -34,12 +34,14 @@ import org.springframework.context.annotation.Bean;
 public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicationConfiguration {
 
     /**
-     * Override TenantDatabaseUpgradeService binding, because the real one has a @PostConstruct
-     * upgradeAllTenants() which accesses the database on start-up.
+     * Override TenantDatabaseUpgradeService binding, because the real one has
+     * a @PostConstruct upgradeAllTenants() which accesses the database on
+     * start-up.
      */
     @Bean
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
         return new TenantDatabaseUpgradeService(null, null) {
+
             @Override
             public void upgradeAllTenants() {
                 // NOOP

@@ -46,12 +46,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJobReadPlatformService {
+
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+    public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }
@@ -64,7 +64,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         final PaginationHelper<ReportMailingJobData> paginationHelper = new PaginationHelper<>();
 
         sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlStringBuilder.append(mapper.ReportMailingJobSchema());
+        sqlStringBuilder.append(mapper.reportMailingJobSchema());
         sqlStringBuilder.append(" where rmj.is_deleted = 0");
 
         if (searchParameters.isOrderByRequested()) {
@@ -86,14 +86,14 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             }
         }
 
-        return paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()", sqlStringBuilder.toString(),
-                queryParameters.toArray(), mapper);
+        return paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()", sqlStringBuilder.toString(), queryParameters.toArray(),
+                mapper);
     }
 
     @Override
     public Collection<ReportMailingJobData> retrieveAllActiveReportMailingJobs() {
         final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-        final String sql = "select " + mapper.ReportMailingJobSchema() + " where rmj.is_deleted = 0 and is_active = 1"
+        final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.is_deleted = 0 and is_active = 1"
                 + " order by rmj.name";
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
@@ -103,7 +103,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     public ReportMailingJobData retrieveReportMailingJob(final Long reportMailingJobId) {
         try {
             final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-            final String sql = "select " + mapper.ReportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = 0";
+            final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = 0";
 
             return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId });
         }
@@ -122,13 +122,13 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     }
 
     private static final class ReportMailingJobMapper implements RowMapper<ReportMailingJobData> {
-        public String ReportMailingJobSchema() {
+
+        public String reportMailingJobSchema() {
             return "rmj.id, rmj.name, rmj.description, rmj.start_datetime as startDateTime, rmj.recurrence, rmj.created_date as createdOnDate, "
                     + "cbu.username as createdByUsername, cbu.firstname as createdByFirstname, cbu.lastname as createdByLastname, "
                     + "rmj.lastmodified_date as updatedOnDate, "
                     + "mbu.username as updatedByUsername, mbu.firstname as updatedByFirstname, mbu.lastname as updatedByLastname, "
-                    + "rmj.email_recipients as emailRecipients, "
-                    + "rmj.email_subject as emailSubject, rmj.email_message as emailMessage, "
+                    + "rmj.email_recipients as emailRecipients, " + "rmj.email_subject as emailSubject, rmj.email_message as emailMessage, "
                     + "rmj.email_attachment_file_format as emailAttachmentFileFormat, "
                     + "rmj.stretchy_report_param_map as stretchyReportParamMap, rmj.previous_run_datetime as previousRunDateTime, "
                     + "rmj.next_run_datetime as nextRunDateTime, rmj.previous_run_status as previousRunStatus, "
@@ -136,14 +136,9 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
                     + "rmj.number_of_runs as numberOfRuns, rmj.is_active as isActive, rmj.run_as_userid as runAsUserId, "
                     + "sr.id as reportId, sr.report_name as reportName, sr.report_type as reportType, sr.report_subtype as reportSubType, "
                     + "sr.report_category as reportCategory, sr.report_sql as reportSql, sr.description as reportDescription, "
-                    + "sr.core_report as coreReport, sr.use_report as useReport "
-                    + "from m_report_mailing_job rmj "
-                    + "inner join m_appuser cbu "
-                    + "on cbu.id = rmj.createdby_id "
-                    + "left join m_appuser mbu "
-                    + "on mbu.id = rmj.lastmodifiedby_id "
-                    + "left join stretchy_report sr "
-                    + "on rmj.stretchy_report_id = sr.id";
+                    + "sr.core_report as coreReport, sr.use_report as useReport " + "from m_report_mailing_job rmj "
+                    + "inner join m_appuser cbu " + "on cbu.id = rmj.createdby_id " + "left join m_appuser mbu "
+                    + "on mbu.id = rmj.lastmodifiedby_id " + "left join stretchy_report sr " + "on rmj.stretchy_report_id = sr.id";
         }
 
         @Override
@@ -162,7 +157,8 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             EnumOptionData emailAttachmentFileFormat = null;
 
             if (emailAttachmentFileFormatString != null) {
-                ReportMailingJobEmailAttachmentFileFormat format = ReportMailingJobEmailAttachmentFileFormat.newInstance(emailAttachmentFileFormatString);
+                ReportMailingJobEmailAttachmentFileFormat format = ReportMailingJobEmailAttachmentFileFormat
+                        .newInstance(emailAttachmentFileFormatString);
 
                 emailAttachmentFileFormat = format.toEnumOptionData();
             }
@@ -200,8 +196,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
 
             return ReportMailingJobData.newInstance(id, name, description, startDateTime, recurrence, timeline, emailRecipients,
                     emailSubject, emailMessage, emailAttachmentFileFormat, stretchyReport, stretchyReportParamMap, previousRunDateTime,
-                    nextRunDateTime, previousRunStatus, previousRunErrorLog, previousRunErrorMessage, numberOfRuns, isActive,
-                    runAsUserId);
+                    nextRunDateTime, previousRunStatus, previousRunErrorLog, previousRunErrorMessage, numberOfRuns, isActive, runAsUserId);
         }
     }
 }

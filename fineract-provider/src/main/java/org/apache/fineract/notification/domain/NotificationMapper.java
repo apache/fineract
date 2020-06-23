@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.notification.domain;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -78,4 +77,9 @@ public class NotificationMapper extends AbstractPersistableCustom {
         isRead = read;
     }
 
+    @Override
+    public String toString() {
+        return "NotificationMapper [notification=" + this.notification + ", userId=" + this.userId + ", isRead=" + this.isRead
+                + ", createdAt=" + this.createdAt + ", getId()=" + this.getId() + "]";
+    }
 }

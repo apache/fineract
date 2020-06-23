@@ -19,7 +19,6 @@
 
 package org.apache.fineract.accounting.glaccount.domain;
 
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
@@ -54,13 +53,13 @@ public class TrialBalance extends AbstractPersistableCustom {
     @Column(name = "closing_balance", nullable = false)
     private BigDecimal closingBalance;
 
-    public static TrialBalance getInstance(final Long officeId, final Long glAccountId,
-                                           final BigDecimal amount, final Date entryDate, final Date transactionDate) {
+    public static TrialBalance getInstance(final Long officeId, final Long glAccountId, final BigDecimal amount, final Date entryDate,
+            final Date transactionDate) {
         return new TrialBalance(officeId, glAccountId, amount, entryDate, transactionDate);
     }
 
-    private TrialBalance(final Long officeId, final Long glAccountId,
-                         final BigDecimal amount, final Date entryDate, final Date transactionDate) {
+    private TrialBalance(final Long officeId, final Long glAccountId, final BigDecimal amount, final Date entryDate,
+            final Date transactionDate) {
         this.officeId = officeId;
         this.glAccountId = glAccountId;
         this.amount = amount;
@@ -68,8 +67,7 @@ public class TrialBalance extends AbstractPersistableCustom {
         this.transactionDate = transactionDate;
     }
 
-    protected TrialBalance() {
-    }
+    protected TrialBalance() {}
 
     public Long getOfficeId() {
         return officeId;
@@ -97,14 +95,13 @@ public class TrialBalance extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
+        if (!(obj instanceof TrialBalance)) {
+            return false;
+        }
         TrialBalance other = (TrialBalance) obj;
-        return Objects.equals(other.officeId, officeId)
-            && Objects.equals(other.glAccountId, glAccountId)
-            && Objects.equals(other.amount, amount)
-            && Objects.equals(other.entryDate, entryDate)
-            && Objects.equals(other.transactionDate, transactionDate)
-            && Objects.equals(other.closingBalance, closingBalance);
+        return Objects.equals(other.officeId, officeId) && Objects.equals(other.glAccountId, glAccountId)
+                && Objects.equals(other.amount, amount) && Objects.equals(other.entryDate, entryDate)
+                && Objects.equals(other.transactionDate, transactionDate) && Objects.equals(other.closingBalance, closingBalance);
     }
 
     @Override

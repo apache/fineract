@@ -39,7 +39,7 @@ public class HookTemplate extends AbstractPersistableCustom {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Schema> fields = new HashSet<>();
 
     private HookTemplate(final String name) {

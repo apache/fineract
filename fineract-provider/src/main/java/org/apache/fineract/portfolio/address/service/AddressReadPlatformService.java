@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.apache.fineract.portfolio.address.data.AddressData;
 
 public interface AddressReadPlatformService {
+
     public Collection<AddressData> retrieveAddressFields(long clientid);
 
     public Collection<AddressData> retrieveAllClientAddress(long clientid);

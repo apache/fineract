@@ -28,15 +28,18 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  */
 
 final class WorkingDaysApiResourceSwagger {
+
     private WorkingDaysApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetWorkingDaysResponse")
     public static final class GetWorkingDaysResponse {
+
         private GetWorkingDaysResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
@@ -48,17 +51,21 @@ final class WorkingDaysApiResourceSwagger {
 
     @ApiModel(value = "GetWorkingDaysTemplateResponse")
     public static final class GetWorkingDaysTemplateResponse {
+
         private GetWorkingDaysTemplateResponse() {
 
         }
+
         public Collection<EnumOptionData> repaymentRescheduleOptions;
     }
 
     @ApiModel(value = "PutWorkingDaysRequest")
     public static final class PutWorkingDaysRequest {
+
         private PutWorkingDaysRequest() {
 
         }
+
         @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
         public String recurrence;
         @ApiModelProperty(example = "en")
@@ -71,9 +78,11 @@ final class WorkingDaysApiResourceSwagger {
 
     @ApiModel(value = "PutWorkingDaysResponse")
     public static final class PutWorkingDaysResponse {
+
         private PutWorkingDaysResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

@@ -23,9 +23,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.StringTokenizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DateRange {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DateRange.class);
     private static final String ISO_8601_DATE_PATTERN = "yyy-MM-dd";
     private static final String RANGE_DELIMITER = "..";
 
@@ -70,7 +73,7 @@ public class DateRange {
         try {
             cal.setTime(sdf.parse(tokenizer.nextToken()));
         } catch (ParseException ex) {
-
+            LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
         }
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -83,7 +86,7 @@ public class DateRange {
             try {
                 cal.setTime(sdf.parse(tokenizer.nextToken()));
             } catch (ParseException ex) {
-
+                LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
             }
         }
         cal.set(Calendar.HOUR_OF_DAY, 23);

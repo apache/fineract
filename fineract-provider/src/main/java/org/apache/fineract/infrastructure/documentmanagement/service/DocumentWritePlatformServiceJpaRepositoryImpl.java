@@ -42,15 +42,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
     private final ContentRepositoryFactory contentRepositoryFactory;
 
     @Autowired
-    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final DocumentRepository documentRepository, final ContentRepositoryFactory documentStoreFactory) {
+    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
+            final ContentRepositoryFactory documentStoreFactory) {
         this.context = context;
         this.documentRepository = documentRepository;
         this.contentRepositoryFactory = documentStoreFactory;
@@ -80,7 +80,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             return document.getId();
         } catch (final DataIntegrityViolationException dve) {
-            logger.error("Error occured.", dve);
+            LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
@@ -88,13 +88,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
-    public Long createInternalDocument(final String entityType, final Long entityId,
-            final Long fileSize, final InputStream inputStream, final String mimeType,
-            final String name, final String description, final String fileName) {
+    public Long createInternalDocument(final String entityType, final Long entityId, final Long fileSize, final InputStream inputStream,
+            final String mimeType, final String name, final String description, final String fileName) {
 
-
-        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName,
-                fileSize, mimeType, description, null);
+        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName, fileSize, mimeType,
+                description, null);
 
         final Long documentId = createDocument(documentCommand, inputStream);
 
@@ -136,11 +134,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             return new CommandProcessingResult(documentForUpdate.getId());
         } catch (final DataIntegrityViolationException dve) {
-            logger.error("Error occured.", dve);
+            LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         } catch (final ContentManagementException cme) {
-            logger.error("Error occured.", cme);
+            LOG.error("Error occured.", cme);
             throw new ContentManagementException(documentCommand.getName(), cme.getMessage());
         }
     }
@@ -153,8 +151,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
         final Document document = this.documentRepository.findById(documentCommand.getId())
-                .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(),
-                        documentCommand.getParentEntityId(), documentCommand.getId()));
+                .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
+                        documentCommand.getId()));
         this.documentRepository.delete(document);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
@@ -163,20 +161,24 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     }
 
     private void validateParentEntityType(final DocumentCommand documentCommand) {
-        if (!checkValidEntityType(documentCommand.getParentEntityType())) { throw new InvalidEntityTypeForDocumentManagementException(
-                documentCommand.getParentEntityType()); }
+        if (!checkValidEntityType(documentCommand.getParentEntityType())) {
+            throw new InvalidEntityTypeForDocumentManagementException(documentCommand.getParentEntityType());
+        }
     }
 
     private static boolean checkValidEntityType(final String entityType) {
-        for (final DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
-            if (entities.name().equalsIgnoreCase(entityType)) { return true; }
+        for (final DocumentManagementEntity entities : DocumentManagementEntity.values()) {
+            if (entities.name().equalsIgnoreCase(entityType)) {
+                return true;
+            }
         }
         return false;
     }
 
     /*** Entities for document Management **/
-    public static enum DOCUMENT_MANAGEMENT_ENTITY {
-        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS,IMPORT;
+    public static enum DocumentManagementEntity {
+
+        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS, IMPORT;
 
         @Override
         public String toString() {

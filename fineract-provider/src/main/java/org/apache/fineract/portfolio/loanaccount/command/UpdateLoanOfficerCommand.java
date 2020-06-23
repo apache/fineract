@@ -65,8 +65,10 @@ public class UpdateLoanOfficerCommand {
 
         baseDataValidator.reset().parameter("loans").value(this.loans).arrayNotEmpty();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateForLoanReassignment() {
@@ -79,7 +81,9 @@ public class UpdateLoanOfficerCommand {
 
         baseDataValidator.reset().parameter("assignmentDate").value(this.assignmentDate).notNull();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

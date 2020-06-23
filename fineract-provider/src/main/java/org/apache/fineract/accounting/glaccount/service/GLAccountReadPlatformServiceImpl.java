@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
+    private static final String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
 
     @Autowired
     public GLAccountReadPlatformServiceImpl(final RoutingDataSource dataSource) {
@@ -110,19 +110,24 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
-            final Boolean manualTransactionsAllowed, final Boolean disabled, JournalEntryAssociationParametersData associationParametersData) {
+            final Boolean manualTransactionsAllowed, final Boolean disabled,
+            JournalEntryAssociationParametersData associationParametersData) {
         if (accountClassification != null) {
-            if (!checkValidGLAccountType(accountClassification)) { throw new GLAccountInvalidClassificationException(accountClassification); }
+            if (!checkValidGLAccountType(accountClassification)) {
+                throw new GLAccountInvalidClassificationException(accountClassification);
+            }
         }
 
         if (usage != null) {
-            if (!checkValidGLAccountUsage(usage)) { throw new GLAccountInvalidClassificationException(accountClassification); }
+            if (!checkValidGLAccountUsage(usage)) {
+                throw new GLAccountInvalidClassificationException(accountClassification);
+            }
         }
 
         final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
         String sql = "select " + rm.schema();
         // append SQL statement for fetching account totals
-        if (associationParametersData!=null) {
+        if (associationParametersData != null) {
             if (associationParametersData.isRunningBalanceRequired()) {
                 sql = sql + " and gl_j.id in (select t1.id from (select t2.account_id, max(t2.id) as id from "
                         + "(select id, max(entry_date) as entry_date, account_id from acc_gl_journal_entry where is_running_balance_calculated = 1 "
@@ -133,8 +138,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
-        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null)
-                || (manualTransactionsAllowed != null) || (disabled != null)) {
+        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null) || (manualTransactionsAllowed != null)
+                || (disabled != null)) {
             filtersPresent = true;
             sql += " where";
         }
@@ -195,7 +200,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             }
         }
 
-        sql+=" ORDER BY gl_code ASC";
+        sql += " ORDER BY gl_code ASC";
 
         final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
@@ -231,19 +236,24 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountData> retrieveAllEnabledDetailGLAccounts() {
-        return retrieveAllGLAccounts(null, null, GLAccountUsage.DETAIL.getValue(), null, false, new JournalEntryAssociationParametersData());
+        return retrieveAllGLAccounts(null, null, GLAccountUsage.DETAIL.getValue(), null, false,
+                new JournalEntryAssociationParametersData());
     }
 
     private static boolean checkValidGLAccountType(final int type) {
         for (final GLAccountType accountType : GLAccountType.values()) {
-            if (accountType.getValue().equals(type)) { return true; }
+            if (accountType.getValue().equals(type)) {
+                return true;
+            }
         }
         return false;
     }
 
     private static boolean checkValidGLAccountUsage(final int type) {
         for (final GLAccountUsage accountUsage : GLAccountUsage.values()) {
-            if (accountUsage.getValue().equals(type)) { return true; }
+            if (accountUsage.getValue().equals(type)) {
+                return true;
+            }
         }
         return false;
     }

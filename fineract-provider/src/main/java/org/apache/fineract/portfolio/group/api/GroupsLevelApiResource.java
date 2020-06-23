@@ -44,8 +44,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GroupsLevelApiResource {
 
-    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName",
-            "parentLevelId", "parentLevelName", "childLevelId", "childLevelName", "superParent", "recursable", "canHaveClients"));
+    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName", "parentLevelId",
+            "parentLevelName", "childLevelId", "childLevelName", "superParent", "recursable", "canHaveClients"));
 
     private final PlatformSecurityContext context;
     private final GroupLevelReadPlatformService groupLevelReadPlatformService;

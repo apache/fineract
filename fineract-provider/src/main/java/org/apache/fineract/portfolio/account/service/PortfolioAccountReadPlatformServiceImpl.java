@@ -90,8 +90,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
                 break;
-                default:
-                break;
             }
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId);
@@ -104,7 +102,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     public Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO) {
 
         final List<Object> sqlParams = new ArrayList<>();
-        //sqlParams.add(portfolioAccountDTO.getClientId());
+        // sqlParams.add(portfolioAccountDTO.getClientId());
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
         String defaultAccountStatus = "300";
@@ -151,18 +149,16 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sqlParams.add(portfolioAccountDTO.getDepositType());
                 }
 
-                if(portfolioAccountDTO.isExcludeOverDraftAccounts()){
+                if (portfolioAccountDTO.isExcludeOverDraftAccounts()) {
                     sql += " and sa.allow_overdraft = 0";
                 }
 
-                if(portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null){
+                if (portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null) {
                     sql += " and sa.group_id = ? ";
                     sqlParams.add(portfolioAccountDTO.getGroupId());
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
-            break;
-            default:
             break;
         }
 
@@ -223,8 +219,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, currency);
@@ -287,8 +283,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final BigDecimal amtForTransfer = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalOverpaid");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
@@ -304,15 +300,15 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             final StringBuilder amountQueryString = new StringBuilder(400);
             amountQueryString.append("(select (SUM(ifnull(mr.principal_completed_derived, 0)) +");
             amountQueryString.append("SUM(ifnull(mr.interest_completed_derived, 0)) + ");
-             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
-             amountQueryString.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
-             amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
-             amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
-             amountQueryString.append("  and  mr.duedate >= CURDATE() group by ml.id having");
-             amountQueryString.append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + ");
-             amountQueryString.append(" SUM(ifnull(mr.interest_completed_derived, 0)) + ");
-             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
-             amountQueryString.append("SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
+            amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
+            amountQueryString.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
+            amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
+            amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
+            amountQueryString.append("  and  mr.duedate >= CURDATE() group by ml.id having");
+            amountQueryString.append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + ");
+            amountQueryString.append(" SUM(ifnull(mr.interest_completed_derived, 0)) + ");
+            amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
+            amountQueryString.append("SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("la.id as id, la.account_no as accountNo, la.external_id as externalId, ");
@@ -365,8 +361,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final BigDecimal amtForTransfer = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalOverpaid");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
@@ -376,20 +372,21 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
         // TODO Auto-generated method stub
-        Object[] sqlParams = new Object[] { accountId , accountId};
+        Object[] sqlParams = new Object[] { accountId, accountId };
         PortfolioAccountData accountData = null;
-        //String currencyCode = null;
+        // String currencyCode = null;
         try {
             String sql = null;
-            //final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
+            // final PortfolioAccountType accountType =
+            // PortfolioAccountType.fromInt(accountTypeId);
 
-                    sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
-                  /*  if (currencyCode != null) {
-                        sql += " and la.currency_code = ?";
-                        sqlParams = new Object[] {accountId , accountId,currencyCode };
-                    }*/
+            sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
+            /*
+             * if (currencyCode != null) { sql += " and la.currency_code = ?";
+             * sqlParams = new Object[] {accountId , accountId,currencyCode }; }
+             */
 
-                    accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);
+            accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);
 
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId);

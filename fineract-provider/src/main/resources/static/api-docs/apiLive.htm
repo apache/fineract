@@ -678,6 +678,62 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsim</td>
+                                <td><a href="#gsim_submit">Submit a GSIM</a></td>
+                                <td></td>
+                                <td><a href="#gsim_modify">Modify GSIM</a></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=approve</td>
+                                <td><a href="#gsim_approve">Approve a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=undoapproval</td>
+                                <td><a href="#gsim_undoapprove">Undoapprove a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=reject</td>
+                                <td><a href="#gsim_reject">Reject a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=withdrawnByApplicant</td>
+                                <td><a href="#gsim_reject">Withdraw a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=activate</td>
+                                <td><a href="#gsim_activate">Activate a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/gsimcommands/{gsimId}?command=close</td>
+                                <td><a href="#gsim_close">Close a GSIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 								<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
@@ -686,6 +742,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td></td>
+                                <td>savingsaccounts/{savingsId}/transactions?command=gsimDeposit</td>
+                                <td><a href="#savingsaccounts_gsim_deposit">Make a GSIM-Deposit</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td></td>
 								<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
@@ -1329,6 +1393,70 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td></td>
+                                <td>loans</td>
+                                <td><a href="#glim_submit">Submit a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=approve</td>
+                                <td><a href="#glim_approve">Approve GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=undoapproval</td>
+                                <td><a href="#glim_undoapproval">Undoapprove a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=reject</td>
+                                <td><a href="#glim_reject">Reject a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=disburse</td>
+                                <td><a href="#glim_disburse">Disburse a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=undodisbursal</td>
+                                <td><a href="#glim_undodisbursal">UndoDisburse a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}?command=glimrepayment</td>
+                                <td><a href="#glim_repayment">GLIM Repayment</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/glimAccount/{glimId}</td>
+                                <td></td>
+                                <td><a href="#glim_retrieve">Retrieve a GLIM</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#loans_transactions">Loan Transactions</a></td>
 								<td>loans/{loanId}/transactions?command=repayment</td>
@@ -1702,6 +1830,22 @@
                                 <td>groups/{groupId}?command=updateRole</td>
                                 <td><a href="#groups_updateRole">Update Role</a></td>
                                 <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}/gsimaccounts</td>
+                                <td></td>
+                                <td><a href="#gsim_list">List of GSIM Applications</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}/glimaccounts</td>
+                                <td></td>
+                                <td><a href="#glim_list">List of GLIM Applications</a></td>
                                 <td></td>
                                 <td></td>
                             </tr>
@@ -4328,7 +4472,7 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 					</p>
 					<p>
 						Two-Factor authentication and delivery methods can be configured via
-						the <a href="#twofactor_configure"<i>/twofactor/configure</i> endpoint.</a>
+						the <a href="#twofactor_configure"><i>/twofactor/configure</i> endpoint.</a>
 					</p>
 				</div>
 				<div class="method-example">
@@ -9603,6 +9747,315 @@ GET https://DomainName/fineract-provider/api/v1/groups?paged=true
 			</div>
 			<!-- end of group api docs -->
 
+            <!--Getting GSIM: -->
+            <a id="gsim_list" name="gsim_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a GSIM Application</h4>
+                    <p>Associations: String optional
+                        One of, or comma separated of GSIM Applications or all for all associations
+                    </p>
+
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET  https://DomainName/fineract-provider/api/v1/groups/{groupId}/gsimaccounts
+                    </code>
+
+
+                    <code class="method-response">
+[{
+  "gsimId": 1,
+  "groupId": 1,
+  "accountNumber": "000000006",
+  "childGSIMAccounts": [],
+  "parentBalance": 2500.000000,
+  "savingsStatus": "SUBMITTED_AND_PENDING_APPROVAL"
+  },
+  {
+  "gsimId": 8,
+  "groupId": 1,
+  "accountNumber": "000000014",
+  "childGSIMAccounts": [{
+    "id": 14,
+    "displayName": "(1) qwe poi",
+    "accountNo": "0000000141",
+    "productId": 1,
+    "productName": "productrial",
+    "shortProductName": "Ipro",
+    "status": {
+    "id": 400,
+    "code": "savingsAccountStatusType.withdrawn.by.applicant",
+    "value": "Withdrawn by applicant",
+    "submittedAndPendingApproval": false,
+    "approved": false,
+    "rejected": false,
+    "withdrawnByApplicant": true,
+    "active": false,
+    "closed": true,
+    "prematureClosed": false,
+    "transferInProgress": false,
+    "transferOnHold": false,
+    "matured": false
+    },
+    "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 1,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+    },
+    "accountType": {
+    "id": 0,
+    "code": "accountType.invalid",
+    "value": "Invalid"
+    },
+    "timeline": {
+    "submittedOnDate": [2020, 6, 3],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "withdrawnOnDate": [2020, 6, 3],
+    "withdrawnByUsername": "mifos",
+    "withdrawnByFirstname": "App",
+    "withdrawnByLastname": "Administrator",
+    "closedOnDate": [2020, 6, 3],
+    "closedByUsername": "mifos",
+    "closedByFirstname": "App",
+    "closedByLastname": "Administrator"
+    },
+    "subStatus": {
+    "id": 0,
+    "code": "SavingsAccountSubStatusEnum.none",
+    "value": "None",
+    "none": true,
+    "inactive": false,
+    "dormant": false,
+    "escheat": false,
+    "block": false,
+    "blockCredit": false,
+    "blockDebit": false
+    },
+    "depositType": {
+    "id": 100,
+    "code": "depositAccountType.savingsDeposit",
+    "value": "Savings"
+    }
+    }],
+    "parentBalance": 0.000000,
+    "savingsStatus": "SUBMITTED_AND_PENDING_APPROVAL"
+    }, {
+    "gsimId": 10,
+    "groupId": 1,
+    "accountNumber": "000000016",
+    "childGSIMAccounts": [{
+    "id": 16,
+    "displayName": "(1) qwe poi",
+    "accountNo": "0000000161",
+    "productId": 1,
+    "productName": "productrial",
+    "shortProductName": "Ipro",
+    "status": {
+    "id": 600,
+    "code": "savingsAccountStatusType.closed",
+    "value": "Closed",
+    "submittedAndPendingApproval": false,
+    "approved": false,
+    "rejected": false,
+    "withdrawnByApplicant": false,
+    "active": false,
+    "closed": true,
+    "prematureClosed": false,
+    "transferInProgress": false,
+    "transferOnHold": false,
+    "matured": false
+    },
+    "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 1,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+    },
+    "accountType": {
+    "id": 0,
+    "code": "accountType.invalid",
+    "value": "Invalid"
+    },
+    "timeline": {
+    "submittedOnDate": [2020, 6, 3],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "approvedOnDate": [2020, 6, 4],
+    "approvedByUsername": "mifos",
+    "approvedByFirstname": "App",
+    "approvedByLastname": "Administrator",
+    "activatedOnDate": [2020, 6, 4],
+    "closedOnDate": [2020, 6, 4],
+    "closedByUsername": "mifos",
+    "closedByFirstname": "App",
+    "closedByLastname": "Administrator"
+    },
+    "subStatus": {
+    "id": 0,
+    "code": "SavingsAccountSubStatusEnum.none",
+    "value": "None",
+    "none": true,
+    "inactive": false,
+    "dormant": false,
+    "escheat": false,
+    "block": false,
+    "blockCredit": false,
+    "blockDebit": false
+    },
+    "lastActiveTransactionDate": [2020, 6, 4],
+    "depositType": {
+      "id": 100,
+      "code": "depositAccountType.savingsDeposit",
+      "value": "Savings"
+    }
+  }],
+  "parentBalance": 0.000000,
+  "savingsStatus": "CLOSED_OBLIGATIONS_MET"
+}]
+
+                    </code>
+                </div>
+            </div>
+
+            <!--end of getting GSIM:-->
+
+            <!--Getting GLIM: -->
+            <a id="glim_list" name="glim_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a GLIM Application</h4>
+                    <p>Associations: String optional
+                        One of, or comma separated of GLIM Applications or all for all associations
+                    </p>
+
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET  https://DomainName/fineract-provider/api/v1/groups/{groupId}/glimaccounts
+                    </code>
+
+                    <code class="method-response">
+[{
+  "glimId": 1,
+  "groupId": 1,
+  "accountNumber": "000000002",
+  "childGLIMAccounts": [{
+    "id": 2,
+    "accountNo": "0000000021",
+    "parentAccountNumber": "000000002",
+    "productId": 1,
+    "productName": "loanp1",
+    "shortProductName": "LP1",
+    "status": {
+      "id": 500,
+      "code": "loanStatusType.rejected",
+      "value": "Rejected",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+      "loanType": {
+        "id": 4,
+        "code": "accountType.glim",
+        "value": "GLIM"
+      },
+      "timeline": {
+      "submittedOnDate": [2020, 6, 10],
+      "submittedByUsername": "mifos",
+      "submittedByFirstname": "App",
+      "submittedByLastname": "Administrator",
+      "rejectedOnDate": [2020, 6, 12],
+      "rejectedByUsername": "mifos",
+      "rejectedByFirstname": "App",
+      "rejectedByLastname": "Administrator",
+      "expectedDisbursementDate": [2020, 6, 10],
+      "closedOnDate": [2020, 6, 12],
+      "closedByUsername": "mifos",
+      "closedByFirstname": "App",
+      "closedByLastname": "Administrator",
+      "expectedMaturityDate": [2021, 4, 10],
+      "writeOffByUsername": "mifos",
+      "writeOffByFirstname": "App",
+      "writeOffByLastname": "Administrator"
+    },
+    "inArrears": false
+  }],
+  "parentPrincipalAmount": 10.000000,
+  "loanStatus": "SUBMITTED_AND_PENDING_APPROVAL"
+},{
+  "glimId": 2,
+  "groupId": 1,
+  "accountNumber": "000000003",
+  "childGLIMAccounts": [{
+    "id": 3,
+    "accountNo": "0000000031",
+    "parentAccountNumber": "000000003",
+    "productId": 1,
+    "productName": "loanp1",
+    "shortProductName": "LP1",
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved",
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "loanType": {
+    "id": 4,
+    "code": "accountType.glim",
+    "value": "GLIM"
+    },
+    "timeline": {
+    "submittedOnDate": [2020, 6, 10],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "approvedOnDate": [2020, 6, 12],
+    "approvedByUsername": "mifos",
+    "approvedByFirstname": "App",
+    "approvedByLastname": "Administrator",
+    "expectedDisbursementDate": [2020, 6, 10],
+    "expectedMaturityDate": [2021, 4, 10]
+    },
+    "inArrears": false
+  }],
+  "parentPrincipalAmount": 10.000000,
+  "loanStatus": "SUBMITTED_AND_PENDING_APPROVAL"
+}]
+                    </code>
+                </div>
+            </div>
+
+            <!--end of getting GLIM:-->
+
+
+            <!-- end of GSIM api docs -->
+
+
+            <!--end of GLIM api docs -->
+
 			<!-- start of loans api docs -->
 			<a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -10835,6 +11288,34 @@ GET https://DomainName/fineract-provider/api/v1/loans
 				</div>
 			</div>
 
+<a id="glim_retrieve" name="glim_retrieve" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Retrieve GLIM Application</h4>
+      <p>Allows you to retrieve the GLIM Application.</p>
+    </div>
+    <div class="method-example">
+    <code class="method-declaration">
+GET  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}
+    </code>
+    <code class="method-response">
+[
+  {
+  "glimId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "clientName": "client1 qwe",
+  "childLoanId": 2,
+  "parentAccountNo": "000000002",
+  "parentPrincipalAmount": 10.000000,
+  "childLoanAccountNo": "0000000021",
+  "childPrincipalAmount": 1000.000000
+  }
+]
+      </code>
+   </div>
+  </div>
+
 			<a id="loans_update" name="loans_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -11652,6 +12133,423 @@ Content-Type: application/json
 					</code>
 				</div>
 			</div>
+            <!--start of GLIM api docs -->
+
+<a id="glim_submit" name="glim_submit" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+    <h4>Submit new GLIM Application</h4>
+    <p>Allows you to Submit the GLIM Application. GLIM Application should be in Pending state.</p>
+    <table class=matrixHeading>
+    <tr class="matrixHeadingBG">
+    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+    </tr>
+    <tr class=alt>
+    <td>interestRatePerPeriod, expectedDisbursementDate, clientId, groupId, productId, totalLoan, loanType, interestType,
+    principal, charges, transactionProcessingStrategyId, submittedOnDate, amortizationType, repaymentFrequencyType,
+    loanTermFrequencyType, loanTermFrequency, repaymentEvery, numberOfRepayments, interestCalculationPeriodType,
+    isParentAccount, locale,dateFormat</td>
+    </tr>
+    </table>
+
+  </div>
+  <div class="method-example">
+    <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/loans
+    </code>
+    <code class="method-request">
+POST:  loans
+Content-Type: application/json
+Request Body:
+{
+  "interestRatePerPeriod":"2",
+  "expectedDisbursementDate":"10 June 2020",
+  "productId":"1",
+  "loanType":"glim",
+  "dateFormat":"dd MMMM yyyy",
+  "groupId":"1",
+  "clientId":"2",
+  "totalLoan":"10",
+  "interestType":"0",
+  "locale":"en_GB",
+  "principal":"1000.00",
+  "charges":[],
+  "transactionProcessingStrategyId":"1",
+  "submittedOnDate":"10 June 2020",
+  "amortizationType":"1",
+  "repaymentFrequencyType":"2",
+  "loanTermFrequencyType":"2",
+  "loanTermFrequency":"10",
+  "repaymentEvery":"1",
+  "numberOfRepayments":"10",
+  "interestCalculationPeriodType":"1",
+  "isParentAccount":"1"
+}
+     </code>
+
+    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 2,
+  "resourceId": 2,
+  "glimId": 1
+}
+    </code>
+    </div>
+ </div>
+
+<a id="glim_approve" name="glim_approve" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Approve GLIM Application</h4>
+      <p>Allows you to Approve the GLIM Application.</p>
+      <table class=matrixHeading>
+        <tr class="matrixHeadingBG">
+        <td><div class="fineractHeading2">Mandatory Fields</div></td>
+        </tr>
+        <tr class=alt>
+        <td> loanId, approvedOnDate, dateFormat, locale, glimPrincipal</td>
+        </tr>
+      </table>
+    </div>
+    <div class="method-example">
+    <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=approve
+    </code>
+    <code class="method-request">
+POST:  loans/glimAccount/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+"approvalFormData":[
+    {
+      "loanId":2,
+      "approvedOnDate": "12 June 2020",
+      "dateFormat":"dd MMMM yyyy",
+      "locale":"en"
+    }
+  ],
+"glimPrincipal":1000,
+"locale"="en"
+}
+    </code>
+
+    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved",
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedOnDate": "12 June 2020"
+    }
+}
+      </code>
+    </div>
+  </div>
+
+<a id="glim_undoapproval" name="glim_undoapproval" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Undo approval GLIM Application</h4>
+      <p>Allows you to undoApprove the GLIM Application. GLIM application should be in Approved state.</p>
+      <table class=matrixHeading>
+      <tr class="matrixHeadingBG">
+      <td><div class="fineractHeading2">Optional Fields</div></td>
+      </tr>
+      <tr class=alt>
+      <td> note </td>
+      </tr>
+      </table>
+    </div>
+    <div class="method-example">
+      <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=undoapproval
+      </code>
+      <code class="method-request">
+POST:  loans/glimAccount/1?command=undoapproval
+Content-Type: application/json
+Request Body:
+{
+  "note":"Undoapproving glim application due to some reasons"
+}
+      </code>
+
+      <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 100,
+      "code": "loanStatusType.submitted.and.pending.approval",
+      "value": "Submitted and pending approval",
+      "pendingApproval": true,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+  "approvedOnDate": ""
+  }
+}
+      </code>
+    </div>
+  </div>
+
+<a id="glim_reject" name="glim_reject" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Reject GLIM Application</h4>
+      <p>Allows you to reject the GLIM Application. GLIM application should be in pending state</p>
+      <table class=matrixHeading>
+        <tr class="matrixHeadingBG">
+        <td><div class="fineractHeading2">Mandatory Fields</div></td>
+        </tr>
+        <tr class=alt>
+        <td> rejectedOnDate, dateFormat, locale</td>
+        </tr>
+      </table>
+
+    </div>
+    <div class="method-example">
+      <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=reject
+      </code>
+      <code class="method-request">
+POST:  loans/glimAccount/1?command=reject
+Content-Type: application/json
+Request Body:
+{
+  "rejectedOnDate":"12 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en"
+}
+   </code>
+
+   <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 500,
+      "code": "loanStatusType.rejected",
+      "value": "Rejected",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedOnDate": "12 June 2020",
+    "closedOnDate": "12 June 2020"
+    }
+  }
+    </code>
+    </div>
+  </div>
+
+<a id="glim_disburse" name="glim_disburse" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+  <div class="method-description">
+  <h4>Disburse GLIM Application</h4>
+  <p>Allows you to disburse the GLIM Application, GLIM Account should be in Approved state. </p>
+  <table class=matrixHeading>
+    <tr class="matrixHeadingBG">
+    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+    </tr>
+    <tr class=alt>
+    <td> actualDisbursementDate, dateFormat, locale</td>
+    </tr>
+   </table>
+
+   </div>
+   <div class="method-example">
+      <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=disburse
+      </code>
+      <code class="method-request">
+POST:  loans/glimAccount/2?command=disburse
+Content-Type: application/json
+Request Body:
+{
+  "actualDisbursementDate":"12 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en"
+}
+       </code>
+
+  <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 3,
+  "resourceId": 3,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "loanStatusType.active",
+      "value": "Active",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": true,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "actualDisbursementDate": "12 June 2020"
+  }
+}
+    </code>
+  </div>
+</div>
+
+<a id="glim_undodisbursal" name="glim_undodisbursal" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Undo Disbursal GLIM Application</h4>
+      <p>Allows you to undoDisburse the GLIM Application. GLIM application should be in Disburse state</p>
+      <table class=matrixHeading>
+        <tr class="matrixHeadingBG">
+        <td><div class="fineractHeading2">Optional Fields</div></td>
+        </tr>
+        <tr class=alt>
+        <td> note </td>
+        </tr>
+      </table>
+    </div>
+    <div class="method-example">
+    <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=undodisbursal
+    </code>
+    <code class="method-request">
+POST:  loans/glimAccount/2?command=undodisbursal
+Content-Type: application/json
+Request Body:
+{
+  "note":"undoDisbursal due to some reasons."
+}
+    </code>
+
+    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 3,
+  "resourceId": 3,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved",
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+      },
+    "actualDisbursementDate": ""
+    }
+}
+      </code>
+      </div>
+  </div>
+
+<a id="glim_repayment" name="glim_repayment" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Repayment GLIM Application</h4>
+        <p>Allows you to repayment the GLIM Application, GLIM Application should be in Disburse state.</p>
+        <table class=matrixHeading>
+          <tr class="matrixHeadingBG">
+          <td><div class="fineractHeading2">Mandatory Fields</div></td>
+          </tr>
+          <tr class=alt>
+          <td> loanId, transactionDate, dateFormat, locale, transactionAmount </td>
+          </tr>
+       </table>
+    </div>
+    <div class="method-example">
+      <code class="method-declaration">
+POST  https://DomainName/fineract-provider/api/v1/loans/glimAccount/{glimId}?command=glimrepayment
+      </code>
+      <code class="method-request">
+POST:  loans/glimAccount/2?command=glimrepayment
+Content-Type: application/json
+Request Body:
+{
+  "formDataArray":[
+    {
+      "loanId":3,
+      "transactionDate":"12 June 2020",
+      "dateFormat":"dd MMMM yyyy",
+      "locale":"en",
+      "transactionAmount":"1000"
+      }
+  ]
+}
+      </code>
+
+      <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "loanId": 3,
+  "resourceId": 3,
+  "changes": {
+    "transactionDate": "12 June 2020",
+    "transactionAmount": "1000",
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "paymentTypeId": ""
+    }
+}
+      </code>
+    </div>
+  </div>
 
 			<a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -27008,7 +27906,452 @@ Request Body:
 	        </code>
 	    </div>
 	</div>
-	<a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
+            <!-- start of GSIM api docs -->
+<a id="gsim_submit" name="gsim_submit" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h2>Submit New GSIM</h2>
+            <p>The API concept of <b>GSIM</b> models the <b>Group Savings Individual Monitoring</b> system and the process of <b>maintaining the savings of groups.</b></p>
+            <table class=matrixHeading>
+              <tr class="matrixHeadingBG">
+                <td><div class="fineractHeading2">Field Descriptions</div></td>
+              </tr>
+            <tr class=alt>
+              <td>gsimId</td>
+            </tr>
+            <tr>
+              <td class=fielddesc>The gsimId associated with the account is Auto Generated and it is pass through route-parameters while taking actions on that specific GSIM Account.</td>
+            </tr>
+            <tr class=alt>
+               <td>isGSIM</td>
+            </tr>
+            <tr>
+              <td class=fielddesc>isGSIM is a boolean value, which is included when a savings account will be child account of a GSIM.</td>
+            </tr>
+            <tr class=alt>
+              <td>childAccountId</td>
+            </tr>
+            <tr>
+              <td class=fielddesc>childAccountId is the Id of Savings Account linked to the GSIM Account(ParentAccount).</td>
+            </tr>
+            </table>
+        </div>
+    <div class="method-example">
+          <code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/savingsaccounts/gsim
+          </code>
+          <code class="method-request">
+{
+  "clientArray":[
+    {
+      "clientId":2,
+      "groupId":1,
+      "productId":"1",
+      "submittedOnDate":"10 June 2020",
+      "dateFormat":"dd MMMM yyyy",
+      "locale":"en",
+      "isParentAccount":1,
+      "isGSIM":true,
+      "applicationId":1234
+    },
+    {
+      "clientId":5,
+      "groupId":1,
+      "productId":"1",
+      "submittedOnDate":"10 June 2020",
+      "dateFormat":"dd MMMM yyyy",
+      "locale":"en",
+      "isParentAccount":1,
+      "isGSIM":true,
+      "applicationId":1234
+    }
+  ]
+}
+
+           </code>
+
+           <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 5,
+  "savingsId": 2,
+  "resourceId": 2,
+  "gsimId": 2
+}
+           </code>
+         </div>
+    </div>
+
+<a id="gsim_approve" name="gsim_approve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+         <div class="method-description">
+         <h2>Approve GSIM application</h2>
+         <p>Approves GSIM application so long as its in 'Submitted and pending approval' state.</p>
+         <table class=matrixHeading>
+           <tr class="matrixHeadingBG">
+           <td><div class="fineractHeading2">Mandatory Fields</div></td>
+           </tr>
+           <tr class=alt>
+           <td>approvedOnDate, dateFormat, locale</td>
+           </tr>
+         </table>
+         </div>
+         <div class="method-example">
+           <code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=approve
+           </code>
+
+           <code class="method-request">
+{
+  "approvedOnDate": "03 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en"
+}
+           </code>
+
+                    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "clientId": 4,
+  "savingsId": 13,
+  "resourceId": 13,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "savingsAccountStatusType.approved",
+      "value": "Approved",
+      "submittedAndPendingApproval": false,
+      "approved": true,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": false,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedOnDate": "03 June 2020"
+  }
+}
+                    </code>
+                </div>
+            </div>
+
+<a id="gsim_undoapprove" name="gsim_undoapprove" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>UndoApproval GSIM application</h4>
+      <p>Will move 'approved' GSIM application back to 'Submitted and pending approval' state.</p>
+      <table class=matrixHeading>
+        <tr class="matrixHeadingBG">
+        <td><div class="fineractHeading2">Optional Fields</div></td>
+        </tr>
+        <tr class=alt>
+        <td> note </td>
+        </tr>
+        </table>
+        </div>
+        <div class="method-example">
+          <code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=undoapproval
+          </code>
+          <code class="method-request">
+{
+  “note”:”GSIM Application Undo Approval Note”
+}
+          </code>
+          <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "clientId": 4,
+  "savingsId": 13,
+  "resourceId": 13,
+  "changes": {
+    "status": {
+      "id": 100,
+      "code": "savingsAccountStatusType.submitted.and.pending.approval",
+      "value": "Submitted and pending approval",
+      "submittedAndPendingApproval": true,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": false,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "approvedOnDate": ""
+  }
+}
+          </code>
+      </div>
+   </div>
+
+<a id="gsim_reject" name="gsim_reject" class="old-syle-anchor">&nbsp;</a>
+   <div class="method-section">
+      <div class="method-description">
+        <h4>Reject GSIM application</h4>
+        <p>Rejects GSIM application so long as its in 'Submitted and pending approval' state.</p>
+        <table class=matrixHeading>
+        <tr class="matrixHeadingBG">
+          <td><div class="fineractHeading2">Mandatory Fields</div></td>
+        </tr>
+        <tr class=alt>
+          <td>rejectedOnDate, dateFormat, locale</td>
+        </tr>
+        </table>
+
+      </div>
+      <div class="method-example">
+        <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=reject
+        </code>
+        <code class="method-request">Associations: String optional One of, or comma separated of GSIM Applications or all for all associations
+POST:  savingsaccounts/gsimcommands/7?command=reject
+Content-Type: application/json
+Request Body:
+{
+  "rejectedOnDate": "03 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "note":"rejection due to some reason"
+}
+
+        </code>
+
+        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "clientId": 4,
+  "savingsId": 13,
+  "resourceId": 13,
+  "changes": {
+    "status": {
+      "id": 500,
+      "code": "savingsAccountStatusType.rejected",
+      "value": "Rejected",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": true,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": true,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedOnDate": "03 June 2020",
+    "closedOnDate": "03 June 2020",
+    "note": "rejection due to some reason"
+  }
+}
+        </code>
+    </div>
+  </div>
+
+<a id="gsim_withdraw" name="gsim_withdraw" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+    <h4>Withdraw GSIM application</h4>
+    <p>Used when an applicant withdraws from the GSIM application. It must be in 'Submitted and pending approval' state.</p>
+
+    <table class=matrixHeading>
+    <tr class="matrixHeadingBG">
+    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+    </tr>
+    <tr class=alt>
+    <td>withdrawnOnDate, dateFormat, locale</td>
+    </tr>
+    </table>
+    </div>
+  <div class="method-example">
+    <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=withdrawnByApplicant
+    </code>
+    <code class="method-request">
+POST:  /savingsaccounts/gsimcommands/1?command=withdrawnOnDate
+Content-Type: application/json
+Request Body:
+{
+  "withdrawnOnDate": "03 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "note":"withdrawal by applicant"
+}
+    </code>
+
+    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 400,
+      "code": "savingsAccountStatusType.withdrawn.by.applicant",
+      "value": "Withdrawn by applicant",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": true,
+      "active": false,
+      "closed": true,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "03 June 2020",
+    "closedOnDate": "03 June 2020",
+    "note": "withdrawal by applicant"
+  }
+}
+    </code>
+    </div>
+  </div>
+
+<a id="gsim_activate" name="gsim_activate" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+    <h4>Activate a GSIM Application</h4>
+    <p>Results in an approved GSIM application being converted into an 'active' savings account.</p>
+    <table class=matrixHeading>
+      <tr class="matrixHeadingBG">
+      <td><div class="fineractHeading2">Mandatory Fields</div></td>
+      </tr>
+      <tr class=alt>
+      <td>activatedOnDate, dateFormat, locale</td>
+      </tr>
+    </table>
+
+    </div>
+    <div class="method-example">
+      <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=activate
+      </code>
+      <code class="method-request">
+POST:  /savingsaccounts/gsimcommands/10?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "activatedOnDate": "03 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en"
+}
+
+      </code>
+
+      <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 1,
+  "savingsId": 16,
+  "resourceId": 16,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "savingsAccountStatusType.active",
+      "value": "Active",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": true,
+      "closed": false,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "activatedOnDate": "03 June 2020"
+  }
+}
+      </code>
+   </div>
+  </div>
+
+<a id="gsim_close" name="gsim_close" class="old-syle-anchor">&nbsp;</a>
+  <div class="method-section">
+    <div class="method-description">
+      <h4>Close a GSIM Application</h4>
+      <p>Results in an Activated savings application being converted into an 'closed' savings account.</p>
+      <table class=matrixHeading>
+      <tr class="matrixHeadingBG">
+      <td><div class="fineractHeading2">Mandatory Fields</div></td>
+      </tr>
+      <tr class=alt>
+      <td>closedOnDate, dateFormat, locale</td>
+      </tr>
+      </table>
+
+    </div>
+    <div class="method-example">
+      <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/savingsaccounts/gsimcommands/{gsimId}?command=close
+      </code>
+      <code class="method-request">
+POST:  savingsaccounts/gsimcommands/10?command=close
+Content-Type: application/json
+Request Body:
+{
+  "closedOnDate": "04 June 2020",
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en"
+}
+      </code>
+      <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 1,
+  "savingsId": 16,
+  "resourceId": 16,
+  "changes": {
+    "status": {
+      "id": 600,
+      "code": "savingsAccountStatusType.closed",
+      "value": "Closed",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": true,
+      "prematureClosed": false,
+      "transferInProgress": false,
+      "transferOnHold": false,
+      "matured": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "closedOnDate": "04 June 2020"
+  }
+}
+      </code>
+    </div>
+  </div>
+
+            <!--end of gsim -->
+            <a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
             <h2>List savings applications/accounts</h2>
@@ -27220,7 +28563,6 @@ No Request Body:
 	    </div>
 	</div>
 
-
 	<a id="savingsaccounts_withholdtaxupdate" name="savingsaccounts_withholdtaxupdate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -27247,6 +28589,51 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+    <a id="gsim_modify" name="gsim_modify" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+       <div class="method-description">
+           <h4>Modify a GSIM Application</h4>
+                    <p>Allows you to modify the GSIM Application by updating groupId, clientId, productId.</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>groupId, clientId, productId</td>
+                        </tr>
+                    </table>
+
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+https://DomainName/fineract-provider/api/v1/savingsaccounts/gsim/{gsimId}
+                    </code>
+                    <code class="method-request">
+PUT:  savingsaccounts/gsim/6
+Content-Type: application/json
+Request Body:
+{
+  "groupId": 2,
+  "clientId": 3,
+  "productId":2
+}
+                    </code>
+
+                    <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "clientId": 3,
+  "savingsId": 12,
+  "resourceId": 12,
+  "changes": {
+    "clientId": 3,
+    "productId": 2
+  }
+}
+                    </code>
+                </div>
+            </div>
 
 	<a id="savingsaccounts_delete" name="savingsaccounts_delete" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
@@ -27443,6 +28830,45 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+
+            <a id="savingsaccounts_gsim_deposit" name="savingsaccounts_gsim_deposit" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h2>GSIM Deposit Transaction</h2>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST
+https://DomainName/fineract-provider/api/v1 /savingsaccounts/{savingsId}/transactions?command=gsimDeposit
+                    </code>
+                    <code class="method-request">POST :  savingsaccounts/1/transactions?command=gsimDeposit
+Content-Type: application/json
+No Request Body:
+{
+  savingsArray:[
+    {
+    "transactionDate":"04 June 2020",
+    "dateFormat"="dd MMMM yyyy",
+    "locale"="en",
+    "transactionAmount":2500,
+    "paymentTypeId":1,
+    "childAccountId":1
+    }
+  ]
+}
+
+                    </code>
+                    <code class="method-response">
+                        {
+                        "officeId": 1,
+                        "groupId": 1,
+                        "savingsId": 1,
+                        "resourceId": 26,
+                        "changes": {}
+                        }
+
+                    </code>
+                </div>
+            </div>
 
 	<a id="savingsaccounts_withdrawal" name="savingsaccounts_withdrawal" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">

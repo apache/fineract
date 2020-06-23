@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LIKELIHOOD", action = "UPDATE")
 public class UpdateLikelihoodCommandHandler implements NewCommandSourceHandler {
 
-
     private final WriteLikelihoodService writePlatformService;
 
     @Autowired

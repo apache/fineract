@@ -189,7 +189,9 @@ public class DepositProductAssembler {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public RecurringDepositProduct assembleRecurringDepositProduct(final JsonCommand command) {
@@ -292,8 +294,8 @@ public class DepositProductAssembler {
                 preClosurePenalInterest = command.bigDecimalValueOfParameterNamed(preClosurePenalInterestParamName);
                 final Integer preClosurePenalInterestOnTypeId = command
                         .integerValueOfParameterNamed(preClosurePenalInterestOnTypeIdParamName);
-                preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null : PreClosurePenalInterestOnType
-                        .fromInt(preClosurePenalInterestOnTypeId);
+                preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null
+                        : PreClosurePenalInterestOnType.fromInt(preClosurePenalInterestOnTypeId);
             }
         }
 
@@ -329,8 +331,8 @@ public class DepositProductAssembler {
             preClosurePenalInterestOnTypeId = produPreClosureDetail.preClosurePenalInterestOnTypeId();
         }
 
-        preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null : PreClosurePenalInterestOnType
-                .fromInt(preClosurePenalInterestOnTypeId);
+        preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null
+                : PreClosurePenalInterestOnType.fromInt(preClosurePenalInterestOnTypeId);
 
         DepositPreClosureDetail preClosureDetail1 = DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest,
                 preClosurePenalInterestType);
@@ -343,11 +345,11 @@ public class DepositProductAssembler {
         final Integer minDepositTerm = command.integerValueOfParameterNamed(minDepositTermParamName);
         final Integer maxDepositTerm = command.integerValueOfParameterNamed(maxDepositTermParamName);
         final Integer minDepositTermTypeId = command.integerValueOfParameterNamed(minDepositTermTypeIdParamName);
-        final SavingsPeriodFrequencyType minDepositTermType = (minDepositTermTypeId == null) ? null : SavingsPeriodFrequencyType
-                .fromInt(minDepositTermTypeId);
+        final SavingsPeriodFrequencyType minDepositTermType = (minDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(minDepositTermTypeId);
         final Integer maxDepositTermTypeId = command.integerValueOfParameterNamed(maxDepositTermTypeIdParamName);
-        final SavingsPeriodFrequencyType maxDepositTermType = (maxDepositTermTypeId == null) ? null : SavingsPeriodFrequencyType
-                .fromInt(maxDepositTermTypeId);
+        final SavingsPeriodFrequencyType maxDepositTermType = (maxDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(maxDepositTermTypeId);
         final Integer inMultiplesOfDepositTerm = command.integerValueOfParameterNamed(inMultiplesOfDepositTermParamName);
         final Integer inMultiplesOfDepositTermTypeId = command.integerValueOfParameterNamed(inMultiplesOfDepositTermTypeIdParamName);
         final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = (inMultiplesOfDepositTermTypeId == null) ? null
@@ -392,11 +394,11 @@ public class DepositProductAssembler {
             maxDepositTermTypeId = prodDepositTermDetail.maxDepositTermType();
         }
 
-        final SavingsPeriodFrequencyType minDepositTermType = (minDepositTermTypeId == null) ? null : SavingsPeriodFrequencyType
-                .fromInt(minDepositTermTypeId);
+        final SavingsPeriodFrequencyType minDepositTermType = (minDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(minDepositTermTypeId);
 
-        final SavingsPeriodFrequencyType maxDepositTermType = (maxDepositTermTypeId == null) ? null : SavingsPeriodFrequencyType
-                .fromInt(maxDepositTermTypeId);
+        final SavingsPeriodFrequencyType maxDepositTermType = (maxDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(maxDepositTermTypeId);
 
         if (command.parameterExists(inMultiplesOfDepositTermParamName)) {
             inMultiplesOfDepositTerm = command.integerValueOfParameterNamed(inMultiplesOfDepositTermParamName);
@@ -426,9 +428,15 @@ public class DepositProductAssembler {
         Boolean adjustAdvanceTowardsFuturePayments = command
                 .booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
 
-        if (isMandatoryDeposit == null) isMandatoryDeposit = false;
-        if (allowWithdrawal == null) allowWithdrawal = false;
-        if (adjustAdvanceTowardsFuturePayments == null) adjustAdvanceTowardsFuturePayments = false;
+        if (isMandatoryDeposit == null) {
+            isMandatoryDeposit = false;
+        }
+        if (allowWithdrawal == null) {
+            allowWithdrawal = false;
+        }
+        if (adjustAdvanceTowardsFuturePayments == null) {
+            adjustAdvanceTowardsFuturePayments = false;
+        }
 
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
                 adjustAdvanceTowardsFuturePayments);

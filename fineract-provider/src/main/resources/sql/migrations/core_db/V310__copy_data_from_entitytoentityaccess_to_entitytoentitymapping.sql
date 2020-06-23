@@ -17,7 +17,7 @@
 -- under the License.
 --
 
-insert ignore into m_entity_to_entity_mapping (from_id,to_id,rel_id)  
+insert ignore into m_entity_to_entity_mapping (from_id,to_id,rel_id)
 select  mea.entity_id as fromId,
 mea.second_entity_id as toid,
 case mea.access_type_code_value_id

@@ -18,12 +18,12 @@
 --
 
 CREATE TABLE `m_trial_balance` (
-	`office_id` BIGINT(20) NOT NULL,
-	`account_id` BIGINT(20) NOT NULL,
-	`amount` DECIMAL(19,6) NOT NULL,
-	`entry_date` DATE NOT NULL,
-	`created_date` DATE NULL,
-	`closing_balance` DECIMAL(19,6) NOT NULL
+    `office_id` BIGINT NOT NULL,
+    `account_id` BIGINT NOT NULL,
+    `amount` DECIMAL(19,6) NOT NULL,
+    `entry_date` DATE NOT NULL,
+    `created_date` DATE NULL,
+    `closing_balance` DECIMAL(19,6) NOT NULL
 );
 
 

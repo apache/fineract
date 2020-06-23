@@ -22,66 +22,66 @@ import java.math.BigDecimal;
 
 public interface LoanProductConstants {
 
-    public static final String useBorrowerCycleParameterName = "useBorrowerCycle";
+    public static final String USE_BORROWER_CYCLE_PARAMETER_NAME = "useBorrowerCycle";
 
-    public static final String principalVariationsForBorrowerCycleParameterName = "principalVariationsForBorrowerCycle";
-    public static final String interestRateVariationsForBorrowerCycleParameterName = "interestRateVariationsForBorrowerCycle";
-    public static final String numberOfRepaymentVariationsForBorrowerCycleParameterName = "numberOfRepaymentVariationsForBorrowerCycle";
+    public static final String PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME = "principalVariationsForBorrowerCycle";
+    public static final String INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME = "interestRateVariationsForBorrowerCycle";
+    public static final String NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME = "numberOfRepaymentVariationsForBorrowerCycle";
 
-    public static final String defaultValueParameterName = "defaultValue";
-    public static final String minValueParameterName = "minValue";
-    public static final String maxValueParameterName = "maxValue";
-    public static final String valueConditionTypeParamName = "valueConditionType";
-    public static final String borrowerCycleNumberParamName = "borrowerCycleNumber";
-    public static final String borrowerCycleIdParameterName = "id";
+    public static final String DEFAULT_VALUE_PARAMETER_NAME = "defaultValue";
+    public static final String MIN_VALUE_PARAMETER_NAME = "minValue";
+    public static final String MAX_VALUE_PARAMETER_NAME = "maxValue";
+    public static final String VALUE_CONDITION_TYPE_PARAM_NAME = "valueConditionType";
+    public static final String BORROWER_CYCLE_NUMBER_PARAM_NAME = "borrowerCycleNumber";
+    public static final String BORROWER_CYCLE_ID_PARAMETER_NAME = "id";
 
-    public static final String principalPerCycleParameterName = "principalPerCycle";
-    public static final String minPrincipalPerCycleParameterName = "minPrincipalPerCycle";
-    public static final String maxPrincipalPerCycleParameterName = "maxPrincipalPerCycle";
-    public static final String principalValueUsageConditionParamName = "principalValueUsageCondition";
-    public static final String principalCycleNumbersParamName = "principalCycleNumbers";
+    public static final String PRINCIPAL_PER_CYCLE_PARAMETER_NAME = "principalPerCycle";
+    public static final String MIN_PRINCIPAL_PER_CYCLE_PARAMETER_NAME = "minPrincipalPerCycle";
+    public static final String MAX_PRINCIPAL_PER_CYCLE_PARAMETER_NAME = "maxPrincipalPerCycle";
+    public static final String PRINCIPAL_VALUE_USAGE_CONDITION_PARAM_NAME = "principalValueUsageCondition";
+    public static final String PRINCIPAL_CYCLE_NUMBERS_PARAM_NAME = "principalCycleNumbers";
 
-    public static final String numberOfRepaymentsPerCycleParameterName = "numberOfRepaymentsPerCycle";
-    public static final String minNumberOfRepaymentsPerCycleParameterName = "minNumberOfRepaymentsPerCycle";
-    public static final String maxNumberOfRepaymentsPerCycleParameterName = "maxNumberOfRepaymentsPerCycle";
-    public static final String repaymentValueUsageConditionParamName = "repaymentValueUsageCondition";
-    public static final String repaymentCycleNumberParamName = "repaymentCycleNumber";
+    public static final String NUMBER_OF_REPAYMENTS_PER_CYCLE_PARAMETER_NAME = "numberOfRepaymentsPerCycle";
+    public static final String MIN_NUMBER_OF_REPAYMENTS_PER_CYCLE_PARAMETER_NAME = "minNumberOfRepaymentsPerCycle";
+    public static final String MAX_NUMBER_OF_REPAYMENTS_PER_CYCLE_PARAMETER_NAME = "maxNumberOfRepaymentsPerCycle";
+    public static final String REPAYMENT_VALUE_USAGE_CONDITION_PARAM_NAME = "repaymentValueUsageCondition";
+    public static final String REPAYMENT_CYCLE_NUMBER_PARAM_NAME = "repaymentCycleNumber";
 
-    public static final String interestRatePerPeriodPerCycleParameterName = "interestRatePerPeriodPerCycle";
-    public static final String minInterestRatePerPeriodPerCycleParameterName = "minInterestRatePerPeriodPerCycle";
-    public static final String maxInterestRatePerPeriodPerCycleParameterName = "maxInterestRatePerPeriodPerCycle";
-    public static final String interestRateValueUsageConditionParamName = "interestRateValueUsageCondition";
-    public static final String interestRateCycleNumberParamName = "interestRateCycleNumber";
+    public static final String INTEREST_RATE_PER_PERIOD_PER_CYCLE_PARAMETER_NAME = "interestRatePerPeriodPerCycle";
+    public static final String MIN_INTEREST_RATE_PER_PERIOD_PER_CYCLE_PARAMETER_NAME = "minInterestRatePerPeriodPerCycle";
+    public static final String MAX_INTEREST_RATE_PER_PERIOD_PER_CYCLE_PARAMETER_NAME = "maxInterestRatePerPeriodPerCycle";
+    public static final String INTEREST_RATE_VALUE_USAGE_CONDITION_PARAM_NAME = "interestRateValueUsageCondition";
+    public static final String INTEREST_RATE_CYCLE_NUMBER_PARAM_NAME = "interestRateCycleNumber";
 
-    public static final String principal = "principal";
-    public static final String minPrincipal = "minPrincipal";
-    public static final String maxPrincipal = "maxPrincipalValue";
+    public static final String PRINCIPAL = "principal";
+    public static final String MIN_PRINCIPAL = "minPrincipal";
+    public static final String MAX_PRINCIPAL = "maxPrincipalValue";
 
-    public static final String interestRatePerPeriod = "interestRatePerPeriod";
-    public static final String minInterestRatePerPeriod = "minInterestRatePerPeriod";
-    public static final String maxInterestRatePerPeriod = "maxInterestRatePerPeriod";
+    public static final String INTEREST_RATE_PER_PERIOD = "interestRatePerPeriod";
+    public static final String MIN_INTEREST_RATE_PER_PERIOD = "minInterestRatePerPeriod";
+    public static final String MAX_INTEREST_RATE_PER_PERIOD = "maxInterestRatePerPeriod";
 
-    public static final String numberOfRepayments = "numberOfRepayments";
-    public static final String minNumberOfRepayments = "minNumberOfRepayments";
-    public static final String maxNumberOfRepayments = "maxNumberOfRepayments";
+    public static final String NUMBER_OF_REPAYMENTS = "numberOfRepayments";
+    public static final String MIN_NUMBER_OF_REPAYMENTS = "minNumberOfRepayments";
+    public static final String MAX_NUMBER_OF_REPAYMENTS = "maxNumberOfRepayments";
 
     public static final String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greterthan";
     public static final String VALUE_CONDITION_START_WITH_ERROR = "condition.type.must.start.with.equal";
-    public static final String shortName = "shortName";
+    public static final String SHORT_NAME = "shortName";
 
-    public static final String multiDisburseLoanParameterName = "multiDisburseLoan";
-    public static final String maxTrancheCountParameterName = "maxTrancheCount";
-    public static final String outstandingLoanBalanceParameterName = "outstandingLoanBalance";
+    public static final String MULTI_DISBURSE_LOAN_PARAMETER_NAME = "multiDisburseLoan";
+    public static final String MAX_TRANCHE_COUNT_PARAMETER_NAME = "maxTrancheCount";
+    public static final String OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME = "outstandingLoanBalance";
 
-    public static final String graceOnArrearsAgeingParameterName = "graceOnArrearsAgeing";
-    public static final String overdueDaysForNPAParameterName = "overdueDaysForNPA";
-    public static final String minimumDaysBetweenDisbursalAndFirstRepayment = "minimumDaysBetweenDisbursalAndFirstRepayment";
-    public static final String accountMovesOutOfNPAOnlyOnArrearsCompletionParamName = "accountMovesOutOfNPAOnlyOnArrearsCompletion";
+    public static final String GRACE_ON_ARREARS_AGEING_PARAMETER_NAME = "graceOnArrearsAgeing";
+    public static final String OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME = "overdueDaysForNPA";
+    public static final String MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT = "minimumDaysBetweenDisbursalAndFirstRepayment";
+    public static final String ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME = "accountMovesOutOfNPAOnlyOnArrearsCompletion";
 
     // Interest recalculation related
-    public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";
-    public static final String daysInYearTypeParameterName = "daysInYearType";
-    public static final String daysInMonthTypeParameterName = "daysInMonthType";
+    public static final String IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME = "isInterestRecalculationEnabled";
+    public static final String DAYS_IN_YEAR_TYPE_PARAMETER_NAME = "daysInYearType";
+    public static final String DAYS_IN_MONTH_TYPE_PARAMETER_NAME = "daysInMonthType";
     public static final String interestRecalculationCompoundingMethodParameterName = "interestRecalculationCompoundingMethod";
     public static final String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";
     public static final String recalculationRestFrequencyTypeParameterName = "recalculationRestFrequencyType";
@@ -111,7 +111,7 @@ public interface LoanProductConstants {
     public static final String canDefineEmiAmountParamName = "canDefineInstallmentAmount";
     public static final String installmentAmountInMultiplesOfParamName = "installmentAmountInMultiplesOf";
 
-    //Loan Configurable Attributes
+    // Loan Configurable Attributes
     public static final String allowAttributeOverridesParamName = "allowAttributeOverrides";
     public static final String amortizationTypeParamName = "amortizationType";
     public static final String interestTypeParamName = "interestType";
@@ -122,18 +122,17 @@ public interface LoanProductConstants {
     public static final String graceOnPrincipalAndInterestPaymentParamName = "graceOnPrincipalAndInterestPayment";
     public static final String allowCompoundingOnEodParamName = "allowCompoundingOnEod";
 
-    //Variable Installments Settings
-    public static final String allowVariableInstallmentsParamName = "allowVariableInstallments" ;
-    public static final String minimumGapBetweenInstallments = "minimumGap" ;
-    public static final String maximumGapBetweenInstallments = "maximumGap" ;
+    // Variable Installments Settings
+    public static final String allowVariableInstallmentsParamName = "allowVariableInstallments";
+    public static final String minimumGapBetweenInstallments = "minimumGap";
+    public static final String maximumGapBetweenInstallments = "maximumGap";
 
+    public static final String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalcualtion";
 
-    public static final String allowPartialPeriodInterestCalcualtionParamName = "allowPartialPeriodInterestCalcualtion";
+    public static final String CAN_USE_FOR_TOPUP = "canUseForTopup";
 
-    public static final String canUseForTopup = "canUseForTopup";
+    public static final String IS_EQUAL_AMORTIZATION_PARAM = "isEqualAmortization";
 
-    public static final String isEqualAmortizationParam = "isEqualAmortization";
-
-    public static final String ratesParamName = "rates";
+    public static final String RATES_PARAM_NAME = "rates";
 
 }

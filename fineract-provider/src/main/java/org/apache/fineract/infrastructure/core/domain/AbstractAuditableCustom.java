@@ -34,7 +34,8 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 
 /**
  * A custom copy of {@link AbstractAuditable} to override the column names used
- * on database.  It also uses Instant instead of LocalDateTime for created and modified.
+ * on database. It also uses Instant instead of LocalDateTime for created and
+ * modified.
  *
  * Abstract base class for auditable entities. Stores the audit values in
  * persistent fields.
@@ -49,7 +50,7 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
 
     private static final long serialVersionUID = 141481953116476081L;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "createdby_id")
     private AppUser createdBy;
 
@@ -57,7 +58,7 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lastmodifiedby_id")
     private AppUser lastModifiedBy;
 

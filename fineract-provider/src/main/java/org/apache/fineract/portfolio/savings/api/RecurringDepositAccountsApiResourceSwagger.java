@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/26/17.
  */
 final class RecurringDepositAccountsApiResourceSwagger {
-    private RecurringDepositAccountsApiResourceSwagger() {
-    }
+
+    private RecurringDepositAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetRecurringDepositAccountsTemplateResponse")
-    public final static class GetRecurringDepositAccountsTemplateResponse {
-        private GetRecurringDepositAccountsTemplateResponse() {
-        }
+    public static final class GetRecurringDepositAccountsTemplateResponse {
 
-        final class GetRecurringProductOptions {
-            private GetRecurringProductOptions() {
-            }
+        private GetRecurringDepositAccountsTemplateResponse() {}
+
+        static final class GetRecurringProductOptions {
+
+            private GetRecurringProductOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -53,13 +53,13 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsResponse")
-    public final static class GetRecurringDepositAccountsResponse {
-        private GetRecurringDepositAccountsResponse() {
-        }
+    public static final class GetRecurringDepositAccountsResponse {
 
-        final class GetRecurringDepositAccountsStatus {
-            private GetRecurringDepositAccountsStatus() {
-            }
+        private GetRecurringDepositAccountsResponse() {}
+
+        static final class GetRecurringDepositAccountsStatus {
+
+            private GetRecurringDepositAccountsStatus() {}
 
             @ApiModelProperty(example = "100")
             public Integer id;
@@ -87,9 +87,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public Boolean transferOnHold;
         }
 
-        final class GetRecurringDepositAccountsTimeline {
-            private GetRecurringDepositAccountsTimeline() {
-            }
+        static final class GetRecurringDepositAccountsTimeline {
+
+            private GetRecurringDepositAccountsTimeline() {}
 
             @ApiModelProperty(example = "[2014, 3, 1]")
             public LocalDate submittedOnDate;
@@ -101,9 +101,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String submittedByLastname;
         }
 
-        final class GetRecurringDepositAccountsCurrency {
-            private GetRecurringDepositAccountsCurrency() {
-            }
+        static final class GetRecurringDepositAccountsCurrency {
+
+            private GetRecurringDepositAccountsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -121,9 +121,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringDepositAccountsInterestCompoundingPeriodType {
-            private GetRecurringDepositAccountsInterestCompoundingPeriodType() {
-            }
+        static final class GetRecurringDepositAccountsInterestCompoundingPeriodType {
+
+            private GetRecurringDepositAccountsInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -133,9 +133,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsInterestPostingPeriodType {
-            private GetRecurringDepositAccountsInterestPostingPeriodType() {
-            }
+        static final class GetRecurringDepositAccountsInterestPostingPeriodType {
+
+            private GetRecurringDepositAccountsInterestPostingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -145,9 +145,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsInterestCalculationType {
-            private GetRecurringDepositAccountsInterestCalculationType() {
-            }
+        static final class GetRecurringDepositAccountsInterestCalculationType {
+
+            private GetRecurringDepositAccountsInterestCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -157,9 +157,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsInterestCalculationDaysInYearType {
-            private GetRecurringDepositAccountsInterestCalculationDaysInYearType() {
-            }
+        static final class GetRecurringDepositAccountsInterestCalculationDaysInYearType {
+
+            private GetRecurringDepositAccountsInterestCalculationDaysInYearType() {}
 
             @ApiModelProperty(example = "365")
             public Integer id;
@@ -169,18 +169,18 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsSummary {
-            private GetRecurringDepositAccountsSummary() {
-            }
+        static final class GetRecurringDepositAccountsSummary {
+
+            private GetRecurringDepositAccountsSummary() {}
 
             public GetRecurringDepositAccountsCurrency currency;
             @ApiModelProperty(example = "0")
             public Float accountBalance;
         }
 
-        final class GetRecurringDepositAccountsMinDepositTermType {
-            private GetRecurringDepositAccountsMinDepositTermType() {
-            }
+        static final class GetRecurringDepositAccountsMinDepositTermType {
+
+            private GetRecurringDepositAccountsMinDepositTermType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -190,9 +190,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsMaxDepositTermType {
-            private GetRecurringDepositAccountsMaxDepositTermType() {
-            }
+        static final class GetRecurringDepositAccountsMaxDepositTermType {
+
+            private GetRecurringDepositAccountsMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -202,9 +202,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsDepositPeriodFrequency {
-            private GetRecurringDepositAccountsDepositPeriodFrequency() {
-            }
+        static final class GetRecurringDepositAccountsDepositPeriodFrequency {
+
+            private GetRecurringDepositAccountsDepositPeriodFrequency() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -214,9 +214,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositAccountsRecurringDepositFrequencyType {
-            private GetRecurringDepositAccountsRecurringDepositFrequencyType() {
-            }
+        static final class GetRecurringDepositAccountsRecurringDepositFrequencyType {
+
+            private GetRecurringDepositAccountsRecurringDepositFrequencyType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -273,9 +273,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRequest")
-    public final static class PostRecurringDepositAccountsRequest {
-        private PostRecurringDepositAccountsRequest() {
-        }
+    public static final class PostRecurringDepositAccountsRequest {
+
+        private PostRecurringDepositAccountsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer clientId;
@@ -304,9 +304,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsResponse")
-    public final static class PostRecurringDepositAccountsResponse {
-        private PostRecurringDepositAccountsResponse() {
-        }
+    public static final class PostRecurringDepositAccountsResponse {
+
+        private PostRecurringDepositAccountsResponse() {}
 
         @ApiModelProperty(example = "2")
         public Integer officeId;
@@ -319,21 +319,21 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsAccountIdResponse")
-    public final static class GetRecurringDepositAccountsAccountIdResponse {
-        private GetRecurringDepositAccountsAccountIdResponse() {
-        }
+    public static final class GetRecurringDepositAccountsAccountIdResponse {
 
-        final class GetRecurringDepositAccountsAccountChart {
-            private GetRecurringDepositAccountsAccountChart() {
-            }
+        private GetRecurringDepositAccountsAccountIdResponse() {}
 
-            final class GetRecurringDepositAccountsChartSlabs {
-                private GetRecurringDepositAccountsChartSlabs() {
-                }
+        static final class GetRecurringDepositAccountsAccountChart {
 
-                final class GetRecurringDepositAccountsPeriodType {
-                    private GetRecurringDepositAccountsPeriodType() {
-                    }
+            private GetRecurringDepositAccountsAccountChart() {}
+
+            static final class GetRecurringDepositAccountsChartSlabs {
+
+                private GetRecurringDepositAccountsChartSlabs() {}
+
+                static final class GetRecurringDepositAccountsPeriodType {
+
+                    private GetRecurringDepositAccountsPeriodType() {}
 
                     @ApiModelProperty(example = "0")
                     public Integer id;
@@ -343,9 +343,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetRecurringDepositAccountsAccountChartCurrency {
-                    private GetRecurringDepositAccountsAccountChartCurrency() {
-                    }
+                static final class GetRecurringDepositAccountsAccountChartCurrency {
+
+                    private GetRecurringDepositAccountsAccountChartCurrency() {}
 
                     @ApiModelProperty(example = "USD")
                     public String code;
@@ -373,9 +373,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
                 public GetRecurringDepositAccountsAccountChartCurrency currency;
             }
 
-            final class GetRecurringDepositAccountsPeriodTypes {
-                private GetRecurringDepositAccountsPeriodTypes() {
-                }
+            static final class GetRecurringDepositAccountsPeriodTypes {
+
+                private GetRecurringDepositAccountsPeriodTypes() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -443,9 +443,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositAccountsAccountIdRequest")
-    public final static class PutRecurringDepositAccountsAccountIdRequest {
-        private PutRecurringDepositAccountsAccountIdRequest() {
-        }
+    public static final class PutRecurringDepositAccountsAccountIdRequest {
+
+        private PutRecurringDepositAccountsAccountIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -454,13 +454,13 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositAccountsAccountIdResponse")
-    public final static class PutRecurringDepositAccountsAccountIdResponse {
-        private PutRecurringDepositAccountsAccountIdResponse() {
-        }
+    public static final class PutRecurringDepositAccountsAccountIdResponse {
 
-        final class PutRecurringDepositAccountsChanges {
-            private PutRecurringDepositAccountsChanges() {
-            }
+        private PutRecurringDepositAccountsAccountIdResponse() {}
+
+        static final class PutRecurringDepositAccountsChanges {
+
+            private PutRecurringDepositAccountsChanges() {}
 
             @ApiModelProperty(example = "6000")
             public Integer depositAmount;
@@ -480,15 +480,15 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsAccountIdRequest")
-    public final static class PostRecurringDepositAccountsAccountIdRequest {
-        private PostRecurringDepositAccountsAccountIdRequest() {
-        }
+    public static final class PostRecurringDepositAccountsAccountIdRequest {
+
+        private PostRecurringDepositAccountsAccountIdRequest() {}
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsAccountIdResponse")
-    public final static class PostRecurringDepositAccountsAccountIdResponse {
-        private PostRecurringDepositAccountsAccountIdResponse() {
-        }
+    public static final class PostRecurringDepositAccountsAccountIdResponse {
+
+        private PostRecurringDepositAccountsAccountIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -501,9 +501,9 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteRecurringDepositAccountsResponse")
-    public final static class DeleteRecurringDepositAccountsResponse {
-        private DeleteRecurringDepositAccountsResponse() {
-        }
+    public static final class DeleteRecurringDepositAccountsResponse {
+
+        private DeleteRecurringDepositAccountsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

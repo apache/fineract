@@ -27,5 +27,6 @@ public interface ExternalServicesPropertiesRepository extends JpaRepository<Exte
         JpaSpecificationExecutor<ExternalServicesProperties> {
 
     @Query("SELECT ep from ExternalServicesProperties ep where ep.externalServicePropertiesPK.name=:name and ep.externalServicePropertiesPK.externalServiceId=:externalServiceId")
-    ExternalServicesProperties findOneByExternalServicePropertiesPK(@Param("name") String name, @Param("externalServiceId") Long externalServiceId);
+    ExternalServicesProperties findOneByExternalServicePropertiesPK(@Param("name") String name,
+            @Param("externalServiceId") Long externalServiceId);
 }

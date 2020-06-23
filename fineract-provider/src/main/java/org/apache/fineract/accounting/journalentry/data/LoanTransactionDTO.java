@@ -133,11 +133,11 @@ public class LoanTransactionDTO {
         return this.isAccountTransfer;
     }
 
-        public void setIsLoanToLoanTransfer(boolean isLoanToLoanTransfer) {
-                this.isLoanToLoanTransfer = isLoanToLoanTransfer;
-        }
+    public void setIsLoanToLoanTransfer(boolean isLoanToLoanTransfer) {
+        this.isLoanToLoanTransfer = isLoanToLoanTransfer;
+    }
 
-        public boolean isLoanToLoanTransfer(){
-            return this.isLoanToLoanTransfer;
-        }
+    public boolean isLoanToLoanTransfer() {
+        return this.isLoanToLoanTransfer;
+    }
 }

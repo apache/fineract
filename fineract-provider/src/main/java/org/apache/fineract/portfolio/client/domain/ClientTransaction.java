@@ -93,7 +93,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ClientChargePaidBy> clientChargePaidByCollection = new HashSet<>();
 
     @Transient
@@ -204,7 +204,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     }
 
     public Client getClient() {
-        return this.client ;
+        return this.client;
     }
 
     public Money getAmount() {

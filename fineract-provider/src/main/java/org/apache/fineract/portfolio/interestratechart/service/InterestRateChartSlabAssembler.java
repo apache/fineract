@@ -61,7 +61,8 @@ public class InterestRateChartSlabAssembler {
 
     @Autowired
     public InterestRateChartSlabAssembler(final FromJsonHelper fromApiJsonHelper,
-            final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, final InterestIncentiveAssembler incentiveAssembler) {
+            final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper,
+            final InterestIncentiveAssembler incentiveAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.interestRateChartRepositoryWrapper = interestRateChartRepositoryWrapper;
         this.incentiveAssembler = incentiveAssembler;
@@ -118,7 +119,9 @@ public class InterestRateChartSlabAssembler {
         final InterestRateChart chart = this.interestRateChartRepositoryWrapper.findOneWithNotFoundDetection(chartId);
         final InterestRateChartSlab interestRateChartSlab = chart.findChartSlab(chartSlabId);
 
-        if (interestRateChartSlab == null) throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        if (interestRateChartSlab == null) {
+            throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        }
 
         return interestRateChartSlab;
     }
@@ -143,6 +146,8 @@ public class InterestRateChartSlabAssembler {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

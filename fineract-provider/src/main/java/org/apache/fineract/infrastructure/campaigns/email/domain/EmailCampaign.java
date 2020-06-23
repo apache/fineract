@@ -60,7 +60,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "businessRule_id", nullable = false)
-    private Report businessRuleId ;
+    private Report businessRuleId;
 
     @Column(name = "param_value")
     private String paramValue;
@@ -123,7 +123,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @Temporal(TemporalType.TIMESTAMP)
     private Date recurrenceStartDate;
 
-    @Column(name="is_visible",nullable = true)
+    @Column(name = "is_visible", nullable = true)
     private boolean isVisible;
 
     @Column(name = "previous_run_status", nullable = true)
@@ -135,20 +135,20 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @Column(name = "previous_run_error_message", nullable = true)
     private String previousRunErrorMessage;
 
-    public EmailCampaign() {
-    }
+    public EmailCampaign() {}
 
     private EmailCampaign(final String campaignName, final Integer campaignType, final Report businessRuleId, final String paramValue,
-                        final String emailSubject, final String emailMessage,final LocalDate submittedOnDate, final AppUser submittedBy,
-                          final Report stretchyReport, final String stretchyReportParamMap, final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat,
-                          final String recurrence, final LocalDateTime localDateTime) {
+            final String emailSubject, final String emailMessage, final LocalDate submittedOnDate, final AppUser submittedBy,
+            final Report stretchyReport, final String stretchyReportParamMap,
+            final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat, final String recurrence,
+            final LocalDateTime localDateTime) {
         this.campaignName = campaignName;
         this.campaignType = EmailCampaignType.fromInt(campaignType).getValue();
         this.businessRuleId = businessRuleId;
         this.paramValue = paramValue;
-        this.status     = EmailCampaignStatus.PENDING.getValue();
+        this.status = EmailCampaignStatus.PENDING.getValue();
         this.emailSubject = emailSubject;
-        this.emailMessage    = emailMessage;
+        this.emailMessage = emailMessage;
         this.emailAttachmentFileFormat = emailAttachmentFileFormat.getValue();
         this.stretchyReport = stretchyReport;
         this.stretchyReportParamMap = stretchyReportParamMap;
@@ -157,50 +157,58 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.recurrence = recurrence;
         LocalDateTime recurrenceStartDate = new LocalDateTime();
         this.isVisible = true;
-        if(localDateTime != null){
+        if (localDateTime != null) {
             this.recurrenceStartDate = localDateTime.toDate();
-        }else{
+        } else {
             this.recurrenceStartDate = recurrenceStartDate.toDate();
         }
 
     }
 
-    public static EmailCampaign instance(final AppUser submittedBy, final Report businessRuleId, final Report stretchyReport, final JsonCommand command){
+    public static EmailCampaign instance(final AppUser submittedBy, final Report businessRuleId, final Report stretchyReport,
+            final JsonCommand command) {
 
         final String campaignName = command.stringValueOfParameterNamed(EmailCampaignValidator.campaignName);
-        final Long  campaignType = command.longValueOfParameterNamed(EmailCampaignValidator.campaignType);
+        final Long campaignType = command.longValueOfParameterNamed(EmailCampaignValidator.campaignType);
 
         final String paramValue = command.stringValueOfParameterNamed(EmailCampaignValidator.paramValue);
         final String emailSubject = command.stringValueOfParameterNamed(EmailCampaignValidator.emailSubject);
-        final String emailMessage   = command.stringValueOfParameterNamed(EmailCampaignValidator.emailMessage);
-        final String stretchyReportParamMap = command.stringValueOfParameterNamed(ScheduledEmailConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME);
-        final Integer emailAttachmentFileFormatId = command.integerValueOfParameterNamed(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
+        final String emailMessage = command.stringValueOfParameterNamed(EmailCampaignValidator.emailMessage);
+        final String stretchyReportParamMap = command
+                .stringValueOfParameterNamed(ScheduledEmailConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME);
+        final Integer emailAttachmentFileFormatId = command
+                .integerValueOfParameterNamed(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
         final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat;
-        if (emailAttachmentFileFormatId!=null) {
+        if (emailAttachmentFileFormatId != null) {
             emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(emailAttachmentFileFormatId);
-        }else{emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(2);}
+        } else {
+            emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(2);
+        }
         LocalDate submittedOnDate = new LocalDate();
         if (command.hasParameter(EmailCampaignValidator.submittedOnDateParamName)) {
             submittedOnDate = command.localDateValueOfParameterNamed(EmailCampaignValidator.submittedOnDateParamName);
         }
 
-        final String recurrence   = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceParamName);
+        final String recurrence = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceParamName);
         final Locale locale = command.extractLocale();
-        final  DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        LocalDateTime recurrenceStartDate = new  LocalDateTime();
-        if(EmailCampaignType.fromInt(campaignType.intValue()).isSchedule()) {
-            if(command.hasParameter(EmailCampaignValidator.recurrenceStartDate)){
-                recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate),fmt);
+        LocalDateTime recurrenceStartDate = new LocalDateTime();
+        if (EmailCampaignType.fromInt(campaignType.intValue()).isSchedule()) {
+            if (command.hasParameter(EmailCampaignValidator.recurrenceStartDate)) {
+                recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate),
+                        fmt);
             }
-        } else{recurrenceStartDate = null;}
+        } else {
+            recurrenceStartDate = null;
+        }
 
-
-        return new EmailCampaign(campaignName,campaignType.intValue(),businessRuleId,paramValue,emailSubject,emailMessage,
-                submittedOnDate,submittedBy,stretchyReport,stretchyReportParamMap,emailAttachmentFileFormat,recurrence,recurrenceStartDate);
+        return new EmailCampaign(campaignName, campaignType.intValue(), businessRuleId, paramValue, emailSubject, emailMessage,
+                submittedOnDate, submittedBy, stretchyReport, stretchyReportParamMap, emailAttachmentFileFormat, recurrence,
+                recurrenceStartDate);
     }
 
-    public Map<String,Object> update(JsonCommand command){
+    public Map<String, Object> update(JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
@@ -224,7 +232,8 @@ public class EmailCampaign extends AbstractPersistableCustom {
             actualChanges.put(EmailCampaignValidator.campaignType, EmailCampaignType.fromInt(newValue));
             this.campaignType = EmailCampaignType.fromInt(newValue).getValue();
         }
-        if (command.isChangeInLongParameterNamed(EmailCampaignValidator.businessRuleId, (this.businessRuleId != null) ? this.businessRuleId.getId() : null)) {
+        if (command.isChangeInLongParameterNamed(EmailCampaignValidator.businessRuleId,
+                (this.businessRuleId != null) ? this.businessRuleId.getId() : null)) {
             final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
             actualChanges.put(EmailCampaignValidator.businessRuleId, newValue);
         }
@@ -236,7 +245,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
         final Locale locale = command.extractLocale();
-        final  DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
         if (command.isChangeInLocalDateParameterNamed(EmailCampaignValidator.recurrenceStartDate, getRecurrenceStartDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate);
@@ -244,7 +253,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
             actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
 
-            final LocalDateTime newValue =  LocalDateTime.parse(valueAsInput, fmt);
+            final LocalDateTime newValue = LocalDateTime.parse(valueAsInput, fmt);
 
             this.recurrenceStartDate = newValue.toDate();
         }
@@ -252,11 +261,10 @@ public class EmailCampaign extends AbstractPersistableCustom {
         return actualChanges;
     }
 
+    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
 
-    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate){
-
-        if(isActive()){
-            //handle errors if already activated
+        if (isActive()) {
+            // handle errors if already activated
             final String defaultUserMessage = "Cannot activate campaign. Campaign is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.already.active", defaultUserMessage,
                     EmailCampaignValidator.activationDateParamName, activationLocalDate.toString(formatter));
@@ -270,12 +278,12 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.approvedBy = currentUser;
         this.status = EmailCampaignStatus.ACTIVE.getValue();
 
-       validate();
+        validate();
     }
 
-    public void close(final AppUser currentUser,final DateTimeFormatter dateTimeFormatter, final LocalDate closureLocalDate){
-        if(isClosed()){
-            //handle errors if already activated
+    public void close(final AppUser currentUser, final DateTimeFormatter dateTimeFormatter, final LocalDate closureLocalDate) {
+        if (isClosed()) {
+            // handle errors if already activated
             final String defaultUserMessage = "Cannot close campaign. Campaign already in closed state.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.already.closed", defaultUserMessage,
                     EmailCampaignValidator.statusParamName, EmailCampaignStatus.fromInt(this.status).getCode());
@@ -285,20 +293,20 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-        if(this.campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()){
+        if (this.campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()) {
             this.nextTriggerDate = null;
             this.lastTriggerDate = null;
         }
         this.closedBy = currentUser;
         this.closureDate = closureLocalDate.toDate();
-        this.status     = EmailCampaignStatus.CLOSED.getValue();
+        this.status = EmailCampaignStatus.CLOSED.getValue();
         validateClosureDate();
     }
 
-    public void reactivate(final AppUser currentUser, final DateTimeFormatter dateTimeFormat,final LocalDate reactivateLocalDate){
+    public void reactivate(final AppUser currentUser, final DateTimeFormatter dateTimeFormat, final LocalDate reactivateLocalDate) {
 
-        if(!isClosed()){
-            //handle errors if already activated
+        if (!isClosed()) {
+            // handle errors if already activated
             final String defaultUserMessage = "Cannot reactivate campaign. Campaign must be in closed state.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.must.be.closed", defaultUserMessage,
                     EmailCampaignValidator.statusParamName, EmailCampaignStatus.fromInt(this.status).getCode());
@@ -310,8 +318,8 @@ public class EmailCampaign extends AbstractPersistableCustom {
         }
 
         this.approvedOnDate = reactivateLocalDate.toDate();
-        this.status  = EmailCampaignStatus.ACTIVE.getValue();
-        this.approvedBy =currentUser;
+        this.status = EmailCampaignStatus.ACTIVE.getValue();
+        this.approvedBy = currentUser;
         this.closureDate = null;
         this.isVisible = true;
         this.closedBy = null;
@@ -319,9 +327,9 @@ public class EmailCampaign extends AbstractPersistableCustom {
         validateReactivate();
     }
 
-    public void delete(){
-        if(!isClosed()){
-            //handle errors if already activated
+    public void delete() {
+        if (!isClosed()) {
+            // handle errors if already activated
             final String defaultUserMessage = "Cannot delete campaign. Campaign must be in closed state.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.must.be.closed", defaultUserMessage,
                     EmailCampaignValidator.statusParamName, EmailCampaignStatus.fromInt(this.status).getCode());
@@ -334,45 +342,48 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.isVisible = false;
     }
 
-
-
-
-    public boolean isActive(){
+    public boolean isActive() {
         return EmailCampaignStatus.fromInt(this.status).isActive();
     }
 
-    public boolean isPending(){
-        return  EmailCampaignStatus.fromInt(this.status).isPending();
+    public boolean isPending() {
+        return EmailCampaignStatus.fromInt(this.status).isPending();
     }
 
-    public boolean isClosed(){
+    public boolean isClosed() {
         return EmailCampaignStatus.fromInt(this.status).isClosed();
     }
 
-    public boolean isDirect(){
+    public boolean isDirect() {
         return EmailCampaignType.fromInt(this.campaignType).isDirect();
     }
 
-    public boolean isSchedule(){
+    public boolean isSchedule() {
         return EmailCampaignType.fromInt(this.campaignType).isSchedule();
     }
 
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateActivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
-    private void validateReactivate(){
+    private void validateReactivate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateReactivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
-    private void validateClosureDate(){
+    private void validateClosureDate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateClosureDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
@@ -406,7 +417,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
     }
 
-    private void validateReactivationDate(final List<ApiParameterError> dataValidationErrors){
+    private void validateReactivationDate(final List<ApiParameterError> dataValidationErrors) {
         if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
@@ -434,7 +445,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
     }
 
-    private void validateClosureDate(final List<ApiParameterError> dataValidationErrors){
+    private void validateClosureDate(final List<ApiParameterError> dataValidationErrors) {
         if (getClosureDate() != null && isDateInTheFuture(getClosureDate())) {
             final String defaultUserMessage = "closure date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.closureDate.in.the.future",
@@ -445,11 +456,12 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
 
     }
+
     public LocalDate getClosureDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
     }
 
     public LocalDate getActivationLocalDate() {
@@ -459,6 +471,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         }
         return activationLocalDate;
     }
+
     private boolean isDateInTheFuture(final LocalDate localDate) {
         return localDate.isAfter(DateUtils.getLocalDateOfTenant());
     }
@@ -471,7 +484,9 @@ public class EmailCampaign extends AbstractPersistableCustom {
         return this.campaignName;
     }
 
-    public String getEmailSubject() { return this.emailSubject; }
+    public String getEmailSubject() {
+        return this.emailSubject;
+    }
 
     public String getEmailMessage() {
         return this.emailMessage;
@@ -486,13 +501,12 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getRecurrenceStartDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
     }
+
     public LocalDateTime getRecurrenceStartDateTime() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
     }
-
-
 
     public void setLastTriggerDate(Date lastTriggerDate) {
         this.lastTriggerDate = lastTriggerDate;
@@ -503,23 +517,23 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getNextTriggerDate() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
 
     }
 
-    public Date getNextTriggerDateInDate(){
+    public Date getNextTriggerDateInDate() {
         return this.nextTriggerDate;
     }
 
     public LocalDate getLastTriggerDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
     }
 
     public void updateIsVisible(boolean isVisible) {
         this.isVisible = isVisible;
     }
 
-    public void updateBusinessRuleId(final Report report){
+    public void updateBusinessRuleId(final Report report) {
         this.businessRuleId = report;
     }
 
@@ -539,7 +553,9 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.stretchyReportParamMap = stretchyReportParamMap;
     }
 
-    public AppUser getApprovedBy() {return this.approvedBy;}
+    public AppUser getApprovedBy() {
+        return this.approvedBy;
+    }
 
     public AppUser getClosedBy() {
         return this.closedBy;

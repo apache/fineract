@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeInter
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
@@ -222,8 +223,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
         populateDerivedFields(transactionAmount, chargeAmount);
 
-        if (this.isWithdrawalFee()
-                || this.isSavingsNoActivity()) {
+        if (this.isWithdrawalFee() || this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 
@@ -291,6 +291,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
             break;
+            default:
         }
     }
 
@@ -419,10 +420,12 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
+                default:
             }
         }
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_NONVIRTUAL") // https://issues.apache.org/jira/browse/FINERACT-987
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -465,6 +468,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
             actualChanges.put(amountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
+
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
                 break;
@@ -490,6 +494,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
+                default:
             }
         }
 
@@ -497,7 +502,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) == 1;
+        return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public LocalDate getDueLocalDate() {
@@ -540,7 +545,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
 
@@ -655,7 +660,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
     }
 
-    public boolean isSavingsNoActivity(){
+    public boolean isSavingsNoActivity() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
     }
 
@@ -684,40 +689,38 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
-        if (this.currencyCode() == null || matchingCurrencyCode == null) { return false; }
+        if (this.currencyCode() == null || matchingCurrencyCode == null) {
+            return false;
+        }
         return this.currencyCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SavingsAccountCharge)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SavingsAccountCharge)) {
+            return false;
+        }
         SavingsAccountCharge that = (SavingsAccountCharge) o;
-        return Objects.equals(penaltyCharge, that.penaltyCharge) &&
-               Objects.equals(paid, that.paid) &&
-               Objects.equals(waived, that.waived) &&
-               Objects.equals(status, that.status) &&
-               Objects.equals(savingsAccount, that.savingsAccount) &&
-               Objects.equals(charge, that.charge) &&
-               Objects.equals(chargeTime, that.chargeTime) &&
-               Objects.equals(dueDate, that.dueDate) &&
-               Objects.equals(feeOnMonth, that.feeOnMonth) &&
-               Objects.equals(feeOnDay, that.feeOnDay) &&
-               Objects.equals(feeInterval, that.feeInterval) &&
-               Objects.equals(chargeCalculation, that.chargeCalculation) &&
-               Objects.equals(percentage, that.percentage) &&
-               Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) &&
-               Objects.equals(amount, that.amount) &&
-               Objects.equals(amountPaid, that.amountPaid) &&
-               Objects.equals(amountWaived, that.amountWaived) &&
-               Objects.equals(amountWrittenOff, that.amountWrittenOff) &&
-               Objects.equals(amountOutstanding, that.amountOutstanding) &&
-               Objects.equals(inactivationDate, that.inactivationDate);
+        return Objects.equals(penaltyCharge, that.penaltyCharge) && Objects.equals(paid, that.paid) && Objects.equals(waived, that.waived)
+                && Objects.equals(status, that.status) && Objects.equals(savingsAccount, that.savingsAccount)
+                && Objects.equals(charge, that.charge) && Objects.equals(chargeTime, that.chargeTime)
+                && Objects.equals(dueDate, that.dueDate) && Objects.equals(feeOnMonth, that.feeOnMonth)
+                && Objects.equals(feeOnDay, that.feeOnDay) && Objects.equals(feeInterval, that.feeInterval)
+                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
+                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) && Objects.equals(amount, that.amount)
+                && Objects.equals(amountPaid, that.amountPaid) && Objects.equals(amountWaived, that.amountWaived)
+                && Objects.equals(amountWrittenOff, that.amountWrittenOff) && Objects.equals(amountOutstanding, that.amountOutstanding)
+                && Objects.equals(inactivationDate, that.inactivationDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(savingsAccount, charge, chargeTime, dueDate, feeOnMonth, feeOnDay, feeInterval, chargeCalculation, percentage, amountPercentageAppliedTo, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penaltyCharge, paid, waived, status, inactivationDate);
+        return Objects.hash(savingsAccount, charge, chargeTime, dueDate, feeOnMonth, feeOnDay, feeInterval, chargeCalculation, percentage,
+                amountPercentageAppliedTo, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penaltyCharge, paid,
+                waived, status, inactivationDate);
     }
 
     public BigDecimal calculateWithdralFeeAmount(@NotNull BigDecimal transactionAmount) {
@@ -832,7 +835,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     public boolean isChargeIsOverPaid(final LocalDate nextDueDate) {
         final BigDecimal amountPaid = this.amountPaid == null ? BigDecimal.ZERO : amountPaid();
-        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) == 1;
+        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private BigDecimal amountPaid() {

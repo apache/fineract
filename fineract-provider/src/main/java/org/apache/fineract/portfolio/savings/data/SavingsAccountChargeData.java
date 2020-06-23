@@ -78,11 +78,11 @@ public class SavingsAccountChargeData implements Serializable {
 
     private final Collection<ChargeData> chargeOptions;
 
-    public SavingsAccountChargeData(Long chargeId,  BigDecimal amount,LocalDate dueDate) {
+    public SavingsAccountChargeData(Long chargeId, BigDecimal amount, LocalDate dueDate) {
         this.chargeId = chargeId;
         this.amount = amount;
         this.dueDate = dueDate;
-        this.id=null;
+        this.id = null;
         this.accountId = null;
         this.name = null;
         this.chargeTimeType = null;
@@ -191,6 +191,5 @@ public class SavingsAccountChargeData implements Serializable {
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
     }
-
 
 }

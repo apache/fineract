@@ -99,7 +99,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampaignWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
 
     private final PlatformSecurityContext context;
 
@@ -154,8 +154,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         final Long reportId = command.longValueOfParameterNamed(EmailCampaignValidator.stretchyReportId);
 
-        final Report report = this.reportRepository.findById(reportId)
-                .orElseThrow(() -> new ReportNotFoundException(reportId));
+        final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
         // find all report parameters and store them as json string
         final Set<ReportParameterUsage> reportParameterUsages = report.getReportParameterUsages();
@@ -187,13 +186,14 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(resourceId)
                     .orElseThrow(() -> new EmailCampaignNotFound(resourceId));
 
-            if (emailCampaign.isActive()) { throw new EmailCampaignMustBeClosedToEditException(emailCampaign.getId()); }
+            if (emailCampaign.isActive()) {
+                throw new EmailCampaignMustBeClosedToEditException(emailCampaign.getId());
+            }
             final Map<String, Object> changes = emailCampaign.update(command);
 
             if (changes.containsKey(EmailCampaignValidator.businessRuleId)) {
                 final Long newValue = command.longValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
-                final Report reportId = this.reportRepository.findById(newValue)
-                        .orElseThrow(() -> new ReportNotFoundException(newValue));
+                final Report reportId = this.reportRepository.findById(newValue).orElseThrow(() -> new ReportNotFoundException(newValue));
                 emailCampaign.updateBusinessRuleId(reportId);
 
             }
@@ -220,7 +220,9 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(resourceId)
                 .orElseThrow(() -> new EmailCampaignNotFound(resourceId));
 
-        if (emailCampaign.isActive()) { throw new EmailCampaignMustBeClosedToBeDeletedException(emailCampaign.getId()); }
+        if (emailCampaign.isActive()) {
+            throw new EmailCampaignMustBeClosedToBeDeletedException(emailCampaign.getId());
+        }
 
         /*
          * Do not delete but set a boolean is_visible to zero
@@ -293,7 +295,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = emailCampaignData.getNextTriggerDate().toLocalDateTime();
 
-                logger.info("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
+                LOG.info("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoEmailOutboundTable(emailCampaignData.getParamValue(), emailCampaignData.getEmailSubject(),
                             emailCampaignData.getMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());
@@ -579,7 +581,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
                 if (isValidEmail(emailMessage.getEmailAddress())) {
 
-                    final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId()).orElse(null); //
+                    final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId())
+                            .orElse(null); //
 
                     final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat
                             .instance(emailCampaign.getEmailAttachmentFileFormat());

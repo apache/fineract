@@ -40,6 +40,7 @@ public class NotificationEventService {
 
     public void broadcastNotification(final Destination destination, final NotificationData notificationData) {
         this.jmsTemplate.send(destination, new MessageCreator() {
+
             @Override
             public Message createMessage(Session session) throws JMSException {
                 return session.createObjectMessage(notificationData);

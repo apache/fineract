@@ -53,8 +53,11 @@ public class InteropAccountData extends CommandProcessingResult {
     private final SavingsAccountStatusType status;
     private final SavingsAccountSubStatusEnum subStatus;
 
-    private final AccountType accountType; //differentiate Individual, JLG or Group account
-    private final DepositAccountType depositType; //differentiate deposit accounts Savings, FD and RD accounts
+    private final AccountType accountType; // differentiate Individual, JLG or
+                                           // Group account
+    private final DepositAccountType depositType; // differentiate deposit
+                                                  // accounts Savings, FD and RD
+                                                  // accounts
     @NotNull
     private final LocalDate activatedOn;
     private final LocalDate statusUpdateOn;
@@ -63,11 +66,11 @@ public class InteropAccountData extends CommandProcessingResult {
     @NotNull
     private List<InteropIdentifierData> identifiers;
 
-    InteropAccountData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, String accountId,
-                       String productId, String productName, String shortProductName, String currency, BigDecimal accountBalance,
-                       BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
-                       AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn,
-                       LocalDate withdrawnOn, LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
+    InteropAccountData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, String accountId, String productId,
+            String productName, String shortProductName, String currency, BigDecimal accountBalance, BigDecimal availableBalance,
+            SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus, AccountType accountType, DepositAccountType depositType,
+            LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn, LocalDate balanceOn,
+            List<InteropIdentifierData> identifiers) {
         super(resourceId, officeId, commandId, changesOnly);
         this.accountId = accountId;
         this.savingProductId = productId;
@@ -88,17 +91,17 @@ public class InteropAccountData extends CommandProcessingResult {
     }
 
     InteropAccountData(String accountId, String productId, String productName, String shortProductName, String currency,
-                       BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
-                       AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn,
-                       LocalDate withdrawnOn, LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
-        this(null, null, null, null, accountId, productId, productName, shortProductName, currency, accountBalance,
-                availableBalance, status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn,
-                identifiers);
+            BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
+            AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn,
+            LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
+        this(null, null, null, null, accountId, productId, productName, shortProductName, currency, accountBalance, availableBalance,
+                status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn, identifiers);
     }
 
     public static InteropAccountData build(SavingsAccount account) {
-        if (account == null)
+        if (account == null) {
             return null;
+        }
 
         List<InteropIdentifierData> ids = new ArrayList<>();
         for (InteropIdentifier identifier : account.getIdentifiers()) {
@@ -108,26 +111,32 @@ public class InteropAccountData extends CommandProcessingResult {
         SavingsProduct product = account.savingsProduct();
         SavingsAccountSubStatusEnum subStatus = SavingsAccountSubStatusEnum.fromInt(account.getSubStatus());
 
-        return new InteropAccountData(account.getExternalId(), product.getId().toString(), product.getName(),
-                product.getShortName(), account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(),
-                account.getStatus(), subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
+        return new InteropAccountData(account.getExternalId(), product.getId().toString(), product.getName(), product.getShortName(),
+                account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(), account.getStatus(),
+                subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
                 calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids);
     }
 
     private static LocalDate calcStatusUpdateOn(@NotNull SavingsAccount account) {
         LocalDate date = account.getClosedOnDate();
-        if (date != null)
+        if (date != null) {
             return date;
-        if ((date = account.getWithdrawnOnDate()) != null)
+        }
+        if ((date = account.getWithdrawnOnDate()) != null) {
             return date;
-        if ((date = account.getActivationLocalDate()) != null)
+        }
+        if ((date = account.getActivationLocalDate()) != null) {
             return date;
-        if ((date = account.getRejectedOnDate()) != null)
+        }
+        if ((date = account.getRejectedOnDate()) != null) {
             return date;
-        if ((date = account.getApprovedOnDate()) != null)
+        }
+        if ((date = account.getApprovedOnDate()) != null) {
             return date;
-        if ((date = account.getSubmittedOnDate()) != null)
+        }
+        if ((date = account.getSubmittedOnDate()) != null) {
             return date;
+        }
         return null;
     }
 }

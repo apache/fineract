@@ -27,7 +27,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a InterestRateChart.
  */
-public class InterestRateChartData {
+public final class InterestRateChartData {
 
     private final Long id;
     private final String name;
@@ -67,14 +67,14 @@ public class InterestRateChartData {
                 incentiveTypeOptions, genderOptions, clientTypeOptions, clientClassificationOptions);
     }
 
-    public static InterestRateChartData withSlabs(InterestRateChartData interestRateChartData, Collection<InterestRateChartSlabData> chartSlabs) {
+    public static InterestRateChartData withSlabs(InterestRateChartData interestRateChartData,
+            Collection<InterestRateChartSlabData> chartSlabs) {
         return new InterestRateChartData(interestRateChartData.id, interestRateChartData.name, interestRateChartData.description,
                 interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.isPrimaryGroupingByAmount,
                 interestRateChartData.productId, interestRateChartData.productName, chartSlabs, interestRateChartData.periodTypes,
                 interestRateChartData.entityTypeOptions, interestRateChartData.attributeNameOptions,
-                interestRateChartData.conditionTypeOptions, interestRateChartData.incentiveTypeOptions,
-                interestRateChartData.genderOptions, interestRateChartData.clientTypeOptions,
-                interestRateChartData.clientClassificationOptions);
+                interestRateChartData.conditionTypeOptions, interestRateChartData.incentiveTypeOptions, interestRateChartData.genderOptions,
+                interestRateChartData.clientTypeOptions, interestRateChartData.clientClassificationOptions);
     }
 
     public static InterestRateChartData withTemplate(InterestRateChartData interestRateChartData, Collection<EnumOptionData> periodTypes,
@@ -89,11 +89,10 @@ public class InterestRateChartData {
                 clientClassificationOptions);
     }
 
-    public static InterestRateChartData template(Collection<EnumOptionData> periodTypes,
-            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
-            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
-            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
-            final Collection<CodeValueData> clientClassificationOptions) {
+    public static InterestRateChartData template(Collection<EnumOptionData> periodTypes, final Collection<EnumOptionData> entityTypeOptions,
+            final Collection<EnumOptionData> attributeNameOptions, final Collection<EnumOptionData> conditionTypeOptions,
+            final Collection<EnumOptionData> incentiveTypeOptions, final Collection<CodeValueData> genderOptions,
+            final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
         final Long id = null;
         final String name = null;
         final String description = null;
@@ -110,11 +109,12 @@ public class InterestRateChartData {
     }
 
     private InterestRateChartData(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName, Collection<InterestRateChartSlabData> chartSlabs,
-            Collection<EnumOptionData> periodTypes, final Collection<EnumOptionData> entityTypeOptions,
-            final Collection<EnumOptionData> attributeNameOptions, final Collection<EnumOptionData> conditionTypeOptions,
-            final Collection<EnumOptionData> incentiveTypeOptions, final Collection<CodeValueData> genderOptions,
-            final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
+            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName,
+            Collection<InterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes,
+            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
+            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
+            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
+            final Collection<CodeValueData> clientClassificationOptions) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -197,7 +197,6 @@ public class InterestRateChartData {
     public Collection<CodeValueData> clientClassificationOptions() {
         return this.clientClassificationOptions;
     }
-
 
     public boolean isPrimaryGroupingByAmount() {
         return this.isPrimaryGroupingByAmount;

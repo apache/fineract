@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-
 import org.joda.time.LocalDate;
 
-public class ClosingOfSavingsAccounts {
+public final class ClosingOfSavingsAccounts {
 
     private final transient Integer rowIndex;
 
@@ -41,21 +40,19 @@ public class ClosingOfSavingsAccounts {
 
     private final String note;
 
-    public static ClosingOfSavingsAccounts importInstance(Long accountId, LocalDate closedOnDate,
-            Long onAccountClosureId,Long toSavingsAccountId, String accountType,Integer rowIndex,
-            String locale,String dateFormat){
-        return new ClosingOfSavingsAccounts(accountId, closedOnDate,onAccountClosureId,toSavingsAccountId, accountType,
-                rowIndex,locale,dateFormat);
+    public static ClosingOfSavingsAccounts importInstance(Long accountId, LocalDate closedOnDate, Long onAccountClosureId,
+            Long toSavingsAccountId, String accountType, Integer rowIndex, String locale, String dateFormat) {
+        return new ClosingOfSavingsAccounts(accountId, closedOnDate, onAccountClosureId, toSavingsAccountId, accountType, rowIndex, locale,
+                dateFormat);
     }
 
-    private ClosingOfSavingsAccounts(Long accountId, LocalDate closedOnDate,
-            Long onAccountClosureId,Long toSavingsAccountId, String accountType,Integer rowIndex,
-            String locale,String dateFormat ) {
+    private ClosingOfSavingsAccounts(Long accountId, LocalDate closedOnDate, Long onAccountClosureId, Long toSavingsAccountId,
+            String accountType, Integer rowIndex, String locale, String dateFormat) {
         this.accountId = accountId;
         this.closedOnDate = closedOnDate;
         this.onAccountClosureId = onAccountClosureId;
         this.toSavingsAccountId = toSavingsAccountId;
-        this.accountType=accountType;
+        this.accountType = accountType;
         this.rowIndex = rowIndex;
         this.dateFormat = dateFormat;
         this.locale = locale;

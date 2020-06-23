@@ -23,7 +23,8 @@ import org.joda.time.DateTime;
 /**
  * Immutable data object representing report mailing job run history data.
  **/
-public class ReportMailingJobRunHistoryData {
+public final class ReportMailingJobRunHistoryData {
+
     private final Long id;
     private final Long reportMailingJobId;
     private final DateTime startDateTime;
@@ -35,8 +36,8 @@ public class ReportMailingJobRunHistoryData {
     /**
      * ReportMailingJobRunHistoryData private constructor
      **/
-    private ReportMailingJobRunHistoryData(Long id, Long reportMailingJobId, DateTime startDateTime,
-            DateTime endDateTime, String status, String errorMessage, String errorLog) {
+    private ReportMailingJobRunHistoryData(Long id, Long reportMailingJobId, DateTime startDateTime, DateTime endDateTime, String status,
+            String errorMessage, String errorLog) {
         this.id = id;
         this.reportMailingJobId = reportMailingJobId;
         this.startDateTime = startDateTime;
@@ -51,8 +52,8 @@ public class ReportMailingJobRunHistoryData {
      *
      * @return ReportMailingJobRunHistoryData object
      **/
-    public static ReportMailingJobRunHistoryData newInstance(Long id, Long reportMailingJobId, DateTime startDateTime,
-            DateTime endDateTime, String status, String errorMessage, String errorLog) {
+    public static ReportMailingJobRunHistoryData newInstance(Long id, Long reportMailingJobId, DateTime startDateTime, DateTime endDateTime,
+            String status, String errorMessage, String errorLog) {
         return new ReportMailingJobRunHistoryData(id, reportMailingJobId, startDateTime, endDateTime, status, errorMessage, errorLog);
     }
 

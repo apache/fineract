@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
-import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SHARES;
+import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesTransactionDTO;
@@ -65,8 +65,8 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
                         paymentTypeId, amount, chargeAmount, feePayments);
 
             } else if (transactionDTO.getTransactionType().isChargePayment()) {
-                this.helper.createCashBasedJournalEntriesForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE,
-                        CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES, shareProductId, paymentTypeId, shareAccountId, transactionId,
+                this.helper.createCashBasedJournalEntriesForSharesCharges(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE,
+                        CashAccountsForShares.INCOME_FROM_FEES, shareProductId, paymentTypeId, shareAccountId, transactionId,
                         transactionDate, amount, feePayments);
             }
         }
@@ -76,16 +76,16 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
     public void createJournalEntriesForRedeem(final Long shareAccountId, final Long shareProductId, final String currencyCode,
             final Date transactionDate, final String transactionId, final Office office, final Long paymentTypeId, final BigDecimal amount,
             final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
-        if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) != 1) {
-            this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(),
-                    CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+        if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_EQUITY.getValue(),
+                    CashAccountsForShares.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                     transactionDate, amount);
         } else {
-            this.helper.createDebitJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(),
+            this.helper.createDebitJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_EQUITY.getValue(),
                     shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount.add(chargeAmount));
-            this.helper.createCreditJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(),
+            this.helper.createCreditJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),
                     shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount);
-            this.helper.createCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
+            this.helper.createCashBasedJournalEntryForSharesCharges(office, currencyCode, CashAccountsForShares.INCOME_FROM_FEES,
                     shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);
         }
     }
@@ -94,38 +94,38 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
             SharesTransactionDTO transactionDTO, final Date transactionDate, final String transactionId, final Office office,
             final Long paymentTypeId, final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
         if (transactionDTO.getTransactionStatus().isApplied()) {
-            if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) != 1) {
-                this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+            if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),
+                        CashAccountsForShares.SHARES_SUSPENSE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                         transactionDate, amount);
             } else {
-                this.helper.createDebitJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(),
+                this.helper.createDebitJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),
                         shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount);
-                this.helper.createCreditJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
+                this.helper.createCreditJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
                         shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount.subtract(chargeAmount));
-                this.helper.createCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
+                this.helper.createCashBasedJournalEntryForSharesCharges(office, currencyCode, CashAccountsForShares.INCOME_FROM_FEES,
                         shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);
             }
         } else if (transactionDTO.getTransactionStatus().isApproved()) {
             BigDecimal amountForJE = amount;
-            if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
+            if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) > 0) {
                 amountForJE = amount.subtract(chargeAmount);
             }
-            this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
-                    CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+            this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+                    CashAccountsForShares.SHARES_EQUITY.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                     transactionDate, amountForJE);
         } else if (transactionDTO.getTransactionStatus().isRejected()) {
-            if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
-                this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
+            if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) > 0) {
+                this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CashAccountsForShares.INCOME_FROM_FEES,
                         shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);
-                this.helper.createDebitJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(), shareProductId, paymentTypeId, shareAccountId,
-                        transactionId, transactionDate, amount.subtract(chargeAmount));
-                this.helper.createCreditJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId,
-                        transactionId, transactionDate, amount);
+                this.helper.createDebitJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+                        shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount.subtract(chargeAmount));
+                this.helper.createCreditJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),
+                        shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount);
 
-            }else{
-                this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+            } else {
+                this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+                        CashAccountsForShares.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                         transactionDate, amount);
             }
 

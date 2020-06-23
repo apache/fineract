@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes" })
 public class InteropHelper {
 
-    private final static Logger log = LoggerFactory.getLogger(InteropHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InteropHelper.class);
 
     private static final String BASE_URL = "/fineract-provider/api/v1/interoperation";
     private static final String HEALTH_URL = BASE_URL + "/health";
@@ -66,8 +66,8 @@ public class InteropHelper {
     private final BigDecimal amount;
     private final BigDecimal fee;
 
-    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId,
-                         String accountExternalId, String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
+    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId, String accountExternalId,
+            String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
         this.tenantId = tenantId;
@@ -78,7 +78,8 @@ public class InteropHelper {
         this.fee = fee;
     }
 
-    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId, String transactionCode) {
+    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId,
+            String transactionCode) {
         this(requestSpec, responseSpec, Utils.DEFAULT_TENANT, accountExternalId, transactionCode, "TZS", BigDecimal.TEN, BigDecimal.ONE);
     }
 
@@ -135,10 +136,10 @@ public class InteropHelper {
      */
     public String getHealth() {
         String url = buildUrl(HEALTH_URL);
-        log.debug("Calling Interoperable GET Health: {}", url);
+        LOG.debug("Calling Interoperable GET Health: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
-        log.debug("Response Interoperable GET Health: {}", response);
+        LOG.debug("Response Interoperable GET Health: {}", response);
         return response;
     }
 
@@ -147,10 +148,10 @@ public class InteropHelper {
      */
     public String getParty(InteropIdentifierType idType, String idValue) {
         String url = buildUrl(PARTIES_URL + '/' + idType + '/' + idValue);
-        log.debug("Calling Interoperable GET Party: {}", url);
+        LOG.debug("Calling Interoperable GET Party: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
-        log.debug("Response Interoperable GET Party: {}", response);
+        LOG.debug("Response Interoperable GET Party: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_ACCOUNT_ID);
     }
 
@@ -160,10 +161,10 @@ public class InteropHelper {
     public String postParty(InteropIdentifierType idType, String idValue) {
         String url = buildUrl(PARTIES_URL + '/' + idType + '/' + idValue);
         String request = buildPartiesJson();
-        log.debug("Calling Interoperable POST Party: {}, body: {}", url, request);
+        LOG.debug("Calling Interoperable POST Party: {}, body: {}", url, request);
 
         String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
-        log.debug("Response Interoperable POST Party: {}", response);
+        LOG.debug("Response Interoperable POST Party: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_ACCOUNT_ID);
     }
 
@@ -173,10 +174,10 @@ public class InteropHelper {
     public String deleteParty(InteropIdentifierType idType, String idValue) {
         String url = buildUrl(PARTIES_URL + '/' + idType + '/' + idValue);
         String request = buildPartiesJson();
-        log.debug("Calling Interoperable DELETE Party: {}, body: {}", url, request);
+        LOG.debug("Calling Interoperable DELETE Party: {}, body: {}", url, request);
 
         String response = Utils.performServerDelete(requestSpec, responseSpec, url, request, null);
-        log.debug("Response Interoperable DELETE Party: {}", response);
+        LOG.debug("Response Interoperable DELETE Party: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_ACCOUNT_ID);
     }
 
@@ -191,24 +192,25 @@ public class InteropHelper {
      */
     public String getTransactionRequest(String requestCode) {
         String url = buildUrl(TRANSACTIONS_URL + '/' + transactionCode + '/' + REQUESTS_URL_PARAM + '/' + requestCode);
-        log.debug("Calling Interoperable GET Request: {}", url);
+        LOG.debug("Calling Interoperable GET Request: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
-        log.debug("Response Interoperable GET Request: {}", response);
+        LOG.debug("Response Interoperable GET Request: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_REQUEST_CODE);
     }
 
     /**
-     * @param role PAYEE role is not valid for transaction request
+     * @param role
+     *            PAYEE role is not valid for transaction request
      * @return response json
      */
     public String postTransactionRequest(String requestCode, InteropTransactionRole role) {
         String url = buildUrl(REQUESTS_URL);
         String request = buildTransactionRequestJson(requestCode, role);
-        log.debug("Calling Interoperable POST Request: {}, body: {}", url, request);
+        LOG.debug("Calling Interoperable POST Request: {}, body: {}", url, request);
 
         String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
-        log.debug("Response Interoperable POST Request: {}", response);
+        LOG.debug("Response Interoperable POST Request: {}", response);
         return response;
     }
 
@@ -238,10 +240,10 @@ public class InteropHelper {
      */
     public String getQuote(String quoteCode) {
         String url = buildUrl(TRANSACTIONS_URL + '/' + transactionCode + '/' + QUOTES_URL_PARAM + '/' + quoteCode);
-        log.debug("Calling Interoperable GET Quote: {}", url);
+        LOG.debug("Calling Interoperable GET Quote: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
-        log.debug("Response Interoperable GET Quote: {}", response);
+        LOG.debug("Response Interoperable GET Quote: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_QUOTE_CODE);
     }
 
@@ -251,10 +253,10 @@ public class InteropHelper {
     public String postQuote(String quoteCode, InteropTransactionRole role) {
         String url = buildUrl(QUOTES_URL);
         String request = buildQuoteJson(quoteCode, role);
-        log.debug("Calling Interoperable POST Quote: {}, body: {}", url, request);
+        LOG.debug("Calling Interoperable POST Quote: {}, body: {}", url, request);
 
         String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
-        log.debug("Response Interoperable POST Quote: {}", response);
+        LOG.debug("Response Interoperable POST Quote: {}", response);
         return response;
     }
 
@@ -286,10 +288,10 @@ public class InteropHelper {
      */
     public String getTransfer(String transferCode) {
         String url = buildUrl(TRANSACTIONS_URL + '/' + transactionCode + '/' + TRANSFERS_URL_PARAM + '/' + transferCode);
-        log.debug("Calling Interoperable GET Transfer: {}", url);
+        LOG.debug("Calling Interoperable GET Transfer: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
-        log.debug("Response Interoperable GET Transfer: {}", response);
+        LOG.debug("Response Interoperable GET Transfer: {}", response);
         return getJsonAttribute(response, InteropUtil.PARAM_TRANSFER_CODE);
     }
 
@@ -313,10 +315,10 @@ public class InteropHelper {
     public String postTransfer(String transferCode, InteropTransferActionType action, InteropTransactionRole role) {
         String url = buildUrl(TRANSFERS_URL) + '&' + PARAM_TRANSFER_ACTION + '=' + action;
         String request = buildTransferJson(transferCode, role);
-        log.debug("Calling Interoperable POST Transfer: {}, body: {}", url, request);
+        LOG.debug("Calling Interoperable POST Transfer: {}, body: {}", url, request);
 
         String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
-        log.debug("Response Interoperable POST Transfer: {}", response);
+        LOG.debug("Response Interoperable POST Transfer: {}", response);
         return response;
     }
 

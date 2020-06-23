@@ -53,10 +53,11 @@ import org.springframework.stereotype.Component;
 @Path("/" + PasswordPreferencesApiConstants.RESOURCE_NAME)
 @Component
 @Scope("singleton")
-@Api(tags = {"Password preferences"})
+@Api(tags = { "Password preferences" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Password preferences", description = "This API enables management of password policy for user administration.\n" + "\n" + "There is no Apache Fineract functionality for creating a validation policy. The validation policies come pre-installed.\n" + "\n" + "Validation policies may be updated")
-})
+        @Tag(name = "Password preferences", description = "This API enables management of password policy for user administration.\n" + "\n"
+                + "There is no Apache Fineract functionality for creating a validation policy. The validation policies come pre-installed.\n"
+                + "\n" + "Validation policies may be updated") })
 public class PasswordPreferencesApiResource {
 
     private final PlatformSecurityContext context;
@@ -81,7 +82,8 @@ public class PasswordPreferencesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)})
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class) })
     public String retrieve(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
@@ -98,8 +100,9 @@ public class PasswordPreferencesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update password preferences", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "") })
     public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -116,8 +119,10 @@ public class PasswordPreferencesApiResource {
     @Path("/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Application Password validation policies", notes = "ARGUMENTS\n" + "Example Requests:\n" + "\n" + "passwordpreferences")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class, responseContainer = "List")})
+    @ApiOperation(value = "List Application Password validation policies", notes = "ARGUMENTS\n" + "Example Requests:\n" + "\n"
+            + "passwordpreferences")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class, responseContainer = "List") })
     public String template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
 

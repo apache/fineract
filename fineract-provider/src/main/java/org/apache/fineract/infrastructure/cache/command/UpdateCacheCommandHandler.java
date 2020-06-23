@@ -48,8 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
     private final CacheWritePlatformService cacheService;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants
-            .cacheTypeParameter));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants.cacheTypeParameter));
 
     @Autowired
     public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {
@@ -62,7 +61,9 @@ public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         command.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
@@ -75,7 +76,9 @@ public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
         baseDataValidator.reset().parameter(CacheApiConstants.cacheTypeParameter).value(Integer.valueOf(cacheTypeEnum)).notNull()
                 .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3));
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         final CacheType cacheType = CacheType.fromInt(cacheTypeEnum);
 

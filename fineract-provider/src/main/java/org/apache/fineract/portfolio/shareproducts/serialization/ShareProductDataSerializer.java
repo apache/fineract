@@ -66,30 +66,26 @@ public class ShareProductDataSerializer {
     private final ChargeRepositoryWrapper chargeRepository;
 
     private final PlatformSecurityContext platformSecurityContext;
-    private static final Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(
-            ShareProductApiConstants.locale_paramname, ShareProductApiConstants.name_paramname,
-            ShareProductApiConstants.shortname_paramname, ShareProductApiConstants.shortname_paramname,
-            ShareProductApiConstants.description_paramname, ShareProductApiConstants.externalid_paramname,
-            ShareProductApiConstants.totalshares_paramname, ShareProductApiConstants.currency_paramname,
-            ShareProductApiConstants.digitsafterdecimal_paramname,
+    private static final Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(ShareProductApiConstants.locale_paramname,
+            ShareProductApiConstants.name_paramname, ShareProductApiConstants.shortname_paramname,
+            ShareProductApiConstants.shortname_paramname, ShareProductApiConstants.description_paramname,
+            ShareProductApiConstants.externalid_paramname, ShareProductApiConstants.totalshares_paramname,
+            ShareProductApiConstants.currency_paramname, ShareProductApiConstants.digitsafterdecimal_paramname,
             ShareProductApiConstants.digitsafterdecimal_paramname, ShareProductApiConstants.inmultiplesof_paramname,
             ShareProductApiConstants.totalsharesissued_paramname, ShareProductApiConstants.unitprice_paramname,
             ShareProductApiConstants.minimumshares_paramname, ShareProductApiConstants.nominaltshares_paramname,
             ShareProductApiConstants.maximumshares_paramname, ShareProductApiConstants.marketprice_paramname,
-            ShareProductApiConstants.charges_paramname,
-            ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname,
+            ShareProductApiConstants.charges_paramname, ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname,
             ShareProductApiConstants.lockperiod_paramname, ShareProductApiConstants.lockinperiodfrequencytype_paramname,
             ShareProductApiConstants.minimumactiveperiodfordividends_paramname,
-            ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname,
-            ShareProductApiConstants.sharecapital_paramname, ShareProductApiConstants.accountingRuleParamName,
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue()));
+            ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname, ShareProductApiConstants.sharecapital_paramname,
+            ShareProductApiConstants.accountingRuleParamName, AccountingConstants.SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_EQUITY.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_SUSPENSE.getValue()));
 
-    private static final Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(
-            ShareProductApiConstants.locale_paramname, ShareProductApiConstants.dateFormatParamName,
-            ShareProductApiConstants.dividendPeriodStartDateParamName,
+    private static final Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(ShareProductApiConstants.locale_paramname,
+            ShareProductApiConstants.dateFormatParamName, ShareProductApiConstants.dividendPeriodStartDateParamName,
             ShareProductApiConstants.dividendPeriodEndDateParamName, ShareProductApiConstants.dividendAmountParamName));
 
     @Autowired
@@ -101,10 +97,11 @@ public class ShareProductDataSerializer {
     }
 
     public ShareProduct validateAndCreate(JsonCommand jsonCommand) {
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                supportedParametersForCreate);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForCreate);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesproduct");
@@ -117,10 +114,9 @@ public class ShareProductDataSerializer {
         baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank()
                 .notExceedingLengthOf(4);
 
-        final String description = this.fromApiJsonHelper
-                .extractStringNamed(ShareProductApiConstants.description_paramname, element);
-        baseDataValidator.reset().parameter(ShareProductApiConstants.description_paramname).value(description)
-                .notBlank().notExceedingLengthOf(500);
+        final String description = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.description_paramname, element);
+        baseDataValidator.reset().parameter(ShareProductApiConstants.description_paramname).value(description).notBlank()
+                .notExceedingLengthOf(500);
 
         String externalId = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.externalid_paramname, element);
         // baseDataValidator.reset().parameter(ShareProductApiConstants.externalid_paramname).value(externalId).notBlank();
@@ -129,15 +125,15 @@ public class ShareProductDataSerializer {
         baseDataValidator.reset().parameter(ShareProductApiConstants.totalshares_paramname).value(totalNumberOfShares).notNull()
                 .longGreaterThanZero();
         final Long sharesIssued = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.totalsharesissued_paramname, element);
-        if(sharesIssued != null && totalNumberOfShares != null && sharesIssued > totalNumberOfShares) {
+        if (sharesIssued != null && totalNumberOfShares != null && sharesIssued > totalNumberOfShares) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.totalsharesissued_paramname).value(sharesIssued)
-            .failWithCodeNoParameterAddedToErrorCode("sharesIssued.cannot.be.greater.than.totalNumberOfShares");
+                    .failWithCodeNoParameterAddedToErrorCode("sharesIssued.cannot.be.greater.than.totalNumberOfShares");
         }
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.currency_paramname, element);
-        final Integer digitsAfterDecimal = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                ShareProductApiConstants.digitsafterdecimal_paramname, element);
-        final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                ShareProductApiConstants.inmultiplesof_paramname, element);
+        final Integer digitsAfterDecimal = this.fromApiJsonHelper
+                .extractIntegerWithLocaleNamed(ShareProductApiConstants.digitsafterdecimal_paramname, element);
+        final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(ShareProductApiConstants.inmultiplesof_paramname,
+                element);
         final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
 
         final BigDecimal unitPrice = this.fromApiJsonHelper.extractBigDecimalNamed(ShareProductApiConstants.unitprice_paramname, element,
@@ -174,13 +170,13 @@ public class ShareProductDataSerializer {
 
         Set<ShareProductMarketPrice> marketPriceSet = asembleShareMarketPrice(element);
         Set<Charge> charges = assembleListOfProductCharges(element, currencyCode);
-        Boolean allowdividendsForInactiveClients = this.fromApiJsonHelper.extractBooleanNamed(
-                ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname, element);
+        Boolean allowdividendsForInactiveClients = this.fromApiJsonHelper
+                .extractBooleanNamed(ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname, element);
 
-        Integer minimumActivePeriod = this.fromApiJsonHelper.extractIntegerNamed(
-                ShareProductApiConstants.minimumactiveperiodfordividends_paramname, element, locale);
-        PeriodFrequencyType minimumActivePeriodType = extractPeriodType(
-                ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname, element);
+        Integer minimumActivePeriod = this.fromApiJsonHelper
+                .extractIntegerNamed(ShareProductApiConstants.minimumactiveperiodfordividends_paramname, element, locale);
+        PeriodFrequencyType minimumActivePeriodType = extractPeriodType(ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname,
+                element);
         if (minimumActivePeriod != null) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname)
                     .value(minimumActivePeriodType.getValue()).integerSameAsNumber(PeriodFrequencyType.DAYS.getValue());
@@ -201,7 +197,9 @@ public class ShareProductDataSerializer {
         for (ShareProductMarketPrice data : marketPriceSet) {
             data.setShareProduct(product);
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         return product;
     }
 
@@ -220,8 +218,8 @@ public class ShareProductDataSerializer {
                 Long id = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.id_paramname, arrayElement);
                 LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareProductApiConstants.startdate_paramname,
                         arrayElement);
-                final BigDecimal shareValue = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        ShareProductApiConstants.sharevalue_paramname, arrayElement);
+                final BigDecimal shareValue = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
                 ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id, localDate.toDate(), shareValue);
                 set.add(obj);
             }
@@ -237,8 +235,8 @@ public class ShareProductDataSerializer {
             for (JsonElement arrayElement : array) {
                 LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareProductApiConstants.startdate_paramname,
                         arrayElement);
-                final BigDecimal shareValue = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        ShareProductApiConstants.sharevalue_paramname, arrayElement);
+                final BigDecimal shareValue = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
                 ShareProductMarketPrice obj = new ShareProductMarketPrice(localDate.toDate(), shareValue);
                 set.add(obj);
             }
@@ -271,10 +269,11 @@ public class ShareProductDataSerializer {
     public Map<String, Object> validateAndUpdate(JsonCommand jsonCommand, ShareProduct product) {
         Map<String, Object> actualChanges = new HashMap<>();
 
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                supportedParametersForCreate);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForCreate);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesproduct");
@@ -325,24 +324,23 @@ public class ShareProductDataSerializer {
             if (product.setTotalIssuedShares(sharesIssued)) {
                 actualChanges.put(ShareProductApiConstants.totalsharesissued_paramname, sharesIssued);
             }
-        }else {
-            product.setTotalIssuedShares(sharesIssued) ;
+        } else {
+            product.setTotalIssuedShares(sharesIssued);
         }
 
-        if(sharesIssued != null && product.getSubscribedShares() != null && sharesIssued < product.getSubscribedShares()) {
+        if (sharesIssued != null && product.getSubscribedShares() != null && sharesIssued < product.getSubscribedShares()) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.totalsharesissued_paramname).value(sharesIssued)
-            .failWithCodeNoParameterAddedToErrorCode("sharesissued.can.not.be.lessthan.accounts.subscribed.shares");
+                    .failWithCodeNoParameterAddedToErrorCode("sharesissued.can.not.be.lessthan.accounts.subscribed.shares");
         }
-
 
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.currency_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.digitsafterdecimal_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.inmultiplesof_paramname, element)) {
             final String currencyCode = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.currency_paramname, element);
-            final Integer digitsAfterDecimal = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                    ShareProductApiConstants.digitsafterdecimal_paramname, element);
-            final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                    ShareProductApiConstants.inmultiplesof_paramname, element);
+            final Integer digitsAfterDecimal = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(ShareProductApiConstants.digitsafterdecimal_paramname, element);
+            final Integer inMultiplesOf = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(ShareProductApiConstants.inmultiplesof_paramname, element);
             final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
             if (product.setMonetaryCurrency(currency)) {
                 actualChanges.put(ShareProductApiConstants.currency_paramname, currency);
@@ -410,9 +408,10 @@ public class ShareProductDataSerializer {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname, element)) {
-            Boolean allowdividendsForInactiveClients = this.fromApiJsonHelper.extractBooleanNamed(
-                    ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname, element);
+        if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname,
+                element)) {
+            Boolean allowdividendsForInactiveClients = this.fromApiJsonHelper
+                    .extractBooleanNamed(ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname, element);
             if (product.setAllowDividendCalculationForInactiveClients(allowdividendsForInactiveClients)) {
                 actualChanges.put(ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname,
                         allowdividendsForInactiveClients);
@@ -422,8 +421,8 @@ public class ShareProductDataSerializer {
         Integer minimumActivePeriod = null;
 
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.minimumactiveperiodfordividends_paramname, element)) {
-            minimumActivePeriod = this.fromApiJsonHelper.extractIntegerNamed(
-                    ShareProductApiConstants.minimumactiveperiodfordividends_paramname, element, locale);
+            minimumActivePeriod = this.fromApiJsonHelper
+                    .extractIntegerNamed(ShareProductApiConstants.minimumactiveperiodfordividends_paramname, element, locale);
             if (product.setminimumActivePeriod(minimumActivePeriod)) {
                 actualChanges.put(ShareProductApiConstants.minimumactiveperiodfordividends_paramname, minimumActivePeriod);
             }
@@ -455,12 +454,18 @@ public class ShareProductDataSerializer {
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         BigDecimal shareCapitalValue;
         if (sharesIssued != null || unitPrice != null) {
-            if (sharesIssued == null) sharesIssued = product.getTotalShares();
-            if (unitPrice == null) unitPrice = product.getUnitPrice();
+            if (sharesIssued == null) {
+                sharesIssued = product.getTotalShares();
+            }
+            if (unitPrice == null) {
+                unitPrice = product.getUnitPrice();
+            }
             shareCapitalValue = BigDecimal.valueOf(sharesIssued).multiply(unitPrice);
             if (product.setshareCapitalValue(shareCapitalValue)) {
                 actualChanges.put(ShareProductApiConstants.sharecapital_paramname, shareCapitalValue);
@@ -470,10 +475,11 @@ public class ShareProductDataSerializer {
     }
 
     public void validateDividendDetails(JsonCommand jsonCommand) {
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                supportedParametersForDivident);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForDivident);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -481,20 +487,22 @@ public class ShareProductDataSerializer {
 
         JsonElement element = jsonCommand.parsedJson();
 
-        final LocalDate dividendPeriodStartDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                ShareProductApiConstants.dividendPeriodStartDateParamName, element);
+        final LocalDate dividendPeriodStartDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(ShareProductApiConstants.dividendPeriodStartDateParamName, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.dividendPeriodStartDateParamName).value(dividendPeriodStartDate)
                 .notBlank();
 
-        final LocalDate dividendPeriodEndDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                ShareProductApiConstants.dividendPeriodEndDateParamName, element);
+        final LocalDate dividendPeriodEndDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(ShareProductApiConstants.dividendPeriodEndDateParamName, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.dividendPeriodStartDateParamName).value(dividendPeriodEndDate)
                 .notBlank().validateDateAfter(dividendPeriodStartDate);
-        final BigDecimal dividendAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                ShareProductApiConstants.dividendAmountParamName, element);
+        final BigDecimal dividendAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.dividendAmountParamName, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.dividendAmountParamName).value(dividendAmount).notBlank()
                 .positiveAmount();
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
 }

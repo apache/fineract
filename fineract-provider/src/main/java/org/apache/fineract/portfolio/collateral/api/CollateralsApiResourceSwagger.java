@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class CollateralsApiResourceSwagger {
-    private CollateralsApiResourceSwagger() {
-    }
+
+    private CollateralsApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansLoanIdCollateralsResponse")
     public static final class GetLoansLoanIdCollateralsResponse {
-        private GetLoansLoanIdCollateralsResponse() {
-        }
 
-        final class GetCollateralTypeResponse {
-            private GetCollateralTypeResponse() {
-            }
+        private GetLoansLoanIdCollateralsResponse() {}
+
+        static final class GetCollateralTypeResponse {
+
+            private GetCollateralTypeResponse() {}
 
             @ApiModelProperty(example = "8")
             public Integer id;
@@ -44,9 +44,9 @@ final class CollateralsApiResourceSwagger {
             public String name;
         }
 
-        final class GetCollateralCurrencyResponse {
-            private GetCollateralCurrencyResponse() {
-            }
+        static final class GetCollateralCurrencyResponse {
+
+            private GetCollateralCurrencyResponse() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -74,8 +74,8 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "PostLoansLoanIdCollateralsRequest")
     public static final class PostLoansLoanIdCollateralsRequest {
-        private PostLoansLoanIdCollateralsRequest() {
-        }
+
+        private PostLoansLoanIdCollateralsRequest() {}
 
         @ApiModelProperty(example = "9")
         public Integer collateralTypeId;
@@ -83,8 +83,8 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "PostLoansLoanIdCollateralsResponse")
     public static final class PostLoansLoanIdCollateralsResponse {
-        private PostLoansLoanIdCollateralsResponse() {
-        }
+
+        private PostLoansLoanIdCollateralsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer loanId;
@@ -94,8 +94,8 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "PutLoansLoandIdCollateralsCollateralIdRequest")
     public static final class PutLoansLoandIdCollateralsCollateralIdRequest {
-        private PutLoansLoandIdCollateralsCollateralIdRequest() {
-        }
+
+        private PutLoansLoandIdCollateralsCollateralIdRequest() {}
 
         @ApiModelProperty(example = "22 Carat Gold chain weighing 12 grams")
         public String description;
@@ -103,8 +103,8 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "PutLoansLoanIdCollateralsCollateralIdResponse")
     public static final class PutLoansLoanIdCollateralsCollateralIdResponse {
-        private PutLoansLoanIdCollateralsCollateralIdResponse() {
-        }
+
+        private PutLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer loanId;
@@ -115,12 +115,12 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "GetLoansLoanIdCollateralsTemplateResponse")
     public static final class GetLoansLoanIdCollateralsTemplateResponse {
-        private GetLoansLoanIdCollateralsTemplateResponse() {
-        }
 
-        final class GetCollateralsTemplateAllowedTypes {
-            private GetCollateralsTemplateAllowedTypes() {
-            }
+        private GetLoansLoanIdCollateralsTemplateResponse() {}
+
+        static final class GetCollateralsTemplateAllowedTypes {
+
+            private GetCollateralsTemplateAllowedTypes() {}
 
             @ApiModelProperty(example = "9")
             public Integer id;
@@ -135,8 +135,8 @@ final class CollateralsApiResourceSwagger {
 
     @ApiModel(value = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
     public static final class DeleteLoansLoanIdCollateralsCollateralIdResponse {
-        private DeleteLoansLoanIdCollateralsCollateralIdResponse() {
-        }
+
+        private DeleteLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer loanId;

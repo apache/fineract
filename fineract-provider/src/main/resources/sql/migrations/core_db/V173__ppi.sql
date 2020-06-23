@@ -18,99 +18,99 @@
 --
 
 ALTER TABLE `m_code_value`
-ADD COLUMN `code_score` INT(11) NULL AFTER `order_position`;
+ADD COLUMN `code_score` INT NULL AFTER `order_position`;
 
 
 CREATE TABLE IF NOT EXISTS `ppi_scores` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `score_from` int(11) NOT NULL,
-  `score_to` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `score_from` INT NOT NULL,
+  `score_to` INT NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 
 INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(0, 4);
+    (0, 4);
 
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(5, 9);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (5, 9);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(10, 14);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (10, 14);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(15, 19);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (15, 19);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(20, 24);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (20, 24);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(25,29 );
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (25,29 );
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(30, 34);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (30, 34);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(35, 39);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (35, 39);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(40, 44);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (40, 44);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(45, 49);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (45, 49);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(50, 54);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (50, 54);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(55, 59);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (55, 59);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(60,64);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (60,64);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(65, 69);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (65, 69);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(70, 74);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (70, 74);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(75, 79);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (75, 79);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(80,84);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (80,84);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(85, 89);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (85, 89);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(90, 94);
-	INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
+    (90, 94);
+    INSERT INTO `ppi_scores` ( `score_from`, `score_to`)
 VALUES
-	(95, 100);
+    (95, 100);
 
 
 
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(100) NOT NULL,
   `name` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB ;
 
 
 
  CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `likelihood_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `likelihood_id` BIGINT NOT NULL,
   `ppi_name` varchar(250) NOT NULL,
-  `enabled` int(11) NOT NULL DEFAULT '100',
+  `enabled` INT NOT NULL DEFAULT '100',
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 /**PPI permission**/

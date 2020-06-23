@@ -24,8 +24,10 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobData;
 
 public interface ReportMailingJobReadPlatformService {
+
     /**
-     * Retrieve all report mailing jobs that have the isDeleted property set to 0
+     * Retrieve all report mailing jobs that have the isDeleted property set to
+     * 0
      **/
     Page<ReportMailingJobData> retrieveAllReportMailingJobs(SearchParameters searchParameters);
 
@@ -40,7 +42,8 @@ public interface ReportMailingJobReadPlatformService {
     ReportMailingJobData retrieveReportMailingJobEnumOptions();
 
     /**
-     * Retrieve all active report mailing jobs that have their isDeleted property set to 0
+     * Retrieve all active report mailing jobs that have their isDeleted
+     * property set to 0
      **/
     Collection<ReportMailingJobData> retrieveAllActiveReportMailingJobs();
 }

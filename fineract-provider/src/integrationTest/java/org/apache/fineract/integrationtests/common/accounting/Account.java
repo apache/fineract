@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.common.accounting;
 public class Account {
 
     public enum AccountType {
+
         ASSET("1"), INCOME("4"), EXPENSE("5"), LIABILITY("2"), EQUITY("3");
 
         private final String accountValue;

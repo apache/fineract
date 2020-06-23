@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -107,7 +108,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             }
         }
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(),paramList.toArray(),
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
                 entityDataTableChecksMapper);
 
     }
@@ -151,7 +152,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
 
     }
 
-    private List<DatatableCheckStatusData> getStatusList(Integer[] statuses) {
+    private List<DatatableCheckStatusData> getStatusList(ImmutableList<Integer> statuses) {
         List<DatatableCheckStatusData> ret = new ArrayList<>();
         if (statuses != null) {
             for (Integer status : statuses) {

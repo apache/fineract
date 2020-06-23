@@ -28,6 +28,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class FixedDepositProductSheetPopulator extends AbstractWorkbookPopulator {
+
     List<FixedDepositProductData> products;
 
     private static final int ID_COL = 0;
@@ -55,59 +56,70 @@ public class FixedDepositProductSheetPopulator extends AbstractWorkbookPopulator
     private static final int IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE_COL = 22;
 
     public FixedDepositProductSheetPopulator(List<FixedDepositProductData> fixedDepositProducts) {
-        this.products =fixedDepositProducts;
+        this.products = fixedDepositProducts;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
-            int rowIndex = 1;
-            Sheet productSheet = workbook.createSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
-            setLayout(productSheet);
-            CellStyle dateCellStyle = workbook.createCellStyle();
-            short df = workbook.createDataFormat().getFormat(dateFormat);
-            dateCellStyle.setDataFormat(df);
-            for(FixedDepositProductData product : products) {
-                Row row = productSheet.createRow(rowIndex++);
-                writeLong(ID_COL, row, product.getId());
-                writeString(NAME_COL, row, product.getName().trim().replaceAll("[ )(]", "_"));
-                writeString(SHORT_NAME_COL, row, product.getShortName().trim().replaceAll("[ )(]", "_"));
-                writeBigDecimal(NOMINAL_ANNUAL_INTEREST_RATE_COL, row, product.getNominalAnnualInterestRate());
-                writeString(INTEREST_COMPOUNDING_PERIOD_COL, row, product.getInterestCompoundingPeriodType().getValue());
-                writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
-                writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
-                writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
+    public void populate(Workbook workbook, String dateFormat) {
+        int rowIndex = 1;
+        Sheet productSheet = workbook.createSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
+        setLayout(productSheet);
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        short df = workbook.createDataFormat().getFormat(dateFormat);
+        dateCellStyle.setDataFormat(df);
+        for (FixedDepositProductData product : products) {
+            Row row = productSheet.createRow(rowIndex++);
+            writeLong(ID_COL, row, product.getId());
+            writeString(NAME_COL, row, product.getName().trim().replaceAll("[ )(]", "_"));
+            writeString(SHORT_NAME_COL, row, product.getShortName().trim().replaceAll("[ )(]", "_"));
+            writeBigDecimal(NOMINAL_ANNUAL_INTEREST_RATE_COL, row, product.getNominalAnnualInterestRate());
+            writeString(INTEREST_COMPOUNDING_PERIOD_COL, row, product.getInterestCompoundingPeriodType().getValue());
+            writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
+            writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
+            writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
 
-                writeBoolean(PRECLOSURE_PENAL_APPLICABLE_COL, row, product.isPreClosurePenalApplicable());
-                writeInt(MIN_DEPOSIT_TERM_COL, row, product.getMinDepositTerm());
-                writeString(MIN_DEPOSIT_TERM_TYPE_COL, row, product.getMinDepositTermType().getValue());
+            writeBoolean(PRECLOSURE_PENAL_APPLICABLE_COL, row, product.isPreClosurePenalApplicable());
+            writeInt(MIN_DEPOSIT_TERM_COL, row, product.getMinDepositTerm());
+            writeString(MIN_DEPOSIT_TERM_TYPE_COL, row, product.getMinDepositTermType().getValue());
 
-                if(product.getMinDepositAmount() != null)
-                    writeBigDecimal(MIN_DEPOSIT_COL, row, product.getMinDepositAmount());
-                if(product.getMaxDepositAmount() != null)
-                    writeBigDecimal(MAX_DEPOSIT_COL, row, product.getMaxDepositAmount());
-                if(product.getDepositAmount() != null)
-                    writeBigDecimal(DEPOSIT_COL, row, product.getDepositAmount());
-                if(product.getMaxDepositTerm() != null)
-                    writeInt(MAX_DEPOSIT_TERM_COL, row, product.getMaxDepositTerm());
-                if(product.getInMultiplesOfDepositTerm() != null)
-                    writeInt(IN_MULTIPLES_OF_DEPOSIT_TERM_COL, row, product.getInMultiplesOfDepositTerm());
-                if(product.getPreClosurePenalInterest() != null)
-                    writeBigDecimal(PRECLOSURE_PENAL_INTEREST_COL, row, product.getPreClosurePenalInterest());
-                if(product.getMaxDepositTermType() != null)
-                    writeString(MAX_DEPOSIT_TERM_TYPE_COL, row, product.getMaxDepositTermType().getValue());
-                if(product.getPreClosurePenalInterestOnType() != null)
-                    writeString(PRECLOSURE_INTEREST_TYPE_COL, row, product.getPreClosurePenalInterestOnType().getValue());
-                if(product.getInMultiplesOfDepositTermType() != null)
-                    writeString(IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE_COL, row, product.getInMultiplesOfDepositTermType().getValue());
-
-                if(product.getLockinPeriodFrequency() != null)
-                    writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
-                if(product.getLockinPeriodFrequencyType() != null)
-                    writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
-                CurrencyData currency = product.getCurrency();
-                writeString(CURRENCY_COL, row, currency.code());
+            if (product.getMinDepositAmount() != null) {
+                writeBigDecimal(MIN_DEPOSIT_COL, row, product.getMinDepositAmount());
             }
-            productSheet.protectSheet("");
+            if (product.getMaxDepositAmount() != null) {
+                writeBigDecimal(MAX_DEPOSIT_COL, row, product.getMaxDepositAmount());
+            }
+            if (product.getDepositAmount() != null) {
+                writeBigDecimal(DEPOSIT_COL, row, product.getDepositAmount());
+            }
+            if (product.getMaxDepositTerm() != null) {
+                writeInt(MAX_DEPOSIT_TERM_COL, row, product.getMaxDepositTerm());
+            }
+            if (product.getInMultiplesOfDepositTerm() != null) {
+                writeInt(IN_MULTIPLES_OF_DEPOSIT_TERM_COL, row, product.getInMultiplesOfDepositTerm());
+            }
+            if (product.getPreClosurePenalInterest() != null) {
+                writeBigDecimal(PRECLOSURE_PENAL_INTEREST_COL, row, product.getPreClosurePenalInterest());
+            }
+            if (product.getMaxDepositTermType() != null) {
+                writeString(MAX_DEPOSIT_TERM_TYPE_COL, row, product.getMaxDepositTermType().getValue());
+            }
+            if (product.getPreClosurePenalInterestOnType() != null) {
+                writeString(PRECLOSURE_INTEREST_TYPE_COL, row, product.getPreClosurePenalInterestOnType().getValue());
+            }
+            if (product.getInMultiplesOfDepositTermType() != null) {
+                writeString(IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE_COL, row, product.getInMultiplesOfDepositTermType().getValue());
+            }
+
+            if (product.getLockinPeriodFrequency() != null) {
+                writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
+            }
+            if (product.getLockinPeriodFrequencyType() != null) {
+                writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
+            }
+            CurrencyData currency = product.getCurrency();
+            writeString(CURRENCY_COL, row, currency.code());
+        }
+        productSheet.protectSheet("");
     }
 
     private void setLayout(Sheet worksheet) {

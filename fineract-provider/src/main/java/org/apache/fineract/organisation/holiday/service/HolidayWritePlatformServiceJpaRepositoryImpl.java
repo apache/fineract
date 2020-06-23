@@ -54,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
 
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepositoryWrapper holidayRepository;
@@ -96,8 +96,8 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -130,8 +130,8 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -183,7 +183,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -192,15 +192,14 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDateParamName);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDateParamName);
         Integer reshedulingType = null;
-        if(command.parameterExists(HolidayApiConstants.reschedulingType)){
+        if (command.parameterExists(HolidayApiConstants.reschedulingType)) {
             reshedulingType = command.integerValueOfParameterNamed(HolidayApiConstants.reschedulingType);
         }
         LocalDate repaymentsRescheduledTo = null;
-        if(reshedulingType != null && reshedulingType.equals(2)){
-            repaymentsRescheduledTo = command
-                    .localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
+        if (reshedulingType != null && reshedulingType.equals(2)) {
+            repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
         }
-        if(repaymentsRescheduledTo != null){
+        if (repaymentsRescheduledTo != null) {
             this.validateInputDates(fromDate, toDate, repaymentsRescheduledTo);
         }
     }
@@ -214,13 +213,13 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(),
                     toDate.toString());
         }
-        if(repaymentsRescheduledTo != null){
+        if (repaymentsRescheduledTo != null) {
             if ((repaymentsRescheduledTo.isEqual(fromDate) || repaymentsRescheduledTo.isEqual(toDate)
                     || (repaymentsRescheduledTo.isAfter(fromDate) && repaymentsRescheduledTo.isBefore(toDate)))) {
 
                 defaultUserMessage = "Repayments rescheduled date should be before from date or after to date.";
-                throw new HolidayDateException("repayments.rescheduled.date.should.be.before.from.date.or.after.to.date", defaultUserMessage,
-                        repaymentsRescheduledTo.toString());
+                throw new HolidayDateException("repayments.rescheduled.date.should.be.before.from.date.or.after.to.date",
+                        defaultUserMessage, repaymentsRescheduledTo.toString());
             }
 
             final WorkingDays workingDays = this.daysRepositoryWrapper.findOne();
@@ -238,7 +237,8 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             // 3. Holiday should not be on an repaymentsRescheduledTo date of
             // another holiday.//TBD
 
-            // restricting repaymentsRescheduledTo date to be within 7 days range
+            // restricting repaymentsRescheduledTo date to be within 7 days
+            // range
             // before or after from date and to date.
             if (repaymentsRescheduledTo.isBefore(fromDate.minusDays(7)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(7))) {
                 defaultUserMessage = "Repayments Rescheduled to date must be within 7 days before or after from and to dates";
@@ -246,7 +246,6 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                         toDate.toString(), repaymentsRescheduledTo.toString());
             }
         }
-
 
     }
 

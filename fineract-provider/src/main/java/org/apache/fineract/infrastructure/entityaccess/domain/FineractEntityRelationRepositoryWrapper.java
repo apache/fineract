@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FineractEntityRelationRepositoryWrapper {
+public final class FineractEntityRelationRepositoryWrapper {
 
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
 
@@ -34,14 +34,15 @@ public class FineractEntityRelationRepositoryWrapper {
     }
 
     public FineractEntityRelation findOneWithNotFoundDetection(final Long id) {
-        return this.fineractEntityRelationRepository.findById(id)
-                .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
+        return this.fineractEntityRelationRepository.findById(id).orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
     }
 
     public FineractEntityRelation findOneByCodeName(final String codeName) {
-                 final FineractEntityRelation fineractEntityRelation = this.fineractEntityRelationRepository.findOneByCodeName(codeName) ;
-                 if (fineractEntityRelation == null) { throw new FineractEntityAccessNotFoundException(codeName); }
-                 return fineractEntityRelation;
-            }
+        final FineractEntityRelation fineractEntityRelation = this.fineractEntityRelationRepository.findOneByCodeName(codeName);
+        if (fineractEntityRelation == null) {
+            throw new FineractEntityAccessNotFoundException(codeName);
+        }
+        return fineractEntityRelation;
+    }
 
 }

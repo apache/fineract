@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.group.data;
 
 import java.util.Collection;
 
-public class StaffCenterData {
+public final class StaffCenterData {
 
     private final Long staffId;
     @SuppressWarnings("unused")

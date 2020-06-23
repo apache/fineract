@@ -59,8 +59,6 @@ public class ClientEnumerations {
                 optionData = new EnumOptionData(ClientStatus.TRANSFER_ON_HOLD.getValue().longValue(),
                         ClientStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
             break;
-            default:
-            break;
         }
 
         return optionData;
@@ -71,8 +69,7 @@ public class ClientEnumerations {
     }
 
     public static EnumOptionData legalForm(final LegalForm legalForm) {
-        final EnumOptionData optionData = new EnumOptionData(legalForm.getValue().longValue(), legalForm.getCode(),
-                legalForm.toString());
+        final EnumOptionData optionData = new EnumOptionData(legalForm.getValue().longValue(), legalForm.getCode(), legalForm.toString());
         return optionData;
     }
 

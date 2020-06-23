@@ -34,8 +34,8 @@ public class ShareProductDividentPayOutDetailsRepositoryWrapper {
     }
 
     public ShareProductDividendPayOutDetails findOneWithNotFoundDetection(final Long dividendId) {
-        return this.shareProductDividentPayOutDetailsRepository
-                .findById(dividendId).orElseThrow(() -> new DividendNotFoundException(dividendId, "share"));
+        return this.shareProductDividentPayOutDetailsRepository.findById(dividendId)
+                .orElseThrow(() -> new DividendNotFoundException(dividendId, "share"));
     }
 
     public void save(final ShareProductDividendPayOutDetails shareProductDividendPayOutDetails) {

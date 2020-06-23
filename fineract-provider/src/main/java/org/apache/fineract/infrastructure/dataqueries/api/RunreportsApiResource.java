@@ -62,10 +62,8 @@ import org.springframework.stereotype.Component;
 @Path("/runreports")
 @Component
 @Scope("singleton")
-@Api(tags = {"Run Reports"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Run Reports", description = "")
-})
+@Api(tags = { "Run Reports" })
+@SwaggerDefinition(tags = { @Tag(name = "Run Reports", description = "") })
 public class RunreportsApiResource {
 
     private final PlatformSecurityContext context;
@@ -89,9 +87,25 @@ public class RunreportsApiResource {
     @Path("{reportName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
-    @ApiOperation(value = "Running a Report", notes = "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n" + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n" + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n" + "\n" + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n" + "\n" + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n" + "\n" +
-            "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n" + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n" + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n" + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = RunreportsApiResourceSwagger.GetReportNameResponse.class)})
+    @ApiOperation(value = "Running a Report", notes = "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n"
+            + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n"
+            + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n"
+            + "\n"
+            + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n"
+            + "\n"
+            + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n"
+            + "\n" + "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n"
+            + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n"
+            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n"
+            + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n"
+            + "\n" + "\n"
+            + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = RunreportsApiResourceSwagger.GetReportNameResponse.class) })
     public Response runReport(@PathParam("reportName") @ApiParam(value = "reportName") final String reportName,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("isSelfServiceUserReport") @ApiParam(value = "isSelfServiceUserReport") final boolean isSelfServiceUserReport) {
@@ -110,7 +124,9 @@ public class RunreportsApiResource {
             parameterTypeValue = "report";
             String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
             ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
-            if (reportingProcessService != null) { return reportingProcessService.processRequest(reportName, queryParams); }
+            if (reportingProcessService != null) {
+                return reportingProcessService.processRequest(reportName, queryParams);
+            }
         } else {
             parameterTypeValue = "parameter";
         }
@@ -119,8 +135,8 @@ public class RunreportsApiResource {
 
         if (exportPdf) {
             final Map<String, String> reportParams = getReportParams(queryParams);
-            final String pdfFileName = this.readExtraDataAndReportingService
-                    .retrieveReportPDF(reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
+            final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
+                    isSelfServiceUserReport);
 
             final File file = new File(pdfFileName);
 
@@ -156,8 +172,8 @@ public class RunreportsApiResource {
 
         // CSV Export
         final Map<String, String> reportParams = getReportParams(queryParams);
-        final StreamingOutput result = this.readExtraDataAndReportingService
-                .retrieveReportCSV(reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
+        final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
+                isSelfServiceUserReport);
 
         return Response.ok().entity(result).type("text/csv")
                 .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
@@ -169,8 +185,9 @@ public class RunreportsApiResource {
         // (dropdown listbox) values.
         if (!parameterType) {
             final AppUser currentUser = this.context.authenticatedUser();
-            if (currentUser.hasNotPermissionForReport(reportName)) { throw new NoAuthorizationException("Not authorised to run report: "
-                    + reportName); }
+            if (currentUser.hasNotPermissionForReport(reportName)) {
+                throw new NoAuthorizationException("Not authorised to run report: " + reportName);
+            }
         }
     }
 

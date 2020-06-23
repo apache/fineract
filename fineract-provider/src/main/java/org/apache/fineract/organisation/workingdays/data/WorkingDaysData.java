@@ -37,7 +37,8 @@ public class WorkingDaysData {
     @SuppressWarnings("unused")
     private final Collection<EnumOptionData> repaymentRescheduleOptions;
 
-    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType, Boolean extendTermForDailyRepayments, Boolean extendTermForRepaymentsOnHolidays) {
+    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType, Boolean extendTermForDailyRepayments,
+            Boolean extendTermForRepaymentsOnHolidays) {
         this.id = id;
         this.recurrence = recurrence;
         this.repaymentRescheduleType = repaymentRescheduleType;
@@ -47,7 +48,8 @@ public class WorkingDaysData {
     }
 
     public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType,
-            Collection<EnumOptionData> repaymentRescheduleOptions, Boolean extendTermForDailyRepayments, Boolean extendTermForRepaymentsOnHolidays) {
+            Collection<EnumOptionData> repaymentRescheduleOptions, Boolean extendTermForDailyRepayments,
+            Boolean extendTermForRepaymentsOnHolidays) {
         this.id = id;
         this.recurrence = recurrence;
         this.repaymentRescheduleType = repaymentRescheduleType;

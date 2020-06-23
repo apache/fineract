@@ -76,8 +76,8 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
 
             sql += " and ci.id = ?";
 
-            final ClientIdentifierData clientIdentifierData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId,
-                    hierarchySearchString, clientIdentifierId });
+            final ClientIdentifierData clientIdentifierData = this.jdbcTemplate.queryForObject(sql, rm,
+                    new Object[] { clientId, hierarchySearchString, clientIdentifierId });
 
             return clientIdentifierData;
         } catch (final EmptyResultDataAccessException e) {

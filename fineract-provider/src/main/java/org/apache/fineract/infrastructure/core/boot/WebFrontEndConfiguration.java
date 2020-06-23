@@ -27,11 +27,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebFrontEndConfiguration implements WebMvcConfigurer {
 
+    private static final String[] CLASSPATH_RESOURCE_LOCATIONS = { "classpath:/static/", "classpath:/public/" };
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/apps/**").addResourceLocations("file:" +
-                System.getProperty("user.dir") + System.getProperty("file.separator") +
-                "apps" + System.getProperty("file.separator"));
-    }
+        if (!registry.hasMappingForPattern("/**")) {
+            registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+        }
 
+        // TODO: The below path should be version agnostic
+        String[] SWAGGER_RESOURCE_LOCATIONS = { "classpath:/static/swagger-ui/",
+                "classpath:/META-INF/resources/webjars/swagger-ui-dist/3.26.0/" };
+
+        registry.addResourceHandler("/swagger-ui/**").addResourceLocations(SWAGGER_RESOURCE_LOCATIONS);
+    }
 }

@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class TaxComponentApiResourceSwagger {
-    private TaxComponentApiResourceSwagger() {
-    }
+
+    private TaxComponentApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesComponentsResponse")
-    public final static class GetTaxesComponentsResponse {
-        private GetTaxesComponentsResponse() {
-        }
+    public static final class GetTaxesComponentsResponse {
 
-        final class GetTaxesComponentsCreditAccountType {
-            private GetTaxesComponentsCreditAccountType() {
-            }
+        private GetTaxesComponentsResponse() {}
+
+        static final class GetTaxesComponentsCreditAccountType {
+
+            private GetTaxesComponentsCreditAccountType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -47,9 +47,9 @@ final class TaxComponentApiResourceSwagger {
             public String value;
         }
 
-        final class GetTaxesComponentsCreditAccount {
-            private GetTaxesComponentsCreditAccount() {
-            }
+        static final class GetTaxesComponentsCreditAccount {
+
+            private GetTaxesComponentsCreditAccount() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -59,9 +59,9 @@ final class TaxComponentApiResourceSwagger {
             public String glCode;
         }
 
-        final class GetTaxesComponentsHistories {
-            private GetTaxesComponentsHistories() {
-            }
+        static final class GetTaxesComponentsHistories {
+
+            private GetTaxesComponentsHistories() {}
         }
 
         @ApiModelProperty(example = "1")
@@ -78,9 +78,9 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesComponentsRequest")
-    public final static class PostTaxesComponentsRequest {
-        private PostTaxesComponentsRequest() {
-        }
+    public static final class PostTaxesComponentsRequest {
+
+        private PostTaxesComponentsRequest() {}
 
         @ApiModelProperty(example = "tax component 1")
         public String name;
@@ -99,18 +99,18 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesComponentsResponse")
-    public final static class PostTaxesComponentsResponse {
-        private PostTaxesComponentsResponse() {
-        }
+    public static final class PostTaxesComponentsResponse {
+
+        private PostTaxesComponentsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdRequest")
-    public final static class PutTaxesComponentsTaxComponentIdRequest {
-        private PutTaxesComponentsTaxComponentIdRequest() {
-        }
+    public static final class PutTaxesComponentsTaxComponentIdRequest {
+
+        private PutTaxesComponentsTaxComponentIdRequest() {}
 
         @ApiModelProperty(example = "tax component 2")
         public String name;
@@ -125,13 +125,13 @@ final class TaxComponentApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdResponse")
-    public final static class PutTaxesComponentsTaxComponentIdResponse {
-        private PutTaxesComponentsTaxComponentIdResponse() {
-        }
+    public static final class PutTaxesComponentsTaxComponentIdResponse {
 
-        final class PutTaxesComponentsChanges {
-            private PutTaxesComponentsChanges() {
-            }
+        private PutTaxesComponentsTaxComponentIdResponse() {}
+
+        static final class PutTaxesComponentsChanges {
+
+            private PutTaxesComponentsChanges() {}
 
             @ApiModelProperty(example = "15")
             public Float percentage;

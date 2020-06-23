@@ -24,10 +24,13 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class HolidayHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HolidayHelper.class);
     private static final String HOLIDAYS_URL = "/fineract-provider/api/v1/holidays";
     private static final String CREATE_HOLIDAY_URL = HOLIDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
 
@@ -57,14 +60,14 @@ public class HolidayHelper {
         map.put("repaymentsRescheduledTo", "08 April 2013");
         map.put("reschedulingType", 2);
         String HolidayCreateJson = new Gson().toJson(map);
-        System.out.println(HolidayCreateJson);
+        LOG.info("{}", HolidayCreateJson);
         return HolidayCreateJson;
     }
 
     public static String getActivateHolidayDataAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         String activateHoliday = new Gson().toJson(map);
-        System.out.println(activateHoliday);
+        LOG.info("{}", activateHoliday);
         return activateHoliday;
     }
 
@@ -72,7 +75,8 @@ public class HolidayHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOLIDAY_URL, getCreateHolidayDataAsJSON(), "resourceId");
     }
 
-    public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String holidayID) {
+    public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String holidayID) {
         final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
     }
@@ -80,7 +84,7 @@ public class HolidayHelper {
     public static HashMap getHolidayById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String holidayID) {
         final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
+        LOG.info("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_HOLIDAY_BY_ID_URL, "");
         return response;
     }

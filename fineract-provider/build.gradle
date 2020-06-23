@@ -43,13 +43,13 @@ buildscript {
         // below
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.3.1'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.8"
-        // Use Guava version 23+ as a workaround to spotbug intergration.
-        // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
-        classpath 'com.google.guava:guava:28.1-jre'
+        classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.1"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:4.4.0"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.2"
     }
 }
 
@@ -70,7 +70,9 @@ apply plugin: 'checkstyle'
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 apply plugin: 'jacoco'
 apply plugin: "com.gorylenko.gradle-git-properties"
-// apply plugin: 'pmd'
+apply plugin: "net.ltgt.errorprone"
+apply plugin: "com.diffplug.gradle.spotless"
+apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 
 dependencyManagement {
     imports {
@@ -81,40 +83,48 @@ dependencyManagement {
         // As much as possible, we avoid fixed versions, and prefer inheriting them from the Spring BOM, thus NOT listing versions here.
         // (The :+ seems to mean latest available version available on Maven Central, which we should also avoid, as it's not isolated?)
 
-        dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
+        dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
         dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
         dependency 'com.squareup.retrofit:retrofit:1.9.0'
-        dependency 'com.squareup.okhttp:okhttp:2.0.0'
-        dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
-        dependency 'com.google.code.gson:gson:+'
-        dependency 'com.google.guava:guava:28.1-jre'
+        dependency 'com.squareup.okhttp:okhttp:2.7.5'
+        dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
+        dependency 'com.google.code.gson:gson:2.8.6'
         dependency 'org.apache.commons:commons-email:1.5'
-        dependency 'org.apache.commons:commons-io:+'
+        dependency 'commons-io:commons-io:2.7'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-        dependency 'com.lowagie:itext:2.1.7'
-        dependency 'com.lowagie:itext-rtf:2.1.7'
-        dependency 'org.mnode.ical4j:ical4j:1.0.7'
-        dependency 'com.googlecode.flyway:flyway-core:2.1.1'
-        dependency 'org.quartz-scheduler:quartz:+'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
-        dependency 'net.sf.ehcache:ehcache:+'
-        dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
-        dependency 'com.jayway.jsonpath:json-path:0.9.1'
+        dependency 'com.github.librepdf:openpdf:1.3.19'
+        dependency 'org.mnode.ical4j:ical4j:3.0.19'
+        dependency 'org.flywaydb:flyway-core:6.4.4'
+        dependency 'org.quartz-scheduler:quartz:2.3.2'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.804'
+        dependency 'org.ehcache:ehcache:3.8.1'
+        dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
+        dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
-        dependency 'org.apache.httpcomponents:httpclient:+'
+        dependency 'org.apache.httpcomponents:httpclient:4.5.12'
         dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-        dependency 'org.apache.activemq:activemq-broker:+'
+        dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+        dependency 'org.apache.activemq:activemq-broker:5.15.13'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
-        dependency 'junit:junit:+'
-        dependency 'org.mockito:mockito-core:+'
-        dependency 'com.mockrunner:mockrunner-jms:2.0.4'
-        dependency 'io.github.classgraph:classgraph:4.8.78'
-        dependency 'org.dom4j:dom4j:2.1.0'
-        dependency 'nekohtml:nekohtml:1.9.6.2'
-		dependency 'org.awaitility:awaitility:4.0.2'
+        dependency 'org.mockito:mockito-core:3.3.3'
+        dependency 'org.mockito:mockito-junit-jupiter:3.3.3'
+        dependency 'io.github.classgraph:classgraph:4.8.86'
+        dependency 'org.awaitility:awaitility:4.0.3'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
+        dependency 'javax.cache:cache-api:1.1.1'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.10'
+
+        // If this is upgraded, you need to change path in WebFrontEndConfiguration
+        dependency 'org.webjars.npm:swagger-ui-dist:3.27.0'
+
+        dependency ('org.dom4j:dom4j:2.1.3') {
+            exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
+            // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
+            exclude 'xpp3:xpp3'
+            exclude 'pull-parser:pull-parser'
+        }
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
@@ -151,8 +161,22 @@ project.ext.mysqlPassword='mysql'
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
 repositories {
-	jcenter()
-	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+    jcenter()
+    // mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+}
+
+// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+// set the classes directory to point to Eclipse's default build directory
+if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
+{
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "bin/main")
+}
+
+eclipse
+{
+    project {
+        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+    }
 }
 
 openjpa {
@@ -162,9 +186,22 @@ openjpa {
     }
 }
 
+// Configuration for Swagger documentation generation task
+// https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
+resolve {
+    outputFileName = 'fineract'
+    outputFormat = 'JSON'
+    prettyPrint = 'TRUE'
+    classpath = sourceSets.main.runtimeClasspath
+    outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
+}
+
+// Configuration for JaCoCo code coverage task
+// https://www.eclemma.org/jacoco/
 jacoco {
     toolVersion = jacocoVersion
     reportsDir = file("$buildDir/reports/jacoco")
+
 }
 
 jacocoTestReport{
@@ -175,14 +212,62 @@ jacocoTestReport{
     }
 }
 
+spotless {
+  format 'misc', {
+   target '**/*.md', '**/*.properties', '**/*.gradle', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
+   targetExclude '**/build/**', '**/bin/**', '**/.settings/**'
+   indentWithSpaces(4)
+   endWithNewline()
+   trimTrailingWhitespace()
+  }
+
+  java {
+    importOrder() //sort imports alphabetically
+    removeUnusedImports()
+    eclipse().configFile '../config/fineractdev-formatter.xml'
+    endWithNewline()
+    trimTrailingWhitespace()
+
+    // Enforce style modifier order
+      custom 'Modifier ordering', {
+        def modifierRanking = [
+                public      : 1,
+                protected   : 2,
+                private     : 3,
+                abstract    : 4,
+                default     : 5,
+                static      : 6,
+                final       : 7,
+                transient   : 8,
+                volatile    : 9,
+                synchronized: 10,
+                native      : 11,
+                strictfp    : 12]
+        // Find any instance of multiple modifiers. Lead with a non-word character to avoid
+        // accidental matching against for instance, "an alternative default value"
+        it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+          // Do not replace the leading non-word character.  Identify the modifiers
+          it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+            // Sort the modifiers according to the ranking above
+            it.split().sort({ modifierRanking[it] }).join(' ') + ' '
+          }
+          )
+        }
+        )
+      }
+
+  }
+
+    lineEndings 'UNIX'
+}
+
+// Configuration for Apache Release Audit Tool task
+// https://github.com/eskatos/creadur-rat-gradle
 rat {
-    xmlOutput = false
-    htmlOutput = false
-    plainOutput = true
     verbose = false
-    // inputDir = './..'
     reportDir = new File(buildDir,'reports/rat')
     excludes = [
+        '**/*.launch',
         '**/licenses/**',
         '**/*.md',
         '**/*.github/**',
@@ -208,7 +293,7 @@ rat {
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
         // Swagger License
-        '**/src/main/resources/swagger-ui/**',
+        '**/src/main/resources/static/swagger-ui/**',
         // gradle
         '**/.gradle/**',
         '**/gradlew',
@@ -262,30 +347,133 @@ rat {
 }
 
 configurations {
-	providedRuntime // needed for Spring Boot executable WAR
+    providedRuntime // needed for Spring Boot executable WAR
     providedCompile
-	compile() {
-		exclude module: 'hibernate-entitymanager'
-		exclude module: 'hibernate-validator'
-		exclude module: 'activation'
-		exclude module: 'bcmail-jdk14'
-		exclude module: 'bcprov-jdk14'
-		exclude module: 'bctsp-jdk14'
-		exclude module: 'c3p0'
-		exclude module: 'stax-api'
-		exclude module: 'jaxb-api'
-		exclude module: 'jaxb-impl'
-		exclude module: 'jboss-logging'
-		exclude module: 'itext-rtf'
-		exclude module: 'classworlds'
-	}
-	runtime
-	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
+    compile() {
+        exclude module: 'hibernate-entitymanager'
+        exclude module: 'hibernate-validator'
+        exclude module: 'activation'
+        exclude module: 'bcmail-jdk14'
+        exclude module: 'bcprov-jdk14'
+        exclude module: 'bctsp-jdk14'
+        exclude module: 'c3p0'
+        exclude module: 'stax-api'
+        exclude module: 'jaxb-api'
+        exclude module: 'jaxb-impl'
+        exclude module: 'jboss-logging'
+        exclude module: 'itext-rtf'
+        exclude module: 'classworlds'
+    }
+    runtime
+    all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:unchecked'
+    options.compilerArgs += ["-Xlint:unchecked","-Xlint:cast","-Xlint:auxiliaryclass","-Xlint:deprecation",
+                             "-Xlint:dep-ann","-Xlint:divzero","-Xlint:empty","-Xlint:exports","-Xlint:fallthrough",
+                             "-Xlint:finally","-Xlint:module","-Xlint:opens","-Xlint:options","-Xlint:overloads",
+                             "-Xlint:overrides","-Xlint:path","-Xlint:processing","-Xlint:removal",
+                             "-Xlint:requires-automatic","-Xlint:requires-transitive-automatic","-Xlint:try",
+                             "-Xlint:varargs","-Xlint:preview","-Xlint:static","-Werror"]
+                            // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
+
     options.deprecation = true
+    options.errorprone {
+        disableWarningsInGeneratedCode = true
+        //Todo Remove necessary checks from this list
+        disable(
+                "UnusedVariable",
+                "SameNameButDifferent",
+                "UnusedMethod",
+                "ModifiedButNotUsed",
+                "TypeParameterUnusedInFormals",
+                "UnusedNestedClass",
+                "UndefinedEquals",
+                "JdkObsolete",
+                "EmptyBlockTag",
+                "MissingSummary",
+                "MutablePublicArray",
+                "InvalidParam",
+                "ReturnFromVoid",
+                "AlmostJavadoc",
+                "PublicConstructorForAbstractClass",
+                "ProtectedMembersInFinalClass",
+                "StaticAssignmentInConstructor",
+                "UnescapedEntity",
+                "InvalidBlockTag",
+                "ModifyCollectionInEnhancedForLoop",
+                "NonCanonicalType",
+                "InvalidInlineTag",
+        )
+        //TODO gradually enable these checks
+        error(
+                "DefaultCharset",
+                "RemoveUnusedImports",
+                "WaitNotInLoop",
+                "ThreeLetterTimeZoneID",
+                "VariableNameSameAsType",
+                "UnnecessaryParentheses",
+                "MultipleTopLevelClasses",
+                "MixedMutabilityReturnType",
+                "MultiVariableDeclaration",
+                "AssertEqualsArgumentOrderChecker",
+                "EmptySetMultibindingContributions",
+                "BigDecimalEquals",
+                "MixedArrayDimensions",
+                "PackageLocation",
+                "UseBinds",
+                "BadImport",
+                "IntLongMath",
+                "FloatCast",
+                "ReachabilityFenceUsage",
+                "StreamResourceLeak",
+                "TruthIncompatibleType",
+                "ByteBufferBackingArray",
+                "OrphanedFormatString",
+                "CatchAndPrintStackTrace",
+                "ObjectToString",
+                "StringSplitter",
+                "AssertThrowsMultipleStatements",
+                "BoxedPrimitiveConstructor",
+                "EmptyCatch",
+                "BoxedPrimitiveEquality",
+                "SynchronizeOnNonFinalField",
+                "WildcardImport",
+                "FutureReturnValueIgnored",
+                "PrivateConstructorForNoninstantiableModule",
+                "ClassCanBeStatic",
+                "ClassNewInstance",
+                "UnnecessaryStaticImport",
+                "UnsafeFinalization",
+                "JodaPlusMinusLong",
+                "MutableMethodReturnType",
+                "SwitchDefault",
+                "VarTypeName",
+                "ArgumentSelectionDefectChecker",
+                "CompareToZero",
+                "InjectOnConstructorOfAbstractClass",
+                "ImmutableEnumChecker",
+                "NarrowingCompoundAssignment",
+                "MissingCasesInEnumSwitch",
+                "ReferenceEquality",
+                "OperatorPrecedence",
+                "EqualsGetClass",
+                "EqualsUnsafeCast",
+                "DoubleBraceInitialization",
+                "UnnecessaryDefaultInEnumSwitch",
+                "InconsistentCapitalization",
+                "MissingOverride",
+//                "InvalidBlockTag",
+//                "InconsistentOverloads",
+//                "MethodCanBeStatic",
+//                "Var",
+//                "ConstantField",
+//                "UnnecessaryDefaultInEnumSwitch",
+//                "FieldCanBeFinal"
+        )
+    }
+    options.compilerArgs +=["-Xmaxwarns",1500,"-Xmaxerrs",1500]
+
 }
 
 apply from: 'dependencies.gradle'
@@ -339,7 +527,8 @@ modernizer {
 
     ignorePackages = []
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom'
+        '.*AbstractPersistableCustom',
+        '.*EntityTables'
     ]
     ignoreGeneratedClasses = true
 
@@ -350,45 +539,10 @@ modernizer {
     ]
 }
 
-task dist(type:Zip){
-	baseName = 'fineractplatform'
-	version = qualifyVersionIfNecessary(releaseVersion)
-    includeEmptyDirs = true
-	from('../') {
-		fileMode = 0755
-		include '*.md'
-	}
-    from('src/main/dist') {
-        fileMode = 0755
-        include '*'
-    }
-	from('../apps') {
-		fileMode = 0755
-        include '**/*'
-		into('apps')
-	}
-    from('../api-docs/') {
-        fileMode = 0755
-        include '*'
-        into('api-docs')
-    }
-    from('../fineract-db/') {
-        fileMode = 0755
-        include '*.sql'
-        into('database')
-    }
-    from('src/main/resources/sql/migrations') {
-        fileMode = 0755
-        include '**/*'
-        into('database/migrations')
-    }
-
-    from war.outputs.files
-    into(baseName + '-' + version)
-}
-
 compileJava{
     dependsOn rat
+    dependsOn spotlessCheck
+    finalizedBy resolve
 }
 /*
 pmd {
@@ -397,21 +551,21 @@ pmd {
 */
 
 war {
-	from('../licenses/binary/') { // notice the parens
-		into "WEB-INF/licenses/binary/" // no leading slash
-	}
-	from('../LICENSE_RELEASE') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
-	from('../NOTICE_RELEASE') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
-	rename ('LICENSE_RELEASE', 'LICENSE')
-	rename ('NOTICE_RELEASE', 'NOTICE')
+    from('../licenses/binary/') { // notice the parens
+        into "WEB-INF/licenses/binary/" // no leading slash
+    }
+    from('../LICENSE_RELEASE') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    from('../NOTICE_RELEASE') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    rename ('LICENSE_RELEASE', 'LICENSE')
+    rename ('NOTICE_RELEASE', 'NOTICE')
 
-	from('../DISCLAIMER') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
+    from('../DISCLAIMER') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
     war.finalizedBy(bootWar)
 }
 
@@ -423,7 +577,8 @@ license {
         "**/*.mustache",
         "**/package-info.java",
         "**/keystore.jks",
-        "**/swagger-ui/**",
+        "**/static/swagger-ui/**",
+        "**/api-docs/**",
     ])
     strictCheck true
 }
@@ -439,9 +594,12 @@ configurations
 }
 
 dependencies {
-  tomcat "org.apache.tomcat:tomcat:9.0.34@zip"
+  tomcat "org.apache.tomcat:tomcat:9.0.36@zip"
 }
 
+dependencies {
+    errorprone "com.google.errorprone:error_prone_core:2.4.0"
+}
 cargo {
   containerId "tomcat9x"
 
@@ -451,7 +609,7 @@ cargo {
       downloadDir = file("$buildDir/download")
       extractDir = file("$buildDir/tomcat")
     }
-
+    startStopTimeout = 240000
     containerProperties {
       property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
       property 'cargo.tomcat.connector.keystorePass', 'openmf'
@@ -466,6 +624,8 @@ cargo {
 
 cargoRunLocal.dependsOn bootWar
 cargoStartLocal.dependsOn bootWar
+cargoStartLocal.mustRunAfter "integrationTestClasses"
+cargoStartLocal.mustRunAfter "enhance"
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
@@ -490,7 +650,7 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 
 sourceSets {
  integrationTest {
-    	compileClasspath += main.output + test.output
+        compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
     }
 }
@@ -510,19 +670,22 @@ task integrationTest(type:Test) {
 }
 
 integrationTest {
-	testLogging { // FINERACT-927
-		events "skipped", "failed"
-		showStandardStreams = false
-		exceptionFormat "full"
-	}
+    useJUnitPlatform()
+    testLogging { // FINERACT-927
+        events "skipped", "failed"
+        showStandardStreams = false
+        exceptionFormat "full"
+    }
 }
 test {
-	testLogging { // FINERACT-927
-		events "skipped", "failed"
-		showStandardStreams = false
-		exceptionFormat "full"
-	}
+    useJUnitPlatform()
+    testLogging { // FINERACT-927
+        events "skipped", "failed"
+        showStandardStreams = false
+        exceptionFormat "full"
+    }
 }
+
 
 import groovy.sql.Sql
 
@@ -534,8 +697,8 @@ configurations {
 }
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.32'
-    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.36.0'
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.33'
+    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -566,36 +729,23 @@ task setBlankPassword {
     }
 }
 
-
-/*
-* Support publication of artifacts versioned by topic branch.
-* CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
-* If <TOPIC> starts with 'MIFOSX-', change version
-* from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
-* e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.MIFOSX-1234-SNAPSHOT
-*/
-def qualifyVersionIfNecessary(version) {
-
-	if (rootProject.hasProperty("BRANCH_NAME")) {
-		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("MIFOSX-")) {
-			return version.replace('BUILD', qualifier)
-		}
-	}
-	return version
-}
-
 springBoot {
     mainClassName = 'org.apache.fineract.ServerApplication'
 }
 
 bootWar {
     mainClassName = 'org.apache.fineract.ServerApplication'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // To generate an HTML report instead of XML
 spotbugs {
     reportLevel = 'high'
+    showProgress = true
 }
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
 spotbugsMain {

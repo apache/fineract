@@ -27,8 +27,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class AccountNumberFormatNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public AccountNumberFormatNotFoundException(final Long id) {
-        super(AccountNumberFormatConstants.EXCEPTION_ACCOUNT_NUMBER_FORMAT_NOT_FOUND, "AccountNumber format with identifier " + id
-                + " does not exist", id);
+        super(AccountNumberFormatConstants.EXCEPTION_ACCOUNT_NUMBER_FORMAT_NOT_FOUND,
+                "AccountNumber format with identifier " + id + " does not exist", id);
     }
 
 }

@@ -28,9 +28,9 @@ import java.util.Collections;
 import org.apache.fineract.integrationtests.common.CurrenciesHelper;
 import org.apache.fineract.integrationtests.common.CurrencyDomain;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class CurrenciesTest {
@@ -38,7 +38,7 @@ public class CurrenciesTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -52,13 +52,13 @@ public class CurrenciesTest {
         CurrencyDomain currency = CurrenciesHelper.getCurrencybyCode(requestSpec, responseSpec, "USD");
         CurrencyDomain usd = CurrencyDomain.create("USD", "US Dollar", 2, "$", "currency.USD", "US Dollar ($)").build();
 
-        Assert.assertTrue(currency.getDecimalPlaces() >= 0);
-        Assert.assertNotNull(currency.getName());
-        Assert.assertNotNull(currency.getDisplaySymbol());
-        Assert.assertNotNull(currency.getDisplayLabel());
-        Assert.assertNotNull(currency.getNameCode());
+        Assertions.assertTrue(currency.getDecimalPlaces() >= 0);
+        Assertions.assertNotNull(currency.getName());
+        Assertions.assertNotNull(currency.getDisplaySymbol());
+        Assertions.assertNotNull(currency.getDisplayLabel());
+        Assertions.assertNotNull(currency.getNameCode());
 
-        Assert.assertEquals(usd, currency);
+        Assertions.assertEquals(usd, currency);
     }
 
     @Test
@@ -73,12 +73,11 @@ public class CurrenciesTest {
         currenciestoUpdate.add("USD");
         currenciestoUpdate.add("INR");
 
-
         ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec,
                 currenciestoUpdate);
-        Assert.assertNotNull(currenciesOutput);
+        Assertions.assertNotNull(currenciesOutput);
 
-        Assert.assertEquals("Verifying Do Outputed Currencies Match after Updation", currenciestoUpdate, currenciesOutput);
+        Assertions.assertEquals(currenciestoUpdate, currenciesOutput, "Verifying Do Outputed Currencies Match after Updation");
 
         // Test that output matches updation
         ArrayList<CurrencyDomain> currenciesBeforeUpdate = new ArrayList<CurrencyDomain>();
@@ -88,8 +87,8 @@ public class CurrenciesTest {
         Collections.sort(currenciesBeforeUpdate);
 
         ArrayList<CurrencyDomain> currenciesAfterUpdate = CurrenciesHelper.getSelectedCurrencies(requestSpec, responseSpec);
-        Assert.assertNotNull(currenciesAfterUpdate);
+        Assertions.assertNotNull(currenciesAfterUpdate);
 
-        Assert.assertEquals("Verifying Do Selected Currencies Match after Updation", currenciesBeforeUpdate, currenciesAfterUpdate);
+        Assertions.assertEquals(currenciesBeforeUpdate, currenciesAfterUpdate, "Verifying Do Selected Currencies Match after Updation");
     }
 }

@@ -45,14 +45,12 @@ import org.springframework.stereotype.Component;
 @Path("/mixtaxonomy")
 @Component
 @Scope("singleton")
-@Api(tags = {"Mix Taxonomy"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Mix Taxonomy", description = "")
-})
+@Api(tags = { "Mix Taxonomy" })
+@SwaggerDefinition(tags = { @Tag(name = "Mix Taxonomy", description = "") })
 public class MixTaxonomyApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("taxonomyId", "name", "namespace", "dimension",
-            "description"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("taxonomyId", "name", "namespace", "dimension", "description"));
 
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<MixTaxonomyData> toApiJsonSerializer;

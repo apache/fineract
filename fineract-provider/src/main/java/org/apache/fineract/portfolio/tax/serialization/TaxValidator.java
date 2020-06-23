@@ -52,19 +52,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaxValidator {
 
-    final Set<String> supportedTaxComponentCreateParameters = new HashSet<>(Arrays.asList("dateFormat", "locale",
-            TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName,
-            TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAcountIdParamName, TaxApiConstants.creditAccountTypeParamName,
-            TaxApiConstants.creditAcountIdParamName));
+    final Set<String> supportedTaxComponentCreateParameters = new HashSet<>(
+            Arrays.asList("dateFormat", "locale", TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
+                    TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAcountIdParamName,
+                    TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAcountIdParamName));
 
     final Set<String> supportedTaxComponentUpdateParameters = new HashSet<>(Arrays.asList("dateFormat", "locale",
             TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
 
-    final Set<String> supportedTaxGroupParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", TaxApiConstants.nameParamName,
-            TaxApiConstants.taxComponentsParamName));
+    final Set<String> supportedTaxGroupParameters = new HashSet<>(
+            Arrays.asList("dateFormat", "locale", TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
 
-    final Set<String> supportedTaxGroupTaxComponentsCreateParameters = new HashSet<>(Arrays.asList(TaxApiConstants.taxComponentIdParamName,
-            TaxApiConstants.startDateParamName));
+    final Set<String> supportedTaxGroupTaxComponentsCreateParameters = new HashSet<>(
+            Arrays.asList(TaxApiConstants.taxComponentIdParamName, TaxApiConstants.startDateParamName));
 
     final Set<String> supportedTaxGroupTaxComponentsUpdateParameters = new HashSet<>(Arrays.asList(TaxApiConstants.idParamName,
             TaxApiConstants.taxComponentIdParamName, TaxApiConstants.startDateParamName, TaxApiConstants.endDateParamName));
@@ -77,7 +77,9 @@ public class TaxValidator {
     }
 
     public void validateForTaxComponentCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxComponentCreateParameters);
@@ -96,11 +98,7 @@ public class TaxValidator {
 
         final Integer debitAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.debitAccountTypeParamName,
                 element);
-        baseDataValidator
-                .reset()
-                .parameter(TaxApiConstants.debitAccountTypeParamName)
-                .value(debitAccountType)
-                .ignoreIfNull()
+        baseDataValidator.reset().parameter(TaxApiConstants.debitAccountTypeParamName).value(debitAccountType).ignoreIfNull()
                 .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
                         GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
 
@@ -113,11 +111,7 @@ public class TaxValidator {
 
         final Integer creditAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.creditAccountTypeParamName,
                 element);
-        baseDataValidator
-                .reset()
-                .parameter(TaxApiConstants.creditAccountTypeParamName)
-                .value(creditAccountType)
-                .ignoreIfNull()
+        baseDataValidator.reset().parameter(TaxApiConstants.creditAccountTypeParamName).value(creditAccountType).ignoreIfNull()
                 .isOneOfTheseValues(GLAccountType.ASSET.getValue(), GLAccountType.LIABILITY.getValue(), GLAccountType.EQUITY.getValue(),
                         GLAccountType.INCOME.getValue(), GLAccountType.EXPENSE.getValue());
 
@@ -131,7 +125,9 @@ public class TaxValidator {
     }
 
     public void validateForTaxComponentUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxComponentUpdateParameters);
@@ -162,7 +158,9 @@ public class TaxValidator {
     }
 
     public void validateForTaxGroupCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxGroupParameters);
@@ -198,7 +196,9 @@ public class TaxValidator {
     }
 
     public void validateForTaxGroupUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxGroupParameters);
@@ -228,20 +228,16 @@ public class TaxValidator {
                             supportedTaxGroupTaxComponentsUpdateParameters);
                     final Long taxComponentId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
                             taxComponent);
-                    final Long taxMappingId = this.fromApiJsonHelper
-                            .extractLongNamed(TaxApiConstants.taxComponentIdParamName, taxComponent);
+                    final Long taxMappingId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
+                            taxComponent);
                     if (taxMappingId == null) {
-                        baseDataValidator
-                                .reset()
-                                .parameter(
-                                        TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName
-                                                + ".at.index." + i).value(taxComponentId).notNull().longGreaterThanZero();
+                        baseDataValidator.reset().parameter(
+                                TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName + ".at.index." + i)
+                                .value(taxComponentId).notNull().longGreaterThanZero();
                     } else {
-                        baseDataValidator
-                                .reset()
-                                .parameter(
-                                        TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName
-                                                + ".at.index." + i).value(taxComponentId).longGreaterThanZero();
+                        baseDataValidator.reset().parameter(
+                                TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName + ".at.index." + i)
+                                .value(taxComponentId).longGreaterThanZero();
                         baseDataValidator.reset()
                                 .parameter(TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.idParamName + ".at.index." + i)
                                 .value(taxMappingId).longGreaterThanZero();
@@ -278,8 +274,8 @@ public class TaxValidator {
                     baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
                             .validateDateAfter(existing.startDate());
                 }
-                if(mapping.getTaxComponent()!= null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())){
-                    baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");;
+                if (mapping.getTaxComponent() != null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())) {
+                    baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");
                 }
             } else if (mapping.endDate() != null) {
                 baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).failWithCode("not.supported.for.new.association");
@@ -357,7 +353,9 @@ public class TaxValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
 }

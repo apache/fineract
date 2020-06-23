@@ -82,12 +82,11 @@ public class ShareAccountChargeData implements Serializable {
         this.chargeOptions = null;
     }
 
-
-    public ShareAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal amountPaid, final BigDecimal amountWaived,
-            final BigDecimal amountWrittenOff, final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType,
-            final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
-            final Collection<ChargeData> chargeOptions, final Boolean isActive, final BigDecimal chargeamountorpercentage) {
+    public ShareAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name, final CurrencyData currency,
+            final BigDecimal amount, final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
+            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
+            final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo, final Collection<ChargeData> chargeOptions,
+            final Boolean isActive, final BigDecimal chargeamountorpercentage) {
         this.id = id;
         this.chargeId = chargeId;
         this.accountId = accountId;
@@ -107,8 +106,7 @@ public class ShareAccountChargeData implements Serializable {
         this.isActive = isActive;
     }
 
-
     private BigDecimal getAmountOrPercentage() {
-        return (this.chargeCalculationType != null) && (this.chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
+        return this.chargeCalculationType != null && this.chargeCalculationType.getId().intValue() > 1 ? this.percentage : this.amount;
     }
 }

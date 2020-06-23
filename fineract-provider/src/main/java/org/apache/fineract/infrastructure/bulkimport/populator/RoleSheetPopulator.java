@@ -26,17 +26,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class RoleSheetPopulator extends AbstractWorkbookPopulator {
-    private  List<RoleData>rolesList;
 
-    private static final int ID_COL=0;
-    private static final int ROLE_NAME=1;
+    private List<RoleData> rolesList;
+
+    private static final int ID_COL = 0;
+    private static final int ROLE_NAME = 1;
 
     public RoleSheetPopulator(List<RoleData> roles) {
-        this.rolesList=roles;
+        this.rolesList = roles;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int rowIndex = 1;
         Sheet rolesSheet = workbook.createSheet(TemplatePopulateImportConstants.ROLES_SHEET_NAME);
         setLayout(rolesSheet);
@@ -61,6 +62,5 @@ public class RoleSheetPopulator extends AbstractWorkbookPopulator {
         writeString(ID_COL, rowHeader, "ID");
         writeString(ROLE_NAME, rowHeader, "Role Name");
     }
-
 
 }

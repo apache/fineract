@@ -25,7 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Client Loan Integration Test for checking Loan Application Repayment
@@ -38,7 +38,7 @@ public class SurveyIntegrationTest {
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();

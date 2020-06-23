@@ -25,7 +25,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 public class DepositAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public DepositAccountNotFoundException(final DepositAccountType accountType, final Long id) {
-        super("error.msg." + accountType.getCode().toLowerCase() + ".id.invalid", StringUtils.capitalize(accountType.toString()
-                .toLowerCase()) + " account with identifier " + id + " does not exist", id);
+        super("error.msg." + accountType.getCode().toLowerCase() + ".id.invalid",
+                StringUtils.capitalize(accountType.toString().toLowerCase()) + " account with identifier " + id + " does not exist", id);
     }
 }

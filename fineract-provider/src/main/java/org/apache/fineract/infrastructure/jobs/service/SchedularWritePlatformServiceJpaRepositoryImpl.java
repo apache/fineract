@@ -116,7 +116,9 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
         this.dataValidator.validateForUpdate(command.json());
         final ScheduledJobDetail scheduledJobDetail = findByJobId(jobId);
-        if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
+        if (scheduledJobDetail == null) {
+            throw new JobNotFoundException(String.valueOf(jobId));
+        }
         final Map<String, Object> changes = scheduledJobDetail.update(command);
         if (!changes.isEmpty()) {
             this.scheduledJobDetailsRepository.saveAndFlush(scheduledJobDetail);
@@ -134,8 +136,8 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     public boolean processJobDetailForExecution(final String jobKey, final String triggerType) {
         boolean isStopExecution = false;
         final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
-        if (scheduledJobDetail.isCurrentlyRunning()
-                || (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON) && (scheduledJobDetail.getNextRunTime().after(new Date())))) {
+        if (scheduledJobDetail.isCurrentlyRunning() || (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON)
+                && scheduledJobDetail.getNextRunTime().after(new Date()))) {
             isStopExecution = true;
         }
         final SchedulerDetail schedulerDetail = retriveSchedulerDetail();

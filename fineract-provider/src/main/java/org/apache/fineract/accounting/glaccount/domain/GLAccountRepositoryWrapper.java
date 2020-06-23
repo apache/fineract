@@ -38,7 +38,7 @@ public class GLAccountRepositoryWrapper {
     }
 
     public GLAccount findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id).orElseThrow(() ->  new GLAccountNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new GLAccountNotFoundException(id));
     }
 
 }

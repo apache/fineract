@@ -87,8 +87,10 @@ public class FundsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Funds", httpMethod = "GET", notes = "Returns the list of funds.\n" + "\n" + "Example Requests:\n" + "\n" + "funds")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class, responseContainer = "List")})
+    @ApiOperation(value = "Retrieve Funds", httpMethod = "GET", notes = "Returns the list of funds.\n" + "\n" + "Example Requests:\n" + "\n"
+            + "funds")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class, responseContainer = "List") })
     public String retrieveFunds(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -103,8 +105,9 @@ public class FundsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Fund", httpMethod = "POST", notes = "Creates a Fund")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PostFundsRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PostFundsResponse.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PostFundsRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PostFundsResponse.class) })
     public String createFund(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createFund().withJson(apiRequestBodyAsJson).build();
@@ -118,8 +121,9 @@ public class FundsApiResource {
     @Path("{fundId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Fund", httpMethod = "GET", notes = "Returns the details of a Fund.\n" + "\n" + "Example Requests:\n" + "\n" + "funds/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class)})
+    @ApiOperation(value = "Retrieve a Fund", httpMethod = "GET", notes = "Returns the details of a Fund.\n" + "\n" + "Example Requests:\n"
+            + "\n" + "funds/1")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class) })
     public String retreiveFund(@PathParam("fundId") @ApiParam(value = "fundId") final Long fundId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -135,9 +139,11 @@ public class FundsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Fund", httpMethod = "PUT", notes = "Updates the details of a fund.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PutFundsFundIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PutFundsFundIdResponse.class)})
-    public String updateFund(@PathParam("fundId") @ApiParam(value = "fundId") final Long fundId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PutFundsFundIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PutFundsFundIdResponse.class) })
+    public String updateFund(@PathParam("fundId") @ApiParam(value = "fundId") final Long fundId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFund(fundId).withJson(apiRequestBodyAsJson).build();
 

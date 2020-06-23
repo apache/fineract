@@ -28,13 +28,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @CommandType(entity = "SSBENEFICIARYTPT", action = "CREATE")
-public class AddSelfBeneficiariesTPTCommandHandler implements
-        NewCommandSourceHandler {
+public class AddSelfBeneficiariesTPTCommandHandler implements NewCommandSourceHandler {
+
     private final SelfBeneficiariesTPTWritePlatformService writePlatformService;
 
     @Autowired
-    public AddSelfBeneficiariesTPTCommandHandler(
-            final SelfBeneficiariesTPTWritePlatformService writePlatformService) {
+    public AddSelfBeneficiariesTPTCommandHandler(final SelfBeneficiariesTPTWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

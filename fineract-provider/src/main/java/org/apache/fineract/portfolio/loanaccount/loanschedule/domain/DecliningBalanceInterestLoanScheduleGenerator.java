@@ -38,7 +38,8 @@ import org.joda.time.LocalDate;
  * <li>Equal principal payments</li>
  * <li>Equal installment payments</li>
  * </ol>
- * <p></p>
+ * <p>
+ * </p>
  *
  * <p>
  * When amortized using <i>equal principal payments</i>, the <b>principal
@@ -63,8 +64,8 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
             final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
-            final TreeMap<LocalDate, Money> principalVariation, final Map<LocalDate, Money> compoundingMap,
-            final LocalDate periodStartDate, final LocalDate periodEndDate, final Collection<LoanTermVariationsData> termVariations) {
+            final TreeMap<LocalDate, Money> principalVariation, final Map<LocalDate, Money> compoundingMap, final LocalDate periodStartDate,
+            final LocalDate periodEndDate, final Collection<LoanTermVariationsData> termVariations) {
 
         LocalDate interestStartDate = periodStartDate;
         Money interestForThisInstallment = totalCumulativePrincipal.zero();
@@ -122,7 +123,6 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
                 }
             }
         }
-
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,

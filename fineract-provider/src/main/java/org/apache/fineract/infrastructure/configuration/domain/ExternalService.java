@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.apache.fineract.infrastructure.configuration.domain;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;

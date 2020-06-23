@@ -28,11 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "APPROVALUNDO")
-public class GSIMUndoApprovalCommandHandler implements NewCommandSourceHandler
-{
+public class GSIMUndoApprovalCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsApplicationProcessWritePlatformService writePlatformService;
 

@@ -45,14 +45,14 @@ VALUES (@saving_account_no, NULL, 300, NULL, ADDDATE(curdate(), -100), NULL, 1, 
 
 -- saving product, account
 SET @last_saving_prod_id = -1;
-SELECT COALESCE(max(id), 1) into @last_saving_prod_id from m_savings_product;
+SELECT COALESCE(max(id), 1) from m_savings_product into @last_saving_prod_id;
 
 SET @saving_prod_name = concat('Saving Product', @last_saving_prod_id);
 SET @saving_prod_id = -1;
-SELECT id INTO @saving_prod_id FROM m_savings_product WHERE name = @saving_prod_name;
+SELECT id FROM m_savings_product WHERE name = @saving_prod_name INTO @saving_prod_id;
 
 SET @client_id = -1;
-SELECT id INTO @client_id FROM m_client WHERE fullname = @client_name;
+SELECT id FROM m_client WHERE fullname = @client_name INTO @client_id;
 
 INSERT INTO `m_savings_account`
 (`account_no`, `external_id`, `client_id`, `group_id`, `product_id`, `field_officer_id`, `status_enum`,
@@ -69,7 +69,7 @@ VALUES (@saving_account_no, @saving_account_ext_id, @client_id, NULL, @saving_pr
 
 -- interop_identifier
 SET @saving_acc_id = -1;
-SELECT id INTO @saving_acc_id FROM m_savings_account WHERE account_no = @saving_account_no;
+SELECT id FROM m_savings_account WHERE account_no = @saving_account_no INTO @saving_acc_id;
 
 INSERT INTO interop_identifier (id, account_id, type, a_value, sub_value_or_type, created_by, created_on, modified_by, modified_on)
 VALUES (NULL, @saving_acc_id, 'IBAN', @IBAN, NULL, 'operator', CURDATE(), 'operator',

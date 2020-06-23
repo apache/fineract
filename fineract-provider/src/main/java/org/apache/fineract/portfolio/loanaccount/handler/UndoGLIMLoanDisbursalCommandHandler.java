@@ -29,10 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GLIMLOAN", action = "UNDODISBURSAL")
-public class UndoGLIMLoanDisbursalCommandHandler implements NewCommandSourceHandler
-{
+public class UndoGLIMLoanDisbursalCommandHandler implements NewCommandSourceHandler {
 
-private final LoanWritePlatformService writePlatformService;
+    private final LoanWritePlatformService writePlatformService;
 
     @Autowired
     public UndoGLIMLoanDisbursalCommandHandler(final LoanWritePlatformService writePlatformService) {

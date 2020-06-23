@@ -55,37 +55,36 @@ public class BulkImportApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
-    public BulkImportApiResource(final PlatformSecurityContext context,
-                                 final BulkImportWorkbookService bulkImportWorkbookService,
-                                 final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer,
-                                 final ApiRequestParameterHelper apiRequestParameterHelper) {
+    public BulkImportApiResource(final PlatformSecurityContext context, final BulkImportWorkbookService bulkImportWorkbookService,
+            final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
         this.context = context;
         this.bulkImportWorkbookService = bulkImportWorkbookService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
     }
 
-
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveImportDocuments(@Context final UriInfo uriInfo,
-                                          @QueryParam("entityType") final String entityType) {
+    public String retrieveImportDocuments(@Context final UriInfo uriInfo, @QueryParam("entityType") final String entityType) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        Collection<ImportData> importData=new ArrayList<>();
-        if (entityType.equals(GlobalEntityType.CLIENT.getCode())){
+        Collection<ImportData> importData = new ArrayList<>();
+        if (entityType.equals(GlobalEntityType.CLIENT.getCode())) {
             final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTTTY);
-            final Collection<ImportData> importForClientPerson=this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
-            if (importForClientEntity!=null)
-            importData.addAll(importForClientEntity);
-            if (importForClientPerson!=null)
-            importData.addAll(importForClientPerson);
-        }else {
+            final Collection<ImportData> importForClientPerson = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
+            if (importForClientEntity != null) {
+                importData.addAll(importForClientEntity);
+            }
+            if (importForClientPerson != null) {
+                importData.addAll(importForClientPerson);
+            }
+        } else {
             final GlobalEntityType type = GlobalEntityType.fromCode(entityType);
-            if (type == null)
+            if (type == null) {
                 throw new ImportTypeNotFoundException(entityType);
-                importData = this.bulkImportWorkbookService.getImports(type);
+            }
+            importData = this.bulkImportWorkbookService.getImports(type);
         }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, importData);
@@ -93,9 +92,9 @@ public class BulkImportApiResource {
 
     @GET
     @Path("getOutputTemplateLocation")
-    public String retriveOutputTemplateLocation(@QueryParam("importDocumentId")final String importDocumentId ){
+    public String retriveOutputTemplateLocation(@QueryParam("importDocumentId") final String importDocumentId) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        final DocumentData documentData =this.bulkImportWorkbookService.getOutputTemplateLocation(importDocumentId);
+        final DocumentData documentData = this.bulkImportWorkbookService.getOutputTemplateLocation(importDocumentId);
         return this.toApiJsonSerializer.serialize(documentData.fileLocation());
     }
 
@@ -105,7 +104,5 @@ public class BulkImportApiResource {
     public Response getOutputTemplate(@QueryParam("importDocumentId") final String importDocumentId) {
         return bulkImportWorkbookService.getOutputTemplate(importDocumentId);
     }
-
-
 
 }

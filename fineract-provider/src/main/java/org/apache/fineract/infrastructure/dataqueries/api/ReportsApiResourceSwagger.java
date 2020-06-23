@@ -28,15 +28,18 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
  * Created by sanyam on 4/8/17.
  */
 final class ReportsApiResourceSwagger {
+
     private ReportsApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetReportsResponse")
     public static final class GetReportsResponse {
+
         private GetReportsResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Client Listing")
@@ -60,7 +63,8 @@ final class ReportsApiResourceSwagger {
 
     @ApiModel(value = "GetReportsTemplateResponse")
     public static final class GetReportsTemplateResponse {
-        private GetReportsTemplateResponse(){
+
+        private GetReportsTemplateResponse() {
 
         }
 
@@ -71,9 +75,11 @@ final class ReportsApiResourceSwagger {
 
     @ApiModel(value = "PostRepostRequest")
     public static final class PostRepostRequest {
+
         private PostRepostRequest() {
 
         }
+
         @ApiModelProperty(example = "Completely New Report")
         public String reportName;
         @ApiModelProperty(example = "Table")
@@ -91,18 +97,22 @@ final class ReportsApiResourceSwagger {
 
     @ApiModel(value = "PostReportsResponse")
     public static final class PostReportsResponse {
-        private PostReportsResponse(){
+
+        private PostReportsResponse() {
 
         }
+
         @ApiModelProperty(example = "132")
         public long resourceId;
     }
 
     @ApiModel(value = "PutReportRequest")
     public static final class PutReportRequest {
+
         private PutReportRequest() {
 
         }
+
         @ApiModelProperty(example = "Completely New Report")
         public String reportName;
         public Collection<ReportParameterData> reportParameters;
@@ -111,17 +121,22 @@ final class ReportsApiResourceSwagger {
 
     @ApiModel(value = "PutReportResponse")
     public static final class PutReportResponse {
+
         private PutReportResponse() {
 
         }
-        final class PutReportResponseChanges{
+
+        static final class PutReportResponseChanges {
+
             private PutReportResponseChanges() {
 
             }
+
             @ApiModelProperty(example = "Changed New Report")
             public String reportName;
             public Collection<ReportParameterData> reportParameters;
         }
+
         @ApiModelProperty(example = "132")
         public long resourceId;
         public PutReportResponseChanges changes;
@@ -129,9 +144,11 @@ final class ReportsApiResourceSwagger {
 
     @ApiModel(value = "DeleteReportsResponse")
     public static final class DeleteReportsResponse {
-        private DeleteReportsResponse(){
+
+        private DeleteReportsResponse() {
 
         }
+
         @ApiModelProperty(example = "132")
         public long resourceId;
     }

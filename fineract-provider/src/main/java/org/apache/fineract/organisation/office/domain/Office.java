@@ -19,9 +19,9 @@
 package org.apache.fineract.organisation.office.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
@@ -48,7 +48,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private List<Office> children = new LinkedList<>();
+    private List<Office> children = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -118,7 +118,9 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
         final String parentIdParamName = "parentId";
 
-        if (command.parameterExists(parentIdParamName) && this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
+        if (command.parameterExists(parentIdParamName) && this.parent == null) {
+            throw new RootOfficeParentCannotBeUpdated();
+        }
 
         if (this.parent != null && command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
             final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
@@ -171,9 +173,13 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     public void update(final Office newParent) {
 
-        if (this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
+        if (this.parent == null) {
+            throw new RootOfficeParentCannotBeUpdated();
+        }
 
-        if (identifiedBy(newParent.getId())) { throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(getId(), newParent.getId()); }
+        if (identifiedBy(newParent.getId())) {
+            throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(getId(), newParent.getId());
+        }
 
         this.parent = newParent;
         generateHierarchy();
@@ -243,6 +249,6 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     }
 
     public void loadLazyCollections() {
-        this.children.size() ;
+        this.children.size();
     }
 }

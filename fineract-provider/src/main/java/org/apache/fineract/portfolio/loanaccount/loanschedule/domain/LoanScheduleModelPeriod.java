@@ -52,5 +52,6 @@ public interface LoanScheduleModelPeriod {
     void addPrincipalAmount(Money principalDue);
 
     void addInterestAmount(Money interestDue);
+
     Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
 }

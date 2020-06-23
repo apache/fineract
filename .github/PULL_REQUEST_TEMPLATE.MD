@@ -8,7 +8,7 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] Coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions have been followed.
 
-- [ ] API documentation at https://github.com/apache/fineract/blob/develop/api-docs/apiLive.htm has been updated with details of any API changes.
+- [ ] API documentation at fineract-provider/src/main/resources/static/api-docs/apiLive.htm has been updated with details of any API changes.
 
 - [ ] Integration tests have been created/updated for verifying the changes made.
 

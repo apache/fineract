@@ -70,7 +70,6 @@ public class OverdueLoanScheduleData {
         return this.locale;
     }
 
-
     public Integer getPeriodNumber() {
         return this.periodNumber;
     }

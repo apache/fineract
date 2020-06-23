@@ -21,56 +21,56 @@
 -- Table `m_hook_templates`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `m_hook_templates` (
-  `id` SMALLINT(6) NOT NULL AUTO_INCREMENT,
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
+ENGINE = InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 -- -----------------------------------------------------
 -- Table `m_hook`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `m_hook` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `template_id` SMALLINT(6) NOT NULL,
-  `is_active` SMALLINT(3) NOT NULL DEFAULT 1,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `template_id` SMALLINT NOT NULL,
+  `is_active` SMALLINT NOT NULL DEFAULT 1,
   `name` VARCHAR(45) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_template_id_idx` (`template_id` ASC),
   CONSTRAINT `fk_template_id`
     FOREIGN KEY (`template_id`)
     REFERENCES `m_hook_templates` (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
+ENGINE = InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 -- -----------------------------------------------------
 -- Table `m_hook_schema`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `m_hook_schema` (
-  `id` SMALLINT(6) NOT NULL AUTO_INCREMENT,
-  `hook_template_id` SMALLINT(6) NOT NULL,
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
+  `hook_template_id` SMALLINT NOT NULL,
   `field_type` VARCHAR(45) NOT NULL,
   `field_name` VARCHAR(100) NOT NULL,
   `placeholder` VARCHAR(100) DEFAULT NULL,
-  `optional` TINYINT(3) NOT NULL DEFAULT 0,
+  `optional` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   INDEX `fk_hook_template_id_idx` (`hook_template_id` ASC),
   CONSTRAINT `fk_hook_template_id`
     FOREIGN KEY (`hook_template_id`)
     REFERENCES `m_hook_templates` (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
+ENGINE = InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 -- -----------------------------------------------------
 -- Table `m_hook_registered_events`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `hook_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `hook_id` BIGINT NOT NULL,
   `entity_name` VARCHAR(45) NOT NULL,
   `action_name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
@@ -78,15 +78,15 @@ CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
   CONSTRAINT `fk_hook_idc`
     FOREIGN KEY (`hook_id`)
     REFERENCES `m_hook` (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
+ENGINE = InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 -- -----------------------------------------------------
 -- Table `m_hook_configuration`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `hook_id` BIGINT(20) NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `hook_id` BIGINT NULL,
   `field_type` VARCHAR(45) NOT NULL,
   `field_name` VARCHAR(100) NOT NULL,
   `field_value` VARCHAR(100) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
   CONSTRAINT `fk_hook_id_cfg`
     FOREIGN KEY (`hook_id`)
     REFERENCES `m_hook` (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
+ENGINE = InnoDB DEFAULT CHARSET=UTF8MB4;
 
 insert into `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`)
 VALUES ('configuration', 'CREATE_HOOK', 'HOOK', 'CREATE', 0);
@@ -123,5 +123,3 @@ INSERT INTO `m_hook_schema` (`hook_template_id`, `field_type`, `field_name`, `op
 VALUES (2, 'string', 'SMS Provider Token', 0);
 INSERT INTO `m_hook_schema` (`hook_template_id`, `field_type`, `field_name`, `optional`)
 VALUES (2, 'string', 'SMS Provider Account Id', 0);
-
-

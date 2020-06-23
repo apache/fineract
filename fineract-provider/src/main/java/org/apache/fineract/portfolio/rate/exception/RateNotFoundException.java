@@ -23,13 +23,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class RateNotFoundException extends AbstractPlatformResourceNotFoundException {
 
+    public RateNotFoundException(final Long id) {
+        super("error.msg.rate.id.invalid", "Rate with identifier " + id + " does not exist", id);
+    }
 
-  public RateNotFoundException(final Long id) {
-    super("error.msg.rate.id.invalid", "Rate with identifier " + id + " does not exist", id);
-  }
-
-  public RateNotFoundException(final String name) {
-    super("error.msg.rate.id.invalid", "Rate with name " + name + " does not exist", name);
-  }
+    public RateNotFoundException(final String name) {
+        super("error.msg.rate.id.invalid", "Rate with name " + name + " does not exist", name);
+    }
 
 }

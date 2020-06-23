@@ -22,8 +22,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 /**
- * Bowpi GT
- * Created by Jose on 19/07/2017.
+ * Bowpi GT Created by Jose on 19/07/2017.
  */
 public interface RateWriteService {
 

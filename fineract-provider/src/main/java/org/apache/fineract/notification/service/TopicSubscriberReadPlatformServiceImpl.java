@@ -31,7 +31,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberReadPlatformService{
+public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
 

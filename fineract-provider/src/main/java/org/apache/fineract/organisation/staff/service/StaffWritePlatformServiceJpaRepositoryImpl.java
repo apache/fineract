@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
 
     private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
@@ -77,8 +77,8 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
         } catch (final DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleStaffDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -91,8 +91,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), staffId);
 
-            final Staff staffForUpdate = this.staffRepository.findById(staffId)
-                    .orElseThrow(() -> new StaffNotFoundException(staffId));
+            final Staff staffForUpdate = this.staffRepository.findById(staffId).orElseThrow(() -> new StaffNotFoundException(staffId));
             final Map<String, Object> changesOnly = staffForUpdate.update(command);
 
             if (changesOnly.containsKey("officeId")) {
@@ -110,8 +109,8 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
         } catch (final DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleStaffDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -126,8 +125,8 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            throw new PlatformDataIntegrityException("error.msg.staff.duplicate.externalId", "Staff with externalId `" + externalId
-                    + "` already exists", "externalId", externalId);
+            throw new PlatformDataIntegrityException("error.msg.staff.duplicate.externalId",
+                    "Staff with externalId `" + externalId + "` already exists", "externalId", externalId);
         } else if (realCause.getMessage().contains("display_name")) {
             final String lastname = command.stringValueOfParameterNamed("lastname");
             String displayName = lastname;
@@ -135,11 +134,11 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                 final String firstname = command.stringValueOfParameterNamed("firstname");
                 displayName = lastname + ", " + firstname;
             }
-            throw new PlatformDataIntegrityException("error.msg.staff.duplicate.displayName", "A staff with the given display name '"
-                    + displayName + "' already exists", "displayName", displayName);
+            throw new PlatformDataIntegrityException("error.msg.staff.duplicate.displayName",
+                    "A staff with the given display name '" + displayName + "' already exists", "displayName", displayName);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.staff.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

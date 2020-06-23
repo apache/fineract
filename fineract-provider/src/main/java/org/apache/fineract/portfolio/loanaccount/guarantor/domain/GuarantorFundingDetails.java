@@ -61,7 +61,7 @@ public class GuarantorFundingDetails extends AbstractPersistableCustom {
     @Column(name = "amount_transfered_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountTransfered;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantorFundingDetails", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantorFundingDetails", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingTransaction> guarantorFundingTransactions = new ArrayList<>();
 
     protected GuarantorFundingDetails() {}
@@ -120,7 +120,7 @@ public class GuarantorFundingDetails extends AbstractPersistableCustom {
     public void undoReleaseFunds(final BigDecimal amount) {
         this.amountReleased = getAmountReleased().subtract(amount);
         this.amountRemaining = getAmountRemaining().add(amount);
-        if (getStatus().isCompleted() && this.amountRemaining.compareTo(BigDecimal.ZERO) == 1) {
+        if (getStatus().isCompleted() && this.amountRemaining.compareTo(BigDecimal.ZERO) > 0) {
             this.updateStatus(GuarantorFundStatusType.ACTIVE);
         }
     }

@@ -40,64 +40,71 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class SharedAccountImportHandler implements ImportHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SharedAccountImportHandler.class);
     private Workbook workbook;
     private List<ShareAccountData> shareAccountDataList;
-    private List<String>statuses;
+    private List<String> statuses;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public SharedAccountImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+    public SharedAccountImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
+
     @Override
     public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        this.shareAccountDataList=new ArrayList<>();
-        statuses=new ArrayList<String>();
-        readExcelFile(locale,dateFormat);
+        this.workbook = workbook;
+        this.shareAccountDataList = new ArrayList<>();
+        statuses = new ArrayList<String>();
+        readExcelFile(locale, dateFormat);
         return importEntity(dateFormat);
     }
+
     public void readExcelFile(String locale, String dateFormat) {
-        Sheet sharedAccountsSheet=workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
-        Integer noOfEntries= ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
-        for (int rowIndex=1;rowIndex<=noOfEntries;rowIndex++){
+        Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row=sharedAccountsSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, SharedAccountsConstants.STATUS_COL)){
-                    shareAccountDataList.add(readSharedAccount(row,locale,dateFormat));
-                }
+            row = sharedAccountsSheet.getRow(rowIndex);
+            if (ImportHandlerUtils.isNotImported(row, SharedAccountsConstants.STATUS_COL)) {
+                shareAccountDataList.add(readSharedAccount(row, locale, dateFormat));
+            }
         }
     }
 
-    private ShareAccountData readSharedAccount(Row row,String locale, String dateFormat) {
+    private ShareAccountData readSharedAccount(Row row, String locale, String dateFormat) {
         String clientName = ImportHandlerUtils.readAsString(SharedAccountsConstants.CLIENT_NAME_COL, row);
         Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
 
         String productName = ImportHandlerUtils.readAsString(SharedAccountsConstants.PRODUCT_COL, row);
-        Long productId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),productName);
+        Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),
+                productName);
 
-        LocalDate submittedOnDate=ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL,row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL, row);
 
         String externalId = ImportHandlerUtils.readAsString(SharedAccountsConstants.EXTERNAL_ID_COL, row);
 
-        Integer totNoOfShares=ImportHandlerUtils.readAsInt(SharedAccountsConstants.TOTAL_NO_SHARES_COL,row);
+        Integer totNoOfShares = ImportHandlerUtils.readAsInt(SharedAccountsConstants.TOTAL_NO_SHARES_COL, row);
 
-        Long defaultSavingsAccountId=ImportHandlerUtils.readAsLong(SharedAccountsConstants.DEFAULT_SAVINGS_AC_COL,row);
+        Long defaultSavingsAccountId = ImportHandlerUtils.readAsLong(SharedAccountsConstants.DEFAULT_SAVINGS_AC_COL, row);
 
-        Integer minimumActivePeriodDays=ImportHandlerUtils.readAsInt(SharedAccountsConstants.MINIMUM_ACTIVE_PERIOD_IN_DAYS_COL,row);
-        Integer minimumActivePeriodFrequencyType=0;
+        Integer minimumActivePeriodDays = ImportHandlerUtils.readAsInt(SharedAccountsConstants.MINIMUM_ACTIVE_PERIOD_IN_DAYS_COL, row);
+        Integer minimumActivePeriodFrequencyType = 0;
 
-        Integer lockInPeriod=ImportHandlerUtils.readAsInt(SharedAccountsConstants.LOCK_IN_PERIOD_COL,row);
+        Integer lockInPeriod = ImportHandlerUtils.readAsInt(SharedAccountsConstants.LOCK_IN_PERIOD_COL, row);
 
-        Integer lockPeriodFrequencyType=null;
+        Integer lockPeriodFrequencyType = null;
 
-        if (ImportHandlerUtils.readAsString(SharedAccountsConstants.LOCK_IN_PERIOD_FREQUENCY_TYPE,row)!=null) {
+        if (ImportHandlerUtils.readAsString(SharedAccountsConstants.LOCK_IN_PERIOD_FREQUENCY_TYPE, row) != null) {
             if (ImportHandlerUtils.readAsString(SharedAccountsConstants.LOCK_IN_PERIOD_FREQUENCY_TYPE, row)
                     .equals(TemplatePopulateImportConstants.FREQUENCY_DAYS)) {
                 lockPeriodFrequencyType = 0;
@@ -112,65 +119,68 @@ public class SharedAccountImportHandler implements ImportHandler {
                 lockPeriodFrequencyType = 3;
             }
         }
-        LocalDate applicationDate=ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL,row);
-        Boolean allowDividendCalc=ImportHandlerUtils.readAsBoolean(SharedAccountsConstants.ALLOW_DIVIDEND_CALCULATION_FOR_INACTIVE_CLIENTS_COL,row);
+        LocalDate applicationDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL, row);
+        Boolean allowDividendCalc = ImportHandlerUtils
+                .readAsBoolean(SharedAccountsConstants.ALLOW_DIVIDEND_CALCULATION_FOR_INACTIVE_CLIENTS_COL, row);
 
-        List<ShareAccountChargeData> charges=new ArrayList<>();
-        for (int cellNo=SharedAccountsConstants.CHARGES_NAME_1_COL;cellNo<SharedAccountsConstants.CHARGES_NAME_3_COL;cellNo+=2){
-            String chargeName=ImportHandlerUtils.readAsString(cellNo,row);
-            if (chargeName==null||chargeName.equals("0")){
+        List<ShareAccountChargeData> charges = new ArrayList<>();
+        for (int cellNo = SharedAccountsConstants.CHARGES_NAME_1_COL; cellNo < SharedAccountsConstants.CHARGES_NAME_3_COL; cellNo += 2) {
+            String chargeName = ImportHandlerUtils.readAsString(cellNo, row);
+            if (chargeName == null || chargeName.equals("0")) {
                 break;
             }
-            Long chargeId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),chargeName);
+            Long chargeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),
+                    chargeName);
 
-            BigDecimal amount=null;
-            if(ImportHandlerUtils.readAsDouble(cellNo+1,row)!=null)
-            amount=BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo+1,row));
+            BigDecimal amount = null;
+            if (ImportHandlerUtils.readAsDouble(cellNo + 1, row) != null) {
+                amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo + 1, row));
+            }
 
-            ShareAccountChargeData shareAccountChargeData=new ShareAccountChargeData(chargeId,amount);
+            ShareAccountChargeData shareAccountChargeData = new ShareAccountChargeData(chargeId, amount);
             charges.add(shareAccountChargeData);
         }
-        String status=ImportHandlerUtils.readAsString(SharedAccountsConstants.STATUS_COL,row);
+        String status = ImportHandlerUtils.readAsString(SharedAccountsConstants.STATUS_COL, row);
         statuses.add(status);
 
-        return ShareAccountData.importInstance(clientId,productId,totNoOfShares,externalId,submittedOnDate,minimumActivePeriodDays,
-                minimumActivePeriodFrequencyType,lockInPeriod,lockPeriodFrequencyType,applicationDate,allowDividendCalc,charges,
-                defaultSavingsAccountId,row.getRowNum(),locale,dateFormat);
+        return ShareAccountData.importInstance(clientId, productId, totNoOfShares, externalId, submittedOnDate, minimumActivePeriodDays,
+                minimumActivePeriodFrequencyType, lockInPeriod, lockPeriodFrequencyType, applicationDate, allowDividendCalc, charges,
+                defaultSavingsAccountId, row.getRowNum(), locale, dateFormat);
     }
 
     public Count importEntity(String dateFormat) {
-        Sheet sharedAccountsSheet=workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
-        String errorMessage="";
+        Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
+        int successCount = 0;
+        int errorCount = 0;
+        String errorMessage = "";
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 
-        for (ShareAccountData shareAccountData: shareAccountDataList) {
+        for (ShareAccountData shareAccountData : shareAccountDataList) {
             try {
-                String payload=gsonBuilder.create().toJson(shareAccountData);
+                String payload = gsonBuilder.create().toJson(shareAccountData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createAccount("share")//
                         .withJson(payload) //
                         .build(); //
                 final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
-                Cell statusCell = sharedAccountsSheet.getRow(shareAccountData.getRowIndex())
-                        .createCell(SharedAccountsConstants.STATUS_COL);
+                Cell statusCell = sharedAccountsSheet.getRow(shareAccountData.getRowIndex()).createCell(SharedAccountsConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+            } catch (RuntimeException ex) {
                 errorCount++;
-                ex.printStackTrace();
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(sharedAccountsSheet,shareAccountData.getRowIndex(),errorMessage,SharedAccountsConstants.STATUS_COL);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                ImportHandlerUtils.writeErrorMessage(sharedAccountsSheet, shareAccountData.getRowIndex(), errorMessage,
+                        SharedAccountsConstants.STATUS_COL);
             }
         }
         sharedAccountsSheet.setColumnWidth(SharedAccountsConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        ImportHandlerUtils.writeString(SharedAccountsConstants.STATUS_COL, sharedAccountsSheet.getRow(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT),
+        ImportHandlerUtils.writeString(SharedAccountsConstants.STATUS_COL,
+                sharedAccountsSheet.getRow(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT),
                 TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
-        return Count.instance(successCount,errorCount);
+        return Count.instance(successCount, errorCount);
     }
-
 
 }

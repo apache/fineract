@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 
 public class ExtensionData {
 
-    public static final String[] PARAMS = {PARAM_KEY, PARAM_VALUE};
+    public static final String[] PARAMS = { PARAM_KEY, PARAM_VALUE };
 
     @NotNull
     private final String key;
@@ -54,13 +54,14 @@ public class ExtensionData {
     }
 
     public static ExtensionData validateAndParse(DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 
         String key = jsonHelper.extractStringNamed(PARAM_KEY, element);
-        DataValidatorBuilder  dataValidatorCopy = dataValidator.reset().parameter(PARAM_KEY).value(key).notBlank();
+        DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_KEY).value(key).notBlank();
 
         String value = jsonHelper.extractStringNamed(PARAM_VALUE, element);
 

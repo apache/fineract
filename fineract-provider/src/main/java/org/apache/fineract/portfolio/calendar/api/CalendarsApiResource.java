@@ -67,12 +67,11 @@ public class CalendarsApiResource {
     /**
      * The set of parameters that are supported in response for {@link Calendar}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title",
-            "description", "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval",
-            "repeatsOnDay", "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate",
-            "createdByUserId", "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates",
-            "nextTenRecurringDates", "entityTypeOptions", "calendarTypeOptions", "remindByOptions", "frequencyOptions",
-            "repeatsOnDayOptions"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title", "description",
+            "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval", "repeatsOnDay",
+            "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate", "createdByUserId",
+            "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates", "nextTenRecurringDates",
+            "entityTypeOptions", "calendarTypeOptions", "remindByOptions", "frequencyOptions", "repeatsOnDayOptions"));
     private final String resourceNameForPermissions = "CALENDAR";
 
     private final PlatformSecurityContext context;
@@ -181,7 +180,9 @@ public class CalendarsApiResource {
             final String apiRequestBodyAsJson) {
 
         final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
-        if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
+        if (calendarEntityType == null) {
+            throw new CalendarEntityTypeNotSupportedException(entityType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCalendar(resourceDetails, entityType, entityId)
@@ -228,7 +229,8 @@ public class CalendarsApiResource {
         final List<EnumOptionData> remindByOptions = this.dropdownReadPlatformService.retrieveCalendarRemindByOptions();
         final List<EnumOptionData> frequencyOptions = this.dropdownReadPlatformService.retrieveCalendarFrequencyTypeOptions();
         final List<EnumOptionData> repeatsOnDayOptions = this.dropdownReadPlatformService.retrieveCalendarWeekDaysTypeOptions();
-        final List<EnumOptionData> frequencyNthDayTypeOptions = this.dropdownReadPlatformService.retrieveCalendarFrequencyNthDayTypeOptions();
+        final List<EnumOptionData> frequencyNthDayTypeOptions = this.dropdownReadPlatformService
+                .retrieveCalendarFrequencyNthDayTypeOptions();
         return CalendarData.withTemplateOptions(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions,
                 repeatsOnDayOptions, frequencyNthDayTypeOptions);
     }

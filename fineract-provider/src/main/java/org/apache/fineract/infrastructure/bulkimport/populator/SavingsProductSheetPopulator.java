@@ -28,6 +28,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class SavingsProductSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<SavingsProductData> savingsProducts;
 
     private static final int ID_COL = 0;
@@ -48,18 +49,18 @@ public class SavingsProductSheetPopulator extends AbstractWorkbookPopulator {
     private static final int OVERDRAFT_LIMIT_COL = 15;
 
     public SavingsProductSheetPopulator(List<SavingsProductData> savingsProducts) {
-    this.savingsProducts=savingsProducts;
+        this.savingsProducts = savingsProducts;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int rowIndex = 1;
         Sheet productSheet = workbook.createSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
         setLayout(productSheet);
         CellStyle dateCellStyle = workbook.createCellStyle();
         short df = workbook.createDataFormat().getFormat(dateFormat);
         dateCellStyle.setDataFormat(df);
-        for(SavingsProductData product : savingsProducts) {
+        for (SavingsProductData product : savingsProducts) {
             Row row = productSheet.createRow(rowIndex++);
             writeLong(ID_COL, row, product.getId());
             writeString(NAME_COL, row, product.getName().trim().replaceAll("[ )(]", "_"));
@@ -68,21 +69,26 @@ public class SavingsProductSheetPopulator extends AbstractWorkbookPopulator {
             writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
             writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
             writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
-            if(product.getMinRequiredOpeningBalance() != null)
+            if (product.getMinRequiredOpeningBalance() != null) {
                 writeBigDecimal(MIN_OPENING_BALANCE_COL, row, product.getMinRequiredOpeningBalance());
-            if(product.getLockinPeriodFrequency() != null)
+            }
+            if (product.getLockinPeriodFrequency() != null) {
                 writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
-            if(product.getLockinPeriodFrequencyType() != null)
+            }
+            if (product.getLockinPeriodFrequencyType() != null) {
                 writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
+            }
             CurrencyData currency = product.getCurrency();
             writeString(CURRENCY_COL, row, currency.code());
             writeInt(DECIMAL_PLACES_COL, row, currency.decimalPlaces());
-            if(currency.currencyInMultiplesOf() != null)
+            if (currency.currencyInMultiplesOf() != null) {
                 writeInt(IN_MULTIPLES_OF_COL, row, currency.currencyInMultiplesOf());
+            }
             writeBoolean(WITHDRAWAL_FEE_COL, row, product.isWithdrawalFeeForTransfers());
-            writeBoolean(ALLOW_OVERDRAFT_COL, row,product.isAllowOverdraft());
-            if(product.getOverdraftLimit() != null)
+            writeBoolean(ALLOW_OVERDRAFT_COL, row, product.isAllowOverdraft());
+            if (product.getOverdraftLimit() != null) {
                 writeBigDecimal(OVERDRAFT_LIMIT_COL, row, product.getOverdraftLimit());
+            }
         }
         productSheet.protectSheet("");
     }

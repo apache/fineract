@@ -31,4 +31,6 @@ public interface AccountAssociationsReadPlatformService {
     public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId);
 
     public Collection<AccountAssociationsData> retriveLoanAssociations(Long loanId, Integer associationType);
+
+    PortfolioAccountData retriveSavingsAccount(Long savingsId);
 }

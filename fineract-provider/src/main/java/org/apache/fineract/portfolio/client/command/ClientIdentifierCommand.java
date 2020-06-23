@@ -34,7 +34,8 @@ public class ClientIdentifierCommand {
     private final String description;
     private final String status;
 
-    public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String statusString, final String description) {
+    public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String statusString,
+            final String description) {
         this.documentTypeId = documentTypeId;
         this.documentKey = documentKey;
         this.status = statusString;
@@ -61,8 +62,10 @@ public class ClientIdentifierCommand {
         baseDataValidator.reset().parameter("documentTypeId").value(this.documentTypeId).notNull().integerGreaterThanZero();
         baseDataValidator.reset().parameter("documentKey").value(this.documentKey).notBlank();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateForUpdate() {
@@ -79,7 +82,9 @@ public class ClientIdentifierCommand {
 
         baseDataValidator.reset().anyOfNotNull(this.documentTypeId, this.documentKey);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

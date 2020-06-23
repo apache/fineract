@@ -26,15 +26,14 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name="m_loan_reschedule_request_term_variations_mapping")
+@Table(name = "m_loan_reschedule_request_term_variations_mapping")
 public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom {
-
 
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_term_variations_id", nullable = false)
     private LoanTermVariations loanTermVariations;
 
-    protected LoanRescheduleRequestToTermVariationMapping(){
+    protected LoanRescheduleRequestToTermVariationMapping() {
 
     }
 

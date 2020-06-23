@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final CodeRepository codeRepository;
@@ -73,8 +73,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleCodeDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -105,8 +105,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleCodeDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -120,7 +120,9 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         this.context.authenticatedUser();
 
         final Code code = retrieveCodeBy(codeId);
-        if (code.isSystemDefined()) { throw new SystemDefinedCodeCannotBeChangedException(); }
+        if (code.isSystemDefined()) {
+            throw new SystemDefinedCodeCannotBeChangedException();
+        }
 
         try {
             this.codeRepository.delete(code);
@@ -133,8 +135,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     }
 
     private Code retrieveCodeBy(final Long codeId) {
-        return this.codeRepository.findById(codeId)
-                .orElseThrow(() -> new CodeNotFoundException(codeId.toString()));
+        return this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId.toString()));
     }
 
     /*
@@ -148,7 +149,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

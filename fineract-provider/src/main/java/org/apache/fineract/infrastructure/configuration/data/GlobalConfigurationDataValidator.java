@@ -43,10 +43,9 @@ import org.springframework.stereotype.Component;
 public class GlobalConfigurationDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(GlobalConfigurationApiConstant.localeParamName,
-                    GlobalConfigurationApiConstant.dateFormatParamName, GlobalConfigurationApiConstant.ENABLED,
-                    GlobalConfigurationApiConstant.VALUE, GlobalConfigurationApiConstant.DATE_VALUE));
+    private static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            GlobalConfigurationApiConstant.localeParamName, GlobalConfigurationApiConstant.dateFormatParamName,
+            GlobalConfigurationApiConstant.ENABLED, GlobalConfigurationApiConstant.VALUE, GlobalConfigurationApiConstant.DATE_VALUE));
 
     @Autowired
     public GlobalConfigurationDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -55,7 +54,9 @@ public class GlobalConfigurationDataValidator {
 
     public void validateForUpdate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_CONFIGURATION_DATA_PARAMETERS);
@@ -66,26 +67,23 @@ public class GlobalConfigurationDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.ENABLED, element)) {
-            final boolean enabledBool = this.fromApiJsonHelper
-                    .extractBooleanNamed(GlobalConfigurationApiConstant.ENABLED, element);
-            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(enabledBool)
-                    .validateForBooleanValue();
+            final boolean enabledBool = this.fromApiJsonHelper.extractBooleanNamed(GlobalConfigurationApiConstant.ENABLED, element);
+            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(enabledBool).validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.VALUE, element)) {
-            final Long valueStr = this.fromApiJsonHelper.extractLongNamed(GlobalConfigurationApiConstant.VALUE,
-                    element);
-            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(valueStr)
-                    .zeroOrPositiveAmount();
+            final Long valueStr = this.fromApiJsonHelper.extractLongNamed(GlobalConfigurationApiConstant.VALUE, element);
+            baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(valueStr).zeroOrPositiveAmount();
         }
 
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.DATE_VALUE, element)) {
-            final LocalDate dateValue = this.fromApiJsonHelper
-                    .extractLocalDateNamed(GlobalConfigurationApiConstant.DATE_VALUE, element);
+            final LocalDate dateValue = this.fromApiJsonHelper.extractLocalDateNamed(GlobalConfigurationApiConstant.DATE_VALUE, element);
             baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.DATE_VALUE).value(dateValue).notNull();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 }

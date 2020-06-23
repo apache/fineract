@@ -27,7 +27,8 @@ import java.lang.annotation.Target;
 /**
  * Specifies the command type for the annotated class.<br>
  * <br>
- * The entity name (e.g. CLIENT, SAVINGSACCOUNT, LOANPRODUCT) and the action (e.g. CREATE, DELETE) must be given.
+ * The entity name (e.g. CLIENT, SAVINGSACCOUNT, LOANPRODUCT) and the action
+ * (e.g. CREATE, DELETE) must be given.
  *
  * @author Markus Geiss
  * @version 1.0

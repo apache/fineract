@@ -46,11 +46,12 @@ public class LoanAccountSummaryData {
     private final BigDecimal amountPaid;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
-            final LoanApplicationTimelineData timeline, final Boolean inArrears,final BigDecimal originalLoan,final BigDecimal loanBalance,final BigDecimal amountPaid) {
+            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+            final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
+            final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid) {
         this.id = id;
         this.accountNo = accountNo;
-        this.parentAccountNumber=null;
+        this.parentAccountNumber = null;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = loanProductName;
@@ -65,13 +66,13 @@ public class LoanAccountSummaryData {
         this.amountPaid = amountPaid;
     }
 
-
-    public LoanAccountSummaryData(final Long id, final String accountNo,final String parentAccountNumber, final String externalId, final Long productId,
-            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
-            final LoanApplicationTimelineData timeline, final Boolean inArrears,final BigDecimal originalLoan,final BigDecimal loanBalance,final BigDecimal amountPaid) {
+    public LoanAccountSummaryData(final Long id, final String accountNo, final String parentAccountNumber, final String externalId,
+            final Long productId, final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+            final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
+            final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid) {
         this.id = id;
         this.accountNo = accountNo;
-        this.parentAccountNumber=parentAccountNumber;
+        this.parentAccountNumber = parentAccountNumber;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = loanProductName;

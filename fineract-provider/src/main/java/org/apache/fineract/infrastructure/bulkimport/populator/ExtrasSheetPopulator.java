@@ -40,16 +40,14 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     private static final int CURRENCY_CODE_COL = 4;
     private static final int CURRENCY_NAME_COL = 5;
 
-
-    public ExtrasSheetPopulator(List<FundData> funds, List<PaymentTypeData> paymentTypes,
-            List<CurrencyData> currencies) {
+    public ExtrasSheetPopulator(List<FundData> funds, List<PaymentTypeData> paymentTypes, List<CurrencyData> currencies) {
         this.funds = funds;
         this.paymentTypes = paymentTypes;
         this.currencies = currencies;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int fundRowIndex = 1;
         Sheet extrasSheet = workbook.createSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME);
         setLayout(extrasSheet);
@@ -61,20 +59,22 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
         int paymentTypeRowIndex = 1;
         for (PaymentTypeData paymentType : paymentTypes) {
             Row row;
-            if (paymentTypeRowIndex < fundRowIndex)
+            if (paymentTypeRowIndex < fundRowIndex) {
                 row = extrasSheet.getRow(paymentTypeRowIndex++);
-            else
+            } else {
                 row = extrasSheet.createRow(paymentTypeRowIndex++);
+            }
             writeLong(PAYMENT_TYPE_ID_COL, row, paymentType.getId());
             writeString(PAYMENT_TYPE_NAME_COL, row, paymentType.getName().trim().replaceAll("[ )(]", "_"));
         }
         int currencyCodeRowIndex = 1;
         for (CurrencyData currencies : currencies) {
             Row row;
-            if (currencyCodeRowIndex < paymentTypeRowIndex)
+            if (currencyCodeRowIndex < paymentTypeRowIndex || currencyCodeRowIndex < fundRowIndex) {
                 row = extrasSheet.getRow(currencyCodeRowIndex++);
-            else
+            } else {
                 row = extrasSheet.createRow(currencyCodeRowIndex++);
+            }
 
             writeString(CURRENCY_NAME_COL, row, currencies.getName().trim().replaceAll("[ )(]", "_"));
             writeString(CURRENCY_CODE_COL, row, currencies.code());
@@ -99,9 +99,11 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
         writeString(CURRENCY_NAME_COL, rowHeader, "Currency Type ");
         writeString(CURRENCY_CODE_COL, rowHeader, "Currency Code ");
     }
+
     public Integer getFundsSize() {
         return funds.size();
     }
+
     public Integer getPaymentTypesSize() {
         return paymentTypes.size();
     }
@@ -109,7 +111,5 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     public Integer getCurrenciesSize() {
         return currencies.size();
     }
-
-
 
 }

@@ -33,9 +33,11 @@ import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class for testing the integration of Batch API with custom batch
@@ -46,6 +48,7 @@ import org.junit.Test;
  */
 public class BatchRequestsIntegrationTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
@@ -55,9 +58,10 @@ public class BatchRequestsIntegrationTest {
 
     /**
      * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@Before' annotation provided by jUnit.
+     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
+     * jUnit.
      */
-    @Before
+    @BeforeEach
     public void setup() {
 
         Utils.initializeRESTAssured();
@@ -88,7 +92,7 @@ public class BatchRequestsIntegrationTest {
         for (Integer i = 0; i < clientsCount; i++) {
             clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
             groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
-            System.out.println("client " + clientIDs[i] + " has been added to the group " + groupID);
+            LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
         // Generate a random count of number of new loan products to be created
@@ -132,7 +136,7 @@ public class BatchRequestsIntegrationTest {
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {
-            Assert.assertEquals("Verify Status Code 200", 200L, (long) res.getStatusCode());
+            Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
     }
 }

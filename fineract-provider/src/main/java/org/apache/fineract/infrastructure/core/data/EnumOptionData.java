@@ -52,12 +52,14 @@ public class EnumOptionData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EnumOptionData)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof EnumOptionData)) {
+            return false;
+        }
         EnumOptionData that = (EnumOptionData) o;
-        return id.equals(that.id) &&
-                code.equals(that.code) &&
-                value.equals(that.value);
+        return id.equals(that.id) && code.equals(that.code) && value.equals(that.value);
     }
 
     @Override

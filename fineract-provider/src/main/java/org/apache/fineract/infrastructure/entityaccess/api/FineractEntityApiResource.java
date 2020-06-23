@@ -110,8 +110,8 @@ public class FineractEntityApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveEntityToEntityMappings(
-                mapId, fromId, toId);
+        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService
+                .retrieveEntityToEntityMappings(mapId, fromId, toId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerOfficeToLoanProducts.serialize(settings, entityToEntityMappings,
                 FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);

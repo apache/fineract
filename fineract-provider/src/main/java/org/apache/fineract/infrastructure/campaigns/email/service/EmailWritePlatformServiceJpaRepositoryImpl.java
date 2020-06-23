@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
 
     private final EmailMessageAssembler assembler;
     private final EmailMessageRepository repository;
@@ -120,13 +120,16 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
+            final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
 
-        if (realCause.getMessage().contains("email_address")) { throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
-                "The group, client or staff provided has no email address.", "id"); }
+        if (realCause.getMessage().contains("email_address")) {
+            throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
+                    "The group, client or staff provided has no email address.", "id");
+        }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.email.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

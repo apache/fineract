@@ -143,109 +143,70 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-
 @Path("/loans")
 @Component
 @Scope("singleton")
-@Api(tags = {"Loans"})
+@Api(tags = { "Loans" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.\n" +
-                "\n" +
-                "Field Descriptions\n" +
-                "accountNo\n" +
-                "The account no. associated with this loan. Is auto generated if not provided at loan application creation time.\n" +
-                "externalId\n" +
-                "A place to put an external reference for this loan e.g. The ID another system uses.\n" +
-                "If provided, it must be unique.\n" +
-                "fundId\n" +
-                "Optional: For associating a loan with a given fund.\n" +
-                "loanOfficerId\n" +
-                "Optional: For associating a loan with a given staff member who is a loan officer.\n" +
-                "loanPurposeId\n" +
-                "Optional: For marking a loan with a given loan purpose option. Loan purposes are configurable and can be setup by system admin through code/code values screens.\n" +
-                "principal\n" +
-                "The loan amount to be disbursed to through loan.\n" +
-                "loanTermFrequency\n" +
-                "The length of loan term\n" +
-                "Used like: loanTermFrequency loanTermFrequencyType\n" +
-                "e.g. 12 Months\n" +
-                "loanTermFrequencyType\n" +
-                "The loan term period to use. Used like: loanTermFrequency loanTermFrequencyType\n" +
-                "e.g. 12 Months Example Values: 0=Days, 1=Weeks, 2=Months, 3=Years\n" +
-                "numberOfRepayments\n" +
-                "Number of installments to repay.\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks\n" +
-                "repaymentEvery\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks\n" +
-                "repaymentFrequencyType\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks \n" +
-                "Example Values: 0=Days, 1=Weeks, 2=Months\n" +
-                "interestRatePerPeriod\n" +
-                "Interest Rate.\n" +
-                "Used like: interestRatePerPeriod % interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance\n" +
-                "interestRateFrequencyType\n" +
-                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance \n" +
-                "Example Values: 2=Per month, 3=Per year\n" +
-                "graceOnPrincipalPayment\n" +
-                "Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.\n" +
-                "graceOnInterestPayment\n" +
-                "Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.\n" +
-                "graceOnInterestCharged\n" +
-                "Optional: Integer - represents the number of repayment periods that should be interest-free.\n" +
-                "graceOnArrearsAgeing\n" +
-                "Optional: Integer - Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.\n" +
-                "interestChargedFromDate\n" +
-                "Optional: Date - The date from with interest is to start being charged.\n" +
-                "expectedDisbursementDate\n" +
-                "The proposed disbursement date of the loan so a proposed repayment schedule can be provided.\n" +
-                "submittedOnDate\n" +
-                "The date the loan application was submitted by applicant.\n" +
-                "linkAccountId\n" +
-                "The Savings Account id for linking with loan account for payments.\n" +
-                "amortizationType\n" +
-                "Example Values: 0=Equal principle payments, 1=Equal installments\n" +
-                "interestType\n" +
-                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance \n" +
-                "Example Values: 0=Declining Balance, 1=Flat\n" +
-                "interestCalculationPeriodType\n" +
-                "Example Values: 0=Daily, 1=Same as repayment period\n" +
-                "allowPartialPeriodInterestCalcualtion\n" +
-                "This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods. Example: Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)\n" +
-                "inArrearsTolerance\n" +
-                "The amount that can be 'waived' at end of all loan payments because it is too small to worry about.\n" +
-                "This is also the tolerance amount assessed when determining if a loan is in arrears.\n" +
-                "transactionProcessingStrategyId\n" +
-                "An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as Payment Application Logic.\n" +
-                "A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.\n" +
-                "\n" +
-                "Refer to the Payment Application Logic / Transaction Processing Strategy section in the appendix for more detailed overview of each available payment application logic provided out of the box.\n" +
-                "\n" +
-                "List of current approaches:\n" +
-                "1 = Mifos style (Similar to Old Mifos)\n" +
-                "2 = Heavensfamily (Custom MFI approach)\n" +
-                "3 = Creocore (Custom MFI approach)\n" +
-                "4 = RBI (India)\n" +
-                "5 = Principal Interest Penalties Fees Order\n" +
-                "6 = Interest Principal Penalties Fees Order\n" +
-                "7 = Early Payment Strategy\n" +
-                "loanType\n" +
-                "To represent different type of loans.\n" +
-                "At present there are three type of loans are supported. \n" +
-                "Available loan types:\n" +
-                "individual: Loan given to individual member\n" +
-                "group: Loan given to group as a whole\n" +
-                "jlg: Joint liability group loan given to members in a group on individual basis. JLG loan can be given to one or more members in a group.\n" +
-                "recalculationRestFrequencyDate\n" +
-                "Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date\n" +
-                "recalculationCompoundingFrequencyDate\n" +
-                "Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date")
-})
+        @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.\n"
+                + "\n" + "Field Descriptions\n" + "accountNo\n"
+                + "The account no. associated with this loan. Is auto generated if not provided at loan application creation time.\n"
+                + "externalId\n" + "A place to put an external reference for this loan e.g. The ID another system uses.\n"
+                + "If provided, it must be unique.\n" + "fundId\n" + "Optional: For associating a loan with a given fund.\n"
+                + "loanOfficerId\n" + "Optional: For associating a loan with a given staff member who is a loan officer.\n"
+                + "loanPurposeId\n"
+                + "Optional: For marking a loan with a given loan purpose option. Loan purposes are configurable and can be setup by system admin through code/code values screens.\n"
+                + "principal\n" + "The loan amount to be disbursed to through loan.\n" + "loanTermFrequency\n" + "The length of loan term\n"
+                + "Used like: loanTermFrequency loanTermFrequencyType\n" + "e.g. 12 Months\n" + "loanTermFrequencyType\n"
+                + "The loan term period to use. Used like: loanTermFrequency loanTermFrequencyType\n"
+                + "e.g. 12 Months Example Values: 0=Days, 1=Weeks, 2=Months, 3=Years\n" + "numberOfRepayments\n"
+                + "Number of installments to repay.\n" + "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n"
+                + "e.g. 10 (repayments) Every 12 Weeks\n" + "repaymentEvery\n"
+                + "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" + "e.g. 10 (repayments) Every 12 Weeks\n"
+                + "repaymentFrequencyType\n" + "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n"
+                + "e.g. 10 (repayments) Every 12 Weeks \n" + "Example Values: 0=Days, 1=Weeks, 2=Months\n" + "interestRatePerPeriod\n"
+                + "Interest Rate.\n" + "Used like: interestRatePerPeriod % interestRateFrequencyType - interestType\n"
+                + "e.g. 12.0000% Per year - Declining Balance\n" + "interestRateFrequencyType\n"
+                + "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n"
+                + "e.g. 12.0000% Per year - Declining Balance \n" + "Example Values: 2=Per month, 3=Per year\n"
+                + "graceOnPrincipalPayment\n"
+                + "Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.\n"
+                + "graceOnInterestPayment\n"
+                + "Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.\n"
+                + "graceOnInterestCharged\n"
+                + "Optional: Integer - represents the number of repayment periods that should be interest-free.\n"
+                + "graceOnArrearsAgeing\n"
+                + "Optional: Integer - Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.\n"
+                + "interestChargedFromDate\n" + "Optional: Date - The date from with interest is to start being charged.\n"
+                + "expectedDisbursementDate\n"
+                + "The proposed disbursement date of the loan so a proposed repayment schedule can be provided.\n" + "submittedOnDate\n"
+                + "The date the loan application was submitted by applicant.\n" + "linkAccountId\n"
+                + "The Savings Account id for linking with loan account for payments.\n" + "amortizationType\n"
+                + "Example Values: 0=Equal principle payments, 1=Equal installments\n" + "interestType\n"
+                + "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n"
+                + "e.g. 12.0000% Per year - Declining Balance \n" + "Example Values: 0=Declining Balance, 1=Flat\n"
+                + "interestCalculationPeriodType\n" + "Example Values: 0=Daily, 1=Same as repayment period\n"
+                + "allowPartialPeriodInterestCalcualtion\n"
+                + "This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods. Example: Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)\n"
+                + "inArrearsTolerance\n"
+                + "The amount that can be 'waived' at end of all loan payments because it is too small to worry about.\n"
+                + "This is also the tolerance amount assessed when determining if a loan is in arrears.\n"
+                + "transactionProcessingStrategyId\n"
+                + "An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as Payment Application Logic.\n"
+                + "A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.\n"
+                + "\n"
+                + "Refer to the Payment Application Logic / Transaction Processing Strategy section in the appendix for more detailed overview of each available payment application logic provided out of the box.\n"
+                + "\n" + "List of current approaches:\n" + "1 = Mifos style (Similar to Old Mifos)\n"
+                + "2 = Heavensfamily (Custom MFI approach)\n" + "3 = Creocore (Custom MFI approach)\n" + "4 = RBI (India)\n"
+                + "5 = Principal Interest Penalties Fees Order\n" + "6 = Interest Principal Penalties Fees Order\n"
+                + "7 = Early Payment Strategy\n" + "loanType\n" + "To represent different type of loans.\n"
+                + "At present there are three type of loans are supported. \n" + "Available loan types:\n"
+                + "individual: Loan given to individual member\n" + "group: Loan given to group as a whole\n"
+                + "jlg: Joint liability group loan given to members in a group on individual basis. JLG loan can be given to one or more members in a group.\n"
+                + "recalculationRestFrequencyDate\n"
+                + "Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date\n"
+                + "recalculationCompoundingFrequencyDate\n"
+                + "Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date") })
 public class LoansApiResource {
 
     private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
@@ -254,21 +215,22 @@ public class LoansApiResource {
             "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
             "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
             "transactionProcessingStrategyName", "interestRateFrequencyType", "amortizationType", "interestType",
-            "interestCalculationPeriodType", LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, "expectedFirstRepaymentOnDate",
-            "graceOnPrincipalPayment", "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "timeline",
-            "totalFeeChargesAtDisbursement", "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors",
-            "meeting", "productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
-            "repaymentFrequencyTypeOptions", "repaymentFrequencyNthDayTypeOptions", "repaymentFrequencyDaysOfWeekTypeOptions",
-            "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
-            "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions",
-            "syncDisbursementWithMeeting", "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount",
-            "interestRateDifferential", "isFloatingInterestRate", "interestRatesPeriods", LoanApiConstants.canUseForTopup,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
-            LoanApiConstants.datatables, LoanProductConstants.ratesParamName));
+            "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
+            "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment", "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment",
+            "graceOnInterestCharged", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary",
+            "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
+            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
+            "repaymentFrequencyNthDayTypeOptions", "repaymentFrequencyDaysOfWeekTypeOptions", "termFrequencyTypeOptions",
+            "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
+            "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting",
+            "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount", "interestRateDifferential",
+            "isFloatingInterestRate", "interestRatesPeriods", LoanApiConstants.canUseForTopup, LoanApiConstants.isTopup,
+            LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
+            LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME));
 
     private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
-    final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId","groupId", "clientId","parentLoanAccountNo","parentPrincipalAmount",
-            "childLoanAccountNo", "childPrincipalAmount","clientName"));
+    final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
+            "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
     private final String resourceNameForPermissions = "LOAN";
 
     private final PlatformSecurityContext context;
@@ -325,7 +287,8 @@ public class LoansApiResource {
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
             final BulkImportWorkbookService bulkImportWorkbookService,
             final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService, final RateReadService rateReadService,
-            final ConfigurationDomainService configurationDomainService, final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer,
+            final ConfigurationDomainService configurationDomainService,
+            final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer,
             final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
@@ -353,11 +316,11 @@ public class LoansApiResource {
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.rateReadService = rateReadService;
-        this.bulkImportWorkbookService=bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
+        this.bulkImportWorkbookService = bulkImportWorkbookService;
+        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
         this.configurationDomainService = configurationDomainService;
-        this.glimTemplateToApiJsonSerializer=glimTemplateToApiJsonSerializer;
-        this.glimAccountInfoReadPlatformService=glimAccountInfoReadPlatformService;
+        this.glimTemplateToApiJsonSerializer = glimTemplateToApiJsonSerializer;
+        this.glimAccountInfoReadPlatformService = glimAccountInfoReadPlatformService;
     }
 
     /*
@@ -371,8 +334,8 @@ public class LoansApiResource {
     @Path("{loanId}/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveApprovalTemplate(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
-                                           @Context final UriInfo uriInfo) {
+    public String retrieveApprovalTemplate(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -394,12 +357,18 @@ public class LoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Loan Details Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n" + "loans/template?templateType=individual&clientId=1\n" + "\n" + "\n" + "loans/template?templateType=individual&clientId=1&productId=1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansTemplateResponse.class)})
-    public String template(@QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId, @QueryParam("groupId") @ApiParam(value = "groupId") final Long groupId,
-            @QueryParam("productId")@ApiParam(value = "productId") final Long productId, @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
+    @ApiOperation(value = "Retrieve Loan Details Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n"
+            + "loans/template?templateType=individual&clientId=1\n" + "\n" + "\n"
+            + "loans/template?templateType=individual&clientId=1&productId=1")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansTemplateResponse.class) })
+    public String template(@QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @QueryParam("groupId") @ApiParam(value = "groupId") final Long groupId,
+            @QueryParam("productId") @ApiParam(value = "productId") final Long productId,
+            @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("false") @QueryParam("activeOnly") @ApiParam(value = "activeOnly") final boolean onlyActive, @Context final UriInfo uriInfo) {
+            @DefaultValue("false") @QueryParam("activeOnly") @ApiParam(value = "activeOnly") final boolean onlyActive,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -429,14 +398,14 @@ public class LoansApiResource {
             // for JLG loan both client and group details are required
             if (templateType.equals("individual") || templateType.equals("jlg")) {
 
-                if(clientId == null) {
+                if (clientId == null) {
                     newLoanAccount = newLoanAccount == null ? LoanAccountData.emptyTemplate() : newLoanAccount;
                 } else {
                     final LoanAccountData loanAccountClientDetails = this.loanReadPlatformService.retrieveClientDetailsTemplate(clientId);
 
                     officeId = loanAccountClientDetails.officeId();
-                    newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(newLoanAccount,
-                            loanAccountClientDetails);
+                    newLoanAccount = newLoanAccount == null ? loanAccountClientDetails
+                            : LoanAccountData.populateClientDefaults(newLoanAccount, loanAccountClientDetails);
                 }
 
                 // if it's JLG loan add group details
@@ -451,8 +420,8 @@ public class LoansApiResource {
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupDetailsTemplate(groupId);
                 officeId = loanAccountGroupData.groupOfficeId();
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
-                newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
-                        loanAccountGroupData);
+                newLoanAccount = newLoanAccount == null ? loanAccountGroupData
+                        : LoanAccountData.populateGroupDefaults(newLoanAccount, loanAccountGroupData);
                 accountLinkingOptions = getaccountLinkingOptions(newLoanAccount, clientId, groupId);
 
             } else if (templateType.equals("jlgbulk")) {
@@ -460,13 +429,13 @@ public class LoansApiResource {
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupAndMembersDetailsTemplate(groupId);
                 officeId = loanAccountGroupData.groupOfficeId();
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
-                newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
-                        loanAccountGroupData);
+                newLoanAccount = newLoanAccount == null ? loanAccountGroupData
+                        : LoanAccountData.populateGroupDefaults(newLoanAccount, loanAccountGroupData);
                 if (productId != null) {
                     Map<Long, Integer> memberLoanCycle = new HashMap<>();
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
                     accountLinkingOptions = new ArrayList<>();
-                    if(members != null){
+                    if (members != null) {
                         for (ClientData clientData : members) {
                             Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
                             memberLoanCycle.put(clientData.id(), loanCounter);
@@ -509,8 +478,8 @@ public class LoansApiResource {
             currencyCode = currencyData.code();
         }
         final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
-        final PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId, currencyCode,
-                accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
+        final PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId,
+                currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
         if (groupId != null) {
             portfolioAccountDTO.setGroupId(groupId);
         }
@@ -521,19 +490,22 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Loan", httpMethod = "GET", notes = "Note: template=true parameter doesn't apply to this resource." + "Example Requests:\n" + "\n" + "loans/1\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate\n" + "\n" + "\n" + "loans/1?associations=all\n" + "\n" + "loans/1?associations=all&exclude=guarantors\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansLoanIdResponse.class)})
+    @ApiOperation(value = "Retrieve a Loan", httpMethod = "GET", notes = "Note: template=true parameter doesn't apply to this resource."
+            + "Example Requests:\n" + "\n" + "loans/1\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate\n" + "\n" + "\n"
+            + "loans/1?associations=all\n" + "\n" + "loans/1?associations=all&exclude=guarantors\n" + "\n" + "\n"
+            + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansLoanIdResponse.class) })
     public String retrieveLoan(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
-        long start = System.currentTimeMillis() ;
+        long start = System.currentTimeMillis();
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
         if (loanBasicDetails.isInterestRecalculationEnabled()) {
-            Collection<CalendarData> interestRecalculationCalendarDatas = this.calendarReadPlatformService
-                    .retrieveCalendarsByEntity(loanBasicDetails.getInterestRecalculationDetailId(),
-                            CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue(), null);
+            Collection<CalendarData> interestRecalculationCalendarDatas = this.calendarReadPlatformService.retrieveCalendarsByEntity(
+                    loanBasicDetails.getInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue(),
+                    null);
             CalendarData calendarData = null;
             if (!CollectionUtils.isEmpty(interestRecalculationCalendarDatas)) {
                 calendarData = interestRecalculationCalendarDatas.iterator().next();
@@ -550,17 +522,18 @@ public class LoansApiResource {
                     compoundingCalendarData);
         }
         if (loanBasicDetails.isMonthlyRepaymentFrequencyType()) {
-            Collection<CalendarData> loanCalendarDatas = this.calendarReadPlatformService
-                    .retrieveCalendarsByEntity(loanId,
-                            CalendarEntityType.LOANS.getValue(), null);
+            Collection<CalendarData> loanCalendarDatas = this.calendarReadPlatformService.retrieveCalendarsByEntity(loanId,
+                    CalendarEntityType.LOANS.getValue(), null);
             CalendarData calendarData = null;
             if (!CollectionUtils.isEmpty(loanCalendarDatas)) {
                 calendarData = loanCalendarDatas.iterator().next();
             }
-            if(calendarData != null)
+            if (calendarData != null) {
                 loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
+            }
         }
-        Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanBasicDetails);
+        Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService
+                .retrieveLoanInterestRatePeriodData(loanBasicDetails);
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
         Collection<LoanChargeData> charges = null;
@@ -624,8 +597,8 @@ public class LoansApiResource {
                 if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()
                         && loanBasicDetails.isActive()) {
                     mandatoryResponseParameters.add("originalSchedule");
-                    LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(
-                            loanId, repaymentScheduleRelatedData, disbursementData);
+                    LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(loanId,
+                            repaymentScheduleRelatedData, disbursementData);
                     loanBasicDetails = LoanAccountData.withOriginalSchedule(loanBasicDetails, loanScheduleData);
                 }
             }
@@ -713,8 +686,8 @@ public class LoansApiResource {
                 chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId,
                         new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
             } else {
-                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId, new ChargeTimeType[] {
-                        ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId,
+                        new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
             }
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
@@ -741,10 +714,10 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());
             }
 
-            if(loanBasicDetails.product().canUseForTopup() && loanBasicDetails.clientId() != null){
-                clientActiveLoanOptions = this.accountDetailsReadPlatformService.retrieveClientActiveLoanAccountSummary(loanBasicDetails.clientId());
+            if (loanBasicDetails.product().canUseForTopup() && loanBasicDetails.clientId() != null) {
+                clientActiveLoanOptions = this.accountDetailsReadPlatformService
+                        .retrieveClientActiveLoanAccountSummary(loanBasicDetails.clientId());
             }
-
 
         }
 
@@ -753,38 +726,42 @@ public class LoansApiResource {
 
         paidInAdvanceTemplate = this.loanReadPlatformService.retrieveTotalPaidInAdvance(loanId);
 
-        //Get rates from Loan
+        // Get rates from Loan
         boolean isRatesEnabled = this.configurationDomainService.isSubRatesEnabled();
         List<RateData> rates = null;
-        if (isRatesEnabled){
-          rates = this.rateReadService.retrieveLoanRates(loanId);
+        if (isRatesEnabled) {
+            rates = this.rateReadService.retrieveLoanRates(loanId);
         }
 
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions, repaymentStrategyOptions,
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions,
-                calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled);
+                fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions, calendarOptions,
+                notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations, overdueCharges, paidInAdvanceTemplate,
+                interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
         String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
-        return toReturn ;
+        return toReturn;
     }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Loans", httpMethod = "GET", notes = "The list capability of loans can support pagination and sorting.\n" + "Example Requests:\n" + "\n" + "loans\n" + "\n" + "loans?fields=accountNo\n" + "\n" + "loans?offset=10&limit=50\n" + "\n" + "loans?orderBy=accountNo&sortOrder=DESC")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansResponse.class)})
+    @ApiOperation(value = "List Loans", httpMethod = "GET", notes = "The list capability of loans can support pagination and sorting.\n"
+            + "Example Requests:\n" + "\n" + "loans\n" + "\n" + "loans?fields=accountNo\n" + "\n" + "loans?offset=10&limit=50\n" + "\n"
+            + "loans?orderBy=accountNo&sortOrder=DESC")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansResponse.class) })
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
             @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
             // @QueryParam("underHierarchy") final String hierarchy,
-            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder")final String sortOrder,
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
             @QueryParam("accountNo") @ApiParam(value = "accountNo") final String accountNo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -801,11 +778,19 @@ public class LoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Calculate loan repayment schedule | Submit a new Loan Application", httpMethod = "POST", notes = "It calculates the loan repayment Schedule\n" + "Submits a new loan application\n" + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, expectedDisbursementDate, submittedOnDate, loanType\n" + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n" + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n" + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n" + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan: datatables")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansResponse.class)})
-    public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") @ApiParam(value = "command") final String commandParam,
-            @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Calculate loan repayment schedule | Submit a new Loan Application", httpMethod = "POST", notes = "It calculates the loan repayment Schedule\n"
+            + "Submits a new loan application\n"
+            + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, expectedDisbursementDate, submittedOnDate, loanType\n"
+            + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n"
+            + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n"
+            + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n"
+            + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan: datatables")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansResponse.class) })
+    public String calculateLoanScheduleOrSubmitLoanApplication(
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         if (is(commandParam, "calculateLoanSchedule")) {
 
@@ -830,9 +815,11 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Modify a loan application", httpMethod = "PUT", notes = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PutLoansLoanIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PutLoansLoanIdResponse.class)})
-    public String modifyLoanApplication(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PutLoansLoanIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PutLoansLoanIdResponse.class) })
+    public String modifyLoanApplication(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication(loanId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -847,7 +834,7 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Loan Application", httpMethod = "DELETE", notes = "Note: Only loans in \"Submitted and awaiting approval\" status can be deleted.")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.DeleteLoansLoanIdResponse.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.DeleteLoansLoanIdResponse.class) })
     public String deleteLoanApplication(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanApplication(loanId).build();
@@ -861,11 +848,24 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve Loan Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n" + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n" + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n" + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n" + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
-    public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
-           @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve Loan Application:\n"
+            + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n"
+            + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n"
+            + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n"
+            + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n"
+            + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n"
+            + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n"
+            + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n"
+            + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n"
+            + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n"
+            + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n"
+            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class) })
+    public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
@@ -894,7 +894,7 @@ public class LoansApiResource {
         } else if (is(commandParam, "undodisbursal")) {
             final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if (is(commandParam, "undolastdisbursal")) {
+        } else if (is(commandParam, "undolastdisbursal")) {
             final CommandWrapper commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
@@ -910,7 +910,9 @@ public class LoansApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -922,32 +924,39 @@ public class LoansApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
-    public Response getLoansTemplate(@QueryParam("officeId") final Long officeId,
-            @QueryParam("staffId") final Long staffId,@QueryParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOANS.toString(), officeId, staffId,dateFormat);
+    public Response getLoansTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
+            @QueryParam("dateFormat") final String dateFormat) {
+        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOANS.toString(), officeId, staffId, dateFormat);
     }
 
     @GET
     @Path("glimAccount/{glimId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getGlimRepaymentTemplate(@PathParam("glimId") final Long glimId,@Context final UriInfo uriInfo)
-    {
-          this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-          Collection<GlimRepaymentTemplate> glimRepaymentTemplate=this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
-          final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-         return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.GLIM_ACCOUNTS_DATA_PARAMETERS);
+    public String getGlimRepaymentTemplate(@PathParam("glimId") final Long glimId, @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        Collection<GlimRepaymentTemplate> glimRepaymentTemplate = this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.GLIM_ACCOUNTS_DATA_PARAMETERS);
     }
 
     @POST
     @Path("glimAccount/{glimId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Approve GLIM Application | Undo GLIM Application Approval | Reject GLIM Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve GLIM Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the GLIM application\n\n" + "Undo GLIM Application Approval:\n" + "Undoes the GLIM Application Approval\n\n" + "Reject GLIM Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the GLIM application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
+    @ApiOperation(value = "Approve GLIM Application | Undo GLIM Application Approval | Reject GLIM Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve GLIM Application:\n"
+            + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n"
+            + "Approves the GLIM application\n\n" + "Undo GLIM Application Approval:\n" + "Undoes the GLIM Application Approval\n\n"
+            + "Reject GLIM Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the GLIM application\n\n"
+            + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n"
+            + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n"
+            + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n"
+            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class) })
     public String glimStateTransitions(@PathParam("glimId") final Long glimId, @QueryParam("command") final String commandParam,
-          final String apiRequestBodyAsJson) {
+            final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
@@ -973,7 +982,9 @@ public class LoansApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -983,16 +994,17 @@ public class LoansApiResource {
     @Produces("application/vnd.ms-excel")
     public Response getLoanRepaymentTemplate(@QueryParam("officeId") final Long officeId,
             @QueryParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOAN_TRANSACTIONS.toString(), officeId, null,dateFormat);
+        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOAN_TRANSACTIONS.toString(), officeId, null, dateFormat);
     }
 
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String postLoanTemplate(@FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail,
-            @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat){
-        final Long importDocumentId = this. bulkImportWorkbookService.importWorkbook(GlobalEntityType.LOANS.toString(), uploadedInputStream,fileDetail,locale,dateFormat);
+            @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
+            @FormDataParam("dateFormat") final String dateFormat) {
+        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.LOANS.toString(), uploadedInputStream,
+                fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
 
@@ -1000,10 +1012,10 @@ public class LoansApiResource {
     @Path("repayments/uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String postLoanRepaymentTemplate(@FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail,@FormDataParam("locale") final String locale,
-            @FormDataParam("dateFormat") final String dateFormat){
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.LOAN_TRANSACTIONS.toString(), uploadedInputStream,fileDetail,
-                locale,dateFormat);
+            @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
+            @FormDataParam("dateFormat") final String dateFormat) {
+        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.LOAN_TRANSACTIONS.toString(),
+                uploadedInputStream, fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
 }

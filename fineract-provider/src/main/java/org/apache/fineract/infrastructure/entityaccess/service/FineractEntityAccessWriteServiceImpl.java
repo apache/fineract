@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FineractEntityAccessWriteServiceImpl implements FineractEntityAccessWriteService {
 
-    private final static Logger logger = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
     private final FineractEntityAccessRepository entityAccessRepository;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
@@ -77,7 +77,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     @Transactional
     public void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
             final Long secondEntityId) {
-        FineractEntityAccess entityAccess = FineractEntityAccess.createNew(entityType, entityId, accessType, secondEntityType, secondEntityId);
+        FineractEntityAccess entityAccess = FineractEntityAccess.createNew(entityType, entityId, accessType, secondEntityType,
+                secondEntityId);
         entityAccessRepository.save(entityAccess);
     }
 
@@ -93,13 +94,14 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
             final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
-            final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            final Date endDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+            final Date startDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+            final Date endDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
 
             fromApiJsonDeserializer.checkForEntity(relId.toString(), fromId, toId);
             if (startDate != null && endDate != null) {
-                if (endDate
-                        .before(startDate)) { throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
+                if (endDate.before(startDate)) {
+                    throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
+                }
             }
 
             final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
@@ -110,8 +112,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -143,8 +145,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -155,7 +157,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     public CommandProcessingResult deleteEntityToEntityMapping(Long mapId) {
         // TODO Auto-generated method stub
 
-        final FineractEntityToEntityMapping deleteMap = this.fineractEntityToEntityMappingRepositoryWrapper.findOneWithNotFoundDetection(mapId);
+        final FineractEntityToEntityMapping deleteMap = this.fineractEntityToEntityMappingRepositoryWrapper
+                .findOneWithNotFoundDetection(mapId);
         this.fineractEntityToEntityMappingRepository.delete(deleteMap);
 
         return new CommandProcessingResultBuilder(). //
@@ -164,8 +167,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
-        realCause.printStackTrace();
+        LOG.error("Problem occurred in handleDataIntegrityIssues function", realCause);
         if (realCause.getMessage().contains("rel_id_from_id_to_id")) {
             final String fromId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final String toId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
@@ -178,7 +180,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     /*

@@ -85,7 +85,8 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve surveys", notes = "Retrieve surveys. This allows to retrieve the list of survey tables registered .")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class, responseContainer = "List")})
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class, responseContainer = "List") })
     public String retrieveSurveys() {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
@@ -99,7 +100,7 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve survey", notes = "Lists a registered survey table details and the Apache Fineract Core application table they are registered to.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class) })
     public String retrieveSurvey(@PathParam("surveyName") @ApiParam(value = "surveyName") final String surveyName) {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
@@ -114,11 +115,14 @@ public class SurveyApiResource {
     @Path("{surveyName}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.mifos.io/api-docs/apiLive.htm#survey_create ] ")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class)})
-    public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n"
+            + "\n" + "Refer Link for sample Body:  [ https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#survey_create ] ")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class) })
+    public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable,
+            @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .fullFilSurvey(datatable, apptableId) //
@@ -166,8 +170,8 @@ public class SurveyApiResource {
     public String register(@PathParam("surveyName") final String datatable, @PathParam("apptable") final String apptable,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().registerSurvey(datatable, apptable)
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().registerSurvey(datatable, apptable).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

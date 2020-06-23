@@ -38,10 +38,8 @@ public class WorkingDaysApiConstants {
     public static final String extendTermForDailyRepayments = "extendTermForDailyRepayments";
     public static final String extendTermForRepaymentsOnHolidays = "extendTermForRepaymentsOnHolidays";
 
-    protected static final Set<String> WORKING_DAYS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            recurrence,repayment_rescheduling_enum,extendTermForDailyRepayments,extendTermForRepaymentsOnHolidays
-    ));
+    protected static final Set<String> WORKING_DAYS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, recurrence,
+            repayment_rescheduling_enum, extendTermForDailyRepayments, extendTermForRepaymentsOnHolidays));
 
-    protected static final Set<String> WORKING_DAYS_TEMPLATE_PARAMETERS = new HashSet<>(Arrays.asList
-            (rescheduleRepaymentTemplate));
+    protected static final Set<String> WORKING_DAYS_TEMPLATE_PARAMETERS = new HashSet<>(Arrays.asList(rescheduleRepaymentTemplate));
 }

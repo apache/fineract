@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.account;
 
-
 public class AccountDetailConstants {
 
     // general

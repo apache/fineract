@@ -43,7 +43,7 @@ public class FineractEntityApiResourceConstants {
 
     protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(mappingTypes));
 
-    protected static final Set<String> FETCH_ENTITY_TO_ENTITY_MAPPINGS = new HashSet<>(Arrays.asList(mapId,relId,
-            fromEnityType, toEntityType));
+    protected static final Set<String> FETCH_ENTITY_TO_ENTITY_MAPPINGS = new HashSet<>(
+            Arrays.asList(mapId, relId, fromEnityType, toEntityType));
 
 }

@@ -31,32 +31,30 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OfficeHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OfficeHelper.class);
     private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    public OfficeHelper(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+    public OfficeHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
     public OfficeDomain retrieveOfficeByID(int id) {
-        Object get = Utils.performServerGet(
-                requestSpec, responseSpec, OFFICE_URL + "/" + id + "?"
-                        + Utils.TENANT_IDENTIFIER, "");
+        Object get = Utils.performServerGet(requestSpec, responseSpec, OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER, "");
         final String json = new Gson().toJson(get);
-        return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {
-        }.getType());
+        return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {}.getType());
     }
 
     public Integer createOffice(final String openingDate) {
         String json = getAsJSON(openingDate);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec,
-                OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
@@ -67,10 +65,9 @@ public class OfficeHelper {
         map.put("locale", "en");
         map.put("openingDate", openingDate);
 
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
 
-        return Utils.performServerPut(requestSpec, responseSpec, OFFICE_URL
-                + "/" + id + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPut(requestSpec, responseSpec, OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER,
                 new Gson().toJson(map), "resourceId");
     }
 
@@ -81,30 +78,31 @@ public class OfficeHelper {
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("openingDate", openingDate);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
-    public String importOfficeTemplate(File file){
-        String locale="en";
-        String dateFormat="dd MMMM yyyy";
+    public String importOfficeTemplate(File file) {
+        String locale = "en";
+        String dateFormat = "dd MMMM yyyy";
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
-        return Utils.performServerTemplatePost(requestSpec,responseSpec,OFFICE_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
-                null,file,locale,dateFormat);
+        return Utils.performServerTemplatePost(requestSpec, responseSpec, OFFICE_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
+                null, file, locale, dateFormat);
 
     }
 
-    public String getOutputTemplateLocation(final String importDocumentId){
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
-        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
-                +Utils.TENANT_IDENTIFIER,importDocumentId);
+    public String getOutputTemplateLocation(final String importDocumentId) {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
+                "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
     }
+
     public Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
-        byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,OFFICE_URL+"/downloadtemplate"+"?"+
-                Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
-        InputStream inputStream= new ByteArrayInputStream(byteArray);
-        Workbook workbook=new HSSFWorkbook(inputStream);
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,
+                OFFICE_URL + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        Workbook workbook = new HSSFWorkbook(inputStream);
         return workbook;
     }
 }

@@ -80,9 +80,8 @@ public class MeetingsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName,
-                    MeetingApiConstants.clientsAttendance, MeetingApiConstants.clients,
-                    MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
+            Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName, MeetingApiConstants.clientsAttendance,
+                    MeetingApiConstants.clients, MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
 
     @Autowired
     public MeetingsApiResource(final PlatformSecurityContext context, final MeetingReadPlatformService readPlatformService,
@@ -151,8 +150,8 @@ public class MeetingsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(MEETING_RESOURCE_NAME);
 
-        final Collection<MeetingData> meetingsData = this.readPlatformService.retrieveMeetingsByEntity(entityId, CalendarEntityType
-                .valueOf(entityType.toUpperCase()).getValue(), limit);
+        final Collection<MeetingData> meetingsData = this.readPlatformService.retrieveMeetingsByEntity(entityId,
+                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(), limit);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, meetingsData, MEETING_RESPONSE_DATA_PARAMETERS);
@@ -183,7 +182,9 @@ public class MeetingsApiResource {
             final String apiRequestBodyAsJson) {
 
         final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
-        if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
+        if (calendarEntityType == null) {
+            throw new CalendarEntityTypeNotSupportedException(entityType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createMeeting(resourceDetails, entityType, entityId)

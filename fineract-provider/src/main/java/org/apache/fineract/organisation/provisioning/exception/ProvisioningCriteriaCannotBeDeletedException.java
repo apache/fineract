@@ -23,7 +23,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class ProvisioningCriteriaCannotBeDeletedException extends AbstractPlatformDomainRuleException {
 
     public ProvisioningCriteriaCannotBeDeletedException(Long criteriaId) {
-        super("error.msg.provisioningcriteria.id.usedin.provisioning.entries", "Provisioningcriteria with identifier " + criteriaId + "associated in journal entries");
+        super("error.msg.provisioningcriteria.id.usedin.provisioning.entries",
+                "Provisioningcriteria with identifier " + criteriaId + "associated in journal entries");
     }
 
 }

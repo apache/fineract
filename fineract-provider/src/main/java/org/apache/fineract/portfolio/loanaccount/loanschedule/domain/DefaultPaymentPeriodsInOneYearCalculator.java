@@ -45,6 +45,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 paymentPeriodsInOneYear = Integer.valueOf(0);
             break;
+            default:
         }
         return paymentPeriodsInOneYear;
     }
@@ -62,8 +63,8 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             periodFraction = Double.valueOf("1.0");
         } else if (interestChargedFromLocalDate != null && repaymentPeriod.contains(interestChargedFromLocalDate)) {
 
-            final int numberOfDaysInterestCalculationGraceInPeriod = Days.daysBetween(repaymentPeriodStartDate,
-                    interestChargedFromLocalDate).getDays();
+            final int numberOfDaysInterestCalculationGraceInPeriod = Days
+                    .daysBetween(repaymentPeriodStartDate, interestChargedFromLocalDate).getDays();
             periodFraction = calculateRepaymentPeriodFraction(repaymentPeriodFrequencyType, repaidEvery,
                     numberOfDaysInterestCalculationGraceInPeriod);
         }
@@ -91,6 +92,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 fraction = Double.valueOf("0");
             break;
+            default:
         }
         return fraction;
     }

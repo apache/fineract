@@ -56,8 +56,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class BulkLoansApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("officeId", "fromLoanOfficerId",
-            "assignmentDate", "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("officeId", "fromLoanOfficerId", "assignmentDate",
+            "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
 
     private final String resourceNameForPermissions = "LOAN";
 

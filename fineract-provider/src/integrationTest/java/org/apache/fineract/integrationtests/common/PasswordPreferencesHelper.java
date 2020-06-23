@@ -30,17 +30,21 @@ public class PasswordPreferencesHelper {
     public static Object updatePasswordPreferences(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             String validationPolicyId) {
         final String UPDATE_PASSWORD_PREFERENCES_URL = PASSWORD_PREFERENCES_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE PASSWORD PREFERENCE---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL, updatePreferencesAsJson(validationPolicyId), "");
+        // system.out.println("---------------------------------UPDATE PASSWORD
+        // PREFERENCE---------------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL,
+                updatePreferencesAsJson(validationPolicyId), "");
     }
 
     public static Object updateWithInvalidValidationPolicyId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec,String invalidValidationPolicyId, String jsonAttributeToGetback) {
+            final ResponseSpecification responseSpec, String invalidValidationPolicyId, String jsonAttributeToGetback) {
         final String UPDATE_PASSWORD_PREFERENCES_URL = PASSWORD_PREFERENCES_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out
-                .println("---------------------------------UPDATE PASSWORD PREFERENCES WITH INVALID ID-----------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL, updatePreferencesWithInvalidId(invalidValidationPolicyId),
-                jsonAttributeToGetback);
+        // system.out
+        // .println("---------------------------------UPDATE PASSWORD
+        // PREFERENCES WITH INVALID
+        // ID-----------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL,
+                updatePreferencesWithInvalidId(invalidValidationPolicyId), jsonAttributeToGetback);
     }
 
     public static String updatePreferencesAsJson(String validationPolicyId) {
@@ -55,14 +59,15 @@ public class PasswordPreferencesHelper {
         return new Gson().toJson(map);
     }
 
-
     public static int getActivePasswordPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return Utils.performServerGet(requestSpec, responseSpec, PASSWORD_PREFERENCES_URL + "?" + Utils.TENANT_IDENTIFIER, "id");
     }
 
-    public static HashMap<String, Object> getAllPreferences(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static HashMap<String, Object> getAllPreferences(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
 
-        return Utils.performServerGet(requestSpec, responseSpec, PASSWORD_PREFERENCES_URL + "/template" + "?" + Utils.TENANT_IDENTIFIER, "");
+        return Utils.performServerGet(requestSpec, responseSpec, PASSWORD_PREFERENCES_URL + "/template" + "?" + Utils.TENANT_IDENTIFIER,
+                "");
 
     }
 

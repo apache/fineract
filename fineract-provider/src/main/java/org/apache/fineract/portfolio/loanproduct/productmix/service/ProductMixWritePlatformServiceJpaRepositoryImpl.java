@@ -49,7 +49,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductMixWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final ProductMixDataValidator fromApiJsonDeserializer;
     private final ProductMixRepository productMixRepository;
@@ -135,7 +135,9 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = new ArrayList<>(this.productMixRepository.findByProductId(productId));
-            if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
+            if (CollectionUtils.isEmpty(existedProductMixes)) {
+                throw new ProductMixNotFoundException(productId);
+            }
             final Set<String> restrictedIds = new HashSet<>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 
             // updating with empty array means deleting the existed records.
@@ -171,8 +173,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     }
 
     private LoanProduct findByProductIdIfProvided(final Long productId) {
-        return this.productRepository.findById(productId)
-                .orElseThrow(() -> new LoanProductNotFoundException(productId));
+        return this.productRepository.findById(productId).orElseThrow(() -> new LoanProductNotFoundException(productId));
     }
 
     private Map<Long, LoanProduct> getRestrictedProducts(final Set<String> restrictedIds) {
@@ -194,7 +195,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     private List<ProductMix> updateRestrictedIds(final Set<String> restrictedIds, final List<ProductMix> existedProductMixes) {
@@ -219,7 +220,9 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = this.productMixRepository.findByProductId(productId);
-            if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
+            if (CollectionUtils.isEmpty(existedProductMixes)) {
+                throw new ProductMixNotFoundException(productId);
+            }
             this.productMixRepository.deleteAll(existedProductMixes);
             changes.put("removedProductsForMix", getProductIdsFromCollection(existedProductMixes));
             return new CommandProcessingResultBuilder().with(changes).withProductId(productId).build();

@@ -23,13 +23,13 @@ import java.util.Map;
 
 public enum GroupTypes {
 
-    INVALID(0l, "lendingStrategy.invalid", "invalid"), //
-    CENTER(1l, "groupTypes.center", "center"), //
-    GROUP(2l, "groupTypes.group", "group"); //
+    INVALID(0L, "lendingStrategy.invalid", "invalid"), //
+    CENTER(1L, "groupTypes.center", "center"), //
+    GROUP(2L, "groupTypes.group", "group"); //
 
-    private Long id;
-    private String code;
-    private String value;
+    private final Long id;
+    private final String code;
+    private final String value;
 
     private GroupTypes(final Long id, final String code, final String value) {
         this.id = id;

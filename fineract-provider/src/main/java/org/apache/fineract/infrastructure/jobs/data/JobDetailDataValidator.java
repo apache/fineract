@@ -41,9 +41,9 @@ import org.springframework.stereotype.Component;
 public class JobDetailDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-            SchedulerJobApiConstants.cronExpressionParamName));
+    private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
+                    SchedulerJobApiConstants.cronExpressionParamName));
 
     @Autowired
     public JobDetailDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -51,7 +51,9 @@ public class JobDetailDataValidator {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         boolean atLeastOneParameterPassedForUpdate = false;
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -92,7 +94,9 @@ public class JobDetailDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
 }

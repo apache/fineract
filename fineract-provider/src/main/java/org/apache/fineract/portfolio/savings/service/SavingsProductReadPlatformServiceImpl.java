@@ -68,7 +68,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and sp.id in ( " + inClause + " ) ";
         }
 
@@ -84,7 +84,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in ( " + inClause + " ) ";
         }
 
@@ -97,8 +97,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         try {
             this.context.authenticatedUser();
             final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.id = ? and sp.deposit_type_enum = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper, new Object[] { savingProductId,
-                    DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
+                    new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsProductNotFoundException(savingProductId);
         }
@@ -111,8 +111,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         public SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
-            sqlBuilder
-                    .append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append(
+                    "sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
@@ -163,8 +163,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
             final BigDecimal nominalAnnualInterestRate = rs.getBigDecimal("nominalAnnualInterestRate");
 
             final Integer compoundingInterestPeriodTypeValue = JdbcSupport.getInteger(rs, "compoundingInterestPeriodType");
@@ -254,7 +254,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " where id in ( " + inClause + " ) ";
             inClauseAdded = true;
         }
@@ -265,15 +265,17 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             } else {
                 sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
             }
-            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, new Object[] {isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
+                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         }
 
-        if(inClauseAdded) {
+        if (inClauseAdded) {
             sql += " and sp.deposit_type_enum = ?";
-        }else {
-             sql += " where sp.deposit_type_enum = ?";
+        } else {
+            sql += " where sp.deposit_type_enum = ?";
         }
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
+                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
 
     }
 
@@ -288,10 +290,10 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode});
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode });
     }
 }

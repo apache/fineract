@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoanApplicationTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTestBuilder.class);
     private static final String DAYS = "0";
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";
@@ -42,8 +42,8 @@ public class LoanApplicationTestBuilder {
     public static final String DEFAULT_STRATEGY = "1";
     public static final String RBI_INDIA_STRATEGY = "4";
 
-
     private String principal = "10,000";
+    private String glimPrincipal = "1000";
     private String loanTermFrequency = "";
     private String loanTermFrequencyType = "";
     private String numberOfRepayment = "0";
@@ -73,26 +73,25 @@ public class LoanApplicationTestBuilder {
     private String calendarId;
     private boolean syncDisbursementWithMeeting = false;
     private List<HashMap<String, Object>> datatables = null;
-    private List<Map<String, Object>> approvalFormData =null;
-
+    private List<Map<String, Object>> approvalFormData = null;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("groupId", groupID);
         map.put("clientId", clientID);
-        if (this.loanType == "jlg") {
+        if ("jlg".equals(this.loanType)) {
             if (this.calendarId != null) {
                 map.put("calendarId", this.calendarId);
             }
             map.put("syncDisbursementWithMeeting", this.syncDisbursementWithMeeting);
         }
 
-        if (this.loanType == "glim") {
-            if (isParentAccount!=null){
+        if ("glim".equals(this.loanType)) {
+            if (isParentAccount != null) {
                 map.put("isParentAccount", this.isParentAccount);
             }
 
-            if (totalLoan!=null){
+            if (totalLoan != null) {
                 map.put("totalLoan", this.totalLoan);
             }
         }
@@ -103,7 +102,7 @@ public class LoanApplicationTestBuilder {
 
         final HashMap<String, Object> map = new HashMap<>();
 
-        if (this.loanType == "group") {
+        if ("group".equals(this.loanType)) {
             map.put("groupId", ID);
         } else {
             map.put("clientId", ID);
@@ -111,15 +110,19 @@ public class LoanApplicationTestBuilder {
         return build(map, loanProductId, savingsID);
     }
 
-    public String build()
-    {
-         final HashMap<String, Object> map = new HashMap<>();
+    public String build() {
+        final HashMap<String, Object> map = new HashMap<>();
 
-         if(this.approvalFormData != null) {
-             map.put("approvalFormData", this.approvalFormData) ;
-         }
+        if (this.approvalFormData != null) {
+            map.put("approvalFormData", this.approvalFormData);
+        }
 
-        String approvalFormData=new Gson().toJson(map);
+        if (this.glimPrincipal != null) {
+            map.put("glimPrincipal", this.glimPrincipal);
+        }
+        map.put("locale", "en_GB");
+
+        String approvalFormData = new Gson().toJson(map);
         LOG.info("approvalFormData: {} ", approvalFormData);
         return approvalFormData;
     }
@@ -314,8 +317,6 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-
-
     public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
         this.repaymentsStartingFromDate = firstRepaymentDate;
         return this;
@@ -327,9 +328,9 @@ public class LoanApplicationTestBuilder {
     }
 
     public LoanApplicationTestBuilder withApprovalFormData(final List<Map<String, Object>> approvalFormData) {
-          this.approvalFormData = new ArrayList<>();
-          this.approvalFormData.addAll(approvalFormData);
-          return this;
+        this.approvalFormData = new ArrayList<>();
+        this.approvalFormData.addAll(approvalFormData);
+        return this;
     }
 
     /**

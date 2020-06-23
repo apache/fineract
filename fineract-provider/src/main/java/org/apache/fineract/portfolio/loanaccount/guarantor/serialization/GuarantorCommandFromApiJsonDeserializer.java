@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GuarantorJSONinputParams;
 import org.apache.fineract.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +52,12 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
 
     @Override
     public GuarantorCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = GUARANTOR_JSON_INPUT_PARAMS.getAllValues();
+        final Set<String> supportedParameters = GuarantorJSONinputParams.getAllValues();
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
@@ -68,30 +70,27 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
     }
 
     private GuarantorCommand extractGuarantorCommand(final JsonElement element, final Locale locale, final String dateFormat) {
-        final Long clientRelationshipTypeId = this.fromApiJsonHelper.extractLongNamed(
-                GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), element);
-        final Integer guarantorTypeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), element);
-        final Long entityId = this.fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), element);
-        final String firstname = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue(), element);
-        final String lastname = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue(), element);
-        final String addressLine1 = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue(),
+        final Long clientRelationshipTypeId = this.fromApiJsonHelper
+                .extractLongNamed(GuarantorJSONinputParams.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), element);
+        final Integer guarantorTypeId = this.fromApiJsonHelper
+                .extractIntegerSansLocaleNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue(), element);
+        final Long entityId = this.fromApiJsonHelper.extractLongNamed(GuarantorJSONinputParams.ENTITY_ID.getValue(), element);
+        final String firstname = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.FIRSTNAME.getValue(), element);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.LASTNAME.getValue(), element);
+        final String addressLine1 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), element);
+        final String addressLine2 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), element);
+        final String city = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.CITY.getValue(), element);
+        final String state = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.STATE.getValue(), element);
+        final String zip = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ZIP.getValue(), element);
+        final String country = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.COUNTRY.getValue(), element);
+        final String mobileNumber = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), element);
+        final String housePhoneNumber = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.PHONE_NUMBER.getValue(),
                 element);
-        final String addressLine2 = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_2.getValue(),
-                element);
-        final String city = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.CITY.getValue(), element);
-        final String state = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.STATE.getValue(), element);
-        final String zip = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.ZIP.getValue(), element);
-        final String country = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.COUNTRY.getValue(), element);
-        final String mobileNumber = this.fromApiJsonHelper
-                .extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue(), element);
-        final String housePhoneNumber = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue(),
-                element);
-        final String comment = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue(), element);
-        final LocalDate dob = this.fromApiJsonHelper.extractLocalDateNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue(), element,
+        final String comment = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.COMMENT.getValue(), element);
+        final LocalDate dob = this.fromApiJsonHelper.extractLocalDateNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue(), element,
                 dateFormat, locale);
-        final Long savingsId = this.fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.SAVINGS_ID.getValue(), element);
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(GUARANTOR_JSON_INPUT_PARAMS.AMOUNT.getValue(), element,
+        final Long savingsId = this.fromApiJsonHelper.extractLongNamed(GuarantorJSONinputParams.SAVINGS_ID.getValue(), element);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(GuarantorJSONinputParams.AMOUNT.getValue(), element,
                 locale);
 
         return new GuarantorCommand(clientRelationshipTypeId, guarantorTypeId, entityId, firstname, lastname, addressLine1, addressLine2,

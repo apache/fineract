@@ -65,8 +65,8 @@ public class SavingsAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName,
-                    SavingsApiConstants.localeParamName, transactionAmountParamName));
+            Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
+                    transactionAmountParamName));
 
     @Autowired
     public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -77,7 +77,9 @@ public class SavingsAccountTransactionDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -103,7 +105,9 @@ public class SavingsAccountTransactionDataValidator {
     public void validateActivation(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -124,7 +128,9 @@ public class SavingsAccountTransactionDataValidator {
     public void validateClosing(final JsonCommand command, final SavingsAccount account) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -144,9 +150,9 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(withdrawBalanceParamName).value(withdrawBalance).isOneOfTheseValues(true, false);
         }
 
-        if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
-                    "amount.is.on.hold.release.the.amount.to.continue", account.getId());
+        if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("amount.is.on.hold.release.the.amount.to.continue",
+                    account.getId());
         }
 
         validatePaymentTypeDetails(baseDataValidator, element);
@@ -165,18 +171,21 @@ public class SavingsAccountTransactionDataValidator {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
                     .notExceedingLengthOf(50);
-            if(paymentDetailParameterValue != null && !paymentDetailParameterValue.equals("")){
+            if (paymentDetailParameterValue != null && !paymentDetailParameterValue.equals("")) {
                 checkPaymentTypeDetails = true;
             }
         }
-        if(checkPaymentTypeDetails){
+        if (checkPaymentTypeDetails) {
             baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).notBlank().integerGreaterThanZero();
         }
 
     }
 
-    public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account, final AppUser createdUser) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account,
+            final AppUser createdUser) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS);
@@ -198,7 +207,7 @@ public class SavingsAccountTransactionDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
         account.holdAmount(amount);
-        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO)==-1){
+        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
         }
         LocalDate lastTransactionDate = account.retrieveLastTransactionDate();
@@ -217,7 +226,8 @@ public class SavingsAccountTransactionDataValidator {
         return transaction;
     }
 
-    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction, final AppUser createdUser) {
+    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction,
+            final AppUser createdUser) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -233,8 +243,7 @@ public class SavingsAccountTransactionDataValidator {
             boolean isActive = holdTransaction.getSavingsAccount().isActive();
             if (!isActive) {
                 baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                        .failWithCodeNoParameterAddedToErrorCode(
-                                SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
+                        .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
             }
         }
 

@@ -25,8 +25,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 
-public class FloatingRatePeriodData implements
-        Comparable<FloatingRatePeriodData>, Serializable {
+public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData>, Serializable {
 
     private Long id;
     private LocalDate fromDate;
@@ -38,10 +37,8 @@ public class FloatingRatePeriodData implements
     private String modifiedBy;
     private LocalDate modifiedOn;
 
-    public FloatingRatePeriodData(Long id, LocalDate fromDate,
-            BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
-            boolean isActive, String createdBy, LocalDate createdOn,
-            String modifiedBy, LocalDate modifiedOn) {
+    public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
+            boolean isActive, String createdBy, LocalDate createdOn, String modifiedBy, LocalDate modifiedOn) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -62,7 +59,7 @@ public class FloatingRatePeriodData implements
     }
 
     public LocalDate getFromDateAsLocalDate() {
-        return new LocalDate(this.fromDate);
+        return this.fromDate;
     }
 
     public BigDecimal getInterestRate() {
@@ -113,7 +110,7 @@ public class FloatingRatePeriodData implements
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof FloatingRatePeriodData)) {
             return false;
         }
         final FloatingRatePeriodData rhs = (FloatingRatePeriodData) obj;

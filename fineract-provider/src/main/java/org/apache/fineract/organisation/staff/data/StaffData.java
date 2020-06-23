@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing staff data.
  */
-public class StaffData implements Serializable {
+public final class StaffData implements Serializable {
 
     private final Long id;
     private final String externalId;
@@ -40,19 +40,20 @@ public class StaffData implements Serializable {
     private final Boolean isActive;
     private final LocalDate joiningDate;
 
-    //import fields
+    // import fields
     private transient Integer rowIndex;
     private String dateFormat;
     private String locale;
 
-    public static StaffData importInstance(String externalId, String firstName, String lastName, String mobileNo, Long officeId, Boolean isLoanOfficer,
-            Boolean isActive, LocalDate joinedOnDate, Integer rowIndex,String locale, String dateFormat){
-        return  new StaffData(externalId,firstName,lastName,mobileNo,officeId,isLoanOfficer,isActive,
-                joinedOnDate,rowIndex,locale,dateFormat);
+    public static StaffData importInstance(String externalId, String firstname, String lastname, String mobileNo, Long officeId,
+            Boolean isLoanOfficer, Boolean isActive, LocalDate joinedOnDate, Integer rowIndex, String locale, String dateFormat) {
+        return new StaffData(externalId, firstname, lastname, mobileNo, officeId, isLoanOfficer, isActive, joinedOnDate, rowIndex, locale,
+                dateFormat);
 
     }
+
     private StaffData(String externalId, String firstname, String lastname, String mobileNo, Long officeId, Boolean isLoanOfficer,
-            Boolean isActive, LocalDate joiningDate, Integer rowIndex,String locale, String dateFormat) {
+            Boolean isActive, LocalDate joiningDate, Integer rowIndex, String locale, String dateFormat) {
 
         this.externalId = externalId;
         this.firstname = firstname;
@@ -63,8 +64,8 @@ public class StaffData implements Serializable {
         this.isActive = isActive;
         this.joiningDate = joiningDate;
         this.rowIndex = rowIndex;
-        this.dateFormat= dateFormat;
-        this.locale= locale;
+        this.dateFormat = dateFormat;
+        this.locale = locale;
         this.allowedOffices = null;
         this.id = null;
         this.officeName = null;

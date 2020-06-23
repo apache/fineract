@@ -26,13 +26,13 @@ CREATE TABLE `oauth_client_details` (
   `authorized_grant_types` varchar(256) DEFAULT NULL,
   `web_server_redirect_uri` varchar(256) DEFAULT NULL,
   `authorities` varchar(256) DEFAULT NULL,
-  `access_token_validity` int(11) DEFAULT NULL,
-  `refresh_token_validity` int(11) DEFAULT NULL,
+  `access_token_validity` INT DEFAULT NULL,
+  `refresh_token_validity` INT DEFAULT NULL,
   `additional_information` varchar(4096) DEFAULT NULL,
   `autoapprove` BIT(1) NULL DEFAULT NULL,
   PRIMARY KEY (`client_id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 
@@ -48,7 +48,7 @@ CREATE TABLE `oauth_access_token` (
   `authentication` blob,
   `refresh_token` varchar(256) DEFAULT NULL
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 
@@ -57,6 +57,5 @@ CREATE TABLE `oauth_refresh_token` (
   `token` blob,
   `authentication` blob
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
-	

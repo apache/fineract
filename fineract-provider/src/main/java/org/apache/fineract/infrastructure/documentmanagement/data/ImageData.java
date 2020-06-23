@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageData {
 
-    private final static Logger logger = LoggerFactory.getLogger(ImageData.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageData.class);
 
     @SuppressWarnings("unused")
     private final Long imageId;
@@ -48,7 +48,7 @@ public class ImageData {
     private final String entityDisplayName;
 
     private File file;
-    private ContentRepositoryUtils.IMAGE_FILE_EXTENSION fileExtension;
+    private ContentRepositoryUtils.ImageFileExtension fileExtension;
     private InputStream inputStream;
 
     public ImageData(final Long imageId, final String location, final Integer storageType, final String entityDisplayName) {
@@ -67,7 +67,7 @@ public class ImageData {
                 return IOUtils.toByteArray(fileInputStream);
             }
         } catch (IOException e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
         }
         return null;
     }
@@ -94,7 +94,7 @@ public class ImageData {
 
         int newWidth = (int) (src.getWidth() / scaleRatio);
         int newHeight = (int) (src.getHeight() / scaleRatio);
-        int colorModel = fileExtension == ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG ? BufferedImage.TYPE_INT_RGB
+        int colorModel = fileExtension == ContentRepositoryUtils.ImageFileExtension.JPEG ? BufferedImage.TYPE_INT_RGB
                 : BufferedImage.TYPE_INT_ARGB;
         BufferedImage target = new BufferedImage(newWidth, newHeight, colorModel);
         Graphics2D g = target.createGraphics();
@@ -105,14 +105,16 @@ public class ImageData {
     }
 
     public byte[] getContentOfSize(Integer maxWidth, Integer maxHeight) {
-        if (maxWidth == null && maxHeight != null) { return getContent(); }
+        if (maxWidth == null && maxHeight != null) {
+            return getContent();
+        }
         byte[] out = null;
         if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
             try {
                 out = resizeImage(this.inputStream, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
                         maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fis = null;
@@ -120,13 +122,13 @@ public class ImageData {
                 fis = new FileInputStream(this.file);
                 out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException ex) {
-                logger.error("Error occured.", ex);
+                LOG.error("Error occured.", ex);
             } finally {
                 if (fis != null) {
                     try {
                         fis.close();
                     } catch (IOException ex) {
-                        logger.error("Error occured.", ex);
+                        LOG.error("Error occured.", ex);
                     }
                 }
             }
@@ -135,12 +137,12 @@ public class ImageData {
     }
 
     private void setImageContentType(String filename) {
-        fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG;
+        fileExtension = ContentRepositoryUtils.ImageFileExtension.JPEG;
 
-        if (StringUtils.endsWith(filename.toLowerCase(), ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
-            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF;
-        } else if (StringUtils.endsWith(filename, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
-            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG;
+        if (StringUtils.endsWith(filename.toLowerCase(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
+            fileExtension = ContentRepositoryUtils.ImageFileExtension.GIF;
+        } else if (StringUtils.endsWith(filename, ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
+            fileExtension = ContentRepositoryUtils.ImageFileExtension.PNG;
         }
     }
 
@@ -152,7 +154,7 @@ public class ImageData {
     }
 
     public String contentType() {
-        return ContentRepositoryUtils.IMAGE_MIME_TYPE.fromFileExtension(this.fileExtension).getValue();
+        return ContentRepositoryUtils.ImageMIMEtype.fromFileExtension(this.fileExtension).getValue();
     }
 
     public StorageType storageType() {
@@ -181,7 +183,7 @@ public class ImageData {
             try {
                 available = this.inputStream.available();
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fileInputStream = null;
@@ -190,15 +192,15 @@ public class ImageData {
                 available = fileInputStream.available();
                 fileInputStream.close();
             } catch (FileNotFoundException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             } finally {
                 if (fileInputStream != null) {
                     try {
                         fileInputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOG.error("Problem occurred in available function", e);
                     }
                 }
             }

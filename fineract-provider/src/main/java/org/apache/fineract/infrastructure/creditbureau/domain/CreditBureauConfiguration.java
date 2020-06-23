@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_creditbureau_configuration")
 public class CreditBureauConfiguration extends AbstractPersistableCustom {
+
     @Column(name = "configkey")
     private String configurationKey;
 

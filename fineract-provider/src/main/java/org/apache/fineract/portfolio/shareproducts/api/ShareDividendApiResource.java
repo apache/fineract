@@ -52,10 +52,8 @@ import org.springframework.stereotype.Component;
 @Path("/shareproduct/{productId}/dividend")
 @Component
 @Scope("singleton")
-@Api(tags = {"Self Dividend"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Self Dividend", description = "")
-})
+@Api(tags = { "Self Dividend" })
+@SwaggerDefinition(tags = { @Tag(name = "Self Dividend", description = "") })
 public class ShareDividendApiResource {
 
     private final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer;

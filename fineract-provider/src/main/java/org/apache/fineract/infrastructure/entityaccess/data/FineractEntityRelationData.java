@@ -38,7 +38,7 @@ public class FineractEntityRelationData implements Serializable {
         this.mappingTypes = mappingTypes;
     }
 
-    public static FineractEntityRelationData getMappingTypes(final Long id,final String mappingTypes) {
+    public static FineractEntityRelationData getMappingTypes(final Long id, final String mappingTypes) {
         Integer fromEntityType = null;
         final Integer toEntityType = null;
         return new FineractEntityRelationData(id, fromEntityType, toEntityType, mappingTypes);

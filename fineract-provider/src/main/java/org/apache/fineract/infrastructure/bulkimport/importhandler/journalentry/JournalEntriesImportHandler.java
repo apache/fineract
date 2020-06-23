@@ -42,10 +42,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class JournalEntriesImportHandler implements ImportHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JournalEntriesImportHandler.class);
     private Workbook workbook;
     private List<JournalEntryData> gltransaction;
     private LocalDate transactionDate;
@@ -56,16 +61,15 @@ public class JournalEntriesImportHandler implements ImportHandler {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public JournalEntriesImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+    public JournalEntriesImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @Override
     public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        gltransaction=new ArrayList<>();
-        readExcelFile(locale,dateFormat);
+        this.workbook = workbook;
+        gltransaction = new ArrayList<>();
+        readExcelFile(locale, dateFormat);
         return importEntity(dateFormat);
     }
 
@@ -78,64 +82,63 @@ public class JournalEntriesImportHandler implements ImportHandler {
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addJournalEntriesSheet, 4);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row = addJournalEntriesSheet.getRow(rowIndex);
+            row = addJournalEntriesSheet.getRow(rowIndex);
 
-                currentTransactionId = ImportHandlerUtils.readAsString(JournalEntryConstants.TRANSACTION_ID_COL, row);
+            currentTransactionId = ImportHandlerUtils.readAsString(JournalEntryConstants.TRANSACTION_ID_COL, row);
 
-                if (currentTransactionId.equals(prevTransactionId)) {
-                    if (journalEntry != null) {
+            if (currentTransactionId.equals(prevTransactionId)) {
+                if (journalEntry != null) {
 
-                        String creditGLAcct = ImportHandlerUtils.readAsString(
-                                JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
-                        Long glAccountIdCredit = ImportHandlerUtils.getIdByName(
-                                workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), creditGLAcct);
+                    String creditGLAcct = ImportHandlerUtils.readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
+                    Long glAccountIdCredit = ImportHandlerUtils
+                            .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), creditGLAcct);
 
-                        String debitGLAcct = ImportHandlerUtils.readAsString(
-                                JournalEntryConstants. GL_ACCOUNT_ID_DEBIT_COL, row);
+                    String debitGLAcct = ImportHandlerUtils.readAsString(JournalEntryConstants.GL_ACCOUNT_ID_DEBIT_COL, row);
 
-                        Long glAccountIdDebit = ImportHandlerUtils.getIdByName(
-                                workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), debitGLAcct);
+                    Long glAccountIdDebit = ImportHandlerUtils
+                            .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), debitGLAcct);
 
-                        BigDecimal creditAmt=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row)!=null)
+                    BigDecimal creditAmt = null;
+                    if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row) != null) {
                         creditAmt = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row));
-                        BigDecimal debitAmount=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null)
+                    }
+                    BigDecimal debitAmount = null;
+                    if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row) != null) {
                         debitAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row));
-
-                        if (creditGLAcct!=null) {
-
-                            CreditDebit credit = new CreditDebit(
-                                    glAccountIdCredit, creditAmt);
-                            journalEntry.addCredits(credit);
-                        }
-                        if (debitGLAcct!=null) {
-                            CreditDebit debit = new CreditDebit(
-                                    glAccountIdDebit, debitAmount);
-
-                            journalEntry.addDebits(debit);
-                        }
-                    }
-                } else {
-
-                    if (journalEntry != null) {
-                        gltransaction.add(journalEntry);
-                        journalEntry = null;
                     }
 
-                    journalEntry = readAddJournalEntries(row,locale,dateFormat);
+                    if (creditGLAcct != null) {
 
+                        CreditDebit credit = new CreditDebit(glAccountIdCredit, creditAmt);
+                        journalEntry.addCredits(credit);
+                    }
+                    if (debitGLAcct != null) {
+                        CreditDebit debit = new CreditDebit(glAccountIdDebit, debitAmount);
+
+                        journalEntry.addDebits(debit);
+                    }
                 }
+            } else {
+
+                if (journalEntry != null) {
+                    gltransaction.add(journalEntry);
+                    journalEntry = null;
+                }
+
+                journalEntry = readAddJournalEntries(row, locale, dateFormat);
+
+            }
             prevTransactionId = currentTransactionId;
         }
         // Adding last JE
         gltransaction.add(journalEntry);
     }
 
-    private JournalEntryData readAddJournalEntries(Row row,String locale,String dateFormat) {
+    private JournalEntryData readAddJournalEntries(Row row, String locale, String dateFormat) {
         LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
-        if (transactionDateCheck!=null)
+        if (transactionDateCheck != null) {
             transactionDate = transactionDateCheck;
+        }
 
         String officeName = ImportHandlerUtils.readAsString(JournalEntryConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
@@ -143,8 +146,8 @@ public class JournalEntriesImportHandler implements ImportHandler {
         Long paymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
                 paymentType);
         String currencyName = ImportHandlerUtils.readAsString(JournalEntryConstants.CURRENCY_NAME_COL, row);
-        String currencyCode = ImportHandlerUtils.getCodeByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
-                currencyName).toString();
+        String currencyCode = ImportHandlerUtils
+                .getCodeByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), currencyName).toString();
         String glAccountNameCredit = ImportHandlerUtils.readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
         Long glAccountIdCredit = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME),
                 glAccountNameCredit);
@@ -155,73 +158,75 @@ public class JournalEntriesImportHandler implements ImportHandler {
         credits = new ArrayList<>();
         debits = new ArrayList<>();
 
-      //  String credit = readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
-      //  String debit = readAsString(JournalEntryConstants.GL_ACCOUNT_ID_DEBIT_COL, row);
+        // String credit =
+        // readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
+        // String debit =
+        // readAsString(JournalEntryConstants.GL_ACCOUNT_ID_DEBIT_COL, row);
 
-        if (glAccountNameCredit!=null) {
-            if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row) != null){
-                credits.add(new CreditDebit(glAccountIdCredit, BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(
-                        JournalEntryConstants.AMOUNT_CREDIT_COL, row))));
-            }else {
-                credits.add(new CreditDebit(glAccountIdCredit,null));
+        if (glAccountNameCredit != null) {
+            if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row) != null) {
+                credits.add(new CreditDebit(glAccountIdCredit,
+                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row))));
+            } else {
+                credits.add(new CreditDebit(glAccountIdCredit, null));
             }
         }
 
-        if (glAccountNameDebit!=null) {
-            if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null) {
-                debits.add(new CreditDebit(glAccountIdDebit, BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(
-                        JournalEntryConstants.AMOUNT_DEBIT_COL, row))));
-            }else {
+        if (glAccountNameDebit != null) {
+            if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row) != null) {
+                debits.add(new CreditDebit(glAccountIdDebit,
+                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row))));
+            } else {
                 debits.add(new CreditDebit(glAccountIdDebit, null));
             }
         }
-        String accountNo=ImportHandlerUtils.readAsString(JournalEntryConstants.ACCOUNT_NO_COL,row);
-        String chequeNo=ImportHandlerUtils.readAsString(JournalEntryConstants.CHECK_NO_COL,row);
-        String routingCode=ImportHandlerUtils.readAsString(JournalEntryConstants.ROUTING_CODE_COL,row);
-        String receiptNo=ImportHandlerUtils.readAsString(JournalEntryConstants.RECEIPT_NO_COL,row);
-        String bankNo=ImportHandlerUtils.readAsString(JournalEntryConstants.BANK_NO_COL,row);
-        String comments=ImportHandlerUtils.readAsString(JournalEntryConstants.COMMENTS_COL,row);
+        String accountNo = ImportHandlerUtils.readAsString(JournalEntryConstants.ACCOUNT_NO_COL, row);
+        String chequeNo = ImportHandlerUtils.readAsString(JournalEntryConstants.CHECK_NO_COL, row);
+        String routingCode = ImportHandlerUtils.readAsString(JournalEntryConstants.ROUTING_CODE_COL, row);
+        String receiptNo = ImportHandlerUtils.readAsString(JournalEntryConstants.RECEIPT_NO_COL, row);
+        String bankNo = ImportHandlerUtils.readAsString(JournalEntryConstants.BANK_NO_COL, row);
+        String comments = ImportHandlerUtils.readAsString(JournalEntryConstants.COMMENTS_COL, row);
 
-        return JournalEntryData.importInstance(officeId, transactionDate, currencyCode,
-                paymentTypeId, row.getRowNum(), credits, debits,accountNo,chequeNo,routingCode,receiptNo,bankNo,comments,locale,dateFormat);
+        return JournalEntryData.importInstance(officeId, transactionDate, currencyCode, paymentTypeId, row.getRowNum(), credits, debits,
+                accountNo, chequeNo, routingCode, receiptNo, bankNo, comments, locale, dateFormat);
 
     }
 
     public Count importEntity(String dateFormat) {
         Sheet addJournalEntriesSheet = workbook.getSheet(TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
-        String errorMessage="";
+        int successCount = 0;
+        int errorCount = 0;
+        String errorMessage = "";
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        gsonBuilder.registerTypeAdapter(CurrencyData.class,new CurrencyDateCodeSerializer());
+        gsonBuilder.registerTypeAdapter(CurrencyData.class, new CurrencyDateCodeSerializer());
 
         for (JournalEntryData transaction : gltransaction) {
             try {
-                String payload  =gsonBuilder.create().toJson(transaction);
+                String payload = gsonBuilder.create().toJson(transaction);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createJournalEntry() //
                         .withJson(payload) //
                         .build(); //
                 final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
-                Cell statusCell = addJournalEntriesSheet.getRow(
-                        transaction.getRowIndex()).createCell(JournalEntryConstants.STATUS_COL);
+                Cell statusCell = addJournalEntriesSheet.getRow(transaction.getRowIndex()).createCell(JournalEntryConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
-                statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook,
-                        IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+                statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
+            } catch (RuntimeException ex) {
                 errorCount++;
-                ex.printStackTrace();
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(addJournalEntriesSheet,transaction.getRowIndex(),errorMessage, JournalEntryConstants.STATUS_COL);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                ImportHandlerUtils.writeErrorMessage(addJournalEntriesSheet, transaction.getRowIndex(), errorMessage,
+                        JournalEntryConstants.STATUS_COL);
             }
 
         }
         addJournalEntriesSheet.setColumnWidth(JournalEntryConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        ImportHandlerUtils.writeString(JournalEntryConstants.STATUS_COL, addJournalEntriesSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX), TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
-        return Count.instance(successCount,errorCount);
+        ImportHandlerUtils.writeString(JournalEntryConstants.STATUS_COL,
+                addJournalEntriesSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
+                TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
+        return Count.instance(successCount, errorCount);
     }
-
 
 }

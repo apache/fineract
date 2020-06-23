@@ -27,19 +27,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.ExternalServicesConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class ExternalServicesConfigurationTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ExternalServicesConfigurationHelper externalServicesConfigurationHelper;
     private ResponseSpecification httpStatusForidden;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -55,27 +57,27 @@ public class ExternalServicesConfigurationTest {
 
         // Checking for S3
         String configName = "s3_access_key";
-        ArrayList<HashMap> externalServicesConfig = this.externalServicesConfigurationHelper
+        ArrayList<HashMap> externalServicesConfig = ExternalServicesConfigurationHelper
                 .getExternalServicesConfigurationByServiceName(requestSpec, responseSpec, "S3");
-        Assert.assertNotNull(externalServicesConfig);
-        for (Integer configIndex = 0; configIndex < (externalServicesConfig.size()); configIndex++) {
+        Assertions.assertNotNull(externalServicesConfig);
+        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
             String name = (String) externalServicesConfig.get(configIndex).get("name");
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
-                if(value == null){
+                if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
-                System.out.println(name + ":" + value);
-                HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                LOG.info("{} : {}", name, value);
+                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, newValue);
-                Assert.assertNotNull(arrayListValue.get("value"));
-                Assert.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                Assertions.assertNotNull(arrayListValue.get("value"));
+                Assertions.assertEquals(arrayListValue.get("value"), newValue);
+                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, value);
-                Assert.assertNotNull(arrayListValue1.get("value"));
-                Assert.assertEquals(arrayListValue1.get("value"), value);
+                Assertions.assertNotNull(arrayListValue1.get("value"));
+                Assertions.assertEquals(arrayListValue1.get("value"), value);
             }
 
         }
@@ -83,27 +85,28 @@ public class ExternalServicesConfigurationTest {
         // Checking for SMTP:
 
         configName = "username";
-        externalServicesConfig = this.externalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
+        externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
                 responseSpec, "SMTP");
-        Assert.assertNotNull(externalServicesConfig);
-        for (Integer configIndex = 0; configIndex < (externalServicesConfig.size()); configIndex++) {
+        Assertions.assertNotNull(externalServicesConfig);
+
+        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
             String name = (String) externalServicesConfig.get(configIndex).get("name");
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
-                if(value == null){
+                if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
-                System.out.println(name + ":" + value);
-                HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                LOG.info("{} : {}", name, value);
+                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, newValue);
-                Assert.assertNotNull(arrayListValue.get("value"));
-                Assert.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                Assertions.assertNotNull(arrayListValue.get("value"));
+                Assertions.assertEquals(arrayListValue.get("value"), newValue);
+                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, value);
-                Assert.assertNotNull(arrayListValue1.get("value"));
-                Assert.assertEquals(arrayListValue1.get("value"), value);
+                Assertions.assertNotNull(arrayListValue1.get("value"));
+                Assertions.assertEquals(arrayListValue1.get("value"), value);
             }
 
         }

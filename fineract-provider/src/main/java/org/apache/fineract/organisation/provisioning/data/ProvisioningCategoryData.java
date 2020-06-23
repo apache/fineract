@@ -49,7 +49,9 @@ public class ProvisioningCategoryData implements Comparable<ProvisioningCategory
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof ProvisioningCategoryData)) return false;
+        if (!(obj instanceof ProvisioningCategoryData)) {
+            return false;
+        }
         final ProvisioningCategoryData provisionCategoryData = (ProvisioningCategoryData) obj;
         return provisionCategoryData.id.equals(this.id);
     }
@@ -61,7 +63,9 @@ public class ProvisioningCategoryData implements Comparable<ProvisioningCategory
 
     @Override
     public int compareTo(ProvisioningCategoryData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return obj.id.compareTo(this.id);
     }
 }

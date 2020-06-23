@@ -34,8 +34,7 @@ public class DeleteHookCommandHandler implements NewCommandSourceHandler {
     private final HookWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteHookCommandHandler(
-            final HookWritePlatformService writePlatformService) {
+    public DeleteHookCommandHandler(final HookWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

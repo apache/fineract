@@ -58,13 +58,13 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Profile("basicauth")
 @Path("/authentication")
-@Api(tags = {"Authentication HTTP Basic"})
+@Api(tags = { "Authentication HTTP Basic" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
-})
+        @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.") })
 public class AuthenticationApiResource {
 
     public static class AuthenticateRequest {
+
         public String username;
         public String password;
     }
@@ -89,15 +89,19 @@ public class AuthenticationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Verify authentication", notes = "Authenticates the credentials provided and returns the set roles and permissions allowed.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class), @ApiResponse(code = 400, message = "Unauthenticated. Please login")})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class),
+            @ApiResponse(code = 400, message = "Unauthenticated. Please login") })
     public String authenticate(final String apiRequestBodyAsJson) {
-        // TODO FINERACT-819: sort out Jersey so JSON conversion does not have to be done explicitly via GSON here, but implicit by arg
+        // TODO FINERACT-819: sort out Jersey so JSON conversion does not have
+        // to be done explicitly via GSON here, but implicit by arg
         AuthenticateRequest request = new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
         if (request == null) {
-            throw new IllegalArgumentException("Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson);
+            throw new IllegalArgumentException(
+                    "Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson);
         }
         if (request.username == null || request.password == null) {
-            throw new IllegalArgumentException("Username or Password is null in JSON (see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson + "; username=" + request.username + ", password=" + request.password);
+            throw new IllegalArgumentException("Username or Password is null in JSON (see FINERACT-726) of POST to /authentication: "
+                    + apiRequestBodyAsJson + "; username=" + request.username + ", password=" + request.password);
         }
 
         final Authentication authentication = new UsernamePasswordAuthenticationToken(request.username, request.password);
@@ -129,8 +133,8 @@ public class AuthenticationApiResource {
 
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
-            boolean isTwoFactorRequired = twoFactorUtils.isTwoFactorAuthEnabled() && !
-                    principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
+            boolean isTwoFactorRequired = twoFactorUtils.isTwoFactorAuthEnabled()
+                    && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
                 authenticatedUserData = new AuthenticatedUserData(request.username, principal.getId(),
                         new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);

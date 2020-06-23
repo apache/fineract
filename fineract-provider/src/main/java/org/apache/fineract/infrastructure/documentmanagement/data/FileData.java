@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileData {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileData.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileData.class);
 
     private final File file;
     private final String fileName;
@@ -58,10 +58,12 @@ public class FileData {
 
     public InputStream file() {
         try {
-            if (this.inputStream == null) { return new FileInputStream(this.file); }
+            if (this.inputStream == null) {
+                return new FileInputStream(this.file);
+            }
             return this.inputStream;
         } catch (final FileNotFoundException e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
             return null;
         }
     }

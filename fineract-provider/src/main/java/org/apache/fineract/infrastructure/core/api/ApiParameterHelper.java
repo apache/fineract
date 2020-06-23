@@ -169,7 +169,6 @@ public class ApiParameterHelper {
         return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
     }
 
-
     public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 
         final Map<String, String> map = new HashMap<>(queryParameters.size());

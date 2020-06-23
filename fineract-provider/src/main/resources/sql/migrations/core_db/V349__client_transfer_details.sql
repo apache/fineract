@@ -18,24 +18,24 @@
 --
 
 ALTER TABLE `m_client`
-	ADD COLUMN `proposed_transfer_date` DATE NULL DEFAULT NULL AFTER `email_address`;
+    ADD COLUMN `proposed_transfer_date` DATE NULL DEFAULT NULL AFTER `email_address`;
 
-	CREATE TABLE `m_client_transfer_details` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`client_id` BIGINT(20) NOT NULL,
-	`from_office_id` BIGINT(20) NOT NULL,
-	`to_office_id` BIGINT(20) NOT NULL,
-	`proposed_transfer_date` DATE NULL DEFAULT NULL,
-	`transfer_type` TINYINT(2) NOT NULL,
-	`submitted_on` DATE NOT NULL,
-	`submitted_by` BIGINT(20) NOT NULL,
-	PRIMARY KEY (`id`),
-	INDEX `FK_m_client_transfer_details_m_client` (`client_id`),
-	INDEX `FK_m_client_transfer_details_m_office` (`from_office_id`),
-	INDEX `FK_m_client_transfer_details_m_office_2` (`to_office_id`),
-	INDEX `FK_m_client_transfer_details_m_appuser` (`submitted_by`),
-	CONSTRAINT `FK_m_client_transfer_details_m_appuser` FOREIGN KEY (`submitted_by`) REFERENCES `m_appuser` (`id`),
-	CONSTRAINT `FK_m_client_transfer_details_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
-	CONSTRAINT `FK_m_client_transfer_details_m_office` FOREIGN KEY (`from_office_id`) REFERENCES `m_office` (`id`),
-	CONSTRAINT `FK_m_client_transfer_details_m_office_2` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
+    CREATE TABLE `m_client_transfer_details` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `client_id` BIGINT NOT NULL,
+    `from_office_id` BIGINT NOT NULL,
+    `to_office_id` BIGINT NOT NULL,
+    `proposed_transfer_date` DATE NULL DEFAULT NULL,
+    `transfer_type` TINYINT NOT NULL,
+    `submitted_on` DATE NOT NULL,
+    `submitted_by` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `FK_m_client_transfer_details_m_client` (`client_id`),
+    INDEX `FK_m_client_transfer_details_m_office` (`from_office_id`),
+    INDEX `FK_m_client_transfer_details_m_office_2` (`to_office_id`),
+    INDEX `FK_m_client_transfer_details_m_appuser` (`submitted_by`),
+    CONSTRAINT `FK_m_client_transfer_details_m_appuser` FOREIGN KEY (`submitted_by`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_m_client_transfer_details_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+    CONSTRAINT `FK_m_client_transfer_details_m_office` FOREIGN KEY (`from_office_id`) REFERENCES `m_office` (`id`),
+    CONSTRAINT `FK_m_client_transfer_details_m_office_2` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
 );

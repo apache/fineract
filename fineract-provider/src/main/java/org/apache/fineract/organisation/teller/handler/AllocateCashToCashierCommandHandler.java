@@ -35,7 +35,9 @@ public class AllocateCashToCashierCommandHandler implements NewCommandSourceHand
     /**
      * Creates a new instance.
      *
-     * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
+     * @param writePlatformService
+     *            the {@code CashierWritePlatformService} used to access the
+     *            backend
      */
     @Autowired
     public AllocateCashToCashierCommandHandler(final TellerWritePlatformService writePlatformService) {

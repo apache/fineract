@@ -26,10 +26,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class FixedDepositAccountHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositAccountHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -68,7 +71,7 @@ public class FixedDepositAccountHelper {
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
-    public final static String depositAmount = "100000";
+    public static final String DEPOSIT_AMOUNT = "100000";
     private String newDepositAmount = null;
 
     private String interestCompoundingPeriodType = MONTHLY;
@@ -93,6 +96,7 @@ public class FixedDepositAccountHelper {
     private String submittedOnDate = "";
     private String savingsId = null;
     private boolean transferInterest = false;
+    private Integer maturityInstructionId;
 
     public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -124,15 +128,16 @@ public class FixedDepositAccountHelper {
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("linkAccountId", savingsId);
         map.put("transferInterestToSavings", transferInterest);
+        map.put("maturityInstructionId", maturityInstructionId);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountJson);
+        LOG.info("{}", fixedDepositAccountJson);
         return fixedDepositAccountJson;
     }
 
     public static Integer applyFixedDepositApplication(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        System.out.println("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
+        LOG.info("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, APPLY_FIXED_DEPOSIT_ACCOUNT_URL, fixedDepositAccountAsJson,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
@@ -140,7 +145,7 @@ public class FixedDepositAccountHelper {
     public static HashMap getFixedDepositAccountById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer accountID) {
         final String GET_FIXED_DEPOSIT_BY_ID_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING FIXED DEPOSIT ACCOUNT BY ID -------------------------");
+        LOG.info("------------------------ RETRIEVING FIXED DEPOSIT ACCOUNT BY ID -------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_FIXED_DEPOSIT_BY_ID_URL, "");
     }
 
@@ -194,7 +199,7 @@ public class FixedDepositAccountHelper {
                     principal += totalInterest;
                 }
                 totalInterest = 0.0f;
-                System.out.println(principal);
+                LOG.info("{}", principal.toString());
 
             }
             currentDate.add(Calendar.MONTH, 1);
@@ -210,8 +215,9 @@ public class FixedDepositAccountHelper {
                 .withSubmittedOnDate(submittedOnDate) //
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
-                + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+                FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON,
+                CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID,
@@ -227,65 +233,66 @@ public class FixedDepositAccountHelper {
                 .withInterestPostingPeriodType(interestPostingPeriodType) //
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
-                + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+                FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON,
+                CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap approveFixedDeposit(final Integer fixedDepositAccountID, final String approvedOnDate) {
-        System.out.println("--------------------------------- APPROVING FIXED DEPOSIT APPLICATION ------------------------------------");
+        LOG.info("--------------------------------- APPROVING FIXED DEPOSIT APPLICATION ------------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(APPROVE_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getApproveFixedDepositAccountAsJSON(approvedOnDate));
     }
 
     public HashMap undoApproval(final Integer fixedDepositAccountID) {
-        System.out.println("--------------------------------- UNDO APPROVING FIXED DEPOSIT APPLICATION -------------------------------");
+        LOG.info("--------------------------------- UNDO APPROVING FIXED DEPOSIT APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
         return performFixedDepositApplicationActions(
                 createFixedDepositOperationURL(UNDO_APPROVAL_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID), undoBodyJson);
     }
 
     public HashMap rejectApplication(final Integer fixedDepositAccountID, final String rejectedOnDate) {
-        System.out.println("--------------------------------- REJECT FIXED DEPOSIT APPLICATION -------------------------------");
+        LOG.info("--------------------------------- REJECT FIXED DEPOSIT APPLICATION -------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(REJECT_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getRejectedFixedDepositAsJSON(rejectedOnDate));
     }
 
     public HashMap withdrawApplication(final Integer fixedDepositAccountID, final String withdrawApplicationOnDate) {
-        System.out.println("--------------------------------- Withdraw FIXED DEPOSIT APPLICATION -------------------------------");
+        LOG.info("--------------------------------- Withdraw FIXED DEPOSIT APPLICATION -------------------------------");
         return performFixedDepositApplicationActions(
                 createFixedDepositOperationURL(WITHDRAWN_BY_CLIENT_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getWithdrawnFixedDepositAccountAsJSON(withdrawApplicationOnDate));
     }
 
     public HashMap activateFixedDeposit(final Integer fixedDepositAccountID, final String activationDate) {
-        System.out.println("---------------------------------- ACTIVATING FIXED DEPOSIT APPLICATION ----------------------------------");
+        LOG.info("---------------------------------- ACTIVATING FIXED DEPOSIT APPLICATION ----------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(ACTIVATE_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getActivatedFixedDepositAccountAsJSON(activationDate));
     }
 
     public Object deleteFixedDepositApplication(final Integer fixedDepositAccountID, final String jsonAttributeToGetBack) {
-        System.out.println("---------------------------------- DELETE FIXED DEPOSIT APPLICATION ----------------------------------");
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?"
-                + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+        LOG.info("---------------------------------- DELETE FIXED DEPOSIT APPLICATION ----------------------------------");
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
 
     }
 
     public Integer calculateInterestForFixedDeposit(final Integer fixedDepositAccountId) {
-        System.out.println("--------------------------------- CALCULATING INTEREST FOR FIXED DEPOSIT --------------------------------");
+        LOG.info("--------------------------------- CALCULATING INTEREST FOR FIXED DEPOSIT --------------------------------");
         return (Integer) performFixedDepositActions(
                 createFixedDepositCalculateInterestURL(CALCULATE_INTEREST_FIXED_DEPOSIT_COMMAND, fixedDepositAccountId),
                 getCalculatedInterestForFixedDepositApplicationAsJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer postInterestForFixedDeposit(final Integer fixedDepositAccountId) {
-        System.out.println("--------------------------------- POST INTEREST FOR FIXED DEPOSIT --------------------------------");
+        LOG.info("--------------------------------- POST INTEREST FOR FIXED DEPOSIT --------------------------------");
         return (Integer) performFixedDepositActions(
                 createFixedDepositCalculateInterestURL(POST_INTEREST_FIXED_DEPOSIT_COMMAND, fixedDepositAccountId),
                 getCalculatedInterestForFixedDepositApplicationAsJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap calculatePrematureAmountForFixedDeposit(final Integer fixedDepositAccountId, final String closedOnDate) {
-        System.out.println("--------------------- CALCULATING PREMATURE AMOUNT FOR FIXED DEPOSIT ----------------------------");
+        LOG.info("--------------------- CALCULATING PREMATURE AMOUNT FOR FIXED DEPOSIT ----------------------------");
         return (HashMap) performFixedDepositActions(
                 createFixedDepositCalculateInterestURL(CALCULATE_PREMATURE_AMOUNT_COMMAND, fixedDepositAccountId),
                 getCalculatedPrematureAmountForFixedDepositAccountAsJSON(closedOnDate), "");
@@ -293,76 +300,76 @@ public class FixedDepositAccountHelper {
 
     public Object prematureCloseForFixedDeposit(final Integer fixedDepositAccountId, final String closedOnDate, final String closureType,
             final Integer toSavingsId, final String jsonAttributeToGetBack) {
-        System.out.println("--------------------- PREMATURE CLOSE FOR FIXED DEPOSIT ----------------------------");
+        LOG.info("--------------------- PREMATURE CLOSE FOR FIXED DEPOSIT ----------------------------");
         return performFixedDepositActions(createFixedDepositCalculateInterestURL(PREMATURE_CLOSE_COMMAND, fixedDepositAccountId),
                 getPrematureCloseForFixedDepositAccountAsJSON(closedOnDate, closureType, toSavingsId), jsonAttributeToGetBack);
     }
 
     private String getApproveFixedDepositAccountAsJSON(final String approvedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedOnDate", approvedOnDate);
         map.put("note", "Approval NOTE");
         String fixedDepositAccountApproveJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountApproveJson);
+        LOG.info(fixedDepositAccountApproveJson);
         return fixedDepositAccountApproveJson;
     }
 
     private String getRejectedFixedDepositAsJSON(final String rejectedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectedOnDate", rejectedOnDate);
         map.put("note", "Rejected NOTE");
         String fixedDepositAccountJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountJson);
+        LOG.info("{}", fixedDepositAccountJson);
         return fixedDepositAccountJson;
     }
 
     private String getWithdrawnFixedDepositAccountAsJSON(final String withdrawnApplicationOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawnOnDate", withdrawnApplicationOnDate);
         map.put("note", "Withdraw NOTE");
         String fixedDepositAccountJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountJson);
+        LOG.info("{}", fixedDepositAccountJson);
         return fixedDepositAccountJson;
     }
 
     private String getActivatedFixedDepositAccountAsJSON(final String activationDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", activationDate);
         String fixedDepositAccountActivateJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountActivateJson);
+        LOG.info("{}", fixedDepositAccountActivateJson);
         return fixedDepositAccountActivateJson;
     }
 
     private String getCalculatedInterestForFixedDepositApplicationAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         String fixedDepositAccountCalculatedInterestJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountCalculatedInterestJson);
+        LOG.info(fixedDepositAccountCalculatedInterestJson);
         return fixedDepositAccountCalculatedInterestJson;
     }
 
     private String getCalculatedPrematureAmountForFixedDepositAccountAsJSON(final String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         String fixedDepositAccountPrematureClosureJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountPrematureClosureJson);
+        LOG.info(fixedDepositAccountPrematureClosureJson);
         return fixedDepositAccountPrematureClosureJson;
     }
 
     private String getPrematureCloseForFixedDepositAccountAsJSON(final String closedOnDate, final String closureType,
             final Integer toSavingsId) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         map.put("onAccountClosureId", closureType);
         if (toSavingsId != null) {
@@ -370,7 +377,7 @@ public class FixedDepositAccountHelper {
             map.put("transferDescription", "Transferring To Savings Account");
         }
         String fixedDepositAccountPrematureCloseJson = new Gson().toJson(map);
-        System.out.println(fixedDepositAccountPrematureCloseJson);
+        LOG.info(fixedDepositAccountPrematureCloseJson);
         return fixedDepositAccountPrematureCloseJson;
     }
 
@@ -397,10 +404,11 @@ public class FixedDepositAccountHelper {
         return FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
-    public static ArrayList retrieveAllFixedDepositAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        System.out.println("-------------------- RETRIEVING ALL FIXED DEPOSIT ACCOUNTS ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+    public static ArrayList retrieveAllFixedDepositAccounts(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        LOG.info("-------------------- RETRIEVING ALL FIXED DEPOSIT ACCOUNTS ---------------------");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                FIXED_DEPOSIT_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
     }
 
@@ -439,7 +447,8 @@ public class FixedDepositAccountHelper {
         return this;
     }
 
-    public FixedDepositAccountHelper withLockinPeriodFrequency(final String lockingPeriodFrequencyType, final String lockinPeriodFrequency) {
+    public FixedDepositAccountHelper withLockinPeriodFrequency(final String lockingPeriodFrequencyType,
+            final String lockinPeriodFrequency) {
         this.lockingPeriodFrequencyType = lockingPeriodFrequencyType;
         this.lockinPeriodFrequency = lockinPeriodFrequency;
         return this;
@@ -456,7 +465,14 @@ public class FixedDepositAccountHelper {
     }
 
     private String getDepositAmount() {
-        if (this.newDepositAmount == null) { return depositAmount; }
+        if (this.newDepositAmount == null) {
+            return DEPOSIT_AMOUNT;
+        }
         return this.newDepositAmount;
+    }
+
+    public FixedDepositAccountHelper withMaturityInstructionId(Integer maturityInstructionId) {
+        this.maturityInstructionId = maturityInstructionId;
+        return this;
     }
 }

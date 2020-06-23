@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.loanrepayment;
 
+import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
@@ -40,76 +41,86 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class LoanRepaymentImportHandler implements ImportHandler {
-    private  Workbook workbook;
-    private  List<LoanTransactionData> loanRepayments;
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentImportHandler.class);
+    private Workbook workbook;
+    private List<LoanTransactionData> loanRepayments;
     private Long loanAccountId;
     private final LoanReadPlatformService loanReadPlatformService;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
     @Autowired
-    public LoanRepaymentImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService, final LoanReadPlatformService loanReadPlatformService) {
+    public LoanRepaymentImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final LoanReadPlatformService loanReadPlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.loanReadPlatformService = loanReadPlatformService;
     }
 
     @Override
     public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        this.loanRepayments=new ArrayList<>();
-        readExcelFile(locale,dateFormat);
+        this.workbook = workbook;
+        this.loanRepayments = new ArrayList<>();
+        readExcelFile(locale, dateFormat);
         return importEntity(dateFormat);
     }
+
     public void readExcelFile(String locale, String dateFormat) {
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanRepaymentSheet, LoanRepaymentConstants.AMOUNT_COL);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row = loanRepaymentSheet.getRow(rowIndex);
-                if(ImportHandlerUtils.isNotImported(row, LoanRepaymentConstants.STATUS_COL))
-                    loanRepayments.add(readLoanRepayment(row,locale,dateFormat));
+            row = loanRepaymentSheet.getRow(rowIndex);
+            if (ImportHandlerUtils.isNotImported(row, LoanRepaymentConstants.STATUS_COL)) {
+                loanRepayments.add(readLoanRepayment(row, locale, dateFormat));
+            }
         }
     }
 
-    private LoanTransactionData readLoanRepayment(Row row,String locale, String dateFormat) {
-        String loanaccountInfo=ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
-        if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
-            loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr[0]);
+    private LoanTransactionData readLoanRepayment(Row row, String locale, String dateFormat) {
+        String loanaccountInfo = ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
+        if (loanaccountInfo != null) {
+            List<String> loanAccountAr = Splitter.on('-').splitToList(loanaccountInfo);
+            loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr.get(0));
         }
-        BigDecimal repaymentAmount=null;
-        if (ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row)!=null)
-         repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row));
+        BigDecimal repaymentAmount = null;
+        if (ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row) != null) {
+            repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row));
+        }
         LocalDate repaymentDate = ImportHandlerUtils.readAsDate(LoanRepaymentConstants.REPAID_ON_DATE_COL, row);
         String repaymentType = ImportHandlerUtils.readAsString(LoanRepaymentConstants.REPAYMENT_TYPE_COL, row);
-        Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), repaymentType);
+        Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
+                repaymentType);
         String accountNumber = ImportHandlerUtils.readAsString(LoanRepaymentConstants.ACCOUNT_NO_COL, row);
         Integer checkNumber = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.CHECK_NO_COL, row);
         Integer routingCode = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.ROUTING_CODE_COL, row);
         Integer receiptNumber = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.RECEIPT_NO_COL, row);
         Integer bankNumber = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.BANK_NO_COL, row);
-        return LoanTransactionData.importInstance(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
-                checkNumber, routingCode, receiptNumber, bankNumber, loanAccountId, "", row.getRowNum(),locale,dateFormat);
+        return LoanTransactionData.importInstance(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber, checkNumber, routingCode,
+                receiptNumber, bankNumber, loanAccountId, "", row.getRowNum(), locale, dateFormat);
     }
 
     public Count importEntity(String dateFormat) {
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
-        String errorMessage="";
+        int successCount = 0;
+        int errorCount = 0;
+        String errorMessage = "";
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 
         for (LoanTransactionData loanRepayment : loanRepayments) {
             try {
 
-                JsonObject loanRepaymentJsonob=gsonBuilder.create().toJsonTree(loanRepayment).getAsJsonObject();
+                JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayment).getAsJsonObject();
                 loanRepaymentJsonob.remove("manuallyReversed");
-                String payload=loanRepaymentJsonob.toString();
+                String payload = loanRepaymentJsonob.toString();
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .loanRepaymentTransaction(loanRepayment.getAccountId()) //
                         .withJson(payload) //
@@ -119,11 +130,12 @@ public class LoanRepaymentImportHandler implements ImportHandler {
                 Cell statusCell = loanRepaymentSheet.getRow(loanRepayment.getRowIndex()).createCell(LoanRepaymentConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+            } catch (RuntimeException ex) {
                 errorCount++;
-                ex.printStackTrace();
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(loanRepaymentSheet,loanRepayment.getRowIndex(),errorMessage,LoanRepaymentConstants.STATUS_COL);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                ImportHandlerUtils.writeErrorMessage(loanRepaymentSheet, loanRepayment.getRowIndex(), errorMessage,
+                        LoanRepaymentConstants.STATUS_COL);
             }
 
         }
@@ -131,8 +143,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
         ImportHandlerUtils.writeString(LoanRepaymentConstants.STATUS_COL,
                 loanRepaymentSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
                 TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
-        return Count.instance(successCount,errorCount);
+        return Count.instance(successCount, errorCount);
     }
-
 
 }

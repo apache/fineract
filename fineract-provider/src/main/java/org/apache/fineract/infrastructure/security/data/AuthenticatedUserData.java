@@ -92,7 +92,7 @@ public class AuthenticatedUserData {
     }
 
     public AuthenticatedUserData(final String username, final Long userId, final String base64EncodedAuthenticationKey,
-             final boolean isTwoFactorAuthenticationRequired) {
+            final boolean isTwoFactorAuthenticationRequired) {
         this.username = username;
         this.officeId = null;
         this.officeName = null;

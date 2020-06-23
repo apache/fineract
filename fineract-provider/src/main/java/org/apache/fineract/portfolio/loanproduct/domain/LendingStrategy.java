@@ -38,9 +38,9 @@ public enum LendingStrategy {
     LINKED_LOAN(400, "lendingStrategy.linkedLoan", "linkedLoan"), //
     INVALID(900, "lendingStrategy.invalid", "invalid");
 
-    private Integer id;
-    private String code;
-    private String value;
+    private final Integer id;
+    private final String code;
+    private final String value;
 
     LendingStrategy(final Integer id, final String code, final String value) {
         this.id = id;

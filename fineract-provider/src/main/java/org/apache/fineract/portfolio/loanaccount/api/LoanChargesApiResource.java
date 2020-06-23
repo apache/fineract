@@ -66,10 +66,11 @@ import org.springframework.stereotype.Component;
 @Path("/loans/{loanId}/charges")
 @Component
 @Scope("singleton")
-@Api(tags = {"Loan Charges"})
+@Api(tags = { "Loan Charges" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Loan Charges", description = "Its typical for MFIs to add extra costs for their loan products. They can be either Fees or Penalties.\n" + "\n" + "Loan Charges are instances of Charges and represent either fees and penalties for loan products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Loan) are described here")
-})
+        @Tag(name = "Loan Charges", description = "Its typical for MFIs to add extra costs for their loan products. They can be either Fees or Penalties.\n"
+                + "\n"
+                + "Loan Charges are instances of Charges and represent either fees and penalties for loan products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Loan) are described here") })
 public class LoanChargesApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -89,8 +90,7 @@ public class LoanChargesApiResource {
     @Autowired
     public LoanChargesApiResource(final PlatformSecurityContext context, final ChargeReadPlatformService chargeReadPlatformService,
             final LoanChargeReadPlatformService loanChargeReadPlatformService,
-            final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -107,9 +107,12 @@ public class LoanChargesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Loan Charges", httpMethod = "GET", notes = "It lists all the Loan Charges specific to a Loan \n\n" + "Example Requests:\n" + "\n" + "loans/1/charges\n" + "\n" + "\n" + "loans/1/charges?fields=name,amountOrPercentage")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)})
-    public String retrieveAllLoanCharges(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @Context final UriInfo uriInfo){
+    @ApiOperation(value = "List Loan Charges", httpMethod = "GET", notes = "It lists all the Loan Charges specific to a Loan \n\n"
+            + "Example Requests:\n" + "\n" + "loans/1/charges\n" + "\n" + "\n" + "loans/1/charges?fields=name,amountOrPercentage")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class) })
+    public String retrieveAllLoanCharges(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -121,10 +124,12 @@ public class LoanChargesApiResource {
 
     @GET
     @Path("template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Retrieve Loan Charges Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class)})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Loan Charges Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class) })
     public String retrieveTemplate(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -139,12 +144,14 @@ public class LoanChargesApiResource {
 
     @GET
     @Path("{chargeId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Retrieve a Loan Charge", httpMethod = "GET", notes = "Retrieves Loan Charge according to the Loan ID and Charge ID" + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)})
-    public String retrieveLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId,
-                                     @Context final UriInfo uriInfo) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve a Loan Charge", httpMethod = "GET", notes = "Retrieves Loan Charge according to the Loan ID and Charge ID"
+            + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class) })
+    public String retrieveLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -160,13 +167,16 @@ public class LoanChargesApiResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Loan Charge", httpMethod = "POST", notes = "It Creates a Loan Charge")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class)})
-    public String executeLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
-                                    @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class) })
+    public String executeLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         CommandProcessingResult result = null;
         if (is(commandParam, "pay")) {
@@ -184,13 +194,16 @@ public class LoanChargesApiResource {
 
     @PUT
     @Path("{chargeId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Loan Charge", httpMethod = "PUT", notes = "Currently Loan Charges may be updated only if the Loan is not yet approved")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)})
-    public String updateLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId,
-                                   @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class) })
+    public String updateLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanCharge(loanId, loanChargeId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -202,13 +215,17 @@ public class LoanChargesApiResource {
 
     @POST
     @Path("{chargeId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Pay Loan Charge", httpMethod = "POST", notes = "Loan Charge will be paid if the loan is linked with a savings account")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)})
-    public String executeLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId,
-                                    @QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class) })
+    public String executeLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandProcessingResult result = null;
@@ -221,17 +238,21 @@ public class LoanChargesApiResource {
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
         return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
     @Path("{chargeId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Loan Charge", httpMethod = "DELETE", notes = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)})
-    public String deleteLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId) {
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class) })
+    public String deleteLoanCharge(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @PathParam("chargeId") @ApiParam(value = "chargeId") final Long loanChargeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanCharge(loanId, loanChargeId).build();
 

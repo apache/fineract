@@ -22,18 +22,18 @@ Reason for all the tmp tables and renames is had mysql problems with foreign key
 */
 
 CREATE TABLE `stretchy_report_tmp` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `report_name` varchar(100) NOT NULL,
   `report_type` varchar(20) NOT NULL,
   `report_subtype` varchar(20) DEFAULT NULL,
   `report_category` varchar(45) DEFAULT NULL,
   `report_sql` text,
   `description` text,
-  `core_report` tinyint(1) DEFAULT '0',
-  `use_report` tinyint(1) DEFAULT '0',
+  `core_report` tinyint DEFAULT '0',
+  `use_report` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 insert into stretchy_report_tmp
 (id, report_name, report_type, report_subtype, report_category,
@@ -43,7 +43,7 @@ report_sql, description, core_report, use_report
 from stretchy_report;
 
 CREATE TABLE `stretchy_parameter_tmp` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `parameter_name` varchar(45) NOT NULL,
   `parameter_variable` varchar(45) DEFAULT NULL,
   `parameter_label` varchar(45) NOT NULL,
@@ -54,10 +54,10 @@ CREATE TABLE `stretchy_parameter_tmp` (
   `selectOne` varchar(1) DEFAULT NULL,
   `selectAll` varchar(1) DEFAULT NULL,
   `parameter_sql` text,
-  `parent_id` int(11) DEFAULT NULL,
+  `parent_id` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`parameter_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 insert into stretchy_parameter_tmp
 (id, parameter_name, parameter_variable, parameter_label, parameter_displayType, parameter_FormatType,
@@ -67,13 +67,13 @@ parameter_default, special, selectOne, selectAll, parameter_sql, parent_paramete
 from stretchy_parameter;
 
 CREATE TABLE `stretchy_report_parameter_tmp` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `report_id` int(11) NOT NULL,
-  `parameter_id` int(11) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `report_id` INT NOT NULL,
+  `parameter_id` INT NOT NULL,
   `report_parameter_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `report_id_name_UNIQUE` (`report_id`,`report_parameter_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 insert into stretchy_report_parameter_tmp(report_id, parameter_id, report_parameter_name)
 select report_id, parameter_id, report_parameter_name

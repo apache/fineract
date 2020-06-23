@@ -58,22 +58,19 @@ public final class EntityDatatableChecksDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("entityDatatableChecks");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("entityDatatableChecks");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final String entity = this.fromApiJsonHelper.extractStringNamed("entity", element);
-        baseDataValidator.reset().parameter("entity").value(entity).notBlank()
-                .isOneOfTheseStringValues(EntityTables.getEntitiesList());
+        baseDataValidator.reset().parameter("entity").value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
         final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("status", element);
-        final Object[] entityTablesStatuses = EntityTables.getStatus(entity);
+        final Object[] entityTablesStatuses = EntityTables.getStatus(entity).toArray();
 
         baseDataValidator.reset().parameter("status").value(status).isOneOfTheseValues(entityTablesStatuses);
 

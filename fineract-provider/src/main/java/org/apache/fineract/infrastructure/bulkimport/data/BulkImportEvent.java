@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.bulkimport.data;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.context.ApplicationEvent;
 
-public class BulkImportEvent extends ApplicationEvent {
+public final class BulkImportEvent extends ApplicationEvent {
 
     private final String tenantIdentifier;
 
@@ -33,8 +33,8 @@ public class BulkImportEvent extends ApplicationEvent {
 
     private final String dateFormat;
 
-    private BulkImportEvent(final String tenantIdentifier, final Workbook workbook,
-            final Long importId, final String locale, final String dateFormat) {
+    private BulkImportEvent(final String tenantIdentifier, final Workbook workbook, final Long importId, final String locale,
+            final String dateFormat) {
         super(BulkImportEvent.class);
         this.tenantIdentifier = tenantIdentifier;
         this.workbook = workbook;
@@ -43,8 +43,8 @@ public class BulkImportEvent extends ApplicationEvent {
         this.dateFormat = dateFormat;
     }
 
-    public static BulkImportEvent instance(final String tenantIdentifier, final Workbook workbook,
-            final Long importId, final String locale, final String dateFormat) {
+    public static BulkImportEvent instance(final String tenantIdentifier, final Workbook workbook, final Long importId, final String locale,
+            final String dateFormat) {
         return new BulkImportEvent(tenantIdentifier, workbook, importId, locale, dateFormat);
     }
 

@@ -19,10 +19,11 @@
 package org.apache.fineract.integrationtests.common;
 
 import com.google.gson.Gson;
+import java.util.Arrays;
 
 public class OfficeDomain {
 
-    public static class Builder {
+    public static final class Builder {
 
         private int id;
         private String name;
@@ -31,9 +32,8 @@ public class OfficeDomain {
         private String[] openingDate;
         private String hierarchy;
 
-        private Builder(final int id, final String name,
-                final String nameDecorated, final String externalId,
-                final String[] openingDate, final String hierarchy) {
+        private Builder(final int id, final String name, final String nameDecorated, final String externalId, final String[] openingDate,
+                final String hierarchy) {
             this.id = id;
             this.name = name;
             this.nameDecorated = nameDecorated;
@@ -43,8 +43,7 @@ public class OfficeDomain {
         }
 
         public OfficeDomain build() {
-            return new OfficeDomain(this.id, this.name, this.nameDecorated,
-                    this.externalId, this.openingDate, this.hierarchy);
+            return new OfficeDomain(this.id, this.name, this.nameDecorated, this.externalId, this.openingDate, this.hierarchy);
         }
     }
 
@@ -59,9 +58,8 @@ public class OfficeDomain {
         super();
     }
 
-    private OfficeDomain(final int id, final String name,
-            final String nameDecorated, final String externalId,
-            final String[] openingDate, final String hierarchy) {
+    private OfficeDomain(final int id, final String name, final String nameDecorated, final String externalId, final String[] openingDate,
+            final String hierarchy) {
         super();
         this.id = id;
         this.name = name;
@@ -79,11 +77,9 @@ public class OfficeDomain {
         return new Gson().fromJson(jsonData, OfficeDomain.class);
     }
 
-    public static Builder create(final int id, final String name,
-            final String nameDecorated, final String externalId,
+    public static Builder create(final int id, final String name, final String nameDecorated, final String externalId,
             final String[] openingDate, final String hierarchy) {
-        return new Builder(id, name, nameDecorated, externalId, openingDate,
-                hierarchy);
+        return new Builder(id, name, nameDecorated, externalId, openingDate, hierarchy);
     }
 
     public int getId() {
@@ -114,18 +110,24 @@ public class OfficeDomain {
     public int hashCode() {
         int hash = 1;
 
-        if (this.id > 0)
+        if (this.id > 0) {
             hash += this.id;
-        if (this.name != null)
+        }
+        if (this.name != null) {
             hash += this.name.hashCode();
-        if (this.nameDecorated != null)
+        }
+        if (this.nameDecorated != null) {
             hash += this.nameDecorated.hashCode();
-        if (this.externalId != null)
+        }
+        if (this.externalId != null) {
             hash += this.externalId.hashCode();
-        if (this.openingDate != null)
-            hash += this.openingDate.hashCode();
-        if (this.hierarchy != null)
+        }
+        if (this.openingDate != null) {
+            hash += Arrays.hashCode(this.openingDate);
+        }
+        if (this.hierarchy != null) {
             hash += this.hierarchy.hashCode();
+        }
 
         return hash;
     }
@@ -136,17 +138,17 @@ public class OfficeDomain {
             return true;
         }
 
-        if (!(obj instanceof OfficeDomain))
+        if (!(obj instanceof OfficeDomain)) {
             return false;
+        }
 
         OfficeDomain od = (OfficeDomain) obj;
 
-        if (this.id == od.getId() && this.name.equals(od.getName())
-                && this.nameDecorated.equals(od.getName())
-                && this.externalId.equals(od.getExternalId())
-                && this.openingDate.equals(od.getOpeningDate())
-                && this.hierarchy.equals(od.getHierarchy()))
+        if (this.id == od.getId() && this.name.equals(od.getName()) && this.nameDecorated.equals(od.getName())
+                && this.externalId.equals(od.getExternalId()) && Arrays.equals(this.openingDate, od.getOpeningDate())
+                && this.hierarchy.equals(od.getHierarchy())) {
             return true;
+        }
 
         return false;
     }

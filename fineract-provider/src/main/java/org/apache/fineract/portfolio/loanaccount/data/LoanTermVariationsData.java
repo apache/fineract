@@ -44,8 +44,8 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
         this.isSpecificToInstallment = isSpecificToInstallment;
     }
 
-    public LoanTermVariationsData(final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal decimalValue, LocalDate dateValue, final boolean isSpecificToInstallment) {
+    public LoanTermVariationsData(final EnumOptionData termType, final LocalDate termVariationApplicableFrom, final BigDecimal decimalValue,
+            LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = null;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;

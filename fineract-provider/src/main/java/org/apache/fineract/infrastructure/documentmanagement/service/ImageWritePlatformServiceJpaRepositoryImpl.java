@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 import java.io.InputStream;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
-import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;
+import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.EntityTypeForImages;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
@@ -80,14 +80,14 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     public CommandProcessingResult deleteImage(String entityName, final Long clientId) {
         Object owner = null;
         Image image = null;
-        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equals(entityName)) {
+        if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
             owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
             Client client = (Client) owner;
             image = client.getImage();
             client.setImage(null);
             this.clientRepositoryWrapper.save(client);
 
-        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equals(entityName)) {
+        } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
             owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
             Staff staff = (Staff) owner;
             image = staff.getImage();
@@ -97,8 +97,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         }
         // delete image from the file system
         if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory
+                    .getRepository(StorageType.fromInt(image.getStorageType()));
             contentRepository.deleteImage(clientId, image.getLocation());
             this.imageRepository.delete(image);
         }
@@ -114,18 +114,18 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     private Object deletePreviousImage(String entityName, final Long entityId) {
         Object owner = null;
         Image image = null;
-        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equals(entityName)) {
+        if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
             Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
             image = client.getImage();
             owner = client;
-        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equals(entityName)) {
+        } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
             Staff staff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
             image = staff.getImage();
             owner = staff;
         }
         if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory
+                    .getRepository(StorageType.fromInt(image.getStorageType()));
             contentRepository.deleteImage(entityId, image.getLocation());
         }
         return owner;

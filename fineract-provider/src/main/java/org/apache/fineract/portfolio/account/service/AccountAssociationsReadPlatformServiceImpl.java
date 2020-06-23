@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -61,7 +61,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
         } catch (final EmptyResultDataAccessException e) {
-            logger.debug("Linking account is not configured");
+            LOG.debug("Linking account is not configured");
         }
         return linkedAccount;
     }
@@ -90,7 +90,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
         } catch (final EmptyResultDataAccessException e) {
-            logger.debug("Linking account is not configured");
+            LOG.debug("Linking account is not configured");
         }
         return linkedAccount;
     }
@@ -140,15 +140,19 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         public AccountAssociationsMapper() {
             final StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("aa.id as id,");
-            // sqlBuilder.append("savingsAccount.id as savingsAccountId, savingsAccount.account_no as savingsAccountNo,");
+            // sqlBuilder.append("savingsAccount.id as savingsAccountId,
+            // savingsAccount.account_no as savingsAccountNo,");
             sqlBuilder.append("loanAccount.id as loanAccountId, loanAccount.account_no as loanAccountNo,");
-            // sqlBuilder.append("linkLoanAccount.id as linkLoanAccountId, linkLoanAccount.account_no as linkLoanAccountNo, ");
+            // sqlBuilder.append("linkLoanAccount.id as linkLoanAccountId,
+            // linkLoanAccount.account_no as linkLoanAccountNo, ");
             sqlBuilder.append("linkSavingsAccount.id as linkSavingsAccountId, linkSavingsAccount.account_no as linkSavingsAccountNo ");
             sqlBuilder.append("from m_portfolio_account_associations aa ");
-            // sqlBuilder.append("left join m_savings_account savingsAccount on savingsAccount.id = aa.savings_account_id ");
+            // sqlBuilder.append("left join m_savings_account savingsAccount on
+            // savingsAccount.id = aa.savings_account_id ");
             sqlBuilder.append("left join m_loan loanAccount on loanAccount.id = aa.loan_account_id ");
             sqlBuilder.append("left join m_savings_account linkSavingsAccount on linkSavingsAccount.id = aa.linked_savings_account_id ");
-            // sqlBuilder.append("left join m_loan linkLoanAccount on linkLoanAccount.id = aa.linked_loan_account_id ");
+            // sqlBuilder.append("left join m_loan linkLoanAccount on
+            // linkLoanAccount.id = aa.linked_loan_account_id ");
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -190,5 +194,11 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             return new AccountAssociationsData(id, account, linkedAccount);
         }
 
+    }
+
+    @Override
+    public PortfolioAccountData retriveSavingsAccount(final Long savingsId) {
+        String accountNo = jdbcTemplate.queryForObject("select account_no from m_savings_account where id = ?", String.class, savingsId);
+        return PortfolioAccountData.lookup(savingsId, accountNo);
     }
 }

@@ -18,23 +18,22 @@
 --
 
 ALTER TABLE `m_product_loan`
-	ADD COLUMN `can_use_for_topup` TINYINT(1) NOT NULL DEFAULT 0 AFTER `instalment_amount_in_multiples_of`;
+    ADD COLUMN `can_use_for_topup` tinyint NOT NULL DEFAULT 0 AFTER `instalment_amount_in_multiples_of`;
 
 ALTER TABLE `m_loan`
-	ADD COLUMN `is_topup` TINYINT(1) NOT NULL DEFAULT 0 AFTER `loan_sub_status_id`;
+    ADD COLUMN `is_topup` tinyint NOT NULL DEFAULT 0 AFTER `loan_sub_status_id`;
 
 CREATE TABLE `m_loan_topup` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`loan_id` BIGINT NOT NULL,
-	`closure_loan_id` BIGINT NOT NULL,
-	`account_transfer_details_id` BIGINT NULL,
-	`topup_amount` DECIMAL(19,6) NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `m_loan_topup_FK_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
-	CONSTRAINT `m_loan_topup_FK_closure_loan_id` FOREIGN KEY (`closure_loan_id`) REFERENCES `m_loan` (`id`),
-	CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `loan_id` BIGINT NOT NULL,
+    `closure_loan_id` BIGINT NOT NULL,
+    `account_transfer_details_id` BIGINT NULL,
+    `topup_amount` DECIMAL(19,6) NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `m_loan_topup_FK_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
+    CONSTRAINT `m_loan_topup_FK_closure_loan_id` FOREIGN KEY (`closure_loan_id`) REFERENCES `m_loan` (`id`),
+    CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
-

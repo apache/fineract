@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -36,9 +36,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the creation, approval and rejection of a loan reschedule request
@@ -60,7 +60,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     private final String interestRatePerPeriod = "18";
     private final String groupActivationDate = "1 August 2014";
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
     }
@@ -95,7 +95,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         // Test for loan account is created
-        Assert.assertNotNull(this.loanId);
+        Assertions.assertNotNull(this.loanId);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 

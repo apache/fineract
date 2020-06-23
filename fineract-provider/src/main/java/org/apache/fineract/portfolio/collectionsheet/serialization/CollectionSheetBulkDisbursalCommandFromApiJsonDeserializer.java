@@ -39,8 +39,8 @@ import org.springframework.stereotype.Component;
  * {@link CollectionSheetBulkDisbursalCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
+public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer
+        extends AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -51,7 +51,9 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer ex
 
     @Override
     public CollectionSheetBulkDisbursalCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final JsonObject topLevelJsonElement = element.getAsJsonObject();

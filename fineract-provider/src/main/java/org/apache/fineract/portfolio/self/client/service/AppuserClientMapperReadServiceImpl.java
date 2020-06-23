@@ -27,8 +27,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppuserClientMapperReadServiceImpl implements
-        AppuserClientMapperReadService {
+public class AppuserClientMapperReadServiceImpl implements AppuserClientMapperReadService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -41,11 +40,10 @@ public class AppuserClientMapperReadServiceImpl implements
 
     @Override
     public Boolean isClientMappedToUser(Long clientId, Long appUserId) {
-        return this.jdbcTemplate
-                .queryForObject(
-                        "select case when (count(*) > 0) then true else false end "
-                                + " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
-                        new Object[] { clientId, appUserId }, Boolean.class);
+        return this.jdbcTemplate.queryForObject(
+                "select case when (count(*) > 0) then true else false end "
+                        + " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
+                new Object[] { clientId, appUserId }, Boolean.class);
     }
 
     @Override
@@ -56,8 +54,9 @@ public class AppuserClientMapperReadServiceImpl implements
             if (!mappedClientId) {
                 throw new ClientNotFoundException(clientId);
             }
-        } else
+        } else {
             throw new ClientNotFoundException(clientId);
+        }
 
     }
 

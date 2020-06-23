@@ -37,9 +37,10 @@ public class DeleteSmsCampaignCommandHandler implements NewCommandSourceHandler 
     public DeleteSmsCampaignCommandHandler(SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
         this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.smsCampaignWritePlatformService.delete(command.entityId());
+        return this.smsCampaignWritePlatformService.delete(command.entityId());
     }
 }

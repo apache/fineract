@@ -54,10 +54,10 @@ public class Hook extends AbstractAuditableCustom {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<HookResource> events = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<HookConfiguration> config = new HashSet<>();
 
     @ManyToOne(optional = true)
@@ -76,7 +76,9 @@ public class Hook extends AbstractAuditableCustom {
             final Set<HookResource> events, final Template ugdTemplate) {
         final String displayName = command.stringValueOfParameterNamed(displayNameParamName);
         Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
-        if (isActive == null) isActive = false;
+        if (isActive == null) {
+            isActive = false;
+        }
         return new Hook(template, displayName, isActive, config, events, ugdTemplate);
     }
 
@@ -176,7 +178,9 @@ public class Hook extends AbstractAuditableCustom {
     }
 
     public boolean updateEvents(final Set<HookResource> newHookEvents) {
-        if (newHookEvents == null) { return false; }
+        if (newHookEvents == null) {
+            return false;
+        }
 
         if (this.events == null) {
             this.events = new HashSet<>();
@@ -187,7 +191,9 @@ public class Hook extends AbstractAuditableCustom {
     }
 
     public boolean updateConfig(final Set<HookConfiguration> newHookConfig) {
-        if (newHookConfig == null) { return false; }
+        if (newHookConfig == null) {
+            return false;
+        }
 
         if (this.config == null) {
             this.config = new HashSet<>();

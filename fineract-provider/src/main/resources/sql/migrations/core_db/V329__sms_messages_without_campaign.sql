@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-ALTER TABLE `sms_messages_outbound` CHANGE `campaign_id` `campaign_id` BIGINT(20) NULL DEFAULT NULL;
+ALTER TABLE `sms_messages_outbound` CHANGE `campaign_id` `campaign_id` BIGINT NULL DEFAULT NULL;

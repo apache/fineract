@@ -28,15 +28,18 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
  * Created by sanyam on 31/7/17.
  */
 final class DatatablesApiResourceSwagger {
+
     private DatatablesApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetDataTablesResponse")
     public static final class GetDataTablesResponse {
+
         private GetDataTablesResponse() {
 
         }
+
         @ApiModelProperty(example = "m_client")
         public String appTableName;
         @ApiModelProperty(example = "extra_client_details")
@@ -45,10 +48,12 @@ final class DatatablesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostDataTablesRequest")
-    public static final class PostDataTablesRequest{
+    public static final class PostDataTablesRequest {
+
         private PostDataTablesRequest() {
 
         }
+
         @ApiModelProperty(example = "m_client")
         public String applicationTableName;
         @ApiModelProperty(example = "extra_client_details")
@@ -59,27 +64,35 @@ final class DatatablesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostDataTablesResponse")
-    public static final class PostDataTablesResponse{
+    public static final class PostDataTablesResponse {
+
         private PostDataTablesResponse() {
 
         }
+
         @ApiModelProperty(example = "extra_client_details")
         public String resourceIdentifier;
     }
 
     @ApiModel(value = "PutDataTablesRequest")
-    public static final class PutDataTablesRequest{
+    public static final class PutDataTablesRequest {
+
         private PutDataTablesRequest() {
 
         }
-        final class PutDataTablesRequestDropColumns {
+
+        static final class PutDataTablesRequestDropColumns {
+
             private PutDataTablesRequestDropColumns() {}
+
             @ApiModelProperty(example = "Gender_cd_Question")
             public String name;
         }
-        final class PutDataTablesRequestAddColumns {
-            private PutDataTablesRequestAddColumns() {
-            }
+
+        static final class PutDataTablesRequestAddColumns {
+
+            private PutDataTablesRequestAddColumns() {}
+
             @ApiModelProperty(example = "Question")
             public String name;
             @ApiModelProperty(example = "Dropdown")
@@ -89,9 +102,11 @@ final class DatatablesApiResourceSwagger {
             @ApiModelProperty(example = "true")
             public boolean mandatory;
         }
-        final class PutDataTablesRequestChangeColumns {
-            private PutDataTablesRequestChangeColumns() {
-            }
+
+        static final class PutDataTablesRequestChangeColumns {
+
+            private PutDataTablesRequestChangeColumns() {}
+
             @ApiModelProperty(example = "Question")
             public String name;
             @ApiModelProperty(example = "Question 2")
@@ -103,6 +118,7 @@ final class DatatablesApiResourceSwagger {
             @ApiModelProperty(example = "true")
             public boolean mandatory;
         }
+
         @ApiModelProperty(example = "m_client")
         public String appTableName;
         public List<PutDataTablesRequestDropColumns> dropColumns;
@@ -111,33 +127,40 @@ final class DatatablesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutDataTablesResponse")
-    public static final class PutDataTablesResponse{
+    public static final class PutDataTablesResponse {
+
         private PutDataTablesResponse() {
 
         }
+
         @ApiModelProperty(example = "extra_client_details")
         public String resourceIdentifier;
     }
 
     @ApiModel(value = "DeleteDataTablesResponse")
-    public static final class DeleteDataTablesResponse{
+    public static final class DeleteDataTablesResponse {
+
         private DeleteDataTablesResponse() {
 
         }
+
         @ApiModelProperty(example = "extra_client_details")
         public String resourceIdentifier;
     }
 
     @ApiModel(value = "PostDataTablesRegisterDatatableAppTable")
     public static final class PostDataTablesRegisterDatatableAppTable {
-        private PostDataTablesRegisterDatatableAppTable () {}
+
+        private PostDataTablesRegisterDatatableAppTable() {}
     }
 
     @ApiModel(value = "PostDataTablesAppTableIdRequest")
-    public static final class PostDataTablesAppTableIdRequest{
+    public static final class PostDataTablesAppTableIdRequest {
+
         private PostDataTablesAppTableIdRequest() {
 
         }
+
         @ApiModelProperty(example = "Livestock sales")
         public String BusinessDescription;
         @ApiModelProperty(example = "First comment made")
@@ -160,51 +183,64 @@ final class DatatablesApiResourceSwagger {
 
     @ApiModel(value = "PostDataTablesAppTableIdResponse ")
     public static final class PostDataTablesAppTableIdResponse {
-        private PostDataTablesAppTableIdResponse () {
+
+        private PostDataTablesAppTableIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "GetDataTablesAppTableIdResponse")
     public static final class GetDataTablesAppTableIdResponse {
+
         private GetDataTablesAppTableIdResponse() {
 
         }
+
         public List<ResultsetColumnHeaderData> columnHeaders;
         public List<ResultsetRowData> data;
     }
 
     @ApiModel(value = "PutDataTablesAppTableIdRequest")
-    public static final class PutDataTablesAppTableIdRequest{
+    public static final class PutDataTablesAppTableIdRequest {
+
         private PutDataTablesAppTableIdRequest() {
 
         }
+
         @ApiModelProperty(example = "Livestock sales updated")
         public String BusinessDescription;
     }
 
     @ApiModel(value = "PutDataTablesAppTableIdResponse")
     public static final class PutDataTablesAppTableIdResponse {
+
         private PutDataTablesAppTableIdResponse() {
 
         }
-        final class PutDataTablesAppTableIdResponseChanges{
-            private PutDataTablesAppTableIdResponseChanges () {}
+
+        static final class PutDataTablesAppTableIdResponseChanges {
+
+            private PutDataTablesAppTableIdResponseChanges() {}
+
             @ApiModelProperty(example = "Livestock sales updated")
             public String BusinessDescription;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         public PutDataTablesAppTableIdResponseChanges changes;
     }
 
     @ApiModel(value = "PutDataTablesAppTableIdDatatableIdRequest")
-    public static final class PutDataTablesAppTableIdDatatableIdRequest{
+    public static final class PutDataTablesAppTableIdDatatableIdRequest {
+
         private PutDataTablesAppTableIdDatatableIdRequest() {
 
         }
+
         @ApiModelProperty(example = "01 June 1982")
         public String DateOfBirth;
         @ApiModelProperty(example = "5")
@@ -223,27 +259,33 @@ final class DatatablesApiResourceSwagger {
 
     @ApiModel(value = "PutDataTablesAppTableIdDatatableIdResponse ")
     public static final class PutDataTablesAppTableIdDatatableIdResponse {
-        private PutDataTablesAppTableIdDatatableIdResponse () {
+
+        private PutDataTablesAppTableIdDatatableIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "DeleteDataTablesDatatableAppTableIdResponse ")
     public static final class DeleteDataTablesDatatableAppTableIdResponse {
-        private DeleteDataTablesDatatableAppTableIdResponse () {
+
+        private DeleteDataTablesDatatableAppTableIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "DeleteDataTablesDatatableAppTableIdDatatableIdResponse ")
     public static final class DeleteDataTablesDatatableAppTableIdDatatableIdResponse {
-        private DeleteDataTablesDatatableAppTableIdDatatableIdResponse () {
+
+        private DeleteDataTablesDatatableAppTableIdDatatableIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

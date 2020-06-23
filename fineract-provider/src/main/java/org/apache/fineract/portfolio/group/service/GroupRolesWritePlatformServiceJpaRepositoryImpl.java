@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRolesWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(GroupRolesWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupRolesWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final GroupRepositoryWrapper groupRepository;
@@ -80,7 +80,9 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             final Group group = this.groupRepository.findOneWithNotFoundDetection(command.getGroupId());
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, command.getGroupId()); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, command.getGroupId());
+            }
             final GroupRole groupRole = GroupRole.createGroupRole(group, client, role);
             this.groupRoleRepository.save(groupRole);
             return new CommandProcessingResultBuilder().withClientId(client.getId()).withGroupId(group.getId())
@@ -106,7 +108,7 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
                     GroupingTypesApiConstants.clientIdParamName, roleId, clientId, command.getGroupId());
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -138,7 +140,9 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
                 Client client = null;
                 if (newValue != null) {
                     client = this.clientRepository.findOneWithNotFoundDetection(newValue);
-                    if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(newValue, command.getGroupId()); }
+                    if (!group.hasClientAsMember(client)) {
+                        throw new ClientNotInGroupException(newValue, command.getGroupId());
+                    }
                 }
                 groupRole.updateClient(client);
             }

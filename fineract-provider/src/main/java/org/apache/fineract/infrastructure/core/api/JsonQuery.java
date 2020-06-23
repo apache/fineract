@@ -241,7 +241,7 @@ public final class JsonQuery {
      */
     public boolean booleanPrimitiveValueOfParameterNamed(final String parameterName) {
         final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, this.parsedQuery);
-        return (Boolean) ObjectUtils.defaultIfNull(value, Boolean.FALSE);
+        return ObjectUtils.defaultIfNull(value, Boolean.FALSE);
     }
 
     public boolean isChangeInArrayParameterNamed(final String parameterName, final String[] existingValue) {

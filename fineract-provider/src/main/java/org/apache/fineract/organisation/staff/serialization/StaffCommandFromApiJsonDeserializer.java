@@ -52,7 +52,6 @@ public final class StaffCommandFromApiJsonDeserializer {
 
     private final StaffReadPlatformService staffReadPlatformService;
 
-
     @Autowired
     public StaffCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final StaffReadPlatformService staffReadPlatformService) {
@@ -61,7 +60,9 @@ public final class StaffCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -87,13 +88,13 @@ public final class StaffCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
         }
 
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
+            final String activeFlag = this.fromApiJsonHelper.extractStringNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlag);
         }
 
         final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
@@ -109,6 +110,11 @@ public final class StaffCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
+        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -116,8 +122,10 @@ public final class StaffCommandFromApiJsonDeserializer {
         validateForUpdate(json, null);
     }
 
-    public void validateForUpdate(final String json,Long staffId) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    public void validateForUpdate(final String json, Long staffId) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -147,20 +155,25 @@ public final class StaffCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
         }
 
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
+            final String activeFlagStr = this.fromApiJsonHelper.extractStringNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlagStr);
+
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
-            //Need to add here check to see if any clients, group, account and loans are assigned to this staff if staff is being set to inactive --LJB
+
+            // Need to add here check to see if any clients, group, account and
+            // loans are assigned to this staff if staff is being set to
+            // inactive --LJB
             final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
-            if ((!activeFlag && forceStatus == null) ||
-                (!activeFlag && forceStatus)) {
-                 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
+            if ((!activeFlag && forceStatus == null) || (!activeFlag && forceStatus)) {
+                Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
 
                 if (result != null && result.length > 0) {
-                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
+                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned", result);
                 }
 
             }
@@ -182,11 +195,18 @@ public final class StaffCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
+        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

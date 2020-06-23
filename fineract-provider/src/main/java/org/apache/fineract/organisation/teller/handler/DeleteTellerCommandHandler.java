@@ -42,7 +42,9 @@ public class DeleteTellerCommandHandler implements NewCommandSourceHandler {
     /**
      * Creates a new instance
      *
-     * @param writePlatformService the {@code TellerWritePlatformService} used to access the backend
+     * @param writePlatformService
+     *            the {@code TellerWritePlatformService} used to access the
+     *            backend
      */
     @Autowired
     public DeleteTellerCommandHandler(final TellerWritePlatformService writePlatformService) {

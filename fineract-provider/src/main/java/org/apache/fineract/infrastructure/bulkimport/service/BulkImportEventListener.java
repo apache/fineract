@@ -39,6 +39,8 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -47,18 +49,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class BulkImportEventListener implements ApplicationListener<BulkImportEvent> {
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(BulkImportEventListener.class);
     private final TenantDetailsService tenantDetailsService;
     private final ApplicationContext applicationContext;
     private final ImportDocumentRepository importRepository;
     private final DocumentWritePlatformService documentService;
 
     @Autowired
-    public BulkImportEventListener(
-            final TenantDetailsService tenantDetailsService,
-            final ApplicationContext context,
-            final ImportDocumentRepository importRepository,
-            final DocumentWritePlatformService documentService) {
+    public BulkImportEventListener(final TenantDetailsService tenantDetailsService, final ApplicationContext context,
+            final ImportDocumentRepository importRepository, final DocumentWritePlatformService documentService) {
         this.tenantDetailsService = tenantDetailsService;
         this.applicationContext = context;
         this.importRepository = importRepository;
@@ -69,73 +68,72 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
     public void onApplicationEvent(final BulkImportEvent event) {
 
         final String tenantIdentifier = event.getTenantIdentifier();
-        final FineractPlatformTenant tenant = this.tenantDetailsService
-                .loadTenantById(tenantIdentifier);
+        final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
         ImportHandler importHandler = null;
         final ImportDocument importDocument = this.importRepository.findById(event.getImportId()).orElse(null);
         final GlobalEntityType entityType = GlobalEntityType.fromInt(importDocument.getEntityType());
 
-        switch(entityType) {
-            case OFFICES :
+        switch (entityType) {
+            case OFFICES:
                 importHandler = this.applicationContext.getBean("officeImportHandler", ImportHandler.class);
-                break;
+            break;
             case CENTERS:
-                importHandler=this.applicationContext.getBean("centerImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("centerImportHandler", ImportHandler.class);
+            break;
             case CHART_OF_ACCOUNTS:
-                importHandler=this.applicationContext.getBean("chartOfAccountsImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("chartOfAccountsImportHandler", ImportHandler.class);
+            break;
             case CLIENTS_ENTTTY:
-                importHandler=this.applicationContext.getBean("clientEntityImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("clientEntityImportHandler", ImportHandler.class);
+            break;
             case CLIENTS_PERSON:
-                importHandler=this.applicationContext.getBean("clientPersonImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("clientPersonImportHandler", ImportHandler.class);
+            break;
             case FIXED_DEPOSIT_ACCOUNTS:
-                importHandler=this.applicationContext.getBean("fixedDepositImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("fixedDepositImportHandler", ImportHandler.class);
+            break;
             case FIXED_DEPOSIT_TRANSACTIONS:
-                importHandler=this.applicationContext.getBean("fixedDepositTransactionImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("fixedDepositTransactionImportHandler", ImportHandler.class);
+            break;
             case GROUPS:
-                importHandler=this.applicationContext.getBean("groupImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("groupImportHandler", ImportHandler.class);
+            break;
             case GUARANTORS:
-                importHandler=this.applicationContext.getBean("guarantorImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("guarantorImportHandler", ImportHandler.class);
+            break;
             case GL_JOURNAL_ENTRIES:
-                importHandler=this.applicationContext.getBean("journalEntriesImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("journalEntriesImportHandler", ImportHandler.class);
+            break;
             case LOANS:
-                importHandler=this.applicationContext.getBean("loanImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("loanImportHandler", ImportHandler.class);
+            break;
             case LOAN_TRANSACTIONS:
-                importHandler=this.applicationContext.getBean("loanRepaymentImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("loanRepaymentImportHandler", ImportHandler.class);
+            break;
             case RECURRING_DEPOSIT_ACCOUNTS:
-                importHandler=this.applicationContext.getBean("recurringDepositImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("recurringDepositImportHandler", ImportHandler.class);
+            break;
             case RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS:
-                importHandler=this.applicationContext.getBean("recurringDepositTransactionImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("recurringDepositTransactionImportHandler", ImportHandler.class);
+            break;
             case SAVINGS_ACCOUNT:
-                importHandler=this.applicationContext.getBean("savingsImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("savingsImportHandler", ImportHandler.class);
+            break;
             case SAVINGS_TRANSACTIONS:
-                importHandler=this.applicationContext.getBean("savingsTransactionImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("savingsTransactionImportHandler", ImportHandler.class);
+            break;
             case SHARE_ACCOUNTS:
-                importHandler=this.applicationContext.getBean("sharedAccountImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("sharedAccountImportHandler", ImportHandler.class);
+            break;
             case STAFF:
-                importHandler=this.applicationContext.getBean("staffImportHandler",ImportHandler.class);
-                break;
+                importHandler = this.applicationContext.getBean("staffImportHandler", ImportHandler.class);
+            break;
             case USERS:
-                importHandler=this.applicationContext.getBean("userImportHandler",ImportHandler.class);
-                break;
-            default : throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource",
-                    "Unable to find requested resource");
+                importHandler = this.applicationContext.getBean("userImportHandler", ImportHandler.class);
+            break;
+            default:
+                throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
 
         }
 
@@ -151,9 +149,8 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
         modifiedParams.add("location");
         Document document = importDocument.getDocument();
 
-        DocumentCommand documentCommand = new DocumentCommand(modifiedParams, document.getId(), entityType.name(), null,
-                document.getName(), document.getFileName(), document.getSize(), URLConnection.guessContentTypeFromName(document.getFileName()),
-                null, null);
+        DocumentCommand documentCommand = new DocumentCommand(modifiedParams, document.getId(), entityType.name(), null, document.getName(),
+                document.getFileName(), document.getSize(), URLConnection.guessContentTypeFromName(document.getFileName()), null, null);
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
@@ -163,7 +160,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
                 bos.close();
             }
         } catch (IOException io) {
-            io.printStackTrace();
+            LOG.error("Problem occurred in onApplicationEvent function", io);
         }
         byte[] bytes = bos.toByteArray();
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);

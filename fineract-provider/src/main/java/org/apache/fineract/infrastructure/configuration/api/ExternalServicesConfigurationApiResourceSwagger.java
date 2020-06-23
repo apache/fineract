@@ -25,15 +25,18 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 30/7/17.
  */
 final class ExternalServicesConfigurationApiResourceSwagger {
+
     private ExternalServicesConfigurationApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "PutExternalServiceRequest")
-    public static final class PutExternalServiceRequest{
+    public static final class PutExternalServiceRequest {
+
         private PutExternalServiceRequest() {
 
         }
+
         @ApiModelProperty(example = "test@mifos.org")
         public String username;
         @ApiModelProperty(example = "XXXX")

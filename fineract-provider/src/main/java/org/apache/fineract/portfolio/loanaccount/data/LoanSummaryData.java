@@ -76,7 +76,7 @@ public class LoanSummaryData {
             final BigDecimal penaltyChargesOverdue, final BigDecimal totalExpectedRepayment, final BigDecimal totalRepayment,
             final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan, final BigDecimal totalWaived,
             final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding, final BigDecimal totalOverdue,
-            final LocalDate overdueSinceDate,final Long writeoffReasonId,final String writeoffReason) {
+            final LocalDate overdueSinceDate, final Long writeoffReasonId, final String writeoffReason) {
         this.currency = currency;
         this.principalDisbursed = principalDisbursed;
         this.principalPaid = principalPaid;
@@ -120,6 +120,6 @@ public class LoanSummaryData {
     }
 
     public BigDecimal getTotalPaidFeeCharges() {
-        return feeChargesPaid ;
+        return feeChargesPaid;
     }
 }

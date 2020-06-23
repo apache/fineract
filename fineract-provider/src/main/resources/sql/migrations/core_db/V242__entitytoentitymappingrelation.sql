@@ -18,30 +18,30 @@
 --
 
 CREATE TABLE `m_entity_relation` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`from_entity_type` INT(10) NOT NULL,
-	`to_entity_type` INT(10) NOT NULL,
-	`code_name` VARCHAR(50) NOT NULL,
-	PRIMARY KEY (`id`),
-	UNIQUE INDEX `from_entity_type_to_entity_type_code_name` (`from_entity_type`, `to_entity_type`, `code_name`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `from_entity_type` INT NOT NULL,
+    `to_entity_type` INT NOT NULL,
+    `code_name` VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `from_entity_type_to_entity_type_code_name` (`from_entity_type`, `to_entity_type`, `code_name`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 
 CREATE TABLE `m_entity_to_entity_mapping` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`rel_id` BIGINT(20) NOT NULL DEFAULT '0',
-	`from_id` BIGINT(20) NOT NULL DEFAULT '0',
-	`to_id` BIGINT(20) UNSIGNED NOT NULL,
-	`start_date` DATE NULL DEFAULT NULL,
-	`end_date` DATE NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	UNIQUE INDEX `rel_id_from_id_to_id` (`rel_id`, `from_id`, `to_id`),
-	CONSTRAINT `FK__rel_id_m_entity_relation_id` FOREIGN KEY (`rel_id`) REFERENCES `m_entity_relation` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `rel_id` BIGINT NOT NULL DEFAULT '0',
+    `from_id` BIGINT NOT NULL DEFAULT '0',
+    `to_id` BIGINT UNSIGNED NOT NULL,
+    `start_date` DATE NULL DEFAULT NULL,
+    `end_date` DATE NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `rel_id_from_id_to_id` (`rel_id`, `from_id`, `to_id`),
+    CONSTRAINT `FK__rel_id_m_entity_relation_id` FOREIGN KEY (`rel_id`) REFERENCES `m_entity_relation` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;

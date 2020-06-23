@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-alter table `m_code_value` add `is_mandatory` tinyint(1) not null default '0'; 
+alter table `m_code_value` add `is_mandatory` tinyint not null default '0';

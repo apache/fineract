@@ -29,7 +29,8 @@ public class SelfServiceUserAccessVote implements AccessDecisionVoter<FilterInvo
 
     @Override
     public boolean supports(@SuppressWarnings("unused") ConfigAttribute attribute) {
-        // This implementation supports any attribute, because it does not rely on it.
+        // This implementation supports any attribute, because it does not rely
+        // on it.
         return true;
     }
 
@@ -41,16 +42,16 @@ public class SelfServiceUserAccessVote implements AccessDecisionVoter<FilterInvo
     @Override
     public int vote(final Authentication authentication, final FilterInvocation fi,
             @SuppressWarnings("unused") final Collection<ConfigAttribute> attributes) {
-        if(!"OPTIONS".equalsIgnoreCase(fi.getHttpRequest().getMethod())){
+        if (!"OPTIONS".equalsIgnoreCase(fi.getHttpRequest().getMethod())) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
             String pathURL = fi.getRequestUrl();
             boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
 
             boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
-                    ||(!isSelfServiceRequest && user.isSelfServiceUser()));
+                    || (!isSelfServiceRequest && user.isSelfServiceUser()));
 
-            if(notAllowed){
+            if (notAllowed) {
                 return ACCESS_DENIED;
             }
         }

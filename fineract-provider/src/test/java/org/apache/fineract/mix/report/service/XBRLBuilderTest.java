@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.mix.report.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -35,31 +35,34 @@ import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.NamespaceData;
 import org.apache.fineract.mix.service.NamespaceReadPlatformServiceImpl;
 import org.apache.fineract.mix.service.XBRLBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class XBRLBuilderTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
 
     @InjectMocks
     private final XBRLBuilder xbrlBuilder = new XBRLBuilder();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
-        lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString())).thenReturn(
-                new NamespaceData(1l, "mockedprefix", "mockedurl"));
+        lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
+                .thenReturn(new NamespaceData(1L, "mockedprefix", "mockedurl"));
     }
 
     @Test
@@ -69,9 +72,9 @@ public class XBRLBuilderTest {
         when(data1.getName()).thenReturn("Assets");
         map.put(data1, new BigDecimal(10000));
         final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
-        System.out.println(result);
-        NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-            new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8))).getElementsByTagName("Assets");
+        LOG.info("{}", result);
+        NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8))).getElementsByTagName("Assets");
         assertNotNull(nodes);
         assertNotNull(nodes.item(0));
         assertEquals("Assets", nodes.item(0).getNodeName());

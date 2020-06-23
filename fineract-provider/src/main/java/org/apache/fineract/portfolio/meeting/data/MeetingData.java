@@ -29,7 +29,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a Meeting.
  */
-public class MeetingData {
+public final class MeetingData {
 
     private final Long id;
     private final LocalDate meetingDate;

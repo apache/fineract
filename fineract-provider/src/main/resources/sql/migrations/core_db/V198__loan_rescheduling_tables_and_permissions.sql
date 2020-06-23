@@ -18,25 +18,25 @@
 --
 
 create table m_loan_reschedule_request (
-id bigint(20) primary key auto_increment,
-loan_id bigint(20) not null,
-status_enum smallint(5) not null,
-reschedule_from_installment smallint(5) not null comment 'Rescheduling will start from this installment',
-grace_on_principal smallint(5) null comment 'Number of installments that should be added with 0 principal amount',
-grace_on_interest smallint(5) null comment 'Number of installments that should be added with 0 interest rate',
+id BIGINT primary key auto_increment,
+loan_id BIGINT not null,
+status_enum SMALLINT not null,
+reschedule_from_installment SMALLINT not null comment 'Rescheduling will start from this installment',
+grace_on_principal SMALLINT null comment 'Number of installments that should be added with 0 principal amount',
+grace_on_interest SMALLINT null comment 'Number of installments that should be added with 0 interest rate',
 reschedule_from_date date not null comment 'Rescheduling will start from the installment with due date similar to this date.',
-extra_terms smallint(5)	comment 'Number of extra terms to be added to the schedule',
+extra_terms SMALLINT	comment 'Number of extra terms to be added to the schedule',
 interest_rate decimal(19,6)	null comment 'If provided, the interest rate for the unpaid installments will be recalculated',
-recalculate_interest tinyint(1) null comment 'If set to 1, interest will be recalculated starting from the reschedule period.',
+recalculate_interest tinyint null comment 'If set to 1, interest will be recalculated starting from the reschedule period.',
 adjusted_due_date date null comment 'New due date for the first rescheduled installment',
-reschedule_reason_cv_id int(11) null comment 'ID of code value of reason for rescheduling',
+reschedule_reason_cv_id INT null comment 'ID of code value of reason for rescheduling',
 reschedule_reason_comment varchar(500) null comment 'Text provided in addition to the reason code value',
 submitted_on_date date not null,
-submitted_by_user_id bigint(20) not null,
+submitted_by_user_id BIGINT not null,
 approved_on_date date null,
-approved_by_user_id bigint(20) null,
+approved_by_user_id BIGINT null,
 rejected_on_date date null,
-rejected_by_user_id bigint(20) null,
+rejected_by_user_id BIGINT null,
 foreign key (loan_id) references m_loan(id),
 foreign key (reschedule_reason_cv_id) references m_code_value(id),
 foreign key (submitted_by_user_id) references m_appuser(id),
@@ -45,12 +45,12 @@ foreign key (rejected_by_user_id) references m_appuser(id)
 );
 
 create table m_loan_repayment_schedule_history (
- id bigint(20) primary key auto_increment,
- loan_id bigint(20) not null,
- loan_reschedule_request_id bigint(20) null,
+ id BIGINT primary key auto_increment,
+ loan_id BIGINT not null,
+ loan_reschedule_request_id BIGINT null,
  fromdate date null,
  duedate date not null,
- installment smallint(5) not null,
+ installment SMALLINT not null,
  principal_amount decimal(19,6) null,
  principal_completed_derived decimal(19,6) null,
  principal_writtenoff_derived decimal(19,6) null,
@@ -73,15 +73,15 @@ create table m_loan_repayment_schedule_history (
  total_paid_late_derived decimal(19,6) null,
  completed_derived bit(1) not null,
  obligations_met_on_date date null,
- createdby_id bigint(20) null,
+ createdby_id BIGINT null,
  created_date datetime null,
  lastmodified_date datetime null,
- lastmodifiedby_id bigint(20) null,
+ lastmodifiedby_id BIGINT null,
  foreign key (loan_id) references m_loan(id),
  foreign key (loan_reschedule_request_id) references m_loan_reschedule_request(id)
 );
 
-alter table m_loan add rescheduledon_userid bigint(20) null after rescheduledon_date;
+alter table m_loan add rescheduledon_userid BIGINT null after rescheduledon_date;
 
 insert into `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) values ('loan_reschedule', 'READ_RESCHEDULELOAN', 'RESCHEDULELOAN', 'READ', '0');
 

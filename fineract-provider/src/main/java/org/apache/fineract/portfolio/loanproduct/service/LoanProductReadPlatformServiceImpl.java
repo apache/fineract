@@ -68,7 +68,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.rateReadService=rateReadService;
+        this.rateReadService = rateReadService;
     }
 
     @Override
@@ -77,7 +77,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         try {
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
             final Collection<RateData> rates = this.rateReadService.retrieveProductLoanRates(loanProductId);
-            final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(loanProductId);
+            final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(
+                    loanProductId);
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
@@ -108,7 +109,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " where lp.id in ( " + inClause + " ) ";
         }
 
@@ -124,10 +125,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "select " + rm.schema();
 
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " where lp.id in ("+inClause+") ";
-            //Here no need to check injection as this is internal where clause
-           // SQLInjectionValidator.validateSQLInput(inClause);
+        if (inClause != null && !inClause.trim().isEmpty()) {
+            sql += " where lp.id in (" + inClause + ") ";
+            // Here no need to check injection as this is internal where clause
+            // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -155,7 +156,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             if (activeOnly) {
                 sql += " and id in ( " + inClause + " )";
             } else {
@@ -204,16 +205,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
                     + "lpr.rest_frequency_nth_day_enum as restFrequencyNthDayEnum, "
-                    + "lpr.rest_frequency_weekday_enum as restFrequencyWeekDayEnum, "
-                    + "lpr.rest_frequency_on_day as restFrequencyOnDay, "
+                    + "lpr.rest_frequency_weekday_enum as restFrequencyWeekDayEnum, " + "lpr.rest_frequency_on_day as restFrequencyOnDay, "
                     + "lpr.arrears_based_on_original_schedule as isArrearsBasedOnOriginalSchedule, "
                     + "lpr.compounding_frequency_type_enum as compoundingFrequencyTypeEnum, lpr.compounding_frequency_interval as compoundingInterval, "
                     + "lpr.compounding_frequency_nth_day_enum as compoundingFrequencyNthDayEnum, "
                     + "lpr.compounding_frequency_weekday_enum as compoundingFrequencyWeekDayEnum, "
                     + "lpr.compounding_frequency_on_day as compoundingFrequencyOnDay, "
                     + "lpr.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
-                    + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, "
-                    + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
+                    + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, " + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
                     + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
@@ -224,19 +223,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lca.loan_transaction_strategy_id as transactionProcessingStrategyBoolean,lca.interest_calculated_in_period_enum as interestCalcPeriodBoolean, lca.arrearstolerance_amount as arrearsToleranceBoolean, "
                     + "lca.repay_every as repaymentFrequencyBoolean, lca.moratorium as graceOnPrincipalAndInterestBoolean, lca.grace_on_arrears_ageing as graceOnArrearsAgingBoolean, "
                     + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
-                    + "lfr.floating_rates_id as floatingRateId, "
-                    + "fr.name as floatingRateName, "
+                    + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
                     + "lfr.interest_rate_differential as interestRateDifferential, "
                     + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
                     + "lfr.default_differential_lending_rate as defaultDifferentialLendingRate, "
                     + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
                     + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
-                    + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, "
-                    + "lvi.minimum_gap as minimumGap, "
+                    + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, " + "lvi.minimum_gap as minimumGap, "
                     + "lvi.maximum_gap as maximumGap, "
                     + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization "
-                    + " from m_product_loan lp "
-                    + " left join m_fund f on f.id = lp.fund_id "
+                    + " from m_product_loan lp " + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join m_product_loan_guarantee_details lpg on lpg.loan_product_id=lp.id "
                     + " left join ref_loan_transaction_processing_strategy ltps on ltps.id = lp.loan_transaction_strategy_id"
@@ -267,8 +263,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             final BigDecimal principal = rs.getBigDecimal("principal");
             final BigDecimal minPrincipal = rs.getBigDecimal("minPrincipal");
@@ -281,7 +277,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
 
             final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
-            final Integer recurringMoratoriumOnPrincipalPeriods = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "recurringMoratoriumOnPrincipalPeriods");
+            final Integer recurringMoratoriumOnPrincipalPeriods = JdbcSupport.getIntegerDefaultToNullIfZero(rs,
+                    "recurringMoratoriumOnPrincipalPeriods");
             final Integer graceOnInterestPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestPayment");
             final Integer graceOnInterestCharged = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestCharged");
             final Integer graceOnArrearsAgeing = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnArrearsAgeing");
@@ -418,12 +415,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         .preCloseInterestCalculationStrategy(preCloseInterestCalculationStrategyEnumValue);
                 final boolean allowCompoundingOnEod = rs.getBoolean("allowCompoundingOnEod");
 
-                interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
-                        interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
-                        restFrequencyNthDayEnum, restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingFrequencyType,
-                        compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
-                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy,
-                        allowCompoundingOnEod);
+                interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
+                        rescheduleStrategyType, restFrequencyType, restFrequencyInterval, restFrequencyNthDayEnum, restFrequencyWeekDayEnum,
+                        restFrequencyOnDay, compoundingFrequencyType, compoundingInterval, compoundingFrequencyNthDayEnum,
+                        compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay, isArrearsBasedOnOriginalSchedule,
+                        isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod);
             }
 
             final boolean amortization = rs.getBoolean("amortizationBoolean");
@@ -456,7 +452,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
 
             final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
-            final Collection<RateData> rateOptions= null;
+            final Collection<RateData> rateOptions = null;
             final boolean isRatesEnabled = false;
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -464,8 +460,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
                     allowPartialPeriodInterestCalcualtion, fundId, fundName, transactionStrategyId, transactionStrategyName,
-                    graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, this.charges, accountingRuleType,
-                    includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
+                    graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
+                    this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                     principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                     graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
@@ -474,7 +470,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
-                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates, isRatesEnabled);
+                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
+                    isRatesEnabled);
         }
     }
 
@@ -552,11 +549,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
+        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode });
     }
 
     @Override
@@ -572,7 +569,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and lp.id in ( " + inClause + " ) ";
         }
 
@@ -591,7 +588,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause1 = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause1 != null) && (!(inClause1.trim().isEmpty()))) {
+        if (inClause1 != null && !inClause1.trim().isEmpty()) {
             sql += " and rp.id in ( " + inClause1 + " ) ";
         }
 
@@ -601,7 +598,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause2 = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause2 != null) && (!(inClause2.trim().isEmpty()))) {
+        if (inClause2 != null && !inClause2.trim().isEmpty()) {
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
@@ -621,7 +618,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " lp.id in ( " + inClause + " ) and ";
         }
 
@@ -645,14 +642,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
     }
 
-
     private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
 
         public LoanProductFloatingRateMapper() {}
 
         public String schema() {
-            return "lp.id as id,  lp.name as name,"
-                    + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
+            return "lp.id as id,  lp.name as name," + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
                     + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
                     + "lfr.interest_rate_differential as interestRateDifferential, "
                     + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
@@ -678,9 +673,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal maxDifferentialLendingRate = rs.getBigDecimal("maxDifferentialLendingRate");
             final boolean isFloatingInterestRateCalculationAllowed = rs.getBoolean("isFloatingInterestRateCalculationAllowed");
 
-            return LoanProductData.loanProductWithFloatingRates(id, name, isLinkedToFloatingInterestRates, floatingRateId,
-                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
-                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+            return LoanProductData.loanProductWithFloatingRates(id, name, isLinkedToFloatingInterestRates, floatingRateId, floatingRateName,
+                    interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, maxDifferentialLendingRate,
+                    isFloatingInterestRateCalculationAllowed);
         }
     }
 

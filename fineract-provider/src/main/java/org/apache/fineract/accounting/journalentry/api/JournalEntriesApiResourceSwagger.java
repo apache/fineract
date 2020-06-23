@@ -25,14 +25,16 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 25/7/17.
  */
 final class JournalEntriesApiResourceSwagger {
-    private JournalEntriesApiResourceSwagger(){}
+
+    private JournalEntriesApiResourceSwagger() {}
 
     @ApiModel(value = "PostJournalEntriesResponse")
     public static final class PostJournalEntriesResponse {
 
-        private PostJournalEntriesResponse(){
+        private PostJournalEntriesResponse() {
 
         }
+
         @ApiModelProperty(value = "1")
         public Long officeId;
         @ApiModelProperty(value = "RS9MCISID4WK1ZM")
@@ -42,18 +44,22 @@ final class JournalEntriesApiResourceSwagger {
 
     @ApiModel(value = "PostJournalEntriesTransactionIdRequest")
     public static final class PostJournalEntriesTransactionIdRequest {
+
         private PostJournalEntriesTransactionIdRequest() {
 
         }
+
         @ApiModelProperty(value = "1")
         public Long officeId;
     }
 
     @ApiModel(value = "PostJournalEntriesTransactionIdResponse")
     public static final class PostJournalEntriesTransactionIdResponse {
+
         private PostJournalEntriesTransactionIdResponse() {
 
         }
+
         @ApiModelProperty(value = "1")
         public Long officeId;
     }

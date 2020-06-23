@@ -36,13 +36,13 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
     private final PlatformSecurityContext context;
 
     @Autowired
-    public OrganisationCreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource) {
+    public OrganisationCreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     private static final class OrganisationCreditBureauMapper implements RowMapper<OrganisationCreditBureauData> {
+
         public String schema() {
             return "ocb.id as orgCbId,ocb.alias as orgCbAlias,cb.name as creditbureauName,cb.product as creditbureauProduct,cb.country as creditbureauCountry,"
                     + "concat(cb.product,' - ',cb.name,' - ',cb.country) as CreditBureauSummary,"
@@ -52,8 +52,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         }
 
         @Override
-        public OrganisationCreditBureauData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public OrganisationCreditBureauData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long orgCbId = rs.getLong("orgCbId");
             final String orgCbAlias = rs.getString("orgCbAlias");
             final String creditbureauName = rs.getString("creditbureauName");
@@ -63,8 +62,8 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
             final long cbid = rs.getLong("cbid");
             final boolean is_active = rs.getBoolean("is_active");
 
-            return OrganisationCreditBureauData.instance(orgCbId, orgCbAlias, cbid, creditbureauName,
-                    creditbureauProduct, creditbureauCountry, CreditBureauSummary, is_active);
+            return OrganisationCreditBureauData.instance(orgCbId, orgCbAlias, cbid, creditbureauName, creditbureauProduct,
+                    creditbureauCountry, CreditBureauSummary, is_active);
 
         }
     }

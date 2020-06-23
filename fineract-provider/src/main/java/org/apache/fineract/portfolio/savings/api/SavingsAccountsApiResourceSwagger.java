@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/29/17.
  */
 final class SavingsAccountsApiResourceSwagger {
-    private SavingsAccountsApiResourceSwagger() {
-    }
+
+    private SavingsAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSavingsAccountsTemplateResponse")
-    public final static class GetSavingsAccountsTemplateResponse {
-        private GetSavingsAccountsTemplateResponse() {
-        }
+    public static final class GetSavingsAccountsTemplateResponse {
 
-        final class GetSavingsProductOptions {
-            private GetSavingsProductOptions() {
-            }
+        private GetSavingsAccountsTemplateResponse() {}
+
+        static final class GetSavingsProductOptions {
+
+            private GetSavingsProductOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -53,17 +53,17 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsResponse")
-    public final static class GetSavingsAccountsResponse {
-        private GetSavingsAccountsResponse() {
-        }
+    public static final class GetSavingsAccountsResponse {
 
-        final class GetSavingsPageItems {
-            private GetSavingsPageItems() {
-            }
+        private GetSavingsAccountsResponse() {}
 
-            final class GetSavingsStatus {
-                private GetSavingsStatus() {
-                }
+        static final class GetSavingsPageItems {
+
+            private GetSavingsPageItems() {}
+
+            static final class GetSavingsStatus {
+
+                private GetSavingsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -86,17 +86,17 @@ final class SavingsAccountsApiResourceSwagger {
 
             }
 
-            final class GetSavingsTimeline {
-                private GetSavingsTimeline() {
-                }
+            static final class GetSavingsTimeline {
+
+                private GetSavingsTimeline() {}
 
                 @ApiModelProperty(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
             }
 
-            final class GetSavingsCurrency {
-                private GetSavingsCurrency() {
-                }
+            static final class GetSavingsCurrency {
+
+                private GetSavingsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -112,9 +112,9 @@ final class SavingsAccountsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetSavingsInterestCompoundingPeriodType {
-                private GetSavingsInterestCompoundingPeriodType() {
-                }
+            static final class GetSavingsInterestCompoundingPeriodType {
+
+                private GetSavingsInterestCompoundingPeriodType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -124,9 +124,9 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestPostingPeriodType {
-                private GetSavingsInterestPostingPeriodType() {
-                }
+            static final class GetSavingsInterestPostingPeriodType {
+
+                private GetSavingsInterestPostingPeriodType() {}
 
                 @ApiModelProperty(example = "4")
                 public Integer id;
@@ -136,9 +136,9 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestCalculationType {
-                private GetSavingsInterestCalculationType() {
-                }
+            static final class GetSavingsInterestCalculationType {
+
+                private GetSavingsInterestCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -148,9 +148,9 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsInterestCalculationDaysInYearType {
-                private GetSavingsInterestCalculationDaysInYearType() {
-                }
+            static final class GetSavingsInterestCalculationDaysInYearType {
+
+                private GetSavingsInterestCalculationDaysInYearType() {}
 
                 @ApiModelProperty(example = "365")
                 public Integer id;
@@ -160,9 +160,9 @@ final class SavingsAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsSummary {
-                private GetSavingsSummary() {
-                }
+            static final class GetSavingsSummary {
+
+                private GetSavingsSummary() {}
 
                 public GetSavingsCurrency currency;
                 @ApiModelProperty(example = "0")
@@ -201,9 +201,9 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsRequest")
-    public final static class PostSavingsAccountsRequest {
-        private PostSavingsAccountsRequest() {
-        }
+    public static final class PostSavingsAccountsRequest {
+
+        private PostSavingsAccountsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer clientId;
@@ -218,9 +218,9 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsResponse")
-    public final static class PostSavingsAccountsResponse {
-        private PostSavingsAccountsResponse() {
-        }
+    public static final class PostSavingsAccountsResponse {
+
+        private PostSavingsAccountsResponse() {}
 
         @ApiModelProperty(example = "2")
         public Integer officeId;
@@ -233,13 +233,13 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsAccountIdResponse")
-    public final static class GetSavingsAccountsAccountIdResponse {
-        private GetSavingsAccountsAccountIdResponse() {
-        }
+    public static final class GetSavingsAccountsAccountIdResponse {
 
-        final class GetSavingsAccountsSummary {
-            private GetSavingsAccountsSummary() {
-            }
+        private GetSavingsAccountsAccountIdResponse() {}
+
+        static final class GetSavingsAccountsSummary {
+
+            private GetSavingsAccountsSummary() {}
 
             public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
             @ApiModelProperty(example = "0")
@@ -275,9 +275,9 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsAccountIdRequest")
-    public final static class PutSavingsAccountsAccountIdRequest {
-        private PutSavingsAccountsAccountIdRequest() {
-        }
+    public static final class PutSavingsAccountsAccountIdRequest {
+
+        private PutSavingsAccountsAccountIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -286,13 +286,13 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsAccountIdResponse")
-    public final static class PutSavingsAccountsAccountIdResponse {
-        private PutSavingsAccountsAccountIdResponse() {
-        }
+    public static final class PutSavingsAccountsAccountIdResponse {
 
-        final class PutSavingsAccountsChanges {
-            private PutSavingsAccountsChanges() {
-            }
+        private PutSavingsAccountsAccountIdResponse() {}
+
+        static final class PutSavingsAccountsChanges {
+
+            private PutSavingsAccountsChanges() {}
 
             @ApiModelProperty(example = "5.9999999999")
             public Double nominalAnnualInterestRate;
@@ -312,9 +312,9 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsAccountIdRequest")
-    public final static class PostSavingsAccountsAccountIdRequest {
-        private PostSavingsAccountsAccountIdRequest() {
-        }
+    public static final class PostSavingsAccountsAccountIdRequest {
+
+        private PostSavingsAccountsAccountIdRequest() {}
 
         @ApiModelProperty(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -325,13 +325,13 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsAccountIdResponse")
-    public final static class PostSavingsAccountsAccountIdResponse {
-        private PostSavingsAccountsAccountIdResponse() {
-        }
+    public static final class PostSavingsAccountsAccountIdResponse {
 
-        final class PostSavingsAccountsAccountIdChanges {
-            private PostSavingsAccountsAccountIdChanges() {
-            }
+        private PostSavingsAccountsAccountIdResponse() {}
+
+        static final class PostSavingsAccountsAccountIdChanges {
+
+            private PostSavingsAccountsAccountIdChanges() {}
         }
 
         @ApiModelProperty(example = "2")
@@ -344,9 +344,9 @@ final class SavingsAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSavingsAccountsAccountIdResponse")
-    public final static class DeleteSavingsAccountsAccountIdResponse {
-        private DeleteSavingsAccountsAccountIdResponse() {
-        }
+    public static final class DeleteSavingsAccountsAccountIdResponse {
+
+        private DeleteSavingsAccountsAccountIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

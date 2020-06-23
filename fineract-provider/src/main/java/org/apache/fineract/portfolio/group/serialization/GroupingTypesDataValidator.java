@@ -48,35 +48,31 @@ public final class GroupingTypesDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final GroupRepositoryWrapper groupRepositoryWrapper;
 
-    private static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-                    GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
-                    GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.officeIdParamName,
-                    GroupingTypesApiConstants.staffIdParamName, GroupingTypesApiConstants.activeParamName,
-                    GroupingTypesApiConstants.activationDateParamName, GroupingTypesApiConstants.groupMembersParamName,
-                    GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
+    private static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.localeParamName,
+            GroupingTypesApiConstants.dateFormatParamName, GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
+            GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.officeIdParamName,
+            GroupingTypesApiConstants.staffIdParamName, GroupingTypesApiConstants.activeParamName,
+            GroupingTypesApiConstants.activationDateParamName, GroupingTypesApiConstants.groupMembersParamName,
+            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
 
-    private static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-            GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
+    private static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.localeParamName,
+            GroupingTypesApiConstants.dateFormatParamName, GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
             GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.centerIdParamName,
             GroupingTypesApiConstants.officeIdParamName, GroupingTypesApiConstants.staffIdParamName,
             GroupingTypesApiConstants.activeParamName, GroupingTypesApiConstants.activationDateParamName,
             GroupingTypesApiConstants.clientMembersParamName, GroupingTypesApiConstants.collectionMeetingCalendar,
             GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
 
-
     private static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
                     GroupingTypesApiConstants.activationDateParamName));
 
-    private static final Set<String> GROUP_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-            GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
+    private static final Set<String> GROUP_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
+                    GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
 
     @Autowired
-    public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final GroupRepositoryWrapper groupRepositoryWrapper) {
+    public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper, final GroupRepositoryWrapper groupRepositoryWrapper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.groupRepositoryWrapper = groupRepositoryWrapper;
     }
@@ -92,7 +88,9 @@ public final class GroupingTypesDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CENTER_REQUEST_DATA_PARAMETERS);
@@ -123,8 +121,8 @@ public final class GroupingTypesDataValidator {
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
-                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                        GroupingTypesApiConstants.activationDateParamName, element);
+                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName,
+                        element);
                 baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate).notNull();
             } else {
                 // TODO - KW - not using config for now - just supporting move
@@ -140,12 +138,12 @@ public final class GroupingTypesDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            final LocalDate submittedOnDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
-        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
@@ -157,7 +155,9 @@ public final class GroupingTypesDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -192,8 +192,8 @@ public final class GroupingTypesDataValidator {
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
-                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                        GroupingTypesApiConstants.activationDateParamName, element);
+                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName,
+                        element);
                 baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate).notNull();
             } else {
                 // TODO - KW - not using config for now - just supporting move
@@ -209,12 +209,12 @@ public final class GroupingTypesDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            final LocalDate submittedOnDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
-        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
@@ -225,7 +225,9 @@ public final class GroupingTypesDataValidator {
     public void validateForCreateGroup(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -257,8 +259,8 @@ public final class GroupingTypesDataValidator {
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
-                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                        GroupingTypesApiConstants.activationDateParamName, element);
+                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName,
+                        element);
                 baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate).notNull();
             } else {
                 // TODO - KW - not using config for now - just supporting move
@@ -274,12 +276,12 @@ public final class GroupingTypesDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            final LocalDate submittedOnDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
-        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
@@ -290,7 +292,9 @@ public final class GroupingTypesDataValidator {
     public void validateForUpdateCenter(final JsonCommand command, final Long centerId) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CENTER_REQUEST_DATA_PARAMETERS);
@@ -323,14 +327,13 @@ public final class GroupingTypesDataValidator {
 
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(centerId);
 
-        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
-                element);
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName, element);
         if ((active != null && active)
-                || (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
-            final LocalDate joinedDate = this.fromApiJsonHelper
-                    .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
-            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
-                    .notNull().validateDateAfter(submittedOnDate);
+                || this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element)) {
+            final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName,
+                    element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate).notNull()
+                    .validateDateAfter(submittedOnDate);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -339,7 +342,9 @@ public final class GroupingTypesDataValidator {
     public void validateForUpdateGroup(final JsonCommand command, final Long groupId) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -373,19 +378,17 @@ public final class GroupingTypesDataValidator {
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(groupId);
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
-            submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
-        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
-                element);
-        if ((active != null && active) || (this.fromApiJsonHelper
-                .parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
-            final LocalDate joinedDate = this.fromApiJsonHelper
-                    .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
-            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
-                    .notNull().validateDateAfter(submittedOnDate);
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName, element);
+        if ((active != null && active)
+                || this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element)) {
+            final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName,
+                    element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate).notNull()
+                    .validateDateAfter(submittedOnDate);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -394,7 +397,9 @@ public final class GroupingTypesDataValidator {
     public void validateForActivation(final JsonCommand command, final String resourceName) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACTIVATION_REQUEST_DATA_PARAMETERS);
@@ -412,7 +417,9 @@ public final class GroupingTypesDataValidator {
     }
 
     public void validateForUnassignStaff(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -429,15 +436,20 @@ public final class GroupingTypesDataValidator {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForAssignStaff(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        final Set<String> supportedParametersAssignStaff = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.staffIdParamName,GroupingTypesApiConstants.inheritStaffForClientAccounts));
+        final Set<String> supportedParametersAssignStaff = new HashSet<>(
+                Arrays.asList(GroupingTypesApiConstants.staffIdParamName, GroupingTypesApiConstants.inheritStaffForClientAccounts));
 
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersAssignStaff);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -452,16 +464,21 @@ public final class GroupingTypesDataValidator {
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
 
         final String inheritStaffForClientAccountsParamName = GroupingTypesApiConstants.inheritStaffForClientAccounts;
-        final Boolean inheritStaffForClientAccounts= this.fromApiJsonHelper.extractBooleanNamed(inheritStaffForClientAccountsParamName,element);
-        baseDataValidator.reset().parameter(inheritStaffForClientAccountsParamName).value(inheritStaffForClientAccounts).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+        final Boolean inheritStaffForClientAccounts = this.fromApiJsonHelper.extractBooleanNamed(inheritStaffForClientAccountsParamName,
+                element);
+        baseDataValidator.reset().parameter(inheritStaffForClientAccountsParamName).value(inheritStaffForClientAccounts).ignoreIfNull()
+                .notBlank().isOneOfTheseValues(true, false);
 
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForAssociateClients(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -481,7 +498,9 @@ public final class GroupingTypesDataValidator {
 
     public void validateForDisassociateClients(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -502,11 +521,12 @@ public final class GroupingTypesDataValidator {
     public void validateForGroupClose(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -528,11 +548,12 @@ public final class GroupingTypesDataValidator {
     public void validateForCenterClose(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -552,7 +573,9 @@ public final class GroupingTypesDataValidator {
     }
 
     public void validateForAssociateGroups(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -573,7 +596,9 @@ public final class GroupingTypesDataValidator {
 
     public void validateForDisassociateGroups(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 

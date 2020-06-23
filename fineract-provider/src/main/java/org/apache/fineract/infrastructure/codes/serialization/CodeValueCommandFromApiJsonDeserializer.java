@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
+import org.apache.fineract.infrastructure.codes.CodeConstants.CodevalueJSONinputParams;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -44,7 +44,7 @@ public final class CodeValueCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = CODEVALUE_JSON_INPUT_PARAMS.getAllValues();
+    private final Set<String> supportedParameters = CodevalueJSONinputParams.getAllValues();
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -53,7 +53,9 @@ public final class CodeValueCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -63,31 +65,32 @@ public final class CodeValueCommandFromApiJsonDeserializer {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), element);
-        baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
+        final String name = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.NAME.getValue(), element);
+        baseDataValidator.reset().parameter(CodevalueJSONinputParams.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue(), element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue()).value(description)
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.DESCRIPTION.getValue(), element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(), element);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.DESCRIPTION.getValue()).value(description)
                     .notExceedingLengthOf(500);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element)) {
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.POSITION.getValue(), element)) {
             // Validate input value is a valid Integer
-            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
+            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CodevalueJSONinputParams.POSITION.getValue(), element);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element)) {
-            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.IS_ACTIVE.getValue(), element)) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue(), element);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -97,33 +100,33 @@ public final class CodeValueCommandFromApiJsonDeserializer {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), element)) {
-            final String name = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue()).value(name).notBlank()
-                    .notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.NAME.getValue(), element)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.NAME.getValue(), element);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
         }
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue(), element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue()).value(description)
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.DESCRIPTION.getValue(), element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(), element);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.DESCRIPTION.getValue()).value(description)
                     .notExceedingLengthOf(500);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element)) {
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.POSITION.getValue(), element)) {
             // Validate input value is a valid Integer
-            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
+            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CodevalueJSONinputParams.POSITION.getValue(), element);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element)) {
-            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
+        if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.IS_ACTIVE.getValue(), element)) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue(), element);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

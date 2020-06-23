@@ -28,21 +28,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/14/17.
  */
 final class TaxGroupApiResourceSwagger {
-    private TaxGroupApiResourceSwagger() {
-    }
+
+    private TaxGroupApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesGroupResponse")
-    public final static class GetTaxesGroupResponse {
-        private GetTaxesGroupResponse() {
-        }
+    public static final class GetTaxesGroupResponse {
 
-        final class GetTaxesGroupTaxAssociations {
-            private GetTaxesGroupTaxAssociations() {
-            }
+        private GetTaxesGroupResponse() {}
 
-            final class GetTaxesGroupTaxComponent {
-                private GetTaxesGroupTaxComponent() {
-                }
+        static final class GetTaxesGroupTaxAssociations {
+
+            private GetTaxesGroupTaxAssociations() {}
+
+            static final class GetTaxesGroupTaxComponent {
+
+                private GetTaxesGroupTaxComponent() {}
 
                 @ApiModelProperty(example = "7")
                 public Integer id;
@@ -65,13 +65,13 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PostTaxesGroupRequest")
-    public final static class PostTaxesGroupRequest {
-        private PostTaxesGroupRequest() {
-        }
+    public static final class PostTaxesGroupRequest {
 
-        final class PostTaxesGroupTaxComponents {
-            private PostTaxesGroupTaxComponents() {
-            }
+        private PostTaxesGroupRequest() {}
+
+        static final class PostTaxesGroupTaxComponents {
+
+            private PostTaxesGroupTaxComponents() {}
 
             @ApiModelProperty(example = "7")
             public Integer taxComponentId;
@@ -90,21 +90,21 @@ final class TaxGroupApiResourceSwagger {
 
     @ApiModel(value = "PostTaxesGroupResponse")
     public static final class PostTaxesGroupResponse {
-        private PostTaxesGroupResponse() {
-        }
+
+        private PostTaxesGroupResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdRequest")
-    public final static class PutTaxesGroupTaxGroupIdRequest {
-        private PutTaxesGroupTaxGroupIdRequest() {
-        }
+    public static final class PutTaxesGroupTaxGroupIdRequest {
 
-        final class PutTaxesGroupTaxComponents {
-            private PutTaxesGroupTaxComponents() {
-            }
+        private PutTaxesGroupTaxGroupIdRequest() {}
+
+        static final class PutTaxesGroupTaxComponents {
+
+            private PutTaxesGroupTaxComponents() {}
 
             @ApiModelProperty(example = "7")
             public Integer id;
@@ -124,17 +124,17 @@ final class TaxGroupApiResourceSwagger {
     }
 
     @ApiModel(value = "PutTaxesGroupTaxGroupIdResponse")
-    public final static class PutTaxesGroupTaxGroupIdResponse {
-        private PutTaxesGroupTaxGroupIdResponse() {
-        }
+    public static final class PutTaxesGroupTaxGroupIdResponse {
 
-        final class PutTaxesGroupChanges {
-            private PutTaxesGroupChanges() {
-            }
+        private PutTaxesGroupTaxGroupIdResponse() {}
 
-            final class PutTaxesGroupModifiedComponents {
-                private PutTaxesGroupModifiedComponents() {
-                }
+        static final class PutTaxesGroupChanges {
+
+            private PutTaxesGroupChanges() {}
+
+            static final class PutTaxesGroupModifiedComponents {
+
+                private PutTaxesGroupModifiedComponents() {}
 
                 @ApiModelProperty(example = "Apr 22, 2016 12:00:00 AM")
                 public String endDate;

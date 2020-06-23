@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
-public class CreditBureauProduct {
+public final class CreditBureauProduct {
 
     private final long creditBureauProductId;
 
@@ -26,8 +26,7 @@ public class CreditBureauProduct {
 
     private final long creditBureauMasterId;
 
-    private CreditBureauProduct(final long creditBureauProductId, final String creditBureauProductName,
-            final long creditBureauMasterId) {
+    private CreditBureauProduct(final long creditBureauProductId, final String creditBureauProductName, final long creditBureauMasterId) {
         this.creditBureauProductId = creditBureauProductId;
         this.creditBureauProductName = creditBureauProductName;
         this.creditBureauMasterId = creditBureauMasterId;

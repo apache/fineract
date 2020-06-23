@@ -65,8 +65,8 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -104,7 +104,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl implements DepositApplicationProcessWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
@@ -175,19 +175,19 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         if (realCause.getMessage().contains("'sa_account_no_UNIQUE'")) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             errorCodeBuilder.append(".duplicate.accountNo");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Savings account with accountNo " + accountNo
-                    + " already exists", "accountNo", accountNo);
+            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
+                    "Savings account with accountNo " + accountNo + " already exists", "accountNo", accountNo);
 
         } else if (realCause.getMessage().contains("sa_external_id_UNIQUE")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             errorCodeBuilder.append(".duplicate.externalId");
-            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Savings account with externalId " + externalId
-                    + " already exists", "externalId", externalId);
+            throw new PlatformDataIntegrityException(errorCodeBuilder.toString(),
+                    "Savings account with externalId " + externalId + " already exists", "externalId", externalId);
         }
 
         errorCodeBuilder.append(".unknown.data.integrity.issue");
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Unknown data integrity issue with savings account.");
     }
 
@@ -232,11 +232,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -249,8 +249,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -295,11 +295,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -312,8 +312,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -333,9 +333,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         defaultUserMessage, account.clientId());
             } else if (groups.size() > 1) {
                 final String defaultUserMessage = "Client belongs to more than one group. Cannot support recurring deposit.";
-                throw new GeneralPlatformDomainRuleException(
-                        "error.msg.recurring.deposit.account.cannot.create.belongs.to.multiple.groups", defaultUserMessage,
-                        account.clientId());
+                throw new GeneralPlatformDomainRuleException("error.msg.recurring.deposit.account.cannot.create.belongs.to.multiple.groups",
+                        defaultUserMessage, account.clientId());
             } else {
                 Group group = groups.iterator().next();
                 Group parent = group.getParent();
@@ -346,13 +345,13 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 } else {
                     groupId = group.getId();
                 }
-                CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-                        groupId, entityType, CalendarType.COLLECTION.getValue());
-                if(parentCalendarInstance == null){
+                CalendarInstance parentCalendarInstance = this.calendarInstanceRepository
+                        .findByEntityIdAndEntityTypeIdAndCalendarTypeId(groupId, entityType, CalendarType.COLLECTION.getValue());
+                if (parentCalendarInstance == null) {
                     final String defaultUserMessage = "Meeting frequency is not attached to the Group/Center to which the client belongs to.";
                     throw new GeneralPlatformDomainRuleException(
-                            "error.msg.meeting.frequency.not.attached.to.group.to.which.client.belongs.to",
-                            defaultUserMessage, account.clientId());
+                            "error.msg.meeting.frequency.not.attached.to.group.to.which.client.belongs.to", defaultUserMessage,
+                            account.clientId());
                 }
                 calendarInstance = CalendarInstance.from(parentCalendarInstance.getCalendar(), account.getId(),
                         CalendarEntityType.SAVINGS.getValue());
@@ -462,8 +461,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult((long) -1);
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResult((long) -1);
         }
@@ -533,8 +532,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
@@ -546,7 +545,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
             if (clientId != null) {
                 final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-                if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+                if (client.isNotActive()) {
+                    throw new ClientNotActiveException(clientId);
+                }
                 account.update(client);
             } else {
                 final Client client = null;
@@ -557,10 +558,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         if (changes.containsKey(SavingsApiConstants.groupIdParamName)) {
             final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
             if (groupId != null) {
-                final Group group = this.groupRepository.findById(groupId)
-                        .orElseThrow(() -> new GroupNotFoundException(groupId));
+                final Group group = this.groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
                 if (group.isNotActive()) {
-                    if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                    if (group.isCenter()) {
+                        throw new CenterNotActiveException(groupId);
+                    }
                     throw new GroupNotActiveException(groupId);
                 }
                 account.update(group);
@@ -590,8 +592,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         if (changes.containsKey("charges")) {
-            final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(), account
-                    .getCurrency().getCode());
+            final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(),
+                    account.getCurrency().getCode());
             final boolean updated = account.update(charges);
             if (!updated) {
                 changes.remove("charges");
@@ -609,13 +611,15 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         if (account.isNotSubmittedAndPendingApproval()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
-                    .resourceName() + DepositsApiConstants.deleteApplicationAction);
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(depositAccountType.resourceName() + DepositsApiConstants.deleteApplicationAction);
 
             baseDataValidator.reset().parameter(DepositsApiConstants.activatedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final List<Note> relatedNotes = this.noteRepository.findBySavingsAccountId(savingsId);
@@ -775,19 +779,24 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private void checkClientOrGroupActive(final SavingsAccount account) {
         final Client client = account.getClient();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = account.group();
         if (group != null) {
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(group.getId());
+                }
                 throw new GroupNotActiveException(group.getId());
             }
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent,
+            Object entity) {
+        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

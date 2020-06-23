@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings("rawtypes")
 public class JournalEntryHelper {
@@ -62,7 +62,7 @@ public class JournalEntryHelper {
 
     public void ensureNoAccountingTransactionsWithTransactionId(final String transactionId) {
         ArrayList<HashMap> transactions = getJournalEntriesByTransactionId(transactionId);
-        assertTrue("Tranasactions are is not empty", transactions.isEmpty());
+        assertTrue(transactions.isEmpty(), "Tranasactions are is not empty");
 
     }
 
@@ -88,7 +88,7 @@ public class JournalEntryHelper {
                     break;
                 }
             }
-            Assert.assertTrue("Journal Entry not found", matchFound);
+            Assertions.assertTrue(matchFound, "Journal Entry not found");
         }
     }
 

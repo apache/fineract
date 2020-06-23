@@ -31,12 +31,13 @@ public class JobParameter extends AbstractPersistableCustom {
     @Column(name = "job_id", nullable = false)
     private Long jobId;
 
-    @Column(name = "parameter_name",nullable = true)
+    @Column(name = "parameter_name", nullable = true)
     private String parameterName;
 
-    @Column(name = "parameter_value",nullable = true)
+    @Column(name = "parameter_value", nullable = true)
     private String parameterValue;
 
+    public JobParameter() {}
 
     public JobParameter(final Long jobId, final String parameterName, final String parameterValue) {
         this.jobId = jobId;
@@ -44,8 +45,8 @@ public class JobParameter extends AbstractPersistableCustom {
         this.parameterValue = parameterValue;
     }
 
-    public static JobParameter getInstance(final Long jobId, final String parameterName, final String parameterValue){
-        return new JobParameter(jobId,parameterName,parameterValue);
+    public static JobParameter getInstance(final Long jobId, final String parameterName, final String parameterValue) {
+        return new JobParameter(jobId, parameterName, parameterValue);
     }
 
     public Long getJobId() {
@@ -72,10 +73,11 @@ public class JobParameter extends AbstractPersistableCustom {
         this.parameterValue = parameterValue;
     }
 
-
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
+        if (!(obj instanceof JobParameter)) {
+            return false;
+        }
         JobParameter jobParameter = (JobParameter) obj;
         return Objects.equals(jobParameter.getJobId(), this.getJobId())
                 && Objects.equals(jobParameter.getParameterName(), this.getParameterName())
@@ -84,6 +86,6 @@ public class JobParameter extends AbstractPersistableCustom {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobId,parameterName,parameterValue);
+        return Objects.hash(jobId, parameterName, parameterValue);
     }
 }

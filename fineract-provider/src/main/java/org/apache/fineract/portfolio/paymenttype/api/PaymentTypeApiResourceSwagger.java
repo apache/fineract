@@ -25,13 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 01/01/18.
  */
 final class PaymentTypeApiResourceSwagger {
-    private PaymentTypeApiResourceSwagger() {
-    }
+
+    private PaymentTypeApiResourceSwagger() {}
 
     @ApiModel(value = "GetPaymentTypesResponse")
-    public final static class GetPaymentTypesResponse {
-        private GetPaymentTypesResponse() {
-        }
+    public static final class GetPaymentTypesResponse {
+
+        private GetPaymentTypesResponse() {}
 
         @ApiModelProperty(example = "24")
         public Integer id;
@@ -46,9 +46,9 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "GetPaymentTypesPaymentTypeIdResponse")
-    public final static class GetPaymentTypesPaymentTypeIdResponse {
-        private GetPaymentTypesPaymentTypeIdResponse() {
-        }
+    public static final class GetPaymentTypesPaymentTypeIdResponse {
+
+        private GetPaymentTypesPaymentTypeIdResponse() {}
 
         @ApiModelProperty(example = "13")
         public Integer id;
@@ -63,9 +63,9 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PostPaymentTypesRequest")
-    public final static class PostPaymentTypesRequest {
-        private PostPaymentTypesRequest() {
-        }
+    public static final class PostPaymentTypesRequest {
+
+        private PostPaymentTypesRequest() {}
 
         @ApiModelProperty(example = "cash")
         public String name;
@@ -78,18 +78,18 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PostPaymentTypesResponse")
-    public final static class PostPaymentTypesResponse {
-        private PostPaymentTypesResponse() {
-        }
+    public static final class PostPaymentTypesResponse {
+
+        private PostPaymentTypesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutPaymentTypesPaymentTypeIdRequest")
-    public final static class PutPaymentTypesPaymentTypeIdRequest {
-        private PutPaymentTypesPaymentTypeIdRequest() {
-        }
+    public static final class PutPaymentTypesPaymentTypeIdRequest {
+
+        private PutPaymentTypesPaymentTypeIdRequest() {}
 
         @ApiModelProperty(example = "mPay")
         public String name;
@@ -102,18 +102,18 @@ final class PaymentTypeApiResourceSwagger {
     }
 
     @ApiModel(value = "PutPaymentTypesPaymentTypeIdResponse")
-    public final static class PutPaymentTypesPaymentTypeIdResponse {
-        private PutPaymentTypesPaymentTypeIdResponse() {
-        }
+    public static final class PutPaymentTypesPaymentTypeIdResponse {
+
+        private PutPaymentTypesPaymentTypeIdResponse() {}
 
         @ApiModelProperty(example = "13")
         public Integer resourceId;
     }
 
     @ApiModel(value = "DeletePaymentTypesPaymentTypeIdResponse")
-    public final static class DeletePaymentTypesPaymentTypeIdResponse {
-        private DeletePaymentTypesPaymentTypeIdResponse() {
-        }
+    public static final class DeletePaymentTypesPaymentTypeIdResponse {
+
+        private DeletePaymentTypesPaymentTypeIdResponse() {}
 
         @ApiModelProperty(example = "13")
         public Integer resourceId;

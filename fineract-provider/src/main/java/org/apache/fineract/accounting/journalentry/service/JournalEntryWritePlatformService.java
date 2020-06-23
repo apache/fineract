@@ -39,9 +39,9 @@ public interface JournalEntryWritePlatformService {
 
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
 
-    public String revertProvisioningJournalEntries(final Date reversalTransactionDate, final Long entityId, final Integer entityType) ;
+    public String revertProvisioningJournalEntries(final Date reversalTransactionDate, final Long entityId, final Integer entityType);
 
-    public String createProvisioningJournalEntries(ProvisioningEntry entry) ;
+    public String createProvisioningJournalEntries(ProvisioningEntry entry);
 
     void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
 

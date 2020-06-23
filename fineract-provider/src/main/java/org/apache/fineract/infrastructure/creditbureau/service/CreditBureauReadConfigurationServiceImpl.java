@@ -39,13 +39,13 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource) {
+    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     private static final class CbConfigMapper implements RowMapper<CreditBureauConfigurationData> {
+
         public String schema() {
 
             return "cbconfig.id as configId,cbconfig.configkey,cbconfig.value as configValue,"
@@ -54,8 +54,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         }
 
         @Override
-        public CreditBureauConfigurationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
+        public CreditBureauConfigurationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long configId = rs.getLong("configId");
             final String configkey = rs.getString("configkey");
             final String configValue = rs.getString("configValue");
@@ -86,8 +85,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id= ?";
 
-        List<CreditBureauConfigurationData> config = (List<CreditBureauConfigurationData>) this.jdbcTemplate.query(sql,
-                rm, new Object[] {id});
+        List<CreditBureauConfigurationData> config = this.jdbcTemplate.query(sql, rm, new Object[] { id });
         Map<String, String> configuration = new HashMap<String, String>();
         for (CreditBureauConfigurationData data : config) {
             configuration.put(data.getConfigurationKey(), data.getValue());

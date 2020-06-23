@@ -26,15 +26,18 @@ import java.util.Collection;
  * Created by sanyam on 23/8/17.
  */
 final class RolesApiResourceSwagger {
+
     private RolesApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetRolesResponse")
     public static final class GetRolesResponse {
+
         private GetRolesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Super Users")
@@ -46,9 +49,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "GetRolesRoleIdResponse")
     public static final class GetRolesRoleIdResponse {
+
         private GetRolesRoleIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Super Users")
@@ -60,9 +65,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PostRolesRequest")
     public static final class PostRolesRequest {
+
         private PostRolesRequest() {
 
         }
+
         @ApiModelProperty(example = "Another Role Name")
         public String name;
         @ApiModelProperty(example = "A description outlining the purpose of this role in relation to the application.")
@@ -72,9 +79,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PostRolesResponse")
     public static final class PostRolesResponse {
+
         private PostRolesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
 
@@ -82,9 +91,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PutRolesRoleIdRequest")
     public static final class PutRolesRoleIdRequest {
+
         private PutRolesRoleIdRequest() {
 
         }
+
         @ApiModelProperty(example = "some description(changed)")
         public String description;
 
@@ -92,14 +103,19 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PutRolesRoleIdResponse")
     public static final class PutRolesRoleIdResponse {
+
         private PutRolesRoleIdResponse() {
 
         }
-        final class PutRolesRoleIdResponseChanges {
-            private PutRolesRoleIdResponseChanges(){}
+
+        static final class PutRolesRoleIdResponseChanges {
+
+            private PutRolesRoleIdResponseChanges() {}
+
             @ApiModelProperty(example = "some description(changed)")
             public String description;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         public PutRolesRoleIdResponseChanges changes;
@@ -108,9 +124,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PostRolesRoleIdResponse")
     public static final class PostRolesRoleIdResponse {
+
         private PostRolesRoleIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
 
@@ -118,14 +136,17 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "GetRolesRoleIdPermissionsResponse")
     public static final class GetRolesRoleIdPermissionsResponse {
+
         private GetRolesRoleIdPermissionsResponse() {
 
         }
 
-        final class GetRolesRoleIdPermissionsResponsePermissionData {
+        static final class GetRolesRoleIdPermissionsResponsePermissionData {
+
             private GetRolesRoleIdPermissionsResponsePermissionData() {
 
             }
+
             @ApiModelProperty(example = "authorisation")
             public String grouping;
             @ApiModelProperty(example = "READ_PERMISSION")
@@ -150,31 +171,38 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "PutRolesRoleIdPermissionsRequest")
     public static final class PutRolesRoleIdPermissionsRequest {
+
         private PutRolesRoleIdPermissionsRequest() {
 
         }
 
-        final class PostRolesRoleIdPermissionsResponsePermissions {
+        static final class PostRolesRoleIdPermissionsResponsePermissions {
+
             private PostRolesRoleIdPermissionsResponsePermissions() {
 
             }
+
             @ApiModelProperty(example = "true")
             public String ALL_FUNCTIONS_READ;
         }
+
         public PostRolesRoleIdPermissionsResponsePermissions permissions;
 
     }
 
     @ApiModel(value = "PutRolesRoleIdPermissionsResponse")
     public static final class PutRolesRoleIdPermissionsResponse {
+
         private PutRolesRoleIdPermissionsResponse() {
 
         }
 
-        final class PostRolesRoleIdPermissionsResponsePermissions {
+        static final class PostRolesRoleIdPermissionsResponsePermissions {
+
             private PostRolesRoleIdPermissionsResponsePermissions() {
 
             }
+
             @ApiModelProperty(example = "true")
             public String ALL_FUNCTIONS_READ;
         }
@@ -187,9 +215,11 @@ final class RolesApiResourceSwagger {
 
     @ApiModel(value = "DeleteRolesRoleIdResponse")
     public static final class DeleteRolesRoleIdResponse {
+
         private DeleteRolesRoleIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

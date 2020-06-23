@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class ClientSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<ClientData> allClients;
     private List<OfficeData> officesDataList;
 
@@ -48,7 +49,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         Sheet clientSheet = workbook.createSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
         setLayout(clientSheet);
         setOfficeToClientsMap();
@@ -61,8 +62,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     private void setClientNameToClientIdMap() {
         clientNameToClientId = new HashMap<>();
         for (ClientData clientData : allClients) {
-            clientNameToClientId.put(clientData.displayName().trim() + "(" + clientData.id() + ")",
-                    clientData.id());
+            clientNameToClientId.put(clientData.displayName().trim() + "(" + clientData.id() + ")", clientData.id());
         }
     }
 
@@ -70,8 +70,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
         worksheet.setColumnWidth(OFFICE_NAME_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        for (int colIndex = 1; colIndex <= 10; colIndex++)
+        for (int colIndex = 1; colIndex <= 10; colIndex++) {
             worksheet.setColumnWidth(colIndex, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        }
         writeString(OFFICE_NAME_COL, rowHeader, "Office Names");
         writeString(CLIENT_NAME_COL, rowHeader, "Client Names");
         writeString(CLIENT_ID_COL, rowHeader, "Client ID");
@@ -85,10 +86,10 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         }
     }
 
-    private void setClientNameToSavingsAccountsIdsMap(){
-        clientNameToSavingsAccountIds=new HashMap<>();
-        for (ClientData client: allClients) {
-            clientNameToSavingsAccountIds.put(client.displayName().trim() + "(" + client.id() + ")",client.getSavingsAccountId());
+    private void setClientNameToSavingsAccountsIdsMap() {
+        clientNameToSavingsAccountIds = new HashMap<>();
+        for (ClientData client : allClients) {
+            clientNameToSavingsAccountIds.put(client.displayName().trim() + "(" + client.id() + ")", client.getSavingsAccountId());
         }
 
     }
@@ -104,15 +105,18 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void populateClientsByOfficeName(Sheet clientSheet) {
-        int rowIndex = 1, startIndex = 1, officeIndex = 0;
+        int rowIndex = 1;
+        int startIndex = 1;
+        int officeIndex = 0;
         officeNameToBeginEndIndexesOfClients = new HashMap<>();
         Row row = clientSheet.createRow(rowIndex);
         for (OfficeData office : officesDataList) {
             startIndex = rowIndex + 1;
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> clientList = new ArrayList<String>();
-            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_")))
+            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
                 clientList = officeToClients.get(office.name().trim().replaceAll("[ )(]", "_"));
+            }
             if (!clientList.isEmpty()) {
                 for (String clientName : clientList) {
                     writeString(CLIENT_NAME_COL, row, clientName);
@@ -120,8 +124,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
                     row = clientSheet.createRow(++rowIndex);
                 }
                 officeNameToBeginEndIndexesOfClients.put(officeIndex++, new Integer[] { startIndex, rowIndex });
-            } else
+            } else {
                 officeIndex++;
+            }
         }
     }
 

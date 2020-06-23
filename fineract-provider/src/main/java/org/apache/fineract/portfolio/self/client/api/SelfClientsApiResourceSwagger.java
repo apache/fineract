@@ -29,21 +29,21 @@ import java.util.Set;
  */
 
 final class SelfClientsApiResourceSwagger {
-    private SelfClientsApiResourceSwagger() {
-    }
+
+    private SelfClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfClientsResponse")
-    public final static class GetSelfClientsResponse {
-        private GetSelfClientsResponse() {
-        }
+    public static final class GetSelfClientsResponse {
 
-        final class GetSelfClientsPageItems {
-            private GetSelfClientsPageItems() {
-            }
+        private GetSelfClientsResponse() {}
 
-            final class GetSelfClientsStatus {
-                private GetSelfClientsStatus() {
-                }
+        static final class GetSelfClientsPageItems {
+
+            private GetSelfClientsPageItems() {}
+
+            static final class GetSelfClientsStatus {
+
+                private GetSelfClientsStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -78,13 +78,13 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdResponse")
-    public final static class GetSelfClientsClientIdResponse {
-        private GetSelfClientsClientIdResponse() {
-        }
+    public static final class GetSelfClientsClientIdResponse {
 
-        final class GetSelfClientsTimeline {
-            private GetSelfClientsTimeline() {
-            }
+        private GetSelfClientsClientIdResponse() {}
+
+        static final class GetSelfClientsTimeline {
+
+            private GetSelfClientsTimeline() {}
 
             @ApiModelProperty(example = "[2013, 1, 1]")
             public LocalDate submittedOnDate;
@@ -134,17 +134,17 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdAccountsResponse")
-    public final static class GetSelfClientsClientIdAccountsResponse {
-        private GetSelfClientsClientIdAccountsResponse() {
-        }
+    public static final class GetSelfClientsClientIdAccountsResponse {
 
-        final class GetSelfClientsLoanAccounts {
-            private GetSelfClientsLoanAccounts() {
-            }
+        private GetSelfClientsClientIdAccountsResponse() {}
 
-            final class GetSelfClientsLoanAccountsStatus {
-                private GetSelfClientsLoanAccountsStatus() {
-                }
+        static final class GetSelfClientsLoanAccounts {
+
+            private GetSelfClientsLoanAccounts() {}
+
+            static final class GetSelfClientsLoanAccountsStatus {
+
+                private GetSelfClientsLoanAccountsStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -170,9 +170,9 @@ final class SelfClientsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetSelfClientsLoanAccountsType {
-                private GetSelfClientsLoanAccountsType() {
-                }
+            static final class GetSelfClientsLoanAccountsType {
+
+                private GetSelfClientsLoanAccountsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -198,13 +198,13 @@ final class SelfClientsApiResourceSwagger {
             public Integer loanCycle;
         }
 
-        final class GetSelfClientsSavingsAccounts {
-            private GetSelfClientsSavingsAccounts() {
-            }
+        static final class GetSelfClientsSavingsAccounts {
 
-            final class GetSelfClientsSavingsAccountsCurrency {
-                private GetSelfClientsSavingsAccountsCurrency() {
-                }
+            private GetSelfClientsSavingsAccounts() {}
+
+            static final class GetSelfClientsSavingsAccountsCurrency {
+
+                private GetSelfClientsSavingsAccountsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -220,9 +220,9 @@ final class SelfClientsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetSelfClientsSavingsAccountsStatus {
-                private GetSelfClientsSavingsAccountsStatus() {
-                }
+            static final class GetSelfClientsSavingsAccountsStatus {
+
+                private GetSelfClientsSavingsAccountsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -261,17 +261,17 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdChargesResponse")
-    public final static class GetSelfClientsClientIdChargesResponse {
-        private GetSelfClientsClientIdChargesResponse() {
-        }
+    public static final class GetSelfClientsClientIdChargesResponse {
 
-        final class GetSelfClientsChargesPageItems {
-            private GetSelfClientsChargesPageItems() {
-            }
+        private GetSelfClientsClientIdChargesResponse() {}
 
-            final class GetSelfClientsChargeTimeType {
-                private GetSelfClientsChargeTimeType() {
-                }
+        static final class GetSelfClientsChargesPageItems {
+
+            private GetSelfClientsChargesPageItems() {}
+
+            static final class GetSelfClientsChargeTimeType {
+
+                private GetSelfClientsChargeTimeType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -281,9 +281,9 @@ final class SelfClientsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSelfClientsChargeCalculationType {
-                private GetSelfClientsChargeCalculationType() {
-                }
+            static final class GetSelfClientsChargeCalculationType {
+
+                private GetSelfClientsChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -332,9 +332,9 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdChargesChargeIdResponse")
-    public final static class GetSelfClientsClientIdChargesChargeIdResponse {
-        private GetSelfClientsClientIdChargesChargeIdResponse() {
-        }
+    public static final class GetSelfClientsClientIdChargesChargeIdResponse {
+
+        private GetSelfClientsClientIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "3")
         public Integer id;
@@ -370,17 +370,17 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsResponse")
-    public final static class GetSelfClientsClientIdTransactionsResponse {
-        private GetSelfClientsClientIdTransactionsResponse() {
-        }
+    public static final class GetSelfClientsClientIdTransactionsResponse {
 
-        final class GetSelfClientsClientIdTransactionsPageItems {
-            private GetSelfClientsClientIdTransactionsPageItems() {
-            }
+        private GetSelfClientsClientIdTransactionsResponse() {}
 
-            final class GetSelfClientsClientIdTransactionsType {
-                private GetSelfClientsClientIdTransactionsType() {
-                }
+        static final class GetSelfClientsClientIdTransactionsPageItems {
+
+            private GetSelfClientsClientIdTransactionsPageItems() {}
+
+            static final class GetSelfClientsClientIdTransactionsType {
+
+                private GetSelfClientsClientIdTransactionsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -414,9 +414,9 @@ final class SelfClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsTransactionIdResponse")
-    public final static class GetSelfClientsClientIdTransactionsTransactionIdResponse {
-        private GetSelfClientsClientIdTransactionsTransactionIdResponse() {
-        }
+    public static final class GetSelfClientsClientIdTransactionsTransactionIdResponse {
+
+        private GetSelfClientsClientIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;

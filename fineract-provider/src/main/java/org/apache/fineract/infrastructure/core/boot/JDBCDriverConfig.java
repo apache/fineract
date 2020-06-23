@@ -27,15 +27,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class JDBCDriverConfig {
 
-    private final static String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
-    private final static String PROTOCOL_PROPERTYNAME = "PROTOCOL";
-    private final static String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
+    private static final String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
+    private static final String PROTOCOL_PROPERTYNAME = "PROTOCOL";
+    private static final String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
 
     private String driverClassName;
     private String protocol;
     private String subProtocol;
 
-    @Autowired ApplicationContext context;
+    @Autowired
+    ApplicationContext context;
 
     @PostConstruct
     protected void init() {
@@ -50,8 +51,8 @@ public class JDBCDriverConfig {
     }
 
     public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
-        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':').append(schemaServerPort)
-                .append('/').append(schemaName).toString();
+        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':')
+                .append(schemaServerPort).append('/').append(schemaName).toString();
         return url;
     }
 }

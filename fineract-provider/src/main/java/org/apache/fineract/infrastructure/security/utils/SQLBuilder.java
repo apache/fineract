@@ -25,31 +25,41 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection.
+ * Utility to assemble the WHERE clause of an SQL query without the risk of SQL
+ * injection.
  *
- * <p>When using this utility instead of manually assembling SQL queries, then
- * {@link SQLInjectionValidator} should not be required anymore.  (Correctly using
- * this means only ever passing completely fixed String literals to .)
+ * <p>
+ * When using this utility instead of manually assembling SQL queries, then
+ * {@link SQLInjectionValidator} should not be required anymore. (Correctly
+ * using this means only ever passing completely fixed String literals to .)
  *
  * @author Michael Vorburger <mike@vorburger.ch>
  */
 public class SQLBuilder {
 
-    private final static Pattern ATOZ = Pattern.compile("([a-zA-Z_][a-zA-Z0-9_-]*\\.)?[a-zA-Z_-][a-zA-Z0-9_-]*");
+    private static final Pattern ATOZ = Pattern.compile("([a-zA-Z_][a-zA-Z0-9_-]*\\.)?[a-zA-Z_-][a-zA-Z0-9_-]*");
 
-    // This holds the query string, with the '?' placeholders, but no argument values
+    // This holds the query string, with the '?' placeholders, but no argument
+    // values
     private final StringBuilder sb = new StringBuilder();
 
     // This holds the arguments, in the order of the '?' placeholders in sb
     private final List<Object> args = new ArrayList<>();
 
-    // This holds the criterias, where nth element corresponds to nth element in args
+    // This holds the criterias, where nth element corresponds to nth element in
+    // args
     private final ArrayList<String> crts = new ArrayList<String>();
+
     /**
-     * Adds a criteria for a SQL WHERE clause.
-     * All criteria are appended by AND (support for OR, or nesting, can be added when needed).
-     * @param criteria The name of the column to be filtered, and an operator; e.g. "name =" or "age >" (but without '?' placeholder)
-     * @param argument The argument to be filtered on (e.g. "Michael" or 123).  The null value is explicitly permitted.
+     * Adds a criteria for a SQL WHERE clause. All criteria are appended by AND
+     * (support for OR, or nesting, can be added when needed).
+     *
+     * @param criteria
+     *            The name of the column to be filtered, and an operator; e.g.
+     *            "name =" or "age >" (but without '?' placeholder)
+     * @param argument
+     *            The argument to be filtered on (e.g. "Michael" or 123). The
+     *            null value is explicitly permitted.
      */
     public void addCriteria(String criteria, Object argument) {
         if (criteria == null || criteria.trim().isEmpty()) {
@@ -60,7 +70,8 @@ public class SQLBuilder {
             throw new IllegalArgumentException("criteria cannot be null");
         }
         if (trimmedCriteria.contains("?")) {
-            throw new IllegalArgumentException("criteria cannot contain a '?' (that is automatically added at the end): " + trimmedCriteria);
+            throw new IllegalArgumentException(
+                    "criteria cannot contain a '?' (that is automatically added at the end): " + trimmedCriteria);
         }
         int columnOperatorIndex = trimmedCriteria.indexOf(' ');
         if (columnOperatorIndex == -1) {
@@ -72,12 +83,14 @@ public class SQLBuilder {
         }
         String operator = trimmedCriteria.substring(columnOperatorIndex).trim();
         if (operator.indexOf(' ') > -1) {
-            throw new IllegalArgumentException("criteria cannot contain more than 1 space (between column name and operator): " + trimmedCriteria);
+            throw new IllegalArgumentException(
+                    "criteria cannot contain more than 1 space (between column name and operator): " + trimmedCriteria);
         }
-        if (!operator.equals("=") && !operator.equals("<") && !operator.equals(">")
-                && !operator.equals("<=") && !operator.equals(">=") && !operator.equals("<>")
-                && !operator.equals("LIKE") && !operator.equals("like")) {
-            // add support for SQL's BETWEEN and IN, if/when ever needed.. (it's a little more than just adding above, as it can have multiple arguments)
+        if (!operator.equals("=") && !operator.equals("<") && !operator.equals(">") && !operator.equals("<=") && !operator.equals(">=")
+                && !operator.equals("<>") && !operator.equals("LIKE") && !operator.equals("like")) {
+            // add support for SQL's BETWEEN and IN, if/when ever needed.. (it's
+            // a little more than just adding above, as it can have multiple
+            // arguments)
             throw new IllegalArgumentException("criteria must end with valid SQL operator for WHERE: " + trimmedCriteria);
         }
 
@@ -91,7 +104,8 @@ public class SQLBuilder {
     }
 
     /**
-     * Delegates to {@link #addCriteria(String, Object)} if argument is not null, otherwise does nothing.
+     * Delegates to {@link #addCriteria(String, Object)} if argument is not
+     * null, otherwise does nothing.
      */
     public void addNonNullCriteria(String criteria, Object argument) {
         if (argument != null) {
@@ -100,8 +114,11 @@ public class SQLBuilder {
     }
 
     /**
-     * Returns a SQL WHERE clause, created from the {@link #addCriteria(String, Object)}, with '?' placeholders.
-     * @return SQL WHERE clause, almost always starting with " WHERE ..." (unless no criteria, then empty)
+     * Returns a SQL WHERE clause, created from the
+     * {@link #addCriteria(String, Object)}, with '?' placeholders.
+     *
+     * @return SQL WHERE clause, almost always starting with " WHERE ..."
+     *         (unless no criteria, then empty)
      */
     public String getSQLTemplate() {
         if (sb.length() > 0) {
@@ -112,7 +129,9 @@ public class SQLBuilder {
 
     /**
      * Returns the arguments for the WHERE clause.
-     * @return Object array suitable for use with Spring Framework JdbcTemplate (or plain JDBC {@link PreparedStatement})
+     *
+     * @return Object array suitable for use with Spring Framework JdbcTemplate
+     *         (or plain JDBC {@link PreparedStatement})
      */
     public Object[] getArguments() {
         return args.toArray();
@@ -120,39 +139,34 @@ public class SQLBuilder {
 
     /*
      * Returns a String representation suitable for debugging and log output.
-     * This is ONLY intended for debugging in logs, and NEVER for passing to a JDBC database.
+     * This is ONLY intended for debugging in logs, and NEVER for passing to a
+     * JDBC database.
      */
     @Override
     public String toString() {
-       StringBuilder whereClause  = new StringBuilder("SQLBuilder{");
-       for (int i=0;i<args.size();i++)
-        {
-            if (i!=0)
-            {
+        StringBuilder whereClause = new StringBuilder("SQLBuilder{");
+        for (int i = 0; i < args.size(); i++) {
+            if (i != 0) {
                 whereClause.append("  AND  ");
-            }
-            else
-            {
+            } else {
                 whereClause.append("WHERE  ");
             }
             Object currentArg = args.get(i);
             whereClause.append(crts.get(i));
             whereClause.append(" ");
             whereClause.append("[");
-            if(currentArg instanceof String)
-            {
+            if (currentArg instanceof String) {
                 whereClause.append("'");
                 whereClause.append(currentArg);
                 whereClause.append("'");
-            }else if(currentArg == null)
-            {
+            } else if (currentArg == null) {
                 whereClause.append("null");
-            }else{
+            } else {
                 whereClause.append(String.valueOf(currentArg));
             }
             whereClause.append("]");
         }
-         whereClause.append("}");
-         return whereClause.toString();
+        whereClause.append("}");
+        return whereClause.toString();
     }
 }

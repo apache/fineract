@@ -20,19 +20,19 @@
 INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ( 'daily-tpt-limit', 0, NULL, 0, 0, 'Daily limit for third party transfers');
 
 CREATE TABLE `m_selfservice_beneficiaries_tpt` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`app_user_id` BIGINT NOT NULL,
-	`name` VARCHAR(50) NOT NULL,
-	`office_id` BIGINT NOT NULL,
-	`client_id` BIGINT NOT NULL,
-	`account_id` BIGINT NOT NULL,
-	`account_type` SMALLINT(4) NOT NULL,
-	`transfer_limit` BIGINT NULL DEFAULT 0,
-	`is_active` BIT(1) NOT NULL DEFAULT 0,
-	PRIMARY KEY (`id`),
-	UNIQUE INDEX `name` (`name`, `app_user_id`, `is_active`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `app_user_id` BIGINT NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `office_id` BIGINT NOT NULL,
+    `client_id` BIGINT NOT NULL,
+    `account_id` BIGINT NOT NULL,
+    `account_type` SMALLINT NOT NULL,
+    `transfer_limit` BIGINT NULL DEFAULT 0,
+    `is_active` BIT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `name` (`name`, `app_user_id`, `is_active`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 

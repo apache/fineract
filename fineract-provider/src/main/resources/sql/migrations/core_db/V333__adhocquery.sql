@@ -18,20 +18,20 @@
 --
 
 CREATE TABLE `m_adhoc` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(100) NULL DEFAULT NULL,
-	`query` VARCHAR(2000) NULL DEFAULT NULL,
-	`table_name` VARCHAR(100) NULL DEFAULT NULL,
-	`table_fields` VARCHAR(1000) NULL DEFAULT NULL,
-	`email` VARCHAR(500) NOT NULL,
-	`IsActive` TINYINT(1) NOT NULL DEFAULT '0',
-	`created_date` DATETIME NULL DEFAULT NULL,
-	`createdby_id` BIGINT NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
-	`lastmodified_date` DATETIME NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-	CONSTRAINT `lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NULL DEFAULT NULL,
+    `query` VARCHAR(2000) NULL DEFAULT NULL,
+    `table_name` VARCHAR(100) NULL DEFAULT NULL,
+    `table_fields` VARCHAR(1000) NULL DEFAULT NULL,
+    `email` VARCHAR(500) NOT NULL,
+    `IsActive` tinyint NOT NULL DEFAULT '0',
+    `created_date` DATETIME NULL DEFAULT NULL,
+    `createdby_id` BIGINT NOT NULL,
+    `lastmodifiedby_id` BIGINT NOT NULL,
+    `lastmodified_date` DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB

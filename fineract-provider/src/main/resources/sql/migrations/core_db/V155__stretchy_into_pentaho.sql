@@ -733,5 +733,3 @@ VALUES ((select sr.id From stretchy_report sr where sr.report_name='Written-Off 
 VALUES ((select sr.id From stretchy_report sr where sr.report_name='Written-Off Loans(Pentaho)'),
  (select sp.id from stretchy_parameter sp where sp.parameter_name='endDateSelect'),
  'endDate');
-
-

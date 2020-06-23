@@ -27,6 +27,8 @@ public interface DepositsDropdownReadPlatformService {
 
     Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions();
 
+    Collection<EnumOptionData> maturityInstructionOptions();
+
     /*
      * Collection<EnumOptionData> retrieveDepositTermTypeOptions();
      *

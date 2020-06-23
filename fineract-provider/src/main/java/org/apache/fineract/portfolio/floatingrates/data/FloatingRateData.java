@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-public class FloatingRateData implements Comparable<FloatingRateData> , Serializable {
+public class FloatingRateData implements Comparable<FloatingRateData>, Serializable {
 
     private final Long id;
     private final String name;
@@ -40,10 +40,8 @@ public class FloatingRateData implements Comparable<FloatingRateData> , Serializ
     @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
 
-    public FloatingRateData(Long id, String name, boolean isBaseLendingRate,
-            boolean isActive, String createdBy, LocalDate createdOn,
-            String modifiedBy, LocalDate modifiedOn,
-            List<FloatingRatePeriodData> ratePeriods,
+    public FloatingRateData(Long id, String name, boolean isBaseLendingRate, boolean isActive, String createdBy, LocalDate createdOn,
+            String modifiedBy, LocalDate modifiedOn, List<FloatingRatePeriodData> ratePeriods,
             List<EnumOptionData> interestRateFrequencyTypeOptions) {
         this.id = id;
         this.name = name;
@@ -114,7 +112,7 @@ public class FloatingRateData implements Comparable<FloatingRateData> , Serializ
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof FloatingRateData)) {
             return false;
         }
         final FloatingRateData rhs = (FloatingRateData) obj;
@@ -136,10 +134,8 @@ public class FloatingRateData implements Comparable<FloatingRateData> , Serializ
                 .toHashCode();
     }
 
-    public static FloatingRateData toTemplate(
-            List<EnumOptionData> interestRateFrequencyTypeOptions) {
+    public static FloatingRateData toTemplate(List<EnumOptionData> interestRateFrequencyTypeOptions) {
         // TODO Auto-generated method stub
-        return new FloatingRateData(null, null, false, true, null, null, null,
-                null, null, interestRateFrequencyTypeOptions);
+        return new FloatingRateData(null, null, false, true, null, null, null, null, null, interestRateFrequencyTypeOptions);
     }
 }

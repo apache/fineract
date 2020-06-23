@@ -18,4 +18,4 @@
 --
 
 ALTER TABLE `m_client`
-	ADD COLUMN `is_staff` TINYINT(1) NOT NULL DEFAULT '0' AFTER `mobile_no`;
+    ADD COLUMN `is_staff` tinyint NOT NULL DEFAULT '0' AFTER `mobile_no`;

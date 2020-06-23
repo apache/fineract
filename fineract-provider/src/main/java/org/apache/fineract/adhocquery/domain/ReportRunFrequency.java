@@ -23,15 +23,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum ReportRunFrequency {
-    DAILY(1, "reportRunFrequency.daily"),
-    WEEKLY(2, "reportRunFrequency.weekly"),
-    MONTHLY(3, "reportRunFrequency.monthly"),
-    YEARLY(4, "reportRunFrequency.yearly"),
-    CUSTOM(5, "reportRunFrequency.custom");
 
-    private static final Map<Long, ReportRunFrequency> MAP = Arrays.stream(ReportRunFrequency.values()).collect(Collectors.toMap(
-        ReportRunFrequency::getValue, e -> e
-    ));
+    DAILY(1, "reportRunFrequency.daily"), WEEKLY(2, "reportRunFrequency.weekly"), MONTHLY(3, "reportRunFrequency.monthly"), YEARLY(4,
+            "reportRunFrequency.yearly"), CUSTOM(5, "reportRunFrequency.custom");
+
+    private static final Map<Long, ReportRunFrequency> MAP = Arrays.stream(ReportRunFrequency.values())
+            .collect(Collectors.toMap(ReportRunFrequency::getValue, e -> e));
 
     private final long value;
     private final String code;

@@ -37,7 +37,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateFunctions;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -48,18 +47,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TemplateMergeService {
-    private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
 
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
     private String authToken;
 
-
     public void setAuthToken(final String authToken) {
-        this.authToken =  authToken;
+        this.authToken = authToken;
     }
-
 
     public String compile(final Template template, final Map<String, Object> scopes) throws IOException {
         this.scopes = scopes;
@@ -95,7 +92,7 @@ public class TemplateMergeService {
                 try {
                     this.scopes.put(entry.getKey(), getMapFromUrl(url));
                 } catch (final IOException e) {
-                    logger.error("getCompiledMapFromMappers() failed", e);
+                    LOG.error("getCompiledMapFromMappers() failed", e);
                 }
             }
         }
@@ -122,6 +119,7 @@ public class TemplateMergeService {
             final String password = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
 
             Authenticator.setDefault(new Authenticator() {
+
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(name, password.toCharArray());
@@ -140,7 +138,7 @@ public class TemplateMergeService {
             connection.setDoInput(true);
 
         } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-            logger.error("getConnection() failed, return null", e);
+            LOG.error("getConnection() failed, return null", e);
         }
 
         return connection;
@@ -160,13 +158,13 @@ public class TemplateMergeService {
             }
 
         } catch (final IOException e) {
-            logger.error("getStringFromInputStream() failed", e);
+            LOG.error("getStringFromInputStream() failed", e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    LOG.error("Problem occurred in getStringFromInputStream function", e);
                 }
             }
         }
@@ -178,13 +176,14 @@ public class TemplateMergeService {
     private void expandMapArrays(Object value) {
         if (value instanceof Map) {
             Map<String, Object> valueAsMap = (Map<String, Object>) value;
-            //Map<String, Object> newValue = null;
-            Map<String,Object> valueAsMap_second = new HashMap<>();
-            for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
+            // Map<String, Object> newValue = null;
+            Map<String, Object> valueAsMap_second = new HashMap<>();
+            for (Map.Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
                 Object valueAsMapEntryValue = valueAsMapEntry.getValue();
                 if (valueAsMapEntryValue instanceof Map) { // JSON Object
                     expandMapArrays(valueAsMapEntryValue);
-                } else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
+                } else if (valueAsMapEntryValue instanceof Iterable) { // JSON
+                                                                       // Array
                     Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
                     String valueAsMapEntryKey = valueAsMapEntry.getKey();
                     int i = 0;

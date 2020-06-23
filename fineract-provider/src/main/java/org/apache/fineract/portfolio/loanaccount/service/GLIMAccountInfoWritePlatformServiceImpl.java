@@ -29,8 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoWritePlatformService
-{
+public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoWritePlatformService {
 
     private final PlatformSecurityContext context;
 
@@ -39,56 +38,44 @@ public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoW
     private final LoanRepository loanRepository;
 
     @Autowired
-    public GLIMAccountInfoWritePlatformServiceImpl(final PlatformSecurityContext context,final GLIMAccountInfoRepository glimAccountRepository,
-            final LoanRepository loanRepository)
-    {
-        this.context=context;
-        this.glimAccountRepository=glimAccountRepository;
-        this.loanRepository=loanRepository;
+    public GLIMAccountInfoWritePlatformServiceImpl(final PlatformSecurityContext context,
+            final GLIMAccountInfoRepository glimAccountRepository, final LoanRepository loanRepository) {
+        this.context = context;
+        this.glimAccountRepository = glimAccountRepository;
+        this.loanRepository = loanRepository;
     }
 
     @Override
-    public void addGLIMAccountInfo(String accountNumber,Group group,BigDecimal principalAmount,Long childAccountsCount,
-            Boolean isAcceptingChild,Integer loanStatus,BigDecimal applicationId)
-    {
-        childAccountsCount=2L;
-        GroupLoanIndividualMonitoringAccount glimAccountInfo=GroupLoanIndividualMonitoringAccount.getInstance(accountNumber,group,principalAmount,childAccountsCount,
-                isAcceptingChild,loanStatus,applicationId);
+    public void addGLIMAccountInfo(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,
+            Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
 
-        this.glimAccountRepository.save(glimAccountInfo );
+        GroupLoanIndividualMonitoringAccount glimAccountInfo = GroupLoanIndividualMonitoringAccount.getInstance(accountNumber, group,
+                principalAmount, childAccountsCount, isAcceptingChild, loanStatus, applicationId);
 
+        this.glimAccountRepository.save(glimAccountInfo);
 
     }
 
-
     @Override
-    public void setIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount)
-    {
+    public void setIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount) {
         glimAccount.setIsAcceptingChild(true);
         glimAccountRepository.save(glimAccount);
 
     }
 
-
     @Override
-    public void resetIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount)
-    {
+    public void resetIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount) {
         glimAccount.setIsAcceptingChild(false);
         glimAccountRepository.save(glimAccount);
 
     }
 
-
     @Override
-    public void incrementChildAccountCount(GroupLoanIndividualMonitoringAccount glimAccount)
-    {
-        long count=glimAccount.getChildAccountsCount();
-        glimAccount.setChildAccountsCount(count+1);
+    public void incrementChildAccountCount(GroupLoanIndividualMonitoringAccount glimAccount) {
+        long count = glimAccount.getChildAccountsCount();
+        glimAccount.setChildAccountsCount(count + 1);
         glimAccountRepository.save(glimAccount);
 
     }
-
-
-
 
 }

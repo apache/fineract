@@ -55,7 +55,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
 @Entity
-@Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
+@Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "name" }, name = "name") })
 public class AccountTransferStandingInstruction extends AbstractPersistableCustom {
 
     @ManyToOne
@@ -109,9 +110,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     }
 
     public static AccountTransferStandingInstruction create(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount,
-            final LocalDate validFrom, final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency,
-            final Integer recurrenceInterval, final MonthDay recurrenceOnMonthDay) {
+            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
+            final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
+            final MonthDay recurrenceOnMonthDay) {
         Integer recurrenceOnDay = null;
         Integer recurrenceOnMonth = null;
         if (recurrenceOnMonthDay != null) {
@@ -123,9 +124,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     }
 
     private AccountTransferStandingInstruction(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount,
-            final LocalDate validFrom, final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency,
-            final Integer recurrenceInterval, final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
+            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
+            final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
+            final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
         this.accountTransferDetails = accountTransferDetails;
         this.name = name;
         this.priority = priority;
@@ -150,7 +151,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
 
         validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public Map<String, Object> update(JsonCommand command) {
@@ -234,7 +237,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             this.recurrenceInterval = newValue;
         }
         validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         return actualChanges;
     }
 
@@ -286,15 +291,16 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         this.latsRunDate = latsRunDate;
     }
 
-    public void updateStatus(Integer status){
+    public void updateStatus(Integer status) {
         this.status = status;
     }
 
     /**
-     * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
+     * delete the standing instruction by setting the status to 3 and appending
+     * "_deleted_" and the id to the name
      **/
-     public void delete() {
-         this.status = StandingInstructionStatus.DELETED.getValue();
-         this.name = this.name + "_deleted_" + this.getId();
-     }
+    public void delete() {
+        this.status = StandingInstructionStatus.DELETED.getValue();
+        this.name = this.name + "_deleted_" + this.getId();
+    }
 }

@@ -23,14 +23,17 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaxComponentHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createTaxComponent(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String percentage, final Integer liabilityAccountId) {
-        System.out.println("---------------------------------CREATING A TAX COMPONENT---------------------------------------------");
+        LOG.info("---------------------------------CREATING A TAX COMPONENT---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL,
                 getTaxComponentAsJSON(percentage, liabilityAccountId), "resourceId");
     }
@@ -41,7 +44,7 @@ public class TaxComponentHelper {
             map.put("creditAccountType", Account.AccountType.LIABILITY.toString());
             map.put("creditAcountId", String.valueOf(creditAccountId));
         }
-        System.out.println("map : " + map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 

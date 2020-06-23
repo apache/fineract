@@ -22,9 +22,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public abstract class ApplicationExitUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
 
     private ApplicationExitUtil() {}
 
@@ -34,7 +38,7 @@ public abstract class ApplicationExitUtil {
         // button).. In the case of MariaDB4j that's a problem because then the
         // mysqld won't be stopped, so:
         // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016)
-        System.out.println("\nHit Enter to quit...");
+        LOG.info("\nHit Enter to quit...");
         // NOTE: In Eclipse, System.console() is not available.. so:
         // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429)
         BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));

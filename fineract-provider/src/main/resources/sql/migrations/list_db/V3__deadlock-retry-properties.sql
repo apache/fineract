@@ -18,5 +18,5 @@
 --
 
 ALTER TABLE `tenants`
-  ADD COLUMN `deadlock_max_retries` int(5) DEFAULT 0,
-  ADD COLUMN `deadlock_max_retry_interval` int(5) DEFAULT 1;
+  ADD COLUMN `deadlock_max_retries` INT DEFAULT 0,
+  ADD COLUMN `deadlock_max_retry_interval` INT DEFAULT 1;

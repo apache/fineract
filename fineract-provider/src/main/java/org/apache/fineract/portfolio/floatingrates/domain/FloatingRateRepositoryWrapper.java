@@ -28,8 +28,7 @@ public class FloatingRateRepositoryWrapper {
     private final FloatingRateRepository floatingRateRepository;
 
     @Autowired
-    public FloatingRateRepositoryWrapper(
-            final FloatingRateRepository floatingRateRepository) {
+    public FloatingRateRepositoryWrapper(final FloatingRateRepository floatingRateRepository) {
         this.floatingRateRepository = floatingRateRepository;
     }
 
@@ -38,8 +37,7 @@ public class FloatingRateRepositoryWrapper {
     }
 
     public FloatingRate findOneWithNotFoundDetection(final Long id) {
-        return this.floatingRateRepository
-                .findById(id).orElseThrow(() -> new FloatingRateNotFoundException(id));
+        return this.floatingRateRepository.findById(id).orElseThrow(() -> new FloatingRateNotFoundException(id));
     }
 
     public void save(FloatingRate newFloatingRate) {

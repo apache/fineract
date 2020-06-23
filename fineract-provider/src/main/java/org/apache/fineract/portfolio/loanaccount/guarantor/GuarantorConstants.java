@@ -28,21 +28,23 @@ public class GuarantorConstants {
     /***
      * Enum of all parameters passed in while creating/updating a loan product
      ***/
-    public enum GUARANTOR_JSON_INPUT_PARAMS {
+    public enum GuarantorJSONinputParams {
+
         LOAN_ID("loanId"), CLIENT_RELATIONSHIP_TYPE_ID("clientRelationshipTypeId"), GUARANTOR_TYPE_ID("guarantorTypeId"), ENTITY_ID(
-                "entityId"), FIRSTNAME("firstname"), LASTNAME("lastname"), ADDRESS_LINE_1("addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY(
-                "city"), STATE("state"), ZIP("zip"), COUNTRY("country"), MOBILE_NUMBER("mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT(
-                "comment"), DATE_OF_BIRTH("dob"), AMOUNT("amount"), SAVINGS_ID("savingsId");
+                "entityId"), FIRSTNAME("firstname"), LASTNAME(
+                        "lastname"), ADDRESS_LINE_1("addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY("city"), STATE("state"), ZIP(
+                                "zip"), COUNTRY("country"), MOBILE_NUMBER("mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT(
+                                        "comment"), DATE_OF_BIRTH("dob"), AMOUNT("amount"), SAVINGS_ID("savingsId");
 
         private final String value;
 
-        GUARANTOR_JSON_INPUT_PARAMS(final String value) {
+        GuarantorJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
         static {
-            for (final GUARANTOR_JSON_INPUT_PARAMS type : GUARANTOR_JSON_INPUT_PARAMS.values()) {
+            for (final GuarantorJSONinputParams type : GuarantorJSONinputParams.values()) {
                 values.add(type.value);
             }
         }

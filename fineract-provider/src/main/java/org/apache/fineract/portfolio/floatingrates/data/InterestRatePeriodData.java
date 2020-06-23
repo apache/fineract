@@ -32,8 +32,7 @@ public class InterestRatePeriodData {
     private BigDecimal loanProductDifferentialInterestRate;
     private BigDecimal effectiveInterestRate;
 
-    public InterestRatePeriodData(Date fromDate, BigDecimal interestRate,
-            boolean isDifferentialToBLR, Date blrFromDate,
+    public InterestRatePeriodData(Date fromDate, BigDecimal interestRate, boolean isDifferentialToBLR, Date blrFromDate,
             BigDecimal blrInterestRate) {
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -70,8 +69,7 @@ public class InterestRatePeriodData {
         return this.loanDifferentialInterestRate;
     }
 
-    public void setLoanDifferentialInterestRate(
-            BigDecimal loanDifferentialInterestRate) {
+    public void setLoanDifferentialInterestRate(BigDecimal loanDifferentialInterestRate) {
         this.loanDifferentialInterestRate = loanDifferentialInterestRate;
     }
 
@@ -79,8 +77,7 @@ public class InterestRatePeriodData {
         return this.loanProductDifferentialInterestRate;
     }
 
-    public void setLoanProductDifferentialInterestRate(
-            BigDecimal loanProductDifferentialInterestRate) {
+    public void setLoanProductDifferentialInterestRate(BigDecimal loanProductDifferentialInterestRate) {
         this.loanProductDifferentialInterestRate = loanProductDifferentialInterestRate;
     }
 

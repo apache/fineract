@@ -25,8 +25,8 @@ import org.springframework.util.StringUtils;
 public enum CalendarWeekDaysType {
 
     INVALID(0, "calendarWeekDaysType.invalid"), MO(1, "calendarWeekDaysType.monday"), TU(2, "calendarWeekDaysType.tuesday"), WE(3,
-            "calendarWeekDaysType.wednesday"), TH(4, "calendarWeekDaysType.thursday"), FR(5, "calendarWeekDaysType.friday"), SA(6,
-            "calendarWeekDaysType.saturday"), SU(7, "calendarWeekDaysType.sunday");
+            "calendarWeekDaysType.wednesday"), TH(4, "calendarWeekDaysType.thursday"), FR(5,
+                    "calendarWeekDaysType.friday"), SA(6, "calendarWeekDaysType.saturday"), SU(7, "calendarWeekDaysType.sunday");
 
     private final Integer value;
     private final String code;
@@ -79,7 +79,9 @@ public enum CalendarWeekDaysType {
     public static CalendarWeekDaysType fromString(final String weekDayString) {
         CalendarWeekDaysType weekDay = CalendarWeekDaysType.INVALID;
 
-        if (StringUtils.isEmpty(weekDayString)) return weekDay;
+        if (StringUtils.isEmpty(weekDayString)) {
+            return weekDay;
+        }
 
         if (weekDayString.equalsIgnoreCase(CalendarWeekDaysType.MO.toString())) {
             weekDay = CalendarWeekDaysType.MO;

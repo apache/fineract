@@ -18,22 +18,22 @@
 --
 
 CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL,
   `from_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `interest_rate_chart_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `interest_rate_chart_id` BIGINT NOT NULL,
   `description` varchar(200) DEFAULT NULL,
-  `period_type_enum` smallint(5) NOT NULL DEFAULT '1',
-  `from_period` int(11) NOT NULL DEFAULT '0',
-  `to_period` int(11) DEFAULT NULL,
+  `period_type_enum` SMALLINT NOT NULL DEFAULT '1',
+  `from_period` INT NOT NULL DEFAULT '0',
+  `to_period` INT DEFAULT NULL,
   `amount_range_from` decimal(19,6) DEFAULT NULL,
   `amount_range_to` decimal(19,6) DEFAULT NULL,
   `annual_interest_rate` decimal(19,6) NOT NULL,
@@ -41,54 +41,54 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
   PRIMARY KEY (`id`),
   KEY `FKIRS00000000000001` (`interest_rate_chart_id`),
   CONSTRAINT `FKIRS00000000000001` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
-  `deposit_product_id` bigint(20) NOT NULL,
-  `interest_rate_chart_id` bigint(20) NOT NULL,
+  `deposit_product_id` BIGINT NOT NULL,
+  `interest_rate_chart_id` BIGINT NOT NULL,
   UNIQUE KEY `deposit_product_id_interest_rate_chart_id` (`deposit_product_id`,`interest_rate_chart_id`),
   KEY `FKDPIRC00000000000002` (`interest_rate_chart_id`),
   CONSTRAINT `FKDPIRC00000000000001` FOREIGN KEY (`deposit_product_id`) REFERENCES `m_savings_product` (`id`),
   CONSTRAINT `FKDPIRC00000000000002` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
-  `min_deposit_term` int(11) DEFAULT NULL,
-  `max_deposit_term` int(11) DEFAULT NULL,
-  `min_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `max_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `in_multiples_of_deposit_term` int(11) DEFAULT NULL,
-  `in_multiples_of_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `interest_free_period_applicable` smallint(5) DEFAULT NULL,
-  `interest_free_from_period` int(11) DEFAULT NULL,
-  `interest_free_to_period` int(11) DEFAULT NULL,
-  `interest_free_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `pre_closure_penal_applicable` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_product_id` BIGINT NOT NULL DEFAULT '0',
+  `min_deposit_term` INT DEFAULT NULL,
+  `max_deposit_term` INT DEFAULT NULL,
+  `min_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `max_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `in_multiples_of_deposit_term` INT DEFAULT NULL,
+  `in_multiples_of_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `interest_free_period_applicable` SMALLINT DEFAULT NULL,
+  `interest_free_from_period` INT DEFAULT NULL,
+  `interest_free_to_period` INT DEFAULT NULL,
+  `interest_free_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `pre_closure_penal_applicable` SMALLINT DEFAULT NULL,
   `pre_closure_penal_interest` decimal(19,6) DEFAULT NULL,
-  `pre_closure_penal_interest_on_enum` smallint(5) DEFAULT NULL,
+  `pre_closure_penal_interest_on_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDPTP00000000000001` (`savings_product_id`),
   CONSTRAINT `FKDPTP00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
-  `recurring_deposit_type_enum` smallint(5) DEFAULT NULL,
-  `recurring_deposit_frequency` int(11) DEFAULT NULL,
-  `recurring_deposit_frequency_type_enum` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_product_id` BIGINT NOT NULL DEFAULT '0',
+  `recurring_deposit_type_enum` SMALLINT DEFAULT NULL,
+  `recurring_deposit_frequency` INT DEFAULT NULL,
+  `recurring_deposit_frequency_type_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDPRD00000000000001` (`savings_product_id`),
   CONSTRAINT `FKDPRD00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL,
   `from_date` date NOT NULL,
@@ -96,15 +96,15 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
   PRIMARY KEY (`id`),
   KEY `FKSAIRC00000000000001` (`savings_account_id`),
   CONSTRAINT `FKSAIRC00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_interest_rate_chart_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_interest_rate_chart_id` BIGINT NOT NULL,
   `description` varchar(200) DEFAULT NULL,
-  `period_type_enum` smallint(5) NOT NULL DEFAULT '1',
-  `from_period` int(11) NOT NULL DEFAULT '0',
-  `to_period` int(11) DEFAULT NULL,
+  `period_type_enum` SMALLINT NOT NULL DEFAULT '1',
+  `from_period` INT NOT NULL DEFAULT '0',
+  `to_period` INT DEFAULT NULL,
   `amount_range_from` decimal(19,6) DEFAULT NULL,
   `amount_range_to` decimal(19,6) DEFAULT NULL,
   `annual_interest_rate` decimal(19,6) NOT NULL,
@@ -112,56 +112,56 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
   PRIMARY KEY (`id`),
   KEY `FKSAIRS00000000000001` (`savings_account_interest_rate_chart_id`),
   CONSTRAINT `FKSAIRS00000000000001` FOREIGN KEY (`savings_account_interest_rate_chart_id`) REFERENCES `m_savings_account_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL DEFAULT '0',
   `recurring_deposit_amount` decimal(19,6) DEFAULT NULL,
-  `recurring_deposit_type_enum` smallint(5) DEFAULT NULL,
-  `recurring_deposit_frequency` int(11) DEFAULT NULL,
-  `recurring_deposit_frequency_type_enum` smallint(5) DEFAULT NULL,
+  `recurring_deposit_type_enum` SMALLINT DEFAULT NULL,
+  `recurring_deposit_frequency` INT DEFAULT NULL,
+  `recurring_deposit_frequency_type_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDARD00000000000001` (`savings_account_id`),
   CONSTRAINT `FKDARD00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
-  `min_deposit_term` int(11) DEFAULT NULL,
-  `max_deposit_term` int(11) DEFAULT NULL,
-  `min_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `max_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `in_multiples_of_deposit_term` int(11) DEFAULT NULL,
-  `in_multiples_of_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `interest_free_period_applicable` smallint(5) DEFAULT NULL,
-  `interest_free_from_period` int(11) DEFAULT NULL,
-  `interest_free_to_period` int(11) DEFAULT NULL,
-  `interest_free_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `pre_closure_penal_applicable` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL DEFAULT '0',
+  `min_deposit_term` INT DEFAULT NULL,
+  `max_deposit_term` INT DEFAULT NULL,
+  `min_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `max_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `in_multiples_of_deposit_term` INT DEFAULT NULL,
+  `in_multiples_of_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `interest_free_period_applicable` SMALLINT DEFAULT NULL,
+  `interest_free_from_period` INT DEFAULT NULL,
+  `interest_free_to_period` INT DEFAULT NULL,
+  `interest_free_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `pre_closure_penal_applicable` SMALLINT DEFAULT NULL,
   `pre_closure_penal_interest` decimal(19,6) DEFAULT NULL,
-  `pre_closure_penal_interest_on_enum` smallint(5) DEFAULT NULL,
-  `deposit_period` int(11) DEFAULT NULL,
-  `deposit_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `pre_closure_penal_interest_on_enum` SMALLINT DEFAULT NULL,
+  `deposit_period` INT DEFAULT NULL,
+  `deposit_period_frequency_enum` SMALLINT DEFAULT NULL,
   `deposit_amount` decimal(19,6) DEFAULT NULL,
   `maturity_amount` decimal(19,6) DEFAULT NULL,
   `maturity_date` date DEFAULT NULL,
-  `on_account_closure_enum` smallint(5) DEFAULT NULL,
+  `on_account_closure_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDATP00000000000001` (`savings_account_id`),
   CONSTRAINT `FKDATP00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 ALTER TABLE `m_savings_product`
-	ADD COLUMN `deposit_type_enum` SMALLINT(5) NOT NULL DEFAULT '100' AFTER `description`;
+    ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `description`;
 
 ALTER TABLE `m_savings_account`
-	ADD COLUMN `deposit_type_enum` SMALLINT(5) NOT NULL DEFAULT '100' AFTER `account_type_enum`;
+    ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `account_type_enum`;
 
 ALTER TABLE `m_client`
-  ADD COLUMN `gender_cv_id` INT(11) NULL DEFAULT NULL AFTER `mobile_no`,
+  ADD COLUMN `gender_cv_id` INT NULL DEFAULT NULL AFTER `mobile_no`,
   ADD COLUMN `date_of_birth` DATE NULL DEFAULT NULL AFTER `gender_cv_id`;
 
 

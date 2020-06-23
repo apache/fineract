@@ -25,15 +25,18 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 22/8/17.
  */
 final class PasswordPreferencesApiResourceSwagger {
+
     private PasswordPreferencesApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetPasswordPreferencesTemplateResponse")
     public static final class GetPasswordPreferencesTemplateResponse {
+
         private GetPasswordPreferencesTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Password must be at least 1 character and not more that 50 characters long")
@@ -46,9 +49,11 @@ final class PasswordPreferencesApiResourceSwagger {
 
     @ApiModel(value = "PutPasswordPreferencesTemplateRequest")
     public static final class PutPasswordPreferencesTemplateRequest {
+
         private PutPasswordPreferencesTemplateRequest() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long validationPolicyId;
     }

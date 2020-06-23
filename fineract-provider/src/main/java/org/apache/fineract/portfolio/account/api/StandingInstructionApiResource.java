@@ -66,10 +66,11 @@ import org.springframework.stereotype.Component;
 @Path("/standinginstructions")
 @Component
 @Scope("singleton")
-@Api(tags = {"Standing Instructions"})
+@Api(tags = { "Standing Instructions" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Standing Instructions", description = "Standing instructions (or standing orders) refer to instructions a bank account holder (\"the payer\") gives to his or her bank to pay a set amount at regular intervals to another's (\"the payee's\") account.\n" + "\n" + "Note: At present only savings account to savings account and savings account to Loan account transfers are permitted.")
-})
+        @Tag(name = "Standing Instructions", description = "Standing instructions (or standing orders) refer to instructions a bank account holder (\"the payer\") gives to his or her bank to pay a set amount at regular intervals to another's (\"the payee's\") account.\n"
+                + "\n"
+                + "Note: At present only savings account to savings account and savings account to Loan account transfers are permitted.") })
 public class StandingInstructionApiResource {
 
     private final PlatformSecurityContext context;
@@ -81,11 +82,11 @@ public class StandingInstructionApiResource {
 
     @Autowired
     public StandingInstructionApiResource(final PlatformSecurityContext context,
-                        final DefaultToApiJsonSerializer<StandingInstructionData> toApiJsonSerializer,
-                        final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-                        final ApiRequestParameterHelper apiRequestParameterHelper,
-                        final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
-                        final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final DefaultToApiJsonSerializer<StandingInstructionData> toApiJsonSerializer,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -96,15 +97,24 @@ public class StandingInstructionApiResource {
 
     @GET
     @Path("template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Retrieve Standing Instruction Template", httpMethod = "GET", notes = "This is a convenience resource. " + "It can be useful when building maintenance user interface screens for client applications. " + "The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1\n" + "\n" + "standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Standing Instruction Template", httpMethod = "GET", notes = "This is a convenience resource. "
+            + "It can be useful when building maintenance user interface screens for client applications. "
+            + "The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n"
+            + "Example Requests:\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1\n" + "\n"
+            + "standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1\n" + "\n"
+            + "standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1")
     @ApiResponses(@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsTemplateResponse.class))
-    public String template(@QueryParam("fromOfficeId") @ApiParam(value = "fromOfficeId") final Long fromOfficeId, @QueryParam("fromClientId") @ApiParam(value = "fromClientId") final Long fromClientId,
-                           @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccountId, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
-                           @QueryParam("toOfficeId") @ApiParam(value = "toOfficeId") final Long toOfficeId, @QueryParam("toClientId") @ApiParam(value = "toClientId") final Long toClientId,
-                           @QueryParam("toAccountId") @ApiParam(value = "toAccountId") final Long toAccountId, @QueryParam("toAccountType") @ApiParam(value = "toAccountType") final Integer toAccountType,
-                           @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType, @Context final UriInfo uriInfo) {
+    public String template(@QueryParam("fromOfficeId") @ApiParam(value = "fromOfficeId") final Long fromOfficeId,
+            @QueryParam("fromClientId") @ApiParam(value = "fromClientId") final Long fromClientId,
+            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccountId,
+            @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
+            @QueryParam("toOfficeId") @ApiParam(value = "toOfficeId") final Long toOfficeId,
+            @QueryParam("toClientId") @ApiParam(value = "toClientId") final Long toClientId,
+            @QueryParam("toAccountId") @ApiParam(value = "toAccountId") final Long toAccountId,
+            @QueryParam("toAccountType") @ApiParam(value = "toAccountType") final Integer toAccountType,
+            @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
@@ -117,11 +127,13 @@ public class StandingInstructionApiResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create new Standing Instruction", httpMethod = "POST", notes = "Ability to create new instruction for transfer of monetary funds from one account to another")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PostStandingInstructionsRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PostStandingInstructionsRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class) })
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createStandingInstruction().withJson(apiRequestBodyAsJson)
@@ -134,13 +146,19 @@ public class StandingInstructionApiResource {
 
     @PUT
     @Path("{standingInstructionId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Update Standing Instruction | Delete Standing Instruction", httpMethod = "PUT", notes = "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n" + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = false, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class)})
-    public String update(@PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId, @ApiParam(hidden = true) final String apiRequestBodyAsJson,
-                         @QueryParam("command") @ApiParam(value = "command") final String commandParam) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Update Standing Instruction | Delete Standing Instruction", httpMethod = "PUT", notes = "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n"
+            + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n"
+            + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n"
+            + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = false, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class) })
+    public String update(@PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam) {
 
         CommandWrapper commandRequest = null;
         if (is(commandParam, "update")) {
@@ -165,16 +183,23 @@ public class StandingInstructionApiResource {
     }
 
     @GET
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Standing Instructions", httpMethod = "GET", notes = "Example Requests:\n" + "\n" + "standinginstructions")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class)})
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
-                              @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-                              @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
-                              @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder, @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
-                              @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName, @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-                              @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType) {
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class) })
+    public String retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
+            @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
+            @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName,
+            @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount,
+            @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType) {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
@@ -194,14 +219,20 @@ public class StandingInstructionApiResource {
 
     @GET
     @Path("{standingInstructionId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Retrieve Standing Instruction", httpMethod = "GET", notes = "Example Requests :\n" + "\n" + "standinginstructions/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class)})
-    public String retrieveOne(@PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId, @Context final UriInfo uriInfo,
-                              @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch, @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
-                              @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-                              @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Standing Instruction", httpMethod = "GET", notes = "Example Requests :\n" + "\n"
+            + "standinginstructions/1")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class) })
+    public String retrieveOne(
+            @PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId,
+            @Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
@@ -220,11 +251,11 @@ public class StandingInstructionApiResource {
             }
             if (associationParameters.contains("template")) {
                 final StandingInstructionData templateData = this.standingInstructionReadPlatformService.retrieveTemplate(
-                        standingInstructionData.fromClient().officeId(), standingInstructionData.fromClient().id(), standingInstructionData
-                                .fromAccount().accountId(), standingInstructionData.fromAccountType().getValue(), standingInstructionData
-                                .toClient().officeId(), standingInstructionData.toClient().id(), standingInstructionData.toAccount()
-                                .accountId(), standingInstructionData.toAccountType().getValue(), standingInstructionData.transferType()
-                                .getValue());
+                        standingInstructionData.fromClient().officeId(), standingInstructionData.fromClient().id(),
+                        standingInstructionData.fromAccount().accountId(), standingInstructionData.fromAccountType().getValue(),
+                        standingInstructionData.toClient().officeId(), standingInstructionData.toClient().id(),
+                        standingInstructionData.toAccount().accountId(), standingInstructionData.toAccountType().getValue(),
+                        standingInstructionData.transferType().getValue());
                 standingInstructionData = StandingInstructionData.withTemplateData(standingInstructionData, templateData);
             }
         }

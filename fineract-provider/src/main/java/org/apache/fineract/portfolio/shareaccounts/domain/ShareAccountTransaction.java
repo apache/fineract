@@ -53,24 +53,24 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
     private BigDecimal shareValue;
 
     @Column(name = "amount")
-    private BigDecimal amount ;
+    private BigDecimal amount;
 
     @Column(name = "amount_paid")
-    private BigDecimal amountPaid ;
+    private BigDecimal amountPaid;
 
     @Column(name = "charge_amount")
-    private BigDecimal chargeAmount ;
+    private BigDecimal chargeAmount;
 
     @Column(name = "status_enum", nullable = true)
     private Integer status;
 
     @Column(name = "type_enum", nullable = true)
-    private Integer type ;
+    private Integer type;
 
     @Column(name = "is_active", nullable = false)
-    private boolean active = true ;
+    private boolean active = true;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ShareAccountChargePaidBy> shareAccountChargesPaid = new HashSet<>();
 
     protected ShareAccountTransaction() {
@@ -86,40 +86,41 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         this.totalShares = totalShares;
         this.shareValue = shareValue;
         this.status = PurchasedSharesStatusType.APPLIED.getValue();
-        this.type = PurchasedSharesStatusType.PURCHASED.getValue() ;
-        this.amount = shareValue.multiply(BigDecimal.valueOf(totalShares)) ;
-        this.amountPaid = new BigDecimal(this.amount.doubleValue()) ;
+        this.type = PurchasedSharesStatusType.PURCHASED.getValue();
+        this.amount = shareValue.multiply(BigDecimal.valueOf(totalShares));
+        this.amountPaid = new BigDecimal(this.amount.doubleValue());
     }
 
-    private ShareAccountTransaction(final Date transactionDate, final Long totalShares, final BigDecimal shareValue,
-            final Integer status, final Integer type, final BigDecimal amount, final BigDecimal chargeAmount, final BigDecimal amountPaid) {
+    private ShareAccountTransaction(final Date transactionDate, final Long totalShares, final BigDecimal shareValue, final Integer status,
+            final Integer type, final BigDecimal amount, final BigDecimal chargeAmount, final BigDecimal amountPaid) {
         this.transactionDate = transactionDate;
         this.totalShares = totalShares;
         this.shareValue = shareValue;
-        this.status = status ;
-        this.type = type ;
-        this.amount = amount ;
-        this.chargeAmount = chargeAmount ;
-        this.amountPaid = amountPaid ;
+        this.status = status;
+        this.type = type;
+        this.amount = amount;
+        this.chargeAmount = chargeAmount;
+        this.amountPaid = amountPaid;
     }
 
-    public static ShareAccountTransaction createRedeemTransaction(final Date transactionDate, final Long totalShares, final BigDecimal shareValue) {
-        final Integer status = PurchasedSharesStatusType.APPROVED.getValue() ;
-        final Integer type = PurchasedSharesStatusType.REDEEMED.getValue() ;
-        final BigDecimal amount = shareValue.multiply(BigDecimal.valueOf(totalShares)) ;
-        BigDecimal amountPaid = new BigDecimal(amount.doubleValue()) ;
-        return new ShareAccountTransaction(transactionDate, totalShares, shareValue, status, type, amount, null, amountPaid) ;
+    public static ShareAccountTransaction createRedeemTransaction(final Date transactionDate, final Long totalShares,
+            final BigDecimal shareValue) {
+        final Integer status = PurchasedSharesStatusType.APPROVED.getValue();
+        final Integer type = PurchasedSharesStatusType.REDEEMED.getValue();
+        final BigDecimal amount = shareValue.multiply(BigDecimal.valueOf(totalShares));
+        BigDecimal amountPaid = new BigDecimal(amount.doubleValue());
+        return new ShareAccountTransaction(transactionDate, totalShares, shareValue, status, type, amount, null, amountPaid);
     }
 
     public static ShareAccountTransaction createChargeTransaction(final Date transactionDate, final ShareAccountCharge charge) {
-       final Long totalShares = null ;
-       final BigDecimal unitPrice = null ;
-       final Integer status = PurchasedSharesStatusType.APPROVED.getValue() ;
-       final Integer type = PurchasedSharesStatusType.CHARGE_PAYMENT.getValue() ;
-       BigDecimal amount = charge.percentageOrAmount() ;
-       BigDecimal chargeAmount = null ;
-       BigDecimal amountPaid = null ;
-       return new ShareAccountTransaction(transactionDate, totalShares, unitPrice, status, type, amount, chargeAmount, amountPaid) ;
+        final Long totalShares = null;
+        final BigDecimal unitPrice = null;
+        final Integer status = PurchasedSharesStatusType.APPROVED.getValue();
+        final Integer type = PurchasedSharesStatusType.CHARGE_PAYMENT.getValue();
+        BigDecimal amount = charge.percentageOrAmount();
+        BigDecimal chargeAmount = null;
+        BigDecimal amountPaid = null;
+        return new ShareAccountTransaction(transactionDate, totalShares, unitPrice, status, type, amount, chargeAmount, amountPaid);
     }
 
     public Date getPurchasedDate() {
@@ -138,112 +139,119 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         this.transactionDate = purchasedDate;
         this.totalShares = totalShares;
         this.shareValue = shareValue;
-        this.amount = shareValue.multiply(BigDecimal.valueOf(totalShares)) ;
-        this.chargeAmount = BigDecimal.ZERO ;
+        this.amount = shareValue.multiply(BigDecimal.valueOf(totalShares));
+        this.chargeAmount = BigDecimal.ZERO;
         this.status = PurchasedSharesStatusType.APPLIED.getValue();
     }
 
     public void approve() {
-        this.status = PurchasedSharesStatusType.APPROVED.getValue() ;
+        this.status = PurchasedSharesStatusType.APPROVED.getValue();
     }
 
     public void undoApprove() {
-        this.status = PurchasedSharesStatusType.APPLIED.getValue() ;
+        this.status = PurchasedSharesStatusType.APPLIED.getValue();
     }
 
     public void reject() {
-       this.status = PurchasedSharesStatusType.REJECTED.getValue() ;
-       if(this.chargeAmount != null) {
-           this.amount = this.amount.subtract(chargeAmount) ;
-       }
+        this.status = PurchasedSharesStatusType.REJECTED.getValue();
+        if (this.chargeAmount != null) {
+            this.amount = this.amount.subtract(chargeAmount);
+        }
     }
 
     public boolean isPendingForApprovalTransaction() {
-        return this.status.equals(PurchasedSharesStatusType.APPLIED.getValue()) && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue()) ;
+        return this.status.equals(PurchasedSharesStatusType.APPLIED.getValue())
+                && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue());
     }
 
     public boolean isPurchasTransaction() {
-        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue()) && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue()) ;
+        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue())
+                && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue());
     }
 
     public boolean isRedeemTransaction() {
-        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue()) && this.type.equals(PurchasedSharesStatusType.REDEEMED.getValue()) ;
+        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue())
+                && this.type.equals(PurchasedSharesStatusType.REDEEMED.getValue());
     }
 
     public boolean isChargeTransaction() {
-        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue()) && this.type.equals(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue()) ;
+        return this.status.equals(PurchasedSharesStatusType.APPROVED.getValue())
+                && this.type.equals(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue());
     }
 
     public boolean isPurchaseRejectedTransaction() {
-        return this.status.equals(PurchasedSharesStatusType.REJECTED.getValue()) && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue()) ;
+        return this.status.equals(PurchasedSharesStatusType.REJECTED.getValue())
+                && this.type.equals(PurchasedSharesStatusType.PURCHASED.getValue());
     }
 
     public void addShareAccountChargePaidBy(final ShareAccountChargePaidBy chargePaidBy) {
-        this.shareAccountChargesPaid.add(chargePaidBy) ;
+        this.shareAccountChargesPaid.add(chargePaidBy);
     }
 
     public BigDecimal amount() {
-        return this.amount ;
+        return this.amount;
     }
 
     public BigDecimal chargeAmount() {
-        return this.chargeAmount ;
+        return this.chargeAmount;
     }
 
     public void updateChargeAmount(BigDecimal totalChargeAmount) {
         this.amount = this.amount.add(totalChargeAmount);
-        this.chargeAmount = totalChargeAmount ;
+        this.chargeAmount = totalChargeAmount;
     }
 
     public void deductChargesFromTotalAmount(BigDecimal totalChargeAmount) {
         this.amount = this.amount.subtract(totalChargeAmount);
-        this.chargeAmount = totalChargeAmount ;
+        this.chargeAmount = totalChargeAmount;
     }
 
     public Set<ShareAccountChargePaidBy> getChargesPaidBy() {
-        return this.shareAccountChargesPaid ;
+        return this.shareAccountChargesPaid;
     }
 
     public Integer getTransactionStatus() {
-        return this.status ;
+        return this.status;
     }
 
     public Integer getTransactionType() {
-        return this.type ;
+        return this.type;
     }
 
     public void updateAmountPaid(final BigDecimal amountPaid) {
-        this.amountPaid = amountPaid ;
+        this.amountPaid = amountPaid;
     }
 
     public void addAmountPaid(final BigDecimal amountPaid) {
-        if(isRedeemTransaction()) {
-            this.amountPaid = this.amountPaid.subtract(amountPaid) ;
-        }else if(isPurchasTransaction() /*|| isPurchaseRejectedTransaction()*/) {
-            this.amountPaid = this.amountPaid.add(amountPaid) ;
+        if (isRedeemTransaction()) {
+            this.amountPaid = this.amountPaid.subtract(amountPaid);
+        } else if (isPurchasTransaction() /*
+                                           * || isPurchaseRejectedTransaction()
+                                           */) {
+            this.amountPaid = this.amountPaid.add(amountPaid);
         }
     }
 
     public void resetAmountPaid() {
-        this.amountPaid = BigDecimal.ZERO ;
+        this.amountPaid = BigDecimal.ZERO;
     }
 
     public void setActive(boolean active) {
-        this.active = active ;
-        if(!this.active) {
-            //this.shareAccountChargesPaid.clear();
+        this.active = active;
+        if (!this.active) {
+            // this.shareAccountChargesPaid.clear();
         }
     }
 
     public void updateTransactionDate(final Date transactionDate) {
-        this.transactionDate = transactionDate ;
+        this.transactionDate = transactionDate;
     }
 
     public boolean isActive() {
-        return this.active ;
+        return this.active;
     }
 
     public BigDecimal shareValue() {
-        return this.shareValue ;
+        return this.shareValue;
     }
 }

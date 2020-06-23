@@ -27,15 +27,18 @@ import org.joda.time.LocalDate;
  * Created by sanyam on 14/8/17.
  */
 final class OfficesApiResourceSwagger {
+
     private OfficesApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetOfficesResponse")
     public static final class GetOfficesResponse {
+
         private GetOfficesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Head Office")
@@ -48,17 +51,19 @@ final class OfficesApiResourceSwagger {
         public LocalDate openingDate;
         @ApiModelProperty(example = ".")
         public String hierarchy;
-//        @ApiModelProperty(example = "")
-//        public Long parentId;
-//        @ApiModelProperty(example = "")
-//        public String parentName;
+        // @ApiModelProperty(example = "")
+        // public Long parentId;
+        // @ApiModelProperty(example = "")
+        // public String parentName;
     }
 
     @ApiModel(value = "GetOfficesTemplateResponse")
     public static final class GetOfficesTemplateResponse {
+
         private GetOfficesTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "[2009, 1, 1]")
         public LocalDate openingDate;
         public Collection<GetOfficesResponse> allowedParents;
@@ -66,9 +71,11 @@ final class OfficesApiResourceSwagger {
 
     @ApiModel(value = "PostOfficesRequest")
     public static final class PostOfficesRequest {
+
         private PostOfficesRequest() {
 
         }
+
         @ApiModelProperty(example = "Good Friday")
         public String name;
         @ApiModelProperty(example = "dd MMMM yyyy")
@@ -86,9 +93,11 @@ final class OfficesApiResourceSwagger {
 
     @ApiModel(value = "PostOfficesResponse")
     public static final class PostOfficesResponse {
+
         private PostOfficesResponse() {
 
         }
+
         @ApiModelProperty(example = "3")
         public Long officeId;
         @ApiModelProperty(example = "3")
@@ -97,25 +106,32 @@ final class OfficesApiResourceSwagger {
 
     @ApiModel(value = "PutOfficesOfficeIdRequest")
     public static final class PutOfficesOfficeIdRequest {
+
         private PutOfficesOfficeIdRequest() {
 
         }
+
         @ApiModelProperty(example = "Name is updated")
         public String name;
     }
 
     @ApiModel(value = "PutOfficesOfficeIdResponse")
     public static final class PutOfficesOfficeIdResponse {
+
         private PutOfficesOfficeIdResponse() {
 
         }
-        final class PutOfficesOfficeIdResponseChanges {
-            private PutOfficesOfficeIdResponseChanges(){
+
+        static final class PutOfficesOfficeIdResponseChanges {
+
+            private PutOfficesOfficeIdResponseChanges() {
 
             }
+
             @ApiModelProperty(example = "Name is updated")
             public String name;
         }
+
         @ApiModelProperty(example = "3")
         public Long officeId;
         @ApiModelProperty(example = "3")

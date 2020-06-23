@@ -31,10 +31,10 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
     private final BigDecimal provisioningPercentage;
     private final Long liabilityAccount;
     private final String liabilityCode;
-    private final String liabilityName ;
+    private final String liabilityName;
     private final Long expenseAccount;
     private final String expenseCode;
-    private final String expenseName ;
+    private final String expenseName;
 
     public ProvisioningCriteriaDefinitionData(Long id, Long categoryId, String categoryName, Long minAge, Long maxAge,
             BigDecimal provisioningPercentage, Long liabilityAccount, final String liabilityCode, String liabilityName, Long expenseAccount,
@@ -49,8 +49,8 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
         this.categoryName = categoryName;
         this.liabilityCode = liabilityCode;
         this.expenseCode = expenseCode;
-        this.liabilityName = liabilityName ;
-        this.expenseName =  expenseName ;
+        this.liabilityName = liabilityName;
+        this.expenseName = expenseName;
     }
 
     public static ProvisioningCriteriaDefinitionData template(Long categoryId, String categoryName) {
@@ -99,7 +99,9 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
 
     @Override
     public int compareTo(ProvisioningCriteriaDefinitionData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return obj.id.compareTo(this.id);
     }
 

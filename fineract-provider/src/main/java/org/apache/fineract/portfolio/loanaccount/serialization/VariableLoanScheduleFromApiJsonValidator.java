@@ -49,9 +49,8 @@ public class VariableLoanScheduleFromApiJsonValidator {
 
     final Set<String> variableSchedulesupportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.exceptionParamName,
             LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
-    final Set<String> variableSchedulesupportedArrayParameters = new HashSet<>(Arrays.asList(
-            LoanApiConstants.modifiedinstallmentsParamName, LoanApiConstants.newinstallmentsParamName,
-            LoanApiConstants.deletedinstallmentsParamName));
+    final Set<String> variableSchedulesupportedArrayParameters = new HashSet<>(Arrays.asList(LoanApiConstants.modifiedinstallmentsParamName,
+            LoanApiConstants.newinstallmentsParamName, LoanApiConstants.deletedinstallmentsParamName));
     final Set<String> variableScheduleModifiedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
             LoanApiConstants.modifiedDueDateParamName, LoanApiConstants.principalParamName, LoanApiConstants.installmentAmountParamName));
     final Set<String> variableScheduleNewInstallmentParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
@@ -66,7 +65,9 @@ public class VariableLoanScheduleFromApiJsonValidator {
     }
 
     public void validateSchedule(final String json, final Loan loan) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.variableSchedulesupportedParameters);
@@ -112,7 +113,9 @@ public class VariableLoanScheduleFromApiJsonValidator {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("variable.schedule.not.supported",
                     "Loan schedule modification not allowed");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateLoanTermVariations(final Loan loan, final DataValidatorBuilder baseDataValidator, final String dateFormat,
@@ -135,9 +138,8 @@ public class VariableLoanScheduleFromApiJsonValidator {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.principalParamName);
                 throw new UnsupportedParameterException(unsupportedParams);
-            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce() || loan.getLoanProductRelatedDetail()
-                    .getAmortizationMethod().isEqualPrincipal())
-                    && installmentAmount != null) {
+            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce()
+                    || loan.getLoanProductRelatedDetail().getAmortizationMethod().isEqualPrincipal()) && installmentAmount != null) {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.installmentAmountParamName);
                 throw new UnsupportedParameterException(unsupportedParams);

@@ -34,7 +34,8 @@ public class PrematureCloseRecurringDepositAccountCommandHandler implements NewC
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public PrematureCloseRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public PrematureCloseRecurringDepositAccountCommandHandler(
+            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 

@@ -44,10 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/self/surveys/scorecards")
 @Component
 @Scope("singleton")
-@Api(tags = {"Self Score Card"})
-@SwaggerDefinition(tags = {
-  @Tag(name = "Self Score Card", description = "")
-})
+@Api(tags = { "Self Score Card" })
+@SwaggerDefinition(tags = { @Tag(name = "Self Score Card", description = "") })
 public class SelfScorecardApiResource {
 
     private final PlatformSecurityContext context;
@@ -56,8 +54,7 @@ public class SelfScorecardApiResource {
 
     @Autowired
     public SelfScorecardApiResource(final PlatformSecurityContext securityContext,
-            final AppuserClientMapperReadService appuserClientMapperReadService,
-            final ScorecardApiResource scorecardApiResource) {
+            final AppuserClientMapperReadService appuserClientMapperReadService, final ScorecardApiResource scorecardApiResource) {
         this.context = securityContext;
         this.scorecardApiResource = scorecardApiResource;
         this.appuserClientMapperReadService = appuserClientMapperReadService;

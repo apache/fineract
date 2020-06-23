@@ -31,21 +31,19 @@ public class ShareProductDropdownReadPlatformServiceImpl implements ShareProduct
 
     @Override
     public Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {
-        final List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions = Arrays.asList( //
-                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.DAYS), //
-                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.WEEKS), //
-                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.MONTHS), //
-                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.YEARS) //
-                );
+        final List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions = Arrays.asList(
+                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.DAYS),
+                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.WEEKS),
+                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.MONTHS),
+                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.YEARS));
 
         return allowedLockinPeriodFrequencyTypeOptions;
     }
 
     @Override
     public Collection<EnumOptionData> retrieveMinimumActivePeriodFrequencyTypeOptions() {
-        final List<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = Arrays.asList( //
-                SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.DAYS) //
-                );
+        final List<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = Arrays
+                .asList(SharesEnumerations.lockinPeriodFrequencyType(SharePeriodFrequencyType.DAYS));
 
         return minimumActivePeriodFrequencyTypeOptions;
     }

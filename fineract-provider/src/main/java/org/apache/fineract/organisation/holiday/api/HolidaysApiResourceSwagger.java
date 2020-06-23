@@ -28,15 +28,18 @@ import org.joda.time.LocalDate;
  * Created by sanyam on 14/8/17.
  */
 final class HolidaysApiResourceSwagger {
+
     private HolidaysApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetHolidaysResponse")
     public static final class GetHolidaysResponse {
+
         private GetHolidaysResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Good Friday")
@@ -54,16 +57,21 @@ final class HolidaysApiResourceSwagger {
 
     @ApiModel(value = "PostHolidaysRequest")
     public static final class PostHolidaysRequest {
-        private PostHolidaysRequest(){
+
+        private PostHolidaysRequest() {
 
         }
-        final class PostHolidaysRequestOffices {
-            private PostHolidaysRequestOffices(){
+
+        static final class PostHolidaysRequestOffices {
+
+            private PostHolidaysRequestOffices() {
 
             }
+
             @ApiModelProperty(example = "1")
             public Long officeId;
         }
+
         @ApiModelProperty(example = "Good Friday")
         public String name;
         @ApiModelProperty(example = "Good Friday")
@@ -83,15 +91,18 @@ final class HolidaysApiResourceSwagger {
 
     @ApiModel(value = "PostHolidaysResponse")
     public static final class PostHolidaysResponse {
+
         private PostHolidaysResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "PostHolidaysHolidayIdRequest")
     public static final class PostHolidaysHolidayIdRequest {
+
         private PostHolidaysHolidayIdRequest() {
 
         }
@@ -99,18 +110,22 @@ final class HolidaysApiResourceSwagger {
 
     @ApiModel(value = "PostHolidaysHolidayIdResponse")
     public static final class PostHolidaysHolidayIdResponse {
+
         private PostHolidaysHolidayIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "PutHolidaysHolidayIdRequest")
     public static final class PutHolidaysHolidayIdRequest {
+
         private PutHolidaysHolidayIdRequest() {
 
         }
+
         @ApiModelProperty(example = "Independence day")
         public String name;
         @ApiModelProperty(example = "Holiday for Independence day celebration")
@@ -119,16 +134,21 @@ final class HolidaysApiResourceSwagger {
 
     @ApiModel(value = "PutHolidaysHolidayIdResponse")
     public static final class PutHolidaysHolidayIdResponse {
+
         private PutHolidaysHolidayIdResponse() {
 
         }
-        final class PutHolidaysHolidayIdResponseChanges{
-            private PutHolidaysHolidayIdResponseChanges(){}
+
+        static final class PutHolidaysHolidayIdResponseChanges {
+
+            private PutHolidaysHolidayIdResponseChanges() {}
+
             @ApiModelProperty(example = "Independence day")
             public String name;
             @ApiModelProperty(example = "Holiday for Independence day celebration")
             public String description;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         public PutHolidaysHolidayIdResponseChanges changes;
@@ -136,9 +156,11 @@ final class HolidaysApiResourceSwagger {
 
     @ApiModel(value = "DeleteHolidaysHolidayIdResponse")
     public static final class DeleteHolidaysHolidayIdResponse {
+
         private DeleteHolidaysHolidayIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

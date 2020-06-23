@@ -26,29 +26,29 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-public class RateData implements Serializable {
+public final class RateData implements Serializable {
 
-  private Long id;
+    private Long id;
 
-  private String name;
+    private String name;
 
-  private BigDecimal percentage;
+    private BigDecimal percentage;
 
-  private EnumOptionData productApply;
+    private EnumOptionData productApply;
 
-  private boolean active;
+    private boolean active;
 
-  public static RateData instance(final Long id, final String name, final BigDecimal percentage,
-      final EnumOptionData productApply, final boolean active) {
-    return new RateData(id, name, percentage, productApply, active);
-  }
+    public static RateData instance(final Long id, final String name, final BigDecimal percentage, final EnumOptionData productApply,
+            final boolean active) {
+        return new RateData(id, name, percentage, productApply, active);
+    }
 
-  private RateData(final Long id, final String name, final BigDecimal percentage,
-      final EnumOptionData productApply, final boolean active) {
-    this.id = id;
-    this.name = name;
-    this.percentage = percentage;
-    this.productApply = productApply;
-    this.active = active;
-  }
+    private RateData(final Long id, final String name, final BigDecimal percentage, final EnumOptionData productApply,
+            final boolean active) {
+        this.id = id;
+        this.name = name;
+        this.percentage = percentage;
+        this.productApply = productApply;
+        this.active = active;
+    }
 }

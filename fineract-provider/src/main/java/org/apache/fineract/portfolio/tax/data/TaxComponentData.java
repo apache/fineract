@@ -27,7 +27,7 @@ import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-public class TaxComponentData implements Serializable {
+public final class TaxComponentData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;

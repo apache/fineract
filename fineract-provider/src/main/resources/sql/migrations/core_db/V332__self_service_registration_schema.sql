@@ -18,21 +18,21 @@
 --
 
 CREATE TABLE `request_audit_table` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`lastname` VARCHAR(100) NOT NULL,
-	`username` VARCHAR(100) NOT NULL,
-	`mobile_number` VARCHAR(50) NULL DEFAULT NULL,
-	`firstname` VARCHAR(100) NOT NULL,
-	`authentication_token` VARCHAR(100) NULL DEFAULT NULL,
-	`password` VARCHAR(250) NOT NULL,
-	`email` VARCHAR(100) NOT NULL,
-	`client_id` BIGINT(20) NOT NULL,
-	`created_date` DATE NOT NULL,
-	`account_number` VARCHAR(100) NOT NULL,
-	PRIMARY KEY (`id`),
-	INDEX `FK1_request_audit_table_m_client` (`client_id`),
-	CONSTRAINT `FK1_request_audit_table_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `lastname` VARCHAR(100) NOT NULL,
+    `username` VARCHAR(100) NOT NULL,
+    `mobile_number` VARCHAR(50) NULL DEFAULT NULL,
+    `firstname` VARCHAR(100) NOT NULL,
+    `authentication_token` VARCHAR(100) NULL DEFAULT NULL,
+    `password` VARCHAR(250) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `client_id` BIGINT NOT NULL,
+    `created_date` DATE NOT NULL,
+    `account_number` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `FK1_request_audit_table_m_client` (`client_id`),
+    CONSTRAINT `FK1_request_audit_table_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;

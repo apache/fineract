@@ -25,6 +25,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface DepositAccountDomainService {
 
@@ -42,6 +43,11 @@ public interface DepositAccountDomainService {
 
     Long handleFDAccountClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
+
+    @Transactional
+    Long handleFDAccountMaturityClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, LocalDate tenantsTodayDate,
+            DateTimeFormatter fmt, LocalDate closedDate, Integer onAccountClosureId, Long toSavingsId, String transferDescription,
+            Map<String, Object> changes);
 
     Long handleRDAccountClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);

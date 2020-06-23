@@ -67,9 +67,9 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
         }
 
         public String schema() {
-            if(this.isReport){
+            if (this.isReport) {
                 this.sqlBuilder.append(" on t.report_Id = ts.id");
-            }else{
+            } else {
                 this.sqlBuilder.append(" on t.oltp_Id = ts.id");
             }
             return this.sqlBuilder.toString();
@@ -123,7 +123,9 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
         private int bindValueInMinMaxRange(final int value, int min, int max) {
             if (value < min) {
                 return min;
-            } else if (value > max) { return max; }
+            } else if (value > max) {
+                return max;
+            }
             return value;
         }
     }

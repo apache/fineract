@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
@@ -28,14 +27,17 @@ import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfigurationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
+public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
     private EmailConfigurationRepository emailConfigurationRepository;
 
     @Autowired
@@ -45,7 +47,7 @@ public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailServ
 
     @Override
     public void sendEmailWithAttachment(EmailMessageWithAttachmentData emailMessageWithAttachmentData) {
-        try{
+        try {
             JavaMailSenderImpl javaMailSenderImpl = new JavaMailSenderImpl();
             javaMailSenderImpl.setHost(this.getGmailSmtpServer());
             javaMailSenderImpl.setPort(this.getGmailSmtpPort());
@@ -62,39 +64,40 @@ public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailServ
             mimeMessageHelper.setText(emailMessageWithAttachmentData.getText());
             mimeMessageHelper.setSubject(emailMessageWithAttachmentData.getSubject());
             final List<File> attachments = emailMessageWithAttachmentData.getAttachments();
-            if(attachments !=null && attachments.size() > 0){
-                for(final File attachment : attachments){
-                    if(attachment !=null){
-                        mimeMessageHelper.addAttachment(attachment.getName(),attachment);
+            if (attachments != null && attachments.size() > 0) {
+                for (final File attachment : attachments) {
+                    if (attachment != null) {
+                        mimeMessageHelper.addAttachment(attachment.getName(), attachment);
                     }
                 }
             }
 
             javaMailSenderImpl.send(mimeMessage);
 
-        }catch(MessagingException e){
-
+        } catch (MessagingException e) {
+            LOG.error("Could not send emai Problem occurred in sendEmailWithAttachment function", e);
         }
 
     }
 
-
-    private String getGmailSmtpServer(){
+    private String getGmailSmtpServer() {
         final EmailConfiguration gmailSmtpServer = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_SERVER);
-        return (gmailSmtpServer !=null) ? gmailSmtpServer.getValue() : null;
-    }
-    private Integer getGmailSmtpPort(){
-        final EmailConfiguration gmailSmtpPort = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_PORT);
-        return (gmailSmtpPort !=null) ? Integer.parseInt(gmailSmtpPort.getValue()) : null;
-    }
-    private String getGmailSmtpUsername(){
-        final EmailConfiguration gmailSmtpUsername = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_USERNAME);
-        return (gmailSmtpUsername !=null) ? gmailSmtpUsername.getValue() : null;
+        return (gmailSmtpServer != null) ? gmailSmtpServer.getValue() : null;
     }
 
-    private String getGmailSmtpPassword(){
+    private Integer getGmailSmtpPort() {
+        final EmailConfiguration gmailSmtpPort = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_PORT);
+        return (gmailSmtpPort != null) ? Integer.parseInt(gmailSmtpPort.getValue()) : null;
+    }
+
+    private String getGmailSmtpUsername() {
+        final EmailConfiguration gmailSmtpUsername = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_USERNAME);
+        return (gmailSmtpUsername != null) ? gmailSmtpUsername.getValue() : null;
+    }
+
+    private String getGmailSmtpPassword() {
         final EmailConfiguration gmailSmtpPassword = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_PASSWORD);
-        return (gmailSmtpPassword !=null) ? gmailSmtpPassword.getValue() : null;
+        return (gmailSmtpPassword != null) ? gmailSmtpPassword.getValue() : null;
     }
 
     private Properties getJavaMailProperties() {

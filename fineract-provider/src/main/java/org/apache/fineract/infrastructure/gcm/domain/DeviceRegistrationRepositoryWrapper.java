@@ -28,13 +28,11 @@ public class DeviceRegistrationRepositoryWrapper {
     private final DeviceRegistrationRepository repository;
 
     @Autowired
-    public DeviceRegistrationRepositoryWrapper(
-            DeviceRegistrationRepository repository) {
+    public DeviceRegistrationRepositoryWrapper(DeviceRegistrationRepository repository) {
         this.repository = repository;
     }
 
-    public DeviceRegistration findOneWithNotFoundDetection(
-            final Long deviceRegistrationId) {
+    public DeviceRegistration findOneWithNotFoundDetection(final Long deviceRegistrationId) {
         return this.repository.findById(deviceRegistrationId)
                 .orElseThrow(() -> new DeviceRegistrationNotFoundException(deviceRegistrationId));
     }

@@ -129,7 +129,7 @@ public class Staff extends AbstractPersistableCustom {
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
         this.loanOfficer = isLoanOfficer;
-        this.active = (isActive == null) ? true : isActive;
+        this.active = isActive == null ? true : isActive;
         deriveDisplayName(firstname);
         if (joiningDate != null) {
             this.joiningDate = joiningDate.toDateTimeAtStartOfDay().toDate();

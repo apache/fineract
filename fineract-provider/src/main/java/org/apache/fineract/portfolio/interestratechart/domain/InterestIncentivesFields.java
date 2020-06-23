@@ -63,13 +63,15 @@ public class InterestIncentivesFields {
     }
 
     public static InterestIncentivesFields createNew(final Integer entityType, final Integer attributeName, final Integer conditionType,
-            final String attributeValue, final Integer incentiveType, final BigDecimal amount, final DataValidatorBuilder baseDataValidator) {
+            final String attributeValue, final Integer incentiveType, final BigDecimal amount,
+            final DataValidatorBuilder baseDataValidator) {
         return new InterestIncentivesFields(entityType, attributeName, conditionType, attributeValue, incentiveType, amount,
                 baseDataValidator);
     }
 
     private InterestIncentivesFields(final Integer entityType, final Integer attributeName, final Integer conditionType,
-            final String attributeValue, final Integer incentiveType, final BigDecimal amount, final DataValidatorBuilder baseDataValidator) {
+            final String attributeValue, final Integer incentiveType, final BigDecimal amount,
+            final DataValidatorBuilder baseDataValidator) {
         this.entityType = entityType;
         this.attributeName = attributeName;
         this.attributeValue = attributeValue;

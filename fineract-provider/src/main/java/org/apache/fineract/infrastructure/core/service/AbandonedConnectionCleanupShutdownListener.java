@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
     /**
      * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc
@@ -43,13 +43,16 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
     }
 
     private void shutDowncleanUpThreadAndDeregisterJDBCDriver() {
-        /*try {
-
-            AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not required
-            logger.info("Shut-down of AbandonedConnectionCleanupThread successful");
-        } catch (Throwable t) {
-            logger.error("Exception occurred while shut-down of AbandonedConnectionCleanupThread", t);
-        }*/
+        /*
+         * try {
+         *
+         * AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with
+         * mysql connector. With Drizzle not required
+         * LOG.info("Shut-down of AbandonedConnectionCleanupThread successful");
+         * } catch (Throwable t) { LOG.
+         * error("Exception occurred while shut-down of AbandonedConnectionCleanupThread"
+         * , t); }
+         */
 
         // This manually deregisters JDBC driver, which prevents Tomcat 7 from
         // complaining about memory leaks
@@ -58,15 +61,15 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
             Driver driver = drivers.nextElement();
             try {
                 java.sql.DriverManager.deregisterDriver(driver);
-                logger.info("JDBC driver de-registered successfully");
+                LOG.info("JDBC driver de-registered successfully");
             } catch (Throwable t) {
-                logger.error("Exception occured while deristering jdbc driver", t);
+                LOG.error("Exception occured while deristering jdbc driver", t);
             }
         }
         try {
             Thread.sleep(2000L);
         } catch (Exception e) {
-            logger.error("Exception Occcured while trying to sleep.", e);
+            LOG.error("Exception Occcured while trying to sleep.", e);
         }
     }
 }

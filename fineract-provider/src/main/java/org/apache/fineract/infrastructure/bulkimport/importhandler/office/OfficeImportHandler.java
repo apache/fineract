@@ -38,49 +38,50 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OfficeImportHandler implements ImportHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
     private List<OfficeData> offices;
     private Workbook workbook;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public OfficeImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+    public OfficeImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        this.offices=new ArrayList<>();
-        this.workbook=workbook;
+        this.offices = new ArrayList<>();
+        this.workbook = workbook;
         readExcelFile(locale, dateFormat);
-        return importEntity (dateFormat);
+        return importEntity(dateFormat);
     }
 
-
-
     public void readExcelFile(final String locale, final String dateFormat) {
-        Sheet officeSheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet,0);
-        for (int rowIndex=1;rowIndex<=noOfEntries;rowIndex++) {
+        Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
+        for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-            row=officeSheet.getRow(rowIndex);
-            if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)){
+            row = officeSheet.getRow(rowIndex);
+            if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {
                 offices.add(readOffice(row, locale, dateFormat));
             }
         }
     }
 
     private OfficeData readOffice(Row row, final String locale, final String dateFormat) {
-        String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL,row);
-        Long parentId= ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL,row);
-        LocalDate openedDate= ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL,row);
-        String externalId= ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL,row);
-        OfficeData office = OfficeData.importInstance(officeName,parentId,openedDate,externalId);
+        String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL, row);
+        Long parentId = ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL, row);
+        LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
+        String externalId = ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL, row);
+        OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, externalId);
         office.setImportFields(row.getRowNum(), locale, dateFormat);
         return office;
     }
@@ -92,8 +93,8 @@ public class OfficeImportHandler implements ImportHandler {
 
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage="";
-        for (OfficeData office: offices) {
+        String errorMessage = "";
+        for (OfficeData office : offices) {
             try {
                 String payload = gsonBuilder.create().toJson(office);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -101,19 +102,20 @@ public class OfficeImportHandler implements ImportHandler {
                         .withJson(payload) //
                         .build(); //
                 final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-                successCount ++;
+                successCount++;
                 Cell statusCell = officeSheet.getRow(office.getRowIndex()).createCell(OfficeConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+            } catch (RuntimeException ex) {
                 errorCount++;
-                ex.printStackTrace();
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(officeSheet,office.getRowIndex(),errorMessage,OfficeConstants.STATUS_COL);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                ImportHandlerUtils.writeErrorMessage(officeSheet, office.getRowIndex(), errorMessage, OfficeConstants.STATUS_COL);
             }
         }
         officeSheet.setColumnWidth(OfficeConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        ImportHandlerUtils.writeString(OfficeConstants.STATUS_COL, officeSheet.getRow(0), TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
+        ImportHandlerUtils.writeString(OfficeConstants.STATUS_COL, officeSheet.getRow(0),
+                TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
         return Count.instance(successCount, errorCount);
     }
 
@@ -121,5 +123,3 @@ public class OfficeImportHandler implements ImportHandler {
         return offices;
     }
 }
-
-

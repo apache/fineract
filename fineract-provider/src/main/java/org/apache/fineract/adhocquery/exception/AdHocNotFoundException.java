@@ -21,8 +21,7 @@ package org.apache.fineract.adhocquery.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when AdHoc  resources are not
- * found.
+ * A {@link RuntimeException} thrown when AdHoc resources are not found.
  */
 public class AdHocNotFoundException extends AbstractPlatformResourceNotFoundException {
 

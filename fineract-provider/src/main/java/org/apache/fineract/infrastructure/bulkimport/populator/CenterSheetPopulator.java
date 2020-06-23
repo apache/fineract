@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class CenterSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<CenterData> allCenters;
     private List<OfficeData> offices;
 
@@ -47,7 +48,7 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         Sheet centerSheet = workbook.createSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         setLayout(centerSheet);
         setOfficeToCentersMap();
@@ -64,7 +65,9 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void populateCentersByOfficeName(Sheet centerSheet) {
-        int rowIndex = 1, officeIndex = 0, startIndex = 1;
+        int rowIndex = 1;
+        int officeIndex = 0;
+        int startIndex = 1;
         officeNameToBeginEndIndexesOfCenters = new HashMap<Integer, Integer[]>();
         Row row = centerSheet.createRow(rowIndex);
         for (OfficeData office : offices) {
@@ -72,27 +75,28 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> centersList = new ArrayList<String>();
 
-        if (officeToCenters.containsKey(office.name().trim().replaceAll("[ )(]", "_"))){
+            if (officeToCenters.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
                 centersList = officeToCenters.get(office.name().trim().replaceAll("[ )(]", "_"));
-            if (!centersList.isEmpty()) {
-                for (String centerName : centersList) {
-                    writeString(CENTER_NAME_COL, row, centerName);
-                    writeLong(CENTER_ID_COL, row, centerNameToCenterId.get(centerName));
-                    row = centerSheet.createRow(++rowIndex);
+                if (!centersList.isEmpty()) {
+                    for (String centerName : centersList) {
+                        writeString(CENTER_NAME_COL, row, centerName);
+                        writeLong(CENTER_ID_COL, row, centerNameToCenterId.get(centerName));
+                        row = centerSheet.createRow(++rowIndex);
+                    }
+                    officeNameToBeginEndIndexesOfCenters.put(officeIndex++, new Integer[] { startIndex, rowIndex });
+                } else {
+                    officeNameToBeginEndIndexesOfCenters.put(officeIndex++, new Integer[] { startIndex, rowIndex + 1 });
                 }
-                officeNameToBeginEndIndexesOfCenters.put(officeIndex++, new Integer[] { startIndex, rowIndex });
-            } else {
-                officeNameToBeginEndIndexesOfCenters.put(officeIndex++, new Integer[] { startIndex, rowIndex + 1 });
             }
-          }
         }
     }
 
     private void setLayout(Sheet worksheet) {
         Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
-        for (int colIndex = 0; colIndex <= 10; colIndex++)
+        for (int colIndex = 0; colIndex <= 10; colIndex++) {
             worksheet.setColumnWidth(colIndex, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        }
         writeString(OFFICE_NAME_COL, rowHeader, "Office Names");
         writeString(CENTER_NAME_COL, rowHeader, "Center Names");
         writeString(CENTER_ID_COL, rowHeader, "Center ID");

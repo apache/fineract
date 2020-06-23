@@ -31,10 +31,9 @@ public class OTPRequest {
         this.metadata = metadata;
     }
 
-    public static OTPRequest create(String token, int tokenLiveTimeInSec, boolean extendedAccessToken,
-                                    OTPDeliveryMethod deliveryMethod) {
-        final OTPMetadata metadata = new OTPMetadata(DateUtils.getLocalDateTimeOfTenant().toDateTime(),
-                tokenLiveTimeInSec, extendedAccessToken, deliveryMethod);
+    public static OTPRequest create(String token, int tokenLiveTimeInSec, boolean extendedAccessToken, OTPDeliveryMethod deliveryMethod) {
+        final OTPMetadata metadata = new OTPMetadata(DateUtils.getLocalDateTimeOfTenant().toDateTime(), tokenLiveTimeInSec,
+                extendedAccessToken, deliveryMethod);
         return new OTPRequest(token, metadata);
     }
 

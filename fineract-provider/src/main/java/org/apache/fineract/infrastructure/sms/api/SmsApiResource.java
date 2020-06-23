@@ -130,8 +130,8 @@ public class SmsApiResource {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
 
-        final Page<SmsData> smsMessages = this.readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, status.intValue(), fromDate,
-                toDate);
+        final Page<SmsData> smsMessages = this.readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, status.intValue(),
+                fromDate, toDate);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, smsMessages);

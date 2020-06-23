@@ -47,8 +47,7 @@ public class CompoundInterestHelper {
         // total interest earned in previous periods but not yet recognised
         BigDecimal compoundedInterest = BigDecimal.ZERO;
         BigDecimal unCompoundedInterest = BigDecimal.ZERO;
-        final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest,
-                unCompoundedInterest);
+        final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest, unCompoundedInterest);
         for (final PostingPeriod postingPeriod : allPeriods) {
 
             final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(compoundInterestValues);

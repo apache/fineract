@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements AccountingRuleWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AccountingRuleWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountingRuleWritePlatformServiceJpaRepositoryImpl.class);
 
     private final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
     private final AccountingRuleRepository accountingRuleRepository;
@@ -87,9 +87,11 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("accounting_rule_name_unique")) {
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
-        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
+        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) {
+            throw new AccountingRuleDuplicateException();
+        }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }
@@ -195,12 +197,15 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
             }
 
-            if (accountToDebitId != null && debitTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(), AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue()); }
+            if (accountToDebitId != null && debitTags != null) {
+                throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
+                        AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
+            }
 
-            if (accountToCreditId != null && creditTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
-                    AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue()); }
+            if (accountToCreditId != null && creditTags != null) {
+                throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+                        AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+            }
 
             boolean allowMultipleCreditEntries = false;
             if (command.parameterExists(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue())) {

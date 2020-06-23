@@ -34,8 +34,7 @@ public class UpdateHookCommandHandler implements NewCommandSourceHandler {
     private final HookWritePlatformService writePlatformService;
 
     @Autowired
-    public UpdateHookCommandHandler(
-            final HookWritePlatformService writePlatformService) {
+    public UpdateHookCommandHandler(final HookWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
@@ -43,8 +42,7 @@ public class UpdateHookCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService
-                .updateHook(command.entityId(), command);
+        return this.writePlatformService.updateHook(command.entityId(), command);
     }
 
 }

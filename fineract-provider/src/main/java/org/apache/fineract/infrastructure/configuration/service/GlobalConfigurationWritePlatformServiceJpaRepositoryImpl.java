@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements GlobalConfigurationWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(GlobalConfigurationWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalConfigurationWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper repository;
@@ -85,20 +85,15 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
     @Transactional
     @Override
-    public void addSurveyConfig(final String name)
-    {
-        try{
+    public void addSurveyConfig(final String name) {
+        try {
             final GlobalConfigurationProperty ppi = GlobalConfigurationProperty.newSurveyConfiguration(name);
             this.repository.save(ppi);
-        }
-        catch (final DataIntegrityViolationException dve)
-        {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
         }
 
     }
-
-
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
@@ -107,7 +102,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 
         final Throwable realCause = dve.getMostSpecificCause();
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.globalConfiguration.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

@@ -42,7 +42,9 @@ public class ClientNoteCommand {
 
         baseDataValidator.reset().parameter("note").value(this.note).notBlank().notExceedingLengthOf(1000);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

@@ -75,10 +75,13 @@ public class InterestRateChartAssembler {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
-    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode, final DataValidatorBuilder baseDataValidator) {
+    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode,
+            final DataValidatorBuilder baseDataValidator) {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);

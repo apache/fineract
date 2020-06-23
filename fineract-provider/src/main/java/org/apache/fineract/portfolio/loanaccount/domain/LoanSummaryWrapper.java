@@ -126,11 +126,10 @@ public final class LoanSummaryWrapper {
         return total;
     }
 
-    public Money calculateTotalFeeChargesWaived(Set<LoanCharge> charges,
-            final MonetaryCurrency currency) {
+    public Money calculateTotalFeeChargesWaived(Set<LoanCharge> charges, final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanCharge charge : charges) {
-            if(charge.isActive() && !charge.isPenaltyCharge()){
+            if (charge.isActive() && !charge.isPenaltyCharge()) {
                 total = total.plus(charge.getAmountWaived(currency));
             }
         }
@@ -235,7 +234,9 @@ public final class LoanSummaryWrapper {
 
     public Money calculateTotalChargesRepaidAtDisbursement(Set<LoanCharge> charges, MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        if(charges == null) return total ;
+        if (charges == null) {
+            return total;
+        }
         for (final LoanCharge loanCharge : charges) {
             if (!loanCharge.isPenaltyCharge() && loanCharge.getAmountPaid(currency).isGreaterThanZero()) {
                 total = total.plus(loanCharge.getAmountPaid(currency));

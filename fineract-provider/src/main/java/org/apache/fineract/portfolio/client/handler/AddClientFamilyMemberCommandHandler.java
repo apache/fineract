@@ -27,18 +27,15 @@ import org.apache.fineract.portfolio.client.service.ClientFamilyMembersWritePlat
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @CommandType(entity = "FAMILYMEMBERS", action = "CREATE")
-public class AddClientFamilyMemberCommandHandler implements NewCommandSourceHandler
-{
+public class AddClientFamilyMemberCommandHandler implements NewCommandSourceHandler {
 
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
 
     @Autowired
-    public AddClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
-    {
-        this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
+    public AddClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService) {
+        this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
     }
 
     @Override

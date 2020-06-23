@@ -80,8 +80,8 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
     @Override
     public Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit) {
-        final Collection<ShareProductMarketPriceData> shareMarketCollection = null ;
-        final Collection<ChargeData> charges = null ;
+        final Collection<ShareProductMarketPriceData> shareMarketCollection = null;
+        final Collection<ChargeData> charges = null;
         ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -200,7 +200,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
         }
     }
 
-    private final static class ShareProductRowMapper implements RowMapper<ProductData> {
+    private static final class ShareProductRowMapper implements RowMapper<ProductData> {
 
         Collection<ShareProductMarketPriceData> shareMarketCollection;
         Collection<ChargeData> charges;
@@ -243,8 +243,8 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "currency_multiplesof");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             final Long totalShares = rs.getLong("total_shares");
             final Long issuedShares = JdbcSupport.getLongDefaultToNullIfZero(rs, "issued_shares");

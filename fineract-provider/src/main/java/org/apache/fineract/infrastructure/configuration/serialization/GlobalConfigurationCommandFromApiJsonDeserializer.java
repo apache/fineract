@@ -38,8 +38,8 @@ import org.springframework.stereotype.Component;
  * {@link UpdateGlobalConfigurationCommand}'s.
  */
 @Component
-public final class GlobalConfigurationCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<UpdateGlobalConfigurationCommand> {
+public final class GlobalConfigurationCommandFromApiJsonDeserializer
+        extends AbstractFromApiJsonDeserializer<UpdateGlobalConfigurationCommand> {
 
     /**
      * The parameters supported for this command.
@@ -55,7 +55,9 @@ public final class GlobalConfigurationCommandFromApiJsonDeserializer extends
     @Override
     public UpdateGlobalConfigurationCommand commandFromApiJson(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);

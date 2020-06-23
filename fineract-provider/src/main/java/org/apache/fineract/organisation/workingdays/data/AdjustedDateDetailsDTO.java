@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.workingdays.data;
 
 import org.joda.time.LocalDate;
 
-
 public class AdjustedDateDetailsDTO {
 
     /**

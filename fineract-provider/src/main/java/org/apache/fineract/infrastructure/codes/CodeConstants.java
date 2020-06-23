@@ -27,19 +27,20 @@ public class CodeConstants {
      * Enum of all parameters passed in while creating/updating a code and code
      * value
      ***/
-    public static enum CODEVALUE_JSON_INPUT_PARAMS {
-        CODEVALUE_ID("id"), NAME("name"), POSITION("position"), DESCRIPTION("description"), IS_ACTIVE("isActive"),
-        IS_MANDATORY("isMandatory");
+    public static enum CodevalueJSONinputParams {
+
+        CODEVALUE_ID("id"), NAME("name"), POSITION("position"), DESCRIPTION("description"), IS_ACTIVE("isActive"), IS_MANDATORY(
+                "isMandatory");
 
         private final String value;
 
-        private CODEVALUE_JSON_INPUT_PARAMS(final String value) {
+        private CodevalueJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
         static {
-            for (final CODEVALUE_JSON_INPUT_PARAMS type : CODEVALUE_JSON_INPUT_PARAMS.values()) {
+            for (final CodevalueJSONinputParams type : CodevalueJSONinputParams.values()) {
                 values.add(type.value);
             }
         }

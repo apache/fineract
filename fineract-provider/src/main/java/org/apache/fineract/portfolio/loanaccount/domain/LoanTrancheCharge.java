@@ -43,21 +43,23 @@ public class LoanTrancheCharge extends AbstractPersistableCustom {
     }
 
     LoanTrancheCharge(Charge chargeDefinition) {
-        this.charge = chargeDefinition ;
+        this.charge = chargeDefinition;
     }
+
     public LoanTrancheCharge(Charge charge, Loan loan) {
         this.charge = charge;
-        this.loan = loan ;
+        this.loan = loan;
     }
 
     public static LoanTrancheCharge createLoanTrancheCharge(Charge chargeDefinition) {
-        return new LoanTrancheCharge(chargeDefinition) ;
+        return new LoanTrancheCharge(chargeDefinition);
     }
+
     public static LoanTrancheCharge createLoanTrancheChargeWithLoan(Charge chargeDefinition, Loan loan) {
-        return new LoanTrancheCharge(chargeDefinition, loan) ;
+        return new LoanTrancheCharge(chargeDefinition, loan);
     }
 
     public Charge getCharge() {
-        return charge ;
+        return charge;
     }
 }

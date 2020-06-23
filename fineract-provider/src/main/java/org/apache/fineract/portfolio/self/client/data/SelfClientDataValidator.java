@@ -31,18 +31,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class SelfClientDataValidator {
 
-    private static final Set<String> allowedChargesAssociationParameters = new HashSet<>(
-            Arrays.asList("transactions"));
+    private static final Set<String> allowedChargesAssociationParameters = new HashSet<>(Arrays.asList("transactions"));
 
     public void validateClientCharges(final UriInfo uriInfo) {
         List<String> unsupportedParams = new ArrayList<>();
 
-        Set<String> associationParameters = ApiParameterHelper
-                .extractAssociationsForResponseIfProvided(uriInfo
-                        .getQueryParameters());
+        Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
-            associationParameters
-                    .removeAll(allowedChargesAssociationParameters);
+            associationParameters.removeAll(allowedChargesAssociationParameters);
             if (!associationParameters.isEmpty()) {
                 unsupportedParams.addAll(associationParameters);
             }
@@ -60,8 +56,7 @@ public class SelfClientDataValidator {
     public void validateRetrieveOne(final UriInfo uriInfo) {
         List<String> unsupportedParams = new ArrayList<>();
 
-        final boolean templateRequest = ApiParameterHelper.template(uriInfo
-                .getQueryParameters());
+        final boolean templateRequest = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (templateRequest) {
             unsupportedParams.add("template");
         }

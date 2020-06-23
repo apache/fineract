@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class RescheduleLoansApiConstants {
 
-    public final static String ENTITY_NAME = "RESCHEDULELOAN";
+    public static final String ENTITY_NAME = "RESCHEDULELOAN";
 
     public static final String LOAN_RESCHEDULE_REASON = "LoanRescheduleReason";
 
@@ -59,11 +59,9 @@ public class RescheduleLoansApiConstants {
     // approve action request parameters
     public static final String approvedOnDateParam = "approvedOnDate";
 
-    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
-            approvedOnDateParam)));
+    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName, approvedOnDateParam)));
 
-    public static final Set<String> commandParams =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(allCommandParamName, approveCommandParamName,
-                    pendingCommandParamName, rejectCommandParamName)));
+    public static final Set<String> commandParams = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(allCommandParamName, approveCommandParamName, pendingCommandParamName, rejectCommandParamName)));
 }

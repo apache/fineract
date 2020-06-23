@@ -20,16 +20,16 @@ package org.apache.fineract.accounting.provisioning.constant;
 
 public interface ProvisioningEntriesApiConstants {
 
-    public final static String JSON_DATE_PARAM = "date" ;
+    public static final String JSON_DATE_PARAM = "date";
 
-    public final static String JSON_DATEFORMAT_PARAM = "dateFormat" ;
+    public static final String JSON_DATEFORMAT_PARAM = "dateFormat";
 
-    public final static String JSON_LOCALE_PARAM = "locale" ;
+    public static final String JSON_LOCALE_PARAM = "locale";
 
-    public final static String JSON_CREATEJOURNALENTRIES_PARAM = "createjournalentries" ;
+    public static final String JSON_CREATEJOURNALENTRIES_PARAM = "createjournalentries";
 
-    public final static String PROVISIONINGENTRY_PARAM = "provisioningentry";
+    public static final String PROVISIONINGENTRY_PARAM = "provisioningentry";
 
-    public final static String ENTRIES_PARAM = "entries";
+    public static final String ENTRIES_PARAM = "entries";
 
 }

@@ -29,15 +29,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SHAREACCOUNT", action = "CLOSE")
-public class CloseShareAccountCommandHandler implements NewCommandSourceHandler{
+public class CloseShareAccountCommandHandler implements NewCommandSourceHandler {
 
-
-    private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
+    private final ShareAccountWritePlatformService shareAccountWritePlatformService;
 
     @Autowired
     public CloseShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
-        this.shareAccountWritePlatformService = shareAccountWritePlatformService ;
+        this.shareAccountWritePlatformService = shareAccountWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {

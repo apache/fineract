@@ -27,49 +27,44 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  * Created by sanyam on 14/8/17.
  */
 final class CurrenciesApiResourceSwagger {
+
     private CurrenciesApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetCurrenciesResponse")
     public static final class GetCurrenciesResponse {
-        private GetCurrenciesResponse(){
+
+        private GetCurrenciesResponse() {
 
         }
+
         public Collection<CurrencyData> selectedCurrencyOptions;
         public Collection<CurrencyData> currencyOptions;
     }
 
     @ApiModel(value = "PutCurrenciesRequest")
     public static final class PutCurrenciesRequest {
+
         private PutCurrenciesRequest() {
 
         }
-        @ApiModelProperty(example = "[\"KES\",\n" +
-                "        \"BND\",\n" +
-                "        \"LBP\",\n" +
-                "        \"GHC\",\n" +
-                "        \"USD\",\n" +
-                "        \"XOF\",\n" +
-                "        \"AED\",\n" +
-                "        \"AMD\"]")
+
+        @ApiModelProperty(example = "[\"KES\",\n" + "        \"BND\",\n" + "        \"LBP\",\n" + "        \"GHC\",\n"
+                + "        \"USD\",\n" + "        \"XOF\",\n" + "        \"AED\",\n" + "        \"AMD\"]")
         public String currencies;
 
     }
 
     @ApiModel(value = "PutCurrenciesResponse")
     public static final class PutCurrenciesResponse {
+
         private PutCurrenciesResponse() {
 
         }
-        @ApiModelProperty(example = "[\"KES\",\n" +
-                "        \"BND\",\n" +
-                "        \"LBP\",\n" +
-                "        \"GHC\",\n" +
-                "        \"USD\",\n" +
-                "        \"XOF\",\n" +
-                "        \"AED\",\n" +
-                "        \"AMD\"]")
+
+        @ApiModelProperty(example = "[\"KES\",\n" + "        \"BND\",\n" + "        \"LBP\",\n" + "        \"GHC\",\n"
+                + "        \"USD\",\n" + "        \"XOF\",\n" + "        \"AED\",\n" + "        \"AMD\"]")
         public String currencies;
     }
 }

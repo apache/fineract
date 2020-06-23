@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -60,13 +60,14 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access", "cast" })
+@SuppressWarnings({ "unchecked" })
+
 public class SchedulerJobsTestResults {
 
     private static final String FROM_ACCOUNT_TYPE_LOAN = "1";
@@ -93,51 +94,49 @@ public class SchedulerJobsTestResults {
     private JournalEntryHelper journalEntryHelper;
     private StandingInstructionsHelper standingInstructionsHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecForSchedulerJob = new ResponseSpecBuilder().expectStatusCode(202).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
     @Test
-    @Ignore // TODO FINERACT-924
     public void testApplyAnnualFeeForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
                 ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
-        final Integer annualFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getSavingsAnnualFeeJSON());
-        Assert.assertNotNull(annualFeeChargeId);
+        final Integer annualFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getSavingsAnnualFeeJSON());
+        Assertions.assertNotNull(annualFeeChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, annualFeeChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
@@ -147,40 +146,39 @@ public class SchedulerJobsTestResults {
 
         String JobName = "Apply Annual Fee For Savings";
 
-        this.schedulerJobHelper.executeJob(JobName);
-        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, annualFeeChargeId);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, annualFeeChargeId);
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
         final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
         ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
-        LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
+        LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1),
+                annualFeeDueDateAsArrayList.get(2));
         LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-        Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
-                nextDueDateForAnnualFee.isAfter(todaysDate));
+        Assertions.assertTrue(nextDueDateForAnnualFee.isAfter(todaysDate), "Verifying that all due Annual Fees have been paid ");
 
     }
 
     @Test
-    @Ignore
     public void testInterestPostingForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
                 ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
@@ -193,33 +191,32 @@ public class SchedulerJobsTestResults {
 
         String JobName = "Post Interest For Savings";
 
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Assert.assertNotSame("Verifying the Balance after running Post Interest for Savings Job", summaryBefore.get("accountBalance"),
-                summaryAfter.get("accountBalance"));
+        Assertions.assertNotSame(summaryBefore.get("accountBalance"), summaryAfter.get("accountBalance"),
+                "Verifying the Balance after running Post Interest for Savings Job");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testTransferFeeForLoansFromSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
                 ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
@@ -229,66 +226,65 @@ public class SchedulerJobsTestResults {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), savingsId.toString());
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        Integer specifiedDueDateChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+        Integer specifiedDueDateChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON());
-        Assert.assertNotNull(specifiedDueDateChargeId);
+        Assertions.assertNotNull(specifiedDueDateChargeId);
 
         this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString(), "12 March 2013", "100"));
         ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         String JobName = "Transfer Fee For Loans From Savings";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
+        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
         final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
 
-        Assert.assertEquals("Verifying the Balance after running Transfer Fee for Loans from Savings", balance,
-                (Float) summaryAfter.get("accountBalance"));
+        Assertions.assertEquals(balance, (Float) summaryAfter.get("accountBalance"),
+                "Verifying the Balance after running Transfer Fee for Loans from Savings");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-923
     public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.holidayHelper = new HolidayHelper(this.requestSpec, this.responseSpec);
-        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.holidayHelper = new HolidayHelper(requestSpec, responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        Integer holidayId = this.holidayHelper.createHolidays(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(holidayId);
+        Integer holidayId = HolidayHelper.createHolidays(requestSpec, responseSpec);
+        Assertions.assertNotNull(holidayId);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -298,75 +294,72 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
-                this.responseSpec);
-        Assert.assertNotNull(globalConfig);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(requestSpec, responseSpec);
+        Assertions.assertNotNull(globalConfig);
 
         // Updating Value for reschedule-repayments-on-holidays Global
         // Configuration
         Integer configId = (Integer) globalConfig.get(3).get("id");
-        Assert.assertNotNull(configId);
+        Assertions.assertNotNull(configId);
 
-        HashMap configData = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                configId.toString());
-        Assert.assertNotNull(configData);
+        HashMap configData = GlobalConfigurationHelper.getGlobalConfigurationById(requestSpec, responseSpec, configId.toString());
+        Assertions.assertNotNull(configData);
 
         Boolean enabled = (Boolean) globalConfig.get(3).get("enabled");
 
         if (enabled == false) {
             enabled = true;
-            configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                    configId.toString(), enabled);
+            configId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId.toString(),
+                    enabled);
         }
-        final ArrayList<HashMap> repaymentScheduleDataBeforeJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        final ArrayList<HashMap> repaymentScheduleDataBeforeJob = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanID);
 
-        holidayId = this.holidayHelper.activateHolidays(this.requestSpec, this.responseSpec, holidayId.toString());
-        Assert.assertNotNull(holidayId);
+        holidayId = HolidayHelper.activateHolidays(requestSpec, responseSpec, holidayId.toString());
+        Assertions.assertNotNull(holidayId);
 
         String JobName = "Apply Holidays To Loans";
 
-        this.schedulerJobHelper.executeJob(JobName);
-        final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanID);
 
-        HashMap holidayData = this.holidayHelper.getHolidayById(this.requestSpec, this.responseSpec, holidayId.toString());
+        HashMap holidayData = HolidayHelper.getHolidayById(requestSpec, responseSpec, holidayId.toString());
         ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
 
         ArrayList<Integer> rescheduleDateAfter = (ArrayList<Integer>) repaymentScheduleDataAfterJob.get(2).get("fromDate");
 
-        Assert.assertEquals("Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job",
-                repaymentsRescheduledDate, repaymentsRescheduledDate);
+        Assertions.assertEquals(repaymentsRescheduledDate, repaymentsRescheduledDate,
+                "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
                 ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
-        final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+        final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getSavingsSpecifiedDueDateJSON());
-        Assert.assertNotNull(specifiedDueDateChargeId);
+        Assertions.assertNotNull(specifiedDueDateChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
@@ -378,24 +371,23 @@ public class SchedulerJobsTestResults {
 
         String JobName = "Pay Due Savings Charges";
 
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
+        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
         final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
 
-        Assert.assertEquals("Verifying the Balance after running Pay due Savings Charges", balance,
-                (Float) summaryAfter.get("accountBalance"));
+        Assertions.assertEquals(balance, (Float) summaryAfter.get("accountBalance"),
+                "Verifying the Balance after running Pay due Savings Charges");
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testUpdateAccountingRunningBalancesJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -407,10 +399,10 @@ public class SchedulerJobsTestResults {
         final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
                 liabilityAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsID);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
@@ -423,37 +415,36 @@ public class SchedulerJobsTestResults {
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper
-                .checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE, liablilityAccountInitialEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE,
+                liablilityAccountInitialEntry);
 
         String JobName = "Update Accounting Running Balances";
 
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
 
         final Integer INT_BALANCE = Integer.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Assert.assertEquals("Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job",
-                INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"));
+        Assertions.assertEquals(INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"),
+                "Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testUpdateLoanArrearsAgingJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -464,21 +455,20 @@ public class SchedulerJobsTestResults {
 
         String JobName = "Update Loan Arrears Ageing";
 
-        this.schedulerJobHelper.executeJob(JobName);
-        HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
         Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue") + (Float) loanSummaryData.get("interestOverdue");
 
-        Assert.assertEquals("Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job", totalLoanArrearsAging,
-                loanSummaryData.get("totalOverdue"));
+        Assertions.assertEquals(totalLoanArrearsAging, loanSummaryData.get("totalOverdue"),
+                "Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testUpdateLoanPaidInAdvanceJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
@@ -492,16 +482,16 @@ public class SchedulerJobsTestResults {
         todayDate.add(Calendar.DATE, -5);
         final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todayDate.getTime());
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -510,39 +500,37 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        ArrayList<HashMap> loanScheduleBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        ArrayList<HashMap> loanScheduleBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
 
         Float totalDueForCurrentPeriod = (Float) loanScheduleBefore.get(1).get("totalDueForPeriod");
 
         this.loanTransactionHelper.makeRepayment(LOAN_FIRST_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
 
-        HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
         String JobName = "Update Loan Paid In Advance";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         // Retrieving Loan Repayment Schedule after the successful
         // completion of
         // Update Loan Paid in Advance Scheduler Job
-        ArrayList<HashMap> loanScheduleAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        ArrayList<HashMap> loanScheduleAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
 
-        loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+        loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
         Float totalPaidInAdvance = (Float) loanScheduleAfter.get(1).get("totalPaidInAdvanceForPeriod");
 
-        Assert.assertEquals("Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job",
-                totalDueForCurrentPeriod, totalPaidInAdvance);
+        Assertions.assertEquals(totalDueForCurrentPeriod, totalPaidInAdvance,
+                "Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job");
 
     }
 
     // Invalid test case as it won't affect summary (Loan summary is properly
     // updated before running this job)
-    @Ignore
+    @Disabled
     @Test
     public void testUpdateLoanSummaryJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
@@ -556,25 +544,24 @@ public class SchedulerJobsTestResults {
         todaysDate.add(Calendar.DATE, -5);
         final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        Integer disburseChargeId = ChargesHelper
-                .createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getLoanDisbursementJSON());
-        Assert.assertNotNull(disburseChargeId);
+        Integer disburseChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
+        Assertions.assertNotNull(disburseChargeId);
 
         this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getDisbursementChargesForLoanAsJSON(disburseChargeId.toString()));
         ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -583,24 +570,23 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        HashMap loanSummaryBefore = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanSummaryBefore = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
         String JobName = "Update loan Summary";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         Float expectedSummaryAfterJob = (Float) loanSummaryBefore.get("totalExpectedRepayment")
-               /* - (Float) loanSummaryBefore.get("feeChargesPaid")*/;
-        HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-        Assert.assertEquals("Verifying Loan Summary after Running Update Loan Summary Scheduler Job", expectedSummaryAfterJob,
-                (Float) loanSummaryAfter.get("totalExpectedRepayment"));
+        /* - (Float) loanSummaryBefore.get("feeChargesPaid") */;
+        HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
+        Assertions.assertEquals(expectedSummaryAfterJob, (Float) loanSummaryAfter.get("totalExpectedRepayment"),
+                "Verifying Loan Summary after Running Update Loan Summary Scheduler Job");
 
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.standingInstructionsHelper = new StandingInstructionsHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         DateFormat monthDayFormat = new SimpleDateFormat("dd MMMM", Locale.US);
@@ -614,18 +600,18 @@ public class SchedulerJobsTestResults {
         todaysDate.add(Calendar.YEAR, 1);
         final String VALID_TO = dateFormat.format(todaysDate.getTime());
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
                 ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer fromSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsId);
+        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, fromSavingsId);
         SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
 
         fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsId);
@@ -636,9 +622,9 @@ public class SchedulerJobsTestResults {
 
         final Integer toSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsId);
+        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, toSavingsId);
         SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
 
         toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsId);
@@ -656,10 +642,10 @@ public class SchedulerJobsTestResults {
         Integer standingInstructionId = this.standingInstructionsHelper.createStandingInstruction(clientID.toString(),
                 fromSavingsId.toString(), toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO,
                 MONTH_DAY);
-        Assert.assertNotNull(standingInstructionId);
+        Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
         Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
 
@@ -671,44 +657,42 @@ public class SchedulerJobsTestResults {
         Float expectedFromSavingsBalance = fromSavingsBalanceBefore - (Float) standingInstructionData.get("amount");
         Float expectedToSavingsBalance = toSavingsBalanceBefore + (Float) standingInstructionData.get("amount");
 
-        Assert.assertEquals("Verifying From Savings Balance after Successful completion of Scheduler Job", expectedFromSavingsBalance,
-                fromSavingsBalanceAfter);
-        Assert.assertEquals("Verifying To Savings Balance after Successful completion of Scheduler Job", expectedToSavingsBalance,
-                toSavingsBalanceAfter);
+        Assertions.assertEquals(expectedFromSavingsBalance, fromSavingsBalanceAfter,
+                "Verifying From Savings Balance after Successful completion of Scheduler Job");
+        Assertions.assertEquals(expectedToSavingsBalance, toSavingsBalanceAfter,
+                "Verifying To Savings Balance after Successful completion of Scheduler Job");
         Integer fromAccountType = PortfolioAccountType.SAVINGS.getValue();
         Integer transferType = AccountTransferType.ACCOUNT_TRANSFER.getValue();
         List<HashMap> standinInstructionHistoryData = this.standingInstructionsHelper.getStandingInstructionHistory(fromSavingsId,
                 fromAccountType, clientID, transferType);
-        Assert.assertEquals("Verifying the no of stainding instruction transactions logged for the client", 1,
-                standinInstructionHistoryData.size());
+        Assertions.assertEquals(1, standinInstructionHistoryData.size(),
+                "Verifying the no of stainding instruction transactions logged for the client");
         HashMap loggedTransaction = standinInstructionHistoryData.get(0);
 
-        Assert.assertEquals("Verifying transferred amount and logged transaction amounts", (Float) standingInstructionData.get("amount"),
-                (Float) loggedTransaction.get("amount"));
+        Assertions.assertEquals((Float) standingInstructionData.get("amount"), (Float) loggedTransaction.get("amount"),
+                "Verifying transferred amount and logged transaction amounts");
 
     }
 
     @Test
-    @Ignore
     public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        Integer overdueFeeChargeId = ChargesHelper
-                .createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getLoanOverdueFeeJSON());
-        Assert.assertNotNull(overdueFeeChargeId);
+        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanOverdueFeeJSON());
+        Assertions.assertNotNull(overdueFeeChargeId);
 
         final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -717,21 +701,21 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
+                loanID);
 
         String JobName = "Apply penalty to overdue loans";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
 
-        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
+        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, overdueFeeChargeId);
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
-        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
+                loanID);
 
-        Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
-                chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
+        Assertions.assertEquals(chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
@@ -740,26 +724,25 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testAvoidUnncessaryPenaltyWhenAmountZeroForOverdueLoansJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
-        Integer overdueFeeChargeId = ChargesHelper
-                .createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getLoanOverdueFeeJSONWithCalculattionTypePercentage("0.000001"));
-        Assert.assertNotNull(overdueFeeChargeId);
+        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanOverdueFeeJSONWithCalculattionTypePercentage("0.000001"));
+        Assertions.assertNotNull(overdueFeeChargeId);
 
         final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -768,35 +751,34 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
+                loanID);
 
         String JobName = "Apply penalty to overdue loans";
         Integer jobId = 12;
 
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
 
         Map<String, Object> schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
 
-        Assert.assertNotNull(schedulerJob);
+        Assertions.assertNotNull(schedulerJob);
         while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
             Thread.sleep(15000);
             schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
-            Assert.assertNotNull(schedulerJob);
+            Assertions.assertNotNull(schedulerJob);
         }
 
-        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
+        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, overdueFeeChargeId);
 
-        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
+                loanID);
 
-        Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
-                0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
+        Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        final ArrayList loanCharges = this.loanTransactionHelper.getLoanCharges(this.requestSpec,
-                this.responseSpec, loanID);
+        final ArrayList loanCharges = this.loanTransactionHelper.getLoanCharges(requestSpec, responseSpec, loanID);
 
-        Assert.assertNull("Verifying that charge isn't created when the amount is 0", loanCharges);
+        Assertions.assertNull(loanCharges, "Verifying that charge isn't created when the amount is 0");
 
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
@@ -805,21 +787,20 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testUpdateOverdueDaysForNPA() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
 
         final Integer loanProductID = createLoanProduct(null);
-        Assert.assertNotNull(loanProductID);
+        Assertions.assertNotNull(loanProductID);
 
         final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assert.assertNotNull(loanID);
+        Assertions.assertNotNull(loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
@@ -829,25 +810,27 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Boolean isNPABefore = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
-        Assert.assertFalse(isNPABefore);
+        Assertions.assertFalse(isNPABefore);
         // Integer jobId = (Integer) allSchedulerJobsData.get(1).get("jobId");
         String JobName = "Update Non Performing Assets";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
-        Assert.assertTrue(isNPAAfter);
+        Assertions.assertTrue(isNPAAfter);
     }
 
     @Test
-    @Ignore // TODO FINERACT-857
     public void testInterestTransferForSavings() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        //FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec,this.responseSpec);
-        //AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        FixedDepositAccountHelper fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        // FixedDepositProductHelper fixedDepositProductHelper = new
+        // FixedDepositProductHelper(this.requestSpec,this.responseSpec);
+        // AccountHelper accountHelper = new AccountHelper(this.requestSpec,
+        // this.responseSpec);
+        FixedDepositAccountHelper fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        //DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+        // DateFormat monthDayFormat = new SimpleDateFormat("dd MMM",
+        // Locale.US);
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -3);
@@ -863,17 +846,17 @@ public class SchedulerJobsTestResults {
         todaysDate.add(Calendar.MONTH, 1);
         final String WHOLE_TERM = "1";
 
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
-        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf(FixedDepositAccountHelper.depositAmount);
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, String.valueOf(balance));
-        Assert.assertNotNull(savingsProductID);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientId);
+        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, String.valueOf(balance));
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID,
                 ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
@@ -882,17 +865,17 @@ public class SchedulerJobsTestResults {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
                 VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, savingsId.toString(), true, fixedDepositAccountHelper);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
-        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
-                this.responseSpec, fixedDepositAccountId.toString());
+        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(requestSpec,
+                responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
 
         fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
@@ -902,18 +885,18 @@ public class SchedulerJobsTestResults {
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
         balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
 
         fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
 
         HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - Float.valueOf(FixedDepositAccountHelper.depositAmount);
+        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
 
         String JobName = "Transfer Interest To Savings";
-        this.schedulerJobHelper.executeJob(JobName);
+        this.schedulerJobHelper.executeAndAwaitJob(JobName);
         fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        assertEquals("Verifying opening Balance", Float.valueOf(FixedDepositAccountHelper.depositAmount),
-                fixedDepositSummary.get("accountBalance"));
+        assertEquals(Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT), fixedDepositSummary.get("accountBalance"),
+                "Verifying opening Balance");
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
         balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + interestPosted;
@@ -922,7 +905,9 @@ public class SchedulerJobsTestResults {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        // system.out.println("------------------------------CREATING NEW
+        // SAVINGS
+        // PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
@@ -933,7 +918,9 @@ public class SchedulerJobsTestResults {
     }
 
     private static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        // system.out.println("------------------------------CREATING NEW
+        // SAVINGS
+        // PRODUCT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
@@ -942,7 +929,9 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createLoanProduct(final String chargeId) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        // system.out.println("------------------------------CREATING NEW LOAN
+        // PRODUCT
+        // ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("15,000.00") //
                 .withNumberOfRepayments("4") //
@@ -957,7 +946,8 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        // system.out.println("--------------------------------APPLYING FOR LOAN
+        // APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("15,000.00") //
                 .withLoanTermFrequency("4") //
@@ -976,8 +966,10 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
-        System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        // system.out.println("------------------------------CREATING NEW FIXED
+        // DEPOSIT
+        // PRODUCT ---------------------------------------");
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
                 // .withAccountingRuleAsCashBased(accounts)
                 .withPeriodRangeChart()//
@@ -988,17 +980,19 @@ public class SchedulerJobsTestResults {
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType, String savingsId,
             final boolean transferInterest, final FixedDepositAccountHelper fixedDepositAccountHelper) {
-        System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
+        // system.out.println("--------------------------------APPLYING FOR
+        // FIXED
+        // DEPOSIT ACCOUNT --------------------------------");
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec)
                 //
                 .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)
-                .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS)
-                .build(clientID, productID, penalInterestType);
-        return fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
+                .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS).build(clientID, productID, penalInterestType);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, requestSpec, responseSpec);
     }
 
     private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#", new DecimalFormatSymbols(Locale.US));
-        Assert.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
+        Assertions.assertTrue(
+                Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
     }
 }

@@ -19,22 +19,23 @@
 package org.apache.fineract.batch.command;
 
 /**
- * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService}
- * to get the proper commandStrategy for each request in BatchRequest. It uses
- * Builder pattern to create object of this type.
+ * Provides an object to
+ * {@link org.apache.fineract.batch.service.BatchApiService} to get the proper
+ * commandStrategy for each request in BatchRequest. It uses Builder pattern to
+ * create object of this type.
  *
  * @author Rishabh Shukla
  *
  * @see org.apache.fineract.batch.service.BatchApiService
  */
-public class CommandContext {
+public final class CommandContext {
 
     /**
      * Static Builder class to provide a Build method for CommandContext.
      *
      * @author Rishabh Shukla
      */
-    public static class Builder {
+    public static final class Builder {
 
         private String resource;
         private String method;
@@ -77,7 +78,9 @@ public class CommandContext {
      * @return boolean
      */
     public boolean matcher(CommandContext other) {
-        if (this.resource.matches(other.resource) && this.method.equals(other.method)) { return true; }
+        if (this.resource.matches(other.resource) && this.method.equals(other.method)) {
+            return true;
+        }
         return false;
     }
 
@@ -92,16 +95,30 @@ public class CommandContext {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CommandContext)) {
+            return false;
+        }
         CommandContext other = (CommandContext) obj;
         if (this.method == null) {
-            if (other.method != null) return false;
-        } else if (!this.method.equals(other.method)) return false;
+            if (other.method != null) {
+                return false;
+            }
+        } else if (!this.method.equals(other.method)) {
+            return false;
+        }
         if (this.resource == null) {
-            if (other.resource != null) return false;
-        } else if (!this.resource.equals(other.resource)) return false;
+            if (other.resource != null) {
+                return false;
+            }
+        } else if (!this.resource.equals(other.resource)) {
+            return false;
+        }
         return true;
     }
 

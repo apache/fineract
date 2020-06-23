@@ -22,17 +22,19 @@ import java.util.Map;
 
 public class ReportData {
 
-    private final Long reportId;
+    private Long reportId;
 
-    private final String reportName;
+    private String reportName;
 
-    private final String reportType;
+    private String reportType;
 
-    private final String reportSubType;
+    private String reportSubType;
 
-    private final String reportDescription;
+    private String reportDescription;
 
-    private final Map<String, Object> reportParamName;
+    private Map<String, Object> reportParamName;
+
+    public ReportData() {}
 
     public ReportData(final Long reportId, final String reportName, final String reportType, final String reportSubType,
             final Map<String, Object> reportParamName, final String reportDescription) {
@@ -44,8 +46,8 @@ public class ReportData {
         this.reportDescription = reportDescription;
     }
 
-    public static ReportData instance(final Long reportId, final String reportName, final String reportType,
-            final String reportSubType, final Map<String, Object> reportParamName, final String reportDescription) {
+    public static ReportData instance(final Long reportId, final String reportName, final String reportType, final String reportSubType,
+            final Map<String, Object> reportParamName, final String reportDescription) {
         return new ReportData(reportId, reportName, reportType, reportSubType, reportParamName, reportDescription);
     }
 

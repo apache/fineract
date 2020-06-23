@@ -40,13 +40,14 @@ public class GlobalConfigurationRepositoryWrapper {
 
     public GlobalConfigurationProperty findOneByNameWithNotFoundDetection(final String propertyName) {
         final GlobalConfigurationProperty property = this.repository.findOneByName(propertyName);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+        if (property == null) {
+            throw new GlobalConfigurationPropertyNotFoundException(propertyName);
+        }
         return property;
     }
 
     public GlobalConfigurationProperty findOneWithNotFoundDetection(final Long configId) {
-        return this.repository.findById(configId)
-                .orElseThrow(() -> new GlobalConfigurationPropertyNotFoundException(configId));
+        return this.repository.findById(configId).orElseThrow(() -> new GlobalConfigurationPropertyNotFoundException(configId));
     }
 
     public void save(final GlobalConfigurationProperty globalConfigurationProperty) {

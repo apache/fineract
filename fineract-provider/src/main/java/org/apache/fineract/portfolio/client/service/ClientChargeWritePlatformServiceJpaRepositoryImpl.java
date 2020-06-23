@@ -65,7 +65,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements ClientChargeWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ChargeRepositoryWrapper chargeRepository;
@@ -123,11 +123,13 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
             LocalDate activationDate = client.getActivationLocalDate();
             LocalDate dueDate = clientCharge.getDueLocalDate();
-            if(dueDate.isBefore(activationDate)){
+            if (dueDate.isBefore(activationDate)) {
                 baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate.toString(fmt))
-                .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
+                        .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
 
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             validateDueDateOnWorkingDay(clientCharge, fmt);
@@ -282,7 +284,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
         if (clientCharge.isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (requiresTransactionDateValidation) {
@@ -304,17 +308,23 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         // validate charge is not already paid or waived
         if (clientCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         } else if (clientCharge.isPaid()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (requiresTransactionAmountValidation) {
             final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
             if (!clientCharge.getAmountOutstanding().isGreaterThanOrEqualTo(chargePaid)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
     }
@@ -408,14 +418,18 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled() && this.holidayRepository.isHoliday(officeId, date)) {
                 baseDataValidator.reset().parameter(jsonPropertyName).value(date.toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode(errorMessageFragmentForActivityOnHoliday);
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(date)) {
                 baseDataValidator.reset().parameter(jsonPropertyName).value(date.toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode(errorMessageFragmentForActivityOnNonWorkingDay);
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
     }
@@ -434,11 +448,12 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("FK_m_client_charge_paid_by_m_client_charge")) {
 
-        throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",
-                "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
-                "clientChargeId", clientChargeId); }
+            throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",
+                    "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
+                    "clientChargeId", clientChargeId);
+        }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

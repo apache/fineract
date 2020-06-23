@@ -49,12 +49,10 @@ public class FineractEntityAccessUtil {
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
 
     @Autowired
-    public FineractEntityAccessUtil (
-            final PlatformSecurityContext context,
+    public FineractEntityAccessUtil(final PlatformSecurityContext context,
             final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityAccessWriteService fineractEntityAccessWriteService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final CodeValueRepositoryWrapper codeValueRepository,
+            final CodeValueReadPlatformService codeValueReadPlatformService, final CodeValueRepositoryWrapper codeValueRepository,
             final FineractEntityAccessReadService fineractEntityAccessReadService,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
             final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository) {
@@ -68,65 +66,59 @@ public class FineractEntityAccessUtil {
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
     }
 
-
     @Transactional
-    public void checkConfigurationAndAddProductResrictionsForUserOffice (
-            final FineractEntityAccessType fineractEntityAccessType,
+    public void checkConfigurationAndAddProductResrictionsForUserOffice(final FineractEntityAccessType fineractEntityAccessType,
             final Long productOrChargeId) {
 
         AppUser thisUser = this.context.authenticatedUser();
 
-        // check if the office specific products are enabled. If yes, then save this product or charge against a specific office
+        // check if the office specific products are enabled. If yes, then save
+        // this product or charge against a specific office
         // i.e. this product or charge is specific for this office.
 
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(
-                        FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
-        if (property.isEnabled() ) {
-            // If this property is enabled, then Fineract need to restrict access to this loan product to only the office of the current user
+                .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+        if (property.isEnabled()) {
+            // If this property is enabled, then Fineract need to restrict
+            // access to this loan product to only the office of the current
+            // user
             final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
-                    .findOneByNameWithNotFoundDetection(
-                            FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE);
+                    .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE);
 
-            if (restrictToUserOfficeProperty.isEnabled() ) {
+            if (restrictToUserOfficeProperty.isEnabled()) {
                 final Long officeId = thisUser.getOffice().getId();
-                                Date startDateFormapping = null;
-                                Date endDateFormapping = null;
-                                FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepositoryWrapper
-                                        .findOneByCodeName(fineractEntityAccessType.toStr());
-                                Long relId = fineractEntityRelation.getId();
-                                final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper
-                                        .findOneWithNotFoundDetection(relId);
-                                final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, officeId,
-                                        productOrChargeId, startDateFormapping, endDateFormapping);
-                                this.fineractEntityToEntityMappingRepository.save(newMap);
-                            }
+                Date startDateFormapping = null;
+                Date endDateFormapping = null;
+                FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepositoryWrapper
+                        .findOneByCodeName(fineractEntityAccessType.toStr());
+                Long relId = fineractEntityRelation.getId();
+                final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
+                final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, officeId, productOrChargeId,
+                        startDateFormapping, endDateFormapping);
+                this.fineractEntityToEntityMappingRepository.save(newMap);
+            }
         }
 
     }
 
-    public String getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled (
-            FineractEntityType fineractEntityType) {
+    public String getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType fineractEntityType) {
         String inClause = "";
 
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(
-                        FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+                .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
 
-        if (property.isEnabled() ) {
-            // Get 'SQL In Clause' for fetching only products/charges that are relevant for current user's office
+        if (property.isEnabled()) {
+            // Get 'SQL In Clause' for fetching only products/charges that are
+            // relevant for current user's office
             if (fineractEntityType.equals(FineractEntityType.SAVINGS_PRODUCT)) {
-                inClause = fineractEntityAccessReadService.
-                        getSQLQueryInClauseIDList_ForSavingsProductsForOffice (
-                        this.context.authenticatedUser().getOffice().getId(), false);
+                inClause = fineractEntityAccessReadService
+                        .getSQLQueryInClauseIDList_ForSavingsProductsForOffice(this.context.authenticatedUser().getOffice().getId(), false);
             } else if (fineractEntityType.equals(FineractEntityType.LOAN_PRODUCT)) {
-                inClause = fineractEntityAccessReadService.
-                        getSQLQueryInClauseIDList_ForLoanProductsForOffice (
-                        this.context.authenticatedUser().getOffice().getId(), false);
+                inClause = fineractEntityAccessReadService
+                        .getSQLQueryInClauseIDList_ForLoanProductsForOffice(this.context.authenticatedUser().getOffice().getId(), false);
             } else if (fineractEntityType.equals(FineractEntityType.CHARGE)) {
-                inClause = fineractEntityAccessReadService.
-                        getSQLQueryInClauseIDList_ForChargesForOffice(
-                        this.context.authenticatedUser().getOffice().getId(), false);
+                inClause = fineractEntityAccessReadService
+                        .getSQLQueryInClauseIDList_ForChargesForOffice(this.context.authenticatedUser().getOffice().getId(), false);
             }
         }
         return inClause;

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.search.data;
 
-import org.apache.fineract.portfolio.search.SearchConstants.SEARCH_SUPPORTED_RESOURCES;
+import org.apache.fineract.portfolio.search.SearchConstants.SearchSupportedResources;
 
 public class SearchConditions {
 
@@ -30,28 +30,29 @@ public class SearchConditions {
     private final Boolean savingSeach;
     private final Boolean shareSeach;
     private final Boolean clientIdentifierSearch;
-    private  Boolean exactMatch;
+    private Boolean exactMatch;
 
     public SearchConditions(final String searchQueryParam, final String searchResource, Boolean exactMatch) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
-        this.exactMatch=exactMatch;
-        this.clientSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.CLIENTS.name().toLowerCase())) ? true : false;
-        this.groupSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.GROUPS.name().toLowerCase())) ? true : false;
-        this.loanSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase())) ? true : false;
-        this.savingSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.SAVINGS.name().toLowerCase())) ? true : false;
-        this.shareSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.SHARES.name().toLowerCase())) ? true : false;
-          this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
+        this.exactMatch = exactMatch;
+        this.clientSearch = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTS.name().toLowerCase())) ? true : false;
+        this.groupSearch = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.GROUPS.name().toLowerCase())) ? true : false;
+        this.loanSeach = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.LOANS.name().toLowerCase())) ? true : false;
+        this.savingSeach = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.SAVINGS.name().toLowerCase())) ? true : false;
+        this.shareSeach = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.SHARES.name().toLowerCase())) ? true : false;
+        this.clientIdentifierSearch = (null == searchResource
+                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
-            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach, final Boolean clientIdentifierSearch, Boolean exactMatch) {
+            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach,
+            final Boolean clientIdentifierSearch, Boolean exactMatch) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
@@ -60,7 +61,7 @@ public class SearchConditions {
         this.savingSeach = savingSeach;
         this.shareSeach = shareSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
-        this.exactMatch=exactMatch;
+        this.exactMatch = exactMatch;
     }
 
     public String getSearchQuery() {
@@ -70,9 +71,11 @@ public class SearchConditions {
     public String getSearchResource() {
         return this.searchResource;
     }
+
     public Boolean getExactMatch() {
         return this.exactMatch;
     }
+
     public Boolean isClientSearch() {
         return this.clientSearch;
     }

@@ -38,12 +38,10 @@ public class EmailBusinessRulesData {
     private final String reportDescription;
 
     @SuppressWarnings("unused")
-    private final Map<String,Object> reportParamName;
+    private final Map<String, Object> reportParamName;
 
-
-
-    public EmailBusinessRulesData(final Long reportId, final String reportName,final String reportType, final Map<String,Object> reportParamName,
-                                  final String reportSubType, final String reportDescription) {
+    public EmailBusinessRulesData(final Long reportId, final String reportName, final String reportType,
+            final Map<String, Object> reportParamName, final String reportSubType, final String reportDescription) {
         this.reportId = reportId;
         this.reportName = reportName;
         this.reportType = reportType;
@@ -52,10 +50,9 @@ public class EmailBusinessRulesData {
         this.reportSubType = reportSubType;
     }
 
-
-    public static EmailBusinessRulesData instance(final Long reportId, final String reportName, final String reportType, final Map<String,Object> reportParamName,
-                                                  final String reportSubType, final String reportDescription){
-        return new EmailBusinessRulesData(reportId,reportName,reportType,reportParamName,reportSubType,reportDescription);
+    public static EmailBusinessRulesData instance(final Long reportId, final String reportName, final String reportType,
+            final Map<String, Object> reportParamName, final String reportSubType, final String reportDescription) {
+        return new EmailBusinessRulesData(reportId, reportName, reportType, reportParamName, reportSubType, reportDescription);
     }
 
     public Map<String, Object> getReportParamName() {
@@ -80,8 +77,12 @@ public class EmailBusinessRulesData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof EmailBusinessRulesData)) {
+            return false;
+        }
 
         EmailBusinessRulesData that = (EmailBusinessRulesData) o;
 
