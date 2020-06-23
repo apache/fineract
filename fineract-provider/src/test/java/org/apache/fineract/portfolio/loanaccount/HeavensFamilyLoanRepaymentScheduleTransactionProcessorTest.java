@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,14 +39,12 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     // class under test
     private HeavensFamilyLoanRepaymentScheduleTransactionProcessor processor;
 
-    //
     private final LocalDate july2nd = new LocalDate(2012, 7, 2);
     private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 
     @BeforeEach
     public void setUpForEachTestCase() throws Exception {
-
         Field field = MoneyHelper.class.getDeclaredField("roundingMode");
         field.setAccessible(true);
         field.set(null, RoundingMode.HALF_EVEN);
@@ -62,6 +61,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
      * and zero principal portion
      */
     @Test
+    @Disabled
     public void givenSingleOnTimeLoanTransactionShouldPayoffInterestComponentFirst() {
 
         // // setup
