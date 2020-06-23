@@ -346,7 +346,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
         if (latestGLClosureByBranch != null) {
             if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
-                    || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
+                    || latestGLClosureByBranch.getClosingDate().compareTo(journalEntriesTransactionDate) == 0 ? Boolean.TRUE
+                            : Boolean.FALSE) {
                 final String accountName = null;
                 final String accountGLCode = null;
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED,
@@ -597,7 +598,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) {
+            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0
+                    ? Boolean.TRUE
+                    : Boolean.FALSE) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }

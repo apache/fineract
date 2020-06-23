@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
@@ -525,8 +526,10 @@ public final class CalendarData implements Serializable {
                 && Objects.equals(frequency, that.frequency) && Objects.equals(interval, that.interval)
                 && Objects.equals(repeatsOnDay, that.repeatsOnDay) && Objects.equals(repeatsOnNthDayOfMonth, that.repeatsOnNthDayOfMonth)
                 && Objects.equals(remindBy, that.remindBy) && Objects.equals(firstReminder, that.firstReminder)
-                && Objects.equals(secondReminder, that.secondReminder) && Objects.equals(recurringDates, that.recurringDates)
-                && Objects.equals(nextTenRecurringDates, that.nextTenRecurringDates) && Objects.equals(humanReadable, that.humanReadable)
+                && Objects.equals(secondReminder, that.secondReminder)
+                && CollectionUtils.isEqualCollection(recurringDates, that.recurringDates)
+                && CollectionUtils.isEqualCollection(nextTenRecurringDates, that.nextTenRecurringDates)
+                && Objects.equals(humanReadable, that.humanReadable)
                 && Objects.equals(recentEligibleMeetingDate, that.recentEligibleMeetingDate)
                 && Objects.equals(createdDate, that.createdDate) && Objects.equals(lastUpdatedDate, that.lastUpdatedDate)
                 && Objects.equals(createdByUserId, that.createdByUserId) && Objects.equals(createdByUsername, that.createdByUsername)
