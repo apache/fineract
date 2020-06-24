@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implements RecurringDepositProductWritePlatformService {
 
-    private final Logger logger;
+    private final Logger LOG;
     private final PlatformSecurityContext context;
     private final RecurringDepositProductRepository recurringDepositProductRepository;
     private final DepositProductDataValidator fromApiJsonDataValidator;
@@ -75,7 +75,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
         this.depositProductAssembler = depositProductAssembler;
-        this.logger = LoggerFactory.getLogger(RecurringDepositProductWritePlatformServiceJpaRepositoryImpl.class);
+        this.LOG = LoggerFactory.getLogger(RecurringDepositProductWritePlatformServiceJpaRepositoryImpl.class);
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.chartAssembler = chartAssembler;
     }
@@ -101,8 +101,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -123,8 +123,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command, product
-                        .currency().getCode());
+                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
@@ -161,8 +161,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -184,16 +184,15 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Recurring Deposit product with name `"
-                    + name + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name",
+                    "Recurring Deposit product with name `" + name + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("sp_unq_short_name")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
@@ -207,6 +206,6 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.logger.error("Error occured.", dae);
+        this.LOG.error("Error occured.", dae);
     }
 }

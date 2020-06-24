@@ -36,31 +36,31 @@ public class DisbursementData implements Comparable<DisbursementData> {
     private final BigDecimal chargeAmount;
     private final BigDecimal waivedChargeAmount;
 
-    //import fields
+    // import fields
     private transient Integer rowIndex;
     private String dateFormat;
     private String locale;
     private String note;
     private transient String linkAccountId;
 
-    public  static DisbursementData importInstance(LocalDate actualDisbursementDate,String linkAccountId,
-            Integer rowIndex,String locale,String dateFormat){
-        return new DisbursementData(actualDisbursementDate,linkAccountId,rowIndex,locale,dateFormat);
+    public static DisbursementData importInstance(LocalDate actualDisbursementDate, String linkAccountId, Integer rowIndex, String locale,
+            String dateFormat) {
+        return new DisbursementData(actualDisbursementDate, linkAccountId, rowIndex, locale, dateFormat);
     }
-    private DisbursementData(LocalDate actualDisbursementDate,String linkAccountId,
-            Integer rowIndex,String locale,String dateFormat) {
-        this.dateFormat= dateFormat;
-        this.locale= locale;
+
+    private DisbursementData(LocalDate actualDisbursementDate, String linkAccountId, Integer rowIndex, String locale, String dateFormat) {
+        this.dateFormat = dateFormat;
+        this.locale = locale;
         this.actualDisbursementDate = actualDisbursementDate;
         this.rowIndex = rowIndex;
-        this.note="";
-        this.linkAccountId=linkAccountId;
-        this.id=null;
-        this.expectedDisbursementDate=null;
-        this.principal=null;
-        this.loanChargeId=null;
-        this.chargeAmount=null;
-        this.waivedChargeAmount=null;
+        this.note = "";
+        this.linkAccountId = linkAccountId;
+        this.id = null;
+        this.expectedDisbursementDate = null;
+        this.principal = null;
+        this.loanChargeId = null;
+        this.chargeAmount = null;
+        this.waivedChargeAmount = null;
 
     }
 
@@ -101,7 +101,9 @@ public class DisbursementData implements Comparable<DisbursementData> {
 
     @Override
     public int compareTo(final DisbursementData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
 
         return obj.expectedDisbursementDate.compareTo(this.expectedDisbursementDate);
     }
@@ -116,9 +118,8 @@ public class DisbursementData implements Comparable<DisbursementData> {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
 
-
     public BigDecimal getWaivedChargeAmount() {
-        if(this.waivedChargeAmount == null){
+        if (this.waivedChargeAmount == null) {
             return BigDecimal.ZERO;
         }
         return this.waivedChargeAmount;

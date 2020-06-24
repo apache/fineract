@@ -31,9 +31,9 @@ public class ClientIdSerializer implements JsonSerializer<Collection<ClientData>
 
     @Override
     public JsonElement serialize(Collection<ClientData> src, Type typeOfSrc, JsonSerializationContext context) {
-        JsonArray clientIdJsonArray=new JsonArray();
-        for (ClientData client:src) {
-            JsonElement clientIdElment=new JsonPrimitive(client.id().toString());
+        JsonArray clientIdJsonArray = new JsonArray();
+        for (ClientData client : src) {
+            JsonElement clientIdElment = new JsonPrimitive(client.id().toString());
             clientIdJsonArray.add(clientIdElment);
         }
         return clientIdJsonArray;

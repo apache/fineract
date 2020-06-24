@@ -60,16 +60,17 @@ public class EndOfDayBalance {
     }
 
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
-            final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+            final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal interest = BigDecimal.ZERO.setScale(9, MoneyHelper.getRoundingMode());
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
-        if(realBalanceForInterestCalculation.compareTo(BigDecimal.ZERO) >= 0){
+        if (realBalanceForInterestCalculation.compareTo(BigDecimal.ZERO) >= 0) {
             if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
                 final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
                 final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
-                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
+                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
+                        MathContext.DECIMAL64);
                 interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
                         MoneyHelper.getRoundingMode());
             }
@@ -77,7 +78,8 @@ public class EndOfDayBalance {
             if (realBalanceForInterestCalculation.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
                 final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
                 final BigDecimal dailyInterestRate = overdraftInterestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
-                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
+                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
+                        MathContext.DECIMAL64);
                 interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
                         MoneyHelper.getRoundingMode());
             }
@@ -88,9 +90,8 @@ public class EndOfDayBalance {
     /**
      * Future Value (FV) = PV x (1+r)^n
      *
-     * Interest = FV - PV PV = Principal or the Account Balance r = rate per
-     * compounding period (so for daily, r = nominalInterestRateAsFraction x
-     * 1/365 n = number of periods rate is compounded
+     * Interest = FV - PV PV = Principal or the Account Balance r = rate per compounding period (so for daily, r =
+     * nominalInterestRateAsFraction x 1/365 n = number of periods rate is compounded
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
             final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
@@ -100,7 +101,7 @@ public class EndOfDayBalance {
         final BigDecimal presentValue = this.endOfDayBalance.getAmount().add(interestToCompound);
         BigDecimal futureValue = presentValue.setScale(9, MoneyHelper.getRoundingMode());
 
-        if(presentValue.compareTo(BigDecimal.ZERO) >= 0){
+        if (presentValue.compareTo(BigDecimal.ZERO) >= 0) {
             if (presentValue.compareTo(minBalanceForInterestCalculation) >= 0) {
                 final BigDecimal r = interestRateAsFraction.multiply(multiplicand);
 
@@ -111,7 +112,7 @@ public class EndOfDayBalance {
                 futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered), MathContext.DECIMAL64)
                         .setScale(9, MoneyHelper.getRoundingMode());
             }
-        }else{
+        } else {
             if (presentValue.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
                 final BigDecimal r = overdraftInterestRateAsFraction.multiply(multiplicand);
 
@@ -130,9 +131,8 @@ public class EndOfDayBalance {
     /**
      * @param compoundingPeriodInterval
      * @param upToInterestCalculationDate
-     *            : For calculating maturity details in advance
-     *            upToInterestCalculationDate will be maturity date else it will
-     *            be DateUtils.getLocalDateOfTenant().
+     *            : For calculating maturity details in advance upToInterestCalculationDate will be maturity date else
+     *            it will be DateUtils.getLocalDateOfTenant().
      * @return
      */
     public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval, final LocalDate upToInterestCalculationDate) {

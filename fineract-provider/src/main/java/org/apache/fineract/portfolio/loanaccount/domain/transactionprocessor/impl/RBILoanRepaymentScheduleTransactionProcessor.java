@@ -33,20 +33,18 @@ import org.joda.time.LocalDate;
  *
  * From https://mifosforge.jira.com/browse/MIFOS-5636:
  *
- * Per RBI regulations, all interest must be paid (both current and overdue)
- * before principal is paid.
+ * Per RBI regulations, all interest must be paid (both current and overdue) before principal is paid.
  *
- * For example on a loan with two installments due (one current and one overdue)
- * of 220 each (200 principal + 20 interest):
+ * For example on a loan with two installments due (one current and one overdue) of 220 each (200 principal + 20
+ * interest):
  *
- * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal
- * remaining) 20 Payment to interest on Installment #2 (200 principal remaining)
+ * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal remaining) 20 Payment to interest on
+ * Installment #2 (200 principal remaining)
  */
 public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * For creocore, early is defined as any date before the installment due
-     * date
+     * For creocore, early is defined as any date before the installment due date
      */
     @SuppressWarnings("unused")
     @Override
@@ -68,12 +66,12 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
             final LocalDate transactionDate, final Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance,
+                transactionMappings);
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
@@ -119,10 +117,10 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     loanTransaction.getTransactionDate(), installments);
 
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if ((installment.isInterestDue(currency) || installment.getFeeChargesOutstanding(currency).isGreaterThanZero() || installment
-                        .getPenaltyChargesOutstanding(currency).isGreaterThanZero())
-                        && (installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(
-                                currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
+                if ((installment.isInterestDue(currency) || installment.getFeeChargesOutstanding(currency).isGreaterThanZero()
+                        || installment.getPenaltyChargesOutstanding(currency).isGreaterThanZero())
+                        && (installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber()
+                                .equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
                     penaltyChargesPortion = installment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
@@ -159,9 +157,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                             break;
                         }
                     }
-                    if (!isMappingUpdated
-                            && principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)
-                                    .isGreaterThanZero()) {
+                    if (!isMappingUpdated && principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)
+                            .isGreaterThanZero()) {
                         transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(installment, principalPortion,
                                 interestPortion, feeChargesPortion, penaltyChargesPortion));
                     }
@@ -208,8 +205,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

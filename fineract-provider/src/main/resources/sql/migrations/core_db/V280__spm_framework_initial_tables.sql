@@ -18,14 +18,14 @@
 --
 
 CREATE TABLE `m_surveys` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`a_key` VARCHAR(32) NOT NULL,
-	`a_name` VARCHAR(255) NOT NULL,
-	`description` VARCHAR(4000) NULL,
-	`country_code` VARCHAR(2) NOT NULL,
-	`valid_from` DATETIME NULL DEFAULT NULL,
-	`valid_to` DATETIME NULL DEFAULT NULL,
-	PRIMARY KEY (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `a_key` VARCHAR(32) NOT NULL,
+    `a_name` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(4000) NULL,
+    `country_code` VARCHAR(2) NOT NULL,
+    `valid_from` DATETIME NULL DEFAULT NULL,
+    `valid_to` DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `m_survey_components` (

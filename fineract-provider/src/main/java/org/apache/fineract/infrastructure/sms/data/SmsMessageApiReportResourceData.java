@@ -22,10 +22,10 @@ import com.google.gson.Gson;
 import java.util.List;
 
 /**
- * Immutable data object representing the API request body sent in the POST request to
- * the "/report" resource
+ * Immutable data object representing the API request body sent in the POST request to the "/report" resource
  **/
 public class SmsMessageApiReportResourceData {
+
     private List<Long> externalIds;
     private String mifosTenantIdentifier;
 

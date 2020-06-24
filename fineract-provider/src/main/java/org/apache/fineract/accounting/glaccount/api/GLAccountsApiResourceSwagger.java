@@ -30,13 +30,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Created by sanyam on 24/7/17.
  */
 final class GLAccountsApiResourceSwagger {
+
     private GLAccountsApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetGLAccountsResponse")
-    public static final class GetGLAccountsResponse{
-        private GetGLAccountsResponse(){
+    public static final class GetGLAccountsResponse {
+
+        private GetGLAccountsResponse() {
 
         }
 
@@ -74,8 +76,9 @@ final class GLAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetGLAccountsTemplateResponse")
-    public static final class GetGLAccountsTemplateResponse{
-        private GetGLAccountsTemplateResponse(){
+    public static final class GetGLAccountsTemplateResponse {
+
+        private GetGLAccountsTemplateResponse() {
 
         }
 
@@ -102,8 +105,9 @@ final class GLAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGLAccountsRequest")
-    public static final class PostGLAccountsRequest{
-        private PostGLAccountsRequest(){
+    public static final class PostGLAccountsRequest {
+
+        private PostGLAccountsRequest() {
 
         }
 
@@ -134,7 +138,8 @@ final class GLAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGLAccountsResponse")
-    public static final class PostGLAccountsResponse{
+    public static final class PostGLAccountsResponse {
+
         private PostGLAccountsResponse() {
 
         }
@@ -144,7 +149,8 @@ final class GLAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutGLAccountsRequest")
-    public static final class PutGLAccountsRequest{
+    public static final class PutGLAccountsRequest {
+
         private PutGLAccountsRequest() {
 
         }
@@ -154,29 +160,36 @@ final class GLAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutGLAccountsResponse")
-    public static final class PutGLAccountsResponse{
+    public static final class PutGLAccountsResponse {
+
         private PutGLAccountsResponse() {
 
         }
+
         @ApiModel
-        public static final class PutGLAccountsResponsechangesSwagger{
-            private PutGLAccountsResponsechangesSwagger(){}
+        public static final class PutGLAccountsResponsechangesSwagger {
+
+            private PutGLAccountsResponsechangesSwagger() {}
+
             @ApiModelProperty(example = "Cash at Bangalore")
             public String name;
         }
+
         @ApiModelProperty(example = "1")
         public int resourceId;
         public PutGLAccountsResponsechangesSwagger changes;
     }
 
     @ApiModel(value = "DeleteGLAccountsRequest")
-    public static final class DeleteGLAccountsRequest{
+    public static final class DeleteGLAccountsRequest {
+
         private DeleteGLAccountsRequest() {
 
         }
 
-        private static final class DeleteGLAccountsRequestchangesSwagger{
-            private DeleteGLAccountsRequestchangesSwagger(){}
+        private static final class DeleteGLAccountsRequestchangesSwagger {
+
+            private DeleteGLAccountsRequestchangesSwagger() {}
 
         }
 

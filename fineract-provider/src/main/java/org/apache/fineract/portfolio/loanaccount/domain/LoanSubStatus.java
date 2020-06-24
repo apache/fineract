@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum LoanSubStatus {
+
     INVALID(0, "loanSubStatusType.invalid"), //
     FORECLOSED(100, "loanSubStatusType.foreclosed");
 
@@ -68,8 +69,8 @@ public enum LoanSubStatus {
         EnumOptionData optionData = null;
         switch (type) {
             case FORECLOSED:
-                optionData = new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(), codePrefix
-                        + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
+                optionData = new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(),
+                        codePrefix + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
             break;
             default:
                 optionData = new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");

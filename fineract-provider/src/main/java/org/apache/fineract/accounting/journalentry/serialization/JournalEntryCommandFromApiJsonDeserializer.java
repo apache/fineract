@@ -41,8 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link JournalEntryCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link JournalEntryCommand}'s.
  */
 @Component
 public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<JournalEntryCommand> {
@@ -56,7 +55,9 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
 
     @Override
     public JournalEntryCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = JournalEntryJsonInputParams.getAllValues();
@@ -65,11 +66,11 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(), element);
-        final String currencyCode = this.fromApiJsonHelper
-                .extractStringNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue(), element);
+        final String currencyCode = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue(),
+                element);
         final String comments = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.COMMENTS.getValue(), element);
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                JournalEntryJsonInputParams.TRANSACTION_DATE.getValue(), element);
+        final LocalDate transactionDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue(), element);
         final String referenceNumber = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue(),
                 element);
         final Long accountingRuleId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue(),
@@ -93,7 +94,8 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         if (element.isJsonObject()) {
             if (topLevelJsonElement.has(JournalEntryJsonInputParams.CREDITS.getValue())
                     && topLevelJsonElement.get(JournalEntryJsonInputParams.CREDITS.getValue()).isJsonArray()) {
-                credits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, credits, JournalEntryJsonInputParams.CREDITS.getValue());
+                credits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, credits,
+                        JournalEntryJsonInputParams.CREDITS.getValue());
             }
             if (topLevelJsonElement.has(JournalEntryJsonInputParams.DEBITS.getValue())
                     && topLevelJsonElement.get(JournalEntryJsonInputParams.DEBITS.getValue()).isJsonArray()) {

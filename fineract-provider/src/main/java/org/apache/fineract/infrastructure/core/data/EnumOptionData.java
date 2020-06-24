@@ -59,9 +59,7 @@ public class EnumOptionData implements Serializable {
             return false;
         }
         EnumOptionData that = (EnumOptionData) o;
-        return id.equals(that.id) &&
-                code.equals(that.code) &&
-                value.equals(that.value);
+        return id.equals(that.id) && code.equals(that.code) && value.equals(that.value);
     }
 
     @Override

@@ -25,8 +25,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.springframework.stereotype.Component;
 
 /**
- * A wrapper for dealing with side-effect free functionality related to a
- * {@link SavingsAccount}'s {@link SavingsAccountTransaction}'s.
+ * A wrapper for dealing with side-effect free functionality related to a {@link SavingsAccount}'s
+ * {@link SavingsAccountTransaction}'s.
  */
 @Component
 public final class SavingsAccountTransactionSummaryWrapper {
@@ -111,7 +111,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWaivePenaltyChargeAndNotReversed()) {
@@ -130,6 +131,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         }
         return total.getAmountDefaultedToNullIfZero();
     }
+
     public BigDecimal calculateTotalWithholdTaxWithdrawal(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {

@@ -46,8 +46,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
 @Component
 public class FineractEntityDataValidator {
 
@@ -57,10 +55,10 @@ public class FineractEntityDataValidator {
     private final SavingsProductRepository savingsProductRepository;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final RoleRepository roleRepository;
-    private static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType,
-            FineractEntityApiResourceConstants.startDate, FineractEntityApiResourceConstants.LOCALE,
-            FineractEntityApiResourceConstants.DATE_FORMAT, FineractEntityApiResourceConstants.endDate));
+    private static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType,
+                    FineractEntityApiResourceConstants.startDate, FineractEntityApiResourceConstants.LOCALE,
+                    FineractEntityApiResourceConstants.DATE_FORMAT, FineractEntityApiResourceConstants.endDate));
 
     private static final Set<String> UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(FineractEntityApiResourceConstants.relId, FineractEntityApiResourceConstants.fromEnityType,
@@ -82,11 +80,12 @@ public class FineractEntityDataValidator {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -159,13 +158,11 @@ public class FineractEntityDataValidator {
     }
 
     public void checkForLoanProducts(final Long id) {
-        this.loanProductRepository.findById(id)
-                .orElseThrow(() -> new LoanProductNotFoundException(id));
+        this.loanProductRepository.findById(id).orElseThrow(() -> new LoanProductNotFoundException(id));
     }
 
     public void checkForSavingsProducts(final Long id) {
-        this.savingsProductRepository.findById(id)
-                .orElseThrow(() -> new SavingsProductNotFoundException(id));
+        this.savingsProductRepository.findById(id).orElseThrow(() -> new SavingsProductNotFoundException(id));
     }
 
     public void checkForCharges(final Long id) {
@@ -173,17 +170,17 @@ public class FineractEntityDataValidator {
     }
 
     public void checkForRoles(final Long id) {
-        this.roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException(id));
+        this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
     }
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -194,7 +191,8 @@ public class FineractEntityDataValidator {
         boolean atLeastOneParameterPassedForUpdate = false;
         if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String fromEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.fromEnityType, element);
+            final String fromEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.fromEnityType,
+                    element);
             baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromEnityType);
         }
 

@@ -28,8 +28,7 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  * GCM message.
  *
  * <p>
- * Instances of this class are immutable and should be created using a
- * {@link Builder}. Examples:
+ * Instances of this class are immutable and should be created using a {@link Builder}. Examples:
  *
  * <strong>Simplest message:</strong>
  *
@@ -160,11 +159,11 @@ public final class Message implements Serializable {
          */
         public Builder priority(Priority value) {
             switch (value) {
-            case NORMAL:
-                priority = GcmConstants.MESSAGE_PRIORITY_NORMAL;
+                case NORMAL:
+                    priority = GcmConstants.MESSAGE_PRIORITY_NORMAL;
                 break;
-            case HIGH:
-                priority = GcmConstants.MESSAGE_PRIORITY_HIGH;
+                case HIGH:
+                    priority = GcmConstants.MESSAGE_PRIORITY_HIGH;
                 break;
             }
             return this;
@@ -274,8 +273,7 @@ public final class Message implements Serializable {
             builder.append("priority=").append(priority).append(", ");
         }
         if (contentAvailable != null) {
-            builder.append("contentAvailable=").append(contentAvailable)
-                    .append(", ");
+            builder.append("contentAvailable=").append(contentAvailable).append(", ");
         }
         if (collapseKey != null) {
             builder.append("collapseKey=").append(collapseKey).append(", ");
@@ -284,15 +282,13 @@ public final class Message implements Serializable {
             builder.append("timeToLive=").append(timeToLive).append(", ");
         }
         if (delayWhileIdle != null) {
-            builder.append("delayWhileIdle=").append(delayWhileIdle)
-                    .append(", ");
+            builder.append("delayWhileIdle=").append(delayWhileIdle).append(", ");
         }
         if (dryRun != null) {
             builder.append("dryRun=").append(dryRun).append(", ");
         }
         if (restrictedPackageName != null) {
-            builder.append("restrictedPackageName=")
-                    .append(restrictedPackageName).append(", ");
+            builder.append("restrictedPackageName=").append(restrictedPackageName).append(", ");
         }
         if (notification != null) {
             builder.append("notification: ").append(notification).append(", ");
@@ -300,8 +296,7 @@ public final class Message implements Serializable {
         if (!data.isEmpty()) {
             builder.append("data: {");
             for (Map.Entry<String, String> entry : data.entrySet()) {
-                builder.append(entry.getKey()).append("=")
-                        .append(entry.getValue()).append(",");
+                builder.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
             }
             builder.delete(builder.length() - 1, builder.length());
             builder.append("}");

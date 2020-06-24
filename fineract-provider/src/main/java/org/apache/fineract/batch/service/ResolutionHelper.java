@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.service;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -25,7 +26,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -33,9 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides methods to create dependency map among the various batchRequests. It
- * also provides method that takes care of dependency resolution among related
- * requests.
+ * Provides methods to create dependency map among the various batchRequests. It also provides method that takes care of
+ * dependency resolution among related requests.
  *
  * @author Rishabh Shukla
  * @see BatchApiServiceImpl
@@ -49,7 +49,7 @@ public class ResolutionHelper {
      * @author Rishabh shukla
      *
      */
-    public class BatchRequestNode {
+    public static class BatchRequestNode {
 
         private BatchRequest request;
         private final List<BatchRequestNode> childRequests = new ArrayList<>();
@@ -84,10 +84,9 @@ public class ResolutionHelper {
     }
 
     /**
-     * Returns a map containing requests that are divided in accordance of
-     * dependency relations among them. Each different list is identified with a
-     * "Key" which is the "requestId" of the request at topmost level in
-     * dependency hierarchy of that particular list.
+     * Returns a map containing requests that are divided in accordance of dependency relations among them. Each
+     * different list is identified with a "Key" which is the "requestId" of the request at topmost level in dependency
+     * hierarchy of that particular list.
      *
      * @param batchRequests
      * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
@@ -121,10 +120,8 @@ public class ResolutionHelper {
     }
 
     /**
-     * Returns a BatchRequest after dependency resolution. It takes a request
-     * and the response of the request it is dependent upon as its arguments and
-     * change the body or relativeUrl of the request according to parent
-     * Request.
+     * Returns a BatchRequest after dependency resolution. It takes a request and the response of the request it is
+     * dependent upon as its arguments and change the body or relativeUrl of the request according to parent Request.
      *
      * @param request
      * @param parentResponse
@@ -144,7 +141,7 @@ public class ResolutionHelper {
 
         // Iterate through each element in the requestBody to find dependent
         // parameter
-        for (Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
+        for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
             final String key = element.getKey();
             final JsonElement value = resolveDependentVariables(element, responseCtx);
             jsonResultBody.add(key, value);
@@ -159,18 +156,18 @@ public class ResolutionHelper {
         if (relativeUrl.contains("$.")) {
 
             String queryParams = "";
-            if(relativeUrl.contains("?")) {
+            if (relativeUrl.contains("?")) {
                 queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
                 relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
             }
 
-            final String[] parameters = relativeUrl.split("/");
+            final Iterable<String> parameters = Splitter.on('/').split(relativeUrl);
 
             for (String parameter : parameters) {
                 if (parameter.contains("$.")) {
                     final String resParamValue = responseCtx.read(parameter).toString();
                     relativeUrl = relativeUrl.replace(parameter, resParamValue);
-                    br.setRelativeUrl(relativeUrl+queryParams);
+                    br.setRelativeUrl(relativeUrl + queryParams);
                 }
             }
         }
@@ -178,7 +175,7 @@ public class ResolutionHelper {
         return br;
     }
 
-    private JsonElement resolveDependentVariables(final Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
+    private JsonElement resolveDependentVariables(final Map.Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
         JsonElement value = null;
 
         final JsonElement element = entryElement.getValue();
@@ -197,7 +194,7 @@ public class ResolutionHelper {
 
     private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
         JsonObject valueObj = new JsonObject();
-        for (Entry<String, JsonElement> element : jsObject.entrySet()) {
+        for (Map.Entry<String, JsonElement> element : jsObject.entrySet()) {
             final String key = element.getKey();
             final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
             valueObj.add(key, value);

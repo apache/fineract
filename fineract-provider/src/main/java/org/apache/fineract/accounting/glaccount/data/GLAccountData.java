@@ -30,8 +30,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Immutable object representing a General Ledger Account
  *
- * Note: no getter/setters required as google-gson will produce json from fields
- * of object.
+ * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
 public class GLAccountData implements Serializable {
 
@@ -62,19 +61,16 @@ public class GLAccountData implements Serializable {
     final Collection<CodeValueData> allowedIncomeTagOptions;
     final Collection<CodeValueData> allowedExpensesTagOptions;
 
-    //import fields
+    // import fields
     private transient Integer rowIndex;
 
-    public static GLAccountData importInstance(String name, Long parentId, String glCode, Boolean manualEntriesAllowed,
-            EnumOptionData type, EnumOptionData usage, String description, CodeValueData tagId,
-            Integer rowIndex){
-        return new GLAccountData(name,parentId,glCode,manualEntriesAllowed,type,
-                usage,description,tagId,rowIndex);
+    public static GLAccountData importInstance(String name, Long parentId, String glCode, Boolean manualEntriesAllowed, EnumOptionData type,
+            EnumOptionData usage, String description, CodeValueData tagId, Integer rowIndex) {
+        return new GLAccountData(name, parentId, glCode, manualEntriesAllowed, type, usage, description, tagId, rowIndex);
     }
 
-    private GLAccountData(String name, Long parentId, String glCode, Boolean manualEntriesAllowed,
-            EnumOptionData type, EnumOptionData usage, String description, CodeValueData tagId,
-            Integer rowIndex) {
+    private GLAccountData(String name, Long parentId, String glCode, Boolean manualEntriesAllowed, EnumOptionData type,
+            EnumOptionData usage, String description, CodeValueData tagId, Integer rowIndex) {
 
         this.name = name;
         this.parentId = parentId;
@@ -192,8 +188,8 @@ public class GLAccountData implements Serializable {
         final CodeValueData tagId = null;
         final Long organizationRunningBalance = null;
 
-        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated,
-                tagId, organizationRunningBalance);
+        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated, tagId,
+                organizationRunningBalance);
     }
 
     public GLAccountData(final Long id, final String name, final String glCode) {
@@ -240,9 +236,10 @@ public class GLAccountData implements Serializable {
     }
 
     public Integer getTypeId() {
-        if (this.type != null) { return this.type.getId().intValue(); }
+        if (this.type != null) {
+            return this.type.getId().intValue();
+        }
         return null;
     }
-
 
 }

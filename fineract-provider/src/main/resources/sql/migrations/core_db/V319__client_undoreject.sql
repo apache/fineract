@@ -18,8 +18,8 @@
 --
 
 ALTER TABLE `m_client`
-	ADD COLUMN `reopened_on_date` DATE NULL AFTER `legal_form_enum`,
-	ADD COLUMN `reopened_by_userid` BIGINT NULL AFTER `reopened_on_date`;
-	
+    ADD COLUMN `reopened_on_date` DATE NULL AFTER `legal_form_enum`,
+    ADD COLUMN `reopened_by_userid` BIGINT NULL AFTER `reopened_on_date`;
+
 INSERT INTO `m_permission` ( `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'UNDOREJECT_CLIENT', 'CLIENT', 'UNDOREJECT', 1),
 ('portfolio', 'UNDOREJECT_CLIENT_CHECKER', 'CLIENT', 'UNDOREJECT_CHECKER', 1),('portfolio', 'UNDOWITHDRAWAL_CLIENT', 'CLIENT', 'UNDOWITHDRAWAL', 1),('portfolio', 'UNDOWITHDRAWAL_CLIENT_CHECKER', 'CLIENT', 'UNDOWITHDRAWAL_CHECKER', 1);

@@ -27,15 +27,18 @@ import org.joda.time.LocalDate;
  */
 
 final class StaffApiResourceSwagger {
+
     private StaffApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "PostStaffRequest")
     public static final class PostStaffRequest {
+
         private PostStaffRequest() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "John")
@@ -61,9 +64,11 @@ final class StaffApiResourceSwagger {
 
     @ApiModel(value = "PostStaffResponse")
     public static final class PostStaffResponse {
+
         private PostStaffResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "1")
@@ -72,9 +77,11 @@ final class StaffApiResourceSwagger {
 
     @ApiModel(value = "GetStaffResponse")
     public static final class GetStaffResponse {
+
         private GetStaffResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "John")
@@ -100,9 +107,11 @@ final class StaffApiResourceSwagger {
 
     @ApiModel(value = "PutStaffRequest")
     public static final class PutStaffRequest {
+
         private PutStaffRequest() {
 
         }
+
         @ApiModelProperty(example = "false")
         public Boolean isLoanOfficer;
         @ApiModelProperty(example = "17Hbb")
@@ -112,16 +121,21 @@ final class StaffApiResourceSwagger {
 
     @ApiModel(value = "PutStaffResponse")
     public static final class PutStaffResponse {
+
         private PutStaffResponse() {
 
         }
-        final class PutStaffResponseChanges {
-            private PutStaffResponseChanges(){}
+
+        static final class PutStaffResponseChanges {
+
+            private PutStaffResponseChanges() {}
+
             @ApiModelProperty(example = "false")
             public Boolean isLoanOfficer;
             @ApiModelProperty(example = "17Hbb")
             public String externalId;
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "1")

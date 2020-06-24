@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.financialactivityaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when product to GL account mapping are not
- * found.
+ * A {@link RuntimeException} thrown when product to GL account mapping are not found.
  */
 public class FinancialActivityAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
@@ -31,8 +30,9 @@ public class FinancialActivityAccountNotFoundException extends AbstractPlatformR
     }
 
     public FinancialActivityAccountNotFoundException(final Integer financialActivityType) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with for the financial Activity with Id "
-                + financialActivityType + " does not exist", financialActivityType);
+        super("error.msg.financialActivityAccount.not.found",
+                "Financial Activity account with for the financial Activity with Id " + financialActivityType + " does not exist",
+                financialActivityType);
     }
 
 }

@@ -23,8 +23,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class AccountingRuleDataException extends AbstractPlatformDomainRuleException {
 
     public AccountingRuleDataException(final String debitOrCreditAccount, final String debitOrCreditTags) {
-        super("error.msg.accounting.rule." + debitOrCreditAccount + ".or." + debitOrCreditTags + ".required", debitOrCreditAccount + " or "
-                + debitOrCreditTags + " required", debitOrCreditAccount, debitOrCreditTags);
+        super("error.msg.accounting.rule." + debitOrCreditAccount + ".or." + debitOrCreditTags + ".required",
+                debitOrCreditAccount + " or " + debitOrCreditTags + " required", debitOrCreditAccount, debitOrCreditTags);
     }
 
 }

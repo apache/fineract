@@ -28,19 +28,24 @@ public class AccountingRuleInvalidException extends AbstractPlatformDomainRuleEx
 
     /*** enum of reasons for invalid Accounting Closure **/
     public static enum GlClosureInvalidReason {
+
         FUTURE_DATE, ACCOUNTING_CLOSED;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
                 return "Accounting closures cannot be made for a future date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) { return "Accounting Closure for this branch has already been defined for a greater date"; }
+            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) {
+                return "Accounting Closure for this branch has already been defined for a greater date";
+            }
             return name().toString();
         }
 
         public String errorCode() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
                 return "error.msg.glclosure.invalid.future.date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) { return "error.msg.glclosure.invalid.accounting.closed"; }
+            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) {
+                return "error.msg.glclosure.invalid.accounting.closed";
+            }
             return name().toString();
         }
     }

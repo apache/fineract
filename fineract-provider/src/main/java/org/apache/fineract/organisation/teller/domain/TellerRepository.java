@@ -29,5 +29,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @since 2.0.0
  */
 public interface TellerRepository extends JpaRepository<Teller, Long>, JpaSpecificationExecutor<Teller> {
+
     Collection<Teller> findTellerByOfficeId(Long officeId);
 }

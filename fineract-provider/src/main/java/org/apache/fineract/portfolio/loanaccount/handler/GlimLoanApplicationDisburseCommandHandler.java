@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.fineract.portfolio.loanaccount.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
@@ -29,11 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @CommandType(entity = "GLIMLOAN", action = "DISBURSE")
-public class GlimLoanApplicationDisburseCommandHandler implements NewCommandSourceHandler
-{
+public class GlimLoanApplicationDisburseCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
 

@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/15/17.
  */
 final class FixedDepositAccountsApiResourceSwagger {
-    private FixedDepositAccountsApiResourceSwagger() {
-    }
+
+    private FixedDepositAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetFixedDepositAccountsTemplateResponse")
-    public final static class GetFixedDepositAccountsTemplateResponse {
-        private GetFixedDepositAccountsTemplateResponse() {
-        }
+    public static final class GetFixedDepositAccountsTemplateResponse {
 
-        final class GetFixedDepositAccountsProductOptions {
-            private GetFixedDepositAccountsProductOptions() {
-            }
+        private GetFixedDepositAccountsTemplateResponse() {}
+
+        static final class GetFixedDepositAccountsProductOptions {
+
+            private GetFixedDepositAccountsProductOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -53,13 +53,13 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositAccountsResponse")
-    public final static class GetFixedDepositAccountsResponse {
-        private GetFixedDepositAccountsResponse() {
-        }
+    public static final class GetFixedDepositAccountsResponse {
 
-        final class GetFixedDepositAccountsStatus {
-            private GetFixedDepositAccountsStatus() {
-            }
+        private GetFixedDepositAccountsResponse() {}
+
+        static final class GetFixedDepositAccountsStatus {
+
+            private GetFixedDepositAccountsStatus() {}
 
             @ApiModelProperty(example = "100")
             public Integer id;
@@ -87,9 +87,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Boolean transferOnHold;
         }
 
-        final class GetFixedDepositAccountsTimeline {
-            private GetFixedDepositAccountsTimeline() {
-            }
+        static final class GetFixedDepositAccountsTimeline {
+
+            private GetFixedDepositAccountsTimeline() {}
 
             @ApiModelProperty(example = "[2014, 3, 1]")
             public LocalDate submittedOnDate;
@@ -101,9 +101,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String submittedByLastname;
         }
 
-        final class GetFixedDepositAccountsCurrency {
-            private GetFixedDepositAccountsCurrency() {
-            }
+        static final class GetFixedDepositAccountsCurrency {
+
+            private GetFixedDepositAccountsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -121,9 +121,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositAccountsInterestCompoundingPeriodType {
-            private GetFixedDepositAccountsInterestCompoundingPeriodType() {
-            }
+        static final class GetFixedDepositAccountsInterestCompoundingPeriodType {
+
+            private GetFixedDepositAccountsInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -133,9 +133,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestPostingPeriodType {
-            private GetFixedDepositAccountsInterestPostingPeriodType() {
-            }
+        static final class GetFixedDepositAccountsInterestPostingPeriodType {
+
+            private GetFixedDepositAccountsInterestPostingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -145,9 +145,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestCalculationType {
-            private GetFixedDepositAccountsInterestCalculationType() {
-            }
+        static final class GetFixedDepositAccountsInterestCalculationType {
+
+            private GetFixedDepositAccountsInterestCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -157,9 +157,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsInterestCalculationDaysInYearType {
-            private GetFixedDepositAccountsInterestCalculationDaysInYearType() {
-            }
+        static final class GetFixedDepositAccountsInterestCalculationDaysInYearType {
+
+            private GetFixedDepositAccountsInterestCalculationDaysInYearType() {}
 
             @ApiModelProperty(example = "365")
             public Integer id;
@@ -169,18 +169,18 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsSummary {
-            private GetFixedDepositAccountsSummary() {
-            }
+        static final class GetFixedDepositAccountsSummary {
+
+            private GetFixedDepositAccountsSummary() {}
 
             public GetFixedDepositAccountsCurrency currency;
             @ApiModelProperty(example = "0")
             public Float accountBalance;
         }
 
-        final class GetFixedDepositAccountsMinDepositTermType {
-            private GetFixedDepositAccountsMinDepositTermType() {
-            }
+        static final class GetFixedDepositAccountsMinDepositTermType {
+
+            private GetFixedDepositAccountsMinDepositTermType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -190,9 +190,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsMaxDepositTermType {
-            private GetFixedDepositAccountsMaxDepositTermType() {
-            }
+        static final class GetFixedDepositAccountsMaxDepositTermType {
+
+            private GetFixedDepositAccountsMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -202,9 +202,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositAccountsDepositPeriodFrequency {
-            private GetFixedDepositAccountsDepositPeriodFrequency() {
-            }
+        static final class GetFixedDepositAccountsDepositPeriodFrequency {
+
+            private GetFixedDepositAccountsDepositPeriodFrequency() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -258,9 +258,9 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsRequest")
-    public final static class PostFixedDepositAccountsRequest {
-        private PostFixedDepositAccountsRequest() {
-        }
+    public static final class PostFixedDepositAccountsRequest {
+
+        private PostFixedDepositAccountsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer clientId;
@@ -281,9 +281,9 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsResponse")
-    public final static class PostFixedDepositAccountsResponse {
-        private PostFixedDepositAccountsResponse() {
-        }
+    public static final class PostFixedDepositAccountsResponse {
+
+        private PostFixedDepositAccountsResponse() {}
 
         @ApiModelProperty(example = "2")
         public Integer officeId;
@@ -296,21 +296,21 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositAccountsAccountIdResponse")
-    public final static class GetFixedDepositAccountsAccountIdResponse {
-        private GetFixedDepositAccountsAccountIdResponse() {
-        }
+    public static final class GetFixedDepositAccountsAccountIdResponse {
 
-        final class GetFixedDepositAccountsAccountChart {
-            private GetFixedDepositAccountsAccountChart() {
-            }
+        private GetFixedDepositAccountsAccountIdResponse() {}
 
-            final class GetFixedDepositAccountsChartSlabs {
-                private GetFixedDepositAccountsChartSlabs() {
-                }
+        static final class GetFixedDepositAccountsAccountChart {
 
-                final class GetFixedDepositAccountsPeriodType {
-                    private GetFixedDepositAccountsPeriodType() {
-                    }
+            private GetFixedDepositAccountsAccountChart() {}
+
+            static final class GetFixedDepositAccountsChartSlabs {
+
+                private GetFixedDepositAccountsChartSlabs() {}
+
+                static final class GetFixedDepositAccountsPeriodType {
+
+                    private GetFixedDepositAccountsPeriodType() {}
 
                     @ApiModelProperty(example = "0")
                     public Integer id;
@@ -320,9 +320,9 @@ final class FixedDepositAccountsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetFixedDepositAccountsAccountChartCurrency {
-                    private GetFixedDepositAccountsAccountChartCurrency() {
-                    }
+                static final class GetFixedDepositAccountsAccountChartCurrency {
+
+                    private GetFixedDepositAccountsAccountChartCurrency() {}
 
                     @ApiModelProperty(example = "USD")
                     public String code;
@@ -350,9 +350,9 @@ final class FixedDepositAccountsApiResourceSwagger {
                 public GetFixedDepositAccountsAccountChartCurrency currency;
             }
 
-            final class GetFixedDepositAccountsPeriodTypes {
-                private GetFixedDepositAccountsPeriodTypes() {
-                }
+            static final class GetFixedDepositAccountsPeriodTypes {
+
+                private GetFixedDepositAccountsPeriodTypes() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -374,9 +374,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public Set<GetFixedDepositAccountsPeriodTypes> periodTypes;
         }
 
-        final class GetFixedDepositAccountsAccountIdCurrency {
-            private GetFixedDepositAccountsAccountIdCurrency() {
-            }
+        static final class GetFixedDepositAccountsAccountIdCurrency {
+
+            private GetFixedDepositAccountsAccountIdCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -394,9 +394,9 @@ final class FixedDepositAccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositAccountsAccountIdSummary {
-            private GetFixedDepositAccountsAccountIdSummary() {
-            }
+        static final class GetFixedDepositAccountsAccountIdSummary {
+
+            private GetFixedDepositAccountsAccountIdSummary() {}
 
             public GetFixedDepositAccountsAccountIdCurrency currency;
             @ApiModelProperty(example = "0")
@@ -450,9 +450,9 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositAccountsAccountIdRequest")
-    public final static class PutFixedDepositAccountsAccountIdRequest {
-        private PutFixedDepositAccountsAccountIdRequest() {
-        }
+    public static final class PutFixedDepositAccountsAccountIdRequest {
+
+        private PutFixedDepositAccountsAccountIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -461,13 +461,13 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositAccountsAccountIdResponse")
-    public final static class PutFixedDepositAccountsAccountIdResponse {
-        private PutFixedDepositAccountsAccountIdResponse() {
-        }
+    public static final class PutFixedDepositAccountsAccountIdResponse {
 
-        final class PutFixedDepositAccountsChanges {
-            private PutFixedDepositAccountsChanges() {
-            }
+        private PutFixedDepositAccountsAccountIdResponse() {}
+
+        static final class PutFixedDepositAccountsChanges {
+
+            private PutFixedDepositAccountsChanges() {}
 
             @ApiModelProperty(example = "6000")
             public Float depositAmount;
@@ -487,15 +487,15 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositAccountsAccountIdRequest")
-    public final static class PostFixedDepositAccountsAccountIdRequest {
-        private PostFixedDepositAccountsAccountIdRequest() {
-        }
+    public static final class PostFixedDepositAccountsAccountIdRequest {
+
+        private PostFixedDepositAccountsAccountIdRequest() {}
     }
 
     @ApiModel(value = "PostFixedDepositAccountsAccountIdResponse")
-    public final static class PostFixedDepositAccountsAccountIdResponse {
-        private PostFixedDepositAccountsAccountIdResponse() {
-        }
+    public static final class PostFixedDepositAccountsAccountIdResponse {
+
+        private PostFixedDepositAccountsAccountIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -508,9 +508,9 @@ final class FixedDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteFixedDepositAccountsAccountIdResponse")
-    public final static class DeleteFixedDepositAccountsAccountIdResponse {
-        private DeleteFixedDepositAccountsAccountIdResponse() {
-        }
+    public static final class DeleteFixedDepositAccountsAccountIdResponse {
+
+        private DeleteFixedDepositAccountsAccountIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

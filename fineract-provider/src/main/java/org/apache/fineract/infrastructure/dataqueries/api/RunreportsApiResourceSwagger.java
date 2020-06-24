@@ -26,14 +26,18 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
  * Created by sanyam on 5/8/17.
  */
 final class RunreportsApiResourceSwagger {
+
     private RunreportsApiResourceSwagger() {
 
     }
+
     @ApiModel(value = "GetReportNameResponse")
     public static final class GetReportNameResponse {
+
         private GetReportNameResponse() {
 
         }
+
         public ResultsetColumnHeaderData columnHeaders;
         public ResultsetRowData row;
     }

@@ -34,11 +34,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<ShareProductData> sharedProductDataList;
     private List<ChargeData> chargesForSharedProducts;
-    private Map<Long,Integer[]>productToBeginEndIndexesofCharges;
+    private Map<Long, Integer[]> productToBeginEndIndexesofCharges;
 
-    private static final int PRODUCT_ID=0;
+    private static final int PRODUCT_ID = 0;
     private static final int PRODUCT_NAME_COL = 1;
     private static final int CURRENCY_COL = 2;
     private static final int DECIMAL_PLACES_COL = 3;
@@ -51,17 +52,15 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
     private static final int CHARGES_ID_3_COL = 11;
     private static final int CHARGES_NAME_3_COL = 12;
 
-
-
-    public SharedProductsSheetPopulator(List<ShareProductData> shareProductDataList,List<ChargeData> chargesForShares) {
-        this.sharedProductDataList=shareProductDataList;
-        this.chargesForSharedProducts=chargesForShares;
+    public SharedProductsSheetPopulator(List<ShareProductData> shareProductDataList, List<ChargeData> chargesForShares) {
+        this.sharedProductDataList = shareProductDataList;
+        this.chargesForSharedProducts = chargesForShares;
 
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
-        Sheet sharedProductsSheet=workbook.createSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME);
+    public void populate(Workbook workbook, String dateFormat) {
+        Sheet sharedProductsSheet = workbook.createSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME);
         setLayout(sharedProductsSheet);
         populateSheet(sharedProductsSheet);
         sharedProductsSheet.protectSheet("");
@@ -72,29 +71,30 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
         int startIndexCharges = 1;
         int endIndexCharges = 0;
         productToBeginEndIndexesofCharges = new HashMap<>();
-            for (ShareProductData productData : sharedProductDataList) {
-                Row row = sharedProductsSheet.createRow(++index);
-                writeLong(PRODUCT_ID, row, productData.getId());
-                writeString(PRODUCT_NAME_COL, row, productData.getName().replaceAll("[ ]", "_"));
-                writeString(CURRENCY_COL, row, productData.getCurrency().getName().replaceAll("[ ]", "_"));
-                writeInt(DECIMAL_PLACES_COL, row, productData.getCurrency().decimalPlaces());
-                writeBigDecimal(TODAYS_PRICE_COL, row, deriveMarketPrice(productData));
-                writeInt(CURRENCY_IN_MULTIPLES_COL,row,productData.getCurrency().currencyInMultiplesOf());
-                if (chargesForSharedProducts != null) {
-                    int chargeRowIndex=0;
-                    for (ChargeData chargeData:chargesForSharedProducts) {
-                        if (chargeData.getCurrency().getName().equals(productData.getCurrency().getName())) {
-                            writeString(CHARGES_NAME_1_COL+chargeRowIndex, row, chargeData.getName());
-                            writeLong(CHARGES_ID_1_COL+chargeRowIndex, row, chargeData.getId());
-                            chargeRowIndex+=2;
-                            endIndexCharges++;
-                        }
+        for (ShareProductData productData : sharedProductDataList) {
+            Row row = sharedProductsSheet.createRow(++index);
+            writeLong(PRODUCT_ID, row, productData.getId());
+            writeString(PRODUCT_NAME_COL, row, productData.getName().replaceAll("[ ]", "_"));
+            writeString(CURRENCY_COL, row, productData.getCurrency().getName().replaceAll("[ ]", "_"));
+            writeInt(DECIMAL_PLACES_COL, row, productData.getCurrency().decimalPlaces());
+            writeBigDecimal(TODAYS_PRICE_COL, row, deriveMarketPrice(productData));
+            writeInt(CURRENCY_IN_MULTIPLES_COL, row, productData.getCurrency().currencyInMultiplesOf());
+            if (chargesForSharedProducts != null) {
+                int chargeRowIndex = 0;
+                for (ChargeData chargeData : chargesForSharedProducts) {
+                    if (chargeData.getCurrency().getName().equals(productData.getCurrency().getName())) {
+                        writeString(CHARGES_NAME_1_COL + chargeRowIndex, row, chargeData.getName());
+                        writeLong(CHARGES_ID_1_COL + chargeRowIndex, row, chargeData.getId());
+                        chargeRowIndex += 2;
+                        endIndexCharges++;
                     }
-                    productToBeginEndIndexesofCharges.put(productData.getId(), new Integer[]{startIndexCharges, endIndexCharges});
-                    startIndexCharges = endIndexCharges + 1;
                 }
+                productToBeginEndIndexesofCharges.put(productData.getId(), new Integer[] { startIndexCharges, endIndexCharges });
+                startIndexCharges = endIndexCharges + 1;
             }
+        }
     }
+
     private BigDecimal deriveMarketPrice(final ShareProductData shareProductData) {
         BigDecimal marketValue = shareProductData.getUnitPrice();
         Collection<ShareProductMarketPriceData> marketDataSet = shareProductData.getMarketPrice();
@@ -111,44 +111,44 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void setLayout(Sheet workSheet) {
-        Row rowHeader=workSheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
+        Row rowHeader = workSheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
 
-        workSheet.setColumnWidth(PRODUCT_ID,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(PRODUCT_ID,rowHeader,"Product Id");
+        workSheet.setColumnWidth(PRODUCT_ID, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(PRODUCT_ID, rowHeader, "Product Id");
 
-        workSheet.setColumnWidth(PRODUCT_NAME_COL,TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        writeString(PRODUCT_NAME_COL,rowHeader,"Product Name");
+        workSheet.setColumnWidth(PRODUCT_NAME_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        writeString(PRODUCT_NAME_COL, rowHeader, "Product Name");
 
-        workSheet.setColumnWidth(CURRENCY_COL,TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        writeString(CURRENCY_COL,rowHeader,"Currency");
+        workSheet.setColumnWidth(CURRENCY_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        writeString(CURRENCY_COL, rowHeader, "Currency");
 
-        workSheet.setColumnWidth(DECIMAL_PLACES_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(DECIMAL_PLACES_COL,rowHeader,"Decimal Places");
+        workSheet.setColumnWidth(DECIMAL_PLACES_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(DECIMAL_PLACES_COL, rowHeader, "Decimal Places");
 
-        workSheet.setColumnWidth(TODAYS_PRICE_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(TODAYS_PRICE_COL,rowHeader,"Today's Price");
+        workSheet.setColumnWidth(TODAYS_PRICE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(TODAYS_PRICE_COL, rowHeader, "Today's Price");
 
-        workSheet.setColumnWidth(CURRENCY_IN_MULTIPLES_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CURRENCY_IN_MULTIPLES_COL,rowHeader,"Currency in multiples of");
+        workSheet.setColumnWidth(CURRENCY_IN_MULTIPLES_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CURRENCY_IN_MULTIPLES_COL, rowHeader, "Currency in multiples of");
 
-        workSheet.setColumnWidth(CHARGES_NAME_1_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_NAME_1_COL,rowHeader,"Charges Name 1");
+        workSheet.setColumnWidth(CHARGES_NAME_1_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_NAME_1_COL, rowHeader, "Charges Name 1");
 
-        workSheet.setColumnWidth(CHARGES_ID_1_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_ID_1_COL,rowHeader,"Charges Id 1");
+        workSheet.setColumnWidth(CHARGES_ID_1_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_ID_1_COL, rowHeader, "Charges Id 1");
 
-        workSheet.setColumnWidth(CHARGES_NAME_2_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_NAME_2_COL,rowHeader,"Charges Name 2");
+        workSheet.setColumnWidth(CHARGES_NAME_2_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_NAME_2_COL, rowHeader, "Charges Name 2");
 
-        workSheet.setColumnWidth(CHARGES_ID_2_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_ID_2_COL,rowHeader,"Charges Id 2");
+        workSheet.setColumnWidth(CHARGES_ID_2_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_ID_2_COL, rowHeader, "Charges Id 2");
 
-        workSheet.setColumnWidth(CHARGES_NAME_3_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_NAME_3_COL,rowHeader,"Charges Name 3");
+        workSheet.setColumnWidth(CHARGES_NAME_3_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_NAME_3_COL, rowHeader, "Charges Name 3");
 
-        workSheet.setColumnWidth(CHARGES_ID_3_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        writeString(CHARGES_ID_3_COL,rowHeader,"Charges Id 3");
+        workSheet.setColumnWidth(CHARGES_ID_3_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        writeString(CHARGES_ID_3_COL, rowHeader, "Charges Id 3");
 
     }
 

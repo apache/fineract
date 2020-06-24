@@ -69,15 +69,12 @@ import org.springframework.stereotype.Component;
 @Path("/users")
 @Component
 @Scope("singleton")
-@Api(tags = {"Users"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Users", description = "An API capability to support administration of application users.")
-})
+@Api(tags = { "Users" })
+@SwaggerDefinition(tags = { @Tag(name = "Users", description = "An API capability to support administration of application users.") })
 public class UsersApiResource {
 
     /**
-     * The set of parameters that are supported in response for
-     * {@link AppUserData}.
+     * The set of parameters that are supported in response for {@link AppUserData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
             "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
@@ -106,13 +103,15 @@ public class UsersApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
-        this.bulkImportWorkbookService=bulkImportWorkbookService;
+        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
+        this.bulkImportWorkbookService = bulkImportWorkbookService;
     }
 
     @GET
-    @ApiOperation(value = "Retrieve list of users", notes = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n" + "users?fields=id,username,email,officeName")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersResponse.class, responseContainer = "List")})
+    @ApiOperation(value = "Retrieve list of users", notes = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n"
+            + "users?fields=id,username,email,officeName")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersResponse.class, responseContainer = "List") })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
@@ -127,8 +126,9 @@ public class UsersApiResource {
 
     @GET
     @Path("{userId}")
-    @ApiOperation(value = "Retrieve a User", notes = "Example Requests:\n" + "\n" + "users/1\n" + "\n" + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersUserIdResponse.class)})
+    @ApiOperation(value = "Retrieve a User", notes = "Example Requests:\n" + "\n" + "users/1\n" + "\n" + "\n" + "users/1?template=true\n"
+            + "\n" + "\n" + "users/1?fields=username,officeName")
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersUserIdResponse.class) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("userId") @ApiParam(value = "userId") final Long userId, @Context final UriInfo uriInfo) {
@@ -148,8 +148,9 @@ public class UsersApiResource {
 
     @GET
     @Path("template")
-    @ApiOperation(value = "Retrieve User Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "users/template")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersTemplateResponse.class)})
+    @ApiOperation(value = "Retrieve User Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "users/template")
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersTemplateResponse.class) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@Context final UriInfo uriInfo) {
@@ -163,9 +164,13 @@ public class UsersApiResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a User", notes = "Adds new application user.\n" + "\n" + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n" + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n" + "Optional Fields: \n" + "staffId,passwordNeverExpires,isSelfServiceUser,clients")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PostUsersRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PostUsersResponse.class)})
+    @ApiOperation(value = "Create a User", notes = "Adds new application user.\n" + "\n"
+            + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n"
+            + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n"
+            + "Optional Fields: \n" + "staffId,passwordNeverExpires,isSelfServiceUser,clients")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PostUsersRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PostUsersResponse.class) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -183,11 +188,13 @@ public class UsersApiResource {
     @PUT
     @Path("{userId}")
     @ApiOperation(value = "Update a User", notes = "When updating a password you must provide the repeatPassword parameter also.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PutUsersUserIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PutUsersUserIdResponse.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PutUsersUserIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PutUsersUserIdResponse.class) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("userId") @ApiParam(value = "userId") final Long userId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String update(@PathParam("userId") @ApiParam(value = "userId") final Long userId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateUser(userId) //
@@ -202,7 +209,7 @@ public class UsersApiResource {
     @DELETE
     @Path("{userId}")
     @ApiOperation(value = "Delete a User", notes = "Removes the user and the associated roles and permissions.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("userId") @ApiParam(value = "userId") final Long userId) {
@@ -219,19 +226,19 @@ public class UsersApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
-    public Response getUserTemplate(@QueryParam("officeId")final Long officeId,@QueryParam("staffId")final Long staffId,
+    public Response getUserTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
             @QueryParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.USERS.toString(), officeId, staffId,dateFormat);
+        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.USERS.toString(), officeId, staffId, dateFormat);
     }
 
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail,
-            @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat){
-        final Long importDocumentId = this. bulkImportWorkbookService.importWorkbook(GlobalEntityType.USERS.toString(), uploadedInputStream,fileDetail,
-                locale,dateFormat);
+            @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
+            @FormDataParam("dateFormat") final String dateFormat) {
+        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.USERS.toString(), uploadedInputStream,
+                fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
 }

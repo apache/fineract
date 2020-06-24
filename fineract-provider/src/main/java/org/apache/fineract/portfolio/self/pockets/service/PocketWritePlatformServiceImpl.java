@@ -51,9 +51,8 @@ public class PocketWritePlatformServiceImpl implements PocketWritePlatformServic
     private final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService;
 
     @Autowired
-    public PocketWritePlatformServiceImpl(final PlatformSecurityContext context,
-            PocketDataValidator pocketDataValidator, final AccountEntityServiceFactory accountEntityServiceFactory,
-            final PocketRepositoryWrapper pocketRepositoryWrapper,
+    public PocketWritePlatformServiceImpl(final PlatformSecurityContext context, PocketDataValidator pocketDataValidator,
+            final AccountEntityServiceFactory accountEntityServiceFactory, final PocketRepositoryWrapper pocketRepositoryWrapper,
             final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper,
             final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService) {
         this.context = context;
@@ -86,12 +85,10 @@ public class PocketWritePlatformServiceImpl implements PocketWritePlatformServic
             final Long accountId = element.get(PocketApiConstants.accountIdParamName).getAsLong();
             final String accountType = element.get(PocketApiConstants.accountTypeParamName).getAsString();
 
-            final AccountEntityService accountEntityService = this.accountEntityServiceFactory
-                    .getAccountEntityService(accountType);
+            final AccountEntityService accountEntityService = this.accountEntityServiceFactory.getAccountEntityService(accountType);
             accountEntityService.validateSelfUserAccountMapping(accountId);
             Integer accountTypeValue = EntityAccountType.valueOf(accountType).getValue();
-            if (this.pocketAccountMappingReadPlatformService.validatePocketAndAccountMapping(pocketId, accountId,
-                    accountTypeValue)) {
+            if (this.pocketAccountMappingReadPlatformService.validatePocketAndAccountMapping(pocketId, accountId, accountTypeValue)) {
                 throw new PlatformDataIntegrityException(PocketApiConstants.duplicateMappingException,
                         PocketApiConstants.duplicateMappingExceptionMessage, accountId, accountType);
             }
@@ -111,8 +108,7 @@ public class PocketWritePlatformServiceImpl implements PocketWritePlatformServic
         this.pocketDataValidator.validateForDeLinkingAccounts(command.json());
         JsonArray pocketAccountMappingList = command.arrayOfParameterNamed(PocketApiConstants.pocketAccountMappingList);
 
-        Long pocketId = this.pocketRepositoryWrapper
-                .findByAppUserIdWithNotFoundDetection(this.context.authenticatedUser().getId());
+        Long pocketId = this.pocketRepositoryWrapper.findByAppUserIdWithNotFoundDetection(this.context.authenticatedUser().getId());
 
         final List<PocketAccountMapping> pocketAccounts = new ArrayList<>();
 

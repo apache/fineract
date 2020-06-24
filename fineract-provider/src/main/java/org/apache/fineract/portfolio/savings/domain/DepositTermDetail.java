@@ -41,8 +41,7 @@ import org.joda.time.Weeks;
 import org.joda.time.Years;
 
 /**
- * DepositTermDetail encapsulates all the details of a
- * {@link FixedDepositProduct} that are also used and persisted by a
+ * DepositTermDetail encapsulates all the details of a {@link FixedDepositProduct} that are also used and persisted by a
  * {@link FixedDepositAccount}.
  */
 @Embeddable
@@ -129,8 +128,8 @@ public class DepositTermDetail {
         }
 
         if (isMinDepositTermGreaterThanMaxDepositTerm()) {
-            baseDataValidator.parameter(minDepositTermParamName).value(this.minDepositTerm)
-                    .failWithCode(".greater.than.maxDepositTerm", this.minDepositTerm, this.maxDepositTerm);
+            baseDataValidator.parameter(minDepositTermParamName).value(this.minDepositTerm).failWithCode(".greater.than.maxDepositTerm",
+                    this.minDepositTerm, this.maxDepositTerm);
         }
 
         return actualChanges;
@@ -140,7 +139,9 @@ public class DepositTermDetail {
         if (this.minDepositTerm != null && this.maxDepositTerm != null) {
             final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
             final Integer maxDepositInDays = this.convertToSafeDays(maxDepositTerm, SavingsPeriodFrequencyType.fromInt(maxDepositTermType));
-            if (minDepositInDays.compareTo(maxDepositInDays) > 0) { return true; }
+            if (minDepositInDays.compareTo(maxDepositInDays) > 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -181,7 +182,7 @@ public class DepositTermDetail {
             final Integer inMultiplesOfInDays = this.convertToSafeDays(this.inMultiplesOfDepositTerm(),
                     SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType()));
             final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
-            if(inMultiplesOfInDays!=0) {
+            if (inMultiplesOfInDays != 0) {
                 isValidInMultiplesOfPeriod = ((depositPeriodInDays - minDepositInDays) % inMultiplesOfInDays == 0);
             }
         }
@@ -260,8 +261,8 @@ public class DepositTermDetail {
         final SavingsPeriodFrequencyType minDepositTermType = SavingsPeriodFrequencyType.fromInt(this.minDepositTermType);
         final SavingsPeriodFrequencyType maxDepositTermType = SavingsPeriodFrequencyType.fromInt(this.maxDepositTermType);
         final Integer inMultiplesOfDepositTerm = this.inMultiplesOfDepositTerm;
-        final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = SavingsPeriodFrequencyType.fromInt(this
-                .inMultiplesOfDepositTermType());
+        final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = SavingsPeriodFrequencyType
+                .fromInt(this.inMultiplesOfDepositTermType());
 
         return DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                 inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);

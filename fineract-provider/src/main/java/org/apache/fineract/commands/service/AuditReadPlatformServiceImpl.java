@@ -74,10 +74,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
-    private final static Set<String> supportedOrderByValues = new HashSet<>(
-            Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName",
-                    "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
+    private static final Logger LOG = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
+    private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+            "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo",
+            "clientId", "loanId", "maker", "checker", "processingResult"));
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -100,8 +100,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final DepositProductReadPlatformService depositProductReadPlatformService,
-            final ColumnValidator columnValidator) {
+            final DepositProductReadPlatformService depositProductReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -186,7 +185,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     @Override
     public Collection<AuditData> retrieveAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson) {
-        return retrieveEntries("audit", extraCriteria, " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null), includeJson);
+        return retrieveEntries("audit", extraCriteria, " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null),
+                includeJson);
     }
 
     @Override
@@ -214,7 +214,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
         }
 
-        logger.info("sql: {}", sqlBuilder);
+        LOG.info("sql: {}", sqlBuilder);
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(), rm);
@@ -226,10 +226,13 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         return retrieveEntries("makerchecker", extraCriteria, " group by aud.id order by aud.id", includeJson);
     }
 
-    private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL, final boolean includeJson) {
+    private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
+            final boolean includeJson) {
 
-        if ((!useType.equals("audit") && !useType.equals("makerchecker"))) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.auditSearchTemplate.useType", "Invalid Audit Search Template UseType: " + useType); }
+        if ((!useType.equals("audit") && !useType.equals("makerchecker"))) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                    "Invalid Audit Search Template UseType: " + useType);
+        }
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -251,7 +254,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
         sql += extraCriteria.getSQLTemplate();
         sql += groupAndOrderBySQL;
-        logger.info("sql: {}", sql);
+        LOG.info("sql: {}", sql);
 
         return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
     }
@@ -427,8 +430,10 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     @Override
     public AuditSearchData retrieveSearchTemplate(final String useType) {
 
-        if (!(useType.equals("audit") || useType.equals("makerchecker"))) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.auditSearchTemplate.useType", "Invalid Audit Search Template UseType: " + useType); }
+        if (!(useType.equals("audit") || useType.equals("makerchecker"))) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                    "Invalid Audit Search Template UseType: " + useType);
+        }
 
         final AppUser currentUser = this.context.authenticatedUser();
 

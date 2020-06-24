@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class DepositAccountInterestRateChartNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public DepositAccountInterestRateChartNotFoundException(final Long id) {
-        super("error.msg.deposit.account.interest.rate.chart.id.invalid", "Deposit Account Interest rate chart with identifier " + id
-                + " does not exist", id);
+        super("error.msg.deposit.account.interest.rate.chart.id.invalid",
+                "Deposit Account Interest rate chart with identifier " + id + " does not exist", id);
     }
 }

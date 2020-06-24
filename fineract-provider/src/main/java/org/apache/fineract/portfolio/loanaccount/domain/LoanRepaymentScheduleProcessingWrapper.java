@@ -26,8 +26,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.joda.time.LocalDate;
 
 /**
- * A wrapper around loan schedule related data exposing needed behaviour by
- * loan.
+ * A wrapper around loan schedule related data exposing needed behaviour by loan.
  */
 public class LoanRepaymentScheduleProcessingWrapper {
 
@@ -50,8 +49,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
             final Money feeChargesWrittenOffForRepaymentPeriod = cumulativeFeeChargesWrittenOffWithin(startDate, period.getDueDate(),
                     loanCharges, currency, !period.isRecalculatedInterestComponent());
 
-            final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(),
-                    loanCharges, currency, period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent());
+            final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(), loanCharges,
+                    currency, period, totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent());
             final Money penaltyChargesWaivedForRepaymentPeriod = cumulativePenaltyChargesWaivedWithin(startDate, period.getDueDate(),
                     loanCharges, currency, !period.isRecalculatedInterestComponent());
             final Money penaltyChargesWrittenOffForRepaymentPeriod = cumulativePenaltyChargesWrittenOffWithin(startDate,
@@ -76,8 +75,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     if (loanCharge.getChargeCalculation().isPercentageBased()) {
                         BigDecimal amount = BigDecimal.ZERO;
                         if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
-                            amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount()).add(
-                                    period.getInterestCharged(monetaryCurrency).getAmount());
+                            amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount())
+                                    .add(period.getInterestCharged(monetaryCurrency).getAmount());
                         } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
                             amount = amount.add(period.getInterestCharged(monetaryCurrency).getAmount());
                         } else {
@@ -104,7 +103,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         // multi disburment loan.
                         // Then we need to get as of this loan charge due date
                         // how much amount disbursed.
-                        if (loanCharge.getLoan() != null && loanCharge.isSpecifiedDueDate() && loanCharge.getLoan().isMultiDisburmentLoan()) {
+                        if (loanCharge.getLoan() != null && loanCharge.isSpecifiedDueDate()
+                                && loanCharge.getLoan().isMultiDisburmentLoan()) {
                             for (final LoanDisbursementDetails loanDisbursementDetails : loanCharge.getLoan().getDisbursementDetails()) {
                                 if (!loanDisbursementDetails.expectedDisbursementDate().after(loanCharge.getDueDate())) {
                                     amount = amount.add(loanDisbursementDetails.principal());
@@ -179,8 +179,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     if (loanCharge.getChargeCalculation().isPercentageBased()) {
                         BigDecimal amount = BigDecimal.ZERO;
                         if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
-                            amount = amount.add(period.getPrincipal(currency).getAmount()).add(
-                                    period.getInterestCharged(currency).getAmount());
+                            amount = amount.add(period.getPrincipal(currency).getAmount())
+                                    .add(period.getInterestCharged(currency).getAmount());
                         } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
                             amount = amount.add(period.getInterestCharged(currency).getAmount());
                         } else {

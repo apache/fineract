@@ -39,7 +39,7 @@ public class DeleteInterestRateChartSlabCommandHandler implements NewCommandSour
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        //command.subentityId(); //returns chart id
+        // command.subentityId(); //returns chart id
         return this.writePlatformService.deleteChartSlab(command.entityId(), command.subentityId());
     }
 }

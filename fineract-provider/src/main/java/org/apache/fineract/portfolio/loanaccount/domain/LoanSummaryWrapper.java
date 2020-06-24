@@ -26,8 +26,7 @@ import org.joda.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 /**
- * A wrapper for dealing with side-effect free functionality related to a loans
- * transactions and repayment schedule.
+ * A wrapper for dealing with side-effect free functionality related to a loans transactions and repayment schedule.
  */
 @Component
 public final class LoanSummaryWrapper {
@@ -126,11 +125,10 @@ public final class LoanSummaryWrapper {
         return total;
     }
 
-    public Money calculateTotalFeeChargesWaived(Set<LoanCharge> charges,
-            final MonetaryCurrency currency) {
+    public Money calculateTotalFeeChargesWaived(Set<LoanCharge> charges, final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanCharge charge : charges) {
-            if(charge.isActive() && !charge.isPenaltyCharge()){
+            if (charge.isActive() && !charge.isPenaltyCharge()) {
                 total = total.plus(charge.getAmountWaived(currency));
             }
         }
@@ -235,7 +233,7 @@ public final class LoanSummaryWrapper {
 
     public Money calculateTotalChargesRepaidAtDisbursement(Set<LoanCharge> charges, MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        if(charges == null) {
+        if (charges == null) {
             return total;
         }
         for (final LoanCharge loanCharge : charges) {

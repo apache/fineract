@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.organisation.workingdays.domain;
 
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class WorkingDaysEnumerations {
@@ -27,32 +26,33 @@ public class WorkingDaysEnumerations {
         return repaymentRescheduleType(RepaymentRescheduleType.fromInt(id));
     }
 
-    public static EnumOptionData repaymentRescheduleType(final RepaymentRescheduleType type){
+    public static EnumOptionData repaymentRescheduleType(final RepaymentRescheduleType type) {
         EnumOptionData optionData = null;
-        switch(type){
+        switch (type) {
             case INVALID:
-                optionData = new EnumOptionData(RepaymentRescheduleType.INVALID.getValue().longValue(),RepaymentRescheduleType.INVALID.getCode(),
-                        "invalid");
+                optionData = new EnumOptionData(RepaymentRescheduleType.INVALID.getValue().longValue(),
+                        RepaymentRescheduleType.INVALID.getCode(), "invalid");
             break;
 
             case SAME_DAY:
-                optionData = new EnumOptionData(RepaymentRescheduleType.SAME_DAY.getValue().longValue(),RepaymentRescheduleType.SAME_DAY.getCode(),
-                        "same day");
+                optionData = new EnumOptionData(RepaymentRescheduleType.SAME_DAY.getValue().longValue(),
+                        RepaymentRescheduleType.SAME_DAY.getCode(), "same day");
 
-                break;
+            break;
             case MOVE_TO_NEXT_WORKING_DAY:
-                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getValue().longValue(),RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getCode(),
-                        "move to next working day");
-                break;
+                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getValue().longValue(),
+                        RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getCode(), "move to next working day");
+            break;
 
             case MOVE_TO_NEXT_REPAYMENT_MEETING_DAY:
-                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue().longValue(),RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getCode(),
-                        "move to next repayment meeting day");
-                break;
+                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue().longValue(),
+                        RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getCode(), "move to next repayment meeting day");
+            break;
             case MOVE_TO_PREVIOUS_WORKING_DAY:
-                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getValue().longValue(),RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getCode(),
-                        "move to previous working day");
-                break;
+                optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getValue().longValue(),
+                        RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getCode(), "move to previous working day");
+            break;
+            default:
         }
 
         return optionData;

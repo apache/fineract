@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 
 public class CurrencyDomain implements Comparable<CurrencyDomain> {
 
-    public static class Builder {
+    public static final class Builder {
 
         private String code;
         private String name;
@@ -57,8 +57,8 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
         super();
     }
 
-    private CurrencyDomain(final String code, final String name, final int decimalPlaces, final String displaySymbol,
-            final String nameCode, final String displayLabel) {
+    private CurrencyDomain(final String code, final String name, final int decimalPlaces, final String displaySymbol, final String nameCode,
+            final String displayLabel) {
         super();
         this.code = code;
         this.name = name;
@@ -133,7 +133,9 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
         if (!(obj instanceof CurrencyDomain)) {
             return false;

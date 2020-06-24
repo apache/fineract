@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
 public class LoanRescheduleRequestHelper {
+
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -61,6 +62,6 @@ public class LoanRescheduleRequestHelper {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER;
 
         final Integer id = Utils.performServerGet(requestSpec, responseSpec, URL, "id");
-        assertEquals("ERROR IN CREATING LOAN RESCHEDULE REQUEST", requestId, id);
+        assertEquals(requestId, id, "ERROR IN CREATING LOAN RESCHEDULE REQUES");
     }
 }

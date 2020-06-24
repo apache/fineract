@@ -53,7 +53,8 @@ public class LoanInterestRecalculationData {
             final Integer recalculationRestFrequencyOnDay, final CalendarData compoundingCalendarData,
             final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
             final EnumOptionData recalculationCompoundingFrequencyNthDay, final EnumOptionData recalculationCompoundingFrequencyWeekday,
-            final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction, final Boolean allowCompoundingOnEod) {
+            final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction,
+            final Boolean allowCompoundingOnEod) {
         this.id = id;
         this.loanId = loanId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;

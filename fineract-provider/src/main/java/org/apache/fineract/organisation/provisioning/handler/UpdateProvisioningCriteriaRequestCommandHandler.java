@@ -34,7 +34,8 @@ public class UpdateProvisioningCriteriaRequestCommandHandler implements NewComma
     private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
 
     @Autowired
-    public UpdateProvisioningCriteriaRequestCommandHandler(final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
+    public UpdateProvisioningCriteriaRequestCommandHandler(
+            final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
         this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
     }
 

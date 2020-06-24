@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class CurrenciesHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(CurrenciesHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(CurrenciesHelper.class);
     private static final String CURRENCIES_URL = "/fineract-provider/api/v1/currencies";
 
     public static ArrayList<CurrencyDomain> getAllCurrencies(final RequestSpecification requestSpec,
@@ -75,7 +76,7 @@ public class CurrenciesHelper {
     private static String currenciesToJSON(final ArrayList<String> currencies) {
         HashMap map = new HashMap<>();
         map.put("currencies", currencies);
-        LOG.info("map :  {}" , map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 }

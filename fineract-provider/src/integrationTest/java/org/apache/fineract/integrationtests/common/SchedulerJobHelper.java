@@ -22,10 +22,8 @@ import static java.time.Instant.now;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -45,7 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SchedulerJobHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification response200Spec;
     private final ResponseSpecification response202Spec;
@@ -54,12 +53,6 @@ public class SchedulerJobHelper {
         this.requestSpec = requestSpec;
         this.response200Spec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.response202Spec = new ResponseSpecBuilder().expectStatusCode(202).build();
-    }
-
-    public SchedulerJobHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec200, final ResponseSpecification responseSpec202) {
-        this.requestSpec = requestSpec;
-        this.response200Spec = responseSpec200;
-        this.response202Spec = responseSpec202;
     }
 
     private List<Map<String, Object>> getAllSchedulerJobs() {
@@ -86,7 +79,7 @@ public class SchedulerJobHelper {
         final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
         final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_BY_ID_URL, "");
-        LOG.info("{}",response.toString());
+        LOG.info("{}", response.toString());
         assertNotNull(response);
         return response;
     }
@@ -116,16 +109,8 @@ public class SchedulerJobHelper {
     private static String updateSchedulerJobAsJSON(final boolean active) {
         final Map<String, String> map = new HashMap<>();
         map.put("active", Boolean.toString(active));
-        LOG.info("map :  {}" , map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> getSchedulerJobHistory(int jobId) {
-        final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/jobs/" + jobId + "/runhistory?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("------------------------ RETRIEVING SCHEDULER JOB HISTORY -------------------------");
-        final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_STATUS_URL, "");
-        return (List<Map<String, Object>>) response.get("pageItems");
     }
 
     private void runSchedulerJob(int jobId) {
@@ -149,48 +134,15 @@ public class SchedulerJobHelper {
                 return (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
             }
         }
-        throw new IllegalArgumentException("No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
-    }
-
-    // FINERACT-922 TODO Gradually replace use of this method with new executeAndAwaitJob() below, if it proves to be more stable than this one
-    public void executeJob(String jobName) throws InterruptedException {
-        // Stop the Scheduler while we manually trigger execution of job, to avoid side effects and simplify debugging when readings logs
-        updateSchedulerStatus(false);
-
-        int jobId = getSchedulerJobIdByName(jobName);
-
-        // Executing Scheduler Job
-        runSchedulerJob(jobId);
-
-        // Retrieving Scheduler Job by ID
-        Map<String, Object> schedulerJob = getSchedulerJobById(jobId);
-
-        // Waiting for Job to complete
-        while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-            Thread.sleep(15000);
-            schedulerJob = getSchedulerJobById(jobId);
-            assertNotNull(schedulerJob);
-            LOG.info("Job is Still Running");
-        }
-
-        List<Map<String, Object>> jobHistoryData = getSchedulerJobHistory(jobId);
-
-        // print error associated with recent job failure (if any)
-        LOG.error("Last Job run error message (only relevent if the job fails: {}",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorMessage"));
-        LOG.error("Lsat Job failure error log (only relevent if the job fails: {}",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorLog"));
-
-        assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
-
-        // Verifying the Status of the Recently executed Scheduler Job
-        assertEquals("Verifying Last Scheduler Job Status", "success",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
+        throw new IllegalArgumentException(
+                "No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
     }
 
     /**
      * Launches a Job and awaits its completion.
-     * @param jobName displayName (see {@link org.apache.fineract.infrastructure.jobs.service.JobName}) of Scheduler Job
+     *
+     * @param jobName
+     *            displayName (see {@link org.apache.fineract.infrastructure.jobs.service.JobName}) of Scheduler Job
      *
      * @author Michael Vorburger.ch
      */
@@ -200,14 +152,16 @@ public class SchedulerJobHelper {
         DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
 
-        // Stop the Scheduler while we manually trigger execution of job, to avoid side effects and simplify debugging when readings logs
+        // Stop the Scheduler while we manually trigger execution of job, to
+        // avoid side effects and simplify debugging when readings logs
         updateSchedulerStatus(false);
 
         // Executing Scheduler Job
         int jobId = getSchedulerJobIdByName(jobName);
         runSchedulerJob(jobId);
 
-        // Await JobDetailData.lastRunHistory [JobDetailHistoryData] jobRunStartTime >= beforeExecuteTime (or timeout)
+        // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
+        // jobRunStartTime >= beforeExecuteTime (or timeout)
         await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
             String jobRunStartText = lastRunHistory.get("jobRunStartTime");
             if (jobRunStartText == null) {
@@ -217,27 +171,32 @@ public class SchedulerJobHelper {
             return jobRunStartTime.equals(beforeExecuteTime) || jobRunStartTime.isAfter(beforeExecuteTime);
         });
 
-        // Await JobDetailData.lastRunHistory [JobDetailHistoryData] jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
-        Map<String, String> finalLastRunHistory = await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
-            String jobRunEndText = lastRunHistory.get("jobRunEndTime");
-            if (jobRunEndText == null) {
-                return false;
-            }
-            Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
-            Instant jobRunStartTime = df.parse(lastRunHistory.get("jobRunStartTime"), Instant::from);
-            return jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime);
-        });
+        // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
+        // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
+        Map<String, String> finalLastRunHistory = await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId),
+                lastRunHistory -> {
+                    String jobRunEndText = lastRunHistory.get("jobRunEndTime");
+                    if (jobRunEndText == null) {
+                        return false;
+                    }
+                    Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
+                    Instant jobRunStartTime = df.parse(lastRunHistory.get("jobRunStartTime"), Instant::from);
+                    return jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime);
+                });
 
         // Verify triggerType
         assertThat(finalLastRunHistory.get("triggerType"), is("application"));
 
-        // Verify status & propagate jobRunErrorMessage and/or jobRunErrorLog (if any)
+        // Verify status & propagate jobRunErrorMessage and/or jobRunErrorLog
+        // (if any)
         String status = finalLastRunHistory.get("status");
         if (!status.equals("success")) {
             fail("Job status is not success: " + finalLastRunHistory.toString());
         }
 
-        // PS: Checking getSchedulerJobHistory() [/runhistory] is pointless, because the lastRunHistory JobDetailHistoryData is already part of JobDetailData anyway.
+        // PS: Checking getSchedulerJobHistory() [/runhistory] is pointless,
+        // because the lastRunHistory JobDetailHistoryData is already part of
+        // JobDetailData anyway.
     }
 
     @SuppressWarnings("unchecked")

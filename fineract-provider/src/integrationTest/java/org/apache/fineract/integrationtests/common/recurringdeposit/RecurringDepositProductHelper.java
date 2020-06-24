@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class RecurringDepositProductHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositProductHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositProductHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -155,7 +156,7 @@ public class RecurringDepositProductHelper {
         }
 
         String RecurringDepositProductCreateJson = new Gson().toJson(map);
-        LOG.info("{}",RecurringDepositProductCreateJson);
+        LOG.info("{}", RecurringDepositProductCreateJson);
         return RecurringDepositProductCreateJson;
     }
 
@@ -198,7 +199,6 @@ public class RecurringDepositProductHelper {
         return this;
     }
 
-
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -236,8 +236,8 @@ public class RecurringDepositProductHelper {
     public static ArrayList retrieveAllRecurringDepositProducts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("----------------- RETRIEVING ALL RECURRING DEPOSIT PRODUCTS---------------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, RECURRING_DEPOSIT_PRODUCT_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
     }
 

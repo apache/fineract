@@ -37,15 +37,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AdHocWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdHocWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final AdHocRepository adHocRepository;
     private final AdHocDataValidator adHocCommandFromApiJsonDeserializer;
 
-
     @Autowired
     public AdHocWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AdHocRepository adHocRepository,
-             final AdHocDataValidator adHocCommandFromApiJsonDeserializer) {
+            final AdHocDataValidator adHocCommandFromApiJsonDeserializer) {
         this.context = context;
         this.adHocRepository = adHocRepository;
         this.adHocCommandFromApiJsonDeserializer = adHocCommandFromApiJsonDeserializer;
@@ -74,8 +73,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
@@ -83,8 +81,8 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
         if (realCause.getMessage().contains("unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.adhocquery.duplicate.name", "AdHocQuery with name `" + name + "` already exists",
-                    "name", name);
+            throw new PlatformDataIntegrityException("error.msg.adhocquery.duplicate.name",
+                    "AdHocQuery with name `" + name + "` already exists", "name", name);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
@@ -93,7 +91,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     @Transactional
@@ -123,6 +121,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
                     .build();
         }
     }
+
     /**
      * Method for Delete adhoc
      */

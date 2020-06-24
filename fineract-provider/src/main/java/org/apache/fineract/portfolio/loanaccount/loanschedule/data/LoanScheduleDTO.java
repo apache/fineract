@@ -25,7 +25,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 /**
  * Transfer object to return the schedule after generation of schedule
  */
-public class LoanScheduleDTO {
+public final class LoanScheduleDTO {
 
     private final List<LoanRepaymentScheduleInstallment> installments;
     private final LoanScheduleModel loanScheduleModel;
@@ -35,7 +35,8 @@ public class LoanScheduleDTO {
         this.loanScheduleModel = loanScheduleModel;
     }
 
-    public static LoanScheduleDTO from(final List<LoanRepaymentScheduleInstallment> installments, final LoanScheduleModel loanScheduleModel){
+    public static LoanScheduleDTO from(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanScheduleModel loanScheduleModel) {
         return new LoanScheduleDTO(installments, loanScheduleModel);
     }
 

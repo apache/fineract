@@ -33,100 +33,99 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 
-  private List<StaffData> personnel;
-  private List<OfficeData> offices;
+    private List<StaffData> personnel;
+    private List<OfficeData> offices;
 
-  // Maintaining the one to many relationship
-  private Map<String, List<StaffData>> officeToPersonnel;
-
-  /*
-   * Guava Multimap would make this more readable. The value Integer[] contains the beginIndex and
-   * endIndex for the staff list of each office. Required for applying names in excel.
-   */
-  private Map<Integer, Integer[]> officeNameToBeginEndIndexesOfStaff;
-
-  private static final int OFFICE_NAME_COL = 0;
-  private static final int STAFF_NAME_COL = 1;
-  private static final int STAFF_ID_COL = 2;
-
-  public PersonnelSheetPopulator(List<StaffData> personnel, List<OfficeData> offices) {
-    this.personnel = personnel;
-    this.offices = offices;
-  }
-
-
-  @Override
-  public void populate(Workbook workbook,String dateFormat) {
-    Sheet staffSheet = workbook.createSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-    setLayout(staffSheet);
+    // Maintaining the one to many relationship
+    private Map<String, List<StaffData>> officeToPersonnel;
 
     /*
-     * This piece of code could have been avoided by making multiple trips to the database for the
-     * staff of each office but this is more performance efficient
+     * Guava Multimap would make this more readable. The value Integer[] contains the beginIndex and endIndex for the
+     * staff list of each office. Required for applying names in excel.
      */
-    setOfficeToPersonnelMap();
+    private Map<Integer, Integer[]> officeNameToBeginEndIndexesOfStaff;
 
-    populateStaffByOfficeName(staffSheet);
-    staffSheet.protectSheet("");
-  }
+    private static final int OFFICE_NAME_COL = 0;
+    private static final int STAFF_NAME_COL = 1;
+    private static final int STAFF_ID_COL = 2;
 
+    public PersonnelSheetPopulator(List<StaffData> personnel, List<OfficeData> offices) {
+        this.personnel = personnel;
+        this.offices = offices;
+    }
 
-  private void populateStaffByOfficeName(Sheet staffSheet) {
-    int rowIndex = 1, startIndex = 1, officeIndex = 0;
-    officeNameToBeginEndIndexesOfStaff = new HashMap<>();
-    Row row = staffSheet.createRow(rowIndex);
-    for (OfficeData office : offices) {
-      startIndex = rowIndex + 1;
-      writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(]", "_"));
+    @Override
+    public void populate(Workbook workbook, String dateFormat) {
+        Sheet staffSheet = workbook.createSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
+        setLayout(staffSheet);
 
-      List<StaffData> staffList =
-              officeToPersonnel.get(office.name().trim().replaceAll("[ )(]", "_"));
+        /*
+         * This piece of code could have been avoided by making multiple trips to the database for the staff of each
+         * office but this is more performance efficient
+         */
+        setOfficeToPersonnelMap();
 
-    if (staffList!=null){
-      if (!staffList.isEmpty()) {
-        for (StaffData staff : staffList) {
-          writeString(STAFF_NAME_COL, row, staff.getDisplayName());
-          writeLong(STAFF_ID_COL, row, staff.getId());
-          row = staffSheet.createRow(++rowIndex);
+        populateStaffByOfficeName(staffSheet);
+        staffSheet.protectSheet("");
+    }
+
+    private void populateStaffByOfficeName(Sheet staffSheet) {
+        int rowIndex = 1;
+        int startIndex = 1;
+        int officeIndex = 0;
+        officeNameToBeginEndIndexesOfStaff = new HashMap<>();
+        Row row = staffSheet.createRow(rowIndex);
+        for (OfficeData office : offices) {
+            startIndex = rowIndex + 1;
+            writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(]", "_"));
+
+            List<StaffData> staffList = officeToPersonnel.get(office.name().trim().replaceAll("[ )(]", "_"));
+
+            if (staffList != null) {
+                if (!staffList.isEmpty()) {
+                    for (StaffData staff : staffList) {
+                        writeString(STAFF_NAME_COL, row, staff.getDisplayName());
+                        writeLong(STAFF_ID_COL, row, staff.getId());
+                        row = staffSheet.createRow(++rowIndex);
+                    }
+                    officeNameToBeginEndIndexesOfStaff.put(officeIndex++, new Integer[] { startIndex, rowIndex });
+                }
+            } else {
+                officeIndex++;
+            }
         }
-        officeNameToBeginEndIndexesOfStaff.put(officeIndex++, new Integer[]{startIndex, rowIndex});
-      }
-    } else {
-      officeIndex++;
     }
-    }
-  }
 
-  private void setOfficeToPersonnelMap() {
-    officeToPersonnel = new HashMap<>();
-    for (StaffData person : personnel) {
-      add(person.getOfficeName().trim().replaceAll("[ )(]", "_"), person);
+    private void setOfficeToPersonnelMap() {
+        officeToPersonnel = new HashMap<>();
+        for (StaffData person : personnel) {
+            add(person.getOfficeName().trim().replaceAll("[ )(]", "_"), person);
+        }
     }
-  }
 
-  // Guava Multi-map can reduce this.
-  private void add(String key, StaffData value) {
-    List<StaffData> values = officeToPersonnel.get(key);
-    if (values == null) {
-      values = new ArrayList<>();
+    // Guava Multi-map can reduce this.
+    private void add(String key, StaffData value) {
+        List<StaffData> values = officeToPersonnel.get(key);
+        if (values == null) {
+            values = new ArrayList<>();
+        }
+        values.add(value);
+        officeToPersonnel.put(key, values);
     }
-    values.add(value);
-    officeToPersonnel.put(key, values);
-  }
 
-  private void setLayout(Sheet worksheet) {
-    for (Integer i = 0; i < 3; i++) {
-      worksheet.setColumnWidth(i, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+    private void setLayout(Sheet worksheet) {
+        for (Integer i = 0; i < 3; i++) {
+            worksheet.setColumnWidth(i, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        }
+        Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
+        rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
+        writeString(OFFICE_NAME_COL, rowHeader, "Office Name");
+        writeString(STAFF_NAME_COL, rowHeader, "Staff List");
+        writeString(STAFF_ID_COL, rowHeader, "Staff ID");
     }
-    Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
-    rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
-    writeString(OFFICE_NAME_COL, rowHeader, "Office Name");
-    writeString(STAFF_NAME_COL, rowHeader, "Staff List");
-    writeString(STAFF_ID_COL, rowHeader, "Staff ID");
-  }
 
-  public Map<Integer, Integer[]> getOfficeNameToBeginEndIndexesOfStaff() {
-    return officeNameToBeginEndIndexesOfStaff;
-  }
+    public Map<Integer, Integer[]> getOfficeNameToBeginEndIndexesOfStaff() {
+        return officeNameToBeginEndIndexesOfStaff;
+    }
 
 }

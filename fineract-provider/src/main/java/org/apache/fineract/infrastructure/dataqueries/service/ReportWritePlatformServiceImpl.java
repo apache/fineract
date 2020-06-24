@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportWritePlatformServiceImpl implements ReportWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
 
     private final PlatformSecurityContext context;
     private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -102,8 +102,8 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleReportDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -118,8 +118,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             this.fromApiJsonDeserializer.validate(command.json());
 
-            final Report report = this.reportRepository.findById(reportId)
-                    .orElseThrow(() -> new ReportNotFoundException(reportId));
+            final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
             final Map<String, Object> changes = report.update(command, this.readReportingService.getAllowedReportTypes());
 
@@ -143,8 +142,8 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleReportDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -154,8 +153,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     @Override
     public CommandProcessingResult deleteReport(final Long reportId) {
 
-        final Report report = this.reportRepository.findById(reportId)
-                .orElseThrow(() -> new ReportNotFoundException(reportId));
+        final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
         if (report.isCoreReport()) {
             //
@@ -163,7 +161,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         }
 
         final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + report.getReportName());
-        if (permission == null) { throw new PermissionNotFoundException("READ" + "_" + report.getReportName()); }
+        if (permission == null) {
+            throw new PermissionNotFoundException("READ" + "_" + report.getReportName());
+        }
 
         this.reportRepository.delete(report);
         this.permissionRepository.delete(permission);
@@ -174,8 +174,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleReportDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -185,7 +184,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
@@ -219,7 +218,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     if (id != null) {
                         // existing report parameter usage
                         reportParameterUsageItem = this.reportParameterUsageRepository.findById(id).orElse(null);
-                        if (reportParameterUsageItem == null) { throw new ReportParameterNotFoundException(id); }
+                        if (reportParameterUsageItem == null) {
+                            throw new ReportParameterNotFoundException(id);
+                        }
 
                         // check parameter
                         if (jsonObject.has("parameterId")) {

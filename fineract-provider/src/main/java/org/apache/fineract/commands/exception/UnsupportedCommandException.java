@@ -19,8 +19,8 @@
 package org.apache.fineract.commands.exception;
 
 /**
- * A {@link RuntimeException} that is thrown in the case where an invalid or
- * unknown command is attempted to be processed by platform.
+ * A {@link RuntimeException} that is thrown in the case where an invalid or unknown command is attempted to be
+ * processed by platform.
  */
 public class UnsupportedCommandException extends RuntimeException {
 

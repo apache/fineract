@@ -25,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * Wrapper for {@link OfficeRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link OfficeRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -40,18 +39,17 @@ public class OfficeRepositoryWrapper {
     }
 
     public Office findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new OfficeNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new OfficeNotFoundException(id));
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Office findOfficeHierarchy(final Long id) {
-        final Office office = this.repository.findById(id)
-                .orElseThrow(() -> new OfficeNotFoundException(id));
+        final Office office = this.repository.findById(id).orElseThrow(() -> new OfficeNotFoundException(id));
         office.loadLazyCollections();
-        return office ;
+        return office;
 
     }
+
     public Office save(final Office entity) {
         return this.repository.save(entity);
     }

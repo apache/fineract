@@ -62,7 +62,7 @@ import org.springframework.util.CollectionUtils;
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
@@ -83,7 +83,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareAccountSchedularService shareAccountSchedularService, final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
+            final ShareAccountSchedularService shareAccountSchedularService,
+            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -91,7 +92,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
-        this.trialBalanceRepositoryWrapper=trialBalanceRepositoryWrapper;
+        this.trialBalanceRepositoryWrapper = trialBalanceRepositoryWrapper;
     }
 
     @Transactional
@@ -112,10 +113,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_completed_derived,0)) as interest_repaid_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_waived_derived,0)) as interest_waived_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_writtenoff_derived,0)) as interest_writtenoff_derived,");
-        updateSqlBuilder
-        .append("SUM(IFNULL(mr.fee_charges_amount,0)) + IFNULL((select SUM(lc.amount) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_time_enum=1),0) as fee_charges_charged_derived,");
-        updateSqlBuilder
-        .append("SUM(IFNULL(mr.fee_charges_completed_derived,0)) + IFNULL((select SUM(lc.amount_paid_derived) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_time_enum=1),0) as fee_charges_repaid_derived,");
+        updateSqlBuilder.append(
+                "SUM(IFNULL(mr.fee_charges_amount,0)) + IFNULL((select SUM(lc.amount) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_time_enum=1),0) as fee_charges_charged_derived,");
+        updateSqlBuilder.append(
+                "SUM(IFNULL(mr.fee_charges_completed_derived,0)) + IFNULL((select SUM(lc.amount_paid_derived) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_time_enum=1),0) as fee_charges_repaid_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_waived_derived,0)) as fee_charges_waived_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_writtenoff_derived,0)) as fee_charges_writtenoff_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.penalty_charges_amount,0)) as penalty_charges_charged_derived,");
@@ -131,50 +132,50 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append("SET m_loan.principal_disbursed_derived = x.principal_disbursed_derived,");
         updateSqlBuilder.append("m_loan.principal_repaid_derived = x.principal_repaid_derived,");
         updateSqlBuilder.append("m_loan.principal_writtenoff_derived = x.principal_writtenoff_derived,");
-        updateSqlBuilder
-        .append("m_loan.principal_outstanding_derived = (x.principal_disbursed_derived - (x.principal_repaid_derived + x.principal_writtenoff_derived)),");
+        updateSqlBuilder.append(
+                "m_loan.principal_outstanding_derived = (x.principal_disbursed_derived - (x.principal_repaid_derived + x.principal_writtenoff_derived)),");
         updateSqlBuilder.append("m_loan.interest_charged_derived = x.interest_charged_derived,");
         updateSqlBuilder.append("m_loan.interest_repaid_derived = x.interest_repaid_derived,");
         updateSqlBuilder.append("m_loan.interest_waived_derived = x.interest_waived_derived,");
         updateSqlBuilder.append("m_loan.interest_writtenoff_derived = x.interest_writtenoff_derived,");
-        updateSqlBuilder
-        .append("m_loan.interest_outstanding_derived = (x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)),");
+        updateSqlBuilder.append(
+                "m_loan.interest_outstanding_derived = (x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)),");
         updateSqlBuilder.append("m_loan.fee_charges_charged_derived = x.fee_charges_charged_derived,");
         updateSqlBuilder.append("m_loan.fee_charges_repaid_derived = x.fee_charges_repaid_derived,");
         updateSqlBuilder.append("m_loan.fee_charges_waived_derived = x.fee_charges_waived_derived,");
         updateSqlBuilder.append("m_loan.fee_charges_writtenoff_derived = x.fee_charges_writtenoff_derived,");
-        updateSqlBuilder
-        .append("m_loan.fee_charges_outstanding_derived = (x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)),");
+        updateSqlBuilder.append(
+                "m_loan.fee_charges_outstanding_derived = (x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)),");
         updateSqlBuilder.append("m_loan.penalty_charges_charged_derived = x.penalty_charges_charged_derived,");
         updateSqlBuilder.append("m_loan.penalty_charges_repaid_derived = x.penalty_charges_repaid_derived,");
         updateSqlBuilder.append("m_loan.penalty_charges_waived_derived = x.penalty_charges_waived_derived,");
         updateSqlBuilder.append("m_loan.penalty_charges_writtenoff_derived = x.penalty_charges_writtenoff_derived,");
-        updateSqlBuilder
-        .append("m_loan.penalty_charges_outstanding_derived = (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived)),");
-        updateSqlBuilder
-        .append("m_loan.total_expected_repayment_derived = (x.principal_disbursed_derived + x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived),");
-        updateSqlBuilder
-        .append("m_loan.total_repayment_derived = (x.principal_repaid_derived + x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived),");
-        updateSqlBuilder
-        .append("m_loan.total_expected_costofloan_derived = (x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived),");
-        updateSqlBuilder
-        .append("m_loan.total_costofloan_derived = (x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived),");
-        updateSqlBuilder
-        .append("m_loan.total_waived_derived = (x.interest_waived_derived + x.fee_charges_waived_derived + x.penalty_charges_waived_derived),");
-        updateSqlBuilder
-        .append("m_loan.total_writtenoff_derived = (x.interest_writtenoff_derived +  x.fee_charges_writtenoff_derived + x.penalty_charges_writtenoff_derived),");
+        updateSqlBuilder.append(
+                "m_loan.penalty_charges_outstanding_derived = (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived)),");
+        updateSqlBuilder.append(
+                "m_loan.total_expected_repayment_derived = (x.principal_disbursed_derived + x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived),");
+        updateSqlBuilder.append(
+                "m_loan.total_repayment_derived = (x.principal_repaid_derived + x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived),");
+        updateSqlBuilder.append(
+                "m_loan.total_expected_costofloan_derived = (x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived),");
+        updateSqlBuilder.append(
+                "m_loan.total_costofloan_derived = (x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived),");
+        updateSqlBuilder.append(
+                "m_loan.total_waived_derived = (x.interest_waived_derived + x.fee_charges_waived_derived + x.penalty_charges_waived_derived),");
+        updateSqlBuilder.append(
+                "m_loan.total_writtenoff_derived = (x.interest_writtenoff_derived +  x.fee_charges_writtenoff_derived + x.penalty_charges_writtenoff_derived),");
         updateSqlBuilder.append("m_loan.total_outstanding_derived=");
         updateSqlBuilder.append(" (x.principal_disbursed_derived - (x.principal_repaid_derived + x.principal_writtenoff_derived)) + ");
-        updateSqlBuilder
-        .append(" (x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)) +");
-        updateSqlBuilder
-        .append(" (x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)) +");
-        updateSqlBuilder
-        .append(" (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived))");
+        updateSqlBuilder.append(
+                " (x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)) +");
+        updateSqlBuilder.append(
+                " (x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)) +");
+        updateSqlBuilder.append(
+                " (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived))");
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Transactional
@@ -188,28 +189,28 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
-        updateSqlBuilder
-        .append("INSERT INTO m_loan_paid_in_advance(loan_id, principal_in_advance_derived, interest_in_advance_derived, fee_charges_in_advance_derived, penalty_charges_in_advance_derived, total_in_advance_derived)");
+        updateSqlBuilder.append(
+                "INSERT INTO m_loan_paid_in_advance(loan_id, principal_in_advance_derived, interest_in_advance_derived, fee_charges_in_advance_derived, penalty_charges_in_advance_derived, total_in_advance_derived)");
         updateSqlBuilder.append(" select ml.id as loanId,");
         updateSqlBuilder.append(" SUM(ifnull(mr.principal_completed_derived, 0)) as principal_in_advance_derived,");
         updateSqlBuilder.append(" SUM(ifnull(mr.interest_completed_derived, 0)) as interest_in_advance_derived,");
         updateSqlBuilder.append(" SUM(ifnull(mr.fee_charges_completed_derived, 0)) as fee_charges_in_advance_derived,");
         updateSqlBuilder.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0)) as penalty_charges_in_advance_derived,");
-        updateSqlBuilder
-        .append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) + SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
+        updateSqlBuilder.append(
+                " (SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) + SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
         updateSqlBuilder.append(" FROM m_loan ml ");
         updateSqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
         updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 ");
         updateSqlBuilder.append(" and mr.duedate >= CURDATE() ");
         updateSqlBuilder.append(" GROUP BY ml.id");
         updateSqlBuilder
-        .append(" HAVING (SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) +");
+                .append(" HAVING (SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) +");
         updateSqlBuilder
-        .append(" SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0.0");
+                .append(" SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0.0");
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -226,34 +227,42 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Apply annual fee failed for account: {} with message {}", savingsAccountReference.getAccountNo(), error);
+                    LOG.error("Apply annual fee failed for account: {} with message {}", savingsAccountReference.getAccountNo(), error);
                 }
             } catch (final Exception ex) {
-                // need to handle this scenario
+                LOG.error("Apply annual fee failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
 
-        logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), annualFeeData.size());
+        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), annualFeeData.size());
     }
 
     @Override
     @CronTarget(jobName = JobName.PAY_DUE_SAVINGS_CHARGES)
     public void applyDueChargesForSavings() throws JobExecutionException {
-        final Collection<SavingsAccountAnnualFeeData> chargesDueData = this.savingsAccountChargeReadPlatformService.retrieveChargesWithDue();
+        final Collection<SavingsAccountAnnualFeeData> chargesDueData = this.savingsAccountChargeReadPlatformService
+                .retrieveChargesWithDue();
         List<Throwable> exceptions = new ArrayList<>();
         for (final SavingsAccountAnnualFeeData savingsAccountReference : chargesDueData) {
             try {
-                this.savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(), savingsAccountReference.getAccountId());
+                this.savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(),
+                        savingsAccountReference.getAccountId());
             } catch (final PlatformApiDataValidationException e) {
                 exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
+                    LOG.error("Apply Charges due for savings failed for account {} with message: {}",
+                            savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
                 }
+            } catch (final Exception ex) {
+                exceptions.add(ex);
+                LOG.error("Apply Charges due for savings failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
-        logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
-        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
+        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
+        if (!exceptions.isEmpty()) {
+            throw new JobExecutionException(exceptions);
+        }
     }
 
     @Transactional
@@ -270,7 +279,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         resetNPASqlBuilder.append("set loan.is_npa = 0 ");
         resetNPASqlBuilder.append("where  loan.loan_status_id = 300 and mpl.account_moves_out_of_npa_only_on_arrears_completion = 0 ");
         resetNPASqlBuilder
-        .append("or (mpl.account_moves_out_of_npa_only_on_arrears_completion = 1 and laa.overdue_since_date_derived is null)");
+                .append("or (mpl.account_moves_out_of_npa_only_on_arrears_completion = 1 and laa.overdue_since_date_derived is null)");
 
         jdbcTemplate.update(resetNPASqlBuilder.toString());
 
@@ -288,7 +297,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{} : Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{} : Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -304,14 +313,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(), error.getDeveloperMessage());
+                    LOG.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(),
+                            error.getDeveloperMessage());
                 }
             } catch (final Exception ex) {
-                // need to handle this scenario
+                LOG.error("Update maturity details failed for account: {}", depositAccount.accountNo(), ex);
             }
         }
 
-        logger.info("{}: Deposit accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), depositAccounts.size());
+        LOG.info("{}: Deposit accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), depositAccounts.size());
     }
 
     @Override
@@ -376,8 +386,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         List<Throwable> exceptions = new ArrayList<>();
         List<Map<String, Object>> dividendDetails = this.shareAccountDividendReadPlatformService.retriveDividendDetailsForPostDividents();
         for (Map<String, Object> dividendMap : dividendDetails) {
-            Long id = null ;
-            Long savingsId = null ;
+            Long id = null;
+            Long savingsId = null;
             if (dividendMap.get("id") instanceof BigInteger) {
                 // Drizzle is returningBigInteger
                 id = ((BigInteger) dividendMap.get("id")).longValue();
@@ -392,17 +402,19 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error(
+                    LOG.error(
                             "Post Dividends to savings failed due to ApiParameterError for Divident detail Id: {} and savings Id: {} with message: {}",
                             id, savingsId, error.getDeveloperMessage(), e);
                 }
             } catch (final Exception e) {
-                logger.error("Post Dividends to savings failed for Divident detail Id: {} and savings Id: {}", id, savingsId, e);
+                LOG.error("Post Dividends to savings failed for Divident detail Id: {} and savings Id: {}", id, savingsId, e);
                 exceptions.add(e);
             }
         }
 
-        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
+        if (!exceptions.isEmpty()) {
+            throw new JobExecutionException(exceptions);
+        }
     }
 
     @Override
@@ -410,55 +422,54 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     public void updateTrialBalanceDetails() throws JobExecutionException {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
-        tbGapSqlBuilder.append("select distinct(je.transaction_date) ")
-        .append("from acc_gl_journal_entry je ")
-        .append("where je.transaction_date > (select IFNULL(MAX(created_date),'2010-01-01') from m_trial_balance)");
+        tbGapSqlBuilder.append("select distinct(je.transaction_date) ").append("from acc_gl_journal_entry je ")
+                .append("where je.transaction_date > (select IFNULL(MAX(created_date),'2010-01-01') from m_trial_balance)");
 
         final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
 
-        for(Date tbGap : tbGaps) {
+        for (Date tbGap : tbGaps) {
             LocalDate convDate = new DateTime(tbGap).toLocalDate();
             int days = Days.daysBetween(convDate, DateUtils.getLocalDateOfTenant()).getDays();
-            if(days < 1) {
+            if (days < 1) {
                 continue;
             }
             final String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(tbGap);
             final StringBuilder sqlBuilder = new StringBuilder(600);
             sqlBuilder.append("Insert Into m_trial_balance(office_id, account_id, Amount, entry_date, created_date,closing_balance) ")
-            .append("Select je.office_id, je.account_id, sum(if(je.type_enum=1, (-1) * je.amount, je.amount)) ")
-            .append("as Amount, Date(je.entry_date) as 'Entry_Date', je.transaction_date as 'Created_Date',sum(je.amount) as closing_balance ")
-            .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
-            .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
+                    .append("Select je.office_id, je.account_id, sum(if(je.type_enum=1, (-1) * je.amount, je.amount)) ")
+                    .append("as Amount, Date(je.entry_date) as 'Entry_Date', je.transaction_date as 'Created_Date',sum(je.amount) as closing_balance ")
+                    .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
+                    .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
             final int result = jdbcTemplate.update(sqlBuilder.toString(), formattedDate);
-            logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+            LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
 
         // Updating closing balance
         String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
         final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[] {}, Long.class);
 
-
-        for(Long officeId : officeIds) {
+        for (Long officeId : officeIds) {
             String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
-            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] {officeId}, Long.class);
-            for(Long accountId : accountIds) {
-                final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance " +
-                        "is not null order by created_date desc, entry_date desc limit 1";
-                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] {officeId, accountId}, BigDecimal.class);
+            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] { officeId }, Long.class);
+            for (Long accountId : accountIds) {
+                final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance "
+                        + "is not null order by created_date desc, entry_date desc limit 1";
+                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] { officeId, accountId },
+                        BigDecimal.class);
                 List<TrialBalance> tbRows = this.trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
                 BigDecimal closingBalance = null;
-                if(!CollectionUtils.isEmpty(closingBalanceData)) {
+                if (!CollectionUtils.isEmpty(closingBalanceData)) {
                     closingBalance = closingBalanceData.get(0);
                 }
-                if(CollectionUtils.isEmpty(closingBalanceData)) {
+                if (CollectionUtils.isEmpty(closingBalanceData)) {
                     closingBalance = BigDecimal.ZERO;
-                    for(TrialBalance row : tbRows) {
+                    for (TrialBalance row : tbRows) {
                         closingBalance = closingBalance.add(row.getAmount());
                         row.setClosingBalance(closingBalance);
                     }
                 } else {
-                    for(TrialBalance tbRow : tbRows) {
+                    for (TrialBalance tbRow : tbRows) {
                         closingBalance = closingBalance.add(tbRow.getAmount());
                         tbRow.setClosingBalance(closingBalance);
                     }

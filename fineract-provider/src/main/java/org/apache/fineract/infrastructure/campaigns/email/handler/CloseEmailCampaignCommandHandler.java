@@ -29,15 +29,16 @@ import org.springframework.stereotype.Service;
 @Service
 @CommandType(entity = "EMAIL_CAMPAIGN", action = "CLOSE")
 public class CloseEmailCampaignCommandHandler implements NewCommandSourceHandler {
+
     private final EmailCampaignWritePlatformService emailCampaignWritePlatformService;
 
-   @Autowired
+    @Autowired
     public CloseEmailCampaignCommandHandler(final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
         this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
     }
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.emailCampaignWritePlatformService.closeEmailCampaign(command.entityId(), command);
+        return this.emailCampaignWritePlatformService.closeEmailCampaign(command.entityId(), command);
     }
 }

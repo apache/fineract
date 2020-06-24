@@ -22,12 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * INDIVIDUAL_LOAN: Individual loans are applicable only to clients. GROUP_LOAN:
- * * Group loans are applicable only to groups. And tracked only at group level.
- * JOINT_LIABILITY_LOAN: Joint liability loans are applicable only to clients
- * within a group. LINKED_LOAN: Loan is given to group, then later loan amount
- * is split into individual loans. Loan is tracked at both individual and group
- * level
+ * INDIVIDUAL_LOAN: Individual loans are applicable only to clients. GROUP_LOAN: * Group loans are applicable only to
+ * groups. And tracked only at group level. JOINT_LIABILITY_LOAN: Joint liability loans are applicable only to clients
+ * within a group. LINKED_LOAN: Loan is given to group, then later loan amount is split into individual loans. Loan is
+ * tracked at both individual and group level
  *
  */
 public enum LendingStrategy {
@@ -38,9 +36,9 @@ public enum LendingStrategy {
     LINKED_LOAN(400, "lendingStrategy.linkedLoan", "linkedLoan"), //
     INVALID(900, "lendingStrategy.invalid", "invalid");
 
-    private Integer id;
-    private String code;
-    private String value;
+    private final Integer id;
+    private final String code;
+    private final String value;
 
     LendingStrategy(final Integer id, final String code, final String value) {
         this.id = id;

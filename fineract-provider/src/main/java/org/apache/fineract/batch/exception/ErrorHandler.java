@@ -38,11 +38,9 @@ import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Provides an Error Handler method that returns an object of type
- * {@link ErrorInfo} to the CommandStrategy which raised the exception. This
- * class uses various subclasses of RuntimeException to check the kind of
- * exception raised and provide appropriate status and error codes for each one
- * of the raised exception.
+ * Provides an Error Handler method that returns an object of type {@link ErrorInfo} to the CommandStrategy which raised
+ * the exception. This class uses various subclasses of RuntimeException to check the kind of exception raised and
+ * provide appropriate status and error codes for each one of the raised exception.
  *
  * @author Rishabh Shukla
  *
@@ -61,20 +59,18 @@ public class ErrorHandler extends RuntimeException {
     }
 
     /**
-     * Returns an object of ErrorInfo type containing the information regarding
-     * the raised error.
+     * Returns an object of ErrorInfo type containing the information regarding the raised error.
      *
      * @param exception
      * @return ErrorInfo
      */
     public static ErrorInfo handler(final RuntimeException exception) {
 
-        if(exception instanceof AbstractPlatformDomainRuleException) {
-            PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper() ;
-            final String errorBody = jsonHelper
-                    .toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
+        if (exception instanceof AbstractPlatformDomainRuleException) {
+            PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
+            final String errorBody = jsonHelper.toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
             return new ErrorInfo(500, 9999, errorBody);
-        }else if (exception instanceof AbstractPlatformResourceNotFoundException) {
+        } else if (exception instanceof AbstractPlatformResourceNotFoundException) {
 
             final PlatformResourceNotFoundExceptionMapper mapper = new PlatformResourceNotFoundExceptionMapper();
             final String errorBody = jsonHelper
@@ -118,7 +114,7 @@ public class ErrorHandler extends RuntimeException {
             return new ErrorInfo(403, 3003, errorBody);
 
         } else if (exception instanceof TransactionException) {
-            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
+            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage() + "}");
 
         } else if (exception instanceof PlatformInternalServerException) {
 
@@ -126,8 +122,8 @@ public class ErrorHandler extends RuntimeException {
             final String errorBody = jsonHelper.toJson(mapper.toResponse((PlatformInternalServerException) exception).getEntity());
 
             return new ErrorInfo(500, 5001, errorBody);
-        }else if(exception instanceof NonTransientDataAccessException) {
-            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
+        } else if (exception instanceof NonTransientDataAccessException) {
+            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage() + "}");
         }
 
         return new ErrorInfo(500, 9999, "{\"Exception\": " + exception.toString() + "}");

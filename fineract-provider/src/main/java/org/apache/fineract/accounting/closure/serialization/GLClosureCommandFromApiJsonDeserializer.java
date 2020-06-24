@@ -36,8 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link GuarantorCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link GuarantorCommand}'s.
  */
 @Component
 public final class GLClosureCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<GLClosureCommand> {
@@ -51,7 +50,9 @@ public final class GLClosureCommandFromApiJsonDeserializer extends AbstractFromA
 
     @Override
     public GLClosureCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();

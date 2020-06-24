@@ -34,7 +34,8 @@ public class TellerNotFoundException extends AbstractPlatformResourceNotFoundExc
     /**
      * Creates a new instance.
      *
-     * @param tellerId the primary key of the teller
+     * @param tellerId
+     *            the primary key of the teller
      */
     public TellerNotFoundException(Long tellerId) {
         super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, tellerId);

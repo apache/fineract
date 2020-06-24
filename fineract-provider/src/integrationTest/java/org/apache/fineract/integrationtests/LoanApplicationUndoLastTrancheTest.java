@@ -32,21 +32,22 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanApplicationUndoLastTrancheTest {
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private LoanApplicationApprovalTest loanApplicationApprovalTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -57,7 +58,7 @@ public class LoanApplicationUndoLastTrancheTest {
     }
 
     @Test
-    public void LoanApplicationUndoLastTranche() {
+    public void loanApplicationUndoLastTranche() {
 
         final String proposedAmount = "5000";
         final String approvalAmount = "2000";
@@ -67,15 +68,14 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
-                , clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
-                .build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
-                , loanProductID);
+        final Integer loanProductID = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                        .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
+                loanProductID);
 
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
@@ -89,8 +89,7 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // APPLY FOR LOAN WITH TRANCHES
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}"
-                , loanID);
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
@@ -125,7 +124,7 @@ public class LoanApplicationUndoLastTrancheTest {
     }
 
     private void validateDisbursedAmount(Float disbursedAmount) {
-        Assert.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
+        Assertions.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
 
     }
 
@@ -133,7 +132,7 @@ public class LoanApplicationUndoLastTrancheTest {
             List<HashMap> tranches) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
-        //
+                //
                 .withPrincipal(principal)
                 //
                 .withLoanTermFrequency("5")

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-
 /**
  * Holds Tenant's DB server connection connection details.
  */
@@ -47,13 +46,15 @@ public class FineractPlatformTenantConnection {
     private final int maxIntervalBetweenRetries;
     private final boolean testOnBorrow;
 
-    public FineractPlatformTenantConnection(final Long connectionId,final String schemaName, String schemaServer,final String schemaServerPort,final String schemaUsername,final String schemaPassword,
-            final boolean autoUpdateEnabled,final int initialSize,final long validationInterval,final boolean removeAbandoned,final int removeAbandonedTimeout,
-            final boolean logAbandoned,final int abandonWhenPercentageFull,final int maxActive,final int minIdle,final int maxIdle,final int suspectTimeout,
-            final int timeBetweenEvictionRunsMillis,final int minEvictableIdleTimeMillis,final int maxRetriesOnDeadlock,final int maxIntervalBetweenRetries,final boolean tesOnBorrow) {
+    public FineractPlatformTenantConnection(final Long connectionId, final String schemaName, String schemaServer,
+            final String schemaServerPort, final String schemaUsername, final String schemaPassword, final boolean autoUpdateEnabled,
+            final int initialSize, final long validationInterval, final boolean removeAbandoned, final int removeAbandonedTimeout,
+            final boolean logAbandoned, final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle,
+            final int suspectTimeout, final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis,
+            final int maxRetriesOnDeadlock, final int maxIntervalBetweenRetries, final boolean tesOnBorrow) {
 
         this.connectionId = connectionId;
-        this.schemaName =schemaName;
+        this.schemaName = schemaName;
         this.schemaServer = schemaServer;
         this.schemaServerPort = schemaServerPort;
         this.schemaUsername = schemaUsername;
@@ -73,7 +74,7 @@ public class FineractPlatformTenantConnection {
         this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
         this.maxRetriesOnDeadlock = maxRetriesOnDeadlock;
         this.maxIntervalBetweenRetries = maxIntervalBetweenRetries;
-        this.testOnBorrow=tesOnBorrow;
+        this.testOnBorrow = tesOnBorrow;
     }
 
     public String getSchemaServer() {
@@ -163,6 +164,7 @@ public class FineractPlatformTenantConnection {
     public String getSchemaName() {
         return schemaName;
     }
+
     @Override
     public String toString() {
         return this.schemaName + ":" + this.schemaServer + ":" + this.schemaServerPort;

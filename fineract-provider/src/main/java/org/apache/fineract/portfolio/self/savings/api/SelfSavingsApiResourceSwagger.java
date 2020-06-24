@@ -26,17 +26,17 @@ import java.time.LocalDate;
  * Created by Chirag Gupta on 12/25/17.
  */
 final class SelfSavingsApiResourceSwagger {
-    private SelfSavingsApiResourceSwagger() {
-    }
+
+    private SelfSavingsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfSavingsAccountsResponse")
-    public final static class GetSelfSavingsAccountsResponse {
-        private GetSelfSavingsAccountsResponse() {
-        }
+    public static final class GetSelfSavingsAccountsResponse {
 
-        final class GetSelfSavingsStatus {
-            private GetSelfSavingsStatus() {
-            }
+        private GetSelfSavingsAccountsResponse() {}
+
+        static final class GetSelfSavingsStatus {
+
+            private GetSelfSavingsStatus() {}
 
             @ApiModelProperty(example = "100")
             public Integer id;
@@ -59,17 +59,17 @@ final class SelfSavingsApiResourceSwagger {
 
         }
 
-        final class GetSelfSavingsTimeline {
-            private GetSelfSavingsTimeline() {
-            }
+        static final class GetSelfSavingsTimeline {
+
+            private GetSelfSavingsTimeline() {}
 
             @ApiModelProperty(example = "[2013, 3, 1]")
             public LocalDate submittedOnDate;
         }
 
-        final class GetSelfSavingsCurrency {
-            private GetSelfSavingsCurrency() {
-            }
+        static final class GetSelfSavingsCurrency {
+
+            private GetSelfSavingsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -85,9 +85,9 @@ final class SelfSavingsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetSelfSavingsInterestCompoundingPeriodType {
-            private GetSelfSavingsInterestCompoundingPeriodType() {
-            }
+        static final class GetSelfSavingsInterestCompoundingPeriodType {
+
+            private GetSelfSavingsInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -97,9 +97,9 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestPostingPeriodType {
-            private GetSelfSavingsInterestPostingPeriodType() {
-            }
+        static final class GetSelfSavingsInterestPostingPeriodType {
+
+            private GetSelfSavingsInterestPostingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -109,9 +109,9 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestCalculationType {
-            private GetSelfSavingsInterestCalculationType() {
-            }
+        static final class GetSelfSavingsInterestCalculationType {
+
+            private GetSelfSavingsInterestCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -121,9 +121,9 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsInterestCalculationDaysInYearType {
-            private GetSelfSavingsInterestCalculationDaysInYearType() {
-            }
+        static final class GetSelfSavingsInterestCalculationDaysInYearType {
+
+            private GetSelfSavingsInterestCalculationDaysInYearType() {}
 
             @ApiModelProperty(example = "365")
             public Integer id;
@@ -133,9 +133,9 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsSummary {
-            private GetSelfSavingsSummary() {
-            }
+        static final class GetSelfSavingsSummary {
+
+            private GetSelfSavingsSummary() {}
 
             public GetSelfSavingsCurrency currency;
             @ApiModelProperty(example = "0")
@@ -169,13 +169,13 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
-        private GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse() {
-        }
+    public static final class GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse {
 
-        final class GetSelfSavingsTransactionType {
-            private GetSelfSavingsTransactionType() {
-            }
+        private GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse() {}
+
+        static final class GetSelfSavingsTransactionType {
+
+            private GetSelfSavingsTransactionType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -193,9 +193,9 @@ final class SelfSavingsApiResourceSwagger {
             public Boolean feeDeduction;
         }
 
-        final class GetSelfSavingsTransactionCurrency {
-            private GetSelfSavingsTransactionCurrency() {
-            }
+        static final class GetSelfSavingsTransactionCurrency {
+
+            private GetSelfSavingsTransactionCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -213,13 +213,13 @@ final class SelfSavingsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetSelfSavingsPaymentDetailData {
-            private GetSelfSavingsPaymentDetailData() {
-            }
+        static final class GetSelfSavingsPaymentDetailData {
 
-            final class GetSelfSavingsPaymentType {
-                private GetSelfSavingsPaymentType() {
-                }
+            private GetSelfSavingsPaymentDetailData() {}
+
+            static final class GetSelfSavingsPaymentType {
+
+                private GetSelfSavingsPaymentType() {}
 
                 @ApiModelProperty(example = "11")
                 public Integer id;
@@ -262,13 +262,13 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesResponse {
-        private GetSelfSavingsAccountsAccountIdChargesResponse() {
-        }
+    public static final class GetSelfSavingsAccountsAccountIdChargesResponse {
 
-        final class GetSelfSavingsChargeTimeType {
-            private GetSelfSavingsChargeTimeType() {
-            }
+        private GetSelfSavingsAccountsAccountIdChargesResponse() {}
+
+        static final class GetSelfSavingsChargeTimeType {
+
+            private GetSelfSavingsChargeTimeType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -278,9 +278,9 @@ final class SelfSavingsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfSavingsChargeCalculationType {
-            private GetSelfSavingsChargeCalculationType() {
-            }
+        static final class GetSelfSavingsChargeCalculationType {
+
+            private GetSelfSavingsChargeCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -322,9 +322,9 @@ final class SelfSavingsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
-        private GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse() {
-        }
+    public static final class GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse {
+
+        private GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;

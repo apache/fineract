@@ -42,7 +42,7 @@ public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigur
 
     @Autowired
     public EmailConfigurationWritePlatformServiceImpl(final PlatformSecurityContext context, final EmailConfigurationRepository repository,
-                                                      final EmailConfigurationValidator emailConfigurationValidator) {
+            final EmailConfigurationValidator emailConfigurationValidator) {
         this.context = context;
         this.repository = repository;
         this.emailConfigurationValidator = emailConfigurationValidator;
@@ -51,36 +51,33 @@ public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigur
     @Override
     public CommandProcessingResult update(final JsonCommand command) {
 
-            final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
-            this.emailConfigurationValidator.validateUpdateConfiguration(command.json());
-            final String smtpUsername = command.stringValueOfParameterNamed("SMTP_USERNAME");
+        this.emailConfigurationValidator.validateUpdateConfiguration(command.json());
+        final String smtpUsername = command.stringValueOfParameterNamed("SMTP_USERNAME");
 
-            if(!this.emailConfigurationValidator.isValidEmail(smtpUsername)){
-                throw new EmailConfigurationSMTPUsernameNotValid(smtpUsername);
+        if (!this.emailConfigurationValidator.isValidEmail(smtpUsername)) {
+            throw new EmailConfigurationSMTPUsernameNotValid(smtpUsername);
+        }
+
+        final Map<String, Object> changes = new HashMap<>(4);
+
+        Collection<EmailConfiguration> configurations = this.repository.findAll();
+        /**
+         * Default SMTP configuration added to flyway
+         */
+        for (EmailConfiguration config : configurations) {
+            if (config.getName() != null) {
+                String value = command.stringValueOfParameterNamed(config.getName());
+                config.setValue(value);
+                changes.put(config.getName(), value);
+                this.repository.saveAndFlush(config);
             }
+        }
 
-
-            final Map<String,Object> changes = new HashMap<>(4);
-
-            Collection<EmailConfiguration> configurations = this.repository.findAll();
-            /**
-             *Default SMTP configuration added to flyway
-             */
-            for (EmailConfiguration config : configurations) {
-                if(config.getName() !=null){
-                    String value = command.stringValueOfParameterNamed(config.getName());
-                    config.setValue(value);
-                    changes.put(config.getName(),value);
-                    this.repository.saveAndFlush(config);
-                }
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .with(changes)
-                    .build();
+        return new CommandProcessingResultBuilder() //
+                .with(changes).build();
 
     }
-
 
 }

@@ -62,13 +62,10 @@ public class PaymentDetailData implements Serializable {
             return false;
         }
         PaymentDetailData that = (PaymentDetailData) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(paymentType, that.paymentType) &&
-                Objects.equals(accountNumber, that.accountNumber) &&
-                Objects.equals(checkNumber, that.checkNumber) &&
-                Objects.equals(routingCode, that.routingCode) &&
-                Objects.equals(receiptNumber, that.receiptNumber) &&
-                Objects.equals(bankNumber, that.bankNumber);
+        return Objects.equals(id, that.id) && Objects.equals(paymentType, that.paymentType)
+                && Objects.equals(accountNumber, that.accountNumber) && Objects.equals(checkNumber, that.checkNumber)
+                && Objects.equals(routingCode, that.routingCode) && Objects.equals(receiptNumber, that.receiptNumber)
+                && Objects.equals(bankNumber, that.bankNumber);
     }
 
     @Override

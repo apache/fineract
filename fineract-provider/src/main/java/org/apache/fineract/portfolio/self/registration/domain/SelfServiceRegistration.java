@@ -81,10 +81,10 @@ public class SelfServiceRegistration extends AbstractPersistableCustom {
         this.createdDate = new Date();
     }
 
-    public static SelfServiceRegistration instance(final Client client, final String accountNumber, final String firstname,
+    public static SelfServiceRegistration instance(final Client client, final String accountNumber, final String firstName,
             final String lastName, final String mobileNumber, final String email, final String authenticationToken, final String username,
             final String password) {
-        return new SelfServiceRegistration(client, accountNumber, firstname, lastName, mobileNumber, email, authenticationToken, username,
+        return new SelfServiceRegistration(client, accountNumber, firstName, lastName, mobileNumber, email, authenticationToken, username,
                 password);
     }
 

@@ -26,26 +26,25 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("unused")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 
     // class under test
     private HeavensFamilyLoanRepaymentScheduleTransactionProcessor processor;
 
-    //
     private final LocalDate july2nd = new LocalDate(2012, 7, 2);
     private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 
-    @Before
+    @BeforeEach
     public void setUpForEachTestCase() throws Exception {
-
         Field field = MoneyHelper.class.getDeclaredField("roundingMode");
         field.setAccessible(true);
         field.set(null, RoundingMode.HALF_EVEN);
@@ -55,15 +54,14 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     }
 
     /**
-     * Scenario 1: Single transaction which is less than the interest component
-     * of the first installment.
+     * Scenario 1: Single transaction which is less than the interest component of the first installment.
      *
-     * Expectation: - First installment shows interest completed equal to that
-     * of transactions, zero principal completed. (payment order interest,
-     * principal) - transaction has interest portion equal to transaction
-     * amount, and zero principal portion
+     * Expectation: - First installment shows interest completed equal to that of transactions, zero principal
+     * completed. (payment order interest, principal) - transaction has interest portion equal to transaction amount,
+     * and zero principal portion
      */
     @Test
+    @Disabled
     public void givenSingleOnTimeLoanTransactionShouldPayoffInterestComponentFirst() {
 
         // // setup
@@ -605,7 +603,8 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     //
     // Money expectedInterestCompleted = new
     // MoneyBuilder().with(currency).with(interest).build();
-    // assertThat("interest completed not as expected: ",installment.getInterestCompleted(currency).toString(),
+    // assertThat("interest completed not as expected:
+    // ",installment.getInterestCompleted(currency).toString(),
     // is(expectedInterestCompleted.toString()));
     //
     // Money expectedInterestWaived = new

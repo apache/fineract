@@ -29,8 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * Wrapper for {@link ClientRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link ClientRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -46,22 +45,22 @@ public class ClientRepositoryWrapper {
     }
 
     public Client findOneWithNotFoundDetection(final Long id) {
-       return this.findOneWithNotFoundDetection(id, false) ;
+        return this.findOneWithNotFoundDetection(id, false);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Client findOneWithNotFoundDetection(final Long clientId, final boolean loadLazyCollections) {
-        final Client client = this.repository.findById(clientId)
-                .orElseThrow(() -> new ClientNotFoundException(clientId));
-        if(loadLazyCollections) {
+        final Client client = this.repository.findById(clientId).orElseThrow(() -> new ClientNotFoundException(clientId));
+        if (loadLazyCollections) {
             client.loadLazyCollections();
         }
         return client;
     }
 
     public List<Client> findAll(final Collection<Long> clientIds) {
-        return this.repository.findAllById(clientIds) ;
+        return this.repository.findAllById(clientIds);
     }
+
     public void save(final Client client) {
         this.repository.save(client);
     }
@@ -80,15 +79,17 @@ public class ClientRepositoryWrapper {
 
     public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);
-        if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        if (client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
+        }
         this.context.validateAccessRights(client.getOffice().getHierarchy());
         return client;
     }
 
-    public Client getClientByAccountNumber(String accountNumber){
+    public Client getClientByAccountNumber(String accountNumber) {
         Client client = this.repository.getClientByAccountNumber(accountNumber);
-        if(client==null){
-            throw  new ClientNotFoundException(accountNumber);
+        if (client == null) {
+            throw new ClientNotFoundException(accountNumber);
         }
         return client;
     }

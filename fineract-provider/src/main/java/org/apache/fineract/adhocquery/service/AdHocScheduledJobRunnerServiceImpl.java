@@ -41,14 +41,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service(value = "adHocScheduledJobRunnerService")
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource,
-            final AdHocReadPlatformService adHocReadPlatformService
-            ) {
+    public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource, final AdHocReadPlatformService adHocReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.adHocReadPlatformService = adHocReadPlatformService;
 
@@ -57,10 +55,11 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     @Transactional
     @Override
     @CronTarget(jobName = JobName.GENERATE_ADHOCCLIENT_SCEHDULE)
+    @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
     public void generateClientSchedule() {
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
-        if(adhocs.size()>0){
-            adhocs.forEach(adhoc->{
+        if (adhocs.size() > 0) {
+            adhocs.forEach(adhoc -> {
                 boolean run = true;
                 LocalDate next = null;
                 if (adhoc.getReportRunFrequency() != null) {
@@ -71,54 +70,49 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             case DAILY:
                                 next = start.plusDays(1);
                                 run = Days.daysBetween(start, end).getDays() >= 1;
-                                break;
+                            break;
                             case WEEKLY:
                                 next = start.plusDays(7);
                                 run = Days.daysBetween(start, end).getDays() >= 7;
-                                break;
+                            break;
                             case MONTHLY:
                                 next = start.plusMonths(1);
                                 run = Months.monthsBetween(start, end).getMonths() >= 1;
-                                break;
+                            break;
                             case YEARLY:
                                 next = start.plusYears(1);
                                 run = Years.yearsBetween(start, end).getYears() >= 1;
-                                break;
+                            break;
                             case CUSTOM:
                                 next = start.plusDays((int) (long) adhoc.getReportRunEvery());
                                 run = Days.daysBetween(start, end).getDays() >= adhoc.getReportRunEvery();
-                                break;
+                            break;
                             default:
                                 throw new IllegalStateException();
                         }
-
                     }
                 }
 
                 if (run) {
-                    //jdbcTemplate.execute("truncate table "+adhoc.getTableName());
+                    // jdbcTemplate.execute("truncate table
+                    // "+adhoc.getTableName());
                     final StringBuilder insertSqlBuilder = new StringBuilder(900);
-                    insertSqlBuilder
-                            .append("INSERT INTO ")
-                            .append(adhoc.getTableName()+"(")
-                            .append(adhoc.getTableFields()+") ")
+                    insertSqlBuilder.append("INSERT INTO ").append(adhoc.getTableName() + "(").append(adhoc.getTableFields() + ") ")
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        logger.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+                        LOG.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
 
                         this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
                 } else {
-                    logger.info("{}: Skipping execution of {}, scheduled for execution on {}",
-                        new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
+                    LOG.info("{}: Skipping execution of {}, scheduled for execution on {}",
+                            new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
                 }
             });
-        }else{
-            logger.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
+        } else {
+            LOG.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
         }
-
-
 
     }
 

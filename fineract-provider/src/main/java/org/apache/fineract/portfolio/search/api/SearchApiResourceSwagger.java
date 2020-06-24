@@ -23,18 +23,18 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-
-
 /**
  * Created by Kang Breder on 13/06/19.
  */
 final class SearchApiResourceSwagger {
+
     private SearchApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetSearchResponse")
     public static final class GetSearchResponse {
+
         private GetSearchResponse() {
 
         }
@@ -58,10 +58,10 @@ final class SearchApiResourceSwagger {
 
     @ApiModel(value = "PostAdhocQuerySearchRequest")
     public static final class PostAdhocQuerySearchRequest {
+
         private PostAdhocQuerySearchRequest() {
 
         }
-
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -91,6 +91,7 @@ final class SearchApiResourceSwagger {
 
     @ApiModel(value = "PostAdhocQuerySearchResponse")
     public static final class PostAdhocQuerySearchResponse {
+
         private PostAdhocQuerySearchResponse() {
 
         }
@@ -105,4 +106,3 @@ final class SearchApiResourceSwagger {
         public Long percentage;
     }
 }
-

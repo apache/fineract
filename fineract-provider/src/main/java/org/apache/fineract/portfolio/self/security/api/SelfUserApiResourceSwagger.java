@@ -25,13 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class SelfUserApiResourceSwagger {
-    private SelfUserApiResourceSwagger() {
-    }
+
+    private SelfUserApiResourceSwagger() {}
 
     @ApiModel(value = "PutSelfUserRequest")
-    public final static class PutSelfUserRequest {
-        private PutSelfUserRequest() {
-        }
+    public static final class PutSelfUserRequest {
+
+        private PutSelfUserRequest() {}
 
         @ApiModelProperty(example = "Abcd1234")
         public String password;
@@ -40,13 +40,13 @@ final class SelfUserApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfUserResponse")
-    public final static class PutSelfUserResponse {
-        private PutSelfUserResponse() {
-        }
+    public static final class PutSelfUserResponse {
 
-        final class PutSelfUserChanges {
-            private PutSelfUserChanges() {
-            }
+        private PutSelfUserResponse() {}
+
+        static final class PutSelfUserChanges {
+
+            private PutSelfUserChanges() {}
 
             @ApiModelProperty(example = "6a72a630795be86fe926ce540fc45b6b922fe5ba130f185fe806a26b5e5efcdd")
             public String passwordEncoded;

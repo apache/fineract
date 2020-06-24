@@ -43,8 +43,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.joda.time.LocalDate;
 
 /**
- * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor}
- * which is more convenient for concrete implementations to extend.
+ * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor} which is more convenient for concrete
+ * implementations to extend.
  *
  * @see InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
  *
@@ -54,11 +54,10 @@ import org.joda.time.LocalDate;
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * Provides support for passing all {@link LoanTransaction}'s so it will
-     * completely re-process the entire loan schedule. This is required in cases
-     * where the {@link LoanTransaction} being processed is in the past and
-     * falls before existing transactions or and adjustment is made to an
-     * existing in which case the entire loan schedule needs to be re-processed.
+     * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan
+     * schedule. This is required in cases where the {@link LoanTransaction} being processed is in the past and falls
+     * before existing transactions or and adjustment is made to an existing in which case the entire loan schedule
+     * needs to be re-processed.
      */
 
     @Override
@@ -160,9 +159,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
-                     * For existing transactions, check if the re-payment
-                     * breakup (principal, interest, fees, penalties) has
-                     * changed.<br>
+                     * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties)
+                     * has changed.<br>
                      **/
                     final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
@@ -171,13 +169,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     handleTransaction(newLoanTransaction, currency, installments, charges);
                     newLoanTransaction.adjustInterestComponent(currency);
                     /**
-                     * Check if the transaction amounts have changed. If so,
-                     * reverse the original transaction and update
+                     * Check if the transaction amounts have changed. If so, reverse the original transaction and update
                      * changedTransactionDetail accordingly
                      **/
                     if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
-                        loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(newLoanTransaction
-                                .getLoanTransactionToRepaymentScheduleMappings());
+                        loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
+                                newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
                     } else {
                         loanTransaction.reverse();
                         loanTransaction.updateExternalId(null);
@@ -198,8 +195,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     /**
-     * Provides support for processing the latest transaction (which should be
-     * latest transaction) against the loan schedule.
+     * Provides support for processing the latest transaction (which should be latest transaction) against the loan
+     * schedule.
      */
     @Override
     public void handleTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
@@ -284,7 +281,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     // is this transaction early/late/on-time with respect to
                     // the
                     // current installment?
-                    if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate, transactionAmountUnprocessed)) {
+                    if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
+                            transactionAmountUnprocessed)) {
                         transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
                                 installments, loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
                     } else if (isTransactionALateRepaymentOnInstallment(installmentIndex, installments,
@@ -369,9 +367,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanCharge.getAmountOutstanding(currency).isGreaterThanZero() && !loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isInstalmentFee()) {
                     LoanInstallmentCharge unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
-                    if (chargePerInstallment == null
-                            || chargePerInstallment.getRepaymentInstallment().getDueDate()
-                                    .isAfter(unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
+                    if (chargePerInstallment == null || chargePerInstallment.getRepaymentInstallment().getDueDate()
+                            .isAfter(unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
                         installemntCharge = loanCharge;
                         chargePerInstallment = unpaidLoanChargePerInstallment;
                     }
@@ -380,9 +377,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 }
             }
         }
-        if (earliestUnpaidCharge == null
-                || (chargePerInstallment != null && earliestUnpaidCharge.getDueLocalDate().isAfter(
-                        chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+        if (earliestUnpaidCharge == null || (chargePerInstallment != null
+                && earliestUnpaidCharge.getDueLocalDate().isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
             earliestUnpaidCharge = installemntCharge;
         }
 
@@ -407,8 +403,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(transactionDate, currency));
                 interestPortion = interestPortion.plus(currentInstallment.writeOffOutstandingInterest(transactionDate, currency));
                 feeChargesPortion = feeChargesPortion.plus(currentInstallment.writeOffOutstandingFeeCharges(transactionDate, currency));
-                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.writeOffOutstandingPenaltyCharges(transactionDate,
-                        currency));
+                penaltychargesPortion = penaltychargesPortion
+                        .plus(currentInstallment.writeOffOutstandingPenaltyCharges(transactionDate, currency));
             }
         }
 
@@ -417,11 +413,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     // abstract interface
     /**
-     * This method is responsible for checking if the current transaction is 'an
-     * advance/early payment' based on the details passed through.
+     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
+     * details passed through.
      *
-     * Default implementation simply processes transactions as 'Late' if the
-     * transaction date is after the installment due date.
+     * Default implementation simply processes transactions as 'Late' if the transaction date is after the installment
+     * due date.
      */
     protected boolean isTransactionALateRepaymentOnInstallment(final int installmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
@@ -442,11 +438,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final Money transactionAmountUnprocessed, final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     /**
-     * This method is responsible for checking if the current transaction is 'an
-     * advance/early payment' based on the details passed through.
+     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
+     * details passed through.
      *
-     * Default implementation is check transaction date is before installment
-     * due date.
+     * Default implementation is check transaction date is before installment due date.
      */
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate,
@@ -463,9 +458,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * @param transactionMappings
      *            TODO
      */
-    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(
-            final LoanRepaymentScheduleInstallment currentInstallment, final List<LoanRepaymentScheduleInstallment> installments,
-            final LoanTransaction loanTransaction, final LocalDate transactionDate, final Money paymentInAdvance,
+    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+            final LocalDate transactionDate, final Money paymentInAdvance,
             final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     /**
@@ -481,8 +476,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     /**
      * Invoked when a transaction results in an over-payment of the full loan.
      *
-     * transaction amount is greater than the total expected principal and
-     * interest of the loan.
+     * transaction amount is greater than the total expected principal and interest of the loan.
      */
     @SuppressWarnings("unused")
     protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
@@ -560,11 +554,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     /**
-     * Invoked when a there is a refund of an active loan or undo of an active
-     * loan
+     * Invoked when a there is a refund of an active loan or undo of an active loan
      *
-     * Undoes principal, interest, fees and charges of this transaction based on
-     * the repayment strategy
+     * Undoes principal, interest, fees and charges of this transaction based on the repayment strategy
      *
      * @param transactionMappings
      *            TODO
@@ -588,8 +580,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         feeAmount);
                 if (amountDeductedTowardsCharge.isGreaterThanZero()) {
 
-                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, paidCharge, amountDeductedTowardsCharge
-                            .getAmount().multiply(new BigDecimal(-1)), null);
+                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, paidCharge,
+                            amountDeductedTowardsCharge.getAmount().multiply(new BigDecimal(-1)), null);
                     loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
 
                     amountRemaining = amountRemaining.minus(amountDeductedTowardsCharge);
@@ -615,15 +607,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         installemntCharge = loanCharge;
                         chargePerInstallment = paidLoanChargePerInstallment;
                     }
-                } else if (latestPaidCharge == null || loanCharge.isPaidOrPartiallyPaid(currency)
-                        && loanCharge.getDueLocalDate().isAfter(latestPaidCharge.getDueLocalDate())) {
+                } else if (latestPaidCharge == null || (loanCharge.isPaidOrPartiallyPaid(currency)
+                        && loanCharge.getDueLocalDate().isAfter(latestPaidCharge.getDueLocalDate()))) {
                     latestPaidCharge = loanCharge;
                 }
             }
         }
-        if (latestPaidCharge == null
-                || (chargePerInstallment != null && latestPaidCharge.getDueLocalDate().isAfter(
-                        chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+        if (latestPaidCharge == null || (chargePerInstallment != null
+                && latestPaidCharge.getDueLocalDate().isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
             latestPaidCharge = installemntCharge;
         }
 
@@ -689,8 +680,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         principal = principal.minus(principalPortion);
                     }
                 }
-                if (!(principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero() || penaltyCharges
-                        .isGreaterThanZero())) {
+                if (!(principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero()
+                        || penaltyCharges.isGreaterThanZero())) {
                     break;
                 }
             }

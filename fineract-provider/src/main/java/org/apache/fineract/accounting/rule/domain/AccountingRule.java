@@ -42,7 +42,8 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
-@Table(name = "acc_accounting_rule", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "accounting_rule_name_unique") })
+@Table(name = "acc_accounting_rule", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "name" }, name = "accounting_rule_name_unique") })
 public class AccountingRule extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 500)
@@ -66,7 +67,7 @@ public class AccountingRule extends AbstractPersistableCustom {
     @Column(name = "system_defined", nullable = false)
     private Boolean systemDefined;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountingRule", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountingRule", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<AccountingTagRule> accountingTagRules = new ArrayList<>();
 
     @Column(name = "allow_multiple_credits", nullable = false)
@@ -104,8 +105,8 @@ public class AccountingRule extends AbstractPersistableCustom {
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
-        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.OFFICE_ID.getValue(), this.office == null ? 0L
-                : this.office.getId());
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.OFFICE_ID.getValue(),
+                this.office == null ? 0L : this.office.getId());
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
                 this.accountToDebit == null ? 0L : this.accountToDebit.getId());
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),

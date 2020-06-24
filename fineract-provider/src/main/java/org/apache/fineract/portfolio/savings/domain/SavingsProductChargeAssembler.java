@@ -78,14 +78,14 @@ public class SavingsProductChargeAssembler {
                     final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
-                    final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed(chargeTimeTypeParamName,
-                            savingsChargeElement, locale);
+                    final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed(chargeTimeTypeParamName, savingsChargeElement,
+                            locale);
                     final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed(chargeCalculationTypeParamName,
                             savingsChargeElement, locale);
                     final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
                             dateFormat, locale);
-                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper
-                            .extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement);
+                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName,
+                            savingsChargeElement);
                     final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement,
                             locale);
 

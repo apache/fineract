@@ -86,7 +86,9 @@ public class SavingsAccountDataValidator {
 
     public void validateForSubmit(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -139,15 +141,15 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCompoundingPeriodTypeParamName, element)) {
-            final Integer interestCompoundingPeriodType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestCompoundingPeriodTypeParamName, element);
+            final Integer interestCompoundingPeriodType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestCompoundingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestCompoundingPeriodType).notNull()
                     .isOneOfTheseValues(SavingsCompoundingInterestPeriodType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestPostingPeriodTypeParamName, element)) {
-            final Integer interestPostingPeriodType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestPostingPeriodTypeParamName, element);
+            final Integer interestPostingPeriodType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
                     .isOneOfTheseValues(SavingsPostingInterestPeriodType.integerValues());
         }
@@ -160,15 +162,15 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCalculationDaysInYearTypeParamName, element)) {
-            final Integer interestCalculationDaysInYearType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestCalculationDaysInYearTypeParamName, element);
+            final Integer interestCalculationDaysInYearType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestCalculationDaysInYearTypeParamName, element);
             baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
                     .notNull().isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
-            final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    minRequiredOpeningBalanceParamName, element);
+            final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
+                    element);
             baseDataValidator.reset().parameter(minRequiredOpeningBalanceParamName).value(minOpeningBalance).zeroOrPositiveAmount();
         }
 
@@ -179,16 +181,16 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).integerZeroOrGreater();
 
             if (lockinPeriodFrequency != null) {
-                final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                        lockinPeriodFrequencyTypeParamName, element);
+                final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
+                        .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
                 baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
                         .inMinMaxRange(0, 3);
             }
         }
 
         if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyTypeParamName, element)) {
-            final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    lockinPeriodFrequencyTypeParamName, element);
+            final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
 
             if (lockinPeriodFrequencyType != null) {
@@ -200,8 +202,8 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper.extractBooleanNamed(
-                    withdrawalFeeForTransfersParamName, element);
+            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
+                    .extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
@@ -211,7 +213,7 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
         }
 
-        if(this.fromApiJsonHelper.parameterExists(SavingsApiConstants.datatables, element)){
+        if (this.fromApiJsonHelper.parameterExists(SavingsApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(SavingsApiConstants.datatables, element);
             baseDataValidator.reset().parameter(SavingsApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
@@ -263,7 +265,9 @@ public class SavingsAccountDataValidator {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -342,15 +346,15 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCompoundingPeriodTypeParamName, element)) {
-            final Integer interestCompoundingPeriodType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestCompoundingPeriodTypeParamName, element);
+            final Integer interestCompoundingPeriodType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestCompoundingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestCompoundingPeriodType).notNull()
                     .isOneOfTheseValues(SavingsCompoundingInterestPeriodType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestPostingPeriodTypeParamName, element)) {
-            final Integer interestPostingPeriodType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestPostingPeriodTypeParamName, element);
+            final Integer interestPostingPeriodType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
                     .isOneOfTheseValues(SavingsPostingInterestPeriodType.integerValues());
         }
@@ -363,15 +367,15 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCalculationDaysInYearTypeParamName, element)) {
-            final Integer interestCalculationDaysInYearType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestCalculationDaysInYearTypeParamName, element);
+            final Integer interestCalculationDaysInYearType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(interestCalculationDaysInYearTypeParamName, element);
             baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
                     .notNull().isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
-            final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    minRequiredOpeningBalanceParamName, element);
+            final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
+                    element);
             baseDataValidator.reset().parameter(minRequiredOpeningBalanceParamName).value(minOpeningBalance).ignoreIfNull()
                     .zeroOrPositiveAmount();
         }
@@ -384,14 +388,14 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyTypeParamName, element)) {
-            final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    lockinPeriodFrequencyTypeParamName, element);
+            final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
         }
 
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper.extractBooleanNamed(
-                    withdrawalFeeForTransfersParamName, element);
+            final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper
+                    .extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
@@ -406,7 +410,9 @@ public class SavingsAccountDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -421,28 +427,36 @@ public class SavingsAccountDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(nominalAnnualInterestRateOverdraftParamName, element)) {
-            final BigDecimal nominalAnnualInterestRateOverdraft = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateOverdraftParamName, element);
-            baseDataValidator.reset().parameter(nominalAnnualInterestRateOverdraftParamName).value(nominalAnnualInterestRateOverdraft).ignoreIfNull().zeroOrPositiveAmount();
+            final BigDecimal nominalAnnualInterestRateOverdraft = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateOverdraftParamName, element);
+            baseDataValidator.reset().parameter(nominalAnnualInterestRateOverdraftParamName).value(nominalAnnualInterestRateOverdraft)
+                    .ignoreIfNull().zeroOrPositiveAmount();
         }
 
         if (this.fromApiJsonHelper.parameterExists(minOverdraftForInterestCalculationParamName, element)) {
-            final BigDecimal minOverdraftForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minOverdraftForInterestCalculationParamName, element);
-            baseDataValidator.reset().parameter(minOverdraftForInterestCalculationParamName).value(minOverdraftForInterestCalculation).ignoreIfNull().zeroOrPositiveAmount();
+            final BigDecimal minOverdraftForInterestCalculation = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(minOverdraftForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minOverdraftForInterestCalculationParamName).value(minOverdraftForInterestCalculation)
+                    .ignoreIfNull().zeroOrPositiveAmount();
         }
 
     }
 
     public void validateForAssignSavingsOfficer(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
-        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("fromSavingsOfficerId","toSavingsOfficerId","assignmentDate","locale","dateFormat"));
+        final Set<String> supportedParameters = new HashSet<>(
+                Arrays.asList("fromSavingsOfficerId", "toSavingsOfficerId", "assignmentDate", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -456,21 +470,26 @@ public class SavingsAccountDataValidator {
             final LocalDate assignmentDate = this.fromApiJsonHelper.extractLocalDateNamed("assignmentDate", element);
             baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
 
     }
 
     public void validateForUnAssignSavingsOfficer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
-        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate","locale","dateFormat"));
+        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -481,7 +500,9 @@ public class SavingsAccountDataValidator {
             final LocalDate unassignedDate = this.fromApiJsonHelper.extractLocalDateNamed("unassignedDate", element);
             baseDataValidator.reset().parameter("unassignedDate").value(unassignedDate).notNull();
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-}
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
 }

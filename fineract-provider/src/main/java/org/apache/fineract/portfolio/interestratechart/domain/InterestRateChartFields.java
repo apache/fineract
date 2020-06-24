@@ -67,7 +67,8 @@ public class InterestRateChartFields {
         return new InterestRateChartFields(name, description, fromDate, toDate, isPrimaryGroupingByAmount);
     }
 
-    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate, boolean isPrimaryGroupingByAmount) {
+    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate,
+            boolean isPrimaryGroupingByAmount) {
         this.name = name;
         this.description = description;
         this.fromDate = fromDate.toDate();
@@ -127,7 +128,9 @@ public class InterestRateChartFields {
 
     public boolean isFromDateAfter(LocalDate compare) {
         final LocalDate fromDate = getFromDateAsLocalDate();
-        if (fromDate != null && compare != null) { return fromDate.isAfter(compare); }
+        if (fromDate != null && compare != null) {
+            return fromDate.isAfter(compare);
+        }
         return false;
     }
 
@@ -158,7 +161,9 @@ public class InterestRateChartFields {
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
 
-        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) { return true; }
+        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) {
+            return true;
+        }
         return false;// no overlapping
     }
 

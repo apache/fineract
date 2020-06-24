@@ -19,7 +19,7 @@
 
 /***Set defaults for income from Penalties for existing Saving Products**/
 ALTER TABLE `m_loan_transaction`
-	ADD COLUMN `overpayment_portion_derived` DECIMAL(19,6) NULL DEFAULT NULL AFTER `penalty_charges_portion_derived`;
+    ADD COLUMN `overpayment_portion_derived` DECIMAL(19,6) NULL DEFAULT NULL AFTER `penalty_charges_portion_derived`;
 
 /**Add dummy liability account if organization already has a loan product with accounting enabled**/
 INSERT INTO `acc_gl_account` (`name`, `hierarchy`, `gl_code`,`account_usage`, `classification_enum`,`description`)

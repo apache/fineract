@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.accounts.service;
 
-
 public interface AccountsCommandsService {
 
-    public Object handleCommand(final Long accountId, final String command, final String jsonBody) ;
+    public Object handleCommand(final Long accountId, final String command, final String jsonBody);
 }

@@ -36,8 +36,7 @@ public class NotificationData implements Serializable {
     private Long officeId;
     private List<Long> userIds;
 
-    public NotificationData() {
-    }
+    public NotificationData() {}
 
     public NotificationData(String objectType, Long objectId, String action, Long actorId, String content, boolean isSystemGenerated,
             boolean isRead, String tenantIdentifier, Long officeId, List<Long> userIds) {

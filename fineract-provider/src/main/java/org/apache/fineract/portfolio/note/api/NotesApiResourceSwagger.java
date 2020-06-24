@@ -26,17 +26,17 @@ import org.joda.time.DateTime;
  * Created by Chirag Gupta on 12/29/17.
  */
 final class NotesApiResourceSwagger {
-    private NotesApiResourceSwagger() {
-    }
+
+    private NotesApiResourceSwagger() {}
 
     @ApiModel(value = "GetResourceTypeResourceIdNotesResponse")
-    public final static class GetResourceTypeResourceIdNotesResponse {
-        private GetResourceTypeResourceIdNotesResponse() {
-        }
+    public static final class GetResourceTypeResourceIdNotesResponse {
 
-        final class GetNotesNoteType {
-            private GetNotesNoteType() {
-            }
+        private GetResourceTypeResourceIdNotesResponse() {}
+
+        static final class GetNotesNoteType {
+
+            private GetNotesNoteType() {}
 
             @ApiModelProperty(example = "100")
             public Integer id;
@@ -68,9 +68,9 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class GetResourceTypeResourceIdNotesNoteIdResponse {
-        private GetResourceTypeResourceIdNotesNoteIdResponse() {
-        }
+    public static final class GetResourceTypeResourceIdNotesNoteIdResponse {
+
+        private GetResourceTypeResourceIdNotesNoteIdResponse() {}
 
         @ApiModelProperty(example = "76")
         public Integer id;
@@ -94,18 +94,18 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostResourceTypeResourceIdNotesRequest")
-    public final static class PostResourceTypeResourceIdNotesRequest {
-        private PostResourceTypeResourceIdNotesRequest() {
-        }
+    public static final class PostResourceTypeResourceIdNotesRequest {
+
+        private PostResourceTypeResourceIdNotesRequest() {}
 
         @ApiModelProperty(example = "a note about the client")
         public String note;
     }
 
     @ApiModel(value = "PostResourceTypeResourceIdNotesResponse")
-    public final static class PostResourceTypeResourceIdNotesResponse {
-        private PostResourceTypeResourceIdNotesResponse() {
-        }
+    public static final class PostResourceTypeResourceIdNotesResponse {
+
+        private PostResourceTypeResourceIdNotesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -116,22 +116,22 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdRequest")
-    public final static class PutResourceTypeResourceIdNotesNoteIdRequest {
-        private PutResourceTypeResourceIdNotesNoteIdRequest() {
-        }
+    public static final class PutResourceTypeResourceIdNotesNoteIdRequest {
+
+        private PutResourceTypeResourceIdNotesNoteIdRequest() {}
 
         @ApiModelProperty(example = "a note about the client")
         public String note;
     }
 
     @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class PutResourceTypeResourceIdNotesNoteIdResponse {
-        private PutResourceTypeResourceIdNotesNoteIdResponse() {
-        }
+    public static final class PutResourceTypeResourceIdNotesNoteIdResponse {
 
-        final class PutNotesChanges {
-            private PutNotesChanges() {
-            }
+        private PutResourceTypeResourceIdNotesNoteIdResponse() {}
+
+        static final class PutNotesChanges {
+
+            private PutNotesChanges() {}
 
             @ApiModelProperty(example = "a note about the client")
             public String note;
@@ -147,9 +147,9 @@ final class NotesApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class DeleteResourceTypeResourceIdNotesNoteIdResponse {
-        private DeleteResourceTypeResourceIdNotesNoteIdResponse() {
-        }
+    public static final class DeleteResourceTypeResourceIdNotesNoteIdResponse {
+
+        private DeleteResourceTypeResourceIdNotesNoteIdResponse() {}
 
         @ApiModelProperty(example = "76")
         public Integer resourceId;

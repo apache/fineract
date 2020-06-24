@@ -48,7 +48,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 paymentTypeRepositoryWrapper);
     }
 
-    /*** Set of abstractions for saving Saving Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for saving Saving Products to GL Account Mappings
+     ***/
 
     public void saveSavingsToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId) {
@@ -70,7 +72,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.LIABILITY, PortfolioProductType.SAVING);
     }
 
-    /*** Set of abstractions for merging Savings Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for merging Savings Products to GL Account Mappings
+     ***/
 
     public void mergeSavingsToAssetAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
@@ -92,14 +96,14 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
 
     public void mergeSavingsToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes,
-                GLAccountType.LIABILITY, PortfolioProductType.SAVING);
+        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.LIABILITY,
+                PortfolioProductType.SAVING);
     }
 
-    public void createOrmergeSavingsToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final Map<String, Object> changes) {
-        createOrmergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, changes,
-                GLAccountType.LIABILITY, PortfolioProductType.SAVING);
+    public void createOrmergeSavingsToLiabilityAccountMappingChanges(final JsonElement element, final String paramName,
+            final Long productId, final int accountTypeId, final Map<String, Object> changes) {
+        createOrmergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, changes, GLAccountType.LIABILITY,
+                PortfolioProductType.SAVING);
     }
 
     /*** Abstractions for payments channel related to savings products ***/
@@ -132,22 +136,22 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             final AccountingRuleType accountingRuleType) {
         final Map<String, Object> changes = new HashMap<>();
 
-        final Long savingsReferenceId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
-        final Long incomeFromFeesId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
-        final Long incomeFromPenaltiesId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
-        final Long interestOnSavingsId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
+        final Long savingsReferenceId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(),
+                element);
+        final Long incomeFromFeesId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
+                element);
+        final Long incomeFromPenaltiesId = this.fromApiJsonHelper
+                .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
+        final Long interestOnSavingsId = this.fromApiJsonHelper
+                .extractLongNamed(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
         final Long savingsControlId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(),
                 element);
-        final Long transfersInSuspenseAccountId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
-        final Long overdraftControlId = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
-        final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
-                SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), element);
+        final Long transfersInSuspenseAccountId = this.fromApiJsonHelper
+                .extractLongNamed(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
+        final Long overdraftControlId = this.fromApiJsonHelper
+                .extractLongNamed(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+        final Long incomeFromInterest = this.fromApiJsonHelper
+                .extractLongNamed(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), element);
         final Long writeOffId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
                 element);
         switch (accountingRuleType) {
@@ -168,15 +172,12 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             break;
             case ACCRUAL_UPFRONT:
             break;
-            default:
-            break;
         }
         return changes;
     }
 
     /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
+     * Examines and updates each account mapping for given loan product with changes passed in from the Json element
      *
      * @param savingsProductId
      * @param changes
@@ -227,14 +228,11 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                         savingsProductId, CashAccountsForSavings.TRANSFERS_SUSPENSE.getValue(),
                         CashAccountsForSavings.TRANSFERS_SUSPENSE.toString(), changes);
                 createOrmergeSavingsToLiabilityAccountMappingChanges(element, SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(),
-                        savingsProductId, CashAccountsForSavings.ESCHEAT_LIABILITY.getValue(),
-                         changes);
+                        savingsProductId, CashAccountsForSavings.ESCHEAT_LIABILITY.getValue(), changes);
             break;
             case ACCRUAL_PERIODIC:
             break;
             case ACCRUAL_UPFRONT:
-            break;
-            default:
             break;
         }
     }

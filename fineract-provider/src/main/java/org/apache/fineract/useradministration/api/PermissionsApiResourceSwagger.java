@@ -25,15 +25,18 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 22/8/17.
  */
 final class PermissionsApiResourceSwagger {
+
     private PermissionsApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetPermissionsResponse")
     public static final class GetPermissionsResponse {
+
         private GetPermissionsResponse() {
 
         }
+
         @ApiModelProperty(example = "authorisation")
         public String grouping;
         @ApiModelProperty(example = "READ_PERMISSION")
@@ -48,11 +51,12 @@ final class PermissionsApiResourceSwagger {
 
     @ApiModel(value = "PutPermissionsRequest")
     public static final class PutPermissionsRequest {
+
         private PutPermissionsRequest() {
 
         }
-        @ApiModelProperty(example = "\"CREATE_GUARANTOR\":true,\n" +
-                "    \"CREATE_CLIENT\":true")
+
+        @ApiModelProperty(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
         public String permissions;
     }
 }

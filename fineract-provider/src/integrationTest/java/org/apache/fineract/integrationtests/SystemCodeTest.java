@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -32,10 +32,10 @@ import java.util.List;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for creating, updating, deleting codes and code values
@@ -48,7 +48,7 @@ public class SystemCodeTest {
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -72,32 +72,32 @@ public class SystemCodeTest {
 
         final HashMap newCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.responseSpec, createResponseId, "");
 
-        Assert.assertNotNull(newCodeAttributes);
-        assertEquals("Verify value of codeId", createResponseId, newCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(newCodeAttributes);
+        assertEquals(createResponseId, newCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
 
-        assertEquals("Verify code name", codeName, newCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME));
-        assertEquals("Verify system defined is false", false, newCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME));
+        assertEquals(codeName, newCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME), "Verify code name");
+        assertEquals(false, newCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME), "Verify system defined is false");
 
         // update code
         final HashMap updateChangeResponse = (HashMap) CodeHelper.updateCode(this.requestSpec, this.responseSpec, createResponseId,
                 codeName + "(CHANGE)", "changes");
 
-        assertEquals("Verify code name updated", codeName + "(CHANGE)", updateChangeResponse.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME));
+        assertEquals(codeName + "(CHANGE)", updateChangeResponse.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME), "Verify code name updated");
 
         // delete code
         final Integer deleteResponseId = (Integer) CodeHelper.deleteCodeById(this.requestSpec, this.responseSpec, createResponseId,
                 CodeHelper.RESPONSE_ID_ATTRIBUTE_NAME);
-        assertEquals("Verify code deleted", createResponseId, deleteResponseId);
+        assertEquals(createResponseId, deleteResponseId, "Verify code deleted");
 
         // verify code deleted
-        final HashMap deletedCodeValues = (HashMap) CodeHelper
-                .getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId, "");
+        final HashMap deletedCodeValues = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId,
+                "");
 
-        Assert.assertNotNull(deletedCodeValues);
-        assertNull("Verify value of codeId", deletedCodeValues.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(deletedCodeValues);
+        assertNull(deletedCodeValues.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
 
-        assertNull("Verify code name", deletedCodeValues.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME));
-        assertNull("Verify system defined is false", deletedCodeValues.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME));
+        assertNull(deletedCodeValues.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME), "Verify code name");
+        assertNull(deletedCodeValues.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME), "Verify system defined is false");
     }
 
     // @Ignore()
@@ -113,33 +113,33 @@ public class SystemCodeTest {
         // verify code created
         final HashMap newCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.responseSpec, createResponseId, "");
 
-        Assert.assertNotNull(newCodeAttributes);
-        assertEquals("Verify value of codeId", createResponseId, newCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(newCodeAttributes);
+        assertEquals(createResponseId, newCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
 
-        assertEquals("Verify code name", codeName, newCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME));
-        assertEquals("Verify system defined is false", false, newCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME));
+        assertEquals(codeName, newCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME), "Verify code name");
+        assertEquals(false, newCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME), "Verify system defined is false");
 
         // try to create duplicate-- should fail
         final List<HashMap> error = (List) CodeHelper.createCode(this.requestSpec, this.generalResponseSpec, codeName,
                 CommonConstants.RESPONSE_ERROR);
 
-        assertEquals("Verify duplication error", "error.msg.code.duplicate.name", error.get(0).get("userMessageGlobalisationCode"));
+        assertEquals("error.msg.code.duplicate.name", error.get(0).get("userMessageGlobalisationCode"), "Verify duplication error");
 
         // delete code that was just created
 
         final Integer deleteResponseId = (Integer) CodeHelper.deleteCodeById(this.requestSpec, this.responseSpec, createResponseId,
                 CodeHelper.RESPONSE_ID_ATTRIBUTE_NAME);
-        assertEquals("Verify code deleted", createResponseId, deleteResponseId);
+        assertEquals(createResponseId, deleteResponseId, "Verify code deleted");
 
         // verify code deleted
-        final HashMap deletedCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec,
-                deleteResponseId, "");
+        final HashMap deletedCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId,
+                "");
 
-        Assert.assertNotNull(deletedCodeAttributes);
-        assertNull("Verify value of codeId", deletedCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(deletedCodeAttributes);
+        assertNull(deletedCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
 
-        assertNull("Verify code name", deletedCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME));
-        assertNull("Verify system defined is false", deletedCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME));
+        assertNull(deletedCodeAttributes.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME), "Verify code name");
+        assertNull(deletedCodeAttributes.get(CodeHelper.CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME), "Verify system defined is false");
 
     }
 
@@ -154,7 +154,7 @@ public class SystemCodeTest {
         final List<HashMap> error = (List) CodeHelper.deleteCodeById(this.requestSpec, this.generalResponseSpec,
                 (Integer) systemDefinedCode.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), CommonConstants.RESPONSE_ERROR);
 
-        assertEquals("Cannot delete system-defined code", "error.msg.code.systemdefined", error.get(0).get("userMessageGlobalisationCode"));
+        assertEquals("error.msg.code.systemdefined", error.get(0).get("userMessageGlobalisationCode"), "Cannot delete system-defined code");
 
         // update system-defined code should fail
 
@@ -162,8 +162,8 @@ public class SystemCodeTest {
                 (Integer) systemDefinedCode.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME),
                 systemDefinedCode.get(CodeHelper.CODE_NAME_ATTRIBUTE_NAME) + "CHANGE", CommonConstants.RESPONSE_ERROR);
 
-        assertEquals("Cannot update system-defined code", "error.msg.code.systemdefined",
-                updateError.get(0).get("userMessageGlobalisationCode"));
+        assertEquals("error.msg.code.systemdefined", updateError.get(0).get("userMessageGlobalisationCode"),
+                "Cannot update system-defined code");
 
     }
 
@@ -199,47 +199,47 @@ public class SystemCodeTest {
         final List<HashMap> codeValuesList = (List) CodeHelper.getCodeValuesForCode(this.requestSpec, this.responseSpec,
                 createCodeResponseId, "");
 
-        assertEquals("Number of code values returned matches number created", 2, codeValuesList.size());
+        assertEquals(2, codeValuesList.size(), "Number of code values returned matches number created");
 
         // verify values of first code value
         final HashMap codeValuesAttributes1 = (HashMap) CodeHelper.getCodeValueById(this.requestSpec, this.responseSpec,
                 createCodeResponseId, createCodeValueResponseId1, "");
 
-        Assert.assertNotNull(codeValuesAttributes1);
-        assertEquals("Verify value of codeValueId", createCodeValueResponseId1,
-                codeValuesAttributes1.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(codeValuesAttributes1);
+        assertEquals(createCodeValueResponseId1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME),
+                "Verify value of codeValueId");
 
-        assertEquals("Verify value of code name", codeValue1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME));
+        assertEquals(codeValue1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME), "Verify value of code name");
 
-        assertEquals("Verify value of code description", codeDescription1,
-                codeValuesAttributes1.get(CodeHelper.CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME));
+        assertEquals(codeDescription1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME),
+                "Verify value of code description");
 
-        assertEquals("Verify position of code value", codeValue1Position,
-                codeValuesAttributes1.get(CodeHelper.CODE_VALUE_POSITION_ATTRIBUTE_NAME));
+        assertEquals(codeValue1Position, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_POSITION_ATTRIBUTE_NAME),
+                "Verify position of code value");
 
         // verify values of second code value
         final HashMap codeValuesAttributes2 = (HashMap) CodeHelper.getCodeValueById(this.requestSpec, this.responseSpec,
                 createCodeResponseId, createCodeValueResponseId2, "");
 
-        Assert.assertNotNull(codeValuesAttributes2);
-        assertEquals("Verify value of codeValueId", createCodeValueResponseId2,
-                codeValuesAttributes2.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME));
+        Assertions.assertNotNull(codeValuesAttributes2);
+        assertEquals(createCodeValueResponseId2, codeValuesAttributes2.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME),
+                "Verify value of codeValueId");
 
-        assertEquals("Verify value of code name", codeValue2, codeValuesAttributes2.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME));
+        assertEquals(codeValue2, codeValuesAttributes2.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME), "Verify value of code name");
 
-        assertEquals("Verify value of code description", codeDescription2,
-                codeValuesAttributes2.get(CodeHelper.CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME));
+        assertEquals(codeDescription2, codeValuesAttributes2.get(CodeHelper.CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME),
+                "Verify value of code description");
 
-        assertEquals("Verify position of code value", codeValue2Position,
-                codeValuesAttributes2.get(CodeHelper.CODE_VALUE_POSITION_ATTRIBUTE_NAME));
+        assertEquals(codeValue2Position, codeValuesAttributes2.get(CodeHelper.CODE_VALUE_POSITION_ATTRIBUTE_NAME),
+                "Verify position of code value");
 
         // update code value 1
         final HashMap codeValueChanges = (HashMap) CodeHelper.updateCodeValue(this.requestSpec, this.responseSpec, createCodeResponseId,
                 createCodeValueResponseId1, codeValue1 + "CHANGE", codeDescription1 + "CHANGE", 4, "changes");
 
-        assertEquals("Verify changed code value name", codeValueChanges.get("name"), codeValue1 + "CHANGE");
+        assertEquals(codeValue1 + "CHANGE", codeValueChanges.get("name"), "Verify changed code value name");
 
-        assertEquals("Verify changed code value description", codeValueChanges.get("description"), codeDescription1 + "CHANGE");
+        assertEquals(codeDescription1 + "CHANGE", codeValueChanges.get("description"), "Verify changed code value description");
 
         // delete code value
         Integer deletedCodeValueResponseId1 = (Integer) CodeHelper.deleteCodeValueById(this.requestSpec, this.generalResponseSpec,
@@ -255,7 +255,7 @@ public class SystemCodeTest {
         final List<HashMap> deletedCodeValuesList = (List) CodeHelper.getCodeValuesForCode(this.requestSpec, this.responseSpec,
                 createCodeResponseId, "");
 
-        assertEquals("Number of code values is 1", 1, deletedCodeValuesList.size());
+        assertEquals(1, deletedCodeValuesList.size(), "Number of code values is 1");
 
         final Integer deletedCodeValueResponseId2 = (Integer) CodeHelper.deleteCodeValueById(this.requestSpec, this.generalResponseSpec,
                 createCodeResponseId, createCodeValueResponseId2, CodeHelper.SUBRESPONSE_ID_ATTRIBUTE_NAME);
@@ -263,16 +263,16 @@ public class SystemCodeTest {
         final ArrayList<HashMap> deletedCodeValueAttributes2 = (ArrayList<HashMap>) CodeHelper.getCodeValueById(this.requestSpec,
                 this.generalResponseSpec, createCodeResponseId, deletedCodeValueResponseId2, CommonConstants.RESPONSE_ERROR);
 
-        assertEquals("error.msg.codevalue.id.invalid", deletedCodeValueAttributes2.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertEquals(deletedCodeValueAttributes2.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE), "error.msg.codevalue.id.invalid");
 
         final List<HashMap> deletedCodeValuesList1 = (List) CodeHelper.getCodeValuesForCode(this.requestSpec, this.responseSpec,
                 createCodeResponseId, "");
 
-        assertEquals("Number of code values is 0", 0, deletedCodeValuesList1.size());
+        assertEquals(0, deletedCodeValuesList1.size(), "Number of code values is 0");
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testCodeValuesAssignedToTable() {
 

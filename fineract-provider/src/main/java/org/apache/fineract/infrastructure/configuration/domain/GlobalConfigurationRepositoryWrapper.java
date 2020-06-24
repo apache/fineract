@@ -24,8 +24,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link GlobalConfigurationRepository} that adds NULL checking and
- * Error handling capabilities
+ * Wrapper for {@link GlobalConfigurationRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -40,13 +39,14 @@ public class GlobalConfigurationRepositoryWrapper {
 
     public GlobalConfigurationProperty findOneByNameWithNotFoundDetection(final String propertyName) {
         final GlobalConfigurationProperty property = this.repository.findOneByName(propertyName);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+        if (property == null) {
+            throw new GlobalConfigurationPropertyNotFoundException(propertyName);
+        }
         return property;
     }
 
     public GlobalConfigurationProperty findOneWithNotFoundDetection(final Long configId) {
-        return this.repository.findById(configId)
-                .orElseThrow(() -> new GlobalConfigurationPropertyNotFoundException(configId));
+        return this.repository.findById(configId).orElseThrow(() -> new GlobalConfigurationPropertyNotFoundException(configId));
     }
 
     public void save(final GlobalConfigurationProperty globalConfigurationProperty) {

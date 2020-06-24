@@ -21,15 +21,13 @@ package org.apache.fineract.organisation.monetary.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when trying to delete a currency that is
- * still in use.
+ * A {@link RuntimeException} thrown when trying to delete a currency that is still in use.
  */
 public class CurrencyInUseException extends AbstractPlatformDomainRuleException {
 
     public CurrencyInUseException(final String currencyCode) {
         super("error.msg.currency.currencyCode.inUse",
-                "Cannot remove currency with identifier " + currencyCode
-                        + " while it is still in use", currencyCode);
+                "Cannot remove currency with identifier " + currencyCode + " while it is still in use", currencyCode);
     }
 
 }

@@ -16,8 +16,8 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
- 
- -- credit bureau tables 
+
+ -- credit bureau tables
 CREATE TABLE `m_creditbureau` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -78,8 +78,8 @@ CREATE TABLE `m_creditbureau_loanproduct_mapping` (
 --  modify `m_portfolio_command_source` command
 
 ALTER TABLE `m_portfolio_command_source`
-	ADD COLUMN `creditbureau_id` BIGINT NULL DEFAULT NULL AFTER `transaction_id`,
-	ADD COLUMN `organisation_creditbureau_id` BIGINT NULL DEFAULT NULL AFTER `creditbureau_id`;
+    ADD COLUMN `creditbureau_id` BIGINT NULL DEFAULT NULL AFTER `transaction_id`,
+    ADD COLUMN `organisation_creditbureau_id` BIGINT NULL DEFAULT NULL AFTER `creditbureau_id`;
 
 
 -- permissions

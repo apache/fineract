@@ -37,20 +37,20 @@ public class ShareProductCommandsServiceImpl implements ProductCommandsService {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-
     public CommandProcessingResult postDividends(Long productId, JsonCommand jsonCommand) {
-        return null ;
+        return null;
     }
 
     @Override
     public Object handleCommand(Long productId, String command, String jsonBody) {
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonBody);
         final JsonCommand jsonCommand = JsonCommand.from(jsonBody, parsedCommand, this.fromApiJsonHelper, null, null, null, null, null,
-                null, null, null, null, null,null,null);
+                null, null, null, null, null, null, null);
         if (ShareProductApiConstants.PREIEW_DIVIDENDS_COMMAND_STRING.equals(command)) {
-            return null ;
-        } else if (ShareProductApiConstants.POST_DIVIDENdS_COMMAND_STRING.equals(command)) { return postDividends(productId,
-                jsonCommand); }
+            return null;
+        } else if (ShareProductApiConstants.POST_DIVIDENdS_COMMAND_STRING.equals(command)) {
+            return postDividends(productId, jsonCommand);
+        }
         // throw unknow commandexception
         return CommandProcessingResult.empty();
     }

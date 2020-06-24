@@ -23,8 +23,7 @@ import java.util.Map;
 
 /***
  *
- * People typically use either of the following settings when defining interest
- * recalculation method:
+ * People typically use either of the following settings when defining interest recalculation method:
  * <ul>
  * <li>SAME_AS_REPAYMENT_PERIOD</li>
  * <li>DAILY</li>
@@ -35,6 +34,7 @@ import java.util.Map;
  */
 
 public enum InterestRecalculationPeriodMethod {
+
     INVALID(0, "interestRecalculationPeriodMethod.invalid"), //
     DAILY(1, "interestRecalculationPeriodMethod.daily"), //
     WEEKLY(2, "interestRecalculationPeriodMethod.weekly"), //

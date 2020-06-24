@@ -26,8 +26,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link SavingsAccountChargeRepository} that adds NULL checking
- * and Error handling capabilities
+ * Wrapper for {@link SavingsAccountChargeRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -41,13 +40,14 @@ public class SavingsAccountChargeRepositoryWrapper {
     }
 
     public SavingsAccountCharge findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new SavingsAccountChargeNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new SavingsAccountChargeNotFoundException(id));
     }
 
     public SavingsAccountCharge findOneWithNotFoundDetection(final Long id, final Long savingsAccountId) {
         final SavingsAccountCharge savingsAccountCharge = this.repository.findByIdAndSavingsAccountId(id, savingsAccountId);
-        if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(id); }
+        if (savingsAccountCharge == null) {
+            throw new SavingsAccountChargeNotFoundException(id);
+        }
         return savingsAccountCharge;
     }
 

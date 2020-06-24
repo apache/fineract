@@ -45,9 +45,8 @@ public class SpmService {
     private final SurveyValidator surveyValidator;
 
     @Autowired
-    public SpmService(final PlatformSecurityContext securityContext,
-                      final SurveyRepository surveyRepository,
-                      final SurveyValidator surveyValidator) {
+    public SpmService(final PlatformSecurityContext securityContext, final SurveyRepository surveyRepository,
+            final SurveyValidator surveyValidator) {
         super();
         this.securityContext = securityContext;
         this.surveyRepository = surveyRepository;
@@ -80,9 +79,9 @@ public class SpmService {
             this.deactivateSurvey(previousSurvey.getId());
         }
         // set valid from to start of today
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
+        LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         // set valid to for 100 years
-        Calendar cal = Calendar.getInstance() ;
+        Calendar cal = Calendar.getInstance();
         cal.setTime(validFrom.toDate());
         cal.add(Calendar.YEAR, 100);
         survey.setValidFrom(validFrom.toDate());
@@ -98,7 +97,7 @@ public class SpmService {
         } catch (final PersistenceException dve) {
             handleDataIntegrityIssues(dve, dve, survey.getKey());
         }
-        return survey ;
+        return survey;
     }
 
     public Survey updateSurvey(final Survey survey) {
@@ -131,8 +130,8 @@ public class SpmService {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findById(id);
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
-        Calendar cal = Calendar.getInstance() ;
+        LocalDate validFrom = DateUtils.getLocalDateOfTenant();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(validFrom.toDate());
         cal.add(Calendar.YEAR, 100);
         survey.setValidFrom(validFrom.toDate());
@@ -141,19 +140,20 @@ public class SpmService {
         this.surveyRepository.save(survey);
     }
 
-
     public static DateTime getStartOfToday() {
         return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {
 
-        if (realCause.getMessage().contains("m_survey_scorecards")) { throw new PlatformDataIntegrityException(
-                "error.msg.survey.cannot.be.modified.as.used.in.client.survey",
-                "Survey can not be edited as it is already used in client survey", "name", key); }
+        if (realCause.getMessage().contains("m_survey_scorecards")) {
+            throw new PlatformDataIntegrityException("error.msg.survey.cannot.be.modified.as.used.in.client.survey",
+                    "Survey can not be edited as it is already used in client survey", "name", key);
+        }
 
-        if (realCause.getMessage().contains("key")) { throw new PlatformDataIntegrityException("error.msg.survey.duplicate.key",
-                "Survey with key already exists", "name", key); }
+        if (realCause.getMessage().contains("key")) {
+            throw new PlatformDataIntegrityException("error.msg.survey.duplicate.key", "Survey with key already exists", "name", key);
+        }
 
         throw new PlatformDataIntegrityException("error.msg.survey.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

@@ -41,8 +41,8 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
 
     @Autowired
-    public PocketAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final PlatformSecurityContext context, final PocketRepositoryWrapper pocketRepositoryWrapper,
+    public PocketAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
+            final PocketRepositoryWrapper pocketRepositoryWrapper,
             final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.context = context;
@@ -54,8 +54,7 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     public PocketAccountMappingData retrieveAll() {
         final Long pocketId = this.pocketRepositoryWrapper.findByAppUserId(this.context.authenticatedUser().getId());
         if (pocketId != null) {
-            Collection<PocketAccountMapping> pocketAccountMappingList = this.pocketAccountMappingRepositoryWrapper
-                    .findByPocketId(pocketId);
+            Collection<PocketAccountMapping> pocketAccountMappingList = this.pocketAccountMappingRepositoryWrapper.findByPocketId(pocketId);
             if (pocketAccountMappingList != null && !pocketAccountMappingList.isEmpty()) {
                 Collection<PocketAccountMapping> loanAccounts = new ArrayList<>();
                 Collection<PocketAccountMapping> savingsAccounts = new ArrayList<>();
@@ -80,8 +79,7 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     public boolean validatePocketAndAccountMapping(Long pocketId, Long accountId, Integer accountType) {
         final String sql = "select count(id) from m_pocket_accounts_mapping mapping where pocket_id = ? and account_id = ? and account_type = ?";
         try {
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { pocketId, accountId, accountType },
-                    Boolean.class);
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { pocketId, accountId, accountType }, Boolean.class);
         } catch (EmptyResultDataAccessException e) {
             return false;
         }

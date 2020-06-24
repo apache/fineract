@@ -24,16 +24,16 @@ import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 
 /**
- * An enumeration of different options available on account closure
- * {@link FixedDepositAccount} &amp; {@link RecurringDepositAccount}.
+ * An enumeration of different options available on account closure {@link FixedDepositAccount} &amp;
+ * {@link RecurringDepositAccount}.
  */
 public enum DepositAccountOnClosureType {
 
     INVALID(0, "depositAccountClosureType.invalid"), //
     WITHDRAW_DEPOSIT(100, "depositAccountClosureType.withdrawDeposit"), //
     TRANSFER_TO_SAVINGS(200, "depositAccountClosureType.transferToSavings"), //
-    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"),
-    REINVEST_PRINCIPAL_ONLY(400, "depositAccountClosureType.reinvestPrincipalOnly"); //
+    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"), REINVEST_PRINCIPAL_ONLY(400,
+            "depositAccountClosureType.reinvestPrincipalOnly"); //
 
     private final Integer value;
     private final String code;
@@ -53,7 +53,9 @@ public enum DepositAccountOnClosureType {
 
     public static DepositAccountOnClosureType fromInt(final Integer closureTypeValue) {
 
-        if (closureTypeValue == null) { return DepositAccountOnClosureType.INVALID; }
+        if (closureTypeValue == null) {
+            return DepositAccountOnClosureType.INVALID;
+        }
 
         DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.INVALID;
         switch (closureTypeValue) {
@@ -82,8 +84,8 @@ public enum DepositAccountOnClosureType {
     }
 
     public boolean isReinvest() {
-        return this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getValue()) ||
-                       this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getValue());
+        return this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getValue())
+                || this.value.equals(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getValue());
     }
 
     public boolean isReinvestPrincipal() {

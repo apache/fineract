@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing loan reschedule request data.
  **/
-public class LoanRescheduleRequestData {
+public final class LoanRescheduleRequestData {
 
     private final Long id;
     private final Long loanId;
@@ -47,7 +47,9 @@ public class LoanRescheduleRequestData {
 
     /**
      * LoanRescheduleRequestData constructor
-     * @param loanTermVariationsData TODO
+     *
+     * @param loanTermVariationsData
+     *            TODO
      **/
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
             Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
@@ -67,12 +69,13 @@ public class LoanRescheduleRequestData {
         this.loanAccountNumber = loanAccountNumber;
         this.clientId = clientId;
         this.recalculateInterest = recalculateInterest;
-        this.rescheduleReasons = rescheduleReasons ;
+        this.rescheduleReasons = rescheduleReasons;
         this.loanTermVariationsData = loanTermVariationsData;
     }
 
     /**
-     * @param loanTermVariationsData TODO
+     * @param loanTermVariationsData
+     *            TODO
      * @return an instance of the LoanRescheduleRequestData class
      **/
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
@@ -122,6 +125,7 @@ public class LoanRescheduleRequestData {
         return new LoanRescheduleRequestData(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
                 rescheduleReasonCodeValue);
     }
+
     /**
      * @return the id
      */

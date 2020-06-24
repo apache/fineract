@@ -118,7 +118,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
     private BigDecimal maxCap;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
 
     @Column(name = "is_active", nullable = false)
@@ -158,8 +158,8 @@ public class LoanCharge extends AbstractPersistableCustom {
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 if (command.hasParameter("principal") && command.hasParameter("interest")) {
-                    amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal").add(
-                            command.bigDecimalValueOfParameterNamed("interest"));
+                    amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal")
+                            .add(command.bigDecimalValueOfParameterNamed("interest"));
                 } else {
                     amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
                 }
@@ -524,11 +524,12 @@ public class LoanCharge extends AbstractPersistableCustom {
         } else {
             int index = 0;
             final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
-            if(this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()){
+            if (this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()) {
                 oldChargeInstallments.addAll(this.loanInstallmentCharge);
             }
             Collections.sort(oldChargeInstallments);
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments.toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments
+                    .toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
             for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
@@ -543,10 +544,10 @@ public class LoanCharge extends AbstractPersistableCustom {
             }
         }
         Money amount = Money.zero(this.loan.getCurrency());
-        for(LoanInstallmentCharge charge:this.loanInstallmentCharge){
-            amount =amount.plus(charge.getAmount());
+        for (LoanInstallmentCharge charge : this.loanInstallmentCharge) {
+            amount = amount.plus(charge.getAmount());
         }
-        this.amount =amount.getAmount();
+        this.amount = amount.getAmount();
     }
 
     public boolean isDueAtDisbursement() {
@@ -587,12 +588,16 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     private boolean determineIfFullyPaid() {
-        if (this.amount == null) { return true; }
+        if (this.amount == null) {
+            return true;
+        }
         return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
     }
 
     private BigDecimal calculateOutstanding() {
-        if (this.amount == null) { return null; }
+        if (this.amount == null) {
+            return null;
+        }
         BigDecimal amountPaidLocal = BigDecimal.ZERO;
         if (this.amountPaid != null) {
             amountPaidLocal = this.amountPaid;
@@ -631,9 +636,8 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     /**
      * @param percentageOf
-     * @returns a minimum cap or maximum cap set on charges if the criteria fits
-     *          else it returns the percentageOf if the amount is within min and
-     *          max cap
+     * @returns a minimum cap or maximum cap set on charges if the criteria fits else it returns the percentageOf if the
+     *          amount is within min and max cap
      */
     private BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf) {
         BigDecimal minMaxCap = BigDecimal.ZERO;
@@ -701,7 +705,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         return !isPaid();
     }
 
-    public boolean isChargePending(){
+    public boolean isChargePending() {
         return isNotFullyPaid() && !isWaived();
     }
 
@@ -802,29 +806,20 @@ public class LoanCharge extends AbstractPersistableCustom {
         return this.charge;
     }
 
-    /*@Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final LoanCharge rhs = (LoanCharge) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .append(this.charge.getId(), rhs.charge.getId()) //
-                .append(this.amount, rhs.amount) //
-                .append(getDueLocalDate(), rhs.getDueLocalDate()) //
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return 1;
-
-         * return new HashCodeBuilder(3, 5) // .append(getId()) //
-         * .append(this.charge.getId()) //
-         * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
-
-    }*/
+    /*
+     * @Override public boolean equals(final Object obj) { if (obj == null) { return false; } if (obj == this) { return
+     * true; } if (obj.getClass() != getClass()) { return false; } final LoanCharge rhs = (LoanCharge) obj; return new
+     * EqualsBuilder().appendSuper(super.equals(obj)) // .append(getId(), rhs.getId()) // .append(this.charge.getId(),
+     * rhs.charge.getId()) // .append(this.amount, rhs.amount) // .append(getDueLocalDate(), rhs.getDueLocalDate()) //
+     * .isEquals(); }
+     *
+     * @Override public int hashCode() { return 1;
+     *
+     * return new HashCodeBuilder(3, 5) // .append(getId()) // .append(this.charge.getId()) //
+     * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
+     *
+     * }
+     */
 
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);
@@ -846,9 +841,8 @@ public class LoanCharge extends AbstractPersistableCustom {
     public LoanInstallmentCharge getUnpaidInstallmentLoanCharge() {
         LoanInstallmentCharge unpaidChargePerInstallment = null;
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (loanChargePerInstallment.isPending()
-                    && (unpaidChargePerInstallment == null || unpaidChargePerInstallment.getRepaymentInstallment().getDueDate()
-                            .isAfter(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            if (loanChargePerInstallment.isPending() && (unpaidChargePerInstallment == null || unpaidChargePerInstallment
+                    .getRepaymentInstallment().getDueDate().isAfter(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 unpaidChargePerInstallment = loanChargePerInstallment;
             }
         }
@@ -857,14 +851,18 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final LocalDate periodDueDate) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (periodDueDate.isEqual(loanChargePerInstallment.getRepaymentInstallment().getDueDate())) { return loanChargePerInstallment; }
+            if (periodDueDate.isEqual(loanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
+                return loanChargePerInstallment;
+            }
         }
         return null;
     }
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final Integer installmentNumber) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) { return loanChargePerInstallment; }
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) {
+                return loanChargePerInstallment;
+            }
         }
         return null;
     }
@@ -1013,9 +1011,8 @@ public class LoanCharge extends AbstractPersistableCustom {
             Money outstanding = Money.of(currency, loanChargePerInstallment.getAmountOutstanding());
             final boolean partiallyPaid = outstanding.isGreaterThanZero()
                     && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency));
-            if ((partiallyPaid || loanChargePerInstallment.isPaid())
-                    && (paidChargePerInstallment == null || paidChargePerInstallment.getRepaymentInstallment().getDueDate()
-                            .isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            if ((partiallyPaid || loanChargePerInstallment.isPaid()) && (paidChargePerInstallment == null || paidChargePerInstallment
+                    .getRepaymentInstallment().getDueDate().isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 paidChargePerInstallment = loanChargePerInstallment;
             }
         }

@@ -49,13 +49,13 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
         final String schema;
 
         public EmailConfigurationRowMapper() {
-             final StringBuilder sql = new StringBuilder(300);
-                sql.append("cnf.id as id, ");
-                sql.append("cnf.name as name, ");
-                sql.append("cnf.value as value ");
-                sql.append("from scheduled_email_configuration cnf");
+            final StringBuilder sql = new StringBuilder(300);
+            sql.append("cnf.id as id, ");
+            sql.append("cnf.name as name, ");
+            sql.append("cnf.value as value ");
+            sql.append("from scheduled_email_configuration cnf");
 
-                this.schema = sql.toString();
+            this.schema = sql.toString();
         }
 
         public String schema() {
@@ -89,7 +89,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
             return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, name);
         }
 
-        catch(final EmptyResultDataAccessException e) {
+        catch (final EmptyResultDataAccessException e) {
 
             throw new EmailConfigurationNotFoundException(name);
         }

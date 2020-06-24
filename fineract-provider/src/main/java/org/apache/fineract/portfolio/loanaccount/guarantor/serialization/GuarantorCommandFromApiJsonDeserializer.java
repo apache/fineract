@@ -37,8 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link GuarantorCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link GuarantorCommand}'s.
  */
 @Component
 public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<GuarantorCommand> {
@@ -52,7 +51,9 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
 
     @Override
     public GuarantorCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = GuarantorJSONinputParams.getAllValues();
@@ -68,23 +69,20 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
     }
 
     private GuarantorCommand extractGuarantorCommand(final JsonElement element, final Locale locale, final String dateFormat) {
-        final Long clientRelationshipTypeId = this.fromApiJsonHelper.extractLongNamed(
-                GuarantorJSONinputParams.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), element);
-        final Integer guarantorTypeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue(), element);
+        final Long clientRelationshipTypeId = this.fromApiJsonHelper
+                .extractLongNamed(GuarantorJSONinputParams.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), element);
+        final Integer guarantorTypeId = this.fromApiJsonHelper
+                .extractIntegerSansLocaleNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue(), element);
         final Long entityId = this.fromApiJsonHelper.extractLongNamed(GuarantorJSONinputParams.ENTITY_ID.getValue(), element);
         final String firstname = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.FIRSTNAME.getValue(), element);
         final String lastname = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.LASTNAME.getValue(), element);
-        final String addressLine1 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(),
-                element);
-        final String addressLine2 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(),
-                element);
+        final String addressLine1 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue(), element);
+        final String addressLine2 = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue(), element);
         final String city = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.CITY.getValue(), element);
         final String state = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.STATE.getValue(), element);
         final String zip = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.ZIP.getValue(), element);
         final String country = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.COUNTRY.getValue(), element);
-        final String mobileNumber = this.fromApiJsonHelper
-                .extractStringNamed(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), element);
+        final String mobileNumber = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.MOBILE_NUMBER.getValue(), element);
         final String housePhoneNumber = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.PHONE_NUMBER.getValue(),
                 element);
         final String comment = this.fromApiJsonHelper.extractStringNamed(GuarantorJSONinputParams.COMMENT.getValue(), element);

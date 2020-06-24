@@ -33,8 +33,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.joda.time.LocalDate;
 
 /**
- * {@link SavingsAccountSummary} encapsulates all the summary details of a
- * {@link SavingsAccount}.
+ * {@link SavingsAccountSummary} encapsulates all the summary details of a {@link SavingsAccount}.
  */
 @Embeddable
 public final class SavingsAccountSummary {
@@ -101,7 +100,6 @@ public final class SavingsAccountSummary {
         this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
-
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)

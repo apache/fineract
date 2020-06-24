@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/04/17.
  */
 final class InterestRateChartsApiResourceSwagger {
-    private InterestRateChartsApiResourceSwagger() {
-    }
+
+    private InterestRateChartsApiResourceSwagger() {}
 
     @ApiModel(value = "GetInterestRateChartsTemplateResponse")
-    public final static class GetInterestRateChartsTemplateResponse {
-        private GetInterestRateChartsTemplateResponse() {
-        }
+    public static final class GetInterestRateChartsTemplateResponse {
 
-        final class GetInterestRateChartsTemplatePeriodTypes {
-            private GetInterestRateChartsTemplatePeriodTypes() {
-            }
+        private GetInterestRateChartsTemplateResponse() {}
+
+        static final class GetInterestRateChartsTemplatePeriodTypes {
+
+            private GetInterestRateChartsTemplatePeriodTypes() {}
 
             @ApiModelProperty(example = "0")
             public Integer id;
@@ -52,12 +52,12 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "GetInterestRateChartsResponse")
     public static final class GetInterestRateChartsResponse {
-        private GetInterestRateChartsResponse() {
-        }
 
-        final class GetInterestRateChartsChartSlabs {
-            private GetInterestRateChartsChartSlabs() {
-            }
+        private GetInterestRateChartsResponse() {}
+
+        static final class GetInterestRateChartsChartSlabs {
+
+            private GetInterestRateChartsChartSlabs() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -69,9 +69,9 @@ final class InterestRateChartsApiResourceSwagger {
             public GetInterestRateChartsCurrency currency;
         }
 
-        final class GetInterestRateChartsCurrency {
-            private GetInterestRateChartsCurrency() {
-            }
+        static final class GetInterestRateChartsCurrency {
+
+            private GetInterestRateChartsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -100,8 +100,8 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "PostInterestRateChartsRequest")
     public static final class PostInterestRateChartsRequest {
-        private PostInterestRateChartsRequest() {
-        }
+
+        private PostInterestRateChartsRequest() {}
 
         @ApiModelProperty(example = "Chart - 2014")
         public String name;
@@ -119,8 +119,8 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "PostInterestRateChartsResponse")
     public static final class PostInterestRateChartsResponse {
-        private PostInterestRateChartsResponse() {
-        }
+
+        private PostInterestRateChartsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -128,8 +128,9 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "PutInterestRateChartsChartIdRequest")
     public static final class PutInterestRateChartsChartIdRequest {
-        private PutInterestRateChartsChartIdRequest() {
-        }
+
+        private PutInterestRateChartsChartIdRequest() {}
+
         @ApiModelProperty(example = "Interest rate chart for 2014")
         public String name;
         @ApiModelProperty(example = "Interest rate chart for 2014")
@@ -138,8 +139,8 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "PutInterestRateChartsChartIdResponse")
     public static final class PutInterestRateChartsChartIdResponse {
-        private PutInterestRateChartsChartIdResponse() {
-        }
+
+        private PutInterestRateChartsChartIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -147,8 +148,8 @@ final class InterestRateChartsApiResourceSwagger {
 
     @ApiModel(value = "DeleteInterestRateChartsChartIdResponse")
     public static final class DeleteInterestRateChartsChartIdResponse {
-        private DeleteInterestRateChartsChartIdResponse() {
-        }
+
+        private DeleteInterestRateChartsChartIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;

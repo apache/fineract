@@ -27,19 +27,19 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class StandingInstructionHistoryApiResourceSwagger {
-    private StandingInstructionHistoryApiResourceSwagger() {
-    }
+
+    private StandingInstructionHistoryApiResourceSwagger() {}
 
     @ApiModel(value = "GetStandingInstructionRunHistoryResponse")
-    public final static class GetStandingInstructionRunHistoryResponse {
-        private GetStandingInstructionRunHistoryResponse() {
-        }
+    public static final class GetStandingInstructionRunHistoryResponse {
 
-        final class GetStandingInstructionHistoryPageItemsResponse {
+        private GetStandingInstructionRunHistoryResponse() {}
 
-            final class GetStandingInstructionHistoryPageItemsFromClient {
-                private GetStandingInstructionHistoryPageItemsFromClient() {
-                }
+        static final class GetStandingInstructionHistoryPageItemsResponse {
+
+            static final class GetStandingInstructionHistoryPageItemsFromClient {
+
+                private GetStandingInstructionHistoryPageItemsFromClient() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -51,9 +51,9 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String officeName;
             }
 
-            final class GetStandingInstructionHistoryFromAccount {
-                private GetStandingInstructionHistoryFromAccount() {
-                }
+            static final class GetStandingInstructionHistoryFromAccount {
+
+                private GetStandingInstructionHistoryFromAccount() {}
 
                 @ApiModelProperty(example = "2")
                 public Long id;
@@ -65,9 +65,9 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetStandingInstructionHistoryToAccount {
-                private GetStandingInstructionHistoryToAccount() {
-                }
+            static final class GetStandingInstructionHistoryToAccount {
+
+                private GetStandingInstructionHistoryToAccount() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -79,9 +79,9 @@ final class StandingInstructionHistoryApiResourceSwagger {
                 public String productName;
             }
 
-            final class GetStandingInstructionHistoryToClient {
-                private GetStandingInstructionHistoryToClient() {
-                }
+            static final class GetStandingInstructionHistoryToClient {
+
+                private GetStandingInstructionHistoryToClient() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;

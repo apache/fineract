@@ -28,17 +28,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/13/18.
  */
 final class ClientsApiResourceSwagger {
-    private ClientsApiResourceSwagger() {
-    }
+
+    private ClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsTemplateResponse")
-    public final static class GetClientsTemplateResponse {
-        private GetClientsTemplateResponse() {
-        }
+    public static final class GetClientsTemplateResponse {
 
-        final class GetClientsOfficeOptions {
-            private GetClientsOfficeOptions() {
-            }
+        private GetClientsTemplateResponse() {}
+
+        static final class GetClientsOfficeOptions {
+
+            private GetClientsOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -48,9 +48,9 @@ final class ClientsApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetClientsStaffOptions {
-            private GetClientsStaffOptions() {
-            }
+        static final class GetClientsStaffOptions {
+
+            private GetClientsStaffOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -70,9 +70,9 @@ final class ClientsApiResourceSwagger {
             public Boolean isActive;
         }
 
-        final class GetClientsSavingProductOptions {
-            private GetClientsSavingProductOptions() {
-            }
+        static final class GetClientsSavingProductOptions {
+
+            private GetClientsSavingProductOptions() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -84,13 +84,13 @@ final class ClientsApiResourceSwagger {
             public Boolean allowOverdraft;
         }
 
-        final class GetClientsDataTables {
-            private GetClientsDataTables() {
-            }
+        static final class GetClientsDataTables {
 
-            final class GetClientsColumnHeaderData {
-                private GetClientsColumnHeaderData() {
-                }
+            private GetClientsDataTables() {}
+
+            static final class GetClientsColumnHeaderData {
+
+                private GetClientsColumnHeaderData() {}
 
                 @ApiModelProperty(example = "client_id")
                 public String columnName;
@@ -126,17 +126,17 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsResponse")
-    public final static class GetClientsResponse {
-        private GetClientsResponse() {
-        }
+    public static final class GetClientsResponse {
 
-        final class GetClientsPageItemsResponse {
-            private GetClientsPageItemsResponse() {
-            }
+        private GetClientsResponse() {}
 
-            final class GetClientStatus {
-                private GetClientStatus() {
-                }
+        static final class GetClientsPageItemsResponse {
+
+            private GetClientsPageItemsResponse() {}
+
+            static final class GetClientStatus {
+
+                private GetClientStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -169,13 +169,13 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdResponse")
-    public final static class GetClientsClientIdResponse {
-        private GetClientsClientIdResponse() {
-        }
+    public static final class GetClientsClientIdResponse {
 
-        final class GetClientsClientIdStatus {
-            private GetClientsClientIdStatus() {
-            }
+        private GetClientsClientIdResponse() {}
+
+        static final class GetClientsClientIdStatus {
+
+            private GetClientsClientIdStatus() {}
 
             @ApiModelProperty(example = "300")
             public Integer id;
@@ -185,9 +185,9 @@ final class ClientsApiResourceSwagger {
             public String value;
         }
 
-        final class GetClientsTimeline {
-            private GetClientsTimeline() {
-            }
+        static final class GetClientsTimeline {
+
+            private GetClientsTimeline() {}
 
             @ApiModelProperty(example = "[2013, 1, 1]")
             public LocalDate submittedOnDate;
@@ -237,9 +237,9 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsRequest")
-    public final static class PostClientsRequest {
-        private PostClientsRequest() {
-        }
+    public static final class PostClientsRequest {
+
+        private PostClientsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -258,9 +258,9 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsResponse")
-    public final static class PostClientsResponse {
-        private PostClientsResponse() {
-        }
+    public static final class PostClientsResponse {
+
+        private PostClientsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -273,18 +273,18 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutClientsClientIdRequest")
-    public final static class PutClientsClientIdRequest {
-        private PutClientsClientIdRequest() {
-        }
+    public static final class PutClientsClientIdRequest {
+
+        private PutClientsClientIdRequest() {}
 
         @ApiModelProperty(example = "786444UUUYYH7")
         public String externalId;
     }
 
     @ApiModel(value = "PutClientsClientIdResponse")
-    public final static class PutClientsClientIdResponse {
-        private PutClientsClientIdResponse() {
-        }
+    public static final class PutClientsClientIdResponse {
+
+        private PutClientsClientIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -296,15 +296,15 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteClientsClientIdRequest")
-    public final static class DeleteClientsClientIdRequest {
-        private DeleteClientsClientIdRequest() {
-        }
+    public static final class DeleteClientsClientIdRequest {
+
+        private DeleteClientsClientIdRequest() {}
     }
 
     @ApiModel(value = "DeleteClientsClientIdResponse")
-    public final static class DeleteClientsClientIdResponse {
-        private DeleteClientsClientIdResponse() {
-        }
+    public static final class DeleteClientsClientIdResponse {
+
+        private DeleteClientsClientIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -315,18 +315,18 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdRequest")
-    public final static class PostClientsClientIdRequest {
-        private PostClientsClientIdRequest() {
-        }
+    public static final class PostClientsClientIdRequest {
+
+        private PostClientsClientIdRequest() {}
 
         @ApiModelProperty(example = "We cannot accept transfers of clients having loans with less than 1 repayment left")
         public String note;
     }
 
     @ApiModel(value = "PostClientsClientIdResponse")
-    public final static class PostClientsClientIdResponse {
-        private PostClientsClientIdResponse() {
-        }
+    public static final class PostClientsClientIdResponse {
+
+        private PostClientsClientIdResponse() {}
 
         @ApiModelProperty(example = "2")
         public Integer clientId;
@@ -335,17 +335,17 @@ final class ClientsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdAccountsResponse")
-    public final static class GetClientsClientIdAccountsResponse {
-        private GetClientsClientIdAccountsResponse() {
-        }
+    public static final class GetClientsClientIdAccountsResponse {
 
-        final class GetClientsLoanAccounts {
-            private GetClientsLoanAccounts() {
-            }
+        private GetClientsClientIdAccountsResponse() {}
 
-            final class GetClientsLoanAccountsStatus {
-                private GetClientsLoanAccountsStatus() {
-                }
+        static final class GetClientsLoanAccounts {
+
+            private GetClientsLoanAccounts() {}
+
+            static final class GetClientsLoanAccountsStatus {
+
+                private GetClientsLoanAccountsStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -371,9 +371,9 @@ final class ClientsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetClientsLoanAccountsType {
-                private GetClientsLoanAccountsType() {
-                }
+            static final class GetClientsLoanAccountsType {
+
+                private GetClientsLoanAccountsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -399,13 +399,13 @@ final class ClientsApiResourceSwagger {
             public Integer loanCycle;
         }
 
-        final class GetClientsSavingsAccounts {
-            private GetClientsSavingsAccounts() {
-            }
+        static final class GetClientsSavingsAccounts {
 
-            final class GetClientsSavingsAccountsCurrency {
-                private GetClientsSavingsAccountsCurrency() {
-                }
+            private GetClientsSavingsAccounts() {}
+
+            static final class GetClientsSavingsAccountsCurrency {
+
+                private GetClientsSavingsAccountsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -421,9 +421,9 @@ final class ClientsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetClientsSavingsAccountsStatus {
-                private GetClientsSavingsAccountsStatus() {
-                }
+            static final class GetClientsSavingsAccountsStatus {
+
+                private GetClientsSavingsAccountsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;

@@ -44,8 +44,8 @@ import org.springframework.stereotype.Component;
 public class AccountNumberFormatDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
+    private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
 
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
@@ -57,10 +57,11 @@ public class AccountNumberFormatDataValidator {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -73,16 +74,14 @@ public class AccountNumberFormatDataValidator {
                 .integerGreaterThanZero().inMinMaxRange(EntityAccountType.getMinValue(), EntityAccountType.getMaxValue());
 
         if (this.fromApiJsonHelper.parameterExists(AccountNumberFormatConstants.prefixTypeParamName, element)) {
-            final Integer prefixType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    AccountNumberFormatConstants.prefixTypeParamName, element);
+            final Integer prefixType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(AccountNumberFormatConstants.prefixTypeParamName, element);
             DataValidatorBuilder dataValidatorForValidatingPrefixType = baseDataValidator.reset()
                     .parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixType).notNull().integerGreaterThanZero();
 
             /**
-             * Permitted values for prefix type vary based on the actual
-             * selected accountType, carry out this validation only if data
-             * validation errors do not exist for both entity type and prefix
-             * type
+             * Permitted values for prefix type vary based on the actual selected accountType, carry out this validation
+             * only if data validation errors do not exist for both entity type and prefix type
              **/
             boolean areAccountTypeAndPrefixTypeValid = true;
             for (ApiParameterError apiParameterError : dataValidationErrors) {
@@ -103,30 +102,30 @@ public class AccountNumberFormatDataValidator {
 
     }
 
-    public Set<Integer> determineValidAccountNumberPrefixes(
-            EntityAccountType entityAccountType) {
+    public Set<Integer> determineValidAccountNumberPrefixes(EntityAccountType entityAccountType) {
         Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
 
         switch (entityAccountType) {
-        case CLIENT:
-            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
+            case CLIENT:
+                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
             break;
 
-        case LOAN:
-            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
+            case LOAN:
+                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
             break;
 
-        case SAVINGS:
-            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
+            case SAVINGS:
+                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
             break;
 
-        case CENTER:
-            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
+            case CENTER:
+                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
             break;
 
-        case GROUP:
-            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
+            case GROUP:
+                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;
+            default:
         }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();
@@ -138,11 +137,12 @@ public class AccountNumberFormatDataValidator {
 
     public void validateForUpdate(final String json, EntityAccountType entityAccountType) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -154,8 +154,8 @@ public class AccountNumberFormatDataValidator {
         if (this.fromApiJsonHelper.parameterExists(AccountNumberFormatConstants.prefixTypeParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             Set<Integer> validAccountNumberPrefixes = determineValidAccountNumberPrefixes(entityAccountType);
-            final Integer prefixType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    AccountNumberFormatConstants.prefixTypeParamName, element);
+            final Integer prefixType = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(AccountNumberFormatConstants.prefixTypeParamName, element);
             baseDataValidator.reset().parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixType).notNull()
                     .integerGreaterThanZero().isOneOfTheseValues(validAccountNumberPrefixes.toArray());
         }

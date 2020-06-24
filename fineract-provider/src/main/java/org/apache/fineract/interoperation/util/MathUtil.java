@@ -85,10 +85,13 @@ public class MathUtil {
         return value == null ? 0L : Math.abs(value);
     }
 
-    /** @return calculates minimum of the two values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the two values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static Long min(Long first, Long second, boolean notNull) {
-        if (first == null){
+        if (first == null) {
             return notNull ? second : null;
         }
         if (second == null) {
@@ -97,17 +100,18 @@ public class MathUtil {
         return Math.min(first, second);
     }
 
-    /** @return calculates minimum of the values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static Long min(Long first, Long second, Long third, boolean notNull) {
         return min(min(first, second, notNull), third, notNull);
     }
 
     /** @return sum the two values considering null values */
     public static Long add(Long first, Long second) {
-        return first == null
-                ? second
-                : second == null ? first : Math.addExact(first, second);
+        return first == null ? second : second == null ? first : Math.addExact(first, second);
     }
 
     /** @return sum the values considering null values */
@@ -127,17 +131,19 @@ public class MathUtil {
 
     /** @return first minus second considering null values, maybe negative */
     public static Long subtract(Long first, Long second) {
-        return first == null
-                ? null
-                : second == null ? first : Math.subtractExact(first, second);
+        return first == null ? null : second == null ? first : Math.subtractExact(first, second);
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static Long subtractToZero(Long first, Long second, Long third) {
         return subtractToZero(subtract(first, second), third);
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static Long subtractToZero(Long first, Long second, Long third, Long fourth) {
         return subtractToZero(subtract(subtract(first, second), third), fourth);
     }
@@ -151,7 +157,6 @@ public class MathUtil {
     public static Long negate(Long amount) {
         return isEmpty(amount) ? amount : Math.negateExact(amount);
     }
-
 
     // ----------------- BigDecimal -----------------
 
@@ -213,18 +218,21 @@ public class MathUtil {
         return value == null ? BigDecimal.ZERO : value.abs();
     }
 
-    /** @return calculates minimum of the two values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the two values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static BigDecimal min(BigDecimal first, BigDecimal second, boolean notNull) {
-        return notNull
-                ? first == null
-                ? second
-                : second == null ? first : min(first, second, false)
+        return notNull ? first == null ? second : second == null ? first : min(first, second, false)
                 : isLessThan(first, second) ? first : second;
     }
 
-    /** @return calculates minimum of the values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static BigDecimal min(BigDecimal first, BigDecimal second, BigDecimal third, boolean notNull) {
         return min(min(first, second, notNull), third, notNull);
     }
@@ -236,9 +244,7 @@ public class MathUtil {
 
     /** @return sum the two values considering null values */
     public static BigDecimal add(BigDecimal first, BigDecimal second, MathContext mc) {
-        return first == null
-                ? second
-                : second == null ? first : first.add(second, mc);
+        return first == null ? second : second == null ? first : first.add(second, mc);
     }
 
     /** @return sum the values considering null values */
@@ -267,7 +273,8 @@ public class MathUtil {
     }
 
     /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth, BigDecimal fifth, MathContext mc) {
+    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth, BigDecimal fifth,
+            MathContext mc) {
         return add(add(add(add(first, second, mc), third, mc), fourth, mc), fifth, mc);
     }
 
@@ -278,9 +285,7 @@ public class MathUtil {
 
     /** @return first minus second considering null values, maybe negative */
     public static BigDecimal subtract(BigDecimal first, BigDecimal second, MathContext mc) {
-        return first == null
-                ? null
-                : second == null ? first : first.subtract(second, mc);
+        return first == null ? null : second == null ? first : first.subtract(second, mc);
     }
 
     /** @return NONE negative first minus second considering null values */
@@ -288,17 +293,23 @@ public class MathUtil {
         return negativeToZero(subtract(first, second));
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static BigDecimal subtractToZero(BigDecimal first, BigDecimal second, BigDecimal third) {
         return subtractToZero(subtract(first, second), third);
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static BigDecimal subtractToZero(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth) {
         return subtractToZero(subtract(subtract(first, second), third), fourth);
     }
 
-    /** @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency */
+    /**
+     * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency
+     */
     public static BigDecimal normalizeAmount(BigDecimal amount, @NotNull MonetaryCurrency currency) {
         return amount == null ? null : amount.setScale(currency.getDigitsAfterDecimal(), MoneyHelper.getRoundingMode());
     }
@@ -312,7 +323,6 @@ public class MathUtil {
     public static BigDecimal negate(BigDecimal amount, MathContext mc) {
         return isEmpty(amount) ? amount : amount.negate(mc);
     }
-
 
     // ----------------- Money -----------------
 
@@ -358,9 +368,7 @@ public class MathUtil {
     }
 
     public static Money plus(Money first, Money second) {
-        return first == null
-                ? second
-                : second == null ? first : first.plus(second);
+        return first == null ? second : second == null ? first : first.plus(second);
     }
 
     public static Money plus(Money first, Money second, Money third) {
@@ -372,17 +380,19 @@ public class MathUtil {
     }
 
     public static Money minus(Money first, Money second) {
-        return first == null
-                ? null
-                : second == null ? first : first.minus(second);
+        return first == null ? null : second == null ? first : first.minus(second);
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static Money minusToZero(Money first, Money second, Money third) {
         return minusToZero(minus(first, second), third);
     }
 
-    /** @return first minus the others considering null values, maybe negative */
+    /**
+     * @return first minus the others considering null values, maybe negative
+     */
     public static Money minusToZero(Money first, Money second, Money third, Money fourth) {
         return minusToZero(minus(minus(first, second), third), fourth);
     }
@@ -392,18 +402,21 @@ public class MathUtil {
         return negativeToZero(minus(first, second));
     }
 
-    /** @return calculates minimum of the two values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the two values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static Money min(Money first, Money second, boolean notNull) {
-        return notNull
-                ? first == null
-                ? second
-                : second == null ? first : min(first, second, false)
+        return notNull ? first == null ? second : second == null ? first : min(first, second, false)
                 : isLessThan(first, second) ? first : second;
     }
 
-    /** @return calculates minimum of the values considering null values
-     * @param notNull if true then null parameter is omitted, otherwise returns null */
+    /**
+     * @return calculates minimum of the values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
     public static Money min(Money first, Money second, Money third, boolean notNull) {
         return min(min(first, second, notNull), third, notNull);
     }

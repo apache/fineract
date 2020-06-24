@@ -27,8 +27,8 @@ import org.codehaus.jackson.map.SerializerProvider;
 public class TemplateEntitySerializer extends JsonSerializer<TemplateEntity> {
 
     @Override
-    public void serialize(final TemplateEntity value, final JsonGenerator generator, @SuppressWarnings("unused") final SerializerProvider provider)
-            throws IOException, JsonProcessingException {
+    public void serialize(final TemplateEntity value, final JsonGenerator generator,
+            @SuppressWarnings("unused") final SerializerProvider provider) throws IOException, JsonProcessingException {
 
         generator.writeStartObject();
         generator.writeFieldName("id");

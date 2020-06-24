@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
  * Immutable data object that represents a period of a loan schedule.
  *
  */
-public class LoanSchedulePeriodData {
+public final class LoanSchedulePeriodData {
 
     private final Integer period;
     private final LocalDate fromDate;
@@ -93,16 +93,16 @@ public class LoanSchedulePeriodData {
     public static LoanSchedulePeriodData repaymentPeriodWithPayments(@SuppressWarnings("unused") final Long loanId,
             final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate, final LocalDate obligationsMetOnDate,
             final boolean complete, final BigDecimal principalOriginalDue, final BigDecimal principalPaid,
-            final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
-            final BigDecimal outstandingPrincipalBalanceOfLoan, final BigDecimal interestDueOnPrincipalOutstanding,
-            final BigDecimal interestPaid, final BigDecimal interestWaived, final BigDecimal interestWrittenOff,
-            final BigDecimal interestOutstanding, final BigDecimal feeChargesDue, final BigDecimal feeChargesPaid,
-            final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding,
-            final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived,
-            final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding, final BigDecimal totalDueForPeriod,
-            final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod, final BigDecimal totalPaidLateForPeriod,
-            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
-            final BigDecimal totalActualCostOfLoanForPeriod, final BigDecimal totalInstallmentAmountForPeriod) {
+            final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding, final BigDecimal outstandingPrincipalBalanceOfLoan,
+            final BigDecimal interestDueOnPrincipalOutstanding, final BigDecimal interestPaid, final BigDecimal interestWaived,
+            final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding, final BigDecimal feeChargesDue,
+            final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff,
+            final BigDecimal feeChargesOutstanding, final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid,
+            final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding,
+            final BigDecimal totalDueForPeriod, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
+            final BigDecimal totalPaidLateForPeriod, final BigDecimal totalWaived, final BigDecimal totalWrittenOff,
+            final BigDecimal totalOutstanding, final BigDecimal totalActualCostOfLoanForPeriod,
+            final BigDecimal totalInstallmentAmountForPeriod) {
 
         return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, obligationsMetOnDate, complete, principalOriginalDue,
                 principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
@@ -113,7 +113,7 @@ public class LoanSchedulePeriodData {
                 totalActualCostOfLoanForPeriod, totalInstallmentAmountForPeriod);
     }
 
-    public static LoanSchedulePeriodData WithPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
+    public static LoanSchedulePeriodData withPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
             final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
             final BigDecimal penaltyChargesPaid) {
 
@@ -134,8 +134,7 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * constructor used for creating period on loan schedule that is only a
-     * disbursement (typically first period)
+     * constructor used for creating period on loan schedule that is only a disbursement (typically first period)
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
@@ -201,8 +200,7 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * used for repayment only period when creating an empty loan schedule for
-     * preview etc
+     * used for repayment only period when creating an empty loan schedule for preview etc
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final BigDecimal principalOriginalDue, final BigDecimal principalOutstanding,
@@ -264,8 +262,8 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * Used for creating loan schedule periods with full information on expected
-     * principal, interest & charges along with what portion of each is paid.
+     * Used for creating loan schedule periods with full information on expected principal, interest & charges along
+     * with what portion of each is paid.
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,

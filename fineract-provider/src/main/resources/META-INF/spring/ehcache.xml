@@ -21,35 +21,36 @@
 -->
 
 
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
-	<defaultCache eternal="true" maxEntriesLocalHeap="100"
-		overflowToDisk="false" />
+<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
 
-	<cache name="users" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="usersByUsername" maxEntriesLocalHeap="10000"
-		eternal="true" overflowToDisk="false" />
-	<cache name="tenantsById" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="offices" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="officesForDropdown" maxEntriesLocalHeap="10000"
-		eternal="true" overflowToDisk="false" />
-	<cache name="officesById" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="charges" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="funds" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="code_values" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="codes" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="hooks" maxEntriesLocalHeap="10000" eternal="true"
-		overflowToDisk="false" />
-	<cache name="userTFAccessToken" maxEntriesLocalHeap="10000"
-		   overflowToDisk="false" timeToIdleSeconds="7200" />
-	<cache name="tfConfig" maxEntriesLocalHeap="10000" eternal="true"
-		   overflowToDisk="false" />
-</ehcache>
+    <defaultCache eternal="true" maxEntriesLocalHeap="100"
+        overflowToDisk="false" />
+
+    <cache name="users" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="usersByUsername" maxEntriesLocalHeap="10000"
+        eternal="true" overflowToDisk="false" />
+    <cache name="tenantsById" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="offices" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="officesForDropdown" maxEntriesLocalHeap="10000"
+        eternal="true" overflowToDisk="false" />
+    <cache name="officesById" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="charges" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="funds" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="code_values" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="codes" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="hooks" maxEntriesLocalHeap="10000" eternal="true"
+        overflowToDisk="false" />
+    <cache name="userTFAccessToken" maxEntriesLocalHeap="10000"
+           overflowToDisk="false" timeToIdleSeconds="7200" />
+    <cache name="tfConfig" maxEntriesLocalHeap="10000" eternal="true"
+           overflowToDisk="false" />
+</config>

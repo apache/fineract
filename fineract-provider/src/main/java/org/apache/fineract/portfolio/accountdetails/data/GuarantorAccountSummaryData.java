@@ -44,10 +44,12 @@ public class GuarantorAccountSummaryData {
     private final Boolean isActive;
     private final String relationship;
     private final BigDecimal onHoldAmount;
+
     public GuarantorAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
-            final Boolean inArrears,final BigDecimal originalLoan,final BigDecimal loanBalance,final BigDecimal amountPaid,
-            final Boolean isActive, final String relationship, final BigDecimal onHoldAmount) {
+            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+            final EnumOptionData loanType, final Integer loanCycle, final Boolean inArrears, final BigDecimal originalLoan,
+            final BigDecimal loanBalance, final BigDecimal amountPaid, final Boolean isActive, final String relationship,
+            final BigDecimal onHoldAmount) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;

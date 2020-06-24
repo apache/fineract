@@ -23,8 +23,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the important time-line events of a loan
- * application and loan.
+ * Immutable data object represent the important time-line events of a loan application and loan.
  */
 @SuppressWarnings("unused")
 public class LoanApplicationTimelineData {
@@ -100,16 +99,16 @@ public class LoanApplicationTimelineData {
                 writeOffByUsername, writeOffByFirstname, writeOffByLastname);
     }
 
-    public LoanApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
-            final String submittedByFirstname, final String submittedByLastname, final LocalDate rejectedOnDate,
-            final String rejectedByUsername, final String rejectedByFirstname, final String rejectedByLastname,
-            final LocalDate withdrawnOnDate, final String withdrawnByUsername, final String withdrawnByFirstname,
-            final String withdrawnByLastname, final LocalDate approvedOnDate, final String approvedByUsername,
-            final String approvedByFirstname, final String approvedByLastname, final LocalDate expectedDisbursementDate,
-            final LocalDate actualDisbursementDate, final String disbursedByUsername, final String disbursedByFirstname,
-            final String disbursedByLastname, final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname,
-            final String closedByLastname, final LocalDate expectedMaturityDate, final LocalDate writeOffOnDate,
-            final String writeOffByUsername, final String writeOffByFirstname, final String writeOffByLastname) {
+    public LoanApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
+            final String submittedByLastname, final LocalDate rejectedOnDate, final String rejectedByUsername,
+            final String rejectedByFirstname, final String rejectedByLastname, final LocalDate withdrawnOnDate,
+            final String withdrawnByUsername, final String withdrawnByFirstname, final String withdrawnByLastname,
+            final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
+            final String approvedByLastname, final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final String disbursedByUsername, final String disbursedByFirstname, final String disbursedByLastname,
+            final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname, final String closedByLastname,
+            final LocalDate expectedMaturityDate, final LocalDate writeOffOnDate, final String writeOffByUsername,
+            final String writeOffByFirstname, final String writeOffByLastname) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;
@@ -145,12 +144,12 @@ public class LoanApplicationTimelineData {
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,
             final BigDecimal approvedPrincipal, final BigDecimal inArrearsTolerance, final BigDecimal totalFeeChargesAtDisbursement) {
         return new RepaymentScheduleRelatedLoanData(this.expectedDisbursementDate, this.actualDisbursementDate, currency, principal,
-                 inArrearsTolerance, totalFeeChargesAtDisbursement);
+                inArrearsTolerance, totalFeeChargesAtDisbursement);
     }
 
-    public LocalDate getDisbursementDate(){
+    public LocalDate getDisbursementDate() {
         LocalDate disbursementDate = this.expectedDisbursementDate;
-        if(this.actualDisbursementDate != null){
+        if (this.actualDisbursementDate != null) {
             disbursementDate = this.actualDisbursementDate;
         }
         return disbursementDate;

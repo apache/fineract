@@ -44,7 +44,7 @@ public class TaxGroup extends AbstractAuditableCustom {
     @Column(name = "name", length = 100)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
     private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
@@ -96,7 +96,9 @@ public class TaxGroup extends AbstractAuditableCustom {
     public TaxGroupMappings findOneBy(final TaxGroupMappings groupMapping) {
         if (groupMapping.getId() != null) {
             for (TaxGroupMappings groupMappings : this.taxGroupMappings) {
-                if (groupMappings.getId().equals(groupMapping.getId())) { return groupMappings; }
+                if (groupMappings.getId().equals(groupMapping.getId())) {
+                    return groupMappings;
+                }
             }
             throw new TaxMappingNotFoundException(groupMapping.getId());
         }

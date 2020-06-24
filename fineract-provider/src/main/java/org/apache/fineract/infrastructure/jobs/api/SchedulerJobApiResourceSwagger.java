@@ -28,15 +28,18 @@ import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
  * Created by sanyam on 12/8/17.
  */
 final class SchedulerJobApiResourceSwagger {
+
     private SchedulerJobApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetJobsResponse")
     public static final class GetJobsResponse {
+
         private GetJobsResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long jobId;
         @ApiModelProperty(example = "Update loan Summary")
@@ -56,9 +59,11 @@ final class SchedulerJobApiResourceSwagger {
 
     @ApiModel(value = "PutJobsJobsIDRequest")
     public static final class PutJobsJobIDRequest {
+
         private PutJobsJobIDRequest() {
 
         }
+
         @ApiModelProperty(example = "Update loan Summary")
         public String displayName;
         @ApiModelProperty(example = "0 0 22 1/1 * ? *")
@@ -70,12 +75,15 @@ final class SchedulerJobApiResourceSwagger {
 
     @ApiModel(value = "GetJobsJobIDJobRunHistoryResponse")
     public static final class GetJobsJobIDJobRunHistoryResponse {
+
         private GetJobsJobIDJobRunHistoryResponse() {
 
         }
 
-        final class JobDetailHistoryDataSwagger {
-            private JobDetailHistoryDataSwagger(){}
+        static final class JobDetailHistoryDataSwagger {
+
+            private JobDetailHistoryDataSwagger() {}
+
             @ApiModelProperty(example = "1")
             public Long version;
             @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
@@ -87,6 +95,7 @@ final class SchedulerJobApiResourceSwagger {
             @ApiModelProperty(example = "cron")
             public String triggerType;
         }
+
         @ApiModelProperty(example = "8")
         public int totalFilteredRecords;
         public List<JobDetailHistoryDataSwagger> pageItems;

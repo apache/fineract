@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class SmsCampaignData {
+public final class SmsCampaignData {
 
     private Long id;
     private final String campaignName;
@@ -43,7 +43,6 @@ public class SmsCampaignData {
     private final Long providerId;
     private final boolean isNotification;
 
-
     private final Collection<SmsProviderData> smsProviderOptions;
 
     private final Collection<EnumOptionData> campaignTypeOptions;
@@ -61,8 +60,7 @@ public class SmsCampaignData {
     private final Collection<EnumOptionData> periodFrequencyOptions;
 
     private SmsCampaignData(final Long id, final String campaignName, final EnumOptionData campaignType, final EnumOptionData triggerType,
-            final Long runReportId,
-            final String reportName, final String paramValue, final EnumOptionData campaignStatus,
+            final Long runReportId, final String reportName, final String paramValue, final EnumOptionData campaignStatus,
             final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
             final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
             final Long providerId, final Collection<SmsBusinessRulesData> businessRulesOptions,
@@ -105,9 +103,8 @@ public class SmsCampaignData {
     }
 
     public static SmsCampaignData instance(final Long id, final String campaignName, final EnumOptionData campaignType,
-            final EnumOptionData triggerType,
-            final Long runReportId, final String reportName, final String paramValue, final EnumOptionData campaignStatus,
-            final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
+            final EnumOptionData triggerType, final Long runReportId, final String reportName, final String paramValue,
+            final EnumOptionData campaignStatus, final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
             final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
             final Long providerId, final boolean isNotification) {
         final Collection<SmsBusinessRulesData> businessRulesOptions = null;
@@ -119,10 +116,10 @@ public class SmsCampaignData {
         final Collection<EnumOptionData> frequencyTypeOptions = null;
         final Collection<EnumOptionData> periodFrequencyOptions = null;
 
-        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId,
-                reportName, paramValue, campaignStatus, message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine,
-                recurrenceStartDate, recurrence, providerId, businessRulesOptions, smsProviderOptions, campaignTypeOptions,
-                triggerTypeOptions, months, weekDays, frequencyTypeOptions, periodFrequencyOptions, isNotification);
+        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId, reportName, paramValue, campaignStatus,
+                message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId,
+                businessRulesOptions, smsProviderOptions, campaignTypeOptions, triggerTypeOptions, months, weekDays, frequencyTypeOptions,
+                periodFrequencyOptions, isNotification);
     }
 
     public static SmsCampaignData template(final Collection<SmsProviderData> smsProviderOptions,
@@ -146,10 +143,10 @@ public class SmsCampaignData {
         final String reportName = null;
         final Long providerId = null;
         final boolean isNotification = false;
-        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId,
-                reportName, paramValue, campaignStatus, message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine,
-                recurrenceStartDate, recurrence, providerId, businessRulesOptions, smsProviderOptions, campaignTypeOptions,
-                triggerTypeOptions, months, weekDays, frequencyTypeOptions, periodFrequencyOptions, isNotification);
+        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId, reportName, paramValue, campaignStatus,
+                message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId,
+                businessRulesOptions, smsProviderOptions, campaignTypeOptions, triggerTypeOptions, months, weekDays, frequencyTypeOptions,
+                periodFrequencyOptions, isNotification);
     }
 
     public Long getId() {

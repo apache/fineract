@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
@@ -43,7 +43,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class XBRLResultServiceImpl implements XBRLResultService {
-    private final static Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
@@ -52,8 +53,8 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
-    public XBRLResultServiceImpl(final RoutingDataSource dataSource,
-            final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService, final MixTaxonomyReadPlatformService readTaxonomyService) {
+    public XBRLResultServiceImpl(final RoutingDataSource dataSource, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
+            final MixTaxonomyReadPlatformService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -63,24 +64,30 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     public XBRLData getXBRLResult(final Date startDate, final Date endDate, final String currency) {
 
         final HashMap<MixTaxonomyData, BigDecimal> config = retrieveTaxonomyConfig(startDate, endDate);
-        if (config == null || config.size() == 0) { throw new XBRLMappingInvalidException("Mapping is empty"); }
+        if (config == null || config.size() == 0) {
+            throw new XBRLMappingInvalidException("Mapping is empty");
+        }
         return new XBRLData(config, startDate, endDate, currency);
     }
 
     @SuppressWarnings("unchecked")
     private HashMap<MixTaxonomyData, BigDecimal> retrieveTaxonomyConfig(final Date startDate, final Date endDate) {
         final MixTaxonomyMappingData taxonomyMapping = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
-        if (taxonomyMapping == null) { return null; }
+        if (taxonomyMapping == null) {
+            return null;
+        }
         final String config = taxonomyMapping.getConfig();
         if (config != null) {
             // <taxonomyId, mapping>
             HashMap<String, String> configMap = new HashMap<>();
             configMap = new Gson().fromJson(config, configMap.getClass());
-            if (configMap == null) { return null; }
+            if (configMap == null) {
+                return null;
+            }
             // <taxonomyId, value>
             final HashMap<MixTaxonomyData, BigDecimal> resultMap = new HashMap<>();
             setupBalanceMap(getAccountSql(startDate, endDate));
-            for (final Entry<String, String> entry : configMap.entrySet()) {
+            for (final Map.Entry<String, String> entry : configMap.entrySet()) {
                 final BigDecimal value = processMappingString(entry.getValue());
                 if (value != null) {
                     final MixTaxonomyData taxonomy = this.readTaxonomyService.retrieveOne(Long.parseLong(entry.getKey()));
@@ -96,58 +103,38 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private String getAccountSql(final Date startDate, final Date endDate) {
         final String sql = "select debits.glcode as 'glcode', debits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
-                + "from acc_gl_journal_entry,acc_gl_account "
-                + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= "
-                + endDate
-                + " and acc_gl_journal_entry.entry_date > "
-                + startDate
-                +
-                // "and (acc_gl_journal_entry.office_id=${branch} or ${branch}=1) "
+                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
+                + " and acc_gl_journal_entry.entry_date > " + startDate
+                // "and (acc_gl_journal_entry.office_id=${branch} or
+                // ${branch}=1) "
                 // +
-                " group by glcode "
-                + "order by glcode) debits "
-                + "LEFT OUTER JOIN "
+                + " group by glcode " + "order by glcode) debits " + "LEFT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
-                + "from acc_gl_journal_entry,acc_gl_account "
-                + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=1 "
-                + "and acc_gl_journal_entry.entry_date <= "
-                + endDate
-                + " and acc_gl_journal_entry.entry_date > "
-                + startDate
-                +
-                // "and (acc_gl_journal_entry.office_id=${branch} or ${branch}=1) "
+                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
+                + " and acc_gl_journal_entry.entry_date > " + startDate
+                // "and (acc_gl_journal_entry.office_id=${branch} or
+                // ${branch}=1) "
                 // +
-                " group by glcode "
-                + "order by glcode) credits "
-                + "on debits.glcode=credits.glcode "
-                + "union "
+                + " group by glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode " + "union "
                 + "select credits.glcode as 'glcode', credits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
-                + "from acc_gl_journal_entry,acc_gl_account "
-                + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=2 "
-                + "and acc_gl_journal_entry.entry_date <= "
-                + endDate
-                + " and acc_gl_journal_entry.entry_date > "
-                + startDate
-                +
-                // "and (acc_gl_journal_entry.office_id=${branch} or ${branch}=1) "
+                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
+                + " and acc_gl_journal_entry.entry_date > " + startDate
+                // "and (acc_gl_journal_entry.office_id=${branch} or
+                // ${branch}=1) "
                 // +
-                " group by glcode "
-                + "order by glcode) debits "
-                + "RIGHT OUTER JOIN "
+                + " group by glcode " + "order by glcode) debits " + "RIGHT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
-                + "from acc_gl_journal_entry,acc_gl_account "
-                + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=1 "
-                + "and acc_gl_journal_entry.entry_date <= "
-                + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate +
-                // "and (acc_gl_journal_entry.office_id=${branch} or ${branch}=1) "
+                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
+                + " and acc_gl_journal_entry.entry_date > " + startDate
+                // "and (acc_gl_journal_entry.office_id=${branch} or
+                // ${branch}=1) "
                 // +
-                " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
+                + " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
         return sql;
     }
 
@@ -178,7 +165,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 eval = value.floatValue();
             }
         } catch (final ScriptException e) {
-            LOG.error("Problem occurred in processMappingString function",e);
+            LOG.error("Problem occurred in processMappingString function", e);
             throw new IllegalArgumentException(e.getMessage());
         }
 

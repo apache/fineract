@@ -144,8 +144,8 @@ public class DepositProductData {
     }
 
     /**
-     * Returns a {@link DepositProductData} that contains and exist
-     * {@link DepositProductData} data with further template data for dropdowns.
+     * Returns a {@link DepositProductData} that contains and exist {@link DepositProductData} data with further
+     * template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO
@@ -158,7 +158,8 @@ public class DepositProductData {
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
-            final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate, Collection<TaxGroupData> taxGroupOptions) {
+            final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate,
+            Collection<TaxGroupData> taxGroupOptions) {
 
         return new DepositProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
@@ -175,8 +176,7 @@ public class DepositProductData {
     }
 
     public static DepositProductData withAccountingDetails(final DepositProductData existingProduct,
-            final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
             final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
             final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings) {
 
@@ -199,12 +199,12 @@ public class DepositProductData {
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.lockinPeriodFrequency,
                 existingProduct.lockinPeriodFrequencyType, existingProduct.accountingRule, accountingMappings,
-                paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
-                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
-                accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, existingProduct.interestRateCharts, existingProduct.chartTemplate,
-                existingProduct.minBalanceForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions);
+                paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
+                withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions, accountingMappingOptions, existingProduct.charges,
+                chargeOptions, penaltyOptions, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings,
+                existingProduct.interestRateCharts, existingProduct.chartTemplate, existingProduct.minBalanceForInterestCalculation,
+                existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions);
     }
 
     public static DepositProductData instance(final Long id, final String name, final String shortName, final String description,
@@ -318,8 +318,7 @@ public class DepositProductData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
-            final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
             final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
             final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
@@ -455,4 +454,3 @@ public class DepositProductData {
         return interestCompoundingPeriodType;
     }
 }
-

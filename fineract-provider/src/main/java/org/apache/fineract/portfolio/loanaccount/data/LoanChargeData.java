@@ -81,15 +81,13 @@ public class LoanChargeData {
 
     private BigDecimal amountUnrecognized;
 
-
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,
                 null, null, null);
     }
 
     /**
-     * used when populating with details from charge definition (for crud on
-     * charges)
+     * used when populating with details from charge definition (for crud on charges)
      */
     public static LoanChargeData newLoanChargeDetails(final Long chargeId, final String name, final CurrencyData currency,
             final BigDecimal amount, final BigDecimal percentage, final EnumOptionData chargeTimeType,

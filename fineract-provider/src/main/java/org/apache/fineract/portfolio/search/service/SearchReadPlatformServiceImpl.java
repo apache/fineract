@@ -58,7 +58,8 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     @Autowired
     public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final LoanProductReadPlatformService loanProductReadPlatformService, final OfficeReadPlatformService officeReadPlatformService) {
+            final LoanProductReadPlatformService loanProductReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -74,11 +75,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
         final MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("hierarchy", hierarchy + "%");
-        if(searchConditions.getExactMatch()){
+        if (searchConditions.getExactMatch()) {
             params.addValue("search", searchConditions.getSearchQuery());
-           }else{
+        } else {
             params.addValue("search", "%" + searchConditions.getSearchQuery() + "%");
-           }
+        }
         return this.namedParameterjdbcTemplate.query(rm.searchSchema(searchConditions), params, rm);
     }
 
@@ -94,7 +95,6 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , IFNULL(c.id,g.id) as parentId, IFNULL(c.display_name,g.display_name) as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum, IF(g.id is null, 'client', 'group') as parentType "
                     + " from m_loan l left join m_client c on l.client_id = c.id left join m_group g ON l.group_id = g.id left join m_office o on o.id = c.office_id left join m_product_loan pl on pl.id=l.product_id where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (l.account_no like :search or l.external_id like :search)) ";
-
 
             final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
                     + " , IFNULL(c.id,g.id) as parentId, IFNULL(c.display_name,g.display_name) as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, IF(g.id is null, 'client', 'group') as parentType "
@@ -138,8 +138,6 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             if (searchConditions.isGroupSearch()) {
                 sql.append(groupMatchSql).append(union);
             }
-
-
 
             sql.replace(sql.lastIndexOf(union), sql.length(), "");
 

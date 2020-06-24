@@ -24,14 +24,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
-    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"),
-    XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS", "XLS"),
-    PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF", "PDF"),
-    CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV");
 
-    private String code;
-    private String value;
-    private Integer id;
+    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"), XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS",
+            "XLS"), PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF",
+                    "PDF"), CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV");
+
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;
@@ -42,7 +42,8 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     /**
      * Creates a new {@link ReportMailingJobEmailAttachmentFileFormat} object
      *
-     * @param value the value of the enum constant
+     * @param value
+     *            the value of the enum constant
      * @return {@link ReportMailingJobEmailAttachmentFileFormat} object
      */
     public static ReportMailingJobEmailAttachmentFileFormat newInstance(final String value) {
@@ -62,7 +63,8 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     /**
      * Creates a new {@link ReportMailingJobEmailAttachmentFileFormat} object
      *
-     * @param id the id of the enum constant
+     * @param id
+     *            the id of the enum constant
      * @return {@link ReportMailingJobEmailAttachmentFileFormat} object
      */
     public static ReportMailingJobEmailAttachmentFileFormat newInstance(final Integer id) {
@@ -157,7 +159,8 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     }
 
     /**
-     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobEmailAttachmentFileFormat} objects
+     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobEmailAttachmentFileFormat}
+     * objects
      *
      * @return List of {@link EnumOptionData} objects
      */

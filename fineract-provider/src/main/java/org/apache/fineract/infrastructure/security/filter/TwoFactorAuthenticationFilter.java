@@ -43,20 +43,16 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
 
-
 /**
- * This filter is responsible for handling two-factor authentication.
- * The filter is enabled when 'twofactor' environment profile is active, otherwise
- * {@link InsecureTwoFactorAuthenticationFilter} is used.
+ * This filter is responsible for handling two-factor authentication. The filter is enabled when 'twofactor' environment
+ * profile is active, otherwise {@link InsecureTwoFactorAuthenticationFilter} is used.
  *
- * This filter validates an access-token provided as a header 'Fineract-Platform-TFA-Token'.
- * If a valid token is provided, a 'TWOFACTOR_AUTHENTICATED' authority is added to the current
- * authentication.
- * If an invalid(non-existent or invalid) token is provided, 403 response is returned.
+ * This filter validates an access-token provided as a header 'Fineract-Platform-TFA-Token'. If a valid token is
+ * provided, a 'TWOFACTOR_AUTHENTICATED' authority is added to the current authentication. If an invalid(non-existent or
+ * invalid) token is provided, 403 response is returned.
  *
- * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always be granted
- * 'TWOFACTOR_AUTHENTICATED' authority regardless of the value of the 'Fineract-Platform-TFA-Token'
- * header.
+ * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always be granted 'TWOFACTOR_AUTHENTICATED'
+ * authority regardless of the value of the 'Fineract-Platform-TFA-Token' header.
  */
 @Service(value = "twoFactorAuthFilter")
 @Profile("twofactor")
@@ -70,37 +66,35 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
 
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = null;
-        if(context != null) {
+        if (context != null) {
             authentication = context.getAuthentication();
         }
 
         // Process two-factor only when user is authenticated
-        if(authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated()) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
-            if(user == null) {
+            if (user == null) {
                 return;
             }
 
-            if(!user.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION)) {
-                // User can't bypass two-factor auth, check two-factor access token
+            if (!user.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION)) {
+                // User can't bypass two-factor auth, check two-factor access
+                // token
                 String token = request.getHeader("Fineract-Platform-TFA-Token");
-                if(token != null) {
+                if (token != null) {
                     TFAccessToken accessToken = twoFactorService.fetchAccessTokenForUser(user, token);
                     // Token is non-existent or invalid
-                    if(accessToken == null || !accessToken.isValid()) {
-                        response.addHeader("WWW-Authenticate",
-                                "Basic realm=\"Fineract Platform API Two Factor\"");
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                                "Invalid two-factor access token provided");
+                    if (accessToken == null || !accessToken.isValid()) {
+                        response.addHeader("WWW-Authenticate", "Basic realm=\"Fineract Platform API Two Factor\"");
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid two-factor access token provided");
                         return;
                     }
                 } else {
@@ -112,8 +106,7 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
 
             List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
             updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
-            final Authentication updatedAuthentication = createUpdatedAuthentication(authentication,
-                    updatedAuthorities);
+            final Authentication updatedAuthentication = createUpdatedAuthentication(authentication, updatedAuthorities);
             context.setAuthentication(updatedAuthentication);
         }
 
@@ -124,11 +117,10 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
     private Authentication createUpdatedAuthentication(final Authentication currentAuthentication,
             final List<GrantedAuthority> updatedAuthorities) {
 
-        final UsernamePasswordAuthenticationToken authentication = new
-                UsernamePasswordAuthenticationToken(currentAuthentication.getPrincipal(),
-                        currentAuthentication.getCredentials(), updatedAuthorities);
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
 
-        if(currentAuthentication instanceof OAuth2Authentication) {
+        if (currentAuthentication instanceof OAuth2Authentication) {
             final OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) currentAuthentication;
             return new OAuth2Authentication(oAuth2Authentication.getOAuth2Request(), authentication);
         }

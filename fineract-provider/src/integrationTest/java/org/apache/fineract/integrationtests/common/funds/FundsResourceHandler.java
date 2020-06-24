@@ -31,33 +31,26 @@ public class FundsResourceHandler {
     private static final String FUNDS_URL = "/fineract-provider/api/v1/funds";
     private static final String CREATE_FUNDS_URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-    public static Integer createFund(final String fundJSON,
-                                     final RequestSpecification requestSpec,
-                                     final ResponseSpecification responseSpec) {
+    public static Integer createFund(final String fundJSON, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
     }
 
-    public static List<FundsHelper> retrieveAllFunds(final RequestSpecification requestSpec,
-                                                                 final ResponseSpecification responseSpec) {
+    public static List<FundsHelper> retrieveAllFunds(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
         List<HashMap<String, Object>> list = Utils.performServerGet(requestSpec, responseSpec, URL, "");
         final String jsonData = new Gson().toJson(list);
-        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>(){}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>() {}.getType());
     }
 
-    public static String retrieveFund(final Long fundID,
-                                      final RequestSpecification requestSpec,
-                                      final ResponseSpecification responseSpec) {
+    public static String retrieveFund(final Long fundID, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
         return new Gson().toJson(response);
     }
 
-    public static FundsHelper updateFund(final Long fundID,
-                                         final String newName,
-                                         final String newExternalId,
-                                         final RequestSpecification requestSpec,
-                                         final ResponseSpecification responseSpec) {
+    public static FundsHelper updateFund(final Long fundID, final String newName, final String newExternalId,
+            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         FundsHelper fh = FundsHelper.create(newName).externalId(newExternalId).build();
         String updateJSON = new Gson().toJson(fh);
 

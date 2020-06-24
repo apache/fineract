@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.validation;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReportMailingJobValidator {
+
     private final FromJsonHelper fromJsonHelper;
     private static final String EMAIL_REGEX = "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
@@ -60,7 +62,8 @@ public class ReportMailingJobValidator {
     /**
      * validate the request to create a new report mailing job
      *
-     * @param jsonCommand -- the JSON command object (instance of the JsonCommand class)
+     * @param jsonCommand
+     *            -- the JSON command object (instance of the JsonCommand class)
      *
      **/
     public void validateCreateRequest(final JsonCommand jsonCommand) {
@@ -72,12 +75,11 @@ public class ReportMailingJobValidator {
         }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString,
-                ReportMailingJobConstants.CREATE_REQUEST_PARAMETERS);
+        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ReportMailingJobConstants.CREATE_REQUEST_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).
-                resource(StringUtils.lowerCase(ReportMailingJobConstants.REPORT_MAILING_JOB_RESOURCE_NAME));
+        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors)
+                .resource(StringUtils.lowerCase(ReportMailingJobConstants.REPORT_MAILING_JOB_RESOURCE_NAME));
 
         final String name = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.NAME_PARAM_NAME, jsonElement);
         dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.NAME_PARAM_NAME).value(name).notBlank().notExceedingLengthOf(100);
@@ -86,34 +88,35 @@ public class ReportMailingJobValidator {
                 jsonElement);
         dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME).value(startDateTime).notBlank();
 
-        final Integer stretchyReportId = this.fromJsonHelper.extractIntegerWithLocaleNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId).notNull().
-                integerGreaterThanZero();
+        final Integer stretchyReportId = this.fromJsonHelper
+                .extractIntegerWithLocaleNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement);
+        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId).notNull()
+                .integerGreaterThanZero();
 
-        final String emailRecipients = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, jsonElement);
+        final String emailRecipients = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME,
+                jsonElement);
         dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME).value(emailRecipients).notBlank();
 
         final String emailSubject = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME, jsonElement);
-        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank().notExceedingLengthOf(100);
+        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank()
+                .notExceedingLengthOf(100);
 
         final String emailMessage = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, jsonElement);
         dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME).value(emailMessage).notBlank();
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, jsonElement)) {
-            final Boolean isActive = this.fromJsonHelper.extractBooleanNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME,
-                    jsonElement);
+            final Boolean isActive = this.fromJsonHelper.extractBooleanNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, jsonElement);
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME).value(isActive).notNull();
         }
 
-        final Integer emailAttachmentFileFormatId = this.fromJsonHelper.extractIntegerSansLocaleNamed(
-                ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
-        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME).
-                value(emailAttachmentFileFormatId).notNull();
+        final Integer emailAttachmentFileFormatId = this.fromJsonHelper
+                .extractIntegerSansLocaleNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
+        dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
+                .value(emailAttachmentFileFormatId).notNull();
 
         if (emailAttachmentFileFormatId != null) {
-            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME).value(emailAttachmentFileFormatId).
-                    isOneOfTheseValues(ReportMailingJobEmailAttachmentFileFormat.validIds());
+            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
+                    .value(emailAttachmentFileFormatId).isOneOfTheseValues(ReportMailingJobEmailAttachmentFileFormat.validIds());
         }
 
         final String dateFormat = jsonCommand.dateFormat();
@@ -128,8 +131,9 @@ public class ReportMailingJobValidator {
                 LocalDateTime.parse(startDateTime, dateTimeFormatter);
             }
 
-            catch(IllegalArgumentException ex) {
-                dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat).failWithCode("invalid.date.format");
+            catch (IllegalArgumentException ex) {
+                dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
+                        .failWithCode("invalid.date.format");
             }
         }
 
@@ -139,7 +143,8 @@ public class ReportMailingJobValidator {
     /**
      * validate the request to update a report mailing job
      *
-     * @param jsonCommand -- the JSON command object (instance of the JsonCommand class)
+     * @param jsonCommand
+     *            -- the JSON command object (instance of the JsonCommand class)
      *
      **/
     public void validateUpdateRequest(final JsonCommand jsonCommand) {
@@ -151,55 +156,58 @@ public class ReportMailingJobValidator {
         }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString,
-                ReportMailingJobConstants.UPDATE_REQUEST_PARAMETERS);
+        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ReportMailingJobConstants.UPDATE_REQUEST_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).
-                resource(StringUtils.lowerCase(ReportMailingJobConstants.REPORT_MAILING_JOB_RESOURCE_NAME));
+        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors)
+                .resource(StringUtils.lowerCase(ReportMailingJobConstants.REPORT_MAILING_JOB_RESOURCE_NAME));
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.NAME_PARAM_NAME, jsonElement)) {
             final String name = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.NAME_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.NAME_PARAM_NAME).value(name).notBlank().notExceedingLengthOf(100);
+            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.NAME_PARAM_NAME).value(name).notBlank()
+                    .notExceedingLengthOf(100);
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement)) {
-            final Integer stretchyReportId = this.fromJsonHelper.extractIntegerWithLocaleNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME,
-                jsonElement);
-            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId).notNull().
-                integerGreaterThanZero();
+            final Integer stretchyReportId = this.fromJsonHelper
+                    .extractIntegerWithLocaleNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement);
+            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId)
+                    .notNull().integerGreaterThanZero();
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, jsonElement)) {
-            final String emailRecipients = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, jsonElement);
+            final String emailRecipients = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME,
+                    jsonElement);
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME).value(emailRecipients).notBlank();
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME, jsonElement)) {
-            final String emailSubject = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank().notExceedingLengthOf(100);
+            final String emailSubject = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
+                    jsonElement);
+            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank()
+                    .notExceedingLengthOf(100);
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, jsonElement)) {
-            final String emailMessage = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, jsonElement);
+            final String emailMessage = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME,
+                    jsonElement);
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME).value(emailMessage).notBlank();
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, jsonElement)) {
-            final Boolean isActive = this.fromJsonHelper.extractBooleanNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME,
-                    jsonElement);
+            final Boolean isActive = this.fromJsonHelper.extractBooleanNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, jsonElement);
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME).value(isActive).notNull();
         }
 
         if (this.fromJsonHelper.parameterExists(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement)) {
-            final Integer emailAttachmentFileFormatId = this.fromJsonHelper.extractIntegerSansLocaleNamed(
-                ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME).
-                    value(emailAttachmentFileFormatId).notNull();
+            final Integer emailAttachmentFileFormatId = this.fromJsonHelper
+                    .extractIntegerSansLocaleNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
+            dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
+                    .value(emailAttachmentFileFormatId).notNull();
 
             if (emailAttachmentFileFormatId != null) {
-                dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME).value(emailAttachmentFileFormatId).
-                        isOneOfTheseValues(ReportMailingJobEmailAttachmentFileFormat.validIds());
+                dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
+                        .value(emailAttachmentFileFormatId).isOneOfTheseValues(ReportMailingJobEmailAttachmentFileFormat.validIds());
             }
         }
 
@@ -208,20 +216,22 @@ public class ReportMailingJobValidator {
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat).notBlank();
 
             final String startDateTime = this.fromJsonHelper.extractStringNamed(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME,
-                jsonElement);
+                    jsonElement);
             dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME).value(startDateTime).notBlank();
 
             if (StringUtils.isNotEmpty(dateFormat)) {
 
                 try {
-                    final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(jsonCommand.extractLocale());
+                    final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat)
+                            .withLocale(jsonCommand.extractLocale());
 
                     // try to parse the date time string
                     LocalDateTime.parse(startDateTime, dateTimeFormatter);
                 }
 
-                catch(IllegalArgumentException ex) {
-                    dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat).failWithCode("invalid.date.format");
+                catch (IllegalArgumentException ex) {
+                    dataValidatorBuilder.reset().parameter(ReportMailingJobConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
+                            .failWithCode("invalid.date.format");
                 }
             }
         }
@@ -232,7 +242,8 @@ public class ReportMailingJobValidator {
     /**
      * check if string is a valid email address
      *
-     * @param email -- string to be validated
+     * @param email
+     *            -- string to be validated
      * @return true if string is a valid email address
      **/
     public boolean isValidEmail(String email) {
@@ -260,14 +271,15 @@ public class ReportMailingJobValidator {
     /**
      * Validate the email recipients string
      *
-     * @param emailRecipients -- the email recipients string to be validated
+     * @param emailRecipients
+     *            -- the email recipients string to be validated
      * @return a hashset containing valid email addresses
      **/
     public Set<String> validateEmailRecipients(String emailRecipients) {
         Set<String> emailRecipientsSet = new HashSet<>();
 
         if (emailRecipients != null) {
-            String[] split = emailRecipients.split(",");
+            Iterable<String> split = Splitter.on(',').split(emailRecipients);
 
             for (String emailAddress : split) {
                 emailAddress = emailAddress.trim();
@@ -284,18 +296,20 @@ public class ReportMailingJobValidator {
     /**
      * validate the stretchy report param json string
      *
-     * @param stretchyReportParamMap -- json string to be validated
+     * @param stretchyReportParamMap
+     *            -- json string to be validated
      * @return if string is valid or empty, a HashMap object, else null
      **/
-    public HashMap<String,String> validateStretchyReportParamMap(String stretchyReportParamMap) {
-        HashMap<String,String> stretchyReportParamHashMap = new HashMap<>();
+    public HashMap<String, String> validateStretchyReportParamMap(String stretchyReportParamMap) {
+        HashMap<String, String> stretchyReportParamHashMap = new HashMap<>();
 
         if (!StringUtils.isEmpty(stretchyReportParamMap)) {
             try {
-                stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyReportParamMap, new TypeReference<HashMap<String,String>>(){});
+                stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyReportParamMap,
+                        new TypeReference<HashMap<String, String>>() {});
             }
 
-            catch(Exception e) {
+            catch (Exception e) {
                 stretchyReportParamHashMap = null;
             }
         }
@@ -306,7 +320,8 @@ public class ReportMailingJobValidator {
     /**
      * throw a PlatformApiDataValidationException exception if there are validation errors
      *
-     * @param dataValidationErrors -- list of ApiParameterError objects
+     * @param dataValidationErrors
+     *            -- list of ApiParameterError objects
      *
      **/
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

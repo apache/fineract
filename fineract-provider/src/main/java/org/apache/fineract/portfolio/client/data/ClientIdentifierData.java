@@ -45,7 +45,8 @@ public class ClientIdentifierData {
     }
 
     public static ClientIdentifierData template(final ClientIdentifierData data, final Collection<CodeValueData> codeValues) {
-        return new ClientIdentifierData(data.id, data.clientId, data.documentType, data.documentKey, data.description, data.status,  codeValues);
+        return new ClientIdentifierData(data.id, data.clientId, data.documentType, data.documentKey, data.description, data.status,
+                codeValues);
     }
 
     public ClientIdentifierData(final Long id, final Long clientId, final CodeValueData documentType, final String documentKey,

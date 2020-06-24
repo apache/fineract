@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
-
-
 public interface ShareAccountSchedularService {
 
     void postDividend(final Long dividendDetailId, final Long savingsId);

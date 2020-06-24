@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link InvalidTenantIdentiferException}
- * thrown by platform during authentication into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link InvalidTenantIdentiferException} thrown by platform during authentication
+ * into a HTTP API friendly format.
  *
- * The {@link InvalidTenantIdentiferException} is thrown by spring security on
- * platform when a request contains an invalid tenant identifier.
+ * The {@link InvalidTenantIdentiferException} is thrown by spring security on platform when a request contains an
+ * invalid tenant identifier.
  */
 @Provider
 @Component

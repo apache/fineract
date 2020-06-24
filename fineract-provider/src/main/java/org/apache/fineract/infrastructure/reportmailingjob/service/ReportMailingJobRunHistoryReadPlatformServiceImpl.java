@@ -37,14 +37,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements ReportMailingJobRunHistoryReadPlatformService {
+
     private final JdbcTemplate jdbcTemplate;
     private final ReportMailingJobRunHistoryMapper reportMailingJobRunHistoryMapper;
     private final ColumnValidator columnValidator;
     private final PaginationHelper<ReportMailingJobRunHistoryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.reportMailingJobRunHistoryMapper = new ReportMailingJobRunHistoryMapper();
         this.columnValidator = columnValidator;
@@ -57,7 +57,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         final List<Object> queryParameters = new ArrayList<>();
 
         sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlStringBuilder.append(this.reportMailingJobRunHistoryMapper.ReportMailingJobRunHistorySchema());
+        sqlStringBuilder.append(this.reportMailingJobRunHistoryMapper.reportMailingJobRunHistorySchema());
 
         if (reportMailingJobId != null) {
             sqlStringBuilder.append(" where rmjrh.job_id = ? ");
@@ -86,11 +86,11 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
     }
 
     private static final class ReportMailingJobRunHistoryMapper implements RowMapper<ReportMailingJobRunHistoryData> {
-        public String ReportMailingJobRunHistorySchema() {
+
+        public String reportMailingJobRunHistorySchema() {
             return "rmjrh.id, rmjrh.job_id as reportMailingJobId, rmjrh.start_datetime as startDateTime, "
                     + "rmjrh.end_datetime as endDateTime, rmjrh.status, rmjrh.error_message as errorMessage, "
-                    + "rmjrh.error_log as errorLog "
-                    + "from m_report_mailing_job_run_history rmjrh";
+                    + "rmjrh.error_log as errorLog " + "from m_report_mailing_job_run_history rmjrh";
         }
 
         @Override
@@ -103,8 +103,8 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
             final String errorMessage = rs.getString("errorMessage");
             final String errorLog = rs.getString("errorLog");
 
-            return ReportMailingJobRunHistoryData.newInstance(id, reportMailingJobId, startDateTime, endDateTime, status,
-                    errorMessage, errorLog);
+            return ReportMailingJobRunHistoryData.newInstance(id, reportMailingJobId, startDateTime, endDateTime, status, errorMessage,
+                    errorLog);
         }
     }
 }

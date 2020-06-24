@@ -29,15 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "CREATE")
-public class GSIMApplicationSubmittalCommandHandler  implements NewCommandSourceHandler
-{
-
+public class GSIMApplicationSubmittalCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public GSIMApplicationSubmittalCommandHandler(
-            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public GSIMApplicationSubmittalCommandHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 

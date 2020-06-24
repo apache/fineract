@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageData {
 
-    private final static Logger logger = LoggerFactory.getLogger(ImageData.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageData.class);
 
     @SuppressWarnings("unused")
     private final Long imageId;
@@ -67,7 +67,7 @@ public class ImageData {
                 return IOUtils.toByteArray(fileInputStream);
             }
         } catch (IOException e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
         }
         return null;
     }
@@ -105,14 +105,16 @@ public class ImageData {
     }
 
     public byte[] getContentOfSize(Integer maxWidth, Integer maxHeight) {
-        if (maxWidth == null && maxHeight != null) { return getContent(); }
+        if (maxWidth == null && maxHeight != null) {
+            return getContent();
+        }
         byte[] out = null;
         if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
             try {
                 out = resizeImage(this.inputStream, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
                         maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fis = null;
@@ -120,13 +122,13 @@ public class ImageData {
                 fis = new FileInputStream(this.file);
                 out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException ex) {
-                logger.error("Error occured.", ex);
+                LOG.error("Error occured.", ex);
             } finally {
                 if (fis != null) {
                     try {
                         fis.close();
                     } catch (IOException ex) {
-                        logger.error("Error occured.", ex);
+                        LOG.error("Error occured.", ex);
                     }
                 }
             }
@@ -181,7 +183,7 @@ public class ImageData {
             try {
                 available = this.inputStream.available();
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fileInputStream = null;
@@ -190,15 +192,15 @@ public class ImageData {
                 available = fileInputStream.available();
                 fileInputStream.close();
             } catch (FileNotFoundException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             } catch (IOException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             } finally {
                 if (fileInputStream != null) {
                     try {
                         fileInputStream.close();
                     } catch (IOException e) {
-                        logger.error("Problem occurred in available function",e);
+                        LOG.error("Problem occurred in available function", e);
                     }
                 }
             }

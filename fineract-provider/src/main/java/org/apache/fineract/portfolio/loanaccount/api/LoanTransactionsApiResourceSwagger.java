@@ -26,17 +26,17 @@ import java.time.LocalDate;
  * Created by Chirag Gupta on 12/30/17.
  */
 final class LoanTransactionsApiResourceSwagger {
-    private LoanTransactionsApiResourceSwagger() {
-    }
+
+    private LoanTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansLoanIdTransactionsTemplateResponse")
-    public final static class GetLoansLoanIdTransactionsTemplateResponse {
-        private GetLoansLoanIdTransactionsTemplateResponse() {
-        }
+    public static final class GetLoansLoanIdTransactionsTemplateResponse {
 
-        final class GetLoansTransactionType {
-            private GetLoansTransactionType() {
-            }
+        private GetLoansLoanIdTransactionsTemplateResponse() {}
+
+        static final class GetLoansTransactionType {
+
+            private GetLoansTransactionType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -46,9 +46,9 @@ final class LoanTransactionsApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansTotal {
-            private GetLoansTotal() {
-            }
+        static final class GetLoansTotal {
+
+            private GetLoansTotal() {}
 
             @ApiModelProperty(example = "XOF")
             public String currencyCode;
@@ -79,13 +79,13 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class GetLoansLoanIdTransactionsTransactionIdResponse {
-        private GetLoansLoanIdTransactionsTransactionIdResponse() {
-        }
+    public static final class GetLoansLoanIdTransactionsTransactionIdResponse {
 
-        final class GetLoansType {
-            private GetLoansType() {
-            }
+        private GetLoansLoanIdTransactionsTransactionIdResponse() {}
+
+        static final class GetLoansType {
+
+            private GetLoansType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -111,9 +111,9 @@ final class LoanTransactionsApiResourceSwagger {
             public Boolean recoveryRepayment;
         }
 
-        final class GetLoansCurrency {
-            private GetLoansCurrency() {
-            }
+        static final class GetLoansCurrency {
+
+            private GetLoansCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -144,15 +144,15 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsRequest")
-    public final static class PostLoansLoanIdTransactionsRequest {
-        private PostLoansLoanIdTransactionsRequest() {
-        }
+    public static final class PostLoansLoanIdTransactionsRequest {
+
+        private PostLoansLoanIdTransactionsRequest() {}
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsResponse")
-    public final static class PostLoansLoanIdTransactionsResponse {
-        private PostLoansLoanIdTransactionsResponse() {
-        }
+    public static final class PostLoansLoanIdTransactionsResponse {
+
+        private PostLoansLoanIdTransactionsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -163,9 +163,9 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdRequest")
-    public final static class PostLoansLoanIdTransactionsTransactionIdRequest {
-        private PostLoansLoanIdTransactionsTransactionIdRequest() {
-        }
+    public static final class PostLoansLoanIdTransactionsTransactionIdRequest {
+
+        private PostLoansLoanIdTransactionsTransactionIdRequest() {}
 
         @ApiModelProperty(example = "en_GB")
         public String locale;
@@ -180,9 +180,9 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class PostLoansLoanIdTransactionsTransactionIdResponse {
-        private PostLoansLoanIdTransactionsTransactionIdResponse() {
-        }
+    public static final class PostLoansLoanIdTransactionsTransactionIdResponse {
+
+        private PostLoansLoanIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "16")
         public Integer resourceId;

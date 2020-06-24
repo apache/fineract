@@ -31,12 +31,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation that returns a new or existing connection pool
- * datasource based on the tenant details stored in a {@link ThreadLocal}
- * variable for this request.
+ * Implementation that returns a new or existing connection pool datasource based on the tenant details stored in a
+ * {@link ThreadLocal} variable for this request.
  *
- * {@link ThreadLocalContextUtil} is used to retrieve the
- * {@link FineractPlatformTenant} for the request.
+ * {@link ThreadLocalContextUtil} is used to retrieve the {@link FineractPlatformTenant} for the request.
  */
 @Service
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService {
@@ -62,7 +60,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
             synchronized (this.tenantToDataSourceMap) {
-                // if tenantConnection information available switch to the appropriate datasource for that tenant.
+                // if tenantConnection information available switch to the
+                // appropriate datasource for that tenant.
                 DataSource possibleDS = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
                 if (possibleDS != null) {
                     tenantDataSource = possibleDS;
@@ -78,7 +77,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     // creates the tenant data source for the oltp and report database
     private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
-        String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
+        String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(),
+                tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
 
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(this.driverConfig.getDriverClassName());
@@ -96,7 +96,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         config.setRegisterMbeans(true);
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-        // These are the properties for each Tenant DB; the same configuration is also in src/main/resources/META-INF/spring/hikariDataSource.xml for the all Tenants DB -->
+        // These are the properties for each Tenant DB; the same configuration
+        // is also in src/main/resources/META-INF/spring/hikariDataSource.xml
+        // for the all Tenants DB -->
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -109,7 +111,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         config.addDataSourceProperty("maintainTimeStats", "false");
 
         // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
-        // TODO FINERACT-890: config.addDataSourceProperty("logger", "com.mysql.cj.log.Slf4JLogger");
+        // TODO FINERACT-890: config.addDataSourceProperty("logger",
+        // "com.mysql.cj.log.Slf4JLogger");
         config.addDataSourceProperty("logSlowQueries", "true");
         config.addDataSourceProperty("dumpQueriesOnException", "true");
 

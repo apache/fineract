@@ -35,7 +35,8 @@ public class SettleCashFromCashierCommandHandler implements NewCommandSourceHand
     /**
      * Creates a new instance.
      *
-     * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
+     * @param writePlatformService
+     *            the {@code CashierWritePlatformService} used to access the backend
      */
     @Autowired
     public SettleCashFromCashierCommandHandler(final TellerWritePlatformService writePlatformService) {

@@ -31,21 +31,17 @@ import org.joda.time.LocalDate;
 /**
  * Creocore style {@link LoanRepaymentScheduleTransactionProcessor}.
  *
- * For standard transactions, pays off components in order of interest, then
- * principal.
+ * For standard transactions, pays off components in order of interest, then principal.
  *
- * If a transaction results in an advance payment or over-payment for a given
- * installment, the over paid amount is pay off on the principal component of
- * subsequent installments.
+ * If a transaction results in an advance payment or over-payment for a given installment, the over paid amount is pay
+ * off on the principal component of subsequent installments.
  *
- * If the entire principal of an installment is paid in advance then the
- * interest component is waived.
+ * If the entire principal of an installment is paid in advance then the interest component is waived.
  */
 public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * For creocore, early is defined as any date before the installment due
-     * date
+     * For creocore, early is defined as any date before the installment due date
      */
     @SuppressWarnings("unused")
     @Override
@@ -58,8 +54,7 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractL
     }
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time
-     * payments, interest first then principal.
+     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @SuppressWarnings("unused")
     @Override
@@ -68,12 +63,12 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractL
             final LocalDate transactionDate, final Money paymentInAdvance,
             final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance,
+                transactionMappings);
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @SuppressWarnings("unused")
     @Override
@@ -106,8 +101,8 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractL
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

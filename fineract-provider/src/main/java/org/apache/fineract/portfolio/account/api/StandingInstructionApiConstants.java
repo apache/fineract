@@ -40,9 +40,8 @@ public class StandingInstructionApiConstants {
     public static final String recurrenceOnMonthDayParamName = "recurrenceOnMonthDay";
     public static final String monthDayFormatParamName = "monthDayFormat";
 
-    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants
-                    .idParamName,
-            nameParamName, priorityParamName, instructionTypeParamName, statusParamName, AccountDetailConstants.transferTypeParamName,
-            validFromParamName, validTillParamName));
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountDetailConstants.idParamName, nameParamName, priorityParamName, instructionTypeParamName, statusParamName,
+                    AccountDetailConstants.transferTypeParamName, validFromParamName, validTillParamName));
 
 }

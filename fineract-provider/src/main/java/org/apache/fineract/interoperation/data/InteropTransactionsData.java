@@ -30,7 +30,6 @@ public class InteropTransactionsData extends CommandProcessingResult {
 
     List<InteropTransactionData> transactions;
 
-
     public InteropTransactionsData(Long entityId, List<InteropTransactionData> transactions) {
         super(entityId);
         this.transactions = transactions;

@@ -36,11 +36,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor'
- * environment profile is not active.
+ * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor' environment profile is not active.
  *
- * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated
- * platform user.
+ * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated platform user.
  */
 @Service(value = "twoFactorAuthFilter")
 @Profile("!twofactor")
@@ -55,23 +53,22 @@ public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticati
 
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = null;
-        if(context != null) {
+        if (context != null) {
             authentication = context.getAuthentication();
         }
 
         // Add two-factor authenticated authority if user is authenticated
-        if(authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
-            if(user == null) {
+            if (user == null) {
                 return;
             }
 
             List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
             updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
-            UsernamePasswordAuthenticationToken updatedAuthentication =
-                    new UsernamePasswordAuthenticationToken(authentication.getPrincipal(),
-                            authentication.getCredentials(), updatedAuthorities);
+            UsernamePasswordAuthenticationToken updatedAuthentication = new UsernamePasswordAuthenticationToken(
+                    authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
             context.setAuthentication(updatedAuthentication);
         }
 

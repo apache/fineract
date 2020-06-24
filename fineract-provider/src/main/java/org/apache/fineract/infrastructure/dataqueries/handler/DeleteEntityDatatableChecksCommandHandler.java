@@ -34,8 +34,7 @@ public class DeleteEntityDatatableChecksCommandHandler implements NewCommandSour
     private final EntityDatatableChecksWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteEntityDatatableChecksCommandHandler(
-            final EntityDatatableChecksWritePlatformService writePlatformService) {
+    public DeleteEntityDatatableChecksCommandHandler(final EntityDatatableChecksWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

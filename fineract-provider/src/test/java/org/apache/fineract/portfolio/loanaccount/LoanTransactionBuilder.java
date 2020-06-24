@@ -35,8 +35,7 @@ public class LoanTransactionBuilder {
      *
      * LoanTransaction transaction = null;
      *
-     * if (repayment) { transaction =
-     * LoanTransaction.repayment(transactionAmount, transactionDate); }
+     * if (repayment) { transaction = LoanTransaction.repayment(transactionAmount, transactionDate); }
      *
      * return transaction; }
      **/

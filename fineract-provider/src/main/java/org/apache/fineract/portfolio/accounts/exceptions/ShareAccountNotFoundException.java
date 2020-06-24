@@ -20,10 +20,9 @@ package org.apache.fineract.portfolio.accounts.exceptions;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-
-public class ShareAccountNotFoundException extends AbstractPlatformResourceNotFoundException{
+public class ShareAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public ShareAccountNotFoundException(final Long id) {
-        super("error.msg.shareaccount.id.invalid", " Account with identifier " + id + " does not exist" , id);
+        super("error.msg.shareaccount.id.invalid", " Account with identifier " + id + " does not exist", id);
     }
 }

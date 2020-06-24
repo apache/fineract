@@ -32,117 +32,114 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.group.domain.Group;
 
 @Entity
-@Table(name = "glim_accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_number" }, name = "FK_glim_id")})
-public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCustom {
+@Table(name = "glim_accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_number" }, name = "FK_glim_id") })
+public final class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCustom {
 
-     @ManyToOne
-     @JoinColumn(name = "group_id", nullable = false)
-     private Group group;
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
 
-     @Column(name = "account_number", nullable = false)
-     private String accountNumber;
+    @Column(name = "account_number", nullable = false)
+    private String accountNumber;
 
-     @Column(name = "principal_amount")
-     private BigDecimal principalAmount;
+    @Column(name = "principal_amount")
+    private BigDecimal principalAmount;
 
+    @Column(name = "child_accounts_count")
+    private Long childAccountsCount;
 
-     @Column(name = "child_accounts_count")
-     private Long childAccountsCount;
+    @Column(name = "accepting_child")
+    private Boolean isAcceptingChild;
 
-     @Column(name = "accepting_child")
-     private Boolean isAcceptingChild;
+    @OneToMany
+    private Set<Loan> childLoan;
 
-     @OneToMany
-     private Set<Loan> childLoan;
+    @Column(name = "loan_status_id", nullable = false)
+    private Integer loanStatus;
 
-     @Column(name = "loan_status_id", nullable = false)
-     private Integer loanStatus;
+    @Column(name = "application_id", nullable = true)
+    private BigDecimal applicationId;
 
-     @Column(name = "application_id", nullable = true)
-     private BigDecimal applicationId;
+    private GroupLoanIndividualMonitoringAccount() {}
 
-     private GroupLoanIndividualMonitoringAccount() {}
+    private GroupLoanIndividualMonitoringAccount(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,
+            Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
+        this.accountNumber = accountNumber;
+        this.group = group;
+        this.principalAmount = principalAmount;
+        this.childAccountsCount = childAccountsCount;
+        this.isAcceptingChild = isAcceptingChild;
+        this.loanStatus = loanStatus;
+        this.applicationId = applicationId;
+    }
 
-     private GroupLoanIndividualMonitoringAccount(String accountNumber,Group group,BigDecimal principalAmount,Long childAccountsCount,
-               Boolean isAcceptingChild,Integer loanStatus,BigDecimal applicationId)
-     {
-          this.accountNumber=accountNumber;
-          this.group=group;
-          this.principalAmount=principalAmount;
-          this.childAccountsCount=childAccountsCount;
-          this.isAcceptingChild=isAcceptingChild;
-          this.loanStatus=loanStatus;
-          this.applicationId=applicationId;
-     }
+    public static GroupLoanIndividualMonitoringAccount getInstance(String accountNumber, Group group, BigDecimal principalAmount,
+            Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
+        return new GroupLoanIndividualMonitoringAccount(accountNumber, group, principalAmount, childAccountsCount, isAcceptingChild,
+                loanStatus, applicationId);
+    }
 
-     public static GroupLoanIndividualMonitoringAccount getInstance(String accountNumber,Group group,BigDecimal principalAmount,Long childAccountsCount,
-               Boolean isAcceptingChild,Integer loanStatus,BigDecimal applicationId)
-     {
-          return new GroupLoanIndividualMonitoringAccount(accountNumber,group,principalAmount,childAccountsCount,
-                    isAcceptingChild,loanStatus,applicationId);
-     }
+    public String getAccountNumber() {
+        return accountNumber;
+    }
 
-     public String getAccountNumber() {
-          return accountNumber;
-     }
+    public Group getGroup() {
+        return group;
+    }
 
-     public Group getGroup() {
-          return group;
-     }
+    public void setGroup(Group group) {
+        this.group = group;
+    }
 
-     public void setGroup(Group group) {
-          this.group = group;
-     }
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
 
-     public void setAccountNumber(String accountNumber) {
-          this.accountNumber = accountNumber;
-     }
+    public Set<Loan> getChildLoan() {
+        return childLoan;
+    }
 
-     public Set<Loan> getChildLoan() {
-          return childLoan;
-     }
+    public void setChildLoan(Set<Loan> childLoan) {
+        this.childLoan = childLoan;
+    }
 
-     public void setChildLoan(Set<Loan> childLoan) {
-          this.childLoan = childLoan;
-     }
+    public BigDecimal getPrincipalAmount() {
+        return principalAmount;
+    }
 
-     public BigDecimal getPrincipalAmount() {
-          return principalAmount;
-     }
+    public void setPrincipalAmount(BigDecimal principalAmount) {
+        this.principalAmount = principalAmount;
+    }
 
-     public void setPrincipalAmount(BigDecimal principalAmount) {
-          this.principalAmount = principalAmount;
-     }
+    public Long getChildAccountsCount() {
+        return childAccountsCount;
+    }
 
-     public Long getChildAccountsCount() {
-          return childAccountsCount;
-     }
+    public void setChildAccountsCount(Long childAccountsCount) {
+        this.childAccountsCount = childAccountsCount;
+    }
 
-     public void setChildAccountsCount(Long childAccountsCount) {
-          this.childAccountsCount = childAccountsCount;
-     }
+    public Boolean getIsAcceptingChild() {
+        return isAcceptingChild;
+    }
 
-     public Boolean getIsAcceptingChild() {
-          return isAcceptingChild;
-     }
+    public void setIsAcceptingChild(Boolean isAcceptingChild) {
+        this.isAcceptingChild = isAcceptingChild;
+    }
 
-     public void setIsAcceptingChild(Boolean isAcceptingChild) {
-          this.isAcceptingChild = isAcceptingChild;
-     }
+    public Integer getLoanStatus() {
+        return loanStatus;
+    }
 
-     public Integer getLoanStatus() {
-          return loanStatus;
-     }
+    public void setLoanStatus(Integer loanStatus) {
+        this.loanStatus = loanStatus;
+    }
 
-     public void setLoanStatus(Integer loanStatus) {
-          this.loanStatus = loanStatus;
-     }
+    public BigDecimal getApplicationId() {
+        return applicationId;
+    }
 
-     public BigDecimal getApplicationId() {
-          return applicationId;
-     }
-
-     public void setApplicationId(BigDecimal applicationId) {
-          this.applicationId = applicationId;
-     }
+    public void setApplicationId(BigDecimal applicationId) {
+        this.applicationId = applicationId;
+    }
 }

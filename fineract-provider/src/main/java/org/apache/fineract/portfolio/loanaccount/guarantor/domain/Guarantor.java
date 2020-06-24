@@ -98,7 +98,7 @@ public class Guarantor extends AbstractPersistableCustom {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
 
     protected Guarantor() {
@@ -132,14 +132,13 @@ public class Guarantor extends AbstractPersistableCustom {
 
     public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command,
             final List<GuarantorFundingDetails> fundingDetails) {
-        final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID
-                .getValue());
+        final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue());
         final Long entityId = command.longValueOfParameterNamed(GuarantorJSONinputParams.ENTITY_ID.getValue());
         final boolean active = true;
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
             final String firstname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.FIRSTNAME.getValue());
             final String lastname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.LASTNAME.getValue());
-            final Date dateOfBirth = command.DateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
+            final Date dateOfBirth = command.dateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
             final String addressLine1 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue());
             final String addressLine2 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue());
             final String city = command.stringValueOfParameterNamed(GuarantorJSONinputParams.CITY.getValue());
@@ -206,7 +205,7 @@ public class Guarantor extends AbstractPersistableCustom {
                 newValue = command.integerValueOfParameterNamed(paramName);
             }
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue())) {
@@ -220,7 +219,7 @@ public class Guarantor extends AbstractPersistableCustom {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.FIRSTNAME.getValue())) {
@@ -252,9 +251,9 @@ public class Guarantor extends AbstractPersistableCustom {
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
             Date propertyToBeUpdated) {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
-            final Date newValue = command.DateValueOfParameterNamed(paramName);
+            final Date newValue = command.dateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue())) {
@@ -343,7 +342,9 @@ public class Guarantor extends AbstractPersistableCustom {
     }
 
     public boolean hasGuarantor(Long savingsId) {
-        if (savingsId == null) { return false; }
+        if (savingsId == null) {
+            return false;
+        }
         boolean hasGuarantee = false;
         for (GuarantorFundingDetails guarantorFundingDetails : this.guarantorFundDetails) {
             if (guarantorFundingDetails.getStatus().isActive()

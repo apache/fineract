@@ -58,7 +58,7 @@ public class ExternalServicePropertiesPK implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof ExternalServicePropertiesPK)) {
             return false;
         }
         final ExternalServicePropertiesPK rhs = (ExternalServicePropertiesPK) obj;

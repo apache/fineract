@@ -123,5 +123,3 @@ INSERT INTO `m_hook_schema` (`hook_template_id`, `field_type`, `field_name`, `op
 VALUES (2, 'string', 'SMS Provider Token', 0);
 INSERT INTO `m_hook_schema` (`hook_template_id`, `field_type`, `field_name`, `optional`)
 VALUES (2, 'string', 'SMS Provider Account Id', 0);
-
-

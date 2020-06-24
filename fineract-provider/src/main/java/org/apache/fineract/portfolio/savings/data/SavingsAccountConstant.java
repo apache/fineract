@@ -26,35 +26,30 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 public class SavingsAccountConstant extends SavingsApiConstants {
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link SavingsProductData}. Where possible, we try to get response
-     * parameters to match those of request parameters.
+     * These parameters will match the class level parameters of {@link SavingsProductData}. Where possible, we try to
+     * get response parameters to match those of request parameters.
      */
-    protected static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            localeParamName, dateFormatParamName, monthDayFormatParamName, staffIdParamName, isGSIM, isParentAccount,accountNoParamName,
-            externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName, fieldOfficerIdParamName,
-            submittedOnDateParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
-            interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
-            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
+    protected static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
+            dateFormatParamName, monthDayFormatParamName, staffIdParamName, isGSIM, isParentAccount, accountNoParamName,
+            externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName,
+            nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
+            interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
             // withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, chargesParamName,
-            allowOverdraftParamName, overdraftLimitParamName, minRequiredBalanceParamName,
-            enforceMinRequiredBalanceParamName, nominalAnnualInterestRateOverdraftParamName,
-            minOverdraftForInterestCalculationParamName, withHoldTaxParamName, datatables, gsimApplicationId,
-            gsimLastApplication));
+            withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, chargesParamName, allowOverdraftParamName,
+            overdraftLimitParamName, minRequiredBalanceParamName, enforceMinRequiredBalanceParamName,
+            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName, withHoldTaxParamName, datatables,
+            gsimApplicationId, gsimLastApplication));
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link SavingsAccountData}. Where possible, we try to get response
-     * parameters to match those of request parameters.
+     * These parameters will match the class level parameters of {@link SavingsAccountData}. Where possible, we try to
+     * get response parameters to match those of request parameters.
      */
 
     protected static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName,
-                    paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-                    routingCodeParamName, receiptNumberParamName, bankNumberParamName, retailEntriesParamName,
-                    childAccountIdParamName, noteParamName));
+                    paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName,
+                    receiptNumberParamName, bankNumberParamName, retailEntriesParamName, childAccountIdParamName, noteParamName));
 
     protected static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(idParamName, accountNoParamName));
@@ -62,14 +57,14 @@ public class SavingsAccountConstant extends SavingsApiConstants {
     protected static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, activatedOnDateParamName));
 
-    protected static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            localeParamName, dateFormatParamName, closedOnDateParamName, noteParamName, paymentTypeIdParamName,
-            withdrawBalanceParamName, transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName,
-            receiptNumberParamName, bankNumberParamName, postInterestValidationOnClosure));
+    protected static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(localeParamName, dateFormatParamName, closedOnDateParamName, noteParamName, paymentTypeIdParamName,
+                    withdrawBalanceParamName, transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName,
+                    receiptNumberParamName, bankNumberParamName, postInterestValidationOnClosure));
 
     protected static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName,
-                    localeParamName, feeOnMonthDayParamName, monthDayFormatParamName, feeIntervalParamName));
+            Arrays.asList(chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName,
+                    feeOnMonthDayParamName, monthDayFormatParamName, feeIntervalParamName));
 
     protected static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));

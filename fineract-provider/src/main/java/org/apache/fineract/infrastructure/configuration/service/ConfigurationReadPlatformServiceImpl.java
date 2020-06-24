@@ -66,8 +66,6 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         return new GlobalConfigurationData(globalConfiguration);
     }
 
-
-
     @Override
     public GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name) {
 
@@ -75,8 +73,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM "
                 + "c_configuration c where c.name=? order by c.id";
-        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
-                new Object[] { name });
+        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm, new Object[] { name });
 
         return globalConfiguration;
     }
@@ -93,7 +90,6 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         return globalConfiguration;
     }
-
 
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
 

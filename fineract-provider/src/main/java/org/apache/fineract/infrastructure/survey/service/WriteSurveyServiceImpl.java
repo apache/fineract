@@ -44,14 +44,14 @@ public class WriteSurveyServiceImpl implements WriteSurveyService {
     public CommandProcessingResult registerSurvey(JsonCommand command) {
 
         final String dataTableName = this.readWriteNonCoreDataService.getDataTableName(command.getUrl());
-        final String permissionSql = this._getPermissionSql(dataTableName);
+        final String permissionSql = this.getPermissionSql(dataTableName);
         this.readWriteNonCoreDataService.registerDatatable(command, permissionSql);
 
         return CommandProcessingResult.commandOnlyResult(command.commandId());
 
     }
 
-    private String _getPermissionSql(final String dataTableName) {
+    private String getPermissionSql(final String dataTableName) {
         final String createPermission = "'CREATE_" + dataTableName + "'";
         final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
         final String readPermission = "'READ_" + dataTableName + "'";

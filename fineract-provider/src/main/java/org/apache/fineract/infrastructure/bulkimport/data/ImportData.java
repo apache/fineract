@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.bulkimport.data;
 
 import org.joda.time.LocalDate;
 
-public class ImportData {
+public final class ImportData {
 
     @SuppressWarnings("unused")
     private Long importId;
@@ -43,27 +43,20 @@ public class ImportData {
     @SuppressWarnings("unused")
     private Integer failureCount;
 
-    public static ImportData instance(final Long importId, final Long documentId,
-                                      final LocalDate importTime, final LocalDate endTime,
-                                      final Boolean completed, final String name,
-                                      final Long createdBy, final Integer totalRecords, final Integer successCount,
-                                      final Integer failureCount) {
-        return new ImportData(importId, documentId, importTime, endTime,
-                completed, name, createdBy, totalRecords, successCount,
+    public static ImportData instance(final Long importId, final Long documentId, final LocalDate importTime, final LocalDate endTime,
+            final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
+            final Integer failureCount) {
+        return new ImportData(importId, documentId, importTime, endTime, completed, name, createdBy, totalRecords, successCount,
                 failureCount);
     }
 
-    public  static ImportData instance(final Long importId){
-        return new ImportData(importId,null,null,
-                null,null,null,null,null,
-                null,null);
+    public static ImportData instance(final Long importId) {
+        return new ImportData(importId, null, null, null, null, null, null, null, null, null);
     }
 
-    private ImportData(final Long importId, final Long documentId,
-                       final LocalDate importTime, final LocalDate endTime,
-                       final Boolean completed, final String name,
-                       final Long createdBy, final Integer totalRecords, final Integer successCount,
-                       final Integer failureCount) {
+    private ImportData(final Long importId, final Long documentId, final LocalDate importTime, final LocalDate endTime,
+            final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
+            final Integer failureCount) {
         this.importId = importId;
         this.documentId = documentId;
         this.name = name;
@@ -75,6 +68,5 @@ public class ImportData {
         this.successCount = successCount;
         this.failureCount = failureCount;
     }
-
 
 }

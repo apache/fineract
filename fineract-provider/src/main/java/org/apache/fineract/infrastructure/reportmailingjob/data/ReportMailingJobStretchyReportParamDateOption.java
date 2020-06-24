@@ -24,14 +24,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobStretchyReportParamDateOption {
-    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"),
-    TODAY(1, "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"),
-    YESTERDAY(2, "ReportMailingJobStretchyReportParamDateOption.YESTERDAY", "Yesterday"),
-    TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow");
 
-    private String code;
-    private String value;
-    private Integer id;
+    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"), TODAY(1,
+            "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"), YESTERDAY(2,
+                    "ReportMailingJobStretchyReportParamDateOption.YESTERDAY",
+                    "Yesterday"), TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow");
+
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     /**
      * @param id
@@ -47,7 +48,8 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     /**
      * Creates a new {@link ReportMailingJobStretchyReportParamDateOption} object
      *
-     * @param value value of the enum constant
+     * @param value
+     *            value of the enum constant
      * @return {@link ReportMailingJobStretchyReportParamDateOption} object
      */
     public static ReportMailingJobStretchyReportParamDateOption newInstance(final String value) {
@@ -67,7 +69,8 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     /**
      * Creates a new {@link ReportMailingJobStretchyReportParamDateOption} object
      *
-     * @param id id of the enum constant
+     * @param id
+     *            id of the enum constant
      * @return {@link ReportMailingJobStretchyReportParamDateOption} object
      */
     public static ReportMailingJobStretchyReportParamDateOption newInstance(final Integer id) {
@@ -125,7 +128,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     public static Object[] validValues() {
         List<Object> validValues = new ArrayList<>();
 
-        for (ReportMailingJobStretchyReportParamDateOption constant :  ReportMailingJobStretchyReportParamDateOption.values()) {
+        for (ReportMailingJobStretchyReportParamDateOption constant : ReportMailingJobStretchyReportParamDateOption.values()) {
             if (constant.isValid()) {
                 validValues.add(constant.value);
             }
@@ -147,7 +150,8 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobStretchyReportParamDateOption} objects
+     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobStretchyReportParamDateOption}
+     * objects
      *
      * @return List of {@link EnumOptionData} objects
      */

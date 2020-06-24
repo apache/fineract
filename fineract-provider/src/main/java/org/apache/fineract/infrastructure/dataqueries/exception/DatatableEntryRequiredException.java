@@ -26,8 +26,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class DatatableEntryRequiredException extends AbstractPlatformDomainRuleException {
 
     public DatatableEntryRequiredException(String datatableName) {
-        super("error.msg.entry.required.in.datatable." + datatableName, "The datatable " + datatableName
-                + " needs to be filled in before the current action can be proceeded", datatableName);
+        super("error.msg.entry.required.in.datatable." + datatableName,
+                "The datatable " + datatableName + " needs to be filled in before the current action can be proceeded", datatableName);
     }
 
     public DatatableEntryRequiredException(String datatableName, Long appTableId) {

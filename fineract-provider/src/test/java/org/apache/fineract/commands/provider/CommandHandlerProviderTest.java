@@ -18,22 +18,23 @@
  */
 package org.apache.fineract.commands.provider;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.configuration.spring.TestsWithoutDatabaseAndNoJobsConfiguration;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ActiveProfiles("basicauth")
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
@@ -52,14 +53,15 @@ public class CommandHandlerProviderTest {
 
         final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
 
-        final CommandProcessingResult result =
-                registeredHandler.processCommand(
-                        JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null,null,null));
+        final CommandProcessingResult result = registeredHandler
+                .processCommand(JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null, null, null));
         assertEquals(testCommandId, result.commandId());
     }
 
-    @Test(expected = UnsupportedCommandException.class)
-    public void shouldThrowUnsupportedCommandException() {
-        this.commandHandlerProvider.getHandler("WHATEVER", "DOSOMETHING");
+    @Test
+    public void shouldThrowUnsupportedCommandException() throws UnsupportedCommandException {
+        Assertions.assertThrows(UnsupportedCommandException.class, () -> {
+            this.commandHandlerProvider.getHandler("WHATEVER", "DOSOMETHING");
+        });
     }
 }

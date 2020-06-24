@@ -90,8 +90,9 @@ public class ProductToGLAccountMappingHelper {
         if (accountId != null) {
             final ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(productId,
                     portfolioProductType.getValue(), accountTypeId);
-            if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId,
-                    accountTypeName); }
+            if (accountMapping == null) {
+                throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId, accountTypeName);
+            }
             if (!accountMapping.getGlAccount().getId().equals(accountId)) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
@@ -102,21 +103,21 @@ public class ProductToGLAccountMappingHelper {
     }
 
     public void createOrmergeProductToAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final Map<String, Object> changes,
-            final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {
+            final int accountTypeId, final Map<String, Object> changes, final GLAccountType expectedAccountType,
+            final PortfolioProductType portfolioProductType) {
         final Long accountId = this.fromApiJsonHelper.extractLongNamed(paramName, element);
 
         // get the existing product
         if (accountId != null) {
             final ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(productId,
                     portfolioProductType.getValue(), accountTypeId);
-            if(accountMapping == null) {
+            if (accountMapping == null) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
-                ProductToGLAccountMapping newAccountMapping  = new ProductToGLAccountMapping(glAccount, productId,
-                portfolioProductType.getValue(), accountTypeId) ;
+                ProductToGLAccountMapping newAccountMapping = new ProductToGLAccountMapping(glAccount, productId,
+                        portfolioProductType.getValue(), accountTypeId);
                 this.accountMappingRepository.save(newAccountMapping);
-            }else if (!accountMapping.getGlAccount().getId().equals(accountId)) {
+            } else if (!accountMapping.getGlAccount().getId().equals(accountId)) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
                 accountMapping.setGlAccount(glAccount);
@@ -124,9 +125,10 @@ public class ProductToGLAccountMappingHelper {
             }
         }
     }
+
     /**
-     * Saves the payment type to Fund source mappings for a particular
-     * product/product type (also populates the changes array if passed in)
+     * Saves the payment type to Fund source mappings for a particular product/product type (also populates the changes
+     * array if passed in)
      *
      * @param command
      * @param element
@@ -135,8 +137,8 @@ public class ProductToGLAccountMappingHelper {
      */
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes, final PortfolioProductType portfolioProductType) {
-        final JsonArray paymentChannelMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(
-                LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
+        final JsonArray paymentChannelMappingArray = this.fromApiJsonHelper
+                .extractJsonArrayNamed(LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
         if (paymentChannelMappingArray != null) {
             if (changes != null) {
                 changes.put(LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
@@ -152,8 +154,8 @@ public class ProductToGLAccountMappingHelper {
     }
 
     /**
-     * Saves the Charge to Income / Liability account mappings for a particular
-     * product/product type (also populates the changes array if passed in)
+     * Saves the Charge to Income / Liability account mappings for a particular product/product type (also populates the
+     * changes array if passed in)
      *
      * @param command
      * @param element
@@ -208,14 +210,12 @@ public class ProductToGLAccountMappingHelper {
 
         final JsonArray chargeToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayFragmentName, element);
         /**
-         * Variable stores a map representation of charges (key) and their
-         * associated income Id's (value) extracted from the passed in
-         * Jsoncommand
+         * Variable stores a map representation of charges (key) and their associated income Id's (value) extracted from
+         * the passed in Jsoncommand
          **/
         final Map<Long, Long> inputChargeToIncomeAccountMap = new HashMap<>();
         /***
-         * Variable stores all charges which have already been mapped to Income
-         * Accounts in the system
+         * Variable stores all charges which have already been mapped to Income Accounts in the system
          **/
         final Set<Long> existingCharges = new HashSet<>();
         if (chargeToIncomeAccountMappingArray != null) {
@@ -233,15 +233,13 @@ public class ProductToGLAccountMappingHelper {
             // If input map is empty, delete all existing mappings
             if (inputChargeToIncomeAccountMap.size() == 0) {
                 this.accountMappingRepository.deleteInBatch(existingChargeToIncomeAccountMappings);
-            }/**
-             * Else, <br/>
-             * update existing mappings OR <br/>
-             * delete old mappings (which are already present, but not passed in
-             * as a part of Jsoncommand)<br/>
-             * Create new mappings for charges that are passed in as a part of
-             * the Jsoncommand but not already present
-             *
-             **/
+            } /**
+               * Else, <br/>
+               * update existing mappings OR <br/>
+               * delete old mappings (which are already present, but not passed in as a part of Jsoncommand)<br/>
+               * Create new mappings for charges that are passed in as a part of the Jsoncommand but not already present
+               *
+               **/
             else {
                 for (final ProductToGLAccountMapping chargeToIncomeAccountMapping : existingChargeToIncomeAccountMappings) {
                     final Long currentCharge = chargeToIncomeAccountMapping.getCharge().getId();
@@ -262,7 +260,7 @@ public class ProductToGLAccountMappingHelper {
                             chargeToIncomeAccountMapping.setGlAccount(glAccount);
                             this.accountMappingRepository.save(chargeToIncomeAccountMapping);
                         }
-                    }// deleted payment type
+                    } // deleted payment type
                     else {
                         this.accountMappingRepository.delete(chargeToIncomeAccountMapping);
                     }
@@ -291,16 +289,15 @@ public class ProductToGLAccountMappingHelper {
         // find all existing payment Channel to Fund source Mappings
         final List<ProductToGLAccountMapping> existingPaymentChannelToFundSourceMappings = this.accountMappingRepository
                 .findAllPaymentTypeToFundSourceMappings(productId, portfolioProductType.getValue());
-        final JsonArray paymentChannelMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(
-                LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
+        final JsonArray paymentChannelMappingArray = this.fromApiJsonHelper
+                .extractJsonArrayNamed(LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
         /**
-         * Variable stores a map representation of Payment channels (key) and
-         * their fund sources (value) extracted from the passed in Jsoncommand
+         * Variable stores a map representation of Payment channels (key) and their fund sources (value) extracted from
+         * the passed in Jsoncommand
          **/
         final Map<Long, Long> inputPaymentChannelFundSourceMap = new HashMap<>();
         /***
-         * Variable stores all payment types which have already been mapped to
-         * Fund Sources in the system
+         * Variable stores all payment types which have already been mapped to Fund Sources in the system
          **/
         final Set<Long> existingPaymentTypes = new HashSet<>();
         if (paymentChannelMappingArray != null) {
@@ -319,15 +316,14 @@ public class ProductToGLAccountMappingHelper {
             // If input map is empty, delete all existing mappings
             if (inputPaymentChannelFundSourceMap.size() == 0) {
                 this.accountMappingRepository.deleteInBatch(existingPaymentChannelToFundSourceMappings);
-            }/**
-             * Else, <br/>
-             * update existing mappings OR <br/>
-             * delete old mappings (which re already present, but not passed in
-             * as a part of Jsoncommand)<br/>
-             * Create new mappings for payment types that are passed in as a
-             * part of the Jsoncommand but not already present
-             *
-             **/
+            } /**
+               * Else, <br/>
+               * update existing mappings OR <br/>
+               * delete old mappings (which re already present, but not passed in as a part of Jsoncommand)<br/>
+               * Create new mappings for payment types that are passed in as a part of the Jsoncommand but not already
+               * present
+               *
+               **/
             else {
                 for (final ProductToGLAccountMapping existingPaymentChannelToFundSourceMapping : existingPaymentChannelToFundSourceMappings) {
                     final Long currentPaymentChannelId = existingPaymentChannelToFundSourceMapping.getPaymentType().getId();
@@ -341,7 +337,7 @@ public class ProductToGLAccountMappingHelper {
                             existingPaymentChannelToFundSourceMapping.setGlAccount(glAccount);
                             this.accountMappingRepository.save(existingPaymentChannelToFundSourceMapping);
                         }
-                    }// deleted payment type
+                    } // deleted payment type
                     else {
                         this.accountMappingRepository.delete(existingPaymentChannelToFundSourceMapping);
                     }
@@ -386,8 +382,7 @@ public class ProductToGLAccountMappingHelper {
 
         GLAccount glAccount;
         /**
-         * Both CASH and Accrual placeholders have the same value for income
-         * from Interest and penalties
+         * Both CASH and Accrual placeholders have the same value for income from Interest and penalties
          **/
         CashAccountsForLoan placeHolderAccountType;
         if (isPenalty) {
@@ -413,8 +408,8 @@ public class ProductToGLAccountMappingHelper {
     }
 
     /**
-     * Fetches account with a particular Id and throws and Exception it is not
-     * of the expected Account Category ('ASSET','liability' etc)
+     * Fetches account with a particular Id and throws and Exception it is not of the expected Account Category
+     * ('ASSET','liability' etc)
      *
      * @param paramName
      * @param expectedAccountType
@@ -425,9 +420,10 @@ public class ProductToGLAccountMappingHelper {
         final GLAccount glAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
 
         // validate account is of the expected Type
-        if (glAccount.getType().intValue() != expectedAccountType.getValue()) { throw new ProductToGLAccountMappingInvalidException(
-                paramName, glAccount.getName(), accountId, GLAccountType.fromInt(glAccount.getType()).toString(),
-                expectedAccountType.toString()); }
+        if (glAccount.getType().intValue() != expectedAccountType.getValue()) {
+            throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId,
+                    GLAccountType.fromInt(glAccount.getType()).toString(), expectedAccountType.toString());
+        }
         return glAccount;
     }
 
@@ -438,14 +434,16 @@ public class ProductToGLAccountMappingHelper {
         for (GLAccountType glAccountType : expectedAccountTypes) {
             glAccountTypeValues.add(glAccountType.getValue());
         }
-        if (!glAccountTypeValues.contains(glAccount.getType())) { throw new ProductToGLAccountMappingInvalidException(paramName,
-                glAccount.getName(), accountId, GLAccountType.fromInt(glAccount.getType()).toString(), glAccountTypeValues.toString()); }
+        if (!glAccountTypeValues.contains(glAccount.getType())) {
+            throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId,
+                    GLAccountType.fromInt(glAccount.getType()).toString(), glAccountTypeValues.toString());
+        }
         return glAccount;
     }
 
     public void deleteProductToGLAccountMapping(final Long loanProductId, final PortfolioProductType portfolioProductType) {
-        final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository.findByProductIdAndProductType(
-                loanProductId, portfolioProductType.getValue());
+        final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository
+                .findByProductIdAndProductType(loanProductId, portfolioProductType.getValue());
         if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
             this.accountMappingRepository.deleteInBatch(productToGLAccountMappings);
         }

@@ -30,7 +30,9 @@ public class WorkingDaysUtil {
             final WorkingDays workingDays) {
 
         // If date is not a non working day then return date.
-        if (isWorkingDay(workingDays, date)) { return date; }
+        if (isWorkingDay(workingDays, date)) {
+            return date;
+        }
 
         final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
 
@@ -58,7 +60,8 @@ public class WorkingDaysUtil {
         return !isWorkingDay(workingDays, date);
     }
 
-    public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final WorkingDays workingDays) {
+    public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,
+            final WorkingDays workingDays) {
         final LocalDate changedScheduleDate = getOffSetDateIfNonWorkingDay(adjustedDateDetailsDTO.getChangedScheduleDate(),
                 adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(), workingDays);
         adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);

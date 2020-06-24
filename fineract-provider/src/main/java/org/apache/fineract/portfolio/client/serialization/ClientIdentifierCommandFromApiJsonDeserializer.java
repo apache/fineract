@@ -35,8 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link ClientIdentifierCommandFromApiJsonDeserializer} 's.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link ClientIdentifierCommandFromApiJsonDeserializer} 's.
  */
 @Component
 public final class ClientIdentifierCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<ClientIdentifierCommand> {
@@ -44,7 +43,7 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("documentTypeId", "documentKey","status", "description"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("documentTypeId", "documentKey", "status", "description"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -56,7 +55,9 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
     @Override
     public ClientIdentifierCommand commandFromApiJson(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);

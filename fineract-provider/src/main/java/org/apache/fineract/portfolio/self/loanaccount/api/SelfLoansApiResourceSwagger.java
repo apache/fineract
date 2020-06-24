@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/19/17.
  */
 final class SelfLoansApiResourceSwagger {
-    private SelfLoansApiResourceSwagger() {
-    }
+
+    private SelfLoansApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfLoansLoanIdResponse")
-    public final static class GetSelfLoansLoanIdResponse {
-        private GetSelfLoansLoanIdResponse() {
-        }
+    public static final class GetSelfLoansLoanIdResponse {
 
-        final class GetLoansLoanIdStatus {
-            private GetLoansLoanIdStatus() {
-            }
+        private GetSelfLoansLoanIdResponse() {}
+
+        static final class GetLoansLoanIdStatus {
+
+            private GetLoansLoanIdStatus() {}
 
             @ApiModelProperty(example = "300")
             public Integer id;
@@ -63,9 +63,9 @@ final class SelfLoansApiResourceSwagger {
             public Boolean overpaid;
         }
 
-        final class GetLoansLoanIdLoanType {
-            private GetLoansLoanIdLoanType() {
-            }
+        static final class GetLoansLoanIdLoanType {
+
+            private GetLoansLoanIdLoanType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -75,9 +75,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdCurrency {
-            private GetLoansLoanIdCurrency() {
-            }
+        static final class GetLoansLoanIdCurrency {
+
+            private GetLoansLoanIdCurrency() {}
 
             @ApiModelProperty(example = "UGX")
             public String code;
@@ -93,9 +93,9 @@ final class SelfLoansApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoansLoanIdTermPeriodFrequencyType {
-            private GetLoansLoanIdTermPeriodFrequencyType() {
-            }
+        static final class GetLoansLoanIdTermPeriodFrequencyType {
+
+            private GetLoansLoanIdTermPeriodFrequencyType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -105,9 +105,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdRepaymentFrequencyType {
-            private GetLoansLoanIdRepaymentFrequencyType() {
-            }
+        static final class GetLoansLoanIdRepaymentFrequencyType {
+
+            private GetLoansLoanIdRepaymentFrequencyType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -117,9 +117,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestRateFrequencyType {
-            private GetLoansLoanIdInterestRateFrequencyType() {
-            }
+        static final class GetLoansLoanIdInterestRateFrequencyType {
+
+            private GetLoansLoanIdInterestRateFrequencyType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -129,9 +129,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdAmortizationType {
-            private GetLoansLoanIdAmortizationType() {
-            }
+        static final class GetLoansLoanIdAmortizationType {
+
+            private GetLoansLoanIdAmortizationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -141,9 +141,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestType {
-            private GetLoansLoanIdInterestType() {
-            }
+        static final class GetLoansLoanIdInterestType {
+
+            private GetLoansLoanIdInterestType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -153,9 +153,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestCalculationPeriodType {
-            private GetLoansLoanIdInterestCalculationPeriodType() {
-            }
+        static final class GetLoansLoanIdInterestCalculationPeriodType {
+
+            private GetLoansLoanIdInterestCalculationPeriodType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -165,9 +165,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdTimeline {
-            private GetLoansLoanIdTimeline() {
-            }
+        static final class GetLoansLoanIdTimeline {
+
+            private GetLoansLoanIdTimeline() {}
 
             @ApiModelProperty(example = "[2012, 4, 3]")
             public LocalDate submittedOnDate;
@@ -199,18 +199,18 @@ final class SelfLoansApiResourceSwagger {
             public LocalDate expectedMaturityDate;
         }
 
-        final class GetLoansLoanIdSummary {
-            private GetLoansLoanIdSummary() {
+        static final class GetLoansLoanIdSummary {
+
+            private GetLoansLoanIdSummary() {}
+
+            static final class GetLoansLoanIdEmiVariations {
+
+                private GetLoansLoanIdEmiVariations() {}
             }
 
-            final class GetLoansLoanIdEmiVariations {
-                private GetLoansLoanIdEmiVariations() {
-                }
-            }
+            static final class GetLoansLoanIdLinkedAccount {
 
-            final class GetLoansLoanIdLinkedAccount {
-                private GetLoansLoanIdLinkedAccount() {
-                }
+                private GetLoansLoanIdLinkedAccount() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -218,9 +218,9 @@ final class SelfLoansApiResourceSwagger {
                 public Long accountNo;
             }
 
-            final class GetLoansLoanIdDisbursementDetails {
-                private GetLoansLoanIdDisbursementDetails() {
-                }
+            static final class GetLoansLoanIdDisbursementDetails {
+
+                private GetLoansLoanIdDisbursementDetails() {}
 
                 @ApiModelProperty(example = "71")
                 public Integer id;
@@ -232,13 +232,13 @@ final class SelfLoansApiResourceSwagger {
                 public Float approvedPrincipal;
             }
 
-            final class GetLoansLoanIdOverdueCharges {
-                private GetLoansLoanIdOverdueCharges() {
-                }
+            static final class GetLoansLoanIdOverdueCharges {
 
-                final class GetLoansLoanIdChargeTimeType {
-                    private GetLoansLoanIdChargeTimeType() {
-                    }
+                private GetLoansLoanIdOverdueCharges() {}
+
+                static final class GetLoansLoanIdChargeTimeType {
+
+                    private GetLoansLoanIdChargeTimeType() {}
 
                     @ApiModelProperty(example = "9")
                     public Integer id;
@@ -248,9 +248,9 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargeCalculationType {
-                    private GetLoansLoanIdChargeCalculationType() {
-                    }
+                static final class GetLoansLoanIdChargeCalculationType {
+
+                    private GetLoansLoanIdChargeCalculationType() {}
 
                     @ApiModelProperty(example = "2")
                     public Integer id;
@@ -260,9 +260,9 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargePaymentMode {
-                    private GetLoansLoanIdChargePaymentMode() {
-                    }
+                static final class GetLoansLoanIdChargePaymentMode {
+
+                    private GetLoansLoanIdChargePaymentMode() {}
 
                     @ApiModelProperty(example = "0")
                     public Integer id;
@@ -272,9 +272,9 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdFeeFrequency {
-                    private GetLoansLoanIdFeeFrequency() {
-                    }
+                static final class GetLoansLoanIdFeeFrequency {
+
+                    private GetLoansLoanIdFeeFrequency() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -284,9 +284,9 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoanCurrency {
-                    private GetLoanCurrency() {
-                    }
+                static final class GetLoanCurrency {
+
+                    private GetLoanCurrency() {}
 
                     @ApiModelProperty(example = "USD")
                     public String code;
@@ -302,9 +302,9 @@ final class SelfLoansApiResourceSwagger {
                     public String displayLabel;
                 }
 
-                final class GetLoanChargeTemplateChargeAppliesTo {
-                    private GetLoanChargeTemplateChargeAppliesTo() {
-                    }
+                static final class GetLoanChargeTemplateChargeAppliesTo {
+
+                    private GetLoanChargeTemplateChargeAppliesTo() {}
 
                     @ApiModelProperty(example = "1  ")
                     public Integer id;
@@ -469,13 +469,13 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
-        private GetSelfLoansLoanIdTransactionsTransactionIdResponse() {
-        }
+    public static final class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
 
-        final class GetSelfLoansLoanIdTransactionsType {
-            private GetSelfLoansLoanIdTransactionsType() {
-            }
+        private GetSelfLoansLoanIdTransactionsTransactionIdResponse() {}
+
+        static final class GetSelfLoansLoanIdTransactionsType {
+
+            private GetSelfLoansLoanIdTransactionsType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -516,13 +516,13 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdChargesResponse")
-    public final static class GetSelfLoansLoanIdChargesResponse {
-        private GetSelfLoansLoanIdChargesResponse() {
-        }
+    public static final class GetSelfLoansLoanIdChargesResponse {
 
-        final class GetSelfLoansChargeTimeType {
-            private GetSelfLoansChargeTimeType() {
-            }
+        private GetSelfLoansLoanIdChargesResponse() {}
+
+        static final class GetSelfLoansChargeTimeType {
+
+            private GetSelfLoansChargeTimeType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -532,9 +532,9 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfLoansChargeCalculationType {
-            private GetSelfLoansChargeCalculationType() {
-            }
+        static final class GetSelfLoansChargeCalculationType {
+
+            private GetSelfLoansChargeCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -574,21 +574,21 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansTemplateResponse")
-    public final static class GetSelfLoansTemplateResponse {
-        private GetSelfLoansTemplateResponse() {
-        }
+    public static final class GetSelfLoansTemplateResponse {
 
-        final class GetSelfLoansTimeline {
-            private GetSelfLoansTimeline() {
-            }
+        private GetSelfLoansTemplateResponse() {}
+
+        static final class GetSelfLoansTimeline {
+
+            private GetSelfLoansTimeline() {}
 
             @ApiModelProperty(example = "[2013, 3, 8]")
             public LocalDate expectedDisbursementDate;
         }
 
-        final class GetSelfLoansProductOptions {
-            private GetSelfLoansProductOptions() {
-            }
+        static final class GetSelfLoansProductOptions {
+
+            private GetSelfLoansProductOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -607,13 +607,13 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansRequest")
-    public final static class PostSelfLoansRequest {
-        private PostSelfLoansRequest() {
-        }
+    public static final class PostSelfLoansRequest {
 
-        final class PostSelfLoansDisbursementData {
-            private PostSelfLoansDisbursementData() {
-            }
+        private PostSelfLoansRequest() {}
+
+        static final class PostSelfLoansDisbursementData {
+
+            private PostSelfLoansDisbursementData() {}
 
             @ApiModelProperty(example = "01 November 2013")
             public String expectedDisbursementDate;
@@ -623,13 +623,13 @@ final class SelfLoansApiResourceSwagger {
             public Long approvedPrincipal;
         }
 
-        final class PostSelfLoansDatatables {
-            private PostSelfLoansDatatables() {
-            }
+        static final class PostSelfLoansDatatables {
 
-            final class PostSelfLoansData {
-                private PostSelfLoansData() {
-                }
+            private PostSelfLoansDatatables() {}
+
+            static final class PostSelfLoansData {
+
+                private PostSelfLoansData() {}
 
                 @ApiModelProperty(example = "en")
                 public String locale;
@@ -691,9 +691,9 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansResponse")
-    public final static class PostSelfLoansResponse {
-        private PostSelfLoansResponse() {
-        }
+    public static final class PostSelfLoansResponse {
+
+        private PostSelfLoansResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -706,9 +706,9 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdRequest")
-    public final static class PutSelfLoansLoanIdRequest {
-        private PutSelfLoansLoanIdRequest() {
-        }
+    public static final class PutSelfLoansLoanIdRequest {
+
+        private PutSelfLoansLoanIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -743,13 +743,13 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdResponse")
-    public final static class PutSelfLoansLoanIdResponse {
-        private PutSelfLoansLoanIdResponse() {
-        }
+    public static final class PutSelfLoansLoanIdResponse {
 
-        final class PutSelfLoansChanges {
-            private PutSelfLoansChanges() {
-            }
+        private PutSelfLoansLoanIdResponse() {}
+
+        static final class PutSelfLoansChanges {
+
+            private PutSelfLoansChanges() {}
 
             @ApiModelProperty(example = "5000")
             public Long principal;
@@ -769,9 +769,9 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdRequest")
-    public final static class PostSelfLoansLoanIdRequest {
-        private PostSelfLoansLoanIdRequest() {
-        }
+    public static final class PostSelfLoansLoanIdRequest {
+
+        private PostSelfLoansLoanIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -784,17 +784,17 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdResponse")
-    public final static class PostSelfLoansLoanIdResponse {
-        private PostSelfLoansLoanIdResponse() {
-        }
+    public static final class PostSelfLoansLoanIdResponse {
 
-        final class PostSelfLoansLoanIdChanges {
-            private PostSelfLoansLoanIdChanges() {
-            }
+        private PostSelfLoansLoanIdResponse() {}
 
-            final class PostSelfLoansLoanIdStatus {
-                private PostSelfLoansLoanIdStatus() {
-                }
+        static final class PostSelfLoansLoanIdChanges {
+
+            private PostSelfLoansLoanIdChanges() {}
+
+            static final class PostSelfLoansLoanIdStatus {
+
+                private PostSelfLoansLoanIdStatus() {}
 
                 @ApiModelProperty(example = "400")
                 public Integer id;

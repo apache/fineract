@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "EMAIL_CAMPAIGN", action = "ACTIVATE")
 public class ActivateEmailCampaignCommandHandler implements NewCommandSourceHandler {
+
     private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
 
     @Autowired

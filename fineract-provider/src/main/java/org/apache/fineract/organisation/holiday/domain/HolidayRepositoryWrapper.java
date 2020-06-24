@@ -28,8 +28,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link HolidayRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link HolidayRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -43,8 +42,7 @@ public class HolidayRepositoryWrapper {
     }
 
     public Holiday findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new HolidayNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new HolidayNotFoundException(id));
     }
 
     public void save(final Holiday holiday) {

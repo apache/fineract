@@ -19,14 +19,13 @@
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum ScheduledEmailAttachmentFileFormat {
-    INVALID(0, "EmailAttachmentFileFormat.invalid", "invalid"),
-    XLS(1, "EmailAttachmentFileFormat.xls", "xls"),
-    PDF(2, "EmailAttachmentFileFormat.pdf", "pdf"),
-    CSV(3, "EmailAttachmentFileFormat.csv", "csv");
 
-    private String code;
-    private String value;
-    private Integer id;
+    INVALID(0, "EmailAttachmentFileFormat.invalid", "invalid"), XLS(1, "EmailAttachmentFileFormat.xls", "xls"), PDF(2,
+            "EmailAttachmentFileFormat.pdf", "pdf"), CSV(3, "EmailAttachmentFileFormat.csv", "csv");
+
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     ScheduledEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;
@@ -40,18 +39,18 @@ public enum ScheduledEmailAttachmentFileFormat {
         switch (value) {
             case "xls":
                 emailAttachmentFileFormat = XLS;
-                break;
+            break;
 
             case "pdf":
                 emailAttachmentFileFormat = PDF;
-                break;
+            break;
 
             case "csv":
                 emailAttachmentFileFormat = CSV;
-                break;
+            break;
 
             default:
-                break;
+            break;
         }
 
         return emailAttachmentFileFormat;
@@ -63,18 +62,18 @@ public enum ScheduledEmailAttachmentFileFormat {
         switch (id) {
             case 1:
                 emailAttachmentFileFormat = XLS;
-                break;
+            break;
 
             case 2:
                 emailAttachmentFileFormat = PDF;
-                break;
+            break;
 
             case 3:
                 emailAttachmentFileFormat = CSV;
-                break;
+            break;
 
             default:
-                break;
+            break;
         }
 
         return emailAttachmentFileFormat;

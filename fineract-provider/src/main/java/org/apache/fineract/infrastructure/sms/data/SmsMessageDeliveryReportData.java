@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.sms.data;
  * Immutable data object representing an outbound SMS message delivery report data
  **/
 public class SmsMessageDeliveryReportData {
+
     private Long id;
     private String externalId;
     private String addedOnDate;
@@ -35,8 +36,8 @@ public class SmsMessageDeliveryReportData {
      *
      *
      **/
-    private SmsMessageDeliveryReportData(Long id, String externalId, String addedOnDate, String deliveredOnDate,
-            Integer deliveryStatus, Boolean hasError, String errorMessage) {
+    private SmsMessageDeliveryReportData(Long id, String externalId, String addedOnDate, String deliveredOnDate, Integer deliveryStatus,
+            Boolean hasError, String errorMessage) {
         this.id = id;
         this.externalId = externalId;
         this.addedOnDate = addedOnDate;

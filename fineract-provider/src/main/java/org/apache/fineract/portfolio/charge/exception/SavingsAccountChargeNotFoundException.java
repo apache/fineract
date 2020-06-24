@@ -22,8 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when savings account
- * charge does not exist.
+ * {@link AbstractPlatformDomainRuleException} thrown when savings account charge does not exist.
  */
 public class SavingsAccountChargeNotFoundException extends AbstractPlatformResourceNotFoundException {
 
@@ -32,7 +31,8 @@ public class SavingsAccountChargeNotFoundException extends AbstractPlatformResou
     }
 
     public SavingsAccountChargeNotFoundException(final Long id, final Long savingsAccountId) {
-        super("error.msg.savings.account.charge.id.invalid.for.given.savings.account", "Savings Account charge with identifier " + id
-                + " does not exist for Savings Account " + savingsAccountId, id, savingsAccountId);
+        super("error.msg.savings.account.charge.id.invalid.for.given.savings.account",
+                "Savings Account charge with identifier " + id + " does not exist for Savings Account " + savingsAccountId, id,
+                savingsAccountId);
     }
 }

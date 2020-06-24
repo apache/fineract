@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import com.google.common.base.Splitter;
+import java.util.List;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -29,13 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} and
- * Collect Charges for a Loan. It passes the contents of the body from the
- * BatchRequest to
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and
- * gets back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and map
- * those errors to appropriate status codes in BatchResponse.
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} and Collect Charges for a Loan. It passes the
+ * contents of the body from the BatchRequest to
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and gets back the response. This class
+ * will also catch any errors raised by {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and
+ * map those errors to appropriate status codes in BatchResponse.
  *
  * @author Rishabh Shukla
  *
@@ -62,10 +62,10 @@ public class CollectChargesCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String[] pathParameters = request.getRelativeUrl().split("/");
+        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
 
         // Pluck out the loanId out of the relative path
-        Long loanId = Long.parseLong(pathParameters[1]);
+        Long loanId = Long.parseLong(pathParameters.get(1));
 
         // Try-catch blocks to map exceptions to appropriate status codes
         try {

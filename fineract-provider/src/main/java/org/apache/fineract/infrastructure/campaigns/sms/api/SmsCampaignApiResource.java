@@ -100,7 +100,8 @@ public class SmsCampaignApiResource {
 
     @GET
     @Path("template")
-    @ApiOperation(value = "Retrieve a SMS Campaign", notes = "Example Requests:\n" + "\n" + "smscampaigns/1\n" + "\n" + "\n" + "smscampaigns/1?template=true\n" + "\n" + "\n" + "smscampaigns/template")
+    @ApiOperation(value = "Retrieve a SMS Campaign", notes = "Example Requests:\n" + "\n" + "smscampaigns/1\n" + "\n" + "\n"
+            + "smscampaigns/1?template=true\n" + "\n" + "\n" + "smscampaigns/template")
     @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
     public String template(@Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
@@ -112,8 +113,11 @@ public class SmsCampaignApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a SMS Campaign", notes = "Mandatory Fields\n" + "campaignName, campaignType, triggerType, providerId, runReportId, message\n" + "\n" + "Mandatory Fields for Cash based on selected report id\n" + "paramValue in json format")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass =CommandWrapper.class)})
+    @ApiOperation(value = "Create a SMS Campaign", notes = "Mandatory Fields\n"
+            + "campaignName, campaignType, triggerType, providerId, runReportId, message\n" + "\n"
+            + "Mandatory Fields for Cash based on selected report id\n" + "paramValue in json format")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CommandWrapper.class) })
     @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
     public String createCampaign(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
@@ -139,9 +143,9 @@ public class SmsCampaignApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List SMS Campaigns", notes = "Example Requests:\n" + "\n" + "smscampaigns")
     @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
-    public String retrieveAllEmails(@QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
+    public String retrieveAllEmails(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
         Page<SmsCampaignData> smsCampaignDataCollection = this.smsCampaignReadPlatformService.retrieveAll(searchParameters);
@@ -154,9 +158,11 @@ public class SmsCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Campaign")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CommandWrapper.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CommandWrapper.class) })
     @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
-    public String updateCampaign(@PathParam("campaignId") final Long campaignId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String updateCampaign(@PathParam("campaignId") final Long campaignId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSmsCampaign(campaignId).withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

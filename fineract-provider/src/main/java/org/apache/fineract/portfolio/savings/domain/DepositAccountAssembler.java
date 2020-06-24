@@ -148,9 +148,8 @@ public class DepositAccountAssembler {
     }
 
     /**
-     * Assembles a new {@link SavingsAccount} from JSON details passed in
-     * request inheriting details where relevant from chosen
-     * {@link SavingsProduct}.
+     * Assembles a new {@link SavingsAccount} from JSON details passed in request inheriting details where relevant from
+     * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy, final DepositAccountType depositAccountType) {
 
@@ -169,8 +168,9 @@ public class DepositAccountAssembler {
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
         }
 
-        if (product == null) { throw new SavingsProductNotFoundException(productId); }
-
+        if (product == null) {
+            throw new SavingsProductNotFoundException(productId);
+        }
 
         Client client = null;
         Group group = null;
@@ -179,9 +179,18 @@ public class DepositAccountAssembler {
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             final boolean isCalendarInherited = command.booleanPrimitiveValueOfParameterNamed(isCalendarInheritedParamName);
-            client = this.clientRepository.findOneWithNotFoundDetection(clientId, isCalendarInherited); //we need group collection if isCalendarInherited is true
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId, isCalendarInherited); // we
+                                                                                                        // need
+                                                                                                        // group
+                                                                                                        // collection
+                                                                                                        // if
+                                                                                                        // isCalendarInherited
+                                                                                                        // is
+                                                                                                        // true
             accountType = AccountType.INDIVIDUAL;
-            if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(clientId);
+            }
         }
 
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
@@ -191,10 +200,14 @@ public class DepositAccountAssembler {
         }
 
         if (group != null && client != null) {
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, groupId);
+            }
             accountType = AccountType.JLG;
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(groupId);
+                }
                 throw new GroupNotActiveException(groupId);
             }
         }
@@ -296,12 +309,12 @@ public class DepositAccountAssembler {
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
-            if(withHoldTax && product.getTaxGroup()  == null){
+            if (withHoldTax && product.getTaxGroup() == null) {
                 throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
             }
         }
-        Integer depositRolloverId =  null;
-        if(command.parameterExists(maturityInstructionIdParamName)){
+        Integer depositRolloverId = null;
+        if (command.parameterExists(maturityInstructionIdParamName)) {
             depositRolloverId = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
         }
 
@@ -361,8 +374,8 @@ public class DepositAccountAssembler {
 
     public DepositAccountTermAndPreClosure assembleAccountTermAndPreClosure(final JsonCommand command,
             final DepositProductTermAndPreClosure productTermAndPreclosure) {
-        final DepositPreClosureDetail productPreClosure = (productTermAndPreclosure == null) ? null : productTermAndPreclosure
-                .depositPreClosureDetail();
+        final DepositPreClosureDetail productPreClosure = (productTermAndPreclosure == null) ? null
+                : productTermAndPreclosure.depositPreClosureDetail();
         final DepositTermDetail productTerm = (productTermAndPreclosure == null) ? null : productTermAndPreclosure.depositTermDetail();
 
         final DepositPreClosureDetail updatedProductPreClosure = this.depositProductAssembler.assemblePreClosureDetail(command,
@@ -382,8 +395,10 @@ public class DepositAccountAssembler {
                                                // account
         final LocalDate maturityDate = null;// calculated and updated in account
         final Integer accountOnClosureTypeId = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
-        final DepositAccountOnClosureType accountOnClosureType = accountOnClosureTypeId != null ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId) :null;
-        final Long transferToSavingsId  = command.longValueOfParameterNamed(transferToSavingsIdParamName);
+        final DepositAccountOnClosureType accountOnClosureType = accountOnClosureTypeId != null
+                ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId)
+                : null;
+        final Long transferToSavingsId = command.longValueOfParameterNamed(transferToSavingsIdParamName);
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
                 maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
                 trasferInterest, transferToSavingsId);
@@ -429,10 +444,13 @@ public class DepositAccountAssembler {
         return depositAccountRecurringDetail;
     }
 
-    public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command,final PaymentDetail paymentDetail) {
+    public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command,
+            final PaymentDetail paymentDetail) {
         AppUser user = getAppUserIfPresent();
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<>();
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
@@ -451,8 +469,8 @@ public class DepositAccountAssembler {
                     final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
                     final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
                             savingsTransactionElement, locale);
-                    final Integer depositAccountType = this.fromApiJsonHelper.extractIntegerNamed(
-                            CollectionSheetConstants.depositAccountTypeParamName, savingsTransactionElement, locale);
+                    final Integer depositAccountType = this.fromApiJsonHelper
+                            .extractIntegerNamed(CollectionSheetConstants.depositAccountTypeParamName, savingsTransactionElement, locale);
                     PaymentDetail detail = paymentDetail;
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);

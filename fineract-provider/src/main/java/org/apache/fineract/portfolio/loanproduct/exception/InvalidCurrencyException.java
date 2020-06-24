@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when currency mismatch
- * occurs
+ * {@link AbstractPlatformDomainRuleException} thrown when currency mismatch occurs
  */
 public class InvalidCurrencyException extends AbstractPlatformDomainRuleException {
 

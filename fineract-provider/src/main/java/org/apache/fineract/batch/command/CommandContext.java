@@ -19,22 +19,21 @@
 package org.apache.fineract.batch.command;
 
 /**
- * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService}
- * to get the proper commandStrategy for each request in BatchRequest. It uses
- * Builder pattern to create object of this type.
+ * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService} to get the proper commandStrategy for
+ * each request in BatchRequest. It uses Builder pattern to create object of this type.
  *
  * @author Rishabh Shukla
  *
  * @see org.apache.fineract.batch.service.BatchApiService
  */
-public class CommandContext {
+public final class CommandContext {
 
     /**
      * Static Builder class to provide a Build method for CommandContext.
      *
      * @author Rishabh Shukla
      */
-    public static class Builder {
+    public static final class Builder {
 
         private String resource;
         private String method;
@@ -68,16 +67,17 @@ public class CommandContext {
     }
 
     /**
-     * Returns a boolean value if the relativeUrl 'matches' one of the regex
-     * keys in the available commandStrategies. It take CommandContext object as
-     * parameter which contains a 'resource' member as a regex key for available
+     * Returns a boolean value if the relativeUrl 'matches' one of the regex keys in the available commandStrategies. It
+     * take CommandContext object as parameter which contains a 'resource' member as a regex key for available
      * commandStrategies.
      *
      * @param other
      * @return boolean
      */
     public boolean matcher(CommandContext other) {
-        if (this.resource.matches(other.resource) && this.method.equals(other.method)) { return true; }
+        if (this.resource.matches(other.resource) && this.method.equals(other.method)) {
+            return true;
+        }
         return false;
     }
 
@@ -98,7 +98,7 @@ public class CommandContext {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof CommandContext)) {
             return false;
         }
         CommandContext other = (CommandContext) obj;

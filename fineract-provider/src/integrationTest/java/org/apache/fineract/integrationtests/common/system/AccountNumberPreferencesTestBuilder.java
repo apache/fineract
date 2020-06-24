@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 
 public class AccountNumberPreferencesTestBuilder {
+
     private String clientAccountType = "1";
     private String clientPrefixType = "101";
     private String loanAccountType = "2";

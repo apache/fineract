@@ -42,7 +42,8 @@ public class UpdateTellerCommandHandler implements NewCommandSourceHandler {
     /**
      * Creates a new instance
      *
-     * @param writePlatformService the {@code TellerWritePlatformService} used to access the backend
+     * @param writePlatformService
+     *            the {@code TellerWritePlatformService} used to access the backend
      */
     @Autowired
     public UpdateTellerCommandHandler(final TellerWritePlatformService writePlatformService) {

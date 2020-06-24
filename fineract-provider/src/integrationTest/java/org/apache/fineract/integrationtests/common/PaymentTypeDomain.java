@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-public class PaymentTypeDomain {
+public final class PaymentTypeDomain {
 
     private Integer id;
     private String name;

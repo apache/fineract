@@ -49,5 +49,4 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult undoWithdrawal(Long entityId, JsonCommand command);
 
-
 }

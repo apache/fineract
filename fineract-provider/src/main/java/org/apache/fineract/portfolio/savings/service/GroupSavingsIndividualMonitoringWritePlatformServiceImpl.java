@@ -28,61 +28,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements GroupSavingsIndividualMonitoringWritePlatformService
-{
+public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements GroupSavingsIndividualMonitoringWritePlatformService {
 
+    private final PlatformSecurityContext context;
 
-     private final PlatformSecurityContext context;
+    private final GSIMRepositoy gsimAccountRepository;
 
-     private final GSIMRepositoy gsimAccountRepository;
+    private final LoanRepository loanRepository;
 
-     private final LoanRepository loanRepository;
+    @Autowired
+    public GroupSavingsIndividualMonitoringWritePlatformServiceImpl(final PlatformSecurityContext context,
+            final GSIMRepositoy gsimAccountRepository, final LoanRepository loanRepository) {
+        this.context = context;
+        this.gsimAccountRepository = gsimAccountRepository;
+        this.loanRepository = loanRepository;
+    }
 
-     @Autowired
-     public GroupSavingsIndividualMonitoringWritePlatformServiceImpl(final PlatformSecurityContext context,final GSIMRepositoy gsimAccountRepository,
-               final LoanRepository loanRepository)
-     {
-          this.context=context;
-          this.gsimAccountRepository=gsimAccountRepository;
-          this.loanRepository=loanRepository;
-     }
+    @Override
+    public GroupSavingsIndividualMonitoring addGSIMAccountInfo(String accountNumber, Group group, BigDecimal parentDeposit,
+            Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
 
-     @Override
-     public GroupSavingsIndividualMonitoring addGSIMAccountInfo(String accountNumber,Group group,BigDecimal parentDeposit,Long childAccountsCount,
-               Boolean isAcceptingChild,Integer loanStatus,BigDecimal applicationId)
-     {
+        GroupSavingsIndividualMonitoring glimAccountInfo = GroupSavingsIndividualMonitoring.getInstance(accountNumber, group, parentDeposit,
+                childAccountsCount, isAcceptingChild, loanStatus, applicationId);
 
-          GroupSavingsIndividualMonitoring glimAccountInfo=GroupSavingsIndividualMonitoring.getInstance(accountNumber,group,parentDeposit,childAccountsCount,
-                    isAcceptingChild,loanStatus,applicationId);
+        return this.gsimAccountRepository.save(glimAccountInfo);
 
-          return this.gsimAccountRepository.save(glimAccountInfo );
+    }
 
-     }
+    @Override
+    public void setIsAcceptingChild(GroupSavingsIndividualMonitoring glimAccount) {
+        glimAccount.setIsAcceptingChild(true);
+        gsimAccountRepository.save(glimAccount);
 
+    }
 
-     @Override
-     public void setIsAcceptingChild(GroupSavingsIndividualMonitoring glimAccount)
-     {
-          glimAccount.setIsAcceptingChild(true);
-          gsimAccountRepository.save(glimAccount);
+    @Override
+    public void resetIsAcceptingChild(GroupSavingsIndividualMonitoring glimAccount) {
+        glimAccount.setIsAcceptingChild(false);
+        gsimAccountRepository.save(glimAccount);
 
-     }
+    }
 
-
-     @Override
-     public void resetIsAcceptingChild(GroupSavingsIndividualMonitoring glimAccount)
-     {
-          glimAccount.setIsAcceptingChild(false);
-          gsimAccountRepository.save(glimAccount);
-
-     }
-
-
-     @Override
-     public void incrementChildAccountCount(GroupSavingsIndividualMonitoring glimAccount)
-     {
-          long count=glimAccount.getChildAccountsCount();
-          glimAccount.setChildAccountsCount(count+1);
-          gsimAccountRepository.save(glimAccount);
-     }
+    @Override
+    public void incrementChildAccountCount(GroupSavingsIndividualMonitoring glimAccount) {
+        long count = glimAccount.getChildAccountsCount();
+        glimAccount.setChildAccountsCount(count + 1);
+        gsimAccountRepository.save(glimAccount);
+    }
 }

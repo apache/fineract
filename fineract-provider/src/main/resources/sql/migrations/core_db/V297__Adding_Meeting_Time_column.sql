@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-alter table m_calendar add meeting_time Time 
+alter table m_calendar add meeting_time Time

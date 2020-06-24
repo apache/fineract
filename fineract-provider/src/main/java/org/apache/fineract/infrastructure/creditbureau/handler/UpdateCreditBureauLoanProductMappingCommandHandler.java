@@ -34,7 +34,8 @@ public class UpdateCreditBureauLoanProductMappingCommandHandler implements NewCo
     private final CreditBureauLoanProductMappingWritePlatformService writePlatformService;
 
     @Autowired
-    public UpdateCreditBureauLoanProductMappingCommandHandler(final CreditBureauLoanProductMappingWritePlatformService writePlatformService) {
+    public UpdateCreditBureauLoanProductMappingCommandHandler(
+            final CreditBureauLoanProductMappingWritePlatformService writePlatformService) {
 
         this.writePlatformService = writePlatformService;
     }

@@ -22,10 +22,9 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
- * Immutable data object for clients with loans due for disbursement or
- * collection.
+ * Immutable data object for clients with loans due for disbursement or collection.
  */
-public class JLGClientData {
+public final class JLGClientData {
 
     private final Long clientId;
     private final String clientName;
@@ -34,26 +33,24 @@ public class JLGClientData {
     @SuppressWarnings("unused")
     private final EnumOptionData attendanceType;
 
-    public static JLGClientData instance(final Long clientId, final String clientName, final EnumOptionData attendanceType){
+    public static JLGClientData instance(final Long clientId, final String clientName, final EnumOptionData attendanceType) {
         final Collection<LoanDueData> loans = null;
         final Collection<SavingsDueData> savings = null;
         return new JLGClientData(clientId, clientName, loans, savings, attendanceType);
     }
 
-    public static JLGClientData withSavings(final JLGClientData client, final Collection<SavingsDueData> savings){
+    public static JLGClientData withSavings(final JLGClientData client, final Collection<SavingsDueData> savings) {
         final Collection<LoanDueData> loans = null;
         final EnumOptionData attendanceType = null;
 
         return new JLGClientData(client.clientId, client.clientName, loans, savings, attendanceType);
     }
 
-    /*public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans,
-            final EnumOptionData attendanceType) {
-        this.clientId = clientId;
-        this.clientName = clientName;
-        this.loans = loans;
-        this.attendanceType = attendanceType;
-    }*/
+    /*
+     * public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans, final
+     * EnumOptionData attendanceType) { this.clientId = clientId; this.clientName = clientName; this.loans = loans;
+     * this.attendanceType = attendanceType; }
+     */
 
     public static JLGClientData withAttendance(final Long clientId, final String clientName, final EnumOptionData attendanceType) {
         final Collection<LoanDueData> loans = null;
@@ -97,13 +94,15 @@ public class JLGClientData {
         return this.savings;
     }
 
-
     public void setSavings(Collection<SavingsDueData> savings) {
         this.savings = savings;
     }
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof JLGClientData)) {
+            return false;
+        }
         final JLGClientData clientData = (JLGClientData) obj;
         return clientData.clientId.compareTo(this.clientId) == 0;
     }

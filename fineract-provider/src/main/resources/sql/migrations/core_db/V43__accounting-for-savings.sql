@@ -19,7 +19,7 @@
 
 /*add accounting type field to savings product*/
 ALTER TABLE `m_savings_product`
-	ADD COLUMN `accounting_type` SMALLINT NOT NULL AFTER `lockin_period_frequency_enum`;
+    ADD COLUMN `accounting_type` SMALLINT NOT NULL AFTER `lockin_period_frequency_enum`;
 
 /*update existing savings products to have "No" accounting*/
 update m_savings_product set accounting_type=1;

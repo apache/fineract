@@ -28,13 +28,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @CommandType(entity = "SSBENEFICIARYTPT", action = "DELETE")
-public class DeleteSelfBeneficiariesTPTCommandHandler implements
-        NewCommandSourceHandler {
+public class DeleteSelfBeneficiariesTPTCommandHandler implements NewCommandSourceHandler {
+
     private final SelfBeneficiariesTPTWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteSelfBeneficiariesTPTCommandHandler(
-            final SelfBeneficiariesTPTWritePlatformService writePlatformService) {
+    public DeleteSelfBeneficiariesTPTCommandHandler(final SelfBeneficiariesTPTWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

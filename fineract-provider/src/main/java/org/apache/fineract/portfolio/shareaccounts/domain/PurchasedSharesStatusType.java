@@ -19,10 +19,10 @@
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
 public enum PurchasedSharesStatusType {
+
     INVALID(0, "purchasedSharesStatusType.invalid"), APPLIED(100, "purchasedSharesStatusType.applied"), APPROVED(300,
             "purchasedSharesStatusType.approved"), REJECTED(400, "purchasedSharesStatusType.rejected"), PURCHASED(500,
-            "purchasedSharesType.purchased"), REDEEMED(600, "purchasedSharesType.redeemed"),
-            CHARGE_PAYMENT(700, "charge.payment");
+                    "purchasedSharesType.purchased"), REDEEMED(600, "purchasedSharesType.redeemed"), CHARGE_PAYMENT(700, "charge.payment");
 
     private final Integer value;
     private final String code;
@@ -53,7 +53,7 @@ public enum PurchasedSharesStatusType {
             break;
             case 700:
                 enumeration = PurchasedSharesStatusType.CHARGE_PAYMENT;
-                break ;
+            break;
         }
         return enumeration;
     }

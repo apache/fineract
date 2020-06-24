@@ -54,7 +54,6 @@ public class RecurringDepositConstants {
     public static final int CHARGE_AMOUNT_2 = 34;
     public static final int CHARGE_DUE_DATE_2 = 35;
 
-
     public static final int LOOKUP_CLIENT_NAME_COL = 31;
     public static final int LOOKUP_ACTIVATION_DATE_COL = 32;
 }

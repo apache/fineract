@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -29,68 +29,61 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class SavingsStatusChecker {
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsStatusChecker.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsStatusChecker.class);
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
 
     public static void verifySavingsIsApproved(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS APPROVED ------------------------------------");
-        assertTrue("ERROR IN APPROVING SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "approved"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS APPROVED ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "approved"), "ERROR IN APPROVING SAVINGS APPLICATION");
         LOG.info("Savings Application Status: {} \n", savingsStatusHashMap);
     }
 
     public static void verifySavingsIsPending(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS PENDING ------------------------------------");
-        assertTrue("SAVINGS ACCOUNT IS NOT IN PENDING STATE",
-                getStatus(savingsStatusHashMap, "submittedAndPendingApproval"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS PENDING ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "submittedAndPendingApproval"), "SAVINGS ACCOUNT IS NOT IN PENDING STATE");
         LOG.info("Savings Application Status: {} \n", savingsStatusHashMap);
     }
 
     public static void verifySavingsIsActive(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
-        assertTrue("ERROR IN ACTIVATING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "active"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "active"), "ERROR IN ACTIVATING THE SAVINGS APPLICATION");
         LOG.info("Savings Application Status: {} \n", savingsStatusHashMap);
     }
 
     public static void verifySavingsIsRejected(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS REJECTED ------------------------------------");
-        assertTrue("ERROR IN REJECTING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "rejected"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS REJECTED ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "rejected"), "ERROR IN REJECTING THE SAVINGS APPLICATION");
         LOG.info("Savings Application Status: {} \n", savingsStatusHashMap);
     }
 
     public static void verifySavingsIsWithdrawn(final HashMap savingsStatusHashMap) {
         LOG.info(
                 "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS WITHDRAWN ------------------------------------");
-        assertTrue("ERROR IN WITHDRAW  THE SAVINGS APPLICATION",
-                getStatus(savingsStatusHashMap, "withdrawnByApplicant"));
+        assertTrue(getStatus(savingsStatusHashMap, "withdrawnByApplicant"), "ERROR IN WITHDRAW  THE SAVINGS APPLICATION");
         LOG.info("Savings Application Status: {}", savingsStatusHashMap);
     }
 
     public static void verifySavingsAccountIsClosed(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS CLOSED ------------------------------------");
-        assertTrue("ERROR IN CLOSING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "closed"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS CLOSED ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "closed"), "ERROR IN CLOSING THE SAVINGS APPLICATION");
         LOG.info("Savings Application Status: {}", savingsStatusHashMap);
     }
 
     public static void verifySavingsAccountIsNotActive(final HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS INACTIVE ------------------------------------");
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS INACTIVE ------------------------------------");
         assertTrue(getStatus(savingsStatusHashMap, "active"));
         LOG.info("Savings Application Status: {} \n", savingsStatusHashMap);
     }
 
-    public static HashMap getStatusOfSavings(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer savingsID) {
+    public static HashMap getStatusOfSavings(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer savingsID) {
         final String url = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
 
-    public static HashMap getSubStatusOfSavings(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer savingsID) {
+    public static HashMap getSubStatusOfSavings(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer savingsID) {
         final String url = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "subStatus");
     }
@@ -100,58 +93,51 @@ public class SavingsStatusChecker {
     }
 
     public static void verifySavingsSubStatusInactive(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
-        assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "inactive"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "inactive"), "UNEXPECTED SAVINGS ACCOUNT SUB STATUS");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusDormant(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
-        assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "dormant"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "dormant"), "UNEXPECTED SAVINGS ACCOUNT SUB STATUS");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusEscheat(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
-        assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "escheat"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "escheat"), "UNEXPECTED SAVINGS ACCOUNT SUB STATUS");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusNone(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
-        assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "none"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "none"), "UNEXPECTED SAVINGS ACCOUNT SUB STATUS");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusblock(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n-------------------------------------- VERIFYING SAVINGS ACCOUNT IS BLOCKED ------------------------------------");
-        assertTrue("block", getStatus(savingsStatusHashMap, "block"));
+        LOG.info("\n-------------------------------------- VERIFYING SAVINGS ACCOUNT IS BLOCKED ------------------------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "block"), "block");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusIsNone(HashMap savingsStatusHashMap) {
         LOG.info(
                 "\n------------------------- VERIFYING SAVINGS ACCOUNT IS NOT BLOCKED FOR ANY TYPE OF TRANSACTIONS ---------------------------");
-        assertTrue("none", getStatus(savingsStatusHashMap, "none"));
+        assertTrue(getStatus(savingsStatusHashMap, "none"), "none");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusIsDebitBlocked(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n--------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR DEBIT TRANSACTIONS ---------------------");
-        assertTrue("status is blockDebit", getStatus(savingsStatusHashMap, "blockDebit"));
+        LOG.info("\n--------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR DEBIT TRANSACTIONS ---------------------");
+        assertTrue(getStatus(savingsStatusHashMap, "blockDebit"), "status is blockDebit");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 
     public static void verifySavingsSubStatusIsCreditBlocked(HashMap savingsStatusHashMap) {
-        LOG.info(
-                "\n---------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR CREDIT TRANSACTIONS ---------------");
-        assertTrue("blockCredit ", getStatus(savingsStatusHashMap, "blockCredit"));
+        LOG.info("\n---------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR CREDIT TRANSACTIONS ---------------");
+        assertTrue(getStatus(savingsStatusHashMap, "blockCredit"), "blockCredit ");
         LOG.info("Savings Application Sub Status: {} ", savingsStatusHashMap.toString());
     }
 

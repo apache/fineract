@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class HookTemplateData implements Serializable {
+public final class HookTemplateData implements Serializable {
 
     private final Long id;
     private final String name;
@@ -30,13 +30,11 @@ public class HookTemplateData implements Serializable {
     // associations
     private final List<Field> schema;
 
-    public static HookTemplateData instance(final Long id, final String name,
-            final List<Field> schema) {
+    public static HookTemplateData instance(final Long id, final String name, final List<Field> schema) {
         return new HookTemplateData(id, name, schema);
     }
 
-    private HookTemplateData(final Long id, final String name,
-            final List<Field> schema) {
+    private HookTemplateData(final Long id, final String name, final List<Field> schema) {
         this.id = id;
         this.name = name;
 

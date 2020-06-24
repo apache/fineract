@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/01/18.
  */
 final class ProductsApiResourceSwagger {
-    private ProductsApiResourceSwagger() {
-    }
+
+    private ProductsApiResourceSwagger() {}
 
     @ApiModel(value = "GetProductsTypeProductIdResponse")
-    public final static class GetProductsTypeProductIdResponse {
-        private GetProductsTypeProductIdResponse() {
-        }
+    public static final class GetProductsTypeProductIdResponse {
 
-        final class GetProductsCurrency {
-            private GetProductsCurrency() {
-            }
+        private GetProductsTypeProductIdResponse() {}
+
+        static final class GetProductsCurrency {
+
+            private GetProductsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -54,9 +54,9 @@ final class ProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetProductsMarketPrice {
-            private GetProductsMarketPrice() {
-            }
+        static final class GetProductsMarketPrice {
+
+            private GetProductsMarketPrice() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -66,13 +66,13 @@ final class ProductsApiResourceSwagger {
             public Integer shareValue;
         }
 
-        final class GetProductsCharges {
-            private GetProductsCharges() {
-            }
+        static final class GetProductsCharges {
 
-            final class GetChargesCurrency {
-                private GetChargesCurrency() {
-                }
+            private GetProductsCharges() {}
+
+            static final class GetChargesCurrency {
+
+                private GetChargesCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -88,9 +88,9 @@ final class ProductsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetChargeTimeType {
-                private GetChargeTimeType() {
-                }
+            static final class GetChargeTimeType {
+
+                private GetChargeTimeType() {}
 
                 @ApiModelProperty(example = "13")
                 public Integer id;
@@ -100,9 +100,9 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargeAppliesTo {
-                private GetChargeAppliesTo() {
-                }
+            static final class GetChargeAppliesTo {
+
+                private GetChargeAppliesTo() {}
 
                 @ApiModelProperty(example = "4")
                 public Integer id;
@@ -112,9 +112,9 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargeCalculationType {
-                private GetChargeCalculationType() {
-                }
+            static final class GetChargeCalculationType {
+
+                private GetChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -124,9 +124,9 @@ final class ProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargePaymentMode {
-                private GetChargePaymentMode() {
-                }
+            static final class GetChargePaymentMode {
+
+                private GetChargePaymentMode() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -153,9 +153,9 @@ final class ProductsApiResourceSwagger {
             public GetChargePaymentMode chargePaymentMode;
         }
 
-        final class GetLockPeriodTypeEnum {
-            private GetLockPeriodTypeEnum() {
-            }
+        static final class GetLockPeriodTypeEnum {
+
+            private GetLockPeriodTypeEnum() {}
 
             @ApiModelProperty(example = "0")
             public Integer id;
@@ -163,9 +163,9 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingRule {
-            private GetProductsAccountingRule() {
-            }
+        static final class GetProductsAccountingRule {
+
+            private GetProductsAccountingRule() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -175,13 +175,13 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingMappings {
-            private GetProductsAccountingMappings() {
-            }
+        static final class GetProductsAccountingMappings {
 
-            final class GetShareReferenceId {
-                private GetShareReferenceId() {
-                }
+            private GetProductsAccountingMappings() {}
+
+            static final class GetShareReferenceId {
+
+                private GetShareReferenceId() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -191,9 +191,9 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetIncomeFromFeeAccountId {
-                private GetIncomeFromFeeAccountId() {
-                }
+            static final class GetIncomeFromFeeAccountId {
+
+                private GetIncomeFromFeeAccountId() {}
 
                 @ApiModelProperty(example = "14")
                 public Integer id;
@@ -203,9 +203,9 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetShareEquityId {
-                private GetShareEquityId() {
-                }
+            static final class GetShareEquityId {
+
+                private GetShareEquityId() {}
 
                 @ApiModelProperty(example = "66")
                 public Integer id;
@@ -215,9 +215,9 @@ final class ProductsApiResourceSwagger {
                 public String glCode;
             }
 
-            final class GetShareSuspenseId {
-                private GetShareSuspenseId() {
-                }
+            static final class GetShareSuspenseId {
+
+                private GetShareSuspenseId() {}
 
                 @ApiModelProperty(example = "8")
                 public Integer id;
@@ -233,9 +233,9 @@ final class ProductsApiResourceSwagger {
             public GetShareSuspenseId shareSuspenseId;
         }
 
-        final class GetProductsMinimumActivePeriodFrequencyTypeOptions {
-            private GetProductsMinimumActivePeriodFrequencyTypeOptions() {
-            }
+        static final class GetProductsMinimumActivePeriodFrequencyTypeOptions {
+
+            private GetProductsMinimumActivePeriodFrequencyTypeOptions() {}
 
             @ApiModelProperty(example = "0")
             public Integer id;
@@ -245,17 +245,17 @@ final class ProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetProductsAccountingMappingOptions {
-            private GetProductsAccountingMappingOptions() {
-            }
+        static final class GetProductsAccountingMappingOptions {
 
-            final class GetProductsLiabilityAccountOptions {
-                private GetProductsLiabilityAccountOptions() {
-                }
+            private GetProductsAccountingMappingOptions() {}
 
-                final class GetProductsLiabilityType {
-                    private GetProductsLiabilityType() {
-                    }
+            static final class GetProductsLiabilityAccountOptions {
+
+                private GetProductsLiabilityAccountOptions() {}
+
+                static final class GetProductsLiabilityType {
+
+                    private GetProductsLiabilityType() {}
 
                     @ApiModelProperty(example = "2")
                     public Integer id;
@@ -265,9 +265,9 @@ final class ProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetProductsLiabilityUsage {
-                    private GetProductsLiabilityUsage() {
-                    }
+                static final class GetProductsLiabilityUsage {
+
+                    private GetProductsLiabilityUsage() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -277,9 +277,9 @@ final class ProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetProductsTagId {
-                    private GetProductsTagId() {
-                    }
+                static final class GetProductsTagId {
+
+                    private GetProductsTagId() {}
 
                     @ApiModelProperty(example = "0")
                     public Integer id;
@@ -306,13 +306,13 @@ final class ProductsApiResourceSwagger {
                 public GetProductsTagId tagId;
             }
 
-            final class GetProductsAssetAccountOptions {
-                private GetProductsAssetAccountOptions() {
-                }
+            static final class GetProductsAssetAccountOptions {
 
-                final class GetAssetType {
-                    private GetAssetType() {
-                    }
+                private GetProductsAssetAccountOptions() {}
+
+                static final class GetAssetType {
+
+                    private GetAssetType() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -341,13 +341,13 @@ final class ProductsApiResourceSwagger {
                 public GetProductsLiabilityAccountOptions.GetProductsTagId tagId;
             }
 
-            final class GetProductsIncomeAccountOptions {
-                private GetProductsIncomeAccountOptions() {
-                }
+            static final class GetProductsIncomeAccountOptions {
 
-                final class GetIncomeType {
-                    private GetIncomeType() {
-                    }
+                private GetProductsIncomeAccountOptions() {}
+
+                static final class GetIncomeType {
+
+                    private GetIncomeType() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -376,13 +376,13 @@ final class ProductsApiResourceSwagger {
                 public GetProductsLiabilityAccountOptions.GetProductsTagId tagId;
             }
 
-            final class GetProductsEquityAccountOptions {
-                private GetProductsEquityAccountOptions() {
-                }
+            static final class GetProductsEquityAccountOptions {
 
-                final class GetEquityType {
-                    private GetEquityType() {
-                    }
+                private GetProductsEquityAccountOptions() {}
+
+                static final class GetEquityType {
+
+                    private GetEquityType() {}
 
                     @ApiModelProperty(example = "3")
                     public Integer id;
@@ -459,12 +459,12 @@ final class ProductsApiResourceSwagger {
 
     @ApiModel(value = "GetProductsTypeResponse")
     public static final class GetProductsTypeResponse {
-        private GetProductsTypeResponse() {
-        }
 
-        final class GetProductsPageItems {
-            private GetProductsPageItems() {
-            }
+        private GetProductsTypeResponse() {}
+
+        static final class GetProductsPageItems {
+
+            private GetProductsPageItems() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -482,13 +482,13 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostProductsTypeRequest")
-    public final static class PostProductsTypeRequest {
-        private PostProductsTypeRequest() {
-        }
+    public static final class PostProductsTypeRequest {
 
-        final class PostProductsMarketPricePeriods {
-            private PostProductsMarketPricePeriods() {
-            }
+        private PostProductsTypeRequest() {}
+
+        static final class PostProductsMarketPricePeriods {
+
+            private PostProductsMarketPricePeriods() {}
 
             @ApiModelProperty(example = "en")
             public String locale;
@@ -500,9 +500,9 @@ final class ProductsApiResourceSwagger {
             public Integer shareValue;
         }
 
-        final class PostProductsChargesSelected {
-            private PostProductsChargesSelected() {
-            }
+        static final class PostProductsChargesSelected {
+
+            private PostProductsChargesSelected() {}
 
             @ApiModelProperty(example = "20")
             public Integer id;
@@ -551,18 +551,18 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostProductsTypeResponse")
-    public final static class PostProductsTypeResponse {
-        private PostProductsTypeResponse() {
-        }
+    public static final class PostProductsTypeResponse {
+
+        private PostProductsTypeResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutProductsTypeProductIdRequest")
-    public final static class PutProductsTypeProductIdRequest {
-        private PutProductsTypeProductIdRequest() {
-        }
+    public static final class PutProductsTypeProductIdRequest {
+
+        private PutProductsTypeProductIdRequest() {}
 
         @ApiModelProperty(example = "Share Product Description.")
         public String description;
@@ -573,13 +573,13 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutProductsTypeProductIdResponse")
-    public final static class PutProductsTypeProductIdResponse {
-        private PutProductsTypeProductIdResponse() {
-        }
+    public static final class PutProductsTypeProductIdResponse {
 
-        final class PutProductsChanges {
-            private PutProductsChanges() {
-            }
+        private PutProductsTypeProductIdResponse() {}
+
+        static final class PutProductsChanges {
+
+            private PutProductsChanges() {}
 
             @ApiModelProperty(example = "Share Product Description.")
             public String description;

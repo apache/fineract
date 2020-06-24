@@ -20,19 +20,20 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-    spotbugs 'com.github.spotbugs:spotbugs:4.0.3'
+    spotbugs 'com.github.spotbugs:spotbugs:4.0.6'
 
-	// Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
-	// Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
-	// We also (normally should have) no need to ever use 'compileOnly'.
+    // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
+    // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
+    // We also (normally should have) no need to ever use 'compileOnly'.
 
-	// implementation dependencies are directly used (compiled against) in src/main (and src/test)
-	//
+    // implementation dependencies are directly used (compiled against) in src/main (and src/test)
+    //
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.boot:spring-boot-starter-cache',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
@@ -56,7 +57,7 @@ dependencies {
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
-            'org.apache.commons:commons-io',
+            'commons-io:commons-io',
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.poi:poi-ooxml-schemas',
@@ -65,7 +66,6 @@ dependencies {
             'org.drizzle.jdbc:drizzle-jdbc',
             'org.flywaydb:flyway-core',
 
-            'net.sf.ehcache:ehcache',
             'com.github.librepdf:openpdf',
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
@@ -74,55 +74,66 @@ dependencies {
              'jakarta.xml.bind:jakarta.xml.bind-api',
              'org.dom4j:dom4j',
 
-             'com.github.spotbugs:spotbugs-annotations',
+             'javax.cache:cache-api',
+
+             'com.github.spotbugs:spotbugs-annotations'
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
-		exclude group: 'javax.validation'
+        exclude group: 'javax.validation'
     }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
-		exclude group: 'org.hibernate'
+        exclude group: 'org.hibernate'
     }
-	implementation ('org.apache.openjpa:openjpa') {
-		exclude group: 'org.eclipse.persistence'
-		exclude group: 'org.apache.geronimo.specs'
-	}
+    implementation ('org.apache.openjpa:openjpa') {
+        exclude group: 'org.eclipse.persistence'
+        exclude group: 'org.apache.geronimo.specs'
+    }
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
     implementation ('com.amazonaws:aws-java-sdk-s3') {
-		exclude group: 'commons-logging'
+        exclude group: 'commons-logging'
     }
     implementation ('org.mnode.ical4j:ical4j') {
-		exclude group: 'commons-logging'
+        exclude group: 'commons-logging'
+    }
+    implementation ('org.ehcache:ehcache') {
+        exclude group: 'org.glassfish.jaxb', module: 'jaxb-runtime'
     }
 
-	// runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
-	runtimeOnly(
+    // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
+    runtimeOnly(
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
+            'org.webjars.npm:swagger-ui-dist',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient',
-	)
+    )
 
-	// testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
-	// Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
-	//
-    testImplementation( 'junit:junit',
-            'org.junit.platform:junit-platform-runner', // FINERACT-943
-            'org.mockito:mockito-core',
+    // testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
+    // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
+    //
+    testImplementation( 'org.mockito:mockito-core',
+            'org.mockito:mockito-junit-jupiter',
+            'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
-	)
+    )
+    testImplementation('org.mock-server:mockserver-junit-jupiter') {
+        exclude group: 'com.sun.mail', module: 'mailapi'
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+    }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 }

@@ -26,9 +26,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"unused", "rawtypes", "unchecked" })
+@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class StandingInstructionsHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(StandingInstructionsHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(StandingInstructionsHelper.class);
     private static final String STANDING_INSTRUCTIONS_URL = "/fineract-provider/api/v1/standinginstructions";
     private static final String STANDING_INSTRUCTIONS_RUNHISTORY_URL = "/fineract-provider/api/v1/standinginstructionrunhistory";
     private static final String LOCALE = "en_GB";
@@ -90,7 +91,7 @@ public class StandingInstructionsHelper {
         map.put("recurrenceFrequency", RECURRENCE_FREQUENCY_WEEKS);
         map.put("recurrenceOnMonthDay", monthDay);
         String savingsApplicationJSON = new Gson().toJson(map);
-        LOG.info("{}",savingsApplicationJSON);
+        LOG.info("{}", savingsApplicationJSON);
         return savingsApplicationJSON;
     }
 
@@ -113,11 +114,12 @@ public class StandingInstructionsHelper {
         return response;
     }
 
-    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId, Integer transferType) {
+    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
+            Integer transferType) {
         final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
-                + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId
-                + "&transferType=" + transferType;
-        LOG.info("STANDING_INSTRUCTIONS_HISTORY_URL= {}",STANDING_INSTRUCTIONS_HISTORY_URL);
+                + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
+                + transferType;
+        LOG.info("STANDING_INSTRUCTIONS_HISTORY_URL= {}", STANDING_INSTRUCTIONS_HISTORY_URL);
         final List<HashMap> response = (List<HashMap>) Utils.performServerGet(this.requestSpec, this.responseSpec,
                 STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
         return response;

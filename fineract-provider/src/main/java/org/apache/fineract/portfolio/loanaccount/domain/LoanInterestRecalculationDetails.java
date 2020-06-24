@@ -30,8 +30,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMe
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 
 /**
- * Entity for holding interest recalculation setting, details will be copied
- * from product directly
+ * Entity for holding interest recalculation setting, details will be copied from product directly
  *
  * @author conflux
  */
@@ -117,12 +116,13 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom 
     public static LoanInterestRecalculationDetails createFrom(
             final LoanProductInterestRecalculationDetails loanProductInterestRecalculationDetails) {
         return new LoanInterestRecalculationDetails(loanProductInterestRecalculationDetails.getInterestRecalculationCompoundingMethod(),
-                loanProductInterestRecalculationDetails.getRescheduleStrategyMethod(), loanProductInterestRecalculationDetails
-                        .getRestFrequencyType().getValue(), loanProductInterestRecalculationDetails.getRestInterval(),
-                loanProductInterestRecalculationDetails.getRestFrequencyNthDay(),
+                loanProductInterestRecalculationDetails.getRescheduleStrategyMethod(),
+                loanProductInterestRecalculationDetails.getRestFrequencyType().getValue(),
+                loanProductInterestRecalculationDetails.getRestInterval(), loanProductInterestRecalculationDetails.getRestFrequencyNthDay(),
                 loanProductInterestRecalculationDetails.getRestFrequencyWeekday(),
-                loanProductInterestRecalculationDetails.getRestFrequencyOnDay(), loanProductInterestRecalculationDetails
-                        .getCompoundingFrequencyType().getValue(), loanProductInterestRecalculationDetails.getCompoundingInterval(),
+                loanProductInterestRecalculationDetails.getRestFrequencyOnDay(),
+                loanProductInterestRecalculationDetails.getCompoundingFrequencyType().getValue(),
+                loanProductInterestRecalculationDetails.getCompoundingInterval(),
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyNthDay(),
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyWeekday(),
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyOnDay(),

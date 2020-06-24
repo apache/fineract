@@ -30,15 +30,18 @@ import org.joda.time.DateTime;
  * Created by sanyam on 13/8/17.
  */
 final class ReportMailingJobApiResourceSwagger {
-    private ReportMailingJobApiResourceSwagger(){
+
+    private ReportMailingJobApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetReportMailingJobsTemplate")
     public static final class GetReportMailingJobsTemplate {
-        private GetReportMailingJobsTemplate(){
+
+        private GetReportMailingJobsTemplate() {
 
         }
+
         @ApiModelProperty(example = "true")
         public boolean isActive;
         public List<EnumOptionData> emailAttachmentFileFormatOptions;
@@ -47,9 +50,11 @@ final class ReportMailingJobApiResourceSwagger {
 
     @ApiModel(value = "GetReportMailingJobsResponse")
     public static final class GetReportMailingJobsResponse {
-        private GetReportMailingJobsResponse(){
+
+        private GetReportMailingJobsResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Client Numbers Report")
@@ -85,9 +90,11 @@ final class ReportMailingJobApiResourceSwagger {
 
     @ApiModel(value = "PostReportMailingJobsRequest")
     public static final class PostReportMailingJobsRequest {
-        private PostReportMailingJobsRequest(){
+
+        private PostReportMailingJobsRequest() {
 
         }
+
         @ApiModelProperty(example = "en_GB")
         public String locale;
         @ApiModelProperty(example = "dd-MM-yyyy HH:mm:ss")
@@ -117,18 +124,22 @@ final class ReportMailingJobApiResourceSwagger {
 
     @ApiModel(value = "PostReportMailingJobsResponse")
     public static final class PostReportMailingJobsResponse {
-        private PostReportMailingJobsResponse(){
+
+        private PostReportMailingJobsResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "PutReportMailingJobsRequest")
     public static final class PutReportMailingJobsRequest {
-        private PutReportMailingJobsRequest(){
+
+        private PutReportMailingJobsRequest() {
 
         }
+
         @ApiModelProperty(example = "en_GB")
         public String locale;
         @ApiModelProperty(example = "dd-MM-yyyy HH:mm:ss")
@@ -139,14 +150,19 @@ final class ReportMailingJobApiResourceSwagger {
 
     @ApiModel(value = "PutReportMailingJobsResponse")
     public static final class PutReportMailingJobsResponse {
-        private PutReportMailingJobsResponse(){
+
+        private PutReportMailingJobsResponse() {
 
         }
-        final class PutReportMailingJobsResponseChanges{
-            private PutReportMailingJobsResponseChanges(){}
+
+        static final class PutReportMailingJobsResponseChanges {
+
+            private PutReportMailingJobsResponseChanges() {}
+
             @ApiModelProperty(example = "10-08-2016 23:30:00")
             public DateTime startDateTime;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         public PutReportMailingJobsResponseChanges changes;
@@ -154,16 +170,19 @@ final class ReportMailingJobApiResourceSwagger {
 
     @ApiModel(value = "DeleteReportMailingJobsRequest ")
     public static final class DeleteReportMailingJobsRequest {
-        private DeleteReportMailingJobsRequest(){
+
+        private DeleteReportMailingJobsRequest() {
 
         }
     }
 
     @ApiModel(value = "DeleteReportMailingJobsResponse")
     public static final class DeleteReportMailingJobsResponse {
-        private DeleteReportMailingJobsResponse(){
+
+        private DeleteReportMailingJobsResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

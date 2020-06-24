@@ -47,7 +47,7 @@ import org.springframework.core.io.Resource;
  * @see ServerApplication for the same without the embedded MariaDB4j database
  */
 public class ServerWithMariaDB4jApplication {
-    private final static Logger logger = LoggerFactory.getLogger(ServerWithMariaDB4jApplication.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ServerWithMariaDB4jApplication.class);
 
     @Import({ MariaDB4jDataSourceConfiguration.class, EmbeddedTomcatWithSSLConfiguration.class })
     public static class Configuration extends AbstractApplicationConfiguration { }
@@ -55,7 +55,7 @@ public class ServerWithMariaDB4jApplication {
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext ctx = SpringApplication.run(Configuration.class, args);
         if (!Desktop.isDesktopSupported()) {
-            logger.info("Not going to open UI homepage in local web browser, because !Desktop.isDesktopSupported()");
+            LOG.info("Not going to open UI homepage in local web browser, because !Desktop.isDesktopSupported()");
 
         } else {
             // apps/community-app/dist/community-app/index.html
@@ -84,7 +84,7 @@ public class ServerWithMariaDB4jApplication {
             } else if (devResource.exists()) {
                 openWebBrowser(devURI);
             } else {
-                logger.error("Cannot open Fineract UI in browser; not found: " + distResource.toString());
+                LOG.error("Cannot open Fineract UI in browser; not found: " + distResource.toString());
             }
         }
 
@@ -95,10 +95,10 @@ public class ServerWithMariaDB4jApplication {
 
     private static void openWebBrowser(URI uri) {
         try {
-            logger.info("Opening Fineract UI in browser: " + uri.toString());
+            LOG.info("Opening Fineract UI in browser: " + uri.toString());
             Desktop.getDesktop().browse(uri);
         } catch (IOException e) {
-            logger.error("IOException when opening Fineract UI in browser: " + uri.toString(), e);
+            LOG.error("IOException when opening Fineract UI in browser: " + uri.toString(), e);
         }
     }
 

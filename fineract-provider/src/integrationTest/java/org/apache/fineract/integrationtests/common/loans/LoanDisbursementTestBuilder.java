@@ -30,7 +30,7 @@ public class LoanDisbursementTestBuilder {
     Float principalOriginalDue = null;
     String fromDate = null;
 
-    public LoanDisbursementTestBuilder(String dueDate,Float totalOriginalDueForPeriod,Float totalOutstandingForPeriod,
+    public LoanDisbursementTestBuilder(String dueDate, Float totalOriginalDueForPeriod, Float totalOutstandingForPeriod,
             Float interestOutstanding, Float principalOutstanding, Float principalLoanBalanceOutstanding, Float principalDue,
             Float principalOriginalDue, String fromDate) {
         this.dueDate = dueDate;
@@ -80,25 +80,20 @@ public class LoanDisbursementTestBuilder {
         return this.fromDate;
     }
 
-    /*public HashMap<String, String> build(String dueDate,String totalOriginalDueForPeriod,String totalOutstandingForPeriod,
-            String interestOutstanding, String principalOutstanding, String principalLoanBalanceOutstanding, String principalDue,
-            String principalOriginalDue, String fromDate) {
-        HashMap<String, String> expectedRepaymentSchedule = new HashMap<String, String>();
-        expectedRepaymentSchedule.put("dueDate", dueDate);
-        expectedRepaymentSchedule.put("totalOriginalDueForPeriod",
-                totalOriginalDueForPeriod);
-        expectedRepaymentSchedule.put("totalOutstandingForPeriod",
-                totalOutstandingForPeriod);
-        expectedRepaymentSchedule.put("interestOutstanding", interestOutstanding);
-        expectedRepaymentSchedule.put("principalOutstanding",
-                principalOutstanding);
-        expectedRepaymentSchedule.put("principalLoanBalanceOutstanding",
-                principalLoanBalanceOutstanding);
-        expectedRepaymentSchedule.put("principalDue", principalDue);
-        expectedRepaymentSchedule.put("principalOriginalDue",
-                principalOriginalDue);
-        expectedRepaymentSchedule.put("fromDate", fromDate);
-
-        return expectedRepaymentSchedule;
-    }*/
+    /*
+     * public HashMap<String, String> build(String dueDate,String totalOriginalDueForPeriod,String
+     * totalOutstandingForPeriod, String interestOutstanding, String principalOutstanding, String
+     * principalLoanBalanceOutstanding, String principalDue, String principalOriginalDue, String fromDate) {
+     * HashMap<String, String> expectedRepaymentSchedule = new HashMap<String, String>();
+     * expectedRepaymentSchedule.put("dueDate", dueDate); expectedRepaymentSchedule.put("totalOriginalDueForPeriod",
+     * totalOriginalDueForPeriod); expectedRepaymentSchedule.put("totalOutstandingForPeriod",
+     * totalOutstandingForPeriod); expectedRepaymentSchedule.put("interestOutstanding", interestOutstanding);
+     * expectedRepaymentSchedule.put("principalOutstanding", principalOutstanding);
+     * expectedRepaymentSchedule.put("principalLoanBalanceOutstanding", principalLoanBalanceOutstanding);
+     * expectedRepaymentSchedule.put("principalDue", principalDue);
+     * expectedRepaymentSchedule.put("principalOriginalDue", principalOriginalDue);
+     * expectedRepaymentSchedule.put("fromDate", fromDate);
+     *
+     * return expectedRepaymentSchedule; }
+     */
 }

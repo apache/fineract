@@ -28,13 +28,14 @@ public class InteropIdentifierAccountResponseData extends CommandProcessingResul
     @NotEmpty
     private String accountId;
 
-
-    protected InteropIdentifierAccountResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, @NotNull String accountId) {
+    protected InteropIdentifierAccountResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
+            @NotNull String accountId) {
         super(resourceId, officeId, commandId, changesOnly);
         this.accountId = accountId;
     }
 
-    protected static InteropIdentifierAccountResponseData build(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, @NotNull String accountId) {
+    protected static InteropIdentifierAccountResponseData build(Long resourceId, Long officeId, Long commandId,
+            Map<String, Object> changesOnly, @NotNull String accountId) {
         return new InteropIdentifierAccountResponseData(resourceId, officeId, commandId, changesOnly, accountId);
     }
 

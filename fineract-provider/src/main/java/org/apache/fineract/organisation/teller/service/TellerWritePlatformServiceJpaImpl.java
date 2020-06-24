@@ -63,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -78,9 +78,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Autowired
     public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
-            final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final TellerRepositoryWrapper tellerRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final StaffRepository staffRepository, CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
+            final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TellerRepositoryWrapper tellerRepositoryWrapper,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepository staffRepository,
+            CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
             JournalEntryRepository glJournalEntryRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
             final CashierTransactionDataValidator cashierTransactionDataValidator) {
@@ -122,8 +122,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -157,16 +157,16 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
 
     /*
-     * used to restrict modifying operations to office that are either the users
-     * office or lower (child) in the office hierarchy
+     * used to restrict modifying operations to office that are either the users office or lower (child) in the office
+     * hierarchy
      */
     private Teller validateUserPriviledgeOnTellerAndRetrieve(final AppUser currentUser, final Long tellerId) {
 
@@ -174,8 +174,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         final Office userOffice = this.officeRepositoryWrapper.findOfficeHierarchy(userOfficeId);
         final Teller tellerToReturn = this.tellerRepositoryWrapper.findOneWithNotFoundDetection(tellerId);
         final Long tellerOfficeId = tellerToReturn.officeId();
-        if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(tellerOfficeId)) { throw new NoAuthorizationException(
-                    "User does not have sufficient priviledges to act on the provided office."); }
+        if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(tellerOfficeId)) {
+            throw new NoAuthorizationException("User does not have sufficient priviledges to act on the provided office.");
+        }
         return tellerToReturn;
     }
 
@@ -188,8 +189,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         Set<Cashier> isTellerIdPresentInCashier = teller.getCashiers();
 
         for (final Cashier tellerIdInCashier : isTellerIdPresentInCashier) {
-            if (tellerIdInCashier.getTeller().getId().toString()
-                    .equalsIgnoreCase(tellerId.toString())) { throw new CashierExistForTellerException(tellerId); }
+            if (tellerIdInCashier.getTeller().getId().toString().equalsIgnoreCase(tellerId.toString())) {
+                throw new CashierExistForTellerException(tellerId);
+            }
 
         }
         tellerRepositoryWrapper.delete(teller);
@@ -200,8 +202,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleTellerDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -211,7 +212,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.teller.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -233,8 +234,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             this.fromApiJsonDeserializer.validateForAllocateCashier(command.json());
 
-            final Staff staff = this.staffRepository.findById(staffId)
-                    .orElseThrow(() -> new StaffNotFoundException(staffId));
+            final Staff staff = this.staffRepository.findById(staffId).orElseThrow(() -> new StaffNotFoundException(staffId));
             final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
             if (!isFullDay) {
                 hourStartTime = command.longValueOfParameterNamed("hourStartTime");
@@ -268,8 +268,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -284,8 +284,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             this.fromApiJsonDeserializer.validateForAllocateCashier(command.json());
 
             final Long staffId = command.longValueOfParameterNamed("staffId");
-            final Staff staff = this.staffRepository.findById(staffId)
-                    .orElseThrow(() -> new StaffNotFoundException(staffId));
+            final Staff staff = this.staffRepository.findById(staffId).orElseThrow(() -> new StaffNotFoundException(staffId));
 
             final Cashier cashier = validateUserPriviledgeOnCashierAndRetrieve(currentUser, tellerId, cashierId);
 
@@ -308,8 +307,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -333,8 +332,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -345,9 +344,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * @Override public CommandProcessingResult inwardCashToCashier (final Long
-     * cashierId, final CashierTransaction cashierTxn) { CashierTxnType txnType
-     * = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
+     * @Override public CommandProcessingResult inwardCashToCashier (final Long cashierId, final CashierTransaction
+     * cashierTxn) { CashierTxnType txnType = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
      * office hierarchy this.cashierTxnRepository.save(cashierTxn); }
      */
 
@@ -376,8 +374,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         try {
             final AppUser currentUser = this.context.authenticatedUser();
 
-            final Cashier cashier = this.cashierRepository.findById(cashierId)
-                    .orElseThrow(() -> new CashierNotFoundException(cashierId));
+            final Cashier cashier = this.cashierRepository.findById(cashierId).orElseThrow(() -> new CashierNotFoundException(cashierId));
 
             this.fromApiJsonDeserializer.validateForCashTxnForCashier(command.json());
 
@@ -441,7 +438,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null, clientTransaction, shareTransactionId); // Loan and Savings Txn
+                    null, null, clientTransaction, shareTransactionId); // Loan
+                                                                        // and
+                                                                        // Savings
+                                                                        // Txn
 
             final JournalEntry creditJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                 // detail
@@ -450,7 +450,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null, clientTransaction, shareTransactionId); // Loan and Savings Txn
+                    null, null, clientTransaction, shareTransactionId); // Loan
+                                                                        // and
+                                                                        // Savings
+                                                                        // Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);
@@ -463,8 +466,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         } catch (final DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleTellerDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }

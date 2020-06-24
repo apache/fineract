@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Profile;
 /**
  * This Configuration replaces what formerly was in web.xml.
  *
- * @see <a
- *      href="http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-convert-an-existing-application-to-spring-boot">#howto-convert-an-existing-application-to-spring-boot</a>
+ * @see <a href=
+ *      "http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-convert-an-existing-application-to-spring-boot">#howto-convert-an-existing-application-to-spring-boot</a>
  */
 @Configuration
 @Profile("basicauth")

@@ -23,21 +23,20 @@ import java.util.List;
 import org.apache.fineract.portfolio.rate.data.RateData;
 
 /**
- * Bowpi GT
- * Created by Jose on 19/07/2017.
+ * Bowpi GT Created by Jose on 19/07/2017.
  */
 public interface RateReadService {
 
-  Collection<RateData> retrieveAllRates();
+    Collection<RateData> retrieveAllRates();
 
-  Collection<RateData> retrieveLoanApplicableRates();
+    Collection<RateData> retrieveLoanApplicableRates();
 
-  RateData retrieveOne(Long rateId);
+    RateData retrieveOne(Long rateId);
 
-  RateData retrieveByName(String name);
+    RateData retrieveByName(String name);
 
-  List<RateData> retrieveProductLoanRates(Long loanId);
+    List<RateData> retrieveProductLoanRates(Long loanId);
 
-  List<RateData> retrieveLoanRates(Long loanId);
+    List<RateData> retrieveLoanRates(Long loanId);
 
 }

@@ -25,13 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class EntityFieldConfigurationApiResourcesSwagger {
-    private EntityFieldConfigurationApiResourcesSwagger() {
-    }
+
+    private EntityFieldConfigurationApiResourcesSwagger() {}
 
     @ApiModel(value = "GetFieldConfigurationEntityResponse")
     public static final class GetFieldConfigurationEntityResponse {
-        private GetFieldConfigurationEntityResponse() {
-        }
+
+        private GetFieldConfigurationEntityResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer fieldConfigurationId;
@@ -49,4 +49,3 @@ final class EntityFieldConfigurationApiResourcesSwagger {
         public String validation_regex;
     }
 }
-

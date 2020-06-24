@@ -23,7 +23,6 @@ package org.apache.fineract.infrastructure.gcm;
  */
 public final class GcmConstants {
 
-
     /**
      * Title for notification
      */
@@ -33,7 +32,6 @@ public final class GcmConstants {
      * icon for notification.
      */
     public static final String defaultIcon = "default";
-
 
     /**
      * Parameter for to field.
@@ -48,7 +46,7 @@ public final class GcmConstants {
     /**
      * HTTP parameter for registration id.
      */
-    //public static final String PARAM_REGISTRATION_ID = "registration_id";
+    // public static final String PARAM_REGISTRATION_ID = "registration_id";
 
     /**
      * HTTP parameter for collapse key.
@@ -61,15 +59,13 @@ public final class GcmConstants {
     public static final String PARAM_DELAY_WHILE_IDLE = "delay_while_idle";
 
     /**
-     * HTTP parameter for telling gcm to validate the message without actually
-     * sending it.
+     * HTTP parameter for telling gcm to validate the message without actually sending it.
      */
     public static final String PARAM_DRY_RUN = "dry_run";
 
     /**
-     * HTTP parameter for package name that can be used to restrict message
-     * delivery by matching against the package name used to generate the
-     * registration id.
+     * HTTP parameter for package name that can be used to restrict message delivery by matching against the package
+     * name used to generate the registration id.
      */
     public static final String PARAM_RESTRICTED_PACKAGE_NAME = "restricted_package_name";
 
@@ -99,22 +95,19 @@ public final class GcmConstants {
     public static final String MESSAGE_PRIORITY_HIGH = "high";
 
     /**
-     * A particular message could not be sent because the GCM servers were not
-     * available. Used only on JSON requests, as in plain text requests
-     * unavailability is indicated by a 503 response.
+     * A particular message could not be sent because the GCM servers were not available. Used only on JSON requests, as
+     * in plain text requests unavailability is indicated by a 503 response.
      */
     public static final String ERROR_UNAVAILABLE = "Unavailable";
 
     /**
-     * A particular message could not be sent because the GCM servers
-     * encountered an error. Used only on JSON requests, as in plain text
-     * requests internal errors are indicated by a 500 response.
+     * A particular message could not be sent because the GCM servers encountered an error. Used only on JSON requests,
+     * as in plain text requests internal errors are indicated by a 500 response.
      */
     public static final String ERROR_INTERNAL_SERVER_ERROR = "InternalServerError";
 
     /**
-     * Token returned by GCM when the requested registration id has a canonical
-     * value.
+     * Token returned by GCM when the requested registration id has a canonical value.
      */
     public static final String TOKEN_CANONICAL_REG_ID = "registration_id";
 
@@ -209,8 +202,7 @@ public final class GcmConstants {
     public static final String JSON_FAILURE = "failure";
 
     /**
-     * JSON-only field representing the number of messages with a canonical
-     * registration id.
+     * JSON-only field representing the number of messages with a canonical registration id.
      */
     public static final String JSON_CANONICAL_IDS = "canonical_ids";
 

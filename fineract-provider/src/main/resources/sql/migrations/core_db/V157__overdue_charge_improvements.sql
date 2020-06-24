@@ -18,16 +18,16 @@
 --
 
 ALTER TABLE `m_charge`
-	ADD COLUMN `fee_frequency` SMALLINT NULL DEFAULT NULL AFTER `max_cap`;
+    ADD COLUMN `fee_frequency` SMALLINT NULL DEFAULT NULL AFTER `max_cap`;
 
 CREATE TABLE `m_loan_overdue_installment_charge` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`loan_charge_id` BIGINT NOT NULL,
-	`loan_schedule_id` BIGINT NOT NULL,
-	`frequency_number` INT NOT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
-	CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `loan_charge_id` BIGINT NOT NULL,
+    `loan_schedule_id` BIGINT NOT NULL,
+    `frequency_number` INT NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
+    CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

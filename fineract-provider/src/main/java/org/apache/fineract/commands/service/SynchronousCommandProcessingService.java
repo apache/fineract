@@ -75,7 +75,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
 
-         final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
+        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
 
@@ -95,7 +95,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
         String changesOnlyJson = null;
-        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker ;
+        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker;
         if (result.hasChanges() && !rollBack) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
             commandSourceResult.updateJsonTo(changesOnlyJson);
@@ -111,15 +111,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) {
             /*
-             * JournalEntry will generate a new transactionId every time.
-             * Updating the transactionId with old transactionId, because as
-             * there are no entries are created with new transactionId, will
-             * throw an error when checker approves the transaction
+             * JournalEntry will generate a new transactionId every time. Updating the transactionId with old
+             * transactionId, because as there are no entries are created with new transactionId, will throw an error
+             * when checker approves the transaction
              */
             commandSourceResult.updateTransaction(command.getTransactionId());
             /*
-             * Update CommandSource json data with JsonCommand json data, line
-             * 77 and 81 may update the json data
+             * Update CommandSource json data with JsonCommand json data, line 77 and 81 may update the json data
              */
             commandSourceResult.updateJsonTo(command.json());
             throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult);
@@ -211,8 +209,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final String authToken = ThreadLocalContextUtil.getAuthToken();
         final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName,
-                entityName, null, null));
+        final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
 
         final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
 

@@ -35,8 +35,7 @@ public interface DocumentWritePlatformService {
     CommandProcessingResult deleteDocument(DocumentCommand documentCommand);
 
     @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
-    Long createInternalDocument(String entityType, Long entityId,
-            Long fileSize, InputStream inputStream, String mimeType,
-            String name, String description, String fileName);
+    Long createInternalDocument(String entityType, Long entityId, Long fileSize, InputStream inputStream, String mimeType, String name,
+            String description, String fileName);
 
 }

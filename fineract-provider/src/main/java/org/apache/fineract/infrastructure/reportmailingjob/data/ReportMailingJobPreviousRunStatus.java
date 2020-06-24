@@ -21,9 +21,9 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ReportMailingJobPreviousRunStatus {
-    INVALID(-1, "ReportMailingJobPreviousRunStatus.INVALID", "Invalid"),
-    SUCCESS(1, "ReportMailingJobPreviousRunStatus.SUCCESS", "Success"),
-    ERROR(0, "ReportMailingJobPreviousRunStatus.ERROR", "Error");
+
+    INVALID(-1, "ReportMailingJobPreviousRunStatus.INVALID", "Invalid"), SUCCESS(1, "ReportMailingJobPreviousRunStatus.SUCCESS",
+            "Success"), ERROR(0, "ReportMailingJobPreviousRunStatus.ERROR", "Error");
 
     private final String code;
     private final String value;
@@ -38,7 +38,8 @@ public enum ReportMailingJobPreviousRunStatus {
     /**
      * Creates a {@link ReportMailingJobPreviousRunStatus} object
      *
-     * @param value the value of the enum constant
+     * @param value
+     *            the value of the enum constant
      * @return {@link ReportMailingJobPreviousRunStatus} object
      */
     public static ReportMailingJobPreviousRunStatus newInstance(final String value) {

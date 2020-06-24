@@ -117,7 +117,9 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
         final Collection<EnumOptionData> frequencyTypeOptions = this.calendarDropdownReadPlatformService
                 .retrieveCalendarFrequencyTypeOptions();
         final Collection<EnumOptionData> periodFrequencyOptions = this.smsCampaignDropdownReadPlatformService.retrivePeriodFrequencyTypes();
-        //final Collection<TriggerTypeWithSubTypesData> triggerTypeSubTypeOptions = this.smsCampaignDropdownReadPlatformService.getTriggerTypeAndSubTypes();
+        // final Collection<TriggerTypeWithSubTypesData>
+        // triggerTypeSubTypeOptions =
+        // this.smsCampaignDropdownReadPlatformService.getTriggerTypeAndSubTypes();
         return SmsCampaignData.template(smsProviderOptions, campaignTypeOptions, businessRulesOptions, campaignTriggerTypeOptions, months,
                 weekDays, frequencyTypeOptions, periodFrequencyOptions);
     }
@@ -266,8 +268,9 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             final String reportName = rs.getString("reportName");
             final Long providerId = rs.getLong("providerId");
             final Boolean isNotification = rs.getBoolean("isNotification");
-            return SmsCampaignData.instance(id, campaignName, campaignTypeEnum, triggerTypeEnum, runReportId, reportName, paramValue, status, message, nextTriggerDate, lastTriggerDate,
-                    smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId, isNotification);
+            return SmsCampaignData.instance(id, campaignName, campaignTypeEnum, triggerTypeEnum, runReportId, reportName, paramValue,
+                    status, message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId,
+                    isNotification);
         }
     }
 

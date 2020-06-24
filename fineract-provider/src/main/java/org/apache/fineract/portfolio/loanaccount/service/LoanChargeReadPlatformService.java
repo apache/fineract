@@ -41,5 +41,6 @@ public interface LoanChargeReadPlatformService {
 
     Collection<LoanChargeData> retrieveLoanChargesForAccural(Long loanId);
 
-    Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(Long chargeId, LoanTransactionType transactionType, Integer installmentNumber);
+    Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(Long chargeId, LoanTransactionType transactionType,
+            Integer installmentNumber);
 }

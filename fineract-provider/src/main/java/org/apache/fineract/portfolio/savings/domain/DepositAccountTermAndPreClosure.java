@@ -105,7 +105,8 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
             final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest, Long transferToSavingsId) {
 
         return new DepositAccountTermAndPreClosure(preClosureDetail, depositTermDetail, account, depositAmount, maturityAmount,
-                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType, trasferInterest, transferToSavingsId);
+                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType, trasferInterest,
+                transferToSavingsId);
     }
 
     private DepositAccountTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
@@ -164,18 +165,18 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
             this.transferInterestToLinkedAccount = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(maturityInstructionIdParamName, this.onAccountClosureType) || command.integerValueOfParameterNamed(
-                maturityInstructionIdParamName) == null) {
+        if (command.isChangeInIntegerParameterNamed(maturityInstructionIdParamName, this.onAccountClosureType)
+                || command.integerValueOfParameterNamed(maturityInstructionIdParamName) == null) {
             final Integer newValue = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
             actualChanges.put(maturityInstructionIdParamName, newValue);
             this.onAccountClosureType = newValue != null ? DepositAccountOnClosureType.fromInt(newValue).getValue() : null;
         }
 
-        if (command.isChangeInLongParameterNamed(transferToSavingsIdParamName, this.transferToSavingsAccountId) || command.integerValueOfParameterNamed(
-                transferToSavingsIdParamName) == null) {
+        if (command.isChangeInLongParameterNamed(transferToSavingsIdParamName, this.transferToSavingsAccountId)
+                || command.integerValueOfParameterNamed(transferToSavingsIdParamName) == null) {
             final Long newValue = command.longValueOfParameterNamed(transferToSavingsIdParamName);
             actualChanges.put(transferToSavingsIdParamName, newValue);
-            this.transferToSavingsAccountId = newValue ;
+            this.transferToSavingsAccountId = newValue;
         }
 
         if (this.preClosureDetail != null) {
@@ -231,7 +232,6 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
         this.depositAmount = depositAmount;
     }
 
-
     public LocalDate getMaturityLocalDate() {
         LocalDate maturityLocalDate = null;
         if (this.maturityDate != null) {
@@ -249,7 +249,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
     }
 
     public boolean isPreClosurePenalApplicable() {
-        if (this.preClosureDetail != null) { return this.preClosureDetail.preClosurePenalApplicable(); }
+        if (this.preClosureDetail != null) {
+            return this.preClosureDetail.preClosurePenalApplicable();
+        }
         return false;
     }
 
@@ -261,7 +263,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
         }
 
         Integer actualDepositPeriod = this.depositPeriod;
-        if (depositFromDate == null || getMaturityLocalDate() == null || interestPostingUpToDate.isEqual(getMaturityLocalDate())) { return actualDepositPeriod; }
+        if (depositFromDate == null || getMaturityLocalDate() == null || interestPostingUpToDate.isEqual(getMaturityLocalDate())) {
+            return actualDepositPeriod;
+        }
 
         final SavingsPeriodFrequencyType depositPeriodFrequencyType = periodFrequencyType;
         switch (depositPeriodFrequencyType) {

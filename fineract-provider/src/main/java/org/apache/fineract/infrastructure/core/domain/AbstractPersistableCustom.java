@@ -29,13 +29,12 @@ import org.springframework.data.domain.Persistable;
 /**
  * Abstract base class for entities.
  *
- * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but
- * Id is always Long (and this class thus does not require generic parameterization),
- * and auto-generation is of strategy {@link javax.persistence.GenerationType#IDENTITY}.
+ * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but Id is always Long (and this class
+ * thus does not require generic parameterization), and auto-generation is of strategy
+ * {@link javax.persistence.GenerationType#IDENTITY}.
  *
- * The {@link #equals(Object)} and {@link #hashCode()} methods are NOT implemented here,
- * which is untypical for JPA (it's usually implemented based on the Id), because
- * "we end up with issues on OpenJPA" (TODO clarify this).
+ * The {@link #equals(Object)} and {@link #hashCode()} methods are NOT implemented here, which is untypical for JPA
+ * (it's usually implemented based on the Id), because "we end up with issues on OpenJPA" (TODO clarify this).
  */
 @MappedSuperclass
 public abstract class AbstractPersistableCustom implements Persistable<Long>, Serializable {

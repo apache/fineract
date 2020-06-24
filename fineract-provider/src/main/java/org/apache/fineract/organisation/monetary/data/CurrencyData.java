@@ -43,7 +43,7 @@ public class CurrencyData implements Serializable {
     public CurrencyData(String code) {
         this.code = code;
         this.name = null;
-        this.decimalPlaces =0;
+        this.decimalPlaces = 0;
         this.inMultiplesOf = null;
         this.displaySymbol = null;
         this.nameCode = null;
@@ -99,13 +99,9 @@ public class CurrencyData implements Serializable {
             return false;
         }
         CurrencyData that = (CurrencyData) o;
-        return Objects.equals(decimalPlaces, that.decimalPlaces) &&
-                Objects.equals(code, that.code) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(inMultiplesOf, that.inMultiplesOf) &&
-                Objects.equals(displaySymbol, that.displaySymbol) &&
-                Objects.equals(nameCode, that.nameCode) &&
-                Objects.equals(displayLabel, that.displayLabel);
+        return Objects.equals(decimalPlaces, that.decimalPlaces) && Objects.equals(code, that.code) && Objects.equals(name, that.name)
+                && Objects.equals(inMultiplesOf, that.inMultiplesOf) && Objects.equals(displaySymbol, that.displaySymbol)
+                && Objects.equals(nameCode, that.nameCode) && Objects.equals(displayLabel, that.displayLabel);
     }
 
     @Override

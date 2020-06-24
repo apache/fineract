@@ -30,8 +30,7 @@ public interface StaffReadPlatformService {
     Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId);
 
     /**
-     * returns all staff in offices that are above the provided
-     * <code>officeId</code>.
+     * returns all staff in offices that are above the provided <code>officeId</code>.
      */
     Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
 

@@ -81,10 +81,10 @@ public class ShareAccountApplicationTimelineData implements Serializable {
     public ShareAccountApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
             final String submittedByFirstname, final String submittedByLastname, final LocalDate rejectedOnDate,
             final String rejectedByUsername, final String rejectedByFirstname, final String rejectedByLastname,
-            final LocalDate approvedOnDate, final String approvedByUsername,
-            final String approvedByFirstname, final String approvedByLastname, final LocalDate activatedOnDate,
-            final String activatedByUsername, final String activatedByFirstname, final String activatedByLastname,
-            final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
+            final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
+            final String approvedByLastname, final LocalDate activatedOnDate, final String activatedByUsername,
+            final String activatedByFirstname, final String activatedByLastname, final LocalDate closedOnDate,
+            final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;

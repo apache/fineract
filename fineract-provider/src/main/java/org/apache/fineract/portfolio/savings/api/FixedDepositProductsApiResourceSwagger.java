@@ -27,21 +27,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/23/17.
  */
 final class FixedDepositProductsApiResourceSwagger {
-    private FixedDepositProductsApiResourceSwagger() {
-    }
+
+    private FixedDepositProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostFixedDepositProductsRequest")
-    public final static class PostFixedDepositProductsRequest {
-        private PostFixedDepositProductsRequest() {
-        }
+    public static final class PostFixedDepositProductsRequest {
 
-        final class PostFixedDepositProductsCharts {
-            private PostFixedDepositProductsCharts() {
-            }
+        private PostFixedDepositProductsRequest() {}
 
-            final class PostFixedDepositProductsChartSlabs {
-                private PostFixedDepositProductsChartSlabs() {
-                }
+        static final class PostFixedDepositProductsCharts {
+
+            private PostFixedDepositProductsCharts() {}
+
+            static final class PostFixedDepositProductsChartSlabs {
+
+                private PostFixedDepositProductsChartSlabs() {}
 
                 @ApiModelProperty(example = "from 0 to 90 days")
                 public String description;
@@ -106,18 +106,18 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostFixedDepositProductsResponse")
-    public final static class PostFixedDepositProductsResponse {
-        private PostFixedDepositProductsResponse() {
-        }
+    public static final class PostFixedDepositProductsResponse {
+
+        private PostFixedDepositProductsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutFixedDepositProductsProductIdRequest")
-    public final static class PutFixedDepositProductsProductIdRequest {
-        private PutFixedDepositProductsProductIdRequest() {
-        }
+    public static final class PutFixedDepositProductsProductIdRequest {
+
+        private PutFixedDepositProductsProductIdRequest() {}
 
         @ApiModelProperty(example = "Fixed deposit product new offerings")
         public String description;
@@ -130,13 +130,13 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutFixedDepositProductsProductIdResponse")
-    public final static class PutFixedDepositProductsProductIdResponse {
-        private PutFixedDepositProductsProductIdResponse() {
-        }
+    public static final class PutFixedDepositProductsProductIdResponse {
 
-        final class PutFixedDepositProductsChanges {
-            private PutFixedDepositProductsChanges() {
-            }
+        private PutFixedDepositProductsProductIdResponse() {}
+
+        static final class PutFixedDepositProductsChanges {
+
+            private PutFixedDepositProductsChanges() {}
 
             @ApiModelProperty(example = "Fixed deposit product new offerings")
             public String description;
@@ -150,13 +150,13 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositProductsResponse")
-    public final static class GetFixedDepositProductsResponse {
-        private GetFixedDepositProductsResponse() {
-        }
+    public static final class GetFixedDepositProductsResponse {
 
-        final class GetFixedDepositProductsCurrency {
-            private GetFixedDepositProductsCurrency() {
-            }
+        private GetFixedDepositProductsResponse() {}
+
+        static final class GetFixedDepositProductsCurrency {
+
+            private GetFixedDepositProductsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -174,9 +174,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositProductsMinDepositTermType {
-            private GetFixedDepositProductsMinDepositTermType() {
-            }
+        static final class GetFixedDepositProductsMinDepositTermType {
+
+            private GetFixedDepositProductsMinDepositTermType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -186,9 +186,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsMaxDepositTermType {
-            private GetFixedDepositProductsMaxDepositTermType() {
-            }
+        static final class GetFixedDepositProductsMaxDepositTermType {
+
+            private GetFixedDepositProductsMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -198,9 +198,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCompoundingPeriodType {
-            private GetFixedDepositProductsInterestCompoundingPeriodType() {
-            }
+        static final class GetFixedDepositProductsInterestCompoundingPeriodType {
+
+            private GetFixedDepositProductsInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -210,9 +210,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestPostingPeriodType {
-            private GetFixedDepositProductsInterestPostingPeriodType() {
-            }
+        static final class GetFixedDepositProductsInterestPostingPeriodType {
+
+            private GetFixedDepositProductsInterestPostingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -222,9 +222,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCalculationType {
-            private GetFixedDepositProductsInterestCalculationType() {
-            }
+        static final class GetFixedDepositProductsInterestCalculationType {
+
+            private GetFixedDepositProductsInterestCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -234,9 +234,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsInterestCalculationDaysInYearType {
-            private GetFixedDepositProductsInterestCalculationDaysInYearType() {
-            }
+        static final class GetFixedDepositProductsInterestCalculationDaysInYearType {
+
+            private GetFixedDepositProductsInterestCalculationDaysInYearType() {}
 
             @ApiModelProperty(example = "365")
             public Integer id;
@@ -246,9 +246,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsAccountingRule {
-            private GetFixedDepositProductsAccountingRule() {
-            }
+        static final class GetFixedDepositProductsAccountingRule {
+
+            private GetFixedDepositProductsAccountingRule() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -285,13 +285,13 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetFixedDepositProductsProductIdResponse")
-    public final static class GetFixedDepositProductsProductIdResponse {
-        private GetFixedDepositProductsProductIdResponse() {
-        }
+    public static final class GetFixedDepositProductsProductIdResponse {
 
-        final class GetFixedDepositProductsProductIdCurrency {
-            private GetFixedDepositProductsProductIdCurrency() {
-            }
+        private GetFixedDepositProductsProductIdResponse() {}
+
+        static final class GetFixedDepositProductsProductIdCurrency {
+
+            private GetFixedDepositProductsProductIdCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -307,9 +307,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetFixedDepositProductsProductIdInterestCompoundingPeriodType {
-            private GetFixedDepositProductsProductIdInterestCompoundingPeriodType() {
-            }
+        static final class GetFixedDepositProductsProductIdInterestCompoundingPeriodType {
+
+            private GetFixedDepositProductsProductIdInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -319,13 +319,13 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdAccountingMappings {
-            private GetFixedDepositProductsProductIdAccountingMappings() {
-            }
+        static final class GetFixedDepositProductsProductIdAccountingMappings {
 
-            final class GetFixedDepositProductsProductIdSavingsReferenceAccount {
-                private GetFixedDepositProductsProductIdSavingsReferenceAccount() {
-                }
+            private GetFixedDepositProductsProductIdAccountingMappings() {}
+
+            static final class GetFixedDepositProductsProductIdSavingsReferenceAccount {
+
+                private GetFixedDepositProductsProductIdSavingsReferenceAccount() {}
 
                 @ApiModelProperty(example = "12")
                 public Integer id;
@@ -335,9 +335,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
-                private GetFixedDepositProductsProductIdIncomeFromFeeAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdIncomeFromFeeAccount {
+
+                private GetFixedDepositProductsProductIdIncomeFromFeeAccount() {}
 
                 @ApiModelProperty(example = "16")
                 public Integer id;
@@ -347,9 +347,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
-                private GetFixedDepositProductsProductIdIncomeFromPenaltyAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdIncomeFromPenaltyAccount {
+
+                private GetFixedDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
                 @ApiModelProperty(example = "17")
                 public Integer id;
@@ -359,9 +359,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
-                private GetFixedDepositProductsProductIdInterestOnSavingsAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdInterestOnSavingsAccount {
+
+                private GetFixedDepositProductsProductIdInterestOnSavingsAccount() {}
 
                 @ApiModelProperty(example = "15")
                 public Integer id;
@@ -371,9 +371,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdSavingsControlAccount {
-                private GetFixedDepositProductsProductIdSavingsControlAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdSavingsControlAccount {
+
+                private GetFixedDepositProductsProductIdSavingsControlAccount() {}
 
                 @ApiModelProperty(example = "13")
                 public Integer id;
@@ -383,9 +383,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
-                private GetFixedDepositProductsProductIdTransfersInSuspenseAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdTransfersInSuspenseAccount {
+
+                private GetFixedDepositProductsProductIdTransfersInSuspenseAccount() {}
 
                 @ApiModelProperty(example = "14")
                 public Integer id;
@@ -403,13 +403,13 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdTransfersInSuspenseAccount transfersInSuspenseAccount;
         }
 
-        final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
-            private GetFixedDepositProductsProductIdFeeToIncomeAccountMappings() {
-            }
+        static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
 
-            final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
-                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {
-                }
+            private GetFixedDepositProductsProductIdFeeToIncomeAccountMappings() {}
+
+            static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
+
+                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
                 @ApiModelProperty(example = "11")
                 public Integer id;
@@ -421,9 +421,9 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Boolean penalty;
             }
 
-            final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
-                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {
-                }
+            static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
+
+                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
                 @ApiModelProperty(example = "16")
                 public Integer id;
@@ -437,13 +437,13 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
         }
 
-        final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {
-            private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings() {
-            }
+        static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {
 
-            final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
-                private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {
-                }
+            private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings() {}
+
+            static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
+
+                private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
                 @ApiModelProperty(example = "12")
                 public Integer id;
@@ -459,9 +459,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public GetFixedDepositProductsProductIdAccountingMappings.GetFixedDepositProductsProductIdIncomeFromPenaltyAccount incomeAccount;
         }
 
-        final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {
-            private GetFixedDepositProductsProductIdPreClosurePenalInterestOnType() {
-            }
+        static final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {
+
+            private GetFixedDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -471,9 +471,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdMinDepositTermType {
-            private GetFixedDepositProductsProductIdMinDepositTermType() {
-            }
+        static final class GetFixedDepositProductsProductIdMinDepositTermType {
+
+            private GetFixedDepositProductsProductIdMinDepositTermType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -483,9 +483,9 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdMaxDepositTermType {
-            private GetFixedDepositProductsProductIdMaxDepositTermType() {
-            }
+        static final class GetFixedDepositProductsProductIdMaxDepositTermType {
+
+            private GetFixedDepositProductsProductIdMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -495,17 +495,17 @@ final class FixedDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetFixedDepositProductsProductIdActiveChart {
-            private GetFixedDepositProductsProductIdActiveChart() {
-            }
+        static final class GetFixedDepositProductsProductIdActiveChart {
 
-            final class GetFixedDepositProductsProductIdChartSlabs {
-                private GetFixedDepositProductsProductIdChartSlabs() {
-                }
+            private GetFixedDepositProductsProductIdActiveChart() {}
 
-                final class GetFixedDepositProductsProductIdPeriodType {
-                    private GetFixedDepositProductsProductIdPeriodType() {
-                    }
+            static final class GetFixedDepositProductsProductIdChartSlabs {
+
+                private GetFixedDepositProductsProductIdChartSlabs() {}
+
+                static final class GetFixedDepositProductsProductIdPeriodType {
+
+                    private GetFixedDepositProductsProductIdPeriodType() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -572,9 +572,9 @@ final class FixedDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteFixedDepositProductsProductIdResponse")
-    public final static class DeleteFixedDepositProductsProductIdResponse {
-        private DeleteFixedDepositProductsProductIdResponse() {
-        }
+    public static final class DeleteFixedDepositProductsProductIdResponse {
+
+        private DeleteFixedDepositProductsProductIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;

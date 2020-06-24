@@ -32,6 +32,7 @@ import org.joda.time.DateTime;
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
 public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
+
     private static final long serialVersionUID = -3757370929988421076L;
 
     @ManyToOne
@@ -58,13 +59,13 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     /**
      * ReportMailingJobRunHistory protected constructor
      **/
-    protected ReportMailingJobRunHistory() { }
+    protected ReportMailingJobRunHistory() {}
 
     /**
      * ReportMailingJobRunHistory private constructor
      **/
-    private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime, final String status,
-            final String errorMessage, final String errorLog) {
+    private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime,
+            final String status, final String errorMessage, final String errorLog) {
         this.reportMailingJob = reportMailingJob;
         this.startDateTime = null;
 
@@ -88,8 +89,8 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
      *
      * @return ReportMailingJobRunHistory object
      **/
-    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime,
-            final String status, final String errorMessage, final String errorLog) {
+    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final DateTime startDateTime,
+            final DateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
         return new ReportMailingJobRunHistory(reportMailingJob, startDateTime, endDateTime, status, errorMessage, errorLog);
     }
 

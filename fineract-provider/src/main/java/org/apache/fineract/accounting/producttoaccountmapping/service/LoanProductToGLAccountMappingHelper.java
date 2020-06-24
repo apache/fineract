@@ -49,7 +49,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 paymentTypeRepositoryWrapper);
     }
 
-    /*** Set of abstractions for saving Loan Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for saving Loan Products to GL Account Mappings
+     ***/
 
     public void saveLoanToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId) {
@@ -71,7 +73,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.LIABILITY, PortfolioProductType.LOAN);
     }
 
-    /*** Set of abstractions for merging Savings Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for merging Savings Products to GL Account Mappings
+     ***/
     public void mergeLoanToAssetAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
         mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.ASSET,
@@ -92,8 +96,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
 
     public void mergeLoanToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes,
-                GLAccountType.LIABILITY, PortfolioProductType.LOAN);
+        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.LIABILITY,
+                PortfolioProductType.LOAN);
     }
 
     /*** Abstractions for payments channel related to loan products ***/
@@ -127,38 +131,38 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         final Map<String, Object> changes = new HashMap<>();
 
         final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
-        final Long loanPortfolioAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), element);
-        final Long incomeFromInterestId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), element);
+        final Long loanPortfolioAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(),
+                element);
+        final Long incomeFromInterestId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(),
+                element);
         final Long incomeFromFeeId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.INCOME_FROM_FEES.getValue(),
                 element);
-        final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
+        final Long incomeFromPenaltyId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
 
-        final Long incomeFromRecoveryAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), element);
+        final Long incomeFromRecoveryAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), element);
 
-        final Long writeOffAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), element);
+        final Long writeOffAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
+                element);
         final Long overPaymentAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.OVERPAYMENT.getValue(),
                 element);
-        final Long transfersInSuspenseAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
+        final Long transfersInSuspenseAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
 
-        final Long receivableInterestAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
-        final Long receivableFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
-        final Long receivablePenaltyAccountId = this.fromApiJsonHelper.extractLongNamed(
-                LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
+        final Long receivableInterestAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
+        final Long receivableFeeAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FEES_RECEIVABLE.getValue(),
+                element);
+        final Long receivablePenaltyAccountId = this.fromApiJsonHelper
+                .extractLongNamed(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
 
         switch (accountingRuleType) {
             case NONE:
             break;
             case CASH_BASED:
-                populateChangesForCashBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId,
-                        incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
+                populateChangesForCashBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId, incomeFromFeeId,
+                        incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
                         incomeFromRecoveryAccountId);
             break;
             case ACCRUAL_PERIODIC:
@@ -208,8 +212,7 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     }
 
     /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
+     * Examines and updates each account mapping for given loan product with changes passed in from the Json element
      *
      * @param loanProductId
      * @param changes
@@ -235,17 +238,15 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                         CashAccountsForLoan.INTEREST_ON_LOANS.getValue(), CashAccountsForLoan.INTEREST_ON_LOANS.toString(), changes);
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), loanProductId,
                         CashAccountsForLoan.INCOME_FROM_FEES.getValue(), CashAccountsForLoan.INCOME_FROM_FEES.toString(), changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
-                        loanProductId, CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue(),
-                        CashAccountsForLoan.INCOME_FROM_PENALTIES.toString(), changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(),
-                        loanProductId, CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
-                        CashAccountsForLoan.INCOME_FROM_RECOVERY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), loanProductId,
+                        CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), CashAccountsForLoan.INCOME_FROM_PENALTIES.toString(),
+                        changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
+                        CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), CashAccountsForLoan.INCOME_FROM_RECOVERY.toString(), changes);
 
                 // expenses
-                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
-                        loanProductId, CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(),
-                        CashAccountsForLoan.LOSSES_WRITTEN_OFF.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
+                        CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), CashAccountsForLoan.LOSSES_WRITTEN_OFF.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
@@ -262,33 +263,31 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), loanProductId,
                         AccrualAccountsForLoan.TRANSFERS_SUSPENSE.getValue(), AccrualAccountsForLoan.TRANSFERS_SUSPENSE.toString(),
                         changes);
-                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
-                        loanProductId, AccrualAccountsForLoan.INTEREST_RECEIVABLE.getValue(),
-                        AccrualAccountsForLoan.INTEREST_RECEIVABLE.toString(), changes);
+                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INTEREST_RECEIVABLE.getValue(), AccrualAccountsForLoan.INTEREST_RECEIVABLE.toString(),
+                        changes);
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), loanProductId,
                         AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(), AccrualAccountsForLoan.FEES_RECEIVABLE.toString(), changes);
-                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
-                        loanProductId, AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(),
-                        AccrualAccountsForLoan.PENALTIES_RECEIVABLE.toString(), changes);
+                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.PENALTIES_RECEIVABLE.getValue(), AccrualAccountsForLoan.PENALTIES_RECEIVABLE.toString(),
+                        changes);
 
                 // income
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), loanProductId,
-                        AccrualAccountsForLoan.INTEREST_ON_LOANS.getValue(), AccrualAccountsForLoan.INTEREST_ON_LOANS.toString(),
-                        changes);
+                        AccrualAccountsForLoan.INTEREST_ON_LOANS.getValue(), AccrualAccountsForLoan.INTEREST_ON_LOANS.toString(), changes);
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), loanProductId,
-                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), AccrualAccountsForLoan.INCOME_FROM_FEES.toString(),
+                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), AccrualAccountsForLoan.INCOME_FROM_FEES.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue(), AccrualAccountsForLoan.INCOME_FROM_PENALTIES.toString(),
                         changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
-                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue(),
-                        AccrualAccountsForLoan.INCOME_FROM_PENALTIES.toString(), changes);
-                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(),
-                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(),
-                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_RECOVERY.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_RECOVERY.getValue(), AccrualAccountsForLoan.INCOME_FROM_RECOVERY.toString(),
+                        changes);
 
                 // expenses
-                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
-                        loanProductId, AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(),
-                        AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
+                        AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.toString(),
+                        changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,

@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * Immutable data object representing a code.
  */
-public class CodeData implements Serializable {
+public final class CodeData implements Serializable {
 
     private final Long id;
     @SuppressWarnings("unused")

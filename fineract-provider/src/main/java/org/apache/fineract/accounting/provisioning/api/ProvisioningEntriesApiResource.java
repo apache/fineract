@@ -62,10 +62,11 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningentries")
 @Component
 @Scope("singleton")
-@Api(tags = {"Provisioning Entries"})
+@Api(tags = { "Provisioning Entries" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Provisioning Entries", description = "This defines the Provisioning Entries for all active loan products\n" + "\n" + "Field Descriptions\n" + "date\n" + "Date on which day provisioning entries should be created\n" + "createjournalentries\n" + "Boolean variable whether to add journal entries for generated provisioning entries\n")
-})
+        @Tag(name = "Provisioning Entries", description = "This defines the Provisioning Entries for all active loan products\n" + "\n"
+                + "Field Descriptions\n" + "date\n" + "Date on which day provisioning entries should be created\n"
+                + "createjournalentries\n" + "Boolean variable whether to add journal entries for generated provisioning entries\n") })
 public class ProvisioningEntriesApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -74,10 +75,11 @@ public class ProvisioningEntriesApiResource {
     private final DefaultToApiJsonSerializer<Object> entriesApiJsonSerializer;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private static final Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(Arrays.asList(
-            ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM, ProvisioningEntriesApiConstants.ENTRIES_PARAM));
-    private static final Set<String> ALL_PROVISIONING_ENTRIES = new HashSet<>(Arrays.asList
-            (ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM));
+    private static final Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(
+            Arrays.asList(ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM, ProvisioningEntriesApiConstants.ENTRIES_PARAM));
+    private static final Set<String> ALL_PROVISIONING_ENTRIES = new HashSet<>(
+            Arrays.asList(ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM));
+
     @Autowired
     public ProvisioningEntriesApiResource(final PlatformSecurityContext platformSecurityContext,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
@@ -95,9 +97,12 @@ public class ProvisioningEntriesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create new Provisioning Entries", notes = "Creates a new Provisioning Entries\n" + "\n" + "Mandatory Fields\n" + "date\n" + "dateFormat\n" + "locale\n" + "Optional Fields\n" + "createjournalentries")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesResponse.class)})
+    @ApiOperation(value = "Create new Provisioning Entries", notes = "Creates a new Provisioning Entries\n" + "\n" + "Mandatory Fields\n"
+            + "date\n" + "dateFormat\n" + "locale\n" + "Optional Fields\n" + "createjournalentries")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesResponse.class) })
     public String createProvisioningEntries(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
@@ -111,10 +116,13 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Recreates Provisioning Entry", notes = "Recreates Provisioning Entry | createjournalentry.")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class)})
-    public String modifyProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId, @QueryParam("command") @ApiParam(value = "command=createjournalentry\ncommand=recreateprovisioningentry") final String commandParam,
-           @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class) })
+    public String modifyProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId,
+            @QueryParam("command") @ApiParam(value = "command=createjournalentry\ncommand=recreateprovisioningentry") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         if ("createjournalentry".equals(commandParam)) {
@@ -136,8 +144,9 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieves a Provisioning Entry", notes = "Returns the details of a generated Provisioning Entry.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class)})
-    public String retrieveProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId, @Context final UriInfo uriInfo) {
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class) })
+    public String retrieveProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId,
+            @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
         ProvisioningEntryData data = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -148,10 +157,11 @@ public class ProvisioningEntriesApiResource {
     @Path("entries")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = LoanProductProvisioningEntryData.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = LoanProductProvisioningEntryData.class) })
     public String retrieveProviioningEntries(@QueryParam("entryId") final Long entryId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("officeId") final Long officeId,
-            @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId, @Context final UriInfo uriInfo) {
+            @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId,
+            @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser();
         SearchParameters params = SearchParameters.forProvisioningEntries(entryId, officeId, productId, categoryId, offset, limit);
         Page<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntries(params);
@@ -163,9 +173,9 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List all Provisioning Entries")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class, responseContainer = "list")})
-    public String retrieveAllProvisioningEntries(@QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @Context final UriInfo uriInfo) {
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class, responseContainer = "list") })
+    public String retrieveAllProvisioningEntries(@QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
         Page<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

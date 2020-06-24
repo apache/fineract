@@ -23,24 +23,24 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Set;
 
-
 /**
  * Created by Kang Breder on 05/08/19.
  */
 
 final class SelfShareAccountsApiResourceSwagger {
-    private SelfShareAccountsApiResourceSwagger(){
+
+    private SelfShareAccountsApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetShareAccountsClientIdResponse")
-    public final static class GetShareAccountsClientIdResponse {
-        private GetShareAccountsClientIdResponse() {
-        }
+    public static final class GetShareAccountsClientIdResponse {
 
-        final class GetShareAccountsProductOptions {
-            private GetShareAccountsProductOptions() {
-            }
+        private GetShareAccountsClientIdResponse() {}
+
+        static final class GetShareAccountsProductOptions {
+
+            private GetShareAccountsProductOptions() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -52,13 +52,13 @@ final class SelfShareAccountsApiResourceSwagger {
             public Integer totalShares;
         }
 
-        final class GetShareAccountsChargeOptions {
-            private GetShareAccountsChargeOptions() {
-            }
+        static final class GetShareAccountsChargeOptions {
 
-            final class GetShareAccountsCurrency {
-                private GetShareAccountsCurrency() {
-                }
+            private GetShareAccountsChargeOptions() {}
+
+            static final class GetShareAccountsCurrency {
+
+                private GetShareAccountsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -75,9 +75,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsChargeTimeType {
-                private GetShareAccountsChargeTimeType() {
-                }
+            static final class GetShareAccountsChargeTimeType {
+
+                private GetShareAccountsChargeTimeType() {}
 
                 @ApiModelProperty(example = "14")
                 public Integer id;
@@ -87,9 +87,9 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargeAppliesTo {
-                private GetShareAccountsChargeAppliesTo() {
-                }
+            static final class GetShareAccountsChargeAppliesTo {
+
+                private GetShareAccountsChargeAppliesTo() {}
 
                 @ApiModelProperty(example = "4")
                 public Integer id;
@@ -99,9 +99,9 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargeCalculationType {
-                private GetShareAccountsChargeCalculationType() {
-                }
+            static final class GetShareAccountsChargeCalculationType {
+
+                private GetShareAccountsChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -111,9 +111,9 @@ final class SelfShareAccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetShareAccountsChargePaymentMode {
-                private GetShareAccountsChargePaymentMode() {
-                }
+            static final class GetShareAccountsChargePaymentMode {
+
+                private GetShareAccountsChargePaymentMode() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -148,17 +148,17 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetShareAccountsClientIdProductIdResponse")
-    public final static class GetShareAccountsClientIdProductIdResponse {
-        private GetShareAccountsClientIdProductIdResponse() {
-        }
+    public static final class GetShareAccountsClientIdProductIdResponse {
 
-        final class GetClientIdProductIdProductOptions {
-            private GetClientIdProductIdProductOptions() {
-            }
+        private GetShareAccountsClientIdProductIdResponse() {}
 
-            final class GetShareAccountsClientIdProductIdLockPeriodTypeEnum {
-                private GetShareAccountsClientIdProductIdLockPeriodTypeEnum() {
-                }
+        static final class GetClientIdProductIdProductOptions {
+
+            private GetClientIdProductIdProductOptions() {}
+
+            static final class GetShareAccountsClientIdProductIdLockPeriodTypeEnum {
+
+                private GetShareAccountsClientIdProductIdLockPeriodTypeEnum() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -169,9 +169,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum {
-                private GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum() {
-                }
+            static final class GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum {
+
+                private GetShareAccountsClientIdProductIdMinimumActivePeriodForDividendsTypeEnum() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -182,9 +182,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetShareAccountsClientIdProductIdAccountingRule {
-                private GetShareAccountsClientIdProductIdAccountingRule() {
-                }
+            static final class GetShareAccountsClientIdProductIdAccountingRule {
+
+                private GetShareAccountsClientIdProductIdAccountingRule() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -195,13 +195,13 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetClientIdProductIdAccountingMappings {
-                private GetClientIdProductIdAccountingMappings() {
-                }
+            static final class GetClientIdProductIdAccountingMappings {
 
-                final class GetShareAccountsShareReferenceId {
-                    private GetShareAccountsShareReferenceId() {
-                    }
+                private GetClientIdProductIdAccountingMappings() {}
+
+                static final class GetShareAccountsShareReferenceId {
+
+                    private GetShareAccountsShareReferenceId() {}
 
                     @ApiModelProperty(example = "32")
                     public Integer id;
@@ -212,9 +212,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsIncomeFromFeeAccountId {
-                    private GetShareAccountsIncomeFromFeeAccountId() {
-                    }
+                static final class GetShareAccountsIncomeFromFeeAccountId {
+
+                    private GetShareAccountsIncomeFromFeeAccountId() {}
 
                     @ApiModelProperty(example = "40")
                     public Integer id;
@@ -225,9 +225,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsShareEquityId {
-                    private GetShareAccountsShareEquityId() {
-                    }
+                static final class GetShareAccountsShareEquityId {
+
+                    private GetShareAccountsShareEquityId() {}
 
                     @ApiModelProperty(example = "56")
                     public Integer id;
@@ -238,9 +238,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetShareAccountsShareSuspenseId {
-                    private GetShareAccountsShareSuspenseId() {
-                    }
+                static final class GetShareAccountsShareSuspenseId {
+
+                    private GetShareAccountsShareSuspenseId() {}
 
                     @ApiModelProperty(example = "2")
                     public Integer id;
@@ -257,9 +257,9 @@ final class SelfShareAccountsApiResourceSwagger {
                 public GetShareAccountsShareSuspenseId shareSuspenseId;
             }
 
-            final class GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions {
-                private GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions() {
-                }
+            static final class GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions {
+
+                private GetClientIdProductIdMinimumActivePeriodFrequencyTypeOptions() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -270,9 +270,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetClientIdProductIdLockinPeriodFrequencyTypeOptions {
-                private GetClientIdProductIdLockinPeriodFrequencyTypeOptions() {
-                }
+            static final class GetClientIdProductIdLockinPeriodFrequencyTypeOptions {
+
+                private GetClientIdProductIdLockinPeriodFrequencyTypeOptions() {}
 
                 @ApiModelProperty(example = "0")
                 public Integer id;
@@ -283,17 +283,17 @@ final class SelfShareAccountsApiResourceSwagger {
 
             }
 
-            final class GetAccountingMappingOptions {
-                private GetAccountingMappingOptions() {
-                }
+            static final class GetAccountingMappingOptions {
 
-                final class GetAccountingMappingLiabilityAccountOptions {
-                    private GetAccountingMappingLiabilityAccountOptions() {
-                    }
+                private GetAccountingMappingOptions() {}
 
-                    final class GetLiabilityAccountType {
-                        private GetLiabilityAccountType() {
-                        }
+                static final class GetAccountingMappingLiabilityAccountOptions {
+
+                    private GetAccountingMappingLiabilityAccountOptions() {}
+
+                    static final class GetLiabilityAccountType {
+
+                        private GetLiabilityAccountType() {}
 
                         @ApiModelProperty(example = "2")
                         public Integer id;
@@ -304,9 +304,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetLiabilityAccountUsage {
-                        private GetLiabilityAccountUsage() {
-                        }
+                    static final class GetLiabilityAccountUsage {
+
+                        private GetLiabilityAccountUsage() {}
 
                         @ApiModelProperty(example = "1")
                         public Integer id;
@@ -317,9 +317,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetLiabilityAccountTagId {
-                        private GetLiabilityAccountTagId() {
-                        }
+                    static final class GetLiabilityAccountTagId {
+
+                        private GetLiabilityAccountTagId() {}
 
                         @ApiModelProperty(example = "0")
                         public Integer id;
@@ -350,13 +350,13 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetAccountingMappingAssetAccountOptions {
-                    private GetAccountingMappingAssetAccountOptions() {
-                    }
+                static final class GetAccountingMappingAssetAccountOptions {
 
-                    final class GetAssetAccountType {
-                        private GetAssetAccountType() {
-                        }
+                    private GetAccountingMappingAssetAccountOptions() {}
+
+                    static final class GetAssetAccountType {
+
+                        private GetAssetAccountType() {}
 
                         @ApiModelProperty(example = "1")
                         public Integer id;
@@ -367,9 +367,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetAssetAccountUsage {
-                        private GetAssetAccountUsage() {
-                        }
+                    static final class GetAssetAccountUsage {
+
+                        private GetAssetAccountUsage() {}
 
                         @ApiModelProperty(example = "1")
                         public Integer id;
@@ -380,9 +380,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetAssetAccountTagId {
-                        private GetAssetAccountTagId() {
-                        }
+                    static final class GetAssetAccountTagId {
+
+                        private GetAssetAccountTagId() {}
 
                         @ApiModelProperty(example = "0")
                         public Integer id;
@@ -413,13 +413,13 @@ final class SelfShareAccountsApiResourceSwagger {
 
                 }
 
-                final class GetAccountingMappingIncomeAccountOptions {
-                    private GetAccountingMappingIncomeAccountOptions() {
-                    }
+                static final class GetAccountingMappingIncomeAccountOptions {
 
-                    final class GetIncomeAccountType {
-                        private GetIncomeAccountType() {
-                        }
+                    private GetAccountingMappingIncomeAccountOptions() {}
+
+                    static final class GetIncomeAccountType {
+
+                        private GetIncomeAccountType() {}
 
                         @ApiModelProperty(example = "4")
                         public Integer id;
@@ -430,9 +430,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetIncomeAccountUsage {
-                        private GetIncomeAccountUsage() {
-                        }
+                    static final class GetIncomeAccountUsage {
+
+                        private GetIncomeAccountUsage() {}
 
                         @ApiModelProperty(example = "1")
                         public Integer id;
@@ -443,9 +443,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetIncomeAccountTagId {
-                        private GetIncomeAccountTagId() {
-                        }
+                    static final class GetIncomeAccountTagId {
+
+                        private GetIncomeAccountTagId() {}
 
                         @ApiModelProperty(example = "0")
                         public Integer id;
@@ -475,13 +475,13 @@ final class SelfShareAccountsApiResourceSwagger {
                     public GetIncomeAccountTagId tagId;
                 }
 
-                final class GetShareAccountAccountingMappingEquityAccountOptions {
-                    private GetShareAccountAccountingMappingEquityAccountOptions() {
-                    }
+                static final class GetShareAccountAccountingMappingEquityAccountOptions {
 
-                    final class GetShareAccountsEquityAccountType {
-                        private GetShareAccountsEquityAccountType() {
-                        }
+                    private GetShareAccountAccountingMappingEquityAccountOptions() {}
+
+                    static final class GetShareAccountsEquityAccountType {
+
+                        private GetShareAccountsEquityAccountType() {}
 
                         @ApiModelProperty(example = "3")
                         public Integer id;
@@ -492,9 +492,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetShareAccountsEquityAccountUsage {
-                        private GetShareAccountsEquityAccountUsage() {
-                        }
+                    static final class GetShareAccountsEquityAccountUsage {
+
+                        private GetShareAccountsEquityAccountUsage() {}
 
                         @ApiModelProperty(example = "1")
                         public Integer id;
@@ -505,9 +505,9 @@ final class SelfShareAccountsApiResourceSwagger {
 
                     }
 
-                    final class GetShareAccountsEquityAccountTagId {
-                        private GetShareAccountsEquityAccountTagId() {
-                        }
+                    static final class GetShareAccountsEquityAccountTagId {
+
+                        private GetShareAccountsEquityAccountTagId() {}
 
                         @ApiModelProperty(example = "0")
                         public Integer id;
@@ -584,9 +584,9 @@ final class SelfShareAccountsApiResourceSwagger {
             public GetAccountingMappingOptions accountingMappingOptions;
         }
 
-        final class GetClientIdProductIdChargeOptions {
-            private GetClientIdProductIdChargeOptions() {
-            }
+        static final class GetClientIdProductIdChargeOptions {
+
+            private GetClientIdProductIdChargeOptions() {}
 
             public GetShareAccountsClientIdResponse.GetShareAccountsChargeOptions chargeOptions;
         }
@@ -596,13 +596,13 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewShareApplicationRequest")
-    public final static class PostNewShareApplicationRequest {
-        private PostNewShareApplicationRequest() {
-        }
+    public static final class PostNewShareApplicationRequest {
 
-        final class GetShareAccountsCharges {
-            private GetShareAccountsCharges() {
-            }
+        private PostNewShareApplicationRequest() {}
+
+        static final class GetShareAccountsCharges {
+
+            private GetShareAccountsCharges() {}
 
             @ApiModelProperty(example = "2")
             public Integer chargeId;
@@ -632,9 +632,9 @@ final class SelfShareAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewShareApplicationResponse")
-    public final static class PostNewShareApplicationResponse {
-        private PostNewShareApplicationResponse() {
-        }
+    public static final class PostNewShareApplicationResponse {
+
+        private PostNewShareApplicationResponse() {}
 
         @ApiModelProperty(example = "12")
         public Integer resourceId;

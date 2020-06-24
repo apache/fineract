@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "client_device_registration")
-public class DeviceRegistration extends AbstractPersistableCustom {
+public final class DeviceRegistration extends AbstractPersistableCustom {
 
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false, unique = true)
@@ -53,8 +53,7 @@ public class DeviceRegistration extends AbstractPersistableCustom {
         this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant().toDate();
     }
 
-    public static DeviceRegistration instance(final Client client,
-            final String registrationId) {
+    public static DeviceRegistration instance(final Client client, final String registrationId) {
         return new DeviceRegistration(client, registrationId);
     }
 

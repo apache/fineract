@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * {@code TellerTransactionData} represents an immutable data object for a transction.
  *
  * @version 1.0.0
-
+ *
  * @since 2.0.0
  * @see java.io.Serializable
  * @since 2.0.0
@@ -45,9 +45,8 @@ public final class TellerTransactionData implements Serializable {
     /*
      * Sole private CTOR to create a new instance
      */
-    private TellerTransactionData(final Long id, final Long officeId, final Long tellerId, final Long cashierId,
-                                  final Long clientId, final EnumOptionData type, final Double amount,
-                                  final Date postingDate) {
+    private TellerTransactionData(final Long id, final Long officeId, final Long tellerId, final Long cashierId, final Long clientId,
+            final EnumOptionData type, final Double amount, final Date postingDate) {
         this.id = id;
         this.officeId = officeId;
         this.tellerId = tellerId;
@@ -61,19 +60,26 @@ public final class TellerTransactionData implements Serializable {
     /**
      * Creates a new teller transaction data object.
      *
-     * @param id          - id of the transaction
-     * @param officeId    - id of the related office
-     * @param tellerId    - id of the related teller
-     * @param cashierId   - id of the cashier
-     * @param clientId    - id of the client
-     * @param type        - type of transaction (eg receipt, payment, open, close, settle)
-     * @param amount      - amount of the transaction
-     * @param postingDate - posting date of the transaction
+     * @param id
+     *            - id of the transaction
+     * @param officeId
+     *            - id of the related office
+     * @param tellerId
+     *            - id of the related teller
+     * @param cashierId
+     *            - id of the cashier
+     * @param clientId
+     *            - id of the client
+     * @param type
+     *            - type of transaction (eg receipt, payment, open, close, settle)
+     * @param amount
+     *            - amount of the transaction
+     * @param postingDate
+     *            - posting date of the transaction
      * @return the new created {@code TellerTransactionData}
      */
     public static TellerTransactionData instance(final Long id, final Long officeId, final Long tellerId, final Long cashierId,
-                                                 final Long clientId, final EnumOptionData type, final Double amount,
-                                                 final Date postingDate) {
+            final Long clientId, final EnumOptionData type, final Double amount, final Date postingDate) {
         return new TellerTransactionData(id, officeId, tellerId, cashierId, clientId, type, amount, postingDate);
     }
 

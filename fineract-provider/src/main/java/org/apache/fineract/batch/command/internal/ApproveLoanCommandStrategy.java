@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import com.google.common.base.Splitter;
+import java.util.List;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -29,13 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle
- * approval of a pending loan. It passes the contents of the body from the
- * BatchRequest to
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and gets
- * back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map
- * those errors to appropriate status codes in BatchResponse.
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle approval of a pending loan. It passes
+ * the contents of the body from the BatchRequest to
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and gets back the response. This class will
+ * also catch any errors raised by {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map those
+ * errors to appropriate status codes in BatchResponse.
  *
  * @author Rishabh Shukla
  *
@@ -62,17 +62,19 @@ public class ApproveLoanCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String[] pathParameters = request.getRelativeUrl().split("/");
-        Long loanId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
+        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        Long loanId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'approve' function from 'LoansApiResource' to approve a loan
+            // Calls 'approve' function from 'LoansApiResource' to approve a
+            // loan
             responseBody = loansApiResource.stateTransitions(loanId, "approve", request.getBody());
 
             response.setStatusCode(200);
-            // Sets the body of the response after the successful approval of a loan
+            // Sets the body of the response after the successful approval of a
+            // loan
             response.setBody(responseBody);
 
         } catch (RuntimeException e) {

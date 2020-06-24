@@ -40,22 +40,22 @@ public class AccountHelper {
 
     public Account createAssetAccount() {
         final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsAsset().build();
-        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL,
-                assetAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
+        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL, assetAccountJSON,
+                this.GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.ASSET);
     }
 
     public Account createIncomeAccount() {
         final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsIncome().build();
-        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL,
-                assetAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
+        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL, assetAccountJSON,
+                this.GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.INCOME);
     }
 
     public Account createExpenseAccount() {
         final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsExpense().build();
-        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL,
-                assetAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
+        final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL, assetAccountJSON,
+                this.GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.EXPENSE);
     }
 
@@ -68,7 +68,8 @@ public class AccountHelper {
 
     public ArrayList getAccountingWithRunningBalances() {
         final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts?fetchRunningBalance=true";
-        final ArrayList<HashMap> accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");
+        final ArrayList<HashMap> accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec,
+                GET_RUNNING_BALANCE_URL, "");
         return accountRunningBalance;
     }
 

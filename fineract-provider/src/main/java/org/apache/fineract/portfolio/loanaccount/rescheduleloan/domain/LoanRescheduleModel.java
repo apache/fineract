@@ -68,20 +68,19 @@ public final class LoanRescheduleModel {
             final BigDecimal totalPrincipalPaid, final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged,
             final BigDecimal totalPenaltyChargesCharged, final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
 
-        return new LoanRescheduleModel(periods, oldPeriods, applicationCurrency, loanTermInDays, principalDisbursed,
-                totalPrincipalExpected, totalPrincipalPaid, totalInterestCharged, totalFeeChargesCharged, totalPenaltyChargesCharged,
-                totalRepaymentExpected, totalOutstanding);
+        return new LoanRescheduleModel(periods, oldPeriods, applicationCurrency, loanTermInDays, principalDisbursed, totalPrincipalExpected,
+                totalPrincipalPaid, totalInterestCharged, totalFeeChargesCharged, totalPenaltyChargesCharged, totalRepaymentExpected,
+                totalOutstanding);
     }
 
     public static LoanRescheduleModel createWithSchedulehistory(LoanRescheduleModel loanRescheduleModel,
             final Collection<LoanRepaymentScheduleHistory> oldPeriods) {
 
         return new LoanRescheduleModel(loanRescheduleModel.periods, oldPeriods, loanRescheduleModel.applicationCurrency,
-                loanRescheduleModel.loanTermInDays, loanRescheduleModel.totalPrincipalDisbursed,
-                loanRescheduleModel.totalPrincipalExpected, loanRescheduleModel.totalPrincipalPaid,
-                loanRescheduleModel.totalInterestCharged, loanRescheduleModel.totalFeeChargesCharged,
-                loanRescheduleModel.totalPenaltyChargesCharged, loanRescheduleModel.totalRepaymentExpected,
-                loanRescheduleModel.totalOutstanding);
+                loanRescheduleModel.loanTermInDays, loanRescheduleModel.totalPrincipalDisbursed, loanRescheduleModel.totalPrincipalExpected,
+                loanRescheduleModel.totalPrincipalPaid, loanRescheduleModel.totalInterestCharged,
+                loanRescheduleModel.totalFeeChargesCharged, loanRescheduleModel.totalPenaltyChargesCharged,
+                loanRescheduleModel.totalRepaymentExpected, loanRescheduleModel.totalOutstanding);
     }
 
     public LoanScheduleData toData() {

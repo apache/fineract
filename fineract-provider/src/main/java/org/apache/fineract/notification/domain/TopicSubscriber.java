@@ -42,8 +42,7 @@ public class TopicSubscriber extends AbstractPersistableCustom {
     @Column(name = "subscription_date")
     private Date subscriptionDate;
 
-    public TopicSubscriber() {
-    }
+    public TopicSubscriber() {}
 
     public TopicSubscriber(Topic topic, AppUser subscriber, Date subscriptionDate) {
         this.topic = topic;

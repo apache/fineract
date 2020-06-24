@@ -31,8 +31,8 @@ import org.joda.time.LocalTime;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * Support for retrieving possibly null values from jdbc recordset delegating to
- * springs {@link JdbcUtils} where possible.
+ * Support for retrieving possibly null values from jdbc recordset delegating to springs {@link JdbcUtils} where
+ * possible.
  */
 public class JdbcSupport {
 
@@ -62,6 +62,7 @@ public class JdbcSupport {
         }
         return localDate;
     }
+
     public static LocalTime getLocalTime(final ResultSet rs, final String columnName) throws SQLException {
         LocalTime localTime = null;
         final Date timeValue = rs.getTime(columnName);
@@ -70,6 +71,7 @@ public class JdbcSupport {
         }
         return localTime;
     }
+
     public static Long getLong(final ResultSet rs, final String columnName) throws SQLException {
         return (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
     }

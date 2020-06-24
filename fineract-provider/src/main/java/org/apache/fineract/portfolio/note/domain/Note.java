@@ -74,7 +74,6 @@ public class Note extends AbstractAuditableCustom {
     @JoinColumn(name = "share_account_id", nullable = true)
     private ShareAccount shareAccount;
 
-
     public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
         final String note = command.stringValueOfParameterNamed("note");
         return new Note(client, note);

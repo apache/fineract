@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -34,18 +34,18 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Group Test for checking Group: Creation, Activation, Client Association,
- * Updating & Deletion
+ * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
  */
 public class GroupTest {
-    private final static Logger LOG = LoggerFactory.getLogger(GroupTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -54,7 +54,7 @@ public class GroupTest {
     private final String numberOfRepayments = "5";
     private final String interestRatePerPeriod = "18";
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -109,22 +109,22 @@ public class GroupTest {
 
         // create staff
         Integer createStaffId1 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}" , createStaffId1);
-        Assert.assertNotNull(createStaffId1);
+        LOG.info("--------------creating first staff with id------------- {}", createStaffId1);
+        Assertions.assertNotNull(createStaffId1);
 
         Integer createStaffId2 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating second staff with id------------- {}" , createStaffId2);
-        Assert.assertNotNull(createStaffId2);
+        LOG.info("--------------creating second staff with id------------- {}", createStaffId2);
+        Assertions.assertNotNull(createStaffId2);
 
         // assign staff "createStaffId1" to group
         HashMap assignStaffGroupId = (HashMap) GroupHelper.assignStaff(this.requestSpec, this.responseSpec, groupID.toString(),
                 createStaffId1.longValue());
-        assertEquals("Verify assigned staff id is the same as id sent", assignStaffGroupId.get("staffId"), createStaffId1);
+        assertEquals(assignStaffGroupId.get("staffId"), createStaffId1, "Verify assigned staff id is the same as id sent");
 
         // assign staff "createStaffId2" to client
         final HashMap assignStaffToClientChanges = (HashMap) ClientHelper.assignStaffToClient(this.requestSpec, this.responseSpec,
                 clientID.toString(), createStaffId2.toString());
-        assertEquals("Verify assigned staff id is the same as id sent", assignStaffToClientChanges.get("staffId"), createStaffId2);
+        assertEquals(assignStaffToClientChanges.get("staffId"), createStaffId2, "Verify assigned staff id is the same as id sent");
 
         final Integer loanProductId = this.createLoanProduct();
 
@@ -139,13 +139,13 @@ public class GroupTest {
 
         // assert if client staff officer has change Note client was assigned
         // staff with createStaffId2
-        assertNotEquals("Verify if client stuff has changed", assignStaffAndInheritStaffForClientAccounts.get("staffId"), createStaffId2);
-        assertEquals("Verify if client inherited staff assigned above", assignStaffAndInheritStaffForClientAccounts.get("staffId"),
-                getClientStaffId);
+        assertNotEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), createStaffId2, "Verify if client stuff has changed");
+        assertEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), getClientStaffId,
+                "Verify if client inherited staff assigned above");
 
         // assert if clients loan officer has changed
         final Integer loanOfficerId = this.loanTransactionHelper.getLoanOfficerId(loanId.toString());
-        assertEquals("Verify if client loan inherited staff", assignStaffAndInheritStaffForClientAccounts.get("staffId"), loanOfficerId);
+        assertEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), loanOfficerId, "Verify if client loan inherited staff");
 
     }
 

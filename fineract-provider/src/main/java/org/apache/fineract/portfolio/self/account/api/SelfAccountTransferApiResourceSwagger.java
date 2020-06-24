@@ -27,18 +27,17 @@ import java.util.Set;
  */
 
 final class SelfAccountTransferApiResourceSwagger {
-    private SelfAccountTransferApiResourceSwagger() {
-    }
 
+    private SelfAccountTransferApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountTransferTemplateResponse")
-    public final static class GetAccountTransferTemplateResponse {
-        private GetAccountTransferTemplateResponse() {
-        }
+    public static final class GetAccountTransferTemplateResponse {
 
-        final class GetAccountOptions {
-            private GetAccountOptions() {
-            }
+        private GetAccountTransferTemplateResponse() {}
+
+        static final class GetAccountOptions {
+
+            private GetAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -50,9 +49,9 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetAccountOptions> accountTypeOptions;
 
-        final class GetFromAccountOptions {
-            private GetFromAccountOptions() {
-            }
+        static final class GetFromAccountOptions {
+
+            private GetFromAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer accountId;
@@ -72,9 +71,9 @@ final class SelfAccountTransferApiResourceSwagger {
 
         public Set<GetFromAccountOptions> fromAccountTypeOptions;
 
-        final class GetToAccountOptions {
-            private GetToAccountOptions() {
-            }
+        static final class GetToAccountOptions {
+
+            private GetToAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer accountId;
@@ -96,9 +95,9 @@ final class SelfAccountTransferApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewTransferRequest")
-    public final static class PostNewTransferRequest {
-        private PostNewTransferRequest() {
-        }
+    public static final class PostNewTransferRequest {
+
+        private PostNewTransferRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer fromOfficeId;
@@ -130,9 +129,9 @@ final class SelfAccountTransferApiResourceSwagger {
     }
 
     @ApiModel(value = "PostNewTransferResponse")
-    public final static class PostNewTransferResponse {
-        private PostNewTransferResponse() {
-        }
+    public static final class PostNewTransferResponse {
+
+        private PostNewTransferResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer savingsId;

@@ -43,8 +43,8 @@ public class EmailMessageAssembler {
 
     @Autowired
     public EmailMessageAssembler(final EmailMessageRepository emailMessageRepository, final GroupRepositoryWrapper groupRepositoryWrapper,
-                               final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
-                               final FromJsonHelper fromApiJsonHelper) {
+            final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
+            final FromJsonHelper fromApiJsonHelper) {
         this.emailMessageRepository = emailMessageRepository;
         this.groupRepository = groupRepositoryWrapper;
         this.clientRepository = clientRepository;
@@ -81,11 +81,10 @@ public class EmailMessageAssembler {
         final String message = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.messageParamName, element);
         final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.subjectParamName, element);
 
-        return EmailMessage.pendingEmail(group, client, staff,null,emailSubject, message,emailAddress,null);
+        return EmailMessage.pendingEmail(group, client, staff, null, emailSubject, message, emailAddress, null);
     }
 
     public EmailMessage assembleFromResourceId(final Long resourceId) {
-        return this.emailMessageRepository.findById(resourceId)
-                .orElseThrow(() -> new EmailNotFoundException(resourceId));
+        return this.emailMessageRepository.findById(resourceId).orElseThrow(() -> new EmailNotFoundException(resourceId));
     }
 }

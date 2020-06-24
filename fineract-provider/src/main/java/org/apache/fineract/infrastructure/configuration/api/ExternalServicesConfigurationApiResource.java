@@ -54,10 +54,11 @@ import org.springframework.stereotype.Component;
 @Path("/externalservice")
 @Component
 @Scope("singleton")
-@Api(tags = {"External Services"})
+@Api(tags = { "External Services" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "External Services", description = "External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:\n" + "\n" + "S3 (Amazon S3):\n" + "s3_access_key -\n" + "s3_bucket_name -\n" + "s3_secret_key -\n" + "\n" + "\n" + "SMTP (Email Service):\n" + "username -\n" + "password -\n" + "host -\n" + "port -\n" + "useTLS -")
-})
+        @Tag(name = "External Services", description = "External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:\n"
+                + "\n" + "S3 (Amazon S3):\n" + "s3_access_key -\n" + "s3_bucket_name -\n" + "s3_secret_key -\n" + "\n" + "\n"
+                + "SMTP (Email Service):\n" + "username -\n" + "password -\n" + "host -\n" + "port -\n" + "useTLS -") })
 public class ExternalServicesConfigurationApiResource {
 
     private final PlatformSecurityContext context;
@@ -86,9 +87,11 @@ public class ExternalServicesConfigurationApiResource {
     @Path("{servicename}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve External Services Configuration", notes = "Returns a external Service configurations based on the Service Name.\n" + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = ExternalServicesPropertiesData.class)})
-    public String retrieveOne(@PathParam("servicename") @ApiParam(value = "servicename") final String serviceName, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve External Services Configuration", notes = "Returns a external Service configurations based on the Service Name.\n"
+            + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = ExternalServicesPropertiesData.class) })
+    public String retrieveOne(@PathParam("servicename") @ApiParam(value = "servicename") final String serviceName,
+            @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         final Collection<ExternalServicesPropertiesData> externalServiceNVPs = this.externalServicePropertiesReadPlatformService
@@ -101,11 +104,13 @@ public class ExternalServicesConfigurationApiResource {
     @Path("{servicename}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update External Service", notes = "Updates the external Service Configuration for a Service Name.\n" + "\n" + "Example: \n" + "\n" + "externalservice/S3")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "")})
+    @ApiOperation(value = "Update External Service", notes = "Updates the external Service Configuration for a Service Name.\n" + "\n"
+            + "Example: \n" + "\n" + "externalservice/S3")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "") })
     public String updateExternalServiceProperties(@PathParam("servicename") @ApiParam(value = "servicename") final String serviceName,
-                                                  @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         // ExternalServicesData external =
         // this.externalServiceReadPlatformService.getExternalServiceDetailsByServiceName(serviceName);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateExternalServiceProperties(serviceName)

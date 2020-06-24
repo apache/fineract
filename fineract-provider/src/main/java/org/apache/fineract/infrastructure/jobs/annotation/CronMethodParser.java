@@ -65,21 +65,24 @@ public class CronMethodParser {
     }
 
     /**
-     * method adds all the method names to map with annotation attribute value
-     * as key
+     * method adds all the method names to map with annotation attribute value as key
      */
     private static void findAnnotationMethods(final Class<? extends Annotation> annotationClass, final String attributeName)
             throws IOException {
-        final String basePackagePath = ClassUtils.convertClassNameToResourcePath(new StandardEnvironment()
-                .resolveRequiredPlaceholders(SEARCH_PACKAGE));
+        final String basePackagePath = ClassUtils
+                .convertClassNameToResourcePath(new StandardEnvironment().resolveRequiredPlaceholders(SEARCH_PACKAGE));
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackagePath + "/" + RESOURCE_PATTERN;
-        packageSearchPath = packageSearchPath.replace("//", "/"); // else it doesn't work if *.class are in WAR!!
+        packageSearchPath = packageSearchPath.replace("//", "/"); // else it
+                                                                  // doesn't
+                                                                  // work if
+                                                                  // *.class are
+                                                                  // in WAR!!
         final Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
         for (final Resource resource : resources) {
             if (resource.isReadable()) {
                 final MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
-                final Set<MethodMetadata> metadataSet = metadataReader.getAnnotationMetadata().getAnnotatedMethods(
-                        annotationClass.getName());
+                final Set<MethodMetadata> metadataSet = metadataReader.getAnnotationMetadata()
+                        .getAnnotatedMethods(annotationClass.getName());
                 if (metadataSet != null && metadataSet.size() > 0) {
                     for (final MethodMetadata metadata : metadataSet) {
                         final Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());

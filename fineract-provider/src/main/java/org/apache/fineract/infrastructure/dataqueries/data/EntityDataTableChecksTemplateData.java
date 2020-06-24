@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
@@ -41,8 +42,8 @@ public class EntityDataTableChecksTemplateData implements Serializable {
 
     public EntityDataTableChecksTemplateData(final List<String> entities, List<DatatableCheckStatusData> statusClient,
             List<DatatableCheckStatusData> statusGroup, List<DatatableCheckStatusData> statusSavings,
-            List<DatatableCheckStatusData> statusLoans, List<DatatableChecksData> datatables,
-            Collection<LoanProductData> loanProductDatas, Collection<SavingsProductData> savingsProductDatas) {
+            List<DatatableCheckStatusData> statusLoans, List<DatatableChecksData> datatables, Collection<LoanProductData> loanProductDatas,
+            Collection<SavingsProductData> savingsProductDatas) {
 
         this.entities = entities;
         this.statusClient = statusClient;
@@ -66,18 +67,16 @@ public class EntityDataTableChecksTemplateData implements Serializable {
 
         EntityDataTableChecksTemplateData that = (EntityDataTableChecksTemplateData) o;
 
-        return Objects.equals(entities, that.entities) &&
-               Objects.equals(statusClient, that.statusClient) &&
-                Objects.equals(statusGroup, that.statusGroup) &&
-                Objects.equals(statusSavings, that.statusSavings) &&
-                Objects.equals(statusLoans, that.statusLoans) &&
-                Objects.equals(datatables, that.datatables) &&
-                Objects.equals(loanProductDatas, that.loanProductDatas) &&
-                Objects.equals(savingsProductDatas, that.savingsProductDatas);
+        return Objects.equals(entities, that.entities) && Objects.equals(statusClient, that.statusClient)
+                && Objects.equals(statusGroup, that.statusGroup) && Objects.equals(statusSavings, that.statusSavings)
+                && Objects.equals(statusLoans, that.statusLoans) && Objects.equals(datatables, that.datatables)
+                && CollectionUtils.isEqualCollection(loanProductDatas, that.loanProductDatas)
+                && CollectionUtils.isEqualCollection(savingsProductDatas, that.savingsProductDatas);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entities, statusClient, statusGroup, statusSavings, statusLoans, datatables, loanProductDatas, savingsProductDatas);
+        return Objects.hash(entities, statusClient, statusGroup, statusSavings, statusLoans, datatables, loanProductDatas,
+                savingsProductDatas);
     }
 }

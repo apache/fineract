@@ -25,9 +25,7 @@ import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
-
 public class SmsCampaignEnumerations {
-
 
     public static EnumOptionData smscampaignTriggerType(final SmsCampaignTriggerType type) {
         EnumOptionData optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),
@@ -61,7 +59,8 @@ public class SmsCampaignEnumerations {
                 optionData = new EnumOptionData(CampaignType.SMS.getValue().longValue(), CampaignType.SMS.getCode(), "SMS");
             break;
             case NOTIFICATION:
-                optionData = new EnumOptionData(CampaignType.NOTIFICATION.getValue().longValue(), CampaignType.NOTIFICATION.getCode(), "NOTIFICATION");
+                optionData = new EnumOptionData(CampaignType.NOTIFICATION.getValue().longValue(), CampaignType.NOTIFICATION.getCode(),
+                        "NOTIFICATION");
             break;
         }
         return optionData;
@@ -75,7 +74,10 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarMonthType() {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final Month monthType : Month.values()) {
-            if (Month.DECEMBER.compareTo(monthType) != 0) { //We are removing December because we are adding yearly frequency
+            if (Month.DECEMBER.compareTo(monthType) != 0) { // We are removing
+                                                            // December because
+                                                            // we are adding
+                                                            // yearly frequency
                 optionDatas.add(calendarMonthType(monthType));
             }
         }
@@ -85,9 +87,9 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarPeriodFrequencyTypes(final PeriodFrequencyType[] periodFrequencyTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final PeriodFrequencyType periodFrequencyType : periodFrequencyTypes) {
-            if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
-                final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
-                        periodFrequencyType.toString());
+            if (!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
+                final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(),
+                        periodFrequencyType.getCode(), periodFrequencyType.toString());
                 optionDatas.add(optionData);
             }
         }

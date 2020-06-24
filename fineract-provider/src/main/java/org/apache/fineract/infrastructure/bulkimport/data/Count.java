@@ -18,19 +18,17 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.data;
 
-public class Count {
+public final class Count {
 
     private Integer successCount;
     private Integer errorCount;
 
-    public static Count instance(final Integer successCount,
-            final Integer errorCount) {
+    public static Count instance(final Integer successCount, final Integer errorCount) {
         return new Count(successCount, errorCount);
     }
 
-    private Count(final Integer successCount,
-            final Integer errorCount) {
-        this.successCount  = successCount;
+    private Count(final Integer successCount, final Integer errorCount) {
+        this.successCount = successCount;
         this.errorCount = errorCount;
     }
 

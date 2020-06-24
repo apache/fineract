@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class ClientSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<ClientData> allClients;
     private List<OfficeData> officesDataList;
 
@@ -48,7 +49,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         Sheet clientSheet = workbook.createSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
         setLayout(clientSheet);
         setOfficeToClientsMap();
@@ -61,8 +62,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     private void setClientNameToClientIdMap() {
         clientNameToClientId = new HashMap<>();
         for (ClientData clientData : allClients) {
-            clientNameToClientId.put(clientData.displayName().trim() + "(" + clientData.id() + ")",
-                    clientData.id());
+            clientNameToClientId.put(clientData.displayName().trim() + "(" + clientData.id() + ")", clientData.id());
         }
     }
 
@@ -86,10 +86,10 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         }
     }
 
-    private void setClientNameToSavingsAccountsIdsMap(){
-        clientNameToSavingsAccountIds=new HashMap<>();
-        for (ClientData client: allClients) {
-            clientNameToSavingsAccountIds.put(client.displayName().trim() + "(" + client.id() + ")",client.getSavingsAccountId());
+    private void setClientNameToSavingsAccountsIdsMap() {
+        clientNameToSavingsAccountIds = new HashMap<>();
+        for (ClientData client : allClients) {
+            clientNameToSavingsAccountIds.put(client.displayName().trim() + "(" + client.id() + ")", client.getSavingsAccountId());
         }
 
     }
@@ -105,7 +105,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void populateClientsByOfficeName(Sheet clientSheet) {
-        int rowIndex = 1, startIndex = 1, officeIndex = 0;
+        int rowIndex = 1;
+        int startIndex = 1;
+        int officeIndex = 0;
         officeNameToBeginEndIndexesOfClients = new HashMap<>();
         Row row = clientSheet.createRow(rowIndex);
         for (OfficeData office : officesDataList) {

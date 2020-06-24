@@ -37,9 +37,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * Global job Listener class to set Tenant details to
- * {@link ThreadLocalContextUtil} for batch Job and stores the batch job status
- * to database after the execution
+ * Global job Listener class to set Tenant details to {@link ThreadLocalContextUtil} for batch Job and stores the batch
+ * job status to database after the execution
  *
  */
 @Component
@@ -51,15 +50,14 @@ public class SchedulerJobListener implements JobListener {
 
     private final SchedularWritePlatformService schedularService;
 
-    private final AppUserRepositoryWrapper userRepository ;
+    private final AppUserRepositoryWrapper userRepository;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Autowired
-    public SchedulerJobListener(final SchedularWritePlatformService schedularService,
-            final AppUserRepositoryWrapper userRepository) {
+    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final AppUserRepositoryWrapper userRepository) {
         this.schedularService = schedularService;
-        this.userRepository = userRepository ;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -110,7 +108,7 @@ public class SchedulerJobListener implements JobListener {
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
         }
-        if (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && trigger.getNextFireTime() != null
+        if (SchedulerServiceConstants.TRIGGER_TYPE_CRON.equals(triggerType) && trigger.getNextFireTime() != null
                 && trigger.getNextFireTime().after(scheduledJobDetails.getNextRunTime())) {
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
         }
@@ -127,14 +125,15 @@ public class SchedulerJobListener implements JobListener {
     }
 
     private Throwable getCauseFromException(final Throwable exception) {
-        if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL
-                && exception.getCause() != null
+        if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL && exception.getCause() != null
                 && (exception.getCause().toString().contains(SchedulerServiceConstants.SCHEDULER_EXCEPTION)
-                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION) || exception
-                        .getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
+                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION)
+                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
             this.stackTraceLevel++;
             return getCauseFromException(exception.getCause());
-        } else if (exception.getCause() != null) { return exception.getCause(); }
+        } else if (exception.getCause() != null) {
+            return exception.getCause();
+        }
         return exception;
     }
 

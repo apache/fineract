@@ -43,8 +43,7 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
 
     @Autowired
     public SpringEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-                                     NotificationWritePlatformService notificationWritePlatformService,
-                                     AppUserRepository appUserRepository) {
+            NotificationWritePlatformService notificationWritePlatformService, AppUserRepository appUserRepository) {
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.notificationWritePlatformService = notificationWritePlatformService;
         this.appUserRepository = appUserRepository;
@@ -54,8 +53,8 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
     public void onApplicationEvent(SpringEvent event) {
         NotificationData notificationData = event.getNotificationData();
 
-        final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
-                .loadTenantById(notificationData.getTenantIdentifier(), false);
+        final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(notificationData.getTenantIdentifier(),
+                false);
         ThreadLocalContextUtil.setTenant(tenant);
 
         Long appUserId = notificationData.getActor();
@@ -76,15 +75,9 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
             userIds.remove(appUserId);
         }
 
-        notificationWritePlatformService.notify(
-                userIds,
-                notificationData.getObjectType(),
-                notificationData.getObjectIdentfier(),
-                notificationData.getAction(),
-                notificationData.getActor(),
-                notificationData.getContent(),
-                notificationData.isSystemGenerated()
-        );
+        notificationWritePlatformService.notify(userIds, notificationData.getObjectType(), notificationData.getObjectIdentfier(),
+                notificationData.getAction(), notificationData.getActor(), notificationData.getContent(),
+                notificationData.isSystemGenerated());
 
     }
 

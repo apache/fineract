@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -80,7 +79,9 @@ public class FromJsonHelper {
     }
 
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Collection<String> supportedParams) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Map<String, Object> requestMap = this.gsonConverter.fromJson(json, typeOfMap);
 
@@ -91,30 +92,35 @@ public class FromJsonHelper {
             }
         }
 
-        if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
+        if (!unsupportedParameterList.isEmpty()) {
+            throw new UnsupportedParameterException(unsupportedParameterList);
+        }
     }
 
     public void checkForUnsupportedParameters(final JsonObject object, final Collection<String> supportedParams) {
-        if (object == null) { throw new InvalidParameterException(); }
+        if (object == null) {
+            throw new InvalidParameterException();
+        }
 
-        final Set<Entry<String, JsonElement>> entries = object.entrySet();
+        final Set<Map.Entry<String, JsonElement>> entries = object.entrySet();
         final List<String> unsupportedParameterList = new ArrayList<>();
 
-        for (final Entry<String, JsonElement> providedParameter : entries) {
+        for (final Map.Entry<String, JsonElement> providedParameter : entries) {
             if (!supportedParams.contains(providedParameter.getKey())) {
                 unsupportedParameterList.add(providedParameter.getKey());
             }
         }
 
-        if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
+        if (!unsupportedParameterList.isEmpty()) {
+            throw new UnsupportedParameterException(unsupportedParameterList);
+        }
     }
 
     /**
      * @param parentPropertyName
-     *            The full json path to this property,the value is appended to
-     *            the parameter name while generating an error message <br>
-     *            Ex: property "name" in Object "person" would be named as
-     *            "person.name"
+     *            The full json path to this property,the value is appended to the parameter name while generating an
+     *            error message <br>
+     *            Ex: property "name" in Object "person" would be named as "person.name"
      * @param object
      * @param supportedParams
      */
@@ -201,7 +207,7 @@ public class FromJsonHelper {
     }
 
     public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String dateFormat,
-                                               final Locale locale) {
+            final Locale locale) {
         return this.helperDelegator.extractLocalTimeNamed(parameterName, element, dateFormat, locale, new HashSet<>());
     }
 
@@ -211,8 +217,7 @@ public class FromJsonHelper {
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale locale) {
-        return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale,
-                new HashSet<>());
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale, new HashSet<>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,

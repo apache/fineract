@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class S3ContentRepository implements ContentRepository {
 
-    private final static Logger logger = LoggerFactory.getLogger(S3ContentRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(S3ContentRepository.class);
 
     private final String s3BucketName;
     private final AmazonS3 s3Client;
@@ -94,7 +94,8 @@ public class S3ContentRepository implements ContentRepository {
     public String saveImage(final Base64EncodedImage base64EncodedImage, final Long resourceId, final String imageName) {
         final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
-        final InputStream toUploadInputStream = new ByteArrayInputStream(Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
+        final InputStream toUploadInputStream = new ByteArrayInputStream(
+                Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
 
         uploadDocument(imageName, toUploadInputStream, fileLocation);
         return fileLocation;
@@ -106,10 +107,10 @@ public class S3ContentRepository implements ContentRepository {
             deleteObjectFromS3(location);
         } catch (final AmazonServiceException ase) {
             deleteObjectAmazonServiceExceptionMessage(ase);
-            logger.warn("Unable to delete image associated with clients with Id {}", resourceId);
+            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
         } catch (final AmazonClientException ace) {
             deleteObjectAmazonClientExceptionMessage(ace);
-            logger.warn("Unable to delete image associated with clients with Id {}", resourceId);
+            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
         }
     }
 
@@ -123,11 +124,11 @@ public class S3ContentRepository implements ContentRepository {
         FileData fileData = null;
         final String fileName = documentData.fileName();
         try {
-            logger.info("Downloading an object");
+            LOG.info("Downloading an object");
             final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, documentData.fileLocation()));
             fileData = new FileData(s3object.getObjectContent(), fileName, documentData.contentType());
         } catch (final AmazonClientException ace) {
-            logger.error("Error occured.", ace);
+            LOG.error("Error occured.", ace);
             throw new DocumentNotFoundException(documentData.getParentEntityType(), documentData.getParentEntityId(), documentData.getId());
         }
         return fileData;
@@ -138,22 +139,22 @@ public class S3ContentRepository implements ContentRepository {
         try {
             final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
             imageData.updateContent(s3object.getObjectContent());
-        }catch(AmazonS3Exception e) {
-            logger.error("Error occured.", e);
+        } catch (AmazonS3Exception e) {
+            LOG.error("Error occured.", e);
         }
         return imageData;
     }
 
     private void deleteObjectAmazonClientExceptionMessage(final AmazonClientException ace) {
         final String message = "Caught an AmazonClientException." + "Error Message: " + ace.getMessage();
-        logger.error("{}", message);
+        LOG.error("{}", message);
     }
 
     private void deleteObjectAmazonServiceExceptionMessage(final AmazonServiceException ase) {
         final String message = "Caught an AmazonServiceException." + "Error Message:    " + ase.getMessage() + "HTTP Status Code: "
                 + ase.getStatusCode() + "AWS Error Code:   " + ase.getErrorCode() + "Error Type:       " + ase.getErrorType()
                 + "Request ID:       " + ase.getRequestId();
-        logger.error("{}", message);
+        LOG.error("{}", message);
     }
 
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
@@ -172,7 +173,7 @@ public class S3ContentRepository implements ContentRepository {
     private void uploadDocument(final String filename, final InputStream inputStream, final String s3UploadLocation)
             throws ContentManagementException {
         try {
-            logger.info("Uploading a new object to S3 from a file to {}", s3UploadLocation);
+            LOG.info("Uploading a new object to S3 from a file to {}", s3UploadLocation);
             this.s3Client.putObject(new PutObjectRequest(this.s3BucketName, s3UploadLocation, inputStream, new ObjectMetadata()));
         } catch (final AmazonClientException ace) {
             final String message = ace.getMessage();

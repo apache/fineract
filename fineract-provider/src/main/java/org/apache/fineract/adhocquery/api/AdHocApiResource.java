@@ -37,7 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -55,16 +54,15 @@ import org.springframework.stereotype.Component;
 @Path("/adhocquery")
 @Component
 @Scope("singleton")
-@Api(tags = {"AdhocQuery Api"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "AdhocQuery Api", description = "")
-})
+@Api(tags = { "AdhocQuery Api" })
+@SwaggerDefinition(tags = { @Tag(name = "AdhocQuery Api", description = "") })
 public class AdHocApiResource {
 
     /**
      * The set of parameters that are supported in response for {@link AdhocData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName","tableField","isActive","createdBy","createdOn","createdById","updatedById","updatedOn","email"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName", "tableField",
+            "isActive", "createdBy", "createdOn", "createdById", "updatedById", "updatedOn", "email"));
 
     private final PlatformSecurityContext context;
     private final AdHocReadPlatformService adHocReadPlatformService;
@@ -74,8 +72,7 @@ public class AdHocApiResource {
 
     @Autowired
     public AdHocApiResource(final PlatformSecurityContext context, final AdHocReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.adHocReadPlatformService = readPlatformService;
@@ -94,6 +91,7 @@ public class AdHocApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, adhocs, this.RESPONSE_DATA_PARAMETERS);
     }
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -104,6 +102,7 @@ public class AdHocApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
     }
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -123,7 +122,8 @@ public class AdHocApiResource {
     @Path("{adHocId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId, @Context final UriInfo uriInfo) {
+    public String retrieveAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser();
 
@@ -133,6 +133,7 @@ public class AdHocApiResource {
 
         return this.toApiJsonSerializer.serialize(settings, adhoc, this.RESPONSE_DATA_PARAMETERS);
     }
+
     @PUT
     @Path("{adHocId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -148,7 +149,8 @@ public class AdHocApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-     /**
+
+    /**
      * Delete AdHocQuery
      *
      * @param adHocId
@@ -167,10 +169,6 @@ public class AdHocApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
 }

@@ -28,17 +28,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class AccountsApiResourceSwagger {
-    private AccountsApiResourceSwagger() {
-    }
+
+    private AccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountsTypeTemplateResponse")
-    public final static class GetAccountsTypeTemplateResponse {
-        private GetAccountsTypeTemplateResponse() {
-        }
+    public static final class GetAccountsTypeTemplateResponse {
 
-        final class GetAccountsTypeProductOptions {
-            private GetAccountsTypeProductOptions() {
-            }
+        private GetAccountsTypeTemplateResponse() {}
+
+        static final class GetAccountsTypeProductOptions {
+
+            private GetAccountsTypeProductOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -58,13 +58,13 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountsTypeAccountIdResponse")
-    public final static class GetAccountsTypeAccountIdResponse {
-        private GetAccountsTypeAccountIdResponse() {
-        }
+    public static final class GetAccountsTypeAccountIdResponse {
 
-        final class GetAccountsStatus {
-            private GetAccountsStatus() {
-            }
+        private GetAccountsTypeAccountIdResponse() {}
+
+        static final class GetAccountsStatus {
+
+            private GetAccountsStatus() {}
 
             @ApiModelProperty(example = "300")
             public Integer id;
@@ -84,9 +84,9 @@ final class AccountsApiResourceSwagger {
             public Boolean closed;
         }
 
-        final class GetAccountsTimeline {
-            private GetAccountsTimeline() {
-            }
+        static final class GetAccountsTimeline {
+
+            private GetAccountsTimeline() {}
 
             @ApiModelProperty(example = "[2016, 4, 1]")
             public LocalDate submittedOnDate;
@@ -108,9 +108,9 @@ final class AccountsApiResourceSwagger {
             public LocalDate activatedDate;
         }
 
-        final class GetAccountsCurrency {
-            private GetAccountsCurrency() {
-            }
+        static final class GetAccountsCurrency {
+
+            private GetAccountsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -128,9 +128,9 @@ final class AccountsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetAccountsSummary {
-            private GetAccountsSummary() {
-            }
+        static final class GetAccountsSummary {
+
+            private GetAccountsSummary() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -149,13 +149,13 @@ final class AccountsApiResourceSwagger {
             public GetAccountsCurrency currency;
         }
 
-        final class GetAccountsPurchasedShares {
-            private GetAccountsPurchasedShares() {
-            }
+        static final class GetAccountsPurchasedShares {
 
-            final class GetAccountsPurchasedSharesStatus {
-                private GetAccountsPurchasedSharesStatus() {
-                }
+            private GetAccountsPurchasedShares() {}
+
+            static final class GetAccountsPurchasedSharesStatus {
+
+                private GetAccountsPurchasedSharesStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -165,9 +165,9 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsPurchasedSharesType {
-                private GetAccountsPurchasedSharesType() {
-                }
+            static final class GetAccountsPurchasedSharesType {
+
+                private GetAccountsPurchasedSharesType() {}
 
                 @ApiModelProperty(example = "500")
                 public Integer id;
@@ -197,9 +197,9 @@ final class AccountsApiResourceSwagger {
             public Double amountPaid;
         }
 
-        final class GetAccountsLockPeriodTypeEnum {
-            private GetAccountsLockPeriodTypeEnum() {
-            }
+        static final class GetAccountsLockPeriodTypeEnum {
+
+            private GetAccountsLockPeriodTypeEnum() {}
 
             @ApiModelProperty(example = "0")
             public Integer id;
@@ -209,13 +209,13 @@ final class AccountsApiResourceSwagger {
             public String value;
         }
 
-        final class GetAccountsCharges {
-            private GetAccountsCharges() {
-            }
+        static final class GetAccountsCharges {
 
-            final class GetAccountsChargeTimeType {
-                private GetAccountsChargeTimeType() {
-                }
+            private GetAccountsCharges() {}
+
+            static final class GetAccountsChargeTimeType {
+
+                private GetAccountsChargeTimeType() {}
 
                 @ApiModelProperty(example = "13")
                 public Integer id;
@@ -225,9 +225,9 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsChargeCalculationType {
-                private GetAccountsChargeCalculationType() {
-                }
+            static final class GetAccountsChargeCalculationType {
+
+                private GetAccountsChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -237,9 +237,9 @@ final class AccountsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetAccountsChargesCurrency {
-                private GetAccountsChargesCurrency() {
-                }
+            static final class GetAccountsChargesCurrency {
+
+                private GetAccountsChargesCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -286,7 +286,6 @@ final class AccountsApiResourceSwagger {
             public Boolean isActive;
         }
 
-
         @ApiModelProperty(example = "2")
         public Integer id;
         @ApiModelProperty(example = "000000002")
@@ -324,17 +323,17 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountsTypeResponse")
-    public final static class GetAccountsTypeResponse {
-        private GetAccountsTypeResponse() {
-        }
+    public static final class GetAccountsTypeResponse {
 
-        final class GetAccountsPageItems {
-            private GetAccountsPageItems() {
-            }
+        private GetAccountsTypeResponse() {}
 
-            final class GetAccountsTypeStatus {
-                private GetAccountsTypeStatus() {
-                }
+        static final class GetAccountsPageItems {
+
+            private GetAccountsPageItems() {}
+
+            static final class GetAccountsTypeStatus {
+
+                private GetAccountsTypeStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -354,17 +353,17 @@ final class AccountsApiResourceSwagger {
                 public Boolean closed;
             }
 
-            final class GetAccountsTypeTimeline {
-                private GetAccountsTypeTimeline() {
-                }
+            static final class GetAccountsTypeTimeline {
+
+                private GetAccountsTypeTimeline() {}
 
                 @ApiModelProperty(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
             }
 
-            final class GetAccountsTypePurchasedShares {
-                private GetAccountsTypePurchasedShares() {
-                }
+            static final class GetAccountsTypePurchasedShares {
+
+                private GetAccountsTypePurchasedShares() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -376,9 +375,9 @@ final class AccountsApiResourceSwagger {
                 public Integer purchasedPrice;
             }
 
-            final class GetAccountsTypeSummary {
-                private GetAccountsTypeSummary() {
-                }
+            static final class GetAccountsTypeSummary {
+
+                private GetAccountsTypeSummary() {}
 
                 public GetAccountsTypeAccountIdResponse.GetAccountsCharges.GetAccountsChargesCurrency currency;
             }
@@ -408,13 +407,13 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeRequest")
-    public final static class PostAccountsTypeRequest {
-        private PostAccountsTypeRequest() {
-        }
+    public static final class PostAccountsTypeRequest {
 
-        final class PostAccountsCharges {
-            private PostAccountsCharges() {
-            }
+        private PostAccountsTypeRequest() {}
+
+        static final class PostAccountsCharges {
+
+            private PostAccountsCharges() {}
 
             @ApiModelProperty(example = "20")
             public Integer chargeId;
@@ -454,22 +453,22 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeResponse")
-    public final static class PostAccountsTypeResponse {
-        private PostAccountsTypeResponse() {
-        }
+    public static final class PostAccountsTypeResponse {
+
+        private PostAccountsTypeResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PostAccountsTypeAccountIdRequest")
-    public final static class PostAccountsTypeAccountIdRequest {
-        private PostAccountsTypeAccountIdRequest() {
-        }
+    public static final class PostAccountsTypeAccountIdRequest {
 
-        final class PostAccountsRequestedShares {
-            private PostAccountsRequestedShares() {
-            }
+        private PostAccountsTypeAccountIdRequest() {}
+
+        static final class PostAccountsRequestedShares {
+
+            private PostAccountsRequestedShares() {}
 
             @ApiModelProperty(example = "35")
             public Integer id;
@@ -479,18 +478,18 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountsTypeAccountIdResponse")
-    public final static class PostAccountsTypeAccountIdResponse {
-        private PostAccountsTypeAccountIdResponse() {
-        }
+    public static final class PostAccountsTypeAccountIdResponse {
+
+        private PostAccountsTypeAccountIdResponse() {}
 
         @ApiModelProperty(example = "5")
         public Integer resourceId;
     }
 
     @ApiModel(value = "PutAccountsTypeAccountIdRequest")
-    public final static class PutAccountsTypeAccountIdRequest {
-        private PutAccountsTypeAccountIdRequest() {
-        }
+    public static final class PutAccountsTypeAccountIdRequest {
+
+        private PutAccountsTypeAccountIdRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -503,13 +502,13 @@ final class AccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutAccountsTypeAccountIdResponse")
-    public final static class PutAccountsTypeAccountIdResponse {
-        private PutAccountsTypeAccountIdResponse() {
-        }
+    public static final class PutAccountsTypeAccountIdResponse {
 
-        final class PutAccountsChanges {
-            private PutAccountsChanges() {
-            }
+        private PutAccountsTypeAccountIdResponse() {}
+
+        static final class PutAccountsChanges {
+
+            private PutAccountsChanges() {}
 
             @ApiModelProperty(example = "dd MMMM yyyy")
             public String dateFormat;

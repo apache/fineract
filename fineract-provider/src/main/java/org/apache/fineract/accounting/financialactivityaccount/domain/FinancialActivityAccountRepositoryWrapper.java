@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link FinancialActivityAccountRepository} that adds NULL
- * checking and Error handling capabilities
+ * Wrapper for {@link FinancialActivityAccountRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -40,13 +39,14 @@ public class FinancialActivityAccountRepositoryWrapper {
     }
 
     public FinancialActivityAccount findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new FinancialActivityAccountNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new FinancialActivityAccountNotFoundException(id));
     }
 
     public FinancialActivityAccount findByFinancialActivityTypeWithNotFoundDetection(final int financialActivityType) {
         FinancialActivityAccount financialActivityAccount = this.repository.findByFinancialActivityType(financialActivityType);
-        if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(financialActivityType); }
+        if (financialActivityAccount == null) {
+            throw new FinancialActivityAccountNotFoundException(financialActivityType);
+        }
         return financialActivityAccount;
     }
 

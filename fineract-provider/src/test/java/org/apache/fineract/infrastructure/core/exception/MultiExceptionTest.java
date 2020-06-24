@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,18 +28,20 @@ import org.slf4j.LoggerFactory;
 
 class MultiExceptionTest {
 
-    Logger logger = LoggerFactory.getLogger(MultiExceptionTest.class);
+    Logger LOG = LoggerFactory.getLogger(MultiExceptionTest.class);
 
     @Test()
     void testEmpty() throws MultiException {
-        assertThrows(IllegalArgumentException.class, () -> { throw new MultiException(Collections.emptyList()); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            throw new MultiException(Collections.emptyList());
+        });
     }
 
     @Test()
     void test() throws MultiException {
         List<Throwable> causes = List.of(new IllegalArgumentException(), new IllegalStateException());
         MultiException e = new MultiException(causes);
-        logger.warn("Biep, bieb", e);
+        LOG.warn("Biep, bieb", e);
         // Uncomment to see JUnit UI:
         // throw e;
     }

@@ -170,8 +170,7 @@ public final class LoanSummary {
     }
 
     /**
-     * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be
-     * reset.
+     * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be reset.
      */
     public void zeroFields() {
         this.totalPrincipalDisbursed = BigDecimal.ZERO;
@@ -222,16 +221,16 @@ public final class LoanSummary {
         this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
                 .minus(this.totalInterestWrittenOff).getAmount();
 
-        final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency).plus(
-                this.totalFeeChargesDueAtDisbursement);
+        final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency)
+                .plus(this.totalFeeChargesDueAtDisbursement);
         this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
 
-        Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges,currency);
+        Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges, currency);
         this.totalFeeChargesRepaid = totalFeeChargesRepaidAtDisbursement.getAmount();
 
-        if(charges != null) {
+        if (charges != null) {
             this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();
-        }else {
+        } else {
             this.totalFeeChargesWaived = BigDecimal.ZERO;
         }
 
@@ -241,8 +240,8 @@ public final class LoanSummary {
         this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid).minus(this.totalFeeChargesWaived)
                 .minus(this.totalFeeChargesWrittenOff).getAmount();
 
-        final Money totalPenaltyChargesCharged = summaryWrapper
-                .calculateTotalPenaltyChargesCharged(repaymentScheduleInstallments, currency);
+        final Money totalPenaltyChargesCharged = summaryWrapper.calculateTotalPenaltyChargesCharged(repaymentScheduleInstallments,
+                currency);
         this.totalPenaltyChargesCharged = totalPenaltyChargesCharged.getAmount();
         this.totalPenaltyChargesRepaid = summaryWrapper.calculateTotalPenaltyChargesRepaid(repaymentScheduleInstallments, currency)
                 .getAmount();
@@ -333,7 +332,6 @@ public final class LoanSummary {
     public BigDecimal getTotalPenaltyChargesWaived() {
         return this.totalPenaltyChargesWaived;
     }
-
 
     public BigDecimal getTotalExpectedRepayment() {
         return this.totalExpectedRepayment;

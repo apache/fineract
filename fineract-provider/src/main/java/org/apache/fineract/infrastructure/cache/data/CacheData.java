@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.cache.data;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class CacheData {
+public final class CacheData {
 
     @SuppressWarnings("unused")
     private final EnumOptionData cacheType;

@@ -49,15 +49,18 @@ public class RolesHelper {
         return role;
     }
 
-    public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
+    public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(DISABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
-    public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
+    public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
-    public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
+    public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "resourceId");
     }
 

@@ -56,8 +56,8 @@ public class ProductMixApiResource {
 
     private final String resourceNameForPermissions = "PRODUCTMIX";
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName",
-            "restrictedProducts", "allowedProducts", "productOptions"));
+    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -70,8 +70,7 @@ public class ProductMixApiResource {
     @Autowired
     public ProductMixApiResource(final PlatformSecurityContext context,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<ProductMixData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final DefaultToApiJsonSerializer<ProductMixData> toApiJsonSerializer,
             final ProductMixReadPlatformService productMixReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;

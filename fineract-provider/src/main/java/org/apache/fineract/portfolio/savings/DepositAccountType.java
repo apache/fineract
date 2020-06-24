@@ -22,8 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 /**
- * An enumeration of different transactions that can occur on a
- * {@link SavingsAccount}.
+ * An enumeration of different transactions that can occur on a {@link SavingsAccount}.
  */
 public enum DepositAccountType {
 
@@ -52,7 +51,9 @@ public enum DepositAccountType {
 
     public static DepositAccountType fromInt(final Integer transactionType) {
 
-        if (transactionType == null) { return DepositAccountType.INVALID; }
+        if (transactionType == null) {
+            return DepositAccountType.INVALID;
+        }
 
         DepositAccountType depositAccountType = DepositAccountType.INVALID;
         switch (transactionType) {

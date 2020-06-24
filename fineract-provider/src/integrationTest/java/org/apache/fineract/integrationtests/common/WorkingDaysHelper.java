@@ -27,7 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WorkingDaysHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -50,7 +51,7 @@ public class WorkingDaysHelper {
         map.put("locale", "en");
         map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}" , map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
@@ -60,7 +61,7 @@ public class WorkingDaysHelper {
         map.put("locale", "en");
         map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}" , map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
@@ -69,7 +70,8 @@ public class WorkingDaysHelper {
         return (int) workingDays.get("id");
     }
 
-    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
 
         return Utils.performServerGet(requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 

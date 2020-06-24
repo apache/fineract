@@ -44,11 +44,10 @@ public class EntityDatatableChecks extends AbstractPersistableCustom {
     @Column(name = "product_id", nullable = true)
     private Long productId;
 
-    public EntityDatatableChecks() {
-    }
+    public EntityDatatableChecks() {}
 
-    public EntityDatatableChecks(final String entity, final String datatableName, final Long status,
-            final boolean systemDefined, final Long productId) {
+    public EntityDatatableChecks(final String entity, final String datatableName, final Long status, final boolean systemDefined,
+            final Long productId) {
 
         this.entity = entity;
         this.status = status;

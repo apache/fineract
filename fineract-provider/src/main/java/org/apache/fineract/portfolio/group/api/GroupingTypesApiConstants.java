@@ -57,7 +57,7 @@ public class GroupingTypesApiConstants {
     public static final String groupMembersParamName = "groupMembers";
 
     public static final String submittedOnDateParamName = "submittedOnDate";
-    public static final String inheritStaffForClientAccounts   = "inheritStaffForClientAccounts";
+    public static final String inheritStaffForClientAccounts = "inheritStaffForClientAccounts";
 
     // group parameters
     public static final String centerIdParamName = "centerId";
@@ -89,29 +89,24 @@ public class GroupingTypesApiConstants {
     public static final String datatables = "datatables";
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link CenterData}. Where possible, we try to get response parameters to
-     * match those of request parameters.
+     * These parameters will match the class level parameters of {@link CenterData}. Where possible, we try to get
+     * response parameters to match those of request parameters.
      */
-    protected static final Set<String> CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            nameParamName,
-            externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
-            officeOptionsParamName, staffOptionsParamName, statusParamName, activeParamName, activationDateParamName, timeLine,
-            groupMembersParamName, collectionMeetingCalendar, closureReasons, datatables));
+    protected static final Set<String> CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, nameParamName, externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName,
+                    staffNameParamName, hierarchyParamName, officeOptionsParamName, staffOptionsParamName, statusParamName, activeParamName,
+                    activationDateParamName, timeLine, groupMembersParamName, collectionMeetingCalendar, closureReasons, datatables));
 
-    protected static final Set<String> CENTER_GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            nameParamName,
+    protected static final Set<String> CENTER_GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
             officeOptionsParamName, staffOptionsParamName, clientOptionsParamName, datatables));
 
-    protected static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            nameParamName,
-            externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName,
-            hierarchyParamName, officeOptionsParamName, statusParamName, activeParamName, activationDateParamName, staffOptionsParamName,
-            clientOptionsParamName, timeLine, datatables));
+    protected static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, nameParamName, externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName",
+                    staffIdParamName, staffNameParamName, hierarchyParamName, officeOptionsParamName, statusParamName, activeParamName,
+                    activationDateParamName, staffOptionsParamName, clientOptionsParamName, timeLine, datatables));
 
-    protected static final Set<String> COLLECTIONSHEET_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("dueDate", "loanProducts", "groups"));
+    protected static final Set<String> COLLECTIONSHEET_DATA_PARAMETERS = new HashSet<>(Arrays.asList("dueDate", "loanProducts", "groups"));
 
     protected static final Set<String> STAFF_CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(staffIdParamName,
             staffNameParamName, meetingFallCenters, totalCollected, totalOverdue, totaldue, installmentDue));

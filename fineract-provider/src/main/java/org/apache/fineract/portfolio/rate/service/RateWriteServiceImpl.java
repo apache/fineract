@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RateWriteServiceImpl implements RateWriteService {
 
-    private final static Logger logger = LoggerFactory.getLogger(RateWriteServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RateWriteServiceImpl.class);
 
     private final RateRepository rateRepository;
     private final AppUserRepository appUserRepository;
@@ -57,8 +57,7 @@ public class RateWriteServiceImpl implements RateWriteService {
 
     @Autowired
     public RateWriteServiceImpl(RateRepository rateRepository, AppUserRepository appUserRepository,
-            final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            PlatformSecurityContext context) {
+            final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, PlatformSecurityContext context) {
         this.rateRepository = rateRepository;
         this.appUserRepository = appUserRepository;
         this.context = context;
@@ -80,8 +79,7 @@ public class RateWriteServiceImpl implements RateWriteService {
 
             this.rateRepository.save(rate);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                    .withEntityId(rate.getId()).build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rate.getId()).build();
 
         } catch (final DataIntegrityViolationException dve) {
             handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -109,7 +107,8 @@ public class RateWriteServiceImpl implements RateWriteService {
                 final Long newApproveUserId = (Long) changes.get(approveUserIdParamName);
                 AppUser newApproveUser = null;
                 if (newApproveUserId != null) {
-                    newApproveUser = this.appUserRepository.findById(newApproveUserId).orElseThrow(() -> new UserNotFoundException(newApproveUserId));
+                    newApproveUser = this.appUserRepository.findById(newApproveUserId)
+                            .orElseThrow(() -> new UserNotFoundException(newApproveUserId));
                 }
                 rateToUpdate.setApproveUser(newApproveUser);
             }
@@ -134,19 +133,16 @@ public class RateWriteServiceImpl implements RateWriteService {
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleRateDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final Exception dve) {
+    private void handleRateDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("rate_name_org")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId",
-                    "A rate with name '" + name
-                    + "' already exists", "name", name);
+                    "A rate with name '" + name + "' already exists", "name", name);
         }
 
-        logger.error("Error due to Exception", dve);
+        LOG.error("Error due to Exception", dve);
         throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

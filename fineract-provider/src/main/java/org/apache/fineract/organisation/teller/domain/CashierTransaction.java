@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -84,9 +83,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
         super();
     }
 
-    public static CashierTransaction fromJson(
-            final Cashier cashier,
-            final JsonCommand command) {
+    public static CashierTransaction fromJson(final Cashier cashier, final JsonCommand command) {
         final Integer txnType = command.integerValueOfParameterNamed("txnType");
         final BigDecimal txnAmount = command.bigDecimalValueOfParameterNamed("txnAmount");
         final LocalDate txnDate = command.localDateValueOfParameterNamed("txnDate");
@@ -96,13 +93,12 @@ public class CashierTransaction extends AbstractPersistableCustom {
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
 
         // TODO: get client/loan/savings details
-        return new CashierTransaction (cashier, txnType, txnAmount, txnDate,
-                entityType, entityId, txnNote, currencyCode);
+        return new CashierTransaction(cashier, txnType, txnAmount, txnDate, entityType, entityId, txnNote, currencyCode);
 
     }
 
-    public CashierTransaction (Cashier cashier, Integer txnType, BigDecimal txnAmount,
-            LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
+    public CashierTransaction(Cashier cashier, Integer txnType, BigDecimal txnAmount, LocalDate txnDate, String entityType, Long entityId,
+            String txnNote, String currencyCode) {
         this.cashier = cashier;
         this.txnType = txnType;
         if (txnDate != null) {
@@ -165,7 +161,6 @@ public class CashierTransaction extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-
     /**
      * Returns the office of this cashier transaction.
      *
@@ -179,7 +174,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     /**
      * Sets the office of this cashier transaction.
      *
-     * @param office the office of this cashier transaction
+     * @param office
+     *            the office of this cashier transaction
      * @see org.apache.fineract.organisation.office.domain.Office
      */
     public void setOffice(Office office) {
@@ -199,7 +195,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     /**
      * Sets the teller of this cashier transaction.
      *
-     * @param teller the teller of this cashier transaction
+     * @param teller
+     *            the teller of this cashier transaction
      * @see org.apache.fineract.organisation.teller.domain.Teller
      */
     public void setTeller(Teller teller) {
@@ -207,8 +204,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
     }
 
     /**
-     * Returns the transaction type of this cashier transaction.
-     * .
+     * Returns the transaction type of this cashier transaction. .
      *
      * @return the transaction type of this cashier transaction or {@code null} if not present.
      */
@@ -219,7 +215,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     /**
      * Sets the transaction type of this cashier transaction.
      *
-     * @param txnType description the transaction type of this cashier transaction
+     * @param txnType
+     *            description the transaction type of this cashier transaction
      */
     public void setTxnType(Integer txnType) {
         this.txnType = txnType;
@@ -245,7 +242,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     /**
      * Sets the transaction date of this cashier transaction.
      *
-     * @param txnDate transaction date of this cashier transaction
+     * @param txnDate
+     *            transaction date of this cashier transaction
      */
     public void setTxnDate(Date txnDate) {
         this.txnDate = txnDate;
@@ -275,7 +273,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
         return txnAmount;
     }
 
-    public void setTxnNote (String txnNote) {
+    public void setTxnNote(String txnNote) {
         this.txnNote = txnNote;
     }
 

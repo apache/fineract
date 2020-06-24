@@ -63,7 +63,9 @@ public class ProvisioningCategoryData implements Comparable<ProvisioningCategory
 
     @Override
     public int compareTo(ProvisioningCategoryData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return obj.id.compareTo(this.id);
     }
 }

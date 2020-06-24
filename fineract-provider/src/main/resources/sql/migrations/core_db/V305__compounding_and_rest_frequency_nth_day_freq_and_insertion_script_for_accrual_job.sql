@@ -18,12 +18,12 @@
 --
 
 CREATE TABLE `m_loan_interest_recalculation_additional_details` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`loan_repayment_schedule_id` BIGINT NOT NULL,
-	`effective_date` DATE NOT NULL,
-	`amount` DECIMAL(19,6) NOT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `FK_additional_details_repayment_schedule_id` FOREIGN KEY (`loan_repayment_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `loan_repayment_schedule_id` BIGINT NOT NULL,
+    `effective_date` DATE NOT NULL,
+    `amount` DECIMAL(19,6) NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `FK_additional_details_repayment_schedule_id` FOREIGN KEY (`loan_repayment_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 );
 
 
@@ -35,7 +35,7 @@ ADD `compounding_frequency_nth_day_enum` INT, ADD `compounding_frequency_on_day`
 
 
 ALTER TABLE `m_loan_recalculation_details` ADD `rest_frequency_nth_day_enum` INT, ADD `rest_frequency_on_day` INT, ADD `rest_frequency_weekday_enum` INT,
-ADD `compounding_frequency_nth_day_enum` INT, ADD `compounding_frequency_on_day` INT, 
+ADD `compounding_frequency_nth_day_enum` INT, ADD `compounding_frequency_on_day` INT,
 ADD `is_compounding_to_be_posted_as_transaction` tinyint NOT NULL DEFAULT '0',
 ADD `compounding_frequency_weekday_enum` INT, ADD `allow_compounding_on_eod` tinyint NOT NULL DEFAULT '0';
 
@@ -71,8 +71,8 @@ ALTER TABLE `m_loan_recalculation_details` DROP `rest_freqency_date`, DROP `comp
 
 
 ALTER TABLE `job`
-	CHANGE COLUMN `name` `name` VARCHAR(100) NOT NULL AFTER `id`,
-	CHANGE COLUMN `display_name` `display_name` VARCHAR(100) NOT NULL AFTER `name`;
+    CHANGE COLUMN `name` `name` VARCHAR(100) NOT NULL AFTER `id`,
+    CHANGE COLUMN `display_name` `display_name` VARCHAR(100) NOT NULL AFTER `name`;
 
 INSERT INTO `job` (`name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES ('Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', now(), 5, NULL, NULL, NULL, NULL, NULL, 1, 0, 1, 3, 0);
 

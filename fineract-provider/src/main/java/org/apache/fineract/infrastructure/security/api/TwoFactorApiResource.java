@@ -54,7 +54,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class TwoFactorApiResource {
 
-
     private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;
     private final ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer;
     private final ToApiJsonSerializer<AccessTokenData> accessTokenSerializer;
@@ -64,17 +63,11 @@ public class TwoFactorApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final TwoFactorService twoFactorService;
 
-
-
     @Autowired
     public TwoFactorApiResource(ToApiJsonSerializer<OTPMetadata> otpRequestSerializer,
-                                ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer,
-                                ToApiJsonSerializer<AccessTokenData> accessTokenSerializer,
-                                DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-                                PlatformSecurityContext context,
-                                PortfolioCommandSourceWritePlatformService
-                                            commandsSourceWritePlatformService,
-                                TwoFactorService twoFactorService) {
+            ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer, ToApiJsonSerializer<AccessTokenData> accessTokenSerializer,
+            DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer, PlatformSecurityContext context,
+            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, TwoFactorService twoFactorService) {
         this.otpRequestSerializer = otpRequestSerializer;
         this.otpDeliveryMethodSerializer = otpDeliveryMethodSerializer;
         this.accessTokenSerializer = accessTokenSerializer;
@@ -83,7 +76,6 @@ public class TwoFactorApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.twoFactorService = twoFactorService;
     }
-
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -97,8 +89,7 @@ public class TwoFactorApiResource {
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
     public String requestToken(@QueryParam("deliveryMethod") final String deliveryMethod,
-                               @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken,
-                               @Context final UriInfo uriInfo) {
+            @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken, @Context final UriInfo uriInfo) {
         final AppUser user = context.authenticatedUser();
 
         final OTPRequest request = twoFactorService.createNewOTPToken(user, deliveryMethod, extendedAccessToken);
@@ -120,10 +111,9 @@ public class TwoFactorApiResource {
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateConfiguration(final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder()
-                .invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.
-                logCommandSource(commandRequest);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson)
+                .build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

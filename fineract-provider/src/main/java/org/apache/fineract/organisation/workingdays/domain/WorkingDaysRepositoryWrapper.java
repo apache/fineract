@@ -27,8 +27,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link WorkingDaysRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link WorkingDaysRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -44,7 +43,9 @@ public class WorkingDaysRepositoryWrapper {
     public WorkingDays findOne() {
         final List<WorkingDays> workingDaysList = this.repository.findAll();
 
-        if (workingDaysList == null || workingDaysList.isEmpty()) { throw new WorkingDaysNotFoundException(); }
+        if (workingDaysList == null || workingDaysList.isEmpty()) {
+            throw new WorkingDaysNotFoundException();
+        }
         return workingDaysList.get(0);
     }
 

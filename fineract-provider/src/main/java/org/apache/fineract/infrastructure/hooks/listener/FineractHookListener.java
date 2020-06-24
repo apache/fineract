@@ -40,8 +40,7 @@ public class FineractHookListener implements HookListener {
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
-    public FineractHookListener(final HookProcessorProvider hookProcessorProvider,
-            final HookReadPlatformService hookReadPlatformService,
+    public FineractHookListener(final HookProcessorProvider hookProcessorProvider, final HookReadPlatformService hookReadPlatformService,
             final TenantDetailsService tenantDetailsService) {
         this.hookReadPlatformService = hookReadPlatformService;
         this.hookProcessorProvider = hookProcessorProvider;
@@ -52,8 +51,7 @@ public class FineractHookListener implements HookListener {
     public void onApplicationEvent(final HookEvent event) {
 
         final String tenantIdentifier = event.getTenantIdentifier();
-        final FineractPlatformTenant tenant = this.tenantDetailsService
-                .loadTenantById(tenantIdentifier);
+        final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
 
         final AppUser appUser = event.getAppUser();
@@ -64,15 +62,12 @@ public class FineractHookListener implements HookListener {
         final String actionName = hookEventSource.getActionName();
         final String payload = event.getPayload();
 
-        final List<Hook> hooks = this.hookReadPlatformService
-                .retrieveHooksByEvent(hookEventSource.getEntityName(),
-                        hookEventSource.getActionName());
+        final List<Hook> hooks = this.hookReadPlatformService.retrieveHooksByEvent(hookEventSource.getEntityName(),
+                hookEventSource.getActionName());
 
         for (final Hook hook : hooks) {
-            final HookProcessor processor = this.hookProcessorProvider
-                    .getProcessor(hook);
-            processor.process(hook, appUser, payload, entityName, actionName,
-                    tenantIdentifier, authToken);
+            final HookProcessor processor = this.hookProcessorProvider.getProcessor(hook);
+            processor.process(hook, appUser, payload, entityName, actionName, tenantIdentifier, authToken);
         }
     }
 

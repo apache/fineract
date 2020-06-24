@@ -33,8 +33,7 @@ public class HookProcessorProvider implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     @Override
-    public void setApplicationContext(
-            final ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
@@ -42,11 +41,9 @@ public class HookProcessorProvider implements ApplicationContextAware {
         HookProcessor processor;
         final String templateName = hook.getHookTemplate().getName();
         if (templateName.equalsIgnoreCase(smsTemplateName)) {
-            processor = this.applicationContext.getBean("twilioHookProcessor",
-                    TwilioHookProcessor.class);
+            processor = this.applicationContext.getBean("twilioHookProcessor", TwilioHookProcessor.class);
         } else if (templateName.equals(webTemplateName)) {
-            processor = this.applicationContext.getBean("webHookProcessor",
-                    WebHookProcessor.class);
+            processor = this.applicationContext.getBean("webHookProcessor", WebHookProcessor.class);
         } else {
             processor = null;
         }

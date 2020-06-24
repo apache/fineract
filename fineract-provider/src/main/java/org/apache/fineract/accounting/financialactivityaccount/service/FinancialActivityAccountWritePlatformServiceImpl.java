@@ -47,12 +47,13 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
     private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private final static Logger logger = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
 
     @Autowired
     public FinancialActivityAccountWritePlatformServiceImpl(
             final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
-            final FinancialActivityAccountDataValidator fromApiJsonDeserializer, final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
+            final FinancialActivityAccountDataValidator fromApiJsonDeserializer,
+            final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
         this.financialActivityAccountRepository = financialActivityAccountRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
@@ -77,24 +78,25 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .withEntityId(financialActivityAccount.getId()) //
                     .build();
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
+            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
+                    dataIntegrityViolationException);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
     }
 
     /**
-     * Validate that the GL Account is appropriate for the particular Financial
-     * Activity Type
+     * Validate that the GL Account is appropriate for the particular Financial Activity Type
      **/
     private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
         FinancialActivity financialActivity = FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());
         GLAccount glAccount = financialActivityAccount.getGlAccount();
-        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) { throw new FinancialActivityAccountInvalidException(
-                financialActivity, glAccount); }
+        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) {
+            throw new FinancialActivityAccountInvalidException(financialActivity, glAccount);
+        }
     }
 
     @Override
@@ -127,10 +129,11 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
+            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
+                    dataIntegrityViolationException);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -147,14 +150,15 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                 .build();
     }
 
-    private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+    private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final Exception dve) {
         if (realCause.getMessage().contains("financial_activity_type")) {
             final Integer financialActivityId = command
                     .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

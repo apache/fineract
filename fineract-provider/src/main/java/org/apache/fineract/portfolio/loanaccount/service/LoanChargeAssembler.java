@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -74,7 +75,7 @@ public class LoanChargeAssembler {
                     String chargeIds = jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName).getAsString();
                     if (chargeIds != null) {
                         if (chargeIds.indexOf(",") != -1) {
-                            String[] chargeId = chargeIds.split(",");
+                            Iterable<String> chargeId = Splitter.on(',').split(chargeIds);
                             for (String loanChargeId : chargeId) {
                                 disbursementChargeIds.add(Long.parseLong(loanChargeId));
                             }
@@ -112,8 +113,8 @@ public class LoanChargeAssembler {
                     final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
                     final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
                             loanChargeElement, locale);
-                    final LocalDate dueDate = this.fromApiJsonHelper
-                            .extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
+                    final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat,
+                            locale);
                     final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement,
                             locale);
                     if (id == null) {
@@ -152,7 +153,7 @@ public class LoanChargeAssembler {
                                 }
                             }
 
-                            if ( ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
+                            if (ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                     LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                     if (chargeDefinition.isPercentageOfApprovedAmount()
@@ -203,8 +204,7 @@ public class LoanChargeAssembler {
                         final Long loanChargeId = id;
                         final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId).orElse(null);
                         if (loanCharge != null) {
-                            if(!loanCharge.isTrancheDisbursementCharge()
-                                    || disbursementChargeIds.contains(loanChargeId)){
+                            if (!loanCharge.isTrancheDisbursementCharge() || disbursementChargeIds.contains(loanChargeId)) {
                                 loanCharge.update(amount, dueDate, numberOfRepayments);
                                 loanCharges.add(loanCharge);
                             }

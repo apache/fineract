@@ -195,12 +195,21 @@ Instructions to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
-Checkstyle
+Checkstyle and Spotless
 ============
 
-This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml).  It is configured to run automatically during the normal Gradle build, and fail if there are any style violations detected.
-We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
-File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations: 
+
+    `./gradlew spotlessApply`
+
+Since some checks are present in both Checkstyle and Spotless, the same command can help you fix some of the Checkstyle violations (but not all, other Checkstyle violations need to fixed manually).
+
+You can also check for Spotless violations (only; but normally don't have to, because the regular build full already includes this anyway):
+
+    `./gradlew spotlessCheck`
+
+We recommend that you configure your favourite Java IDE to match those conventions. For Eclipse, you can go to 
+Window > Java > Code Style and import our [config/fineractdev-formatter.xml](config/fineractdev-formatter.xml) under formatter section and [config/fineractdev-cleanup.xml](config/fineractdev-cleanup.xml) under Clean up section. The same fineractdev-formatter.xml configuration file (that can be used in Eclipse IDE) is also used by Spotless to both check for violations and autoformat code on the CLI. 
 You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
 
 
@@ -241,6 +250,8 @@ Apache Fineract Platform API
 ============
 
 The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").
+
+If you have your own Fineract instance running, you can find the same documentation under '(your host:port)/fineract-provider/api-docs/apiLive.htm' under your. The Swagger documentation (work in progress) can be accessed under '(your host:port)/fineract-provider/swagger-ui/index.html'
 
 
 API clients (Web UIs, Mobile, etc.)
@@ -311,7 +322,7 @@ If your PR is failing to pass our CI build due to a test failure, then:
 1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.  Do understand that we may not review PRs that are not green - it is the contributor's (that's you!) responsability to get a proposed PR to pass the build, not primarily the maintainers.
 1. Search for the name of the failed test on https://issues.apache.org/jira/, e.g. for `AccountingScenarioIntegrationTest` you would find [FINERACT-899](https://issues.apache.org/jira/browse/FINERACT-899).
 1. If you happen to read in such bugs that tests were just recently fixed, or ignored, then rebase your PR to pick up that change.
-1. If you find previous comments "proving" that the same test has arbitrarily failed in at least 3 past PRs, then please do yourself raise a small separate new PR proposing to add an `@Ignore // TODO FINERACT-123` to the respective unstable test (e.g. [#774](https://github.com/apache/fineract/pull/774)) with the commit message mentioning said JIRA, as always.  (Please do NOT just `@Ignore` any existing tests mixed in as part of your larger PR.)
+1. If you find previous comments "proving" that the same test has arbitrarily failed in at least 3 past PRs, then please do yourself raise a small separate new PR proposing to add an `@Disabled // TODO FINERACT-123` to the respective unstable test (e.g. [#774](https://github.com/apache/fineract/pull/774)) with the commit message mentioning said JIRA, as always.  (Please do NOT just `@Disabled` any existing tests mixed in as part of your larger PR.)
 1. If there is no existing JIRA for the test, then first please evaluate whether the failure couldn't be a (perhaps strange) impact of the change you are proposing after all.  If it's not, then please raise a new JIRA to document the suspected Flaky Test, and link it to [FINERACT-850](https://issues.apache.org/jira/browse/FINERACT-850).  This will allow the next person coming along hitting the same test failure to easily find it, and eventually propose to ignore the unstable test.
 1. Then (only) Close and Reopen your PR, which will cause a new build, to see if it passes.
 1. Of course, we very much appreciate you then jumping onto any such bugs and helping us figure out how to fix all ignored tests!

@@ -24,15 +24,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link CalendarInstanceRepository} that is responsible for
- * checking if {@link CalendarInstance} is returned when using
- * <code>findOne</code> repository method and throwing an appropriate not found
- * exception.
+ * Wrapper for {@link CalendarInstanceRepository} that is responsible for checking if {@link CalendarInstance} is
+ * returned when using <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link CalendarInstanceRepository} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where
+ * {@link CalendarInstanceRepository} is required.
  * </p>
  */
 @Service
@@ -46,8 +44,7 @@ public class CalendarInstanceRepositoryWrapper {
     }
 
     public CalendarInstance findOneWithNotFoundDetection(final Long CalendarInstanceId) {
-        return this.repository.findById(CalendarInstanceId)
-                .orElseThrow(() -> new CalendarInstanceNotFoundException(CalendarInstanceId));
+        return this.repository.findById(CalendarInstanceId).orElseThrow(() -> new CalendarInstanceNotFoundException(CalendarInstanceId));
     }
 
     public void save(final CalendarInstance calendatInstance) {

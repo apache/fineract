@@ -41,10 +41,8 @@ import org.springframework.stereotype.Component;
 @Path("cashiers")
 @Component
 @Scope("singleton")
-@Api(tags = {"Cashiers"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Cashiers", description = "")
-})
+@Api(tags = { "Cashiers" })
+@SwaggerDefinition(tags = { @Tag(name = "Cashiers", description = "") })
 public class CashierApiResource {
 
     private final DefaultToApiJsonSerializer<CashierData> jsonSerializer;

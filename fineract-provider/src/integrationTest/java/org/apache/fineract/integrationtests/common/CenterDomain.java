@@ -21,13 +21,14 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CenterDomain implements Comparable<CenterDomain> {
-    private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
-    public static class Builder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
+
+    public static final class Builder {
 
         private final Integer id;
         private final String accountNo;
@@ -42,7 +43,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         private final ArrayList<HashMap> groupMembers;
 
         private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-                final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
+                final String name, final String externalId, final Integer staffId, final int officeId, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.accountNo = null;
@@ -54,7 +55,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
             this.name = name;
             this.externalId = externalId;
             this.staffId = staffId;
-            this.officeId = officeID;
+            this.officeId = officeId;
             this.officeName = officeName;
             this.hierarchy = hierarchy;
             this.groupMembers = groupMembers;
@@ -84,9 +85,9 @@ public class CenterDomain implements Comparable<CenterDomain> {
         /* super(); */
     }
 
-    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final Integer staffId, final Integer officeID, final String officeName,
-            final String hierarchy, final ArrayList<HashMap> groupMembers) {
+    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode,
+            final String statusvalue, final boolean active, final String name, final String externalId, final Integer staffId,
+            final Integer officeId, final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
         this.status = new HashMap<>();
@@ -97,7 +98,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         this.name = name;
         this.externalId = externalId;
         this.staffId = staffId;
-        this.officeId = officeID;
+        this.officeId = officeId;
         this.officeName = officeName;
         this.hierarchy = hierarchy;
         this.groupMembers = groupMembers;
@@ -112,15 +113,15 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
-            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeID,
+            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeId,
             final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
-        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy,
+        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeId, officeName, hierarchy,
                 groupMembers);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue, Boolean active,
-            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeID,
+            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeId,
             String officeName, String hierarchy, final int[] groupMembers) {
         // String ids = String.valueOf(id);
         final HashMap map = new HashMap<>();
@@ -152,7 +153,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         } else {
             map.put("active", "false");
             if (submittedDate == null) {
-                map.put("submittedOnDate", DateUtils.getDateOfTenant());
+                map.put("submittedOnDate", Utils.getLocalDateOfTenant().toDate());
             } else {
                 map.put("submittedOnDate", submittedDate);
             }
@@ -163,7 +164,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         if (groupMembers != null) {
             map.put("groupMembers", groupMembers);
         }
-        LOG.info("{}",map.toString());
+        LOG.info("{}", map.toString());
         return new Gson().toJson(map);
     }
 
@@ -211,7 +212,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return this.hierarchy;
     }
 
-    public String getAccountNo(){
+    public String getAccountNo() {
         return this.accountNo;
     }
 
@@ -254,7 +255,9 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
         if (!(obj instanceof CenterDomain)) {
             return false;

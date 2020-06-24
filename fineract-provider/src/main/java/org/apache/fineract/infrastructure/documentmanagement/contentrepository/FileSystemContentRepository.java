@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileSystemContentRepository implements ContentRepository {
 
-    private final static Logger logger = LoggerFactory.getLogger(FileSystemContentRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
     public static final String FINERACT_BASE_DIR = System.getProperty("user.home") + File.separator + ".fineract";
 
@@ -86,7 +86,7 @@ public class FileSystemContentRepository implements ContentRepository {
         } catch (final IOException ioe) {
             throw new ContentManagementException(imageName, ioe.getMessage());
         } catch (IllegalArgumentException iae) {
-            logger.error("IllegalArgumentException due to invalid Base64 encoding: {}", base64EncodedImageString, iae);
+            LOG.error("IllegalArgumentException due to invalid Base64 encoding: {}", base64EncodedImageString, iae);
             throw iae;
         }
         return fileLocation;
@@ -97,14 +97,16 @@ public class FileSystemContentRepository implements ContentRepository {
         final boolean fileDeleted = deleteFile(location);
         if (!fileDeleted) {
             // no need to throw an Error, simply log a warning
-            logger.warn("Unable to delete image associated with clients with Id {}", resourceId);
+            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
         }
     }
 
     @Override
     public void deleteFile(final String fileName, final String documentPath) {
         final boolean fileDeleted = deleteFile(documentPath);
-        if (!fileDeleted) { throw new ContentManagementException(fileName, null); }
+        if (!fileDeleted) {
+            throw new ContentManagementException(fileName, null);
+        }
     }
 
     private boolean deleteFile(final String documentPath) {
@@ -169,7 +171,8 @@ public class FileSystemContentRepository implements ContentRepository {
             out.flush();
             out.close();
         } catch (final IOException ioException) {
-            logger.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)", ioException);
+            LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)",
+                    ioException);
             throw new ContentManagementException(fileName, ioException.getMessage());
         }
     }

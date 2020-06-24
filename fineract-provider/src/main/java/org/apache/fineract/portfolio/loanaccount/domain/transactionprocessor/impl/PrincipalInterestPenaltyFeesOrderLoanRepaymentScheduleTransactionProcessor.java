@@ -29,15 +29,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.joda.time.LocalDate;
 
 /**
- * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the
- * payment order of principal first, then interest, penalties and fees.
+ * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the payment order of principal first, then
+ * interest, penalties and fees.
  */
-public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor extends
-        AbstractLoanRepaymentScheduleTransactionProcessor {
+public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
+        extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time
-     * payments, interest first, principal, penalties and charges.
+     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first, principal,
+     * penalties and charges.
      */
     @SuppressWarnings("unused")
     @Override
@@ -46,12 +46,12 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
             final LocalDate transactionDate, final Money paymentInAdvance,
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance,
+                transactionMappings);
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @SuppressWarnings("unused")
     @Override
@@ -84,8 +84,8 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

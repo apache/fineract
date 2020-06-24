@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/10/17.
  */
 final class GroupsApiResourceSwagger {
-    private GroupsApiResourceSwagger() {
-    }
+
+    private GroupsApiResourceSwagger() {}
 
     @ApiModel(value = "GetGroupsTemplateResponse")
-    public final static class GetGroupsTemplateResponse {
-        private GetGroupsTemplateResponse() {
-        }
+    public static final class GetGroupsTemplateResponse {
 
-        final class GetGroupsTemplateOfficeOptions {
-            private GetGroupsTemplateOfficeOptions() {
-            }
+        private GetGroupsTemplateResponse() {}
+
+        static final class GetGroupsTemplateOfficeOptions {
+
+            private GetGroupsTemplateOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -47,9 +47,9 @@ final class GroupsApiResourceSwagger {
             public String nameDecorated;
         }
 
-        final class GetGroupsTemplateStaffOptions {
-            private GetGroupsTemplateStaffOptions() {
-            }
+        static final class GetGroupsTemplateStaffOptions {
+
+            private GetGroupsTemplateStaffOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -57,9 +57,9 @@ final class GroupsApiResourceSwagger {
             public String displayName;
         }
 
-        final class GetGroupsTemplateClientOptions {
-            private GetGroupsTemplateClientOptions() {
-            }
+        static final class GetGroupsTemplateClientOptions {
+
+            private GetGroupsTemplateClientOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -71,17 +71,17 @@ final class GroupsApiResourceSwagger {
             public String officeName;
         }
 
-        final class GetGroupsTemplateDatatables {
-            private GetGroupsTemplateDatatables() {
-            }
+        static final class GetGroupsTemplateDatatables {
 
-            final class GetGroupsTemplateColumnHeaderData {
-                private GetGroupsTemplateColumnHeaderData() {
-                }
+            private GetGroupsTemplateDatatables() {}
 
-                final class GetGroupsTemplateColumnValues {
-                    private GetGroupsTemplateColumnValues() {
-                    }
+            static final class GetGroupsTemplateColumnHeaderData {
+
+                private GetGroupsTemplateColumnHeaderData() {}
+
+                static final class GetGroupsTemplateColumnValues {
+
+                    private GetGroupsTemplateColumnValues() {}
                 }
 
                 @ApiModelProperty(example = "group_id")
@@ -116,16 +116,16 @@ final class GroupsApiResourceSwagger {
 
     @ApiModel(value = "GetGroupsResponse")
     public static final class GetGroupsResponse {
-        private GetGroupsResponse() {
-        }
 
-        final class GetGroupsPageItems {
-            private GetGroupsPageItems() {
-            }
+        private GetGroupsResponse() {}
 
-            final class GetGroupsStatus {
-                private GetGroupsStatus() {
-                }
+        static final class GetGroupsPageItems {
+
+            private GetGroupsPageItems() {}
+
+            static final class GetGroupsStatus {
+
+                private GetGroupsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -156,13 +156,13 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetGroupsGroupIdResponse")
-    public final static class GetGroupsGroupIdResponse {
-        private GetGroupsGroupIdResponse() {
-        }
+    public static final class GetGroupsGroupIdResponse {
 
-        final class GetGroupsGroupIdTimeline {
-            private GetGroupsGroupIdTimeline() {
-            }
+        private GetGroupsGroupIdResponse() {}
+
+        static final class GetGroupsGroupIdTimeline {
+
+            private GetGroupsGroupIdTimeline() {}
 
             @ApiModelProperty(example = "[2013, 11, 14]")
             public LocalDate activatedOnDate;
@@ -190,9 +190,9 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsRequest")
-    public final static class PostGroupsRequest {
-        private PostGroupsRequest() {
-        }
+    public static final class PostGroupsRequest {
+
+        private PostGroupsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -203,9 +203,9 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsResponse")
-    public final static class PostGroupsResponse {
-        private PostGroupsResponse() {
-        }
+    public static final class PostGroupsResponse {
+
+        private PostGroupsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -216,9 +216,9 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteGroupsGroupIdResponse")
-    public final static class DeleteGroupsGroupIdResponse {
-        private DeleteGroupsGroupIdResponse() {
-        }
+    public static final class DeleteGroupsGroupIdResponse {
+
+        private DeleteGroupsGroupIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -229,22 +229,22 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffRequest")
-    public final static class PostGroupsGroupIdCommandUnassignStaffRequest {
-        private PostGroupsGroupIdCommandUnassignStaffRequest() {
-        }
+    public static final class PostGroupsGroupIdCommandUnassignStaffRequest {
+
+        private PostGroupsGroupIdCommandUnassignStaffRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer staffId;
     }
 
     @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffResponse")
-    public final static class PostGroupsGroupIdCommandUnassignStaffResponse {
-        private PostGroupsGroupIdCommandUnassignStaffResponse() {
-        }
+    public static final class PostGroupsGroupIdCommandUnassignStaffResponse {
 
-        final class PostGroupsGroupIdCommandUnassignStaffChanges {
-            private PostGroupsGroupIdCommandUnassignStaffChanges() {
-            }
+        private PostGroupsGroupIdCommandUnassignStaffResponse() {}
+
+        static final class PostGroupsGroupIdCommandUnassignStaffChanges {
+
+            private PostGroupsGroupIdCommandUnassignStaffChanges() {}
         }
 
         @ApiModelProperty(example = "1")
@@ -257,22 +257,22 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutGroupsGroupIdRequest")
-    public final static class PutGroupsGroupIdRequest {
-        private PutGroupsGroupIdRequest() {
-        }
+    public static final class PutGroupsGroupIdRequest {
+
+        private PutGroupsGroupIdRequest() {}
 
         @ApiModelProperty(example = "First Group (changed)")
         public String name;
     }
 
     @ApiModel(value = "PutGroupsGroupIdResponse")
-    public final static class PutGroupsGroupIdResponse {
-        private PutGroupsGroupIdResponse() {
-        }
+    public static final class PutGroupsGroupIdResponse {
 
-        final class PutGroupsGroupIdChanges {
-            private PutGroupsGroupIdChanges() {
-            }
+        private PutGroupsGroupIdResponse() {}
+
+        static final class PutGroupsGroupIdChanges {
+
+            private PutGroupsGroupIdChanges() {}
 
             @ApiModelProperty(example = "First Group (changed)")
             public String name;
@@ -288,17 +288,17 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetGroupsGroupIdAccountsResponse")
-    public final static class GetGroupsGroupIdAccountsResponse {
-        private GetGroupsGroupIdAccountsResponse() {
-        }
+    public static final class GetGroupsGroupIdAccountsResponse {
 
-        final class GetGroupsGroupIdAccountsLoanAccounts {
-            private GetGroupsGroupIdAccountsLoanAccounts() {
-            }
+        private GetGroupsGroupIdAccountsResponse() {}
 
-            final class GetGroupsGroupIdAccountsStatus {
-                private GetGroupsGroupIdAccountsStatus() {
-                }
+        static final class GetGroupsGroupIdAccountsLoanAccounts {
+
+            private GetGroupsGroupIdAccountsLoanAccounts() {}
+
+            static final class GetGroupsGroupIdAccountsStatus {
+
+                private GetGroupsGroupIdAccountsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -324,9 +324,9 @@ final class GroupsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetGroupsGroupIdAccountsLoanType {
-                private GetGroupsGroupIdAccountsLoanType() {
-                }
+            static final class GetGroupsGroupIdAccountsLoanType {
+
+                private GetGroupsGroupIdAccountsLoanType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -348,13 +348,13 @@ final class GroupsApiResourceSwagger {
             public GetGroupsGroupIdAccountsLoanType loanType;
         }
 
-        final class GetGroupsGroupIdAccountsSavingAccounts {
-            private GetGroupsGroupIdAccountsSavingAccounts() {
-            }
+        static final class GetGroupsGroupIdAccountsSavingAccounts {
 
-            final class GetGroupsGroupIdAccountsSavingStatus {
-                private GetGroupsGroupIdAccountsSavingStatus() {
-                }
+            private GetGroupsGroupIdAccountsSavingAccounts() {}
+
+            static final class GetGroupsGroupIdAccountsSavingStatus {
+
+                private GetGroupsGroupIdAccountsSavingStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -376,9 +376,9 @@ final class GroupsApiResourceSwagger {
                 public Boolean closed;
             }
 
-            final class GetGroupsGroupIdAccountsSavingCurrency {
-                private GetGroupsGroupIdAccountsSavingCurrency() {
-                }
+            static final class GetGroupsGroupIdAccountsSavingCurrency {
+
+                private GetGroupsGroupIdAccountsSavingCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -394,9 +394,9 @@ final class GroupsApiResourceSwagger {
                 public String displayLabel;
             }
 
-            final class GetGroupsGroupIdAccountsSavingAccountType {
-                private GetGroupsGroupIdAccountsSavingAccountType() {
-                }
+            static final class GetGroupsGroupIdAccountsSavingAccountType {
+
+                private GetGroupsGroupIdAccountsSavingAccountType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -419,13 +419,13 @@ final class GroupsApiResourceSwagger {
             public GetGroupsGroupIdAccountsSavingAccountType accountType;
         }
 
-        final class GetGroupsGroupIdAccountsMemberLoanAccounts {
-            private GetGroupsGroupIdAccountsMemberLoanAccounts() {
-            }
+        static final class GetGroupsGroupIdAccountsMemberLoanAccounts {
 
-            final class GetGroupsGroupIdAccountsMemberLoanStatus {
-                private GetGroupsGroupIdAccountsMemberLoanStatus() {
-                }
+            private GetGroupsGroupIdAccountsMemberLoanAccounts() {}
+
+            static final class GetGroupsGroupIdAccountsMemberLoanStatus {
+
+                private GetGroupsGroupIdAccountsMemberLoanStatus() {}
 
                 @ApiModelProperty(example = "200")
                 public Integer id;
@@ -451,9 +451,9 @@ final class GroupsApiResourceSwagger {
                 public Boolean overpaid;
             }
 
-            final class GetGroupsGroupIdAccountsMemberLoanType {
-                private GetGroupsGroupIdAccountsMemberLoanType() {
-                }
+            static final class GetGroupsGroupIdAccountsMemberLoanType {
+
+                private GetGroupsGroupIdAccountsMemberLoanType() {}
 
                 @ApiModelProperty(example = "3")
                 public Integer id;
@@ -475,10 +475,9 @@ final class GroupsApiResourceSwagger {
             public GetGroupsGroupIdAccountsMemberLoanType loanType;
         }
 
-        final class GetGroupsGroupIdAccountsMemberSavingsAccounts {
-            private GetGroupsGroupIdAccountsMemberSavingsAccounts() {
-            }
+        static final class GetGroupsGroupIdAccountsMemberSavingsAccounts {
 
+            private GetGroupsGroupIdAccountsMemberSavingsAccounts() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -500,13 +499,13 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdRequest")
-    public final static class PostGroupsGroupIdRequest {
-        private PostGroupsGroupIdRequest() {
-        }
+    public static final class PostGroupsGroupIdRequest {
 
-        final class PostGroupsGroupIdClients {
-            private PostGroupsGroupIdClients() {
-            }
+        private PostGroupsGroupIdRequest() {}
+
+        static final class PostGroupsGroupIdClients {
+
+            private PostGroupsGroupIdClients() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -518,9 +517,9 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdResponse")
-    public final static class PostGroupsGroupIdResponse {
-        private PostGroupsGroupIdResponse() {
-        }
+    public static final class PostGroupsGroupIdResponse {
+
+        private PostGroupsGroupIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;

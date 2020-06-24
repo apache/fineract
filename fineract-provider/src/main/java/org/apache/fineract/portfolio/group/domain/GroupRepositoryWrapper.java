@@ -27,8 +27,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link GroupRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link GroupRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -42,13 +41,14 @@ public class GroupRepositoryWrapper {
     }
 
     public Group findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new GroupNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
     }
 
     public Group findByOfficeWithNotFoundDetection(final Long id, final Office office) {
         final Group group = findOneWithNotFoundDetection(id);
-        if (!group.getOffice().getId().equals(office.getId())) { throw new GroupNotFoundException(id); }
+        if (!group.getOffice().getId().equals(office.getId())) {
+            throw new GroupNotFoundException(id);
+        }
         return group;
     }
 

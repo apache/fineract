@@ -44,9 +44,9 @@ public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
 
     }
 
-    public LoanOverdueInstallmentCharge(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
+    public LoanOverdueInstallmentCharge(final LoanCharge loancharge, final LoanRepaymentScheduleInstallment installment,
             final Integer frequencyNumber) {
-        this.loancharge = loanCharge;
+        this.loancharge = loancharge;
         this.installment = installment;
         this.frequencyNumber = frequencyNumber;
     }

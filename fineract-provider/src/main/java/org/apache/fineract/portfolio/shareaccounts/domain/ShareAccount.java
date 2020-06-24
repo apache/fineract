@@ -130,7 +130,7 @@ public class ShareAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ShareAccountTransaction> shareAccountTransactions;
 
     @Column(name = "lockin_period_frequency")
@@ -147,7 +147,7 @@ public class ShareAccount extends AbstractPersistableCustom {
     @Column(name = "minimum_active_period_frequency_enum", nullable = true)
     private PeriodFrequencyType minimumActivePeriodFrequencyType;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ShareAccountCharge> charges;
 
     @Transient
@@ -215,7 +215,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setSubmittedDate(final Date submittedDate) {
         boolean toReturn = false;
-        if (!this.submittedDate.equals(submittedDate)) {
+        if (this.submittedDate.compareTo(submittedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.submittedDate = submittedDate;
             toReturn = true;
         }
@@ -224,7 +224,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setApprovedDate(final Date approvedDate) {
         boolean toReturn = false;
-        if (!this.approvedDate.equals(approvedDate)) {
+        if (this.approvedDate.compareTo(approvedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.approvedDate = approvedDate;
             toReturn = true;
         }
@@ -256,18 +256,18 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public void addTransaction(final ShareAccountTransaction transaction) {
         transaction.setShareAccount(this);
-        if(transaction.isPendingForApprovalTransaction()) {
-            if(this.totalSharesPending == null) {
-                this.totalSharesPending = transaction.getTotalShares() ;
-            }else {
-                this.totalSharesPending += transaction.getTotalShares() ;
+        if (transaction.isPendingForApprovalTransaction()) {
+            if (this.totalSharesPending == null) {
+                this.totalSharesPending = transaction.getTotalShares();
+            } else {
+                this.totalSharesPending += transaction.getTotalShares();
             }
 
-        }else if(transaction.isPurchasTransaction()) {
-            if(this.totalSharesApproved == null) {
-                this.totalSharesApproved = transaction.getTotalShares() ;
-            }else {
-                this.totalSharesApproved += transaction.getTotalShares() ;
+        } else if (transaction.isPurchasTransaction()) {
+            if (this.totalSharesApproved == null) {
+                this.totalSharesApproved = transaction.getTotalShares();
+            } else {
+                this.totalSharesApproved += transaction.getTotalShares();
             }
         }
 
@@ -276,7 +276,8 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
         boolean returnValue = false;
-        if (this.allowDividendCalculationForInactiveClients == null || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
+        if (this.allowDividendCalculationForInactiveClients == null
+                || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
             this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
             returnValue = true;
         }
@@ -294,7 +295,8 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setLockPeriodFrequencyEnum(final PeriodFrequencyType lockinPeriodFrequencyType) {
         boolean returnValue = false;
-        if (this.lockinPeriodFrequencyType == null || !this.lockinPeriodFrequencyType.getValue().equals(lockinPeriodFrequencyType.getValue())) {
+        if (this.lockinPeriodFrequencyType == null
+                || !this.lockinPeriodFrequencyType.getValue().equals(lockinPeriodFrequencyType.getValue())) {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
             returnValue = true;
         }
@@ -312,7 +314,8 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setminimumActivePeriodTypeEnum(final PeriodFrequencyType minimumActivePeriodForDividends) {
         boolean returnValue = false;
-        if (this.minimumActivePeriodFrequencyType == null || !this.minimumActivePeriodFrequencyType.getValue().equals(minimumActivePeriodForDividends.getValue())) {
+        if (this.minimumActivePeriodFrequencyType == null
+                || !this.minimumActivePeriodFrequencyType.getValue().equals(minimumActivePeriodForDividends.getValue())) {
             this.minimumActivePeriodFrequencyType = minimumActivePeriodForDividends;
             returnValue = true;
         }
@@ -342,7 +345,7 @@ public class ShareAccount extends AbstractPersistableCustom {
     }
 
     public Client getClient() {
-        return this.client ;
+        return this.client;
     }
 
     public String getSavingsAccountNo() {
@@ -368,8 +371,8 @@ public class ShareAccount extends AbstractPersistableCustom {
     }
 
     public void updateRequestedShares(ShareAccountTransaction purchased) {
-        for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
-            if(!transaction.isChargeTransaction() && transaction.getId().equals(purchased.getId())) {
+        for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
+            if (!transaction.isChargeTransaction() && transaction.getId().equals(purchased.getId())) {
                 transaction.update(purchased.getPurchasedDate(), purchased.getTotalShares(), purchased.getPurchasePrice());
             }
         }
@@ -422,9 +425,9 @@ public class ShareAccount extends AbstractPersistableCustom {
         this.totalSharesApproved = null;
         Long tempTotalShares = Long.valueOf(0);
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
-            if(transaction.isPurchasTransaction()) {
+            if (transaction.isPurchasTransaction()) {
                 transaction.undoApprove();
-                tempTotalShares += transaction.getTotalShares() ;
+                tempTotalShares += transaction.getTotalShares();
             }
         }
         this.totalSharesPending = tempTotalShares;
@@ -437,19 +440,20 @@ public class ShareAccount extends AbstractPersistableCustom {
         this.totalSharesPending = null;
         this.totalSharesApproved = null;
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
-            if(transaction.isPendingForApprovalTransaction()) {
+            if (transaction.isPendingForApprovalTransaction()) {
                 transaction.reject();
             }
         }
     }
 
     public void close(final Date closedDate, final AppUser closedBy) {
-        this.closedDate = closedDate ;
-        this.closedBy = closedBy ;
-        this.status = ShareAccountStatusType.CLOSED.getValue() ;
+        this.closedDate = closedDate;
+        this.closedBy = closedBy;
+        this.status = ShareAccountStatusType.CLOSED.getValue();
         this.totalSharesPending = null;
         this.totalSharesApproved = null;
     }
+
     public String getAccountNumber() {
         return this.accountNumber;
     }
@@ -498,7 +502,7 @@ public class ShareAccount extends AbstractPersistableCustom {
     }
 
     public Long getTotalApprovedShares() {
-        return this.totalSharesApproved ;
+        return this.totalSharesApproved;
     }
 
     public void removePendingShares(Long totalShares) {
@@ -510,17 +514,17 @@ public class ShareAccount extends AbstractPersistableCustom {
     }
 
     public void setTotalPendingShares(final Long shares) {
-        this.totalSharesPending = shares ;
+        this.totalSharesPending = shares;
     }
 
     public ShareAccountTransaction getShareAccountTransaction(final ShareAccountTransaction transaction) {
         ShareAccountTransaction returnTrans = null;
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {
-            if (tran.getPurchasedDate().equals(transaction.getPurchasedDate())
-                    && tran.getTotalShares().equals(transaction.getTotalShares())
-                    && tran.getPurchasePrice().equals(transaction.getPurchasePrice())
-                    && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
-                    && tran.getTransactionType().equals(transaction.getTransactionType())) {
+            if (tran.getPurchasedDate().compareTo(transaction.getPurchasedDate()) == 0 ? Boolean.TRUE
+                    : Boolean.FALSE && tran.getTotalShares().equals(transaction.getTotalShares())
+                            && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0 ? Boolean.TRUE
+                                    : Boolean.FALSE && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
+                                            && tran.getTransactionType().equals(transaction.getTransactionType())) {
                 returnTrans = tran;
                 break;
             }
@@ -528,45 +532,45 @@ public class ShareAccount extends AbstractPersistableCustom {
         return returnTrans;
     }
 
-    public Date getSubmittedDate(){
-        return this.submittedDate ;
+    public Date getSubmittedDate() {
+        return this.submittedDate;
     }
 
     public Date getApprovedDate() {
-        return this.approvedDate ;
+        return this.approvedDate;
     }
 
     public void removeTransactions() {
-        for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
+        for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
             transaction.setActive(false);
         }
-        this.totalSharesApproved = Long.valueOf(0) ;
-        this.totalSharesPending = Long.valueOf(0) ;
+        this.totalSharesApproved = Long.valueOf(0);
+        this.totalSharesPending = Long.valueOf(0);
     }
 
     public void removeCharges() {
-        for(ShareAccountCharge charge: this.charges) {
+        for (ShareAccountCharge charge : this.charges) {
             charge.setActive(false);
         }
     }
 
     public void addCharges(Set<ShareAccountCharge> charges) {
-        this.charges.addAll(charges) ;
+        this.charges.addAll(charges);
     }
 
     public Integer getLockinPeriodFrequency() {
-        return this.lockinPeriodFrequency ;
+        return this.lockinPeriodFrequency;
     }
 
-    public  PeriodFrequencyType getLockinPeriodFrequencyType() {
-        return this.lockinPeriodFrequencyType ;
+    public PeriodFrequencyType getLockinPeriodFrequencyType() {
+        return this.lockinPeriodFrequencyType;
     }
 
     public Date getActivatedDate() {
-        return this.activatedDate ;
+        return this.activatedDate;
     }
 
     public Integer status() {
-        return this.status ;
+        return this.status;
     }
 }

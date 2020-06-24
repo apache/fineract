@@ -49,8 +49,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
     private final PaginationHelper<ShareProductDividendPayOutData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }
@@ -116,7 +115,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
             final Long id = rs.getLong("id");
             final BigDecimal amount = rs.getBigDecimal("amount");
             final Integer status = JdbcSupport.getInteger(rs, "status");
-            final EnumOptionData statusEnum = SharesEnumerations.ShareProductDividendStatusEnum(status);
+            final EnumOptionData statusEnum = SharesEnumerations.shareProductDividendStatusEnum(status);
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
 

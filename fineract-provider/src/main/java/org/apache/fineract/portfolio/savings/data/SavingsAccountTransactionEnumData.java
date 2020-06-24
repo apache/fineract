@@ -22,8 +22,7 @@ import java.io.Serializable;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 
 /**
- * Immutable data object represent savings account transaction type
- * enumerations.
+ * Immutable data object represent savings account transaction type enumerations.
  */
 public class SavingsAccountTransactionEnumData implements Serializable {
 

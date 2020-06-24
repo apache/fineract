@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
-public class CreditBureauData {
+public final class CreditBureauData {
 
     private final long creditBureauId;
 
@@ -32,8 +32,8 @@ public class CreditBureauData {
 
     private final long implementationKey;
 
-    private CreditBureauData(final long creditBureauId, final String creditBureauName, final String country,
-            final String productName, final String creditBureauSummary, final long implementationKey) {
+    private CreditBureauData(final long creditBureauId, final String creditBureauName, final String country, final String productName,
+            final String creditBureauSummary, final long implementationKey) {
         this.creditBureauId = creditBureauId;
         this.creditBureauName = creditBureauName;
         this.country = country;
@@ -43,11 +43,10 @@ public class CreditBureauData {
 
     }
 
-    public static CreditBureauData instance(final long creditBureauId, final String creditBureauName,
-            final String country, final String productName, final String creditBureauSummary, final long implementationKey) {
+    public static CreditBureauData instance(final long creditBureauId, final String creditBureauName, final String country,
+            final String productName, final String creditBureauSummary, final long implementationKey) {
 
-        return new CreditBureauData(creditBureauId, creditBureauName, country, productName, creditBureauSummary,
-                implementationKey);
+        return new CreditBureauData(creditBureauId, creditBureauName, country, productName, creditBureauSummary, implementationKey);
     }
 
     public String getCreditBureauSummary() {

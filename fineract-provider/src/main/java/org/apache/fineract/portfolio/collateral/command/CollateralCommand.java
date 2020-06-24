@@ -58,15 +58,16 @@ public class CollateralCommand {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
 
-        baseDataValidator.reset().parameter(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
-                .notNull().integerGreaterThanZero();
-        baseDataValidator.reset().parameter(CollateralJSONinputParams.VALUE.getValue()).value(this.value).ignoreIfNull()
-                .positiveAmount();
+        baseDataValidator.reset().parameter(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId).notNull()
+                .integerGreaterThanZero();
+        baseDataValidator.reset().parameter(CollateralJSONinputParams.VALUE.getValue()).value(this.value).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter(CollateralJSONinputParams.DESCRIPTION.getValue()).value(this.description).ignoreIfNull()
                 .notExceedingLengthOf(500);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateForUpdate() {
@@ -76,12 +77,13 @@ public class CollateralCommand {
 
         baseDataValidator.reset().parameter(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
                 .ignoreIfNull().integerGreaterThanZero();
-        baseDataValidator.reset().parameter(CollateralJSONinputParams.VALUE.getValue()).value(this.value).ignoreIfNull()
-                .positiveAmount();
+        baseDataValidator.reset().parameter(CollateralJSONinputParams.VALUE.getValue()).value(this.value).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter(CollateralJSONinputParams.DESCRIPTION.getValue()).value(this.description).ignoreIfNull()
                 .notExceedingLengthOf(500);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

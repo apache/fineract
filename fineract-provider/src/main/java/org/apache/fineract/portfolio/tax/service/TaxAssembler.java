@@ -132,8 +132,8 @@ public class TaxAssembler {
                 final JsonObject taxComponent = array.get(i).getAsJsonObject();
                 final Long mappingId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.idParamName, taxComponent);
                 final Long taxComponentId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName, taxComponent);
-                TaxComponent component =  null;
-                if(taxComponentId != null){
+                TaxComponent component = null;
+                if (taxComponentId != null) {
                     component = this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(taxComponentId);
                 }
                 LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, taxComponent,
@@ -158,6 +158,8 @@ public class TaxAssembler {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

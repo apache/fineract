@@ -29,10 +29,11 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "GetChargesResponse")
     public static final class GetChargesResponse {
-        private GetChargesResponse() {
-        }
 
-        final class GetChargesCurrencyResponse {
+        private GetChargesResponse() {}
+
+        static final class GetChargesCurrencyResponse {
+
             @ApiModelProperty(example = "USD")
             public String code;
             @ApiModelProperty(example = "US Dollar")
@@ -47,9 +48,9 @@ final class ChargesApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetChargesTimeTypeResponse {
-            private GetChargesTimeTypeResponse() {
-            }
+        static final class GetChargesTimeTypeResponse {
+
+            private GetChargesTimeTypeResponse() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -59,9 +60,9 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesAppliesToResponse {
-            private GetChargesAppliesToResponse() {
-            }
+        static final class GetChargesAppliesToResponse {
+
+            private GetChargesAppliesToResponse() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -71,9 +72,9 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesCalculationTypeResponse {
-            private GetChargesCalculationTypeResponse() {
-            }
+        static final class GetChargesCalculationTypeResponse {
+
+            private GetChargesCalculationTypeResponse() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -83,9 +84,9 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesPaymentModeResponse {
-            private GetChargesPaymentModeResponse() {
-            }
+        static final class GetChargesPaymentModeResponse {
+
+            private GetChargesPaymentModeResponse() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -114,8 +115,8 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "PostChargesRequest")
     public static final class PostChargesRequest {
-        private PostChargesRequest() {
-        }
+
+        private PostChargesRequest() {}
 
         @ApiModelProperty(example = "Loan Service fee")
         public String name;
@@ -139,8 +140,8 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "PostChargesResponse")
     public static final class PostChargesResponse {
-        private PostChargesResponse() {
-        }
+
+        private PostChargesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -148,8 +149,8 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "PutChargesChargeIdRequest")
     public static final class PutChargesChargeIdRequest {
-        private PutChargesChargeIdRequest() {
-        }
+
+        private PutChargesChargeIdRequest() {}
 
         @ApiModelProperty(example = "Loan service fee(changed)")
         public String name;
@@ -157,8 +158,8 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "PutChargesChargeIdResponse")
     public static final class PutChargesChargeIdResponse {
-        private PutChargesChargeIdResponse() {
-        }
+
+        private PutChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -167,8 +168,8 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "DeleteChargesChargeIdResponse")
     public static final class DeleteChargesChargeIdResponse {
-        private DeleteChargesChargeIdResponse() {
-        }
+
+        private DeleteChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -176,12 +177,12 @@ final class ChargesApiResourceSwagger {
 
     @ApiModel(value = "GetChargesTemplateResponse")
     public static final class GetChargesTemplateResponse {
-        private GetChargesTemplateResponse() {
-        }
 
-        final class GetChargesTemplateLoanChargeCalculationTypeOptions {
-            private GetChargesTemplateLoanChargeCalculationTypeOptions() {
-            }
+        private GetChargesTemplateResponse() {}
+
+        static final class GetChargesTemplateLoanChargeCalculationTypeOptions {
+
+            private GetChargesTemplateLoanChargeCalculationTypeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -191,9 +192,9 @@ final class ChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesTemplateLoanChargeTimeTypeOptions {
-            private GetChargesTemplateLoanChargeTimeTypeOptions() {
-            }
+        static final class GetChargesTemplateLoanChargeTimeTypeOptions {
+
+            private GetChargesTemplateLoanChargeTimeTypeOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -202,8 +203,11 @@ final class ChargesApiResourceSwagger {
             @ApiModelProperty(example = "Specified due date")
             public String value;
         }
-        final class GetChargesTemplateFeeFrequencyOptions{
-            private GetChargesTemplateFeeFrequencyOptions(){}
+
+        static final class GetChargesTemplateFeeFrequencyOptions {
+
+            private GetChargesTemplateFeeFrequencyOptions() {}
+
             @ApiModelProperty(example = "0")
             public Integer id;
             @ApiModelProperty(example = "loanTermFrequency.periodFrequencyType.days")
@@ -211,6 +215,7 @@ final class ChargesApiResourceSwagger {
             @ApiModelProperty(example = "Days")
             public String value;
         }
+
         @ApiModelProperty(example = "false")
         public String active;
         @ApiModelProperty(example = "false")

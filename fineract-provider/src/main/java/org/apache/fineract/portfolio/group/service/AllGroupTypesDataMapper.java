@@ -113,7 +113,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
                 submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                 closedByUsername, closedByFirstname, closedByLastname);
 
-        return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
-                staffName, hierarchy, groupLevel, timeline);
+        return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId,
+                centerName, staffId, staffName, hierarchy, groupLevel, timeline);
     }
 }

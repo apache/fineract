@@ -37,8 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link CollateralCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link CollateralCommand}'s.
  */
 @Component
 public final class CollateralCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CollateralCommand> {
@@ -52,7 +51,9 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
 
     @Override
     public CollateralCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = CollateralJSONinputParams.getAllValues();
@@ -67,8 +68,7 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
         final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue(),
                 element);
         final String description = this.fromApiJsonHelper.extractStringNamed(CollateralJSONinputParams.DESCRIPTION.getValue(), element);
-        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(CollateralJSONinputParams.VALUE.getValue(), element,
-                locale);
+        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(CollateralJSONinputParams.VALUE.getValue(), element, locale);
 
         return new CollateralCommand(collateralTypeId, value, description);
     }

@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class CalendarEntityTypeNotSupportedException extends AbstractPlatformResourceNotFoundException {
 
     public CalendarEntityTypeNotSupportedException(final String resource) {
-        super("calendar.entitytype.not.supported", "Calendar does not support resource "+ resource);
+        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
     }
 
 }

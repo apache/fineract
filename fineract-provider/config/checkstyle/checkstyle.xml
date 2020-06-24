@@ -26,8 +26,11 @@
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
 
-    <!-- Checks for whitespace                               -->
-    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <!--
+        You can learn more about individual checkstyles at: https://checkstyle.sourceforge.io/
+        Checks related to LineLength and Indentation are only handled by Spotless
+    -->
+
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
@@ -40,15 +43,13 @@
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
     <module name="SuppressWarningsFilter"/>
-<!-- TODO Enable maximum line length check:
-    <module name="LineLength">
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        <property name="fileExtensions" value="java"/>
-    </module>
-  -->
-   
+
+
     <module name="TreeWalker">
+    <module name="SeparatorWrap">
+            <property name="tokens" value="DOT"/>
+            <property name="option" value="nl"/>
+    </module>
     <module name="SuppressWarningsHolder" />
     <module name="RegexpSinglelineJava">
             <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
@@ -56,17 +57,45 @@
             <property name="ignoreComments" value="false" />
         </module>
         <module name="EqualsHashCode"/>
-
+        <module name="FinalClass"/>
+        <module name="SeparatorWrap">
+            <property name="tokens" value="COMMA"/>
+            <property name="option" value="EOL"/>
+        </module>
+        <module name="NoFinalizer"/>
+        <module name="FallThrough"/>
+        <module name="IllegalThrows" />
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="AvoidStarImport"/>
+        <module name="LeftCurly" />
+         <module name="AnnotationLocation">
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
+        </module>
         <module name="CustomImportOrder">
             <property name="thirdPartyPackageRegExp" value=".*"/>
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
+        <module name="OperatorWrap">
+            <property name="option" value="NL"/>
+            <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
+        </module>
+        <module name="RightCurly">
+            <property name="option" value="ALONE_OR_SINGLELINE"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, STATIC_INIT, INSTANCE_INIT"/>
+        </module>
+        <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
+            <property name="packageNameRegexp" value=".*" />
+            <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
+            <property name="forbiddenImportsExcludesRegexp" value="" />
+            <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
+        </module>
            <module name="OneStatementPerLine"/>
            <module name="EmptyStatement"/>
+         <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="expected|ignore"/>
+        </module>
              <module name="RegexpSinglelineJava">
             <property name="format" value="\.printStackTrace?\("/>
             <property name="message" value="Line contains printStacktrace()."/>
@@ -81,66 +110,59 @@
             <message key="name.invalidPattern"
              value="Method type name ''{0}'' must match pattern ''{1}''."/>
         </module>
-          <module name="PackageName">
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <!-- No PACKAGE_DEF token, as we like our license header to be glue to "package" statement, to save 1 line screen space -->
+            <property name="tokens" value="IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+        </module>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
             <message key="name.invalidPattern"
              value="Package name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+        <module name="OuterTypeFilename"/>
+        <module name="AnnotationLocation">
+            <property name="tokens" value="VARIABLE_DEF"/>
+            <property name="allowSamelineMultipleAnnotations" value="true"/>
         </module>
          <module name="AvoidEscapedUnicodeCharacters">
             <property name="allowEscapesForControlCharacters" value="true"/>
             <property name="allowByTailComment" value="true"/>
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
+        <module name="EmptyBlock">
+            <property name="option" value="TEXT"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
+        </module>
           <module name="UpperEll"/>
           <module name="NeedBraces"/>
-          <module name="ArrayTypeStyle"/>     
+          <module name="MethodParamPad"/>
+          <module name="ArrayTypeStyle"/>
           <module name="NoLineWrap"/>
          <module name="IllegalTokenText">
             <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
             <property name="format" value="\\u00(08|09|0(a|A)|0(c|C)|0(d|D)|22|27|5(C|c))|\\(0(10|11|12|14|15|42|47)|134)"/>
             <property name="message" value="Avoid using corresponding octal or Unicode escape."/>
         </module>
+          <module name="GenericWhitespace">
+            <message key="ws.followed"
+             value="GenericWhitespace ''{0}'' is followed by whitespace."/>
+             <message key="ws.preceded"
+             value="GenericWhitespace ''{0}'' is preceded with whitespace."/>
+             <message key="ws.illegalFollow"
+             value="GenericWhitespace ''{0}'' should followed by whitespace."/>
+             <message key="ws.notPreceded"
+             value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
+        </module>
           <module name="OneTopLevelClass"/>
-<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
-
-        <module name="HiddenField">
-            <property name="ignoreAbstractMethods" value="true" />
-            <property name="ignoreConstructorParameter" value="true" />
-            <property name="ignoreSetter" value="true" />
-            <property name="setterCanReturnItsClass" value="true" />
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+            <message key="name.invalidPattern"
+             value="Method name ''{0}'' must match pattern ''{1}''."/>
         </module>
-        <module name="FinalClass"/>
-        <module name="HideUtilityClassConstructor"/>
-
-        < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
-        <module name="IllegalCatch"/>
-        <module name="IllegalThrows" />
-        <module name="MutableException"/>
-        <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck" />
-
-        < ! - - Checks for API conventions and the like - - >
-        <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
-            <property name="packageNameRegexp" value=".*" />
-            <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
-            <property name="forbiddenImportsExcludesRegexp" value="" />
-            <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
-        </module>
-      
-
-        <module name="OuterTypeFilename"/>
-        
-       
-        <module name="EmptyBlock">
-            <property name="option" value="TEXT"/>
-            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
-        </module>
-      
-        <module name="LeftCurly" />
-        <module name="RightCurly">
-            <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, STATIC_INIT, INSTANCE_INIT"/>
-        </module>
-        <module name="WhitespaceAround">
+          <module name="MutableException"/>
+            <module name="WhitespaceAround">
             <property name="allowEmptyConstructors" value="true"/>
             <property name="allowEmptyMethods" value="true"/>
             <property name="allowEmptyTypes" value="true"/>
@@ -151,27 +173,43 @@
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
         <module name="ParenPad" />
-     
-        <module name="MultipleVariableDeclarations"/>
-  
-        <module name="MissingSwitchDefault"/>
-        <module name="FallThrough"/>
-      
         <module name="ModifierOrder"/>
+<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
+
+        <module name="HiddenField">
+            <property name="ignoreAbstractMethods" value="true" />
+            <property name="ignoreConstructorParameter" value="true" />
+            <property name="ignoreSetter" value="true" />
+            <property name="setterCanReturnItsClass" value="true" />
+        </module>
+
+        <module name="HideUtilityClassConstructor"/>
+
+        < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
+        <module name="IllegalCatch"/>
+
+
+        <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <module name="MissingSwitchDefault"/>
+
+
+
         <module name="RedundantModifier"/>
-        <module name="EmptyLineSeparator">
-            <property name="allowNoEmptyLineBetweenFields" value="true"/>
-            < ! - - No PACKAGE_DEF token, as we like our license header to be glue to "package" statement, to save 1 line screen space - - >
-            <property name="tokens" value="IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
-        </module>
-        <module name="SeparatorWrap">
-            <property name="tokens" value="DOT"/>
-            <property name="option" value="nl"/>
-        </module>
-        <module name="SeparatorWrap">
-            <property name="tokens" value="COMMA"/>
-            <property name="option" value="EOL"/>
-        </module>
+
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
             <message key="name.invalidPattern"
@@ -194,32 +232,10 @@
             <message key="name.invalidPattern"
              value="Class type name ''{0}'' must match pattern ''{1}''."/>
         </module>
-        <module name="MethodName">
-            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
-            <message key="name.invalidPattern"
-             value="Method name ''{0}'' must match pattern ''{1}''."/>
-        </module>
-    
+
         <module name="ConstantName" />
-        <module name="NoFinalizer"/>
-        <module name="GenericWhitespace">
-            <message key="ws.followed"
-             value="GenericWhitespace ''{0}'' is followed by whitespace."/>
-             <message key="ws.preceded"
-             value="GenericWhitespace ''{0}'' is preceded with whitespace."/>
-             <message key="ws.illegalFollow"
-             value="GenericWhitespace ''{0}'' should followed by whitespace."/>
-             <message key="ws.notPreceded"
-             value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
-        </module>
-        <module name="Indentation">
-            <property name="basicOffset" value="4"/>
-            <property name="braceAdjustment" value="0"/>
-            <property name="caseIndent" value="4"/>
-            <property name="throwsIndent" value="4"/>
-            <property name="lineWrappingIndentation" value="4"/>
-            <property name="arrayInitIndent" value="4"/>
-        </module>
+
+
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
             <property name="allowedAbbreviationLength" value="4"/>
@@ -227,24 +243,6 @@
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>
 
-        <module name="MethodParamPad"/>
-        <module name="OperatorWrap">
-            <property name="option" value="NL"/>
-            <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
-        </module>
-        <module name="AnnotationLocation">
-            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
-        </module>
-        <module name="AnnotationLocation">
-            <property name="tokens" value="VARIABLE_DEF"/>
-            <property name="allowSamelineMultipleAnnotations" value="true"/>
-        </module>
-
-        <module name="MethodName">
-            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
-            <message key="name.invalidPattern"
-             value="Method name ''{0}'' must match pattern ''{1}''."/>
-        </module>
 
         <! - - Enable some JavaDoc validation (requires quite a lot of manual clean up work; not a top priority for initial Checkstyle adoption - ->
         <module name="JavadocTagContinuationIndentation"/>

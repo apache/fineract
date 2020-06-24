@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = PocketApiConstants.pocketEntityName, action = PocketApiConstants.delinkAccountsActionName)
 public class DelinkAccountsFromPocketCommandHandler implements NewCommandSourceHandler {
+
     private final PocketWritePlatformService pocketWritePlatformService;
 
     @Autowired

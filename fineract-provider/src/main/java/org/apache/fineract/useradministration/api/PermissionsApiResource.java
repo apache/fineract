@@ -56,14 +56,16 @@ import org.springframework.stereotype.Component;
 @Path("/permissions")
 @Component
 @Scope("singleton")
-@Api(tags = {"Permissions"})
+@Api(tags = { "Permissions" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Permissions", description = "An API capability to support management of application permissions for user administration.\n" + "\n" + "There is no Apache Fineract functionality for creating or deleting permissions. Permissions come pre-installed.\n" + "\n" + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
-})
+        @Tag(name = "Permissions", description = "An API capability to support management of application permissions for user administration.\n"
+                + "\n" + "There is no Apache Fineract functionality for creating or deleting permissions. Permissions come pre-installed.\n"
+                + "\n"
+                + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality") })
 public class PermissionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("grouping", "code", "entityName", "actionName",
-            "selected", "isMakerChecker"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
     private final String resourceNameForPermissions = "PERMISSION";
 
     private final PlatformSecurityContext context;
@@ -74,8 +76,7 @@ public class PermissionsApiResource {
 
     @Autowired
     public PermissionsApiResource(final PlatformSecurityContext context, final PermissionReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<PermissionData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final DefaultToApiJsonSerializer<PermissionData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.permissionReadPlatformService = readPlatformService;
@@ -87,8 +88,15 @@ public class PermissionsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Application Permissions", notes = "ARGUMENTS\n" + "makerCheckerableoptional, Values are true, false. Default is false.\n" + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n" + "\n" + "If makerCheckerable=true then the \"selected\" attribute shows whether the permission is enabled for Maker Check functionality.\n" + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n" + "\n" + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n" + "permissions?fields=grouping,code")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = PermissionsApiResourceSwagger.GetPermissionsResponse.class, responseContainer = "List")})
+    @ApiOperation(value = "List Application Permissions", notes = "ARGUMENTS\n"
+            + "makerCheckerableoptional, Values are true, false. Default is false.\n"
+            + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n"
+            + "\n"
+            + "If makerCheckerable=true then the \"selected\" attribute shows whether the permission is enabled for Maker Check functionality.\n"
+            + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n" + "\n"
+            + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n" + "permissions?fields=grouping,code")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "", response = PermissionsApiResourceSwagger.GetPermissionsResponse.class, responseContainer = "List") })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -109,8 +117,9 @@ public class PermissionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Enable/Disable Permissions for Maker Checker", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PermissionsApiResourceSwagger.PutPermissionsRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PermissionsApiResourceSwagger.PutPermissionsRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class) })
     public String updatePermissionsDetails(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //

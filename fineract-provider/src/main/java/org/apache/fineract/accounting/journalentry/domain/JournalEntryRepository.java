@@ -24,8 +24,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long>, JpaSpecificationExecutor<JournalEntry>,
-        JournalEntryRepositoryCustom {
+public interface JournalEntryRepository
+        extends JpaRepository<JournalEntry, Long>, JpaSpecificationExecutor<JournalEntry>, JournalEntryRepositoryCustom {
 
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.manualEntry=true")
     List<JournalEntry> findUnReversedManualJournalEntriesByTransactionId(@Param("transactionId") String transactionId);
@@ -37,14 +37,20 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     List<String> findNonReversedContraTansactionIds(@Param("contraId") Long contraId, @Param("officeId") Long officeId);
 
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.entityId= :entityId and journalEntry.entityType = :entityType")
-    List<JournalEntry> findProvisioningJournalEntriesByEntityId(@Param("entityId") Long entityId, @Param("entityType") Integer entityType) ;
+    List<JournalEntry> findProvisioningJournalEntriesByEntityId(@Param("entityId") Long entityId, @Param("entityType") Integer entityType);
 
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.entityType = :entityType")
     List<JournalEntry> findJournalEntries(@Param("transactionId") String transactionId, @Param("entityType") Integer entityType);
 
-    /*@Query("select journalEntry from JournalEntry journalEntry where glAccount.id= :accountId and transactionId= :transactionId and transactionDate= :transactionDate"
-            + " and type= :journalEntryType and entityType=1 and entityId= :loanId and loanTransaction.id= :loanTransactionId")
-    JournalEntry findLOANJournalEntryWith(@Param("accountId") Long accountId, @Param("transactionId") String transactionId,
-            @Param("transactionDate") Date transactionDate, @Param("journalEntryType") Integer journalEntryType,
-            @Param("loanId") Long loanId, @Param("loanTransactionId") Long loanTransactionId);*/
+    /*
+     * @Query("select journalEntry from JournalEntry journalEntry where glAccount.id= :accountId and transactionId= :transactionId and transactionDate= :transactionDate"
+     * +
+     * " and type= :journalEntryType and entityType=1 and entityId= :loanId and loanTransaction.id= :loanTransactionId"
+     * ) JournalEntry findLOANJournalEntryWith(@Param("accountId") Long accountId, @Param("transactionId") String
+     * transactionId,
+     *
+     * @Param("transactionDate") Date transactionDate, @Param("journalEntryType") Integer journalEntryType,
+     *
+     * @Param("loanId") Long loanId, @Param("loanTransactionId") Long loanTransactionId);
+     */
 }

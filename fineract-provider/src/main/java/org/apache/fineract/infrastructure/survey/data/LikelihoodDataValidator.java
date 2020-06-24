@@ -46,8 +46,7 @@ import org.springframework.stereotype.Component;
 public class LikelihoodDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(LikelihoodApiConstants.ACTIVE));
+    private static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(Arrays.asList(LikelihoodApiConstants.ACTIVE));
 
     @Autowired
     public LikelihoodDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -56,13 +55,16 @@ public class LikelihoodDataValidator {
 
     public void validateForUpdate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_LIKELIHOOD_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LikelihoodApiConstants.LIKELIHOOD_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(LikelihoodApiConstants.LIKELIHOOD_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (this.fromApiJsonHelper.parameterExists(LikelihoodApiConstants.ACTIVE, element)) {
@@ -71,7 +73,9 @@ public class LikelihoodDataValidator {
             baseDataValidator.reset().parameter(LikelihoodApiConstants.ACTIVE).value(enabledBool).validateForBooleanValue();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 }

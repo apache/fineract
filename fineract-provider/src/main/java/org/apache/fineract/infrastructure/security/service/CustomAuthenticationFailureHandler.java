@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     private String defaultFailureUrl;
     private boolean forwardToDestination = false;
@@ -45,29 +45,28 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public CustomAuthenticationFailureHandler() {}
 
     /**
-     * Performs the redirect or forward to the {@code defaultFailureUrl} if set,
-     * otherwise returns a 401 error code.
+     * Performs the redirect or forward to the {@code defaultFailureUrl} if set, otherwise returns a 401 error code.
      * <p>
-     * If redirecting or forwarding, {@code saveException} will be called to
-     * cache the exception for use in the target view.
+     * If redirecting or forwarding, {@code saveException} will be called to cache the exception for use in the target
+     * view.
      */
     @Override
     public void onAuthenticationFailure(final HttpServletRequest request, final HttpServletResponse response,
             final AuthenticationException exception) throws IOException, ServletException {
 
         if (this.defaultFailureUrl == null) {
-            this.logger.debug("No failure URL set, sending 401 Unauthorized error");
+            this.LOG.debug("No failure URL set, sending 401 Unauthorized error");
 
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
         } else {
             saveException(request, exception);
 
             if (this.forwardToDestination) {
-                this.logger.debug("Forwarding to {}", this.defaultFailureUrl);
+                this.LOG.debug("Forwarding to {}", this.defaultFailureUrl);
 
                 request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
             } else {
-                this.logger.debug("Redirecting to {}", this.defaultFailureUrl);
+                this.LOG.debug("Redirecting to {}", this.defaultFailureUrl);
 
                 final String oauthToken = request.getParameter("oauth_token");
                 request.setAttribute("oauth_token", oauthToken);
@@ -80,10 +79,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     /**
      * Caches the {@code AuthenticationException} for use in view rendering.
      * <p>
-     * If {@code forwardToDestination} is set to true, request scope will be
-     * used, otherwise it will attempt to store the exception in the session. If
-     * there is no session and {@code allowSessionCreation} is {@code true} a
-     * session will be created. Otherwise the exception will not be stored.
+     * If {@code forwardToDestination} is set to true, request scope will be used, otherwise it will attempt to store
+     * the exception in the session. If there is no session and {@code allowSessionCreation} is {@code true} a session
+     * will be created. Otherwise the exception will not be stored.
      */
     protected final void saveException(final HttpServletRequest request, final AuthenticationException exception) {
         if (this.forwardToDestination) {
@@ -113,8 +111,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     }
 
     /**
-     * If set to <tt>true</tt>, performs a forward to the failure destination
-     * URL instead of a redirect. Defaults to <tt>false</tt>.
+     * If set to <tt>true</tt>, performs a forward to the failure destination URL instead of a redirect. Defaults to
+     * <tt>false</tt>.
      */
     public void setUseForward(final boolean forwardToDestination) {
         this.forwardToDestination = forwardToDestination;

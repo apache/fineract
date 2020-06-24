@@ -20,5 +20,5 @@ package org.apache.fineract.infrastructure.survey.api;
 
 public class PovertyLineApiConstants {
 
-    final static String POVERTY_LINE_RESOURCE_NAME = "PovertyLine";
+    static final String POVERTY_LINE_RESOURCE_NAME = "PovertyLine";
 }

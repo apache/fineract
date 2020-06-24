@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class PasswordValidationPolicyNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public PasswordValidationPolicyNotFoundException(final Long id) {
-        super("error.msg.password.validation.policy.id.invalid", "Password Validation Policy with identifier " + id + " does not exist", id);
+        super("error.msg.password.validation.policy.id.invalid", "Password Validation Policy with identifier " + id + " does not exist",
+                id);
     }
 
     public PasswordValidationPolicyNotFoundException() {

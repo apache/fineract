@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing a savings account.
  */
 @SuppressWarnings("unused")
-public class AccountTransferData implements Serializable {
+public final class AccountTransferData implements Serializable {
 
     private final Long id;
     private final Boolean reversed;
@@ -97,8 +97,8 @@ public class AccountTransferData implements Serializable {
         final EnumOptionData fromAccountType = null;
         final EnumOptionData toAccountType = null;
 
-        return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate,
-                description, null, null, toAccountType, null, null, null, null, null, null, null, null, null);
+        return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate, description,
+                null, null, toAccountType, null, null, null, null, null, null, null, null, null);
     }
 
     private AccountTransferData(final Long id, final Boolean reversed, final OfficeData fromOffice, final ClientData fromClient,

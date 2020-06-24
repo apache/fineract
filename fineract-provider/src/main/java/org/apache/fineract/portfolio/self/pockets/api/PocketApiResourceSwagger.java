@@ -27,41 +27,44 @@ import java.util.Set;
  */
 
 final class PocketApiResourceSwagger {
-    private PocketApiResourceSwagger() {
-    }
+
+    private PocketApiResourceSwagger() {}
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
-    public final static class PostLinkDelinkAccountsToFromPocketRequest {
-        private PostLinkDelinkAccountsToFromPocketRequest() {
-    }
-        final class GetPocketAccountDetail {
-            private GetPocketAccountDetail() {
-            }
+    public static final class PostLinkDelinkAccountsToFromPocketRequest {
+
+        private PostLinkDelinkAccountsToFromPocketRequest() {}
+
+        static final class GetPocketAccountDetail {
+
+            private GetPocketAccountDetail() {}
 
             @ApiModelProperty(example = "11")
             public Integer accountId;
             @ApiModelProperty(example = "LOAN")
             public String accountType;
         }
+
         public Set<GetPocketAccountDetail> accountDetail;
     }
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
-    public final static class PostLinkDelinkAccountsToFromPocketResponse {
-        private PostLinkDelinkAccountsToFromPocketResponse() {
-    }
+    public static final class PostLinkDelinkAccountsToFromPocketResponse {
+
+        private PostLinkDelinkAccountsToFromPocketResponse() {}
+
         @ApiModelProperty(example = "6")
         public Integer resourceId;
     }
 
     @ApiModel(value = "GetAccountsLinkedToPocketResponse")
-    public final static class GetAccountsLinkedToPocketResponse {
-        private GetAccountsLinkedToPocketResponse() {
-        }
+    public static final class GetAccountsLinkedToPocketResponse {
 
-        final class GetPocketLoanAccounts {
-            private GetPocketLoanAccounts() {
-            }
+        private GetAccountsLinkedToPocketResponse() {}
+
+        static final class GetPocketLoanAccounts {
+
+            private GetPocketLoanAccounts() {}
 
             @ApiModelProperty(example = "6")
             public Integer pocketId;
@@ -75,9 +78,9 @@ final class PocketApiResourceSwagger {
             public Integer id;
         }
 
-        final class GetPocketSavingAccounts {
-            private GetPocketSavingAccounts() {
-            }
+        static final class GetPocketSavingAccounts {
+
+            private GetPocketSavingAccounts() {}
 
             @ApiModelProperty(example = "6")
             public Integer pocketId;
@@ -91,9 +94,9 @@ final class PocketApiResourceSwagger {
             public Integer id;
         }
 
-        final class GetPocketShareAccounts {
-            private GetPocketShareAccounts() {
-            }
+        static final class GetPocketShareAccounts {
+
+            private GetPocketShareAccounts() {}
 
         }
 
@@ -102,4 +105,3 @@ final class PocketApiResourceSwagger {
         public Set<GetPocketShareAccounts> shareAccounts;
     }
 }
-

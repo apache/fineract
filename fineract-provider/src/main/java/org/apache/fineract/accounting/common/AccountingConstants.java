@@ -27,10 +27,13 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
 public class AccountingConstants {
 
-    /*** Accounting placeholders for cash based accounting for loan products ***/
+    /***
+     * Accounting placeholders for cash based accounting for loan products
+     ***/
     public static enum CashAccountsForLoan {
-        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(6), TRANSFERS_SUSPENSE(
-                10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
+
+        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
+                6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
 
         private final Integer value;
 
@@ -60,10 +63,14 @@ public class AccountingConstants {
         }
     }
 
-    /*** Accounting placeholders for accrual based accounting for loan products ***/
+    /***
+     * Accounting placeholders for accrual based accounting for loan products
+     ***/
     public static enum AccrualAccountsForLoan {
-        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(6), INTEREST_RECEIVABLE(
-                7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
+
+        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
+                6), INTEREST_RECEIVABLE(
+                        7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
 
         private final Integer value;
 
@@ -95,18 +102,23 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a loan product
+     * Enum of all accounting related input parameter names used while creating/updating a loan product
      ***/
     public static enum LoanProductAccountingParams {
-        FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS("interestOnLoanAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), OVERPAYMENT(
-                "overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE(
-                "receivableFeeAccountId"), PENALTIES_RECEIVABLE("receivablePenaltyAccountId"), TRANSFERS_SUSPENSE(
-                "transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
-                "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID("incomeAccountId"), INCOME_FROM_RECOVERY(
-                "incomeFromRecoveryAccountId");
+
+        FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS(
+                "interestOnLoanAccountId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), INCOME_FROM_PENALTIES(
+                        "incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), OVERPAYMENT(
+                                "overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE(
+                                        "receivableFeeAccountId"), PENALTIES_RECEIVABLE("receivablePenaltyAccountId"), TRANSFERS_SUSPENSE(
+                                                "transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
+                                                        "paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
+                                                                "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING(
+                                                                        "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
+                                                                                "penaltyToIncomeAccountMappings"), CHARGE_ID(
+                                                                                        "chargeId"), INCOME_ACCOUNT_ID(
+                                                                                                "incomeAccountId"), INCOME_FROM_RECOVERY(
+                                                                                                        "incomeFromRecoveryAccountId");
 
         private final String value;
 
@@ -125,11 +137,15 @@ public class AccountingConstants {
     }
 
     public static enum LoanProductAccountingDataParams {
-        FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS("interestOnLoanAccount"), INCOME_FROM_FEES(
-                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), OVERPAYMENT(
-                "overpaymentLiabilityAccount"), INTEREST_RECEIVABLE("receivableInterestAccount"), FEES_RECEIVABLE("receivableFeeAccount"), PENALTIES_RECEIVABLE(
-                "receivablePenaltyAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), INCOME_ACCOUNT_ID("incomeAccount"), INCOME_FROM_RECOVERY(
-                "incomeFromRecoveryAccount"), LIABILITY_TRANSFER_SUSPENSE("liabilityTransferInSuspenseAccount");
+
+        FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS(
+                "interestOnLoanAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
+                        "incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), OVERPAYMENT(
+                                "overpaymentLiabilityAccount"), INTEREST_RECEIVABLE("receivableInterestAccount"), FEES_RECEIVABLE(
+                                        "receivableFeeAccount"), PENALTIES_RECEIVABLE("receivablePenaltyAccount"), TRANSFERS_SUSPENSE(
+                                                "transfersInSuspenseAccount"), INCOME_ACCOUNT_ID("incomeAccount"), INCOME_FROM_RECOVERY(
+                                                        "incomeFromRecoveryAccount"), LIABILITY_TRANSFER_SUSPENSE(
+                                                                "liabilityTransferInSuspenseAccount");
 
         private final String value;
 
@@ -147,8 +163,11 @@ public class AccountingConstants {
         }
     }
 
-    /*** Accounting placeholders for cash based accounting for savings products ***/
+    /***
+     * Accounting placeholders for cash based accounting for savings products
+     ***/
     public static enum CashAccountsForSavings {
+
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
                 10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
 
@@ -181,17 +200,23 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a savings product
+     * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
     public static enum SavingProductAccountingParams {
+
         SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
                 "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
-                "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
-                "paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
-                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
-                "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"), INCOME_FROM_INTEREST("incomeFromInterestId"), LOSSES_WRITTEN_OFF(
-                "writeOffAccountId"), ESCHEAT_LIABILITY("escheatLiabilityId");
+                        "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
+                                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE("paymentTypeId"), FUND_SOURCE(
+                                        "fundSourceAccountId"), TRANSFERS_SUSPENSE(
+                                                "transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
+                                                        "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
+                                                                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
+                                                                        "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL(
+                                                                                "overdraftPortfolioControlId"), INCOME_FROM_INTEREST(
+                                                                                        "incomeFromInterestId"), LOSSES_WRITTEN_OFF(
+                                                                                                "writeOffAccountId"), ESCHEAT_LIABILITY(
+                                                                                                        "escheatLiabilityId");
 
         private final String value;
 
@@ -210,12 +235,15 @@ public class AccountingConstants {
     }
 
     public static enum SavingProductAccountingDataParams {
-        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
-                "incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS("interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE(
-                "fundSourceAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                "penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
-                "overdraftPortfolioControl"), INCOME_FROM_INTEREST("incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount"),
-                ESCHEAT_LIABILITY("escheatLiabilityAccount");
+
+        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES(
+                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS(
+                        "interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE("fundSourceAccount"), TRANSFERS_SUSPENSE(
+                                "transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID(
+                                        "charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
+                                                "overdraftPortfolioControl"), INCOME_FROM_INTEREST(
+                                                        "incomeFromInterest"), LOSSES_WRITTEN_OFF(
+                                                                "writeOffAccount"), ESCHEAT_LIABILITY("escheatLiabilityAccount");
 
         private final String value;
 
@@ -234,10 +262,12 @@ public class AccountingConstants {
     }
 
     public static enum FinancialActivity {
-        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), CASH_AT_MAINVAULT(
-                101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(
-                300, "openingBalancesTransferContra", GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), PAYABLE_DIVIDENDS(
-                201, "payableDividends", GLAccountType.LIABILITY);
+
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer",
+                GLAccountType.LIABILITY), CASH_AT_MAINVAULT(101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102,
+                        "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(300, "openingBalancesTransferContra",
+                                GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource",
+                                        GLAccountType.ASSET), PAYABLE_DIVIDENDS(201, "payableDividends", GLAccountType.LIABILITY);
 
         private final Integer value;
         private final String code;
@@ -245,7 +275,7 @@ public class AccountingConstants {
 
         private static List<FinancialActivityData> financialActivities;
         static {
-  financialActivities = new ArrayList<>();
+            financialActivities = new ArrayList<>();
             for (final FinancialActivity type : FinancialActivity.values()) {
                 FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                 financialActivities.add(financialActivityData);
@@ -306,8 +336,11 @@ public class AccountingConstants {
         }
     }
 
-    /*** Accounting placeholders for cash based accounting for Share products ***/
+    /***
+     * Accounting placeholders for cash based accounting for Share products
+     ***/
     public static enum CashAccountsForShares {
+
         SHARES_REFERENCE(1), SHARES_SUSPENSE(2), INCOME_FROM_FEES(3), SHARES_EQUITY(4);
 
         private final Integer value;
@@ -339,10 +372,10 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a savings product
+     * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
     public static enum SharesProductAccountingParams {
+
         SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), SHARES_EQUITY(
                 "shareEquityId");
 

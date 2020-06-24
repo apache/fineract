@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -33,21 +33,22 @@ import org.apache.fineract.integrationtests.common.HookHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.http.conn.HttpHostConnectException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
     private HookHelper hookHelper;
     private OfficeHelper officeHelper;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -69,17 +70,17 @@ public class HookIntegrationTest {
         try {
 
             /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
+             * sleep for a three seconds after each failure to increase the likelihood of the previous request for
+             * creating office completing
              **/
 
             for (int i = 0; i < 6; i++) {
                 try {
                     final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
                     final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
-                    Assert.assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
-                            notificationOfficeId);
-                    LOG.info("Notification Office Id - {}" , notificationOfficeId);
+                    Assertions.assertEquals(createdOfficeID, notificationOfficeId,
+                            "Equality check for created officeId and hook received payload officeId");
+                    LOG.info("Notification Office Id - {}", notificationOfficeId);
                     i = 6;
                 } catch (Exception e) {
                     TimeUnit.SECONDS.sleep(3);
@@ -97,20 +98,20 @@ public class HookIntegrationTest {
     }
 
     @Test
-    public void createUpdateAndDeleteHook(){
+    public void createUpdateAndDeleteHook() {
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
         final String updateURL = "http://localhost";
 
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
-        Assert.assertNotNull(hookId);
+        Assertions.assertNotNull(hookId);
         this.hookHelper.verifyHookCreatedOnServer(hookId);
-        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}", hookId);
         this.hookHelper.updateHook(updateURL, hookId);
         this.hookHelper.verifyUpdateHook(updateURL, hookId);
-        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}", hookId);
         this.hookHelper.deleteHook(hookId);
         this.hookHelper.verifyDeleteHook(hookId);
-        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}", hookId);
 
     }
 }

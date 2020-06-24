@@ -21,10 +21,9 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 import java.util.Collection;
 
 /**
- * Immutable data object for clients with loans due for disbursement or
- * collection.
+ * Immutable data object for clients with loans due for disbursement or collection.
  */
-public class IndividualClientData {
+public final class IndividualClientData {
 
     private final Long clientId;
     private final String clientName;
@@ -98,6 +97,9 @@ public class IndividualClientData {
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof IndividualClientData)) {
+            return false;
+        }
         final IndividualClientData clientData = (IndividualClientData) obj;
         return clientData.clientId.compareTo(this.clientId) == 0;
     }

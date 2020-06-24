@@ -60,9 +60,9 @@ public class AccountTransferDTO {
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
-            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails,
-            final String noteText, final String txnExternalId, final Loan loan, SavingsAccount toSavingsAccount,
-            final SavingsAccount fromSavingsAccount, final Boolean isRegularTransaction, Boolean isExceptionForBalanceCheck) {
+            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails, final String noteText,
+            final String txnExternalId, final Loan loan, SavingsAccount toSavingsAccount, final SavingsAccount fromSavingsAccount,
+            final Boolean isRegularTransaction, Boolean isExceptionForBalanceCheck) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -93,8 +93,8 @@ public class AccountTransferDTO {
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
-            final Integer fromTransferType, final Integer toTransferType, final String txnExternalId,
-            final Loan fromLoan, final Loan toLoan) {
+            final Integer fromTransferType, final Integer toTransferType, final String txnExternalId, final Loan fromLoan,
+            final Loan toLoan) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;

@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class SelfBeneficiariesTPTData {
+
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
@@ -39,8 +40,7 @@ public class SelfBeneficiariesTPTData {
     @SuppressWarnings("unused")
     private final Collection<EnumOptionData> accountTypeOptions;
 
-    public SelfBeneficiariesTPTData(
-            final Collection<EnumOptionData> accountTypeOptions) {
+    public SelfBeneficiariesTPTData(final Collection<EnumOptionData> accountTypeOptions) {
         this.accountTypeOptions = accountTypeOptions;
         this.id = null;
         this.name = null;
@@ -51,10 +51,8 @@ public class SelfBeneficiariesTPTData {
         this.transferLimit = null;
     }
 
-    public SelfBeneficiariesTPTData(final Long id, final String name,
-            final String officeName, final String clientName,
-            final EnumOptionData accountType, final String accountNumber,
-            final Long transferLimit) {
+    public SelfBeneficiariesTPTData(final Long id, final String name, final String officeName, final String clientName,
+            final EnumOptionData accountType, final String accountNumber, final Long transferLimit) {
         this.accountTypeOptions = null;
         this.id = id;
         this.name = name;

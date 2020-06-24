@@ -28,17 +28,17 @@ import java.util.List;
  * Created by Chirag Gupta on 12/31/17.
  */
 final class RecurringDepositAccountTransactionsApiResourceSwagger {
-    private RecurringDepositAccountTransactionsApiResourceSwagger() {
-    }
+
+    private RecurringDepositAccountTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {
-        }
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
 
-        final class GetRecurringTransactionType {
-            private GetRecurringTransactionType() {
-            }
+        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
+
+        static final class GetRecurringTransactionType {
+
+            private GetRecurringTransactionType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -70,9 +70,9 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean overdraftFee;
         }
 
-        final class GetRecurringCurrency {
-            private GetRecurringCurrency() {
-            }
+        static final class GetRecurringCurrency {
+
+            private GetRecurringCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -109,13 +109,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
-        }
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
-        final class GetRecurringTransactionsCurrency {
-            private GetRecurringTransactionsCurrency() {
-            }
+        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
+
+        static final class GetRecurringTransactionsCurrency {
+
+            private GetRecurringTransactionsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -133,9 +133,9 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringTransactionsTransactionType {
-            private GetRecurringTransactionsTransactionType() {
-            }
+        static final class GetRecurringTransactionsTransactionType {
+
+            private GetRecurringTransactionsTransactionType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -153,13 +153,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
             public Boolean feeDeduction;
         }
 
-        final class GetRecurringPaymentDetailData {
-            private GetRecurringPaymentDetailData() {
-            }
+        static final class GetRecurringPaymentDetailData {
 
-            final class GetRecurringPaymentType {
-                private GetRecurringPaymentType() {
-                }
+            private GetRecurringPaymentDetailData() {}
+
+            static final class GetRecurringPaymentType {
+
+                private GetRecurringPaymentType() {}
 
                 @ApiModelProperty(example = "11")
                 public Integer id;
@@ -202,9 +202,9 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {
-        }
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
+
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
 
         @ApiModelProperty(example = "en")
         public String locale;
@@ -229,13 +229,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {
-        }
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
 
-        final class PostRecurringChanges {
-            private PostRecurringChanges() {
-            }
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
+
+        static final class PostRecurringChanges {
+
+            private PostRecurringChanges() {}
 
             @ApiModelProperty(example = "acc123")
             public String accountNumber;
@@ -261,9 +261,9 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
-        }
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

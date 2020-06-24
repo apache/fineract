@@ -46,6 +46,7 @@ public class DepositAccountUtils {
             break;
             case INVALID:
             break;
+            default:
         }
         return nextDepositDate;
     }

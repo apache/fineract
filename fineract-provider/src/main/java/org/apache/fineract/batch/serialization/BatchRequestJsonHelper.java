@@ -26,10 +26,8 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.stereotype.Component;
 
 /**
- * Extends
- * {@link org.apache.fineract.infrastructure.core.serialization.FromJsonHelper} to
- * de-serialize the incoming String into a JSON List of type
- * {@link org.apache.fineract.batch.domain.BatchRequest}
+ * Extends {@link org.apache.fineract.infrastructure.core.serialization.FromJsonHelper} to de-serialize the incoming
+ * String into a JSON List of type {@link org.apache.fineract.batch.domain.BatchRequest}
  *
  * @author Rishabh Shukla
  *
@@ -40,8 +38,7 @@ import org.springframework.stereotype.Component;
 public class BatchRequestJsonHelper extends FromJsonHelper {
 
     /**
-     * Returns a list of batchRequests after de-serializing it from the input
-     * JSON string.
+     * Returns a list of batchRequests after de-serializing it from the input JSON string.
      *
      * @param json
      * @return List&lt;BatchRequest&gt;

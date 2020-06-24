@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.rule.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when Accounting rule resources are not
- * found.
+ * A {@link RuntimeException} thrown when Accounting rule resources are not found.
  */
 public class AccountingRuleNotFoundException extends AbstractPlatformResourceNotFoundException {
 

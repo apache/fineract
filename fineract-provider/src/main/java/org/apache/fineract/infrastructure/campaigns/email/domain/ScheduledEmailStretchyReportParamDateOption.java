@@ -19,14 +19,16 @@
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum ScheduledEmailStretchyReportParamDateOption {
-    INVALID(0, "scheduledEmailStretchyReportParamDateOption.invalid", "invalid"),
-    TODAY(1, "scheduledEmailStretchyReportParamDateOption.today", "today"),
-    // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday", "yesterday"),
+
+    INVALID(0, "scheduledEmailStretchyReportParamDateOption.invalid", "invalid"), TODAY(1,
+            "scheduledEmailStretchyReportParamDateOption.today", "today"),
+    // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday",
+    // "yesterday"),
     TOMORROW(3, "scheduledEmailStretchyReportParamDateOption.tomorrow", "tomorrow");
 
-    private String code;
-    private String value;
-    private Integer id;
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     /**
      * @param id
@@ -49,15 +51,15 @@ public enum ScheduledEmailStretchyReportParamDateOption {
         switch (value) {
             case "today":
                 scheduledEmailStretchyReportParamDateOption = TODAY;
-                break;
+            break;
 
             // case "yesterday":
-                // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
-                // break;
+            // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
+            // break;
 
             case "tomorrow":
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
-                break;
+            break;
         }
 
         return scheduledEmailStretchyReportParamDateOption;
@@ -73,15 +75,15 @@ public enum ScheduledEmailStretchyReportParamDateOption {
         switch (id) {
             case 1:
                 scheduledEmailStretchyReportParamDateOption = TODAY;
-                break;
+            break;
 
             // case 2:
-                // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
-                // break;
+            // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
+            // break;
 
             case 3:
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
-                break;
+            break;
         }
 
         return scheduledEmailStretchyReportParamDateOption;

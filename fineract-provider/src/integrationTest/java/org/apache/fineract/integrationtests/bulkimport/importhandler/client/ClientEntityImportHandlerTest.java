@@ -45,16 +45,20 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientEntityImportHandlerTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -63,86 +67,92 @@ public class ClientEntityImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testClientImport() throws InterruptedException, IOException, ParseException {
 
-        //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
+        // in order to populate helper sheets
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create staff",outcome_staff_creation);
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
+        Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
-        Assert.assertNotNull("Could not create office" ,outcome_office_creation);
+        // in order to populate helper sheets
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
-        //in order to populate helper columns in client entity sheet
-        CodeHelper codeHelper=new CodeHelper();
-        //create constitution
-        codeHelper.retrieveOrCreateCodeValue(24,requestSpec,responseSpec);
-        //create client classification
-        codeHelper.retrieveOrCreateCodeValue(17,requestSpec,responseSpec);
-        //create client types
-        codeHelper.retrieveOrCreateCodeValue(16,requestSpec,responseSpec);
-        //create Address types
-        codeHelper.retrieveOrCreateCodeValue(29,requestSpec,responseSpec);
-        //create State
-        codeHelper.retrieveOrCreateCodeValue(27,requestSpec,responseSpec);
-        //create Country
-        codeHelper.retrieveOrCreateCodeValue(28,requestSpec,responseSpec);
-        //create Main business line
-        codeHelper.retrieveOrCreateCodeValue(25,requestSpec,responseSpec);
+        // in order to populate helper columns in client entity sheet
+        // create constitution
+        CodeHelper.retrieveOrCreateCodeValue(24, requestSpec, responseSpec);
+        // create client classification
+        CodeHelper.retrieveOrCreateCodeValue(17, requestSpec, responseSpec);
+        // create client types
+        CodeHelper.retrieveOrCreateCodeValue(16, requestSpec, responseSpec);
+        // create Address types
+        CodeHelper.retrieveOrCreateCodeValue(29, requestSpec, responseSpec);
+        // create State
+        CodeHelper.retrieveOrCreateCodeValue(27, requestSpec, responseSpec);
+        // create Country
+        CodeHelper.retrieveOrCreateCodeValue(28, requestSpec, responseSpec);
+        // create Main business line
+        CodeHelper.retrieveOrCreateCodeValue(25, requestSpec, responseSpec);
 
-        ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
-        Workbook workbook=clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY,"dd MMMM yyyy");
+        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY, "dd MMMM yyyy");
 
-        //insert dummy data into client entity sheet
+        // insert dummy data into client entity sheet
         Sheet clientEntitySheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
-        Row firstClientRow=clientEntitySheet.getRow(1);
-        firstClientRow.createCell(ClientEntityConstants.NAME_COL).setCellValue(Utils.randomNameGenerator("C_E_",6));
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
+        Row firstClientRow = clientEntitySheet.getRow(1);
+        firstClientRow.createCell(ClientEntityConstants.NAME_COL).setCellValue(Utils.randomNameGenerator("C_E_", 6));
+        Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
         firstClientRow.createCell(ClientEntityConstants.OFFICE_NAME_COL).setCellValue(staffSheet.getRow(1).getCell(0).getStringCellValue());
         firstClientRow.createCell(ClientEntityConstants.STAFF_NAME_COL).setCellValue(staffSheet.getRow(1).getCell(1).getStringCellValue());
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("dd MMMM yyyy");
-        Date incoporationDate=simpleDateFormat.parse("14 May 2001");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Date incoporationDate = simpleDateFormat.parse("14 May 2001");
         firstClientRow.createCell(ClientEntityConstants.INCOPORATION_DATE_COL).setCellValue(incoporationDate);
-        Date validTill=simpleDateFormat.parse("14 May 2019");
+        Date validTill = simpleDateFormat.parse("14 May 2019");
         firstClientRow.createCell(ClientEntityConstants.INCOPORATION_VALID_TILL_COL).setCellValue(validTill);
         firstClientRow.createCell(ClientEntityConstants.MOBILE_NO_COL).setCellValue(Utils.randomNumberGenerator(7));
-        firstClientRow.createCell(ClientEntityConstants.CLIENT_TYPE_COL).setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_TYPES).getStringCellValue());
-        firstClientRow.createCell(ClientEntityConstants.CLIENT_CLASSIFICATION_COL).setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_CLASSIFICATION).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CLIENT_TYPE_COL)
+                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_TYPES).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CLIENT_CLASSIFICATION_COL)
+                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_CLASSIFICATION).getStringCellValue());
         firstClientRow.createCell(ClientEntityConstants.INCOPORATION_NUMBER_COL).setCellValue(Utils.randomNumberGenerator(6));
-        firstClientRow.createCell(ClientEntityConstants.MAIN_BUSINESS_LINE).setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_MAIN_BUSINESS_LINE).getStringCellValue());
-        firstClientRow.createCell(ClientEntityConstants.CONSTITUTION_COL).setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CONSTITUTION_COL).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.MAIN_BUSINESS_LINE)
+                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_MAIN_BUSINESS_LINE).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CONSTITUTION_COL)
+                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CONSTITUTION_COL).getStringCellValue());
         firstClientRow.createCell(ClientEntityConstants.ACTIVE_COL).setCellValue("False");
-        Date submittedDate=simpleDateFormat.parse("28 September 2017");
+        Date submittedDate = simpleDateFormat.parse("28 September 2017");
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
 
-        File directory=new File(System.getProperty("user.home")+File.separator+"Fineract"+File.separator+"bulkimport"+File.separator+"integration_tests"+File.separator+"importhandler"+File.separator+"client") ;
+        File directory = new File(System.getProperty("user.home") + File.separator + "Fineract" + File.separator + "bulkimport"
+                + File.separator + "integration_tests" + File.separator + "importhandler" + File.separator + "client");
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        File file= new File(directory+File.separator+"ClientEntity.xls");
-        OutputStream outputStream=new FileOutputStream(file);
+        File file = new File(directory + File.separator + "ClientEntity.xls");
+        OutputStream outputStream = new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
 
-        String importDocumentId=clientHelper.importClientEntityTemplate(file);
+        String importDocumentId = clientHelper.importClientEntityTemplate(file);
         file.delete();
-        Assert.assertNotNull(importDocumentId);
+        Assertions.assertNotNull(importDocumentId);
 
-        //Wait for the creation of output excel
-        Thread.sleep(3000);
+        // Wait for the creation of output excel
+        Thread.sleep(10000);
 
-        //check status column of output excel
-        String location=clientHelper.getOutputTemplateLocation(importDocumentId);
+        // check status column of output excel
+        String location = clientHelper.getOutputTemplateLocation(importDocumentId);
         FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputWorkbook=new HSSFWorkbook(fileInputStream);
+        Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
         Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
-        Row row= outputClientEntitySheet.getRow(1);
-        Assert.assertEquals("Imported",row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+        Row row = outputClientEntitySheet.getRow(1);
 
+        LOG.info("Output location: {}", location);
+        LOG.info("Failure reason column: {}", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+
+        Assertions.assertEquals("Imported", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+        outputWorkbook.close();
     }
 }

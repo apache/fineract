@@ -38,24 +38,20 @@ public class ShareAccountSummaryData implements Serializable {
     private final CurrencyData currency;
     private final ShareAccountApplicationTimelineData timeline;
 
-    public ShareAccountSummaryData(final Long id, final String accountNo,
-            final String externalId, final Long productId,
-            final String productName, final String shortProductName,
-            final ShareAccountStatusEnumData status,
-            final CurrencyData currency, final Long approvedShares,
-            final Long pendingForApprovalShares,
-            final ShareAccountApplicationTimelineData timeline) {
+    public ShareAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
+            final String productName, final String shortProductName, final ShareAccountStatusEnumData status, final CurrencyData currency,
+            final Long approvedShares, final Long pendingForApprovalShares, final ShareAccountApplicationTimelineData timeline) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
-        if(approvedShares == null) {
-            this.totalApprovedShares = Long.valueOf(0) ;
-        }else {
+        if (approvedShares == null) {
+            this.totalApprovedShares = Long.valueOf(0);
+        } else {
             this.totalApprovedShares = approvedShares;
         }
-        if(pendingForApprovalShares == null) {
-            this.totalPendingForApprovalShares = Long.valueOf(0) ;
-        }else {
+        if (pendingForApprovalShares == null) {
+            this.totalPendingForApprovalShares = Long.valueOf(0);
+        } else {
             this.totalPendingForApprovalShares = pendingForApprovalShares;
         }
         this.productId = productId;
@@ -65,7 +61,6 @@ public class ShareAccountSummaryData implements Serializable {
         this.currency = currency;
         this.timeline = timeline;
     }
-
 
     public String getAccountNo() {
         return this.accountNo;

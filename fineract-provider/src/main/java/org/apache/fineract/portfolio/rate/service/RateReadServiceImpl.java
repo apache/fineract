@@ -43,111 +43,108 @@ import org.springframework.stereotype.Service;
 @Service
 public class RateReadServiceImpl implements RateReadService {
 
-  private final JdbcTemplate jdbcTemplate;
-  private final PlatformSecurityContext context;
+    private final JdbcTemplate jdbcTemplate;
+    private final PlatformSecurityContext context;
 
-  @Autowired
-  public RateReadServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource) {
-    this.context = context;
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
-  }
-
-  @Override
-  public Collection<RateData> retrieveAllRates() {
-    this.context.authenticatedUser();
-    final RateMapper rm = new RateMapper();
-    final String sql = "select " + rm.rateSchema();
-    return this.jdbcTemplate.query(sql, rm, new Object[]{});
-  }
-
-  @Override
-  public RateData retrieveOne(Long rateId) {
-    try {
-      this.context.authenticatedUser();
-      final RateMapper rm = new RateMapper();
-      final String sql = "select " + rm.rateSchema() + " where r.id = ?";
-      final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{rateId});
-      return selectedRate;
-
-    } catch (final EmptyResultDataAccessException e) {
-      throw new RateNotFoundException(rateId);
-    }
-  }
-
-  @Override
-  public RateData retrieveByName(String name) {
-    try {
-      this.context.authenticatedUser();
-      final RateMapper rm = new RateMapper();
-      final String sql = "select " + rm.rateSchema() + " where r.name = ?";
-      final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{name});
-      return selectedRate;
-
-    } catch (final EmptyResultDataAccessException e) {
-      throw new RateNotFoundException(name);
-    }
-  }
-
-  @Override
-  public Collection<RateData> retrieveLoanApplicableRates() {
-    this.context.authenticatedUser();
-    final RateMapper rm = new RateMapper();
-    final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue()});
-  }
-
-  @Override
-  public List<RateData> retrieveLoanRates(Long loanId) {
-    final RateMapper rm = new RateMapper();
-    final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{loanId});
-  }
-
-  @Override
-  public List<RateData> retrieveProductLoanRates(Long loanId) {
-    final RateMapper rm = new RateMapper();
-    final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{loanId});
-  }
-
-  private static final class RateMapper implements RowMapper<RateData> {
-
-
-    public String rateSchema() {
-      return " r.id as id, r.name as name, r.percentage as percentage, " +
-          "r.product_apply as productApply, r.active as active from m_rate r ";
-    }
-
-    public String loanRateSchema() {
-      return rateSchema() + " join m_loan_rate lr on lr.rate_id = r.id";
-    }
-
-    public String productLoanRateSchema() {
-      return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
-    }
-
-    public RateMapper() {
+    @Autowired
+    public RateReadServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource) {
+        this.context = context;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
-    public RateData mapRow(ResultSet resultSet, int i) throws SQLException {
-      final Long id = resultSet.getLong("id");
-      final String name = resultSet.getString("name");
-      final BigDecimal percentage = resultSet.getBigDecimal("percentage");
-      final Integer productApply = resultSet.getInt("productApply");
-      final EnumOptionData productAppliesTo = RateEnumerations.rateAppliesTo(productApply);
-      final boolean active = resultSet.getBoolean("active");
-      return RateData.instance(id, name, percentage, productAppliesTo, active);
+    public Collection<RateData> retrieveAllRates() {
+        this.context.authenticatedUser();
+        final RateMapper rm = new RateMapper();
+        final String sql = "select " + rm.rateSchema();
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
-    public RateData mapRow(Rate rateResponse, int i) {
-      final Long id = rateResponse.getId();
-      final String name = rateResponse.getName();
-      final BigDecimal percentage = rateResponse.getPercentage();
-      final EnumOptionData productApply = RateEnumerations
-          .rateAppliesTo(rateResponse.getProductApply());
-      final boolean active = rateResponse.isActive();
-      return RateData.instance(id, name, percentage, productApply, active);
+    @Override
+    public RateData retrieveOne(Long rateId) {
+        try {
+            this.context.authenticatedUser();
+            final RateMapper rm = new RateMapper();
+            final String sql = "select " + rm.rateSchema() + " where r.id = ?";
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId });
+            return selectedRate;
+
+        } catch (final EmptyResultDataAccessException e) {
+            throw new RateNotFoundException(rateId);
+        }
     }
-  }
+
+    @Override
+    public RateData retrieveByName(String name) {
+        try {
+            this.context.authenticatedUser();
+            final RateMapper rm = new RateMapper();
+            final String sql = "select " + rm.rateSchema() + " where r.name = ?";
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name });
+            return selectedRate;
+
+        } catch (final EmptyResultDataAccessException e) {
+            throw new RateNotFoundException(name);
+        }
+    }
+
+    @Override
+    public Collection<RateData> retrieveLoanApplicableRates() {
+        this.context.authenticatedUser();
+        final RateMapper rm = new RateMapper();
+        final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() });
+    }
+
+    @Override
+    public List<RateData> retrieveLoanRates(Long loanId) {
+        final RateMapper rm = new RateMapper();
+        final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+    }
+
+    @Override
+    public List<RateData> retrieveProductLoanRates(Long loanId) {
+        final RateMapper rm = new RateMapper();
+        final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+    }
+
+    private static final class RateMapper implements RowMapper<RateData> {
+
+        public String rateSchema() {
+            return " r.id as id, r.name as name, r.percentage as percentage, "
+                    + "r.product_apply as productApply, r.active as active from m_rate r ";
+        }
+
+        public String loanRateSchema() {
+            return rateSchema() + " join m_loan_rate lr on lr.rate_id = r.id";
+        }
+
+        public String productLoanRateSchema() {
+            return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
+        }
+
+        public RateMapper() {}
+
+        @Override
+        public RateData mapRow(ResultSet resultSet, int i) throws SQLException {
+            final Long id = resultSet.getLong("id");
+            final String name = resultSet.getString("name");
+            final BigDecimal percentage = resultSet.getBigDecimal("percentage");
+            final Integer productApply = resultSet.getInt("productApply");
+            final EnumOptionData productAppliesTo = RateEnumerations.rateAppliesTo(productApply);
+            final boolean active = resultSet.getBoolean("active");
+            return RateData.instance(id, name, percentage, productAppliesTo, active);
+        }
+
+        public RateData mapRow(Rate rateResponse, int i) {
+            final Long id = rateResponse.getId();
+            final String name = rateResponse.getName();
+            final BigDecimal percentage = rateResponse.getPercentage();
+            final EnumOptionData productApply = RateEnumerations.rateAppliesTo(rateResponse.getProductApply());
+            final boolean active = rateResponse.isActive();
+            return RateData.instance(id, name, percentage, productApply, active);
+        }
+    }
 }

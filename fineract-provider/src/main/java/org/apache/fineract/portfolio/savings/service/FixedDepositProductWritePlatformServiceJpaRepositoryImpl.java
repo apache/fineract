@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements FixedDepositProductWritePlatformService {
 
-    private final Logger logger;
+    private final Logger LOG;
     private final PlatformSecurityContext context;
     private final FixedDepositProductRepository fixedDepositProductRepository;
     private final DepositProductDataValidator fromApiJsonDataValidator;
@@ -75,7 +75,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
         this.fixedDepositProductRepository = fixedDepositProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
         this.depositProductAssembler = depositProductAssembler;
-        this.logger = LoggerFactory.getLogger(FixedDepositProductWritePlatformServiceJpaRepositoryImpl.class);
+        this.LOG = LoggerFactory.getLogger(FixedDepositProductWritePlatformServiceJpaRepositoryImpl.class);
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.chartAssembler = chartAssembler;
     }
@@ -101,8 +101,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -123,8 +123,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command, product
-                        .currency().getCode());
+                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
@@ -161,8 +161,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -184,21 +184,20 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Savings product with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name",
+                    "Savings product with name `" + name + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("sp_unq_short_name")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Savings product with short name `"
-                    + shortName + "` already exists", "shortName", shortName);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name",
+                    "Savings product with short name `" + shortName + "` already exists", "shortName", shortName);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dae);
@@ -207,6 +206,6 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.logger.error("Error occured.", dae);
+        this.LOG.error("Error occured.", dae);
     }
 }

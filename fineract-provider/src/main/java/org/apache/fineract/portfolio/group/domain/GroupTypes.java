@@ -27,9 +27,9 @@ public enum GroupTypes {
     CENTER(1L, "groupTypes.center", "center"), //
     GROUP(2L, "groupTypes.group", "group"); //
 
-    private Long id;
-    private String code;
-    private String value;
+    private final Long id;
+    private final String code;
+    private final String value;
 
     private GroupTypes(final Long id, final String code, final String value) {
         this.id = id;

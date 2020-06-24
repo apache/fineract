@@ -48,7 +48,9 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
     }
 
     public void validateForUpdate(final String json, final String externalServiceName) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         switch (externalServiceName) {

@@ -29,14 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "FLOATINGRATE", action = "UPDATE")
-public class UpdateFloatingRateCommandHandler implements
-        NewCommandSourceHandler {
+public class UpdateFloatingRateCommandHandler implements NewCommandSourceHandler {
 
     private final FloatingRateWritePlatformService writePlatformService;
 
     @Autowired
-    public UpdateFloatingRateCommandHandler(
-            final FloatingRateWritePlatformService writePlatformService) {
+    public UpdateFloatingRateCommandHandler(final FloatingRateWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

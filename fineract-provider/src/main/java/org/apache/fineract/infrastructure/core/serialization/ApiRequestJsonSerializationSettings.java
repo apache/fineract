@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.core.serialization;
 import java.util.Set;
 
 /**
- * A class to encapsulate settings we allow on API that affect how JSON is to be
- * serialized for the response to api call.
+ * A class to encapsulate settings we allow on API that affect how JSON is to be serialized for the response to api
+ * call.
  */
 public class ApiRequestJsonSerializationSettings {
 

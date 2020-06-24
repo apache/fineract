@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link PlatformDataIntegrityException}
- * thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link PlatformDataIntegrityException} thrown by platform into a HTTP API friendly
+ * format.
  *
- * The {@link PlatformDataIntegrityException} is thrown when modifying api call
- * result in data integrity checks to be fired.
+ * The {@link PlatformDataIntegrityException} is thrown when modifying api call result in data integrity checks to be
+ * fired.
  */
 @Provider
 @Component
@@ -43,9 +43,8 @@ public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<Pla
     @Override
     public Response toResponse(final PlatformDataIntegrityException exception) {
 
-        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(
-                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getParameterName(),
-                exception.getDefaultUserMessageArgs());
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(exception.getGlobalisationMessageCode(),
+                exception.getDefaultUserMessage(), exception.getParameterName(), exception.getDefaultUserMessageArgs());
 
         return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
     }

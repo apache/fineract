@@ -43,9 +43,8 @@ public final class AdHocDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList(
-        "name","query","tableName","tableFields","email","isActive", "reportRunFrequency", "reportRunEvery"
-    ));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("name", "query", "tableName", "tableFields", "email", "isActive", "reportRunFrequency", "reportRunEvery"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -55,7 +54,9 @@ public final class AdHocDataValidator {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -83,7 +84,7 @@ public final class AdHocDataValidator {
         final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
         if (reportRunFrequencyCode != null) {
             baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
-                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
+                    .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
         }
 
         final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
@@ -95,7 +96,9 @@ public final class AdHocDataValidator {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -129,21 +132,24 @@ public final class AdHocDataValidator {
         if (this.fromApiJsonHelper.parameterExists("reportRunFrequency", element)) {
             final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
             baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
-                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
+                    .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
         }
         if (this.fromApiJsonHelper.parameterExists("reportRunEvery", element)) {
             final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
             baseDataValidator.reset().parameter("reportRunEvery").value(reportRunEvery).integerGreaterThanZero();
         }
-        /*if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final Integer isActive = this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());
-            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().inMinMaxRange(1, 2);
-        }*/
+        /*
+         * if (this.fromApiJsonHelper.parameterExists("isActive", element)) { final Integer isActive =
+         * this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());
+         * baseDataValidator.reset().parameter("isActive").value(isActive). notNull().inMinMaxRange(1, 2); }
+         */
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

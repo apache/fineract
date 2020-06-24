@@ -26,7 +26,8 @@ public interface LoanAccrualWritePlatformService {
 
     void addAccrualAccounting(Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws Exception;
 
-    void addPeriodicAccruals(LocalDate tilldate, Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws Exception;
+    void addPeriodicAccruals(LocalDate tilldate, Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas)
+            throws Exception;
 
     void addIncomeAndAccrualTransactions(Long loanId) throws Exception;
 }

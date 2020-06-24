@@ -28,12 +28,13 @@ public class LoanRescheduleRequestNotFoundException extends AbstractPlatformReso
     /**
      * LoanRescheduleRequestNotFoundException constructor
      *
-     * @param requestId the loan reschedule request identifier
+     * @param requestId
+     *            the loan reschedule request identifier
      *
      **/
     public LoanRescheduleRequestNotFoundException(final Long requestId) {
-        super("error.msg.loan.reschedule.request.id.invalid",
-                "Loan reschedule request with identifier " + requestId + " does not exist", requestId);
+        super("error.msg.loan.reschedule.request.id.invalid", "Loan reschedule request with identifier " + requestId + " does not exist",
+                requestId);
     }
 
 }

@@ -44,9 +44,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Implementation for {@link BatchApiService} to iterate through all the
- * incoming requests and obtain the appropriate CommandStrategy from
- * CommandStrategyProvider.
+ * Implementation for {@link BatchApiService} to iterate through all the incoming requests and obtain the appropriate
+ * CommandStrategy from CommandStrategyProvider.
  *
  * @author Rishabh Shukla
  *
@@ -78,9 +77,8 @@ public class BatchApiServiceImpl implements BatchApiService {
     }
 
     /**
-     * Returns the response list by getting a proper
-     * {@link org.apache.fineract.batch.command.CommandStrategy}. execute() method
-     * of acquired commandStrategy is then provided with the separate Request.
+     * Returns the response list by getting a proper {@link org.apache.fineract.batch.command.CommandStrategy}.
+     * execute() method of acquired commandStrategy is then provided with the separate Request.
      *
      * @param requestList
      * @param uriInfo
@@ -91,18 +89,18 @@ public class BatchApiServiceImpl implements BatchApiService {
         final List<BatchResponse> responseList = new ArrayList<>(requestList.size());
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
-        if(batchRequestNodes.isEmpty()) {
-             final BatchResponse response = new BatchResponse();
-             ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
-             response.setStatusCode(500);
-             response.setBody(ex.getMessage());
-             responseList.add(response) ;
-             return responseList ;
+        if (batchRequestNodes.isEmpty()) {
+            final BatchResponse response = new BatchResponse();
+            ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+            response.setStatusCode(500);
+            response.setBody(ex.getMessage());
+            responseList.add(response);
+            return responseList;
         }
         for (BatchRequestNode rootNode : batchRequestNodes) {
             final BatchRequest rootRequest = rootNode.getRequest();
-            final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(CommandContext
-                    .resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
+            final CommandStrategy commandStrategy = this.strategyProvider
+                    .getCommandStrategy(CommandContext.resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
             final BatchResponse rootResponse = commandStrategy.execute(rootRequest, uriInfo);
 
             responseList.add(rootResponse);
@@ -135,8 +133,8 @@ public class BatchApiServiceImpl implements BatchApiService {
 
                     if (rootResponse.getStatusCode().equals(200)) {
                         childRequest = this.resolutionHelper.resoluteRequest(childRequest, rootResponse);
-                        final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(CommandContext
-                                .resource(childRequest.getRelativeUrl()).method(childRequest.getMethod()).build());
+                        final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(
+                                CommandContext.resource(childRequest.getRelativeUrl()).method(childRequest.getMethod()).build());
 
                         childResponse = commandStrategy.execute(childRequest, uriInfo);
 
@@ -148,8 +146,8 @@ public class BatchApiServiceImpl implements BatchApiService {
                         childResponse.setStatusCode(Status.CONFLICT.getStatusCode());
 
                         // Some detail information about the error
-                        final ErrorInfo conflictError = new ErrorInfo(Status.CONFLICT.getStatusCode(), 8001, "Parent request with id "
-                                + rootResponse.getRequestId() + " was erroneous!");
+                        final ErrorInfo conflictError = new ErrorInfo(Status.CONFLICT.getStatusCode(), 8001,
+                                "Parent request with id " + rootResponse.getRequestId() + " was erroneous!");
                         childResponse.setBody(conflictError.getMessage());
                     }
                     childResponses.addAll(this.processChildRequests(childNode, childResponse, uriInfo));
@@ -218,21 +216,21 @@ public class BatchApiServiceImpl implements BatchApiService {
             errResponseList.add(errResponse);
 
             return errResponseList;
-        }catch (final NonTransientDataAccessException ex) {
-             ErrorInfo e = ErrorHandler.handler(ex);
-             BatchResponse errResponse = new BatchResponse();
-             errResponse.setStatusCode(e.getStatusCode());
+        } catch (final NonTransientDataAccessException ex) {
+            ErrorInfo e = ErrorHandler.handler(ex);
+            BatchResponse errResponse = new BatchResponse();
+            errResponse.setStatusCode(e.getStatusCode());
 
-             for (BatchResponse res : responseList) {
-                 if (!res.getStatusCode().equals(200)) {
-                     errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
-                     break;
-                 }
-             }
-             List<BatchResponse> errResponseList = new ArrayList<>();
-             errResponseList.add(errResponse);
+            for (BatchResponse res : responseList) {
+                if (!res.getStatusCode().equals(200)) {
+                    errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                    break;
+                }
+            }
+            List<BatchResponse> errResponseList = new ArrayList<>();
+            errResponseList.add(errResponse);
 
-             return errResponseList;
+            return errResponseList;
         }
     }
 }

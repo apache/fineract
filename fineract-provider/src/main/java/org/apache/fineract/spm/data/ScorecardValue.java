@@ -66,15 +66,12 @@ public class ScorecardValue {
         this.value = value;
     }
 
-
     public Date getCreatedOn() {
         return this.createdOn;
     }
 
-
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
-
 
 }

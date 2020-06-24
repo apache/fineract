@@ -29,13 +29,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaxGroupHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createTaxGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Collection<Integer> taxComponentIds) {
         LOG.info("---------------------------------CREATING A TAX GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL, getTaxGroupAsJSON(taxComponentIds), "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL, getTaxGroupAsJSON(taxComponentIds),
+                "resourceId");
     }
 
     public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {

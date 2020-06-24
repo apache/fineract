@@ -26,26 +26,25 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("unused")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
 
     // class under test
     private RBILoanRepaymentScheduleTransactionProcessor processor;
 
-    //
     private final LocalDate july2nd = new LocalDate(2012, 7, 2);
     private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 
-    @Before
+    @BeforeEach
     public void setUpForEachTestCase() throws Exception {
-
         Field field = MoneyHelper.class.getDeclaredField("roundingMode");
         field.setAccessible(true);
         field.set(null, RoundingMode.HALF_EVEN);
@@ -55,10 +54,10 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     }
 
     /**
-     * Scenario 1: Given no overdue installments, current interest due is paid
-     * before principal.
+     * Scenario 1: Given no overdue installments, current interest due is paid before principal.
      */
     @Test
+    @Disabled
     public void givenNoOverdueInstallmentsOnTimeRepaymentPaysOffInterestDueFirst() {
 
         // // setup
@@ -201,7 +200,8 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     //
     // Money expectedInterestCompleted = new
     // MoneyBuilder().with(currency).with(interest).build();
-    // assertThat("interest completed not as expected: ",installment.getInterestCompleted(currency).toString(),
+    // assertThat("interest completed not as expected:
+    // ",installment.getInterestCompleted(currency).toString(),
     // is(expectedInterestCompleted.toString()));
     //
     // Money expectedInterestWaived = new

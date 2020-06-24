@@ -63,8 +63,8 @@ public class ScheduledJobRunHistory extends AbstractPersistableCustom {
 
     }
 
-    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Date startTime,
-            final Date endTime, final String status, final String errorMessage, final String triggerType, final String errorLog) {
+    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Date startTime, final Date endTime,
+            final String status, final String errorMessage, final String triggerType, final String errorLog) {
         this.scheduledJobDetail = scheduledJobDetail;
         this.version = version;
         this.startTime = startTime;

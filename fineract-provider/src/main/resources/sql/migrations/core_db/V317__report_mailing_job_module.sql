@@ -68,9 +68,9 @@ constraint unique_name unique (name)
 );
 
 insert into m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
-values ('jobs', 'CREATE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'CREATE', 0), 
-('jobs', 'UPDATE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'UPDATE', 0), 
-('jobs', 'DELETE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'DELETE', 0), 
+values ('jobs', 'CREATE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'CREATE', 0),
+('jobs', 'UPDATE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'UPDATE', 0),
+('jobs', 'DELETE_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'DELETE', 0),
 ('jobs', 'READ_REPORTMAILINGJOB', 'REPORTMAILINGJOB', 'READ', 0);
 
 insert into m_report_mailing_job_configuration (name, `value`)

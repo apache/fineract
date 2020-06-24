@@ -53,23 +53,23 @@ sum(l.principal_outstanding_derived) as loanOutstandingAmount,
 round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,
 '???' as loanOverPaymentAmount,
 sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) as portfolioAtRisk,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) as portfolioAtRisk,
 
 round((sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
 
 count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) as clientsInDefault,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) as clientsInDefault,
 round((count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
 (sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount
 from m_staff fa
 join m_office o on o.id = fa.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_group pgm on pgm.staff_id = fa.id
 join m_loan l on l.group_id = pgm.id and l.client_id is not null
 left join m_currency cur on cur.code = l.currency_code
@@ -88,7 +88,7 @@ VALUES ('FieldAgentPrograms', 'Table', 'Quipo', false, false, 'List of Field Age
 select pgm.id, pgm.display_name as `name`, sts.enum_message_property as status
  from m_group pgm
  join m_office o on o.id = pgm.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
  left join r_enum_value sts on sts.enum_name = 'status_enum' and sts.enum_id = pgm.status_enum
  where pgm.staff_id = ${staffId}
 ");
@@ -116,11 +116,11 @@ ifnull(laa.principal_overdue_derived, 0.0) as loanInArrearsAmount,
 if(ifnull(laa.principal_overdue_derived, 0.00) > 0, 'Yes', 'No') as inDefault,
 
 if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)  as portfolioAtRisk
+        l.principal_outstanding_derived,0)  as portfolioAtRisk
 
  from m_group pgm
  join m_office o on o.id = pgm.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
  join m_loan l on l.group_id = pgm.id and l.client_id is not null
  left join m_currency cur on cur.code = l.currency_code
  join m_client c on c.id = l.client_id
@@ -158,24 +158,24 @@ sum(l.principal_outstanding_derived) as loanOutstandingAmount,
 round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,
 '???' as loanOverPaymentAmount,
 sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) as portfolioAtRisk,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) as portfolioAtRisk,
 
 round((sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
 
 count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) as clientsInDefault,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) as clientsInDefault,
 round((count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
 (sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount
 from m_staff coord
 join m_staff fa on fa.organisational_role_parent_staff_id = coord.id
 join m_office o on o.id = fa.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_group pgm on pgm.staff_id = fa.id
 join m_loan l on l.group_id = pgm.id and l.client_id is not null
 left join m_currency cur on cur.code = l.currency_code
@@ -199,25 +199,25 @@ sum(l.principal_outstanding_derived) as loanOutstandingAmount,
 round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,
 '???' as loanOverPaymentAmount,
 sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) as portfolioAtRisk,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) as portfolioAtRisk,
 
 round((sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
 
 count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) as clientsInDefault,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) as clientsInDefault,
 round((count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
 (sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount
 from m_staff bm
 join m_staff coord on coord.organisational_role_parent_staff_id = bm.id
 join m_staff fa on fa.organisational_role_parent_staff_id = coord.id
 join m_office o on o.id = fa.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_group pgm on pgm.staff_id = fa.id
 join m_loan l on l.group_id = pgm.id and l.client_id is not null
 left join m_currency cur on cur.code = l.currency_code
@@ -241,26 +241,26 @@ sum(l.principal_outstanding_derived) as loanOutstandingAmount,
 round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,
 '???' as loanOverPaymentAmount,
 sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) as portfolioAtRisk,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) as portfolioAtRisk,
 
 round((sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
 
 count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) as clientsInDefault,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) as clientsInDefault,
 round((count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
 (sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount
 from m_staff pd
 join m_staff bm on bm.organisational_role_parent_staff_id = pd.id
 join m_staff coord on coord.organisational_role_parent_staff_id = bm.id
 join m_staff fa on fa.organisational_role_parent_staff_id = coord.id
 join m_office o on o.id = fa.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_group pgm on pgm.staff_id = fa.id
 join m_loan l on l.group_id = pgm.id and l.client_id is not null
 left join m_currency cur on cur.code = l.currency_code
@@ -284,23 +284,23 @@ sum(l.principal_outstanding_derived) as loanOutstandingAmount,
 round((sum(l.principal_outstanding_derived) * 100) /  sum(l.principal_disbursed_derived),2) as loanOutstandingPC,
 '???' as loanOverPaymentAmount,
 sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) as portfolioAtRisk,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) as portfolioAtRisk,
 
 round((sum(
-	if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
+    if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+        l.principal_outstanding_derived,0)) * 100) / sum(l.principal_outstanding_derived), 2) as portfolioAtRiskPC,
 
 count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) as clientsInDefault,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) as clientsInDefault,
 round((count(distinct(
-		if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-			c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
+        if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
+            c.id,null))) * 100) / count(distinct(c.id)),2) as clientsInDefaultPC,
 (sum(l.principal_disbursed_derived) / count(*))  as averageLoanAmount
 from m_group pgm
 join m_office o on o.id = pgm.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_loan l on l.group_id = pgm.id and l.client_id is not null
 left join m_currency cur on cur.code = l.currency_code
 left join m_loan_arrears_aging laa on laa.loan_id = l.id

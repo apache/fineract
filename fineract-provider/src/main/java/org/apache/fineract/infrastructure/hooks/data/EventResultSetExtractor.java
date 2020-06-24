@@ -26,16 +26,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-public class EventResultSetExtractor implements
-        ResultSetExtractor<List<Grouping>> {
+public class EventResultSetExtractor implements ResultSetExtractor<List<Grouping>> {
 
     @Override
-    public List<Grouping> extractData(final ResultSet rs) throws SQLException,
-            DataAccessException {
+    public List<Grouping> extractData(final ResultSet rs) throws SQLException, DataAccessException {
         final List<Grouping> groupings = new ArrayList<>();
 
         final Map<String, Map<String, List<String>>> groupToEntityMapping = new HashMap<>();
@@ -45,8 +42,7 @@ public class EventResultSetExtractor implements
             final String groupingName = rs.getString("grouping");
             final String entityName = rs.getString("entity_name");
             final String actionName = rs.getString("action_name");
-            Map<String, List<String>> entities = groupToEntityMapping
-                    .get(groupingName);
+            Map<String, List<String>> entities = groupToEntityMapping.get(groupingName);
             List<String> actions = entityToActionMapping.get(entityName);
 
             if (entities == null) {
@@ -66,13 +62,11 @@ public class EventResultSetExtractor implements
             groupToEntityMapping.put(groupingName, entities);
         }
 
-        for (final Entry<String, Map<String, List<String>>> groupingEntry : groupToEntityMapping
-                .entrySet()) {
+        for (final Map.Entry<String, Map<String, List<String>>> groupingEntry : groupToEntityMapping.entrySet()) {
             final List<Entity> entities = new ArrayList<>();
             final Grouping group = new Grouping();
             group.setName(groupingEntry.getKey());
-            for (final Entry<String, List<String>> entityEntry : groupingEntry
-                    .getValue().entrySet()) {
+            for (final Map.Entry<String, List<String>> entityEntry : groupingEntry.getValue().entrySet()) {
                 final List<String> actions = new ArrayList<>();
                 final Entity entity = new Entity();
                 entity.setName(entityEntry.getKey());
@@ -85,6 +79,7 @@ public class EventResultSetExtractor implements
             }
 
             Collections.sort(entities, new Comparator<Entity>() {
+
                 @Override
                 public int compare(final Entity entity1, final Entity entity2) {
                     return entity1.getName().compareTo(entity2.getName());
@@ -95,9 +90,9 @@ public class EventResultSetExtractor implements
         }
 
         Collections.sort(groupings, new Comparator<Grouping>() {
+
             @Override
-            public int compare(final Grouping grouping1,
-                    final Grouping grouping2) {
+            public int compare(final Grouping grouping1, final Grouping grouping2) {
                 return grouping1.getName().compareTo(grouping2.getName());
             }
         });

@@ -24,8 +24,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link FineractEntityAccessRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link FineractEntityAccessRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service
@@ -39,8 +38,7 @@ public class FineractEntityAccessRepositoryWrapper {
     }
 
     public FineractEntityAccess findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
     }
 
     public void save(final FineractEntityAccess fineractEntityAccess) {

@@ -26,18 +26,19 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.NotificationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NotificationApiTest {
-    private final static Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -50,7 +51,7 @@ public class NotificationApiTest {
     public void testNotificationRetrieval() {
         HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper.getNotifications(this.requestSpec,
                 this.responseSpec, "");
-        LOG.info("Response : {}" , response.toString());
-        Assert.assertNotNull(response);
+        LOG.info("Response : {}", response.toString());
+        Assertions.assertNotNull(response);
     }
 }

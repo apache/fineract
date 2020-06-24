@@ -51,6 +51,4 @@ public interface CalendarReadPlatformService {
 
     Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, Long entityTypeId);
 
-
-
 }

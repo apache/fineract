@@ -375,9 +375,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                             }
                             chargeAmount = accruableForInstallment;
                             boolean canAddCharge = chargeAmount.compareTo(BigDecimal.ZERO) > 0;
-                            if (canAddCharge
-                                    && (installmentChargeData.getAmountAccrued() == null || chargeAmount.compareTo(installmentChargeData
-                                            .getAmountAccrued()) != 0)) {
+                            if (canAddCharge && (installmentChargeData.getAmountAccrued() == null
+                                    || chargeAmount.compareTo(installmentChargeData.getAmountAccrued()) != 0)) {
                                 BigDecimal amountForAccrual = chargeAmount;
                                 if (installmentChargeData.getAmountAccrued() != null) {
                                     amountForAccrual = chargeAmount.subtract(installmentChargeData.getAmountAccrued());
@@ -431,8 +430,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             final LocalDate tilldate) {
 
         BigDecimal interestIncome = BigDecimal.ZERO;
-        if(accrualData.getInterestIncome() != null) {
-             interestIncome = accrualData.getInterestIncome();
+        if (accrualData.getInterestIncome() != null) {
+            interestIncome = accrualData.getInterestIncome();
         }
         if (accrualData.getWaivedInterestIncome() != null) {
             BigDecimal recognized = BigDecimal.ZERO;
@@ -443,8 +442,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             for (LoanTransactionData loanTransactionData : loanWaiverTansactions) {
                 if (!loanTransactionData.dateOf().isAfter(accrualData.getFromDateAsLocaldate())
                         || (loanTransactionData.dateOf().isAfter(accrualData.getFromDateAsLocaldate())
-                                && !loanTransactionData.dateOf().isAfter(accrualData.getDueDateAsLocaldate()) && !loanTransactionData
-                                .dateOf().isAfter(tilldate))) {
+                                && !loanTransactionData.dateOf().isAfter(accrualData.getDueDateAsLocaldate())
+                                && !loanTransactionData.dateOf().isAfter(tilldate))) {
                     loanTransactionDatas.add(loanTransactionData);
                 }
             }
@@ -490,7 +489,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public void addIncomeAndAccrualTransactions(Long loanId) throws LoanNotFoundException {
         if (loanId != null) {
             Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-            if (loan == null) { throw new LoanNotFoundException(loanId); }
+            if (loan == null) {
+                throw new LoanNotFoundException(loanId);
+            }
             final List<Long> existingTransactionIds = new ArrayList<>();
             final List<Long> existingReversedTransactionIds = new ArrayList<>();
             existingTransactionIds.addAll(loan.findExistingTransactionIds());

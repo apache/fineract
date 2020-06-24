@@ -25,6 +25,7 @@ import org.joda.time.LocalDate;
  **/
 @SuppressWarnings("unused")
 public class ReportMailingJobTimelineData {
+
     private final LocalDate createdOnDate;
     private final String createdByUsername;
     private final String createdByFirstname;

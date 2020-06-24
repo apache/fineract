@@ -52,11 +52,12 @@ public class WorkingDayValidator {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                WORKING_DAYS_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, WORKING_DAYS_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -71,10 +72,13 @@ public class WorkingDayValidator {
         baseDataValidator.reset().parameter("repaymentRescheduleType").value(repaymentRescheduleType).ignoreIfNull().inMinMaxRange(1, 4);
 
         final Boolean extendTermForDailyRepayments = this.fromApiJsonHelper.extractBooleanNamed("extendTermForDailyRepayments", element);
-        baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForDailyRepayments).value(extendTermForDailyRepayments).ignoreIfNull().validateForBooleanValue();
+        baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForDailyRepayments).value(extendTermForDailyRepayments)
+                .ignoreIfNull().validateForBooleanValue();
 
-        final Boolean extendTermForRepaymentsOnHolidays = this.fromApiJsonHelper.extractBooleanNamed("extendTermForRepaymentsOnHolidays", element);
-        baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays).value(extendTermForRepaymentsOnHolidays).ignoreIfNull().validateForBooleanValue();
+        final Boolean extendTermForRepaymentsOnHolidays = this.fromApiJsonHelper.extractBooleanNamed("extendTermForRepaymentsOnHolidays",
+                element);
+        baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays)
+                .value(extendTermForRepaymentsOnHolidays).ignoreIfNull().validateForBooleanValue();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.client.handler;
 
-
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -32,12 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "UNDOREJECT")
 public class UndoRejectClientCommandHandler implements NewCommandSourceHandler {
 
-     private final ClientWritePlatformService clientWritePlatformService;
+    private final ClientWritePlatformService clientWritePlatformService;
 
-        @Autowired
-        public UndoRejectClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
-            this.clientWritePlatformService = clientWritePlatformService;
-        }
+    @Autowired
+    public UndoRejectClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
+        this.clientWritePlatformService = clientWritePlatformService;
+    }
 
     @Transactional
     @Override

@@ -34,30 +34,22 @@ public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdown
     }
 
     /*
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositTermTypeOptions() { return
-     * SavingsEnumerations.recurringDepositFrequencyType
-     * (SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveDepositTermTypeOptions() { return
+     * SavingsEnumerations.recurringDepositFrequencyType (SavingsPeriodFrequencyType.values()); }
      *
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositPeriodFrequencyOptions() { return
-     * SavingsEnumerations.depositPeriodFrequency
-     * (SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions() { return
+     * SavingsEnumerations.depositPeriodFrequency (SavingsPeriodFrequencyType.values()); }
      *
-     * @Override public Collection<EnumOptionData>
-     * retrieveInMultiplesOfDepositTermTypeOptions() { return
-     * SavingsEnumerations
-     * .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
+     * @Override public Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions() { return
+     * SavingsEnumerations .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
      */
-
 
     @Override
     public Collection<EnumOptionData> maturityInstructionOptions() {
-        return  Arrays.asList(
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.WITHDRAW_DEPOSIT),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY));
+        return Arrays.asList(SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.WITHDRAW_DEPOSIT),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY));
 
     }
 }

@@ -31,11 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SHAREPRODUCT", action = "UPDATE")
 public class UpdateShareProductCommandHandler implements NewCommandSourceHandler {
 
-    private final ShareProductWritePlatformService shareProductWritePlatformService ;
+    private final ShareProductWritePlatformService shareProductWritePlatformService;
 
     @Autowired
     public UpdateShareProductCommandHandler(final ShareProductWritePlatformService shareProductWritePlatformService) {
-        this.shareProductWritePlatformService = shareProductWritePlatformService ;
+        this.shareProductWritePlatformService = shareProductWritePlatformService;
     }
 
     @Transactional

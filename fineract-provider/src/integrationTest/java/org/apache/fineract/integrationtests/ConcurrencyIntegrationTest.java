@@ -35,13 +35,14 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConcurrencyIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -50,7 +51,7 @@ public class ConcurrencyIntegrationTest {
 
     final int MYTHREADS = 30;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -75,7 +76,7 @@ public class ConcurrencyIntegrationTest {
         date.set(2011, 9, 20);
         Float repaymentAmount = 100.0f;
         for (int i = 0; i < 10; i++) {
-            LOG.info("Starting concurrent transaction number {}" , i);
+            LOG.info("Starting concurrent transaction number {}", i);
             date.add(Calendar.DAY_OF_MONTH, 1);
             repaymentAmount = repaymentAmount + 100;
             Runnable worker = new LoanRepaymentExecutor(loanTransactionHelper, loanID, repaymentAmount, date);
@@ -152,12 +153,13 @@ public class ConcurrencyIntegrationTest {
             try {
                 this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
             } catch (Exception e) {
-                LOG.info("Found an exception {}" , e.getMessage());
-                LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}" , repaymentDate, repaymentAmount , loanId);
+                LOG.info("Found an exception {}", e.getMessage());
+                LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}", repaymentDate, repaymentAmount,
+                        loanId);
                 throw (e);
             }
-            LOG.info("Details of passed concurrent transaction, details (date, amount, loanId) are {},{},{}" , repaymentDate
-                    , repaymentAmount ,  loanId);
+            LOG.info("Details of passed concurrent transaction, details (date, amount, loanId) are {},{},{}", repaymentDate,
+                    repaymentAmount, loanId);
         }
     }
 

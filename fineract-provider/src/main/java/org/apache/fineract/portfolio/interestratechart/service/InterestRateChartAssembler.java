@@ -60,8 +60,7 @@ public class InterestRateChartAssembler {
     }
 
     /**
-     * Assembles a new {@link InterestRateChart} from JSON Slabs passed in
-     * request
+     * Assembles a new {@link InterestRateChart} from JSON Slabs passed in request
      */
     public InterestRateChart assembleFrom(final JsonCommand command) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -75,10 +74,13 @@ public class InterestRateChartAssembler {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
-    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode, final DataValidatorBuilder baseDataValidator) {
+    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode,
+            final DataValidatorBuilder baseDataValidator) {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);

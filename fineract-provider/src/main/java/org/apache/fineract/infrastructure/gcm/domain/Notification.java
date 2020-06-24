@@ -26,8 +26,7 @@ import java.util.List;
  * GCM message notification part.
  *
  * <p>
- * Instances of this class are immutable and should be created using a
- * {@link Builder}. Examples:
+ * Instances of this class are immutable and should be created using a {@link Builder}. Examples:
  *
  * <strong>Simplest notification:</strong>
  *

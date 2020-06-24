@@ -32,13 +32,15 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
  * Created by sanyam on 31/7/17.
  */
 final class EntityDatatableChecksApiResourceSwagger {
+
     private EntityDatatableChecksApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetEntityDatatableChecksResponse")
     public static final class GetEntityDatatableChecksResponse {
-        private GetEntityDatatableChecksResponse(){}
+
+        private GetEntityDatatableChecksResponse() {}
 
         public long id;
         public String entity;
@@ -52,7 +54,8 @@ final class EntityDatatableChecksApiResourceSwagger {
 
     @ApiModel(value = "GetEntityDatatableChecksTemplateResponse")
     public static final class GetEntityDatatableChecksTemplateResponse {
-        private GetEntityDatatableChecksTemplateResponse(){}
+
+        private GetEntityDatatableChecksTemplateResponse() {}
 
         public List<String> entities;
         public List<DatatableCheckStatusData> statusClient;
@@ -65,10 +68,12 @@ final class EntityDatatableChecksApiResourceSwagger {
     }
 
     @ApiModel(value = "PostEntityDatatableChecksTemplateRequest")
-    public static final class PostEntityDatatableChecksTemplateRequest{
+    public static final class PostEntityDatatableChecksTemplateRequest {
+
         private PostEntityDatatableChecksTemplateRequest() {
 
         }
+
         @ApiModelProperty(example = "m_loan")
         public String entity;
         @ApiModelProperty(example = "100")
@@ -80,21 +85,24 @@ final class EntityDatatableChecksApiResourceSwagger {
     }
 
     @ApiModel(value = "PostEntityDatatableChecksTemplateResponse")
-    public static final class PostEntityDatatableChecksTemplateResponse{
+    public static final class PostEntityDatatableChecksTemplateResponse {
+
         private PostEntityDatatableChecksTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "DeleteEntityDatatableChecksTemplateResponse")
-    public static final class DeleteEntityDatatableChecksTemplateResponse{
+    public static final class DeleteEntityDatatableChecksTemplateResponse {
+
         private DeleteEntityDatatableChecksTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 }
-

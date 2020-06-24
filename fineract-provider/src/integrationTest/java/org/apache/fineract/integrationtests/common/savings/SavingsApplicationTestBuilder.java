@@ -26,10 +26,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SavingsApplicationTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsApplicationTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsApplicationTestBuilder.class);
     private static final String LOCALE = "en_GB";
 
     private String submittedOnDate = "";
@@ -41,8 +40,8 @@ public class SavingsApplicationTestBuilder {
 
     private List<HashMap<String, Object>> datatables = null;
 
-    private List<Map<String, Object>> clientArray =null;
-    private List<Map<String, Object>> savingsArray =null;
+    private List<Map<String, Object>> clientArray = null;
+    private List<Map<String, Object>> savingsArray = null;
 
     public String build(final String ID, final String savingsProductId, final String accountType) {
 
@@ -66,19 +65,18 @@ public class SavingsApplicationTestBuilder {
         }
 
         String savingsApplicationJSON = new Gson().toJson(map);
-        LOG.info("{}",savingsApplicationJSON);
+        LOG.info("{}", savingsApplicationJSON);
         return savingsApplicationJSON;
     }
 
-    public String build()
-    {
+    public String build() {
         final HashMap<String, Object> map = new HashMap<>();
-        if(this.clientArray != null)  {
-            map.put("clientArray", this.clientArray) ;
+        if (this.clientArray != null) {
+            map.put("clientArray", this.clientArray);
         }
 
-        if(this.savingsArray != null)  {
-             map.put("savingsArray", this.savingsArray) ;
+        if (this.savingsArray != null) {
+            map.put("savingsArray", this.savingsArray);
         }
         String GsimApplicationJSON = new Gson().toJson(map);
         return GsimApplicationJSON;
@@ -109,16 +107,16 @@ public class SavingsApplicationTestBuilder {
         return this;
     }
 
-    public SavingsApplicationTestBuilder withClientArray(final List<Map<String,Object>> clientArray) {
+    public SavingsApplicationTestBuilder withClientArray(final List<Map<String, Object>> clientArray) {
         this.clientArray = new ArrayList<>();
         this.clientArray.addAll(clientArray);
         return this;
     }
 
-    public SavingsApplicationTestBuilder withSavingsArray(final List<Map<String,Object>> savingsArray) {
+    public SavingsApplicationTestBuilder withSavingsArray(final List<Map<String, Object>> savingsArray) {
         this.savingsArray = new ArrayList<>();
         this.savingsArray.addAll(savingsArray);
         return this;
-   }
+    }
 
 }

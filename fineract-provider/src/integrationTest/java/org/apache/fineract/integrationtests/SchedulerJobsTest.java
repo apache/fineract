@@ -19,7 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -31,9 +31,9 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SchedulerJobsTest {
 
@@ -42,7 +42,7 @@ public class SchedulerJobsTest {
     private Boolean originalSchedulerStatus;
     private final Map<Integer, Boolean> originalJobStatus = new HashMap<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -57,7 +57,7 @@ public class SchedulerJobsTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
         for (int jobId = 1; jobId < JobName.values().length; jobId++) {
@@ -67,12 +67,12 @@ public class SchedulerJobsTest {
 
     @Test // FINERACT-926
     public void testDateFormat() {
-        // must start scheduler and make job active to have nextRunTime (which is a
+        // must start scheduler and make job active to have nextRunTime (which
+        // is a
         // java.util.Date)
         schedulerJobHelper.updateSchedulerStatus(true);
         schedulerJobHelper.updateSchedulerJob(1, true);
-        String nextRunTimeText = await().until(
-                () -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
+        String nextRunTimeText = await().until(() -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
                 nextRunTime -> nextRunTime != null);
         DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
@@ -85,24 +85,25 @@ public class SchedulerJobsTest {
             schedulerJobHelper.updateSchedulerStatus(false);
             schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after stopping
-            assertEquals("Verifying Scheduler Job Status", false, schedulerStatus);
+            assertEquals(false, schedulerStatus, "Verifying Scheduler Job Status");
         } else {
             schedulerJobHelper.updateSchedulerStatus(true);
             schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after starting
-            assertEquals("Verifying Scheduler Job Status", true, schedulerStatus);
+            assertEquals(true, schedulerStatus, "Verifying Scheduler Job Status");
         }
     }
 
     @Test
     public void testNumberOfJobs() {
         List<Integer> jobIds = schedulerJobHelper.getAllSchedulerJobIds();
-        assertEquals("Number of jobs in database and code do not match: " + jobIds, JobName.values().length, jobIds.size());
+        assertEquals(JobName.values().length, jobIds.size(), "Number of jobs in database and code do not match: " + jobIds);
     }
 
     @Test
     public void testFlippingJobsActiveStatus() throws InterruptedException {
-        // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side
+        // Stop the Scheduler while we test flapping jobs' active on/off, to
+        // avoid side
         // effects
         schedulerJobHelper.updateSchedulerStatus(false);
 
@@ -118,10 +119,10 @@ public class SchedulerJobsTest {
             Map<String, Object> changes = schedulerJobHelper.updateSchedulerJob(jobId, active);
 
             // Verifying Scheduler Job updates
-            assertEquals("Verifying Scheduler Job Updates", active, changes.get("active"));
+            assertEquals(active, changes.get("active"), "Verifying Scheduler Job Updates");
 
             schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
-            assertEquals("Verifying Get Scheduler Job", active, schedulerJob.get("active"));
+            assertEquals(active, schedulerJob.get("active"), "Verifying Get Scheduler Job");
         }
     }
 

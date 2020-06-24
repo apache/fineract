@@ -53,7 +53,9 @@ public final class CodeValueCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -67,8 +69,7 @@ public final class CodeValueCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(CodevalueJSONinputParams.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.DESCRIPTION.getValue(), element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(),
-                    element);
+            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(), element);
             baseDataValidator.reset().parameter(CodevalueJSONinputParams.DESCRIPTION.getValue()).value(description)
                     .notExceedingLengthOf(500);
         }
@@ -87,7 +88,9 @@ public final class CodeValueCommandFromApiJsonDeserializer {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -99,12 +102,10 @@ public final class CodeValueCommandFromApiJsonDeserializer {
 
         if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.NAME.getValue(), element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.NAME.getValue(), element);
-            baseDataValidator.reset().parameter(CodevalueJSONinputParams.NAME.getValue()).value(name).notBlank()
-                    .notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter(CodevalueJSONinputParams.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
         }
         if (this.fromApiJsonHelper.parameterExists(CodevalueJSONinputParams.DESCRIPTION.getValue(), element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(),
-                    element);
+            final String description = this.fromApiJsonHelper.extractStringNamed(CodevalueJSONinputParams.DESCRIPTION.getValue(), element);
             baseDataValidator.reset().parameter(CodevalueJSONinputParams.DESCRIPTION.getValue()).value(description)
                     .notExceedingLengthOf(500);
         }
@@ -123,7 +124,9 @@ public final class CodeValueCommandFromApiJsonDeserializer {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

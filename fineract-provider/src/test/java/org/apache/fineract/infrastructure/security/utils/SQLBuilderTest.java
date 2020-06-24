@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit Test for {@link SQLBuilder}.
@@ -46,8 +46,9 @@ public class SQLBuilderTest {
         sqlBuilder.addCriteria("hobby LIKE ", "Mifos/Apache Fineract");
         sqlBuilder.addCriteria("age <  ", 123);
         assertEquals(" WHERE  name = ?  AND  hobby LIKE ?  AND  age < ?", sqlBuilder.getSQLTemplate());
-        assertArrayEquals(new Object[] { "Michael", "Mifos/Apache Fineract", 123}, sqlBuilder.getArguments());
-        assertEquals("SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]}", sqlBuilder.toString());
+        assertArrayEquals(new Object[] { "Michael", "Mifos/Apache Fineract", 123 }, sqlBuilder.getArguments());
+        assertEquals("SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]}",
+                sqlBuilder.toString());
     }
 
     @Test
@@ -67,20 +68,46 @@ public class SQLBuilderTest {
     }
 
     @Test
-    public void testAddIllegalArguments() {
-        assertThrows("space between column and operator", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age<", 123));
-        assertThrows("null Criteria Fragment", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria(null, "argument"));
-        assertThrows("empty Criteria Fragment", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("", "argument"));
-        assertThrows("space only Criteria Fragment", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria(" ", "argument"));
-        assertThrows("Criteria Fragment with ?", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age = ?", 123));
-        assertThrows("Criteria Fragment missing operator", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age", 123));
-        assertThrows("Criteria starts with AND", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("and age = ?", 123));
-        assertThrows("Criteria ends with AND", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age = ? and", 123));
-        assertThrows("Criteria starts with OR", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("or age =", 123));
-        assertThrows("Criteria ends with OR", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age = ? or", 123));
-        assertThrows("Criteria contains opening parentheis", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("(age =", 123));
-        assertThrows("Criteria contains closing parentheis", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age = ?)", 123));
-        assertThrows("Offset corner case", IllegalArgumentException.class, () -> new SQLBuilder().addCriteria("age< = ?)", 123));
+    public void testAddIllegalArguments() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age<", 123);
+        }, "space between column and operator");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria(null, "argument");
+        }, "null Criteria Fragment");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("", "argument");
+        }, "empty Criteria Fragment");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria(" ", "argument");
+        }, "space only Criteria Fragment");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age = ?", 123);
+        }, "Criteria Fragment with ?");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age", 123);
+        }, "Criteria Fragment missing operator");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("and age = ?", 123);
+        }, "Criteria starts with AND");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age = ? and", 123);
+        }, "Criteria ends with AND");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("or age =", 123);
+        }, "Criteria starts with OR");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age = ? or", 123);
+        }, "Criteria ends with OR");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("(age =", 123);
+        }, "Criteria contains opening parentheis");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age = ?)", 123);
+        }, "Criteria contains closing parentheis");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new SQLBuilder().addCriteria("age< = ?)", 123);
+        }, "Offset corner case");
 
     }
 }

@@ -57,10 +57,10 @@ public class GuarantorCommand {
     private final Long savingsId;
     private final BigDecimal amount;
 
-    public GuarantorCommand(final Long clientRelationshipTypeId, final Integer guarantorTypeId, final Long entityId,
-            final String firstname, final String lastname, final String addressLine1, final String addressLine2, final String city,
-            final String state, final String zip, final String country, final String mobileNumber, final String housePhoneNumber,
-            final String comment, final LocalDate dob, final Long savingsId, final BigDecimal amount) {
+    public GuarantorCommand(final Long clientRelationshipTypeId, final Integer guarantorTypeId, final Long entityId, final String firstname,
+            final String lastname, final String addressLine1, final String addressLine2, final String city, final String state,
+            final String zip, final String country, final String mobileNumber, final String housePhoneNumber, final String comment,
+            final LocalDate dob, final Long savingsId, final BigDecimal amount) {
 
         this.clientRelationshipTypeId = clientRelationshipTypeId;
 
@@ -109,8 +109,7 @@ public class GuarantorCommand {
         if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GuarantorJSONinputParams.ENTITY_ID.getValue()).value(this.entityId).notNull()
                     .integerGreaterThanZero();
-            baseDataValidator.reset().parameter(GuarantorJSONinputParams.SAVINGS_ID.getValue()).value(this.savingsId)
-                    .longGreaterThanZero();
+            baseDataValidator.reset().parameter(GuarantorJSONinputParams.SAVINGS_ID.getValue()).value(this.savingsId).longGreaterThanZero();
             if (this.savingsId != null) {
                 baseDataValidator.reset().parameter(GuarantorJSONinputParams.AMOUNT.getValue()).value(this.amount).notNull()
                         .positiveAmount();
@@ -124,8 +123,10 @@ public class GuarantorCommand {
             validateNonMandatoryFieldsForMaxLength(baseDataValidator);
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateForUpdate() {
@@ -143,8 +144,7 @@ public class GuarantorCommand {
         if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GuarantorJSONinputParams.ENTITY_ID.getValue()).value(this.entityId).ignoreIfNull()
                     .integerGreaterThanZero();
-            baseDataValidator.reset().parameter(GuarantorJSONinputParams.SAVINGS_ID.getValue()).value(this.savingsId)
-                    .longGreaterThanZero();
+            baseDataValidator.reset().parameter(GuarantorJSONinputParams.SAVINGS_ID.getValue()).value(this.savingsId).longGreaterThanZero();
             if (this.savingsId != null) {
                 baseDataValidator.reset().parameter(GuarantorJSONinputParams.AMOUNT.getValue()).value(this.amount).notNull()
                         .positiveAmount();
@@ -165,8 +165,10 @@ public class GuarantorCommand {
         baseDataValidator.reset().anyOfNotNull(this.entityId, this.addressLine1, this.addressLine2, this.city, this.comment, this.country,
                 this.firstname, this.housePhoneNumber, this.lastname, this.mobileNumber, this.state, this.zip);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     /**
@@ -188,8 +190,8 @@ public class GuarantorCommand {
                 .notExceedingLengthOf(50);
         baseDataValidator.reset().parameter(GuarantorJSONinputParams.MOBILE_NUMBER.getValue()).value(this.mobileNumber).ignoreIfNull()
                 .notExceedingLengthOf(20).validatePhoneNumber();
-        baseDataValidator.reset().parameter(GuarantorJSONinputParams.PHONE_NUMBER.getValue()).value(this.housePhoneNumber)
-                .ignoreIfNull().notExceedingLengthOf(20).validatePhoneNumber();
+        baseDataValidator.reset().parameter(GuarantorJSONinputParams.PHONE_NUMBER.getValue()).value(this.housePhoneNumber).ignoreIfNull()
+                .notExceedingLengthOf(20).validatePhoneNumber();
         baseDataValidator.reset().parameter(GuarantorJSONinputParams.COMMENT.getValue()).value(this.comment).ignoreIfNull()
                 .notExceedingLengthOf(500);
     }

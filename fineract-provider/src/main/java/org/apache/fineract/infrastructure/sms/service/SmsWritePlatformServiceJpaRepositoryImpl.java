@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
 
     private final SmsMessageAssembler assembler;
     private final SmsMessageRepository repository;
@@ -117,16 +117,18 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
+            final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
 
-        if (realCause.getMessage().contains("mobile_no")) { throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
-                "The group, client or staff provided has no mobile no.", "id"); }
+        if (realCause.getMessage().contains("mobile_no")) {
+            throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
+                    "The group, client or staff provided has no mobile no.", "id");
+        }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.sms.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

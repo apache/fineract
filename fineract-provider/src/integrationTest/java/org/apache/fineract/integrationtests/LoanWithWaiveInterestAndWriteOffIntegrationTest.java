@@ -30,30 +30,39 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client Loan Integration Test for checking Loan Disbursement with Waive
- * Interest and Write-Off.
+ * Client Loan Integration Test for checking Loan Disbursement with Waive Interest and Write-Off.
  */
 @SuppressWarnings({ "rawtypes" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    private final String LP_PRINCIPAL = "12,000.00", LP_REPAYMENTS = "2", LP_REPAYMENT_PERIOD = "6", LP_INTEREST_RATE = "1",
-            PRINCIPAL = "4,500.00", LOAN_TERM_FREQUENCY = "18", NUMBER_OF_REPAYMENTS = "9", REPAYMENT_PERIOD = "2",
-            DISBURSEMENT_DATE = "30 October 2010", LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010",
-            EXPECTED_DISBURSAL_DATE = "28 October 2010", RATE_OF_INTEREST_PER_PERIOD = "2", DATE_OF_JOINING = "04 March 2009",
-            INTEREST_VALUE_AMOUNT = "40.00";
+    private final String LP_PRINCIPAL = "12,000.00";
+    private final String LP_REPAYMENTS = "2";
+    private final String LP_REPAYMENT_PERIOD = "6";
+    private final String LP_INTEREST_RATE = "1";
+    private final String PRINCIPAL = "4,500.00";
+    private final String LOAN_TERM_FREQUENCY = "18";
+    private final String NUMBER_OF_REPAYMENTS = "9";
+    private final String REPAYMENT_PERIOD = "2";
+    private final String DISBURSEMENT_DATE = "30 October 2010";
+    private final String LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010";
+    private final String EXPECTED_DISBURSAL_DATE = "28 October 2010";
+    private final String RATE_OF_INTEREST_PER_PERIOD = "2";
+    private final String DATE_OF_JOINING = "04 March 2009";
+    private final String INTEREST_VALUE_AMOUNT = "40.00";
     private LoanTransactionHelper loanTransactionHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -92,7 +101,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap.toString());
+        LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // PERFORM REPAYMENTS AND CHECK LOAN STATUS
@@ -105,7 +114,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DIBURSE AGAIN
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap);
+        LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // MAKE REPAYMENTS
@@ -151,7 +160,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap);
+        LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // MAKE REPAYMENTS
@@ -161,22 +170,26 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         this.loanTransactionHelper.makeRepayment("1 January 2011", repayment_with_interest, loanID);
 
         HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assert.assertTrue("Checking for Principal paid ",
-                Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0);
-        Assert.assertTrue("Checking for interestPaid paid ",
-                Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0);
-        Assert.assertTrue("Checking for total paid ",
-                Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0);
+        Assertions.assertTrue(Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0,
+                "Checking for Principal paid ");
+        Assertions.assertTrue(Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0,
+                "Checking for interestPaid paid ");
+        Assertions.assertTrue(
+                Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0,
+                "Checking for total paid ");
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
         LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 January 2011", loanID));
         toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assert.assertTrue("Checking for Principal written off ",
-                Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0);
-        Assert.assertTrue("Checking for interestPaid written off ",
-                Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0);
-        Assert.assertTrue("Checking for total written off ",
-                Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0);
+        Assertions.assertTrue(
+                Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,
+                "Checking for Principal written off ");
+        Assertions.assertTrue(
+                Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0,
+                "Checking for interestPaid written off ");
+        Assertions.assertTrue(
+                Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0,
+                "Checking for total written off ");
 
     }
 

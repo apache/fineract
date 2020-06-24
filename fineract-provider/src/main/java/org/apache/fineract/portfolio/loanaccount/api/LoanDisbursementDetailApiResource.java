@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanDisbursementDetailApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "expectedDisbursementDate",
-            "actualDisbursementDate", "principal", "approvedPrincipal"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("id", "expectedDisbursementDate", "actualDisbursementDate", "principal", "approvedPrincipal"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -79,7 +79,7 @@ public class LoanDisbursementDetailApiResource {
             final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDisbusementDate(loanId, disbursementId)
-                    .withJson(apiRequestBodyAsJson).build();
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -92,8 +92,8 @@ public class LoanDisbursementDetailApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addAndDeleteDisbursementDetail(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        CommandWrapper commandRequest = new CommandWrapperBuilder().addAndDeleteDisbursementDetails(loanId)
-                    .withJson(apiRequestBodyAsJson).build();
+        CommandWrapper commandRequest = new CommandWrapperBuilder().addAndDeleteDisbursementDetails(loanId).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

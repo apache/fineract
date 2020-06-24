@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.organisation.monetary.domain;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import javax.annotation.PostConstruct;
-import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,12 +39,12 @@ public class MoneyHelper {
     private ConfigurationDomainService configurationDomainService;
 
     @PostConstruct
-    // This is a hack, but fixing this is not trivial, because some @Entity domain classes use this helper
-    @FindBugsSuppressWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    public void someFunction () {
+    // This is a hack, but fixing this is not trivial, because some @Entity
+    // domain classes use this helper
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
+    public void someFunction() {
         staticConfigurationDomainService = configurationDomainService;
     }
-
 
     public static RoundingMode getRoundingMode() {
         if (roundingMode == null) {

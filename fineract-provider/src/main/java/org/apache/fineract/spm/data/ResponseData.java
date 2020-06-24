@@ -29,8 +29,7 @@ public class ResponseData {
         super();
     }
 
-    public ResponseData(final Long id, final String text, final Integer value,
-                        final Integer sequenceNo) {
+    public ResponseData(final Long id, final String text, final Integer value, final Integer sequenceNo) {
         super();
         this.id = id;
         this.text = text;

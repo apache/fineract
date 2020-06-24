@@ -26,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * An abstract helper implementation of {@link ToApiJsonSerializer} for
- * resources to serialize their Java data objects into JSON.
+ * An abstract helper implementation of {@link ToApiJsonSerializer} for resources to serialize their Java data objects
+ * into JSON.
  */
 @Component
 public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
@@ -38,8 +38,7 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     private final GoogleGsonSerializerHelper helper;
 
     @Autowired
-    public DefaultToApiJsonSerializer(
-            final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
+    public DefaultToApiJsonSerializer(final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
             final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
             final CommandProcessingResultJsonSerializer commandProcessingResultSerializer, final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
@@ -137,7 +136,8 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
         return json;
     }
 
-    private Gson findAppropriateSerializer(final ApiRequestJsonSerializationSettings settings, final Set<String> supportedResponseParameters) {
+    private Gson findAppropriateSerializer(final ApiRequestJsonSerializationSettings settings,
+            final Set<String> supportedResponseParameters) {
         Gson gson = null;
         if (settings.isPartialResponseRequired()) {
             gson = this.helper.createGsonBuilderWithParameterExclusionSerializationStrategy(supportedResponseParameters,

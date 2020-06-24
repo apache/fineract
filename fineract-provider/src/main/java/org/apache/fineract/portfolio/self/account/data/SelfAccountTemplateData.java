@@ -25,8 +25,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations;
 
 @SuppressWarnings("unused")
-public class SelfAccountTemplateData implements
-        Comparable<SelfAccountTemplateData> {
+public class SelfAccountTemplateData implements Comparable<SelfAccountTemplateData> {
 
     private final Long accountId;
     private final String accountNo;
@@ -36,10 +35,8 @@ public class SelfAccountTemplateData implements
     private final Long officeId;
     private final String officeName;
 
-    public SelfAccountTemplateData(final Long accountId,
-            final String accountNo, final Integer accountType,
-            final Long clientId, final String clientName, final Long officeId,
-            final String officeName) {
+    public SelfAccountTemplateData(final Long accountId, final String accountNo, final Integer accountType, final Long clientId,
+            final String clientName, final Long officeId, final String officeName) {
         this.accountId = accountId;
         this.accountNo = accountNo;
         this.accountType = AccountTransferEnumerations.accountType(accountType);
@@ -49,8 +46,7 @@ public class SelfAccountTemplateData implements
         this.officeName = officeName;
     }
 
-    public SelfAccountTemplateData(final Long accountId,
-            final Integer accountType, final Long clientId, final Long officeId) {
+    public SelfAccountTemplateData(final Long accountId, final Integer accountType, final Long clientId, final Long officeId) {
         this.accountId = accountId;
         this.accountNo = null;
         this.accountType = AccountTransferEnumerations.accountType(accountType);
@@ -81,7 +77,7 @@ public class SelfAccountTemplateData implements
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof SelfAccountTemplateData)) {
             return false;
         }
         final SelfAccountTemplateData rhs = (SelfAccountTemplateData) obj;
@@ -110,6 +106,5 @@ public class SelfAccountTemplateData implements
     public Integer getAccountType() {
         return this.accountType.getId().intValue();
     }
-
 
 }

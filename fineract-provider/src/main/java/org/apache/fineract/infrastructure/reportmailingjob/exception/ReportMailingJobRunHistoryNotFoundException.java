@@ -25,8 +25,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  **/
 @SuppressWarnings("serial")
 public class ReportMailingJobRunHistoryNotFoundException extends AbstractPlatformResourceNotFoundException {
+
     public ReportMailingJobRunHistoryNotFoundException(final Long reportMailingJobId) {
-        super("error.msg.report.mailing.job.run.history.invalid", "Report mailing job run history with job identifier "
-                + reportMailingJobId + " does not exist", reportMailingJobId);
+        super("error.msg.report.mailing.job.run.history.invalid",
+                "Report mailing job run history with job identifier " + reportMailingJobId + " does not exist", reportMailingJobId);
     }
 }

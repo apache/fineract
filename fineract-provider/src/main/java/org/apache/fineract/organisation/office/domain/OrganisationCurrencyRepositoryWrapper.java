@@ -24,14 +24,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link OrganisationCurrency} that is responsible for checking if
- * {@link OrganisationCurrency} is returned when using <code>findOne</code>
- * repository method and throwing an appropriate not found exception.
+ * Wrapper for {@link OrganisationCurrency} that is responsible for checking if {@link OrganisationCurrency} is returned
+ * when using <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link OrganisationCurrency} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where {@link OrganisationCurrency} is
+ * required.
  * </p>
  */
 @Service
@@ -46,7 +45,9 @@ public class OrganisationCurrencyRepositoryWrapper {
 
     public OrganisationCurrency findOneWithNotFoundDetection(final String currencyCode) {
         final OrganisationCurrency organisationCurrency = this.repository.findOneByCode(currencyCode);
-        if (organisationCurrency == null) { throw new OrganizationalCurrencyNotFoundException(currencyCode); }
+        if (organisationCurrency == null) {
+            throw new OrganizationalCurrencyNotFoundException(currencyCode);
+        }
         return organisationCurrency;
     }
 }

@@ -30,7 +30,7 @@ import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
 public class InteropIdentifierRequestData {
 
-    static final String[] PARAMS = {PARAM_ACCOUNT_ID};
+    static final String[] PARAMS = { PARAM_ACCOUNT_ID };
 
     @NotEmpty
     private final InteropIdentifierType idType;
@@ -42,7 +42,8 @@ public class InteropIdentifierRequestData {
     @NotEmpty
     private final String accountId;
 
-    public InteropIdentifierRequestData(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType, String accountId) {
+    public InteropIdentifierRequestData(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType,
+            String accountId) {
         this.idType = idType;
         this.idValue = idValue;
         this.subIdOrType = subIdOrType;
@@ -65,9 +66,9 @@ public class InteropIdentifierRequestData {
         return accountId;
     }
 
-    public static InteropIdentifierRequestData validateAndParse(final DataValidatorBuilder dataValidator, @NotNull InteropIdentifierType idType,
-                                                                @NotNull String idValue, String subIdOrType, JsonObject element,
-                                                                FromJsonHelper jsonHelper) {
+    public static InteropIdentifierRequestData validateAndParse(final DataValidatorBuilder dataValidator,
+            @NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType, JsonObject element,
+            FromJsonHelper jsonHelper) {
         if (element == null) {
             return null;
         }

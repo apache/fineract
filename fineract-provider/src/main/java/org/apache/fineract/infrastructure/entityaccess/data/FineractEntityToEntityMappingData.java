@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.entityaccess.data;
 import java.io.Serializable;
 import java.util.Date;
 
-public class FineractEntityToEntityMappingData implements Serializable {
+public final class FineractEntityToEntityMappingData implements Serializable {
 
     @SuppressWarnings("unused")
     private Long mapId;
@@ -60,8 +60,7 @@ public class FineractEntityToEntityMappingData implements Serializable {
     }
 
     public static FineractEntityToEntityMappingData getRelatedEntities(final Long mapId, final Long relationId, final Long fromId,
-            final Long toId, final Date startDate, final Date endDate ,final String fromEntity, final String toEntity) {
-
+            final Long toId, final Date startDate, final Date endDate, final String fromEntity, final String toEntity) {
 
         return new FineractEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
 
@@ -88,6 +87,5 @@ public class FineractEntityToEntityMappingData implements Serializable {
     public String getFromEntity() {
         return fromEntity;
     }
-
 
 }

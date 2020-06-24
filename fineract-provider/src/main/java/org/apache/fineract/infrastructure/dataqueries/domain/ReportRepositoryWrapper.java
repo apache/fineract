@@ -23,11 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *  A wrapper class for the ReportRepository that provides a method that returns a Report entity if it exists,
- *  else throws "ReportNotFoundException" exception if the Report does not exist
+ * A wrapper class for the ReportRepository that provides a method that returns a Report entity if it exists, else
+ * throws "ReportNotFoundException" exception if the Report does not exist
  **/
 @Service
 public class ReportRepositoryWrapper {
+
     private final ReportRepository reportRepository;
 
     @Autowired
@@ -38,12 +39,13 @@ public class ReportRepositoryWrapper {
     /**
      * Retrieves an entity by its id
      *
-     * @param id must not be null
-     * @throws ReportNotFoundException if entity not found
+     * @param id
+     *            must not be null
+     * @throws ReportNotFoundException
+     *             if entity not found
      * @return {@link Report} object
      */
     public Report findOneThrowExceptionIfNotFound(final Long id) {
-        return this.reportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
+        return this.reportRepository.findById(id).orElseThrow(() -> new ReportNotFoundException(id));
     }
 }

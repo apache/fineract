@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.exception;
 
-
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class SavingsOfficerUnassignmentDateException extends AbstractPlatformDomainRuleException {

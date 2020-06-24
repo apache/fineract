@@ -41,11 +41,9 @@ public class PocketAccountMapping extends AbstractPersistableCustom {
     @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
-    protected PocketAccountMapping() {
-    }
+    protected PocketAccountMapping() {}
 
-    private PocketAccountMapping(final Long pocketId, final Long accountId, final Integer accountType,
-            final String accountNumber) {
+    private PocketAccountMapping(final Long pocketId, final Long accountId, final Integer accountType, final String accountNumber) {
         this.pocketId = pocketId;
         this.accountId = accountId;
         this.accountType = accountType;

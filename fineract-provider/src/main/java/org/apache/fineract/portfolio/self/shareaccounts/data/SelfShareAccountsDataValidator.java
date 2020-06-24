@@ -54,10 +54,8 @@ public class SelfShareAccountsDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname,
-                element);
-        baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull()
-                .longGreaterThanZero();
+        final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname, element);
+        baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull().longGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);

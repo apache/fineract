@@ -23,7 +23,6 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class FineractEntityMappingConfigurationException extends AbstractPlatformDomainRuleException {
 
     public FineractEntityMappingConfigurationException() {
-        super("error.msg.entityaccess.config",
-                "Error while getting entity maping configuration ");
-}
+        super("error.msg.entityaccess.config", "Error while getting entity maping configuration ");
+    }
 }

@@ -23,6 +23,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface ReportMailingJobRepository extends JpaRepository<ReportMailingJob, Long>, JpaSpecificationExecutor<ReportMailingJob> {
+
     /**
      * Returns all instances of {@link ReportMailingJob} where isActive is true and isDeleted is false
      *

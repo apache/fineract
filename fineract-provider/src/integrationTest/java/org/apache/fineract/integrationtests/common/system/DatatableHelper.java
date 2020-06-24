@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.system;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -31,7 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DatatableHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -48,8 +49,8 @@ public class DatatableHelper {
     }
 
     public String deleteDatatable(final String datatableName) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER,
-                "resourceIdentifier");
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
     }
 
     public Integer deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
@@ -61,9 +62,9 @@ public class DatatableHelper {
     public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String generatedDatatableName) {
         LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
-        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec, DATATABLE_URL + "/"
-                + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
-        assertEquals("ERROR IN CREATING THE DATATABLE", generatedDatatableName, responseRegisteredTableName);
+        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec,
+                DATATABLE_URL + "/" + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
+        assertEquals(generatedDatatableName, responseRegisteredTableName, "ERROR IN CREATING THE DATATABLE");
     }
 
     public static String getTestDatatableAsJSON(final String apptableName, final boolean multiRow) {
@@ -78,7 +79,7 @@ public class DatatableHelper {
         addDatatableColumns(datatableColumnsList, "Date of Approval", "Date", false, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
-        LOG.info("map : {}" , requestJsonString);
+        LOG.info("map : {}", requestJsonString);
         return requestJsonString;
     }
 

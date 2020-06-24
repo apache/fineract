@@ -35,7 +35,9 @@ public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom
     private String name;
 
     @Column(name = "sort_order")
-    private Integer sortOrder ; //Don't change this name as this property name is used as sort order while retrieving this objects
+    private Integer sortOrder; // Don't change this name as this property name
+                               // is used as sort order while retrieving this
+                               // objects
 
     protected LoanTransactionProcessingStrategy() {
         //

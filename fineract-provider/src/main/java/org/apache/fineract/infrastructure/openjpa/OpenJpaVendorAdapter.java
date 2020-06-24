@@ -30,11 +30,12 @@ import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
- * Developed and tested against OpenJPA 2.2.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA. Developed and tested against
+ * OpenJPA 2.2.
  *
- * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
- * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ * <p>
+ * Exposes OpenJPA's persistence provider and EntityManager extension interface, and supports
+ * {@link AbstractJpaVendorAdapter}'s common configuration settings.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -47,7 +48,6 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
     private final PersistenceProvider persistenceProvider = new PersistenceProviderImpl();
 
     private final OpenJpaDialect jpaDialect = new OpenJpaDialect();
-
 
     @Override
     public PersistenceProvider getPersistenceProvider() {
@@ -65,8 +65,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
         if (getDatabasePlatform() != null) {
             jpaProperties.put("openjpa.jdbc.DBDictionary", getDatabasePlatform());
-        }
-        else if (getDatabase() != null) {
+        } else if (getDatabase() != null) {
             String databaseDictonary = determineDatabaseDictionary(getDatabase());
             if (databaseDictonary != null) {
                 jpaProperties.put("openjpa.jdbc.DBDictionary", databaseDictonary);
@@ -77,7 +76,8 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
             jpaProperties.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
         }
         if (isShowSql()) {
-            // Taken from the OpenJPA 0.9.6 docs ("Standard OpenJPA Log Configuration + All SQL Statements")
+            // Taken from the OpenJPA 0.9.6 docs ("Standard OpenJPA Log
+            // Configuration + All SQL Statements")
             jpaProperties.put("openjpa.Log", "DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE");
         }
 
@@ -86,21 +86,33 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
     /**
      * Determine the OpenJPA database dictionary name for the given database.
-     * @param database the specified database
+     *
+     * @param database
+     *            the specified database
      * @return the OpenJPA database dictionary name, or {@code null} if none found
      */
     protected String determineDatabaseDictionary(Database database) {
         switch (database) {
-            case DB2: return "db2";
-            case DERBY: return "derby";
-            case HSQL: return "hsql(SimulateLocking=true)";
-            case INFORMIX: return "informix";
-            case MYSQL: return "mysql";
-            case ORACLE: return "oracle";
-            case POSTGRESQL: return "postgres";
-            case SQL_SERVER: return "sqlserver";
-            case SYBASE: return "sybase";
-            default: return null;
+            case DB2:
+                return "db2";
+            case DERBY:
+                return "derby";
+            case HSQL:
+                return "hsql(SimulateLocking=true)";
+            case INFORMIX:
+                return "informix";
+            case MYSQL:
+                return "mysql";
+            case ORACLE:
+                return "oracle";
+            case POSTGRESQL:
+                return "postgres";
+            case SQL_SERVER:
+                return "sqlserver";
+            case SYBASE:
+                return "sybase";
+            default:
+                return null;
         }
     }
 

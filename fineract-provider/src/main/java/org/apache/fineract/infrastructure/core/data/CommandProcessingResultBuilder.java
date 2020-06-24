@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.core.data;
 import java.util.Map;
 
 /**
- * Represents the successful result of an REST API call that results in
- * processing a command.
+ * Represents the successful result of an REST API call that results in processing a command.
  */
 public class CommandProcessingResultBuilder {
 
@@ -44,8 +43,8 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
-                this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.transactionId, this.changes, this.productId,  this.rollbackTransaction,
-                this.subEntityId);
+                this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.transactionId, this.changes, this.productId,
+                this.rollbackTransaction, this.subEntityId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {

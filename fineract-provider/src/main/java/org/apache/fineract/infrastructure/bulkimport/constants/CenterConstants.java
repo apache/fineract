@@ -20,32 +20,28 @@ package org.apache.fineract.infrastructure.bulkimport.constants;
 
 public class CenterConstants {
 
-    //Column indices
-    public static final int CENTER_NAME_COL = 0;//A
-    public static final int OFFICE_NAME_COL = 1;//B
-    public static final int STAFF_NAME_COL = 2;//C
-    public static final int EXTERNAL_ID_COL = 3;//D
-    public static final int ACTIVE_COL = 4;//E
-    public static final int ACTIVATION_DATE_COL = 5;//F
-    public static final int SUBMITTED_ON_DATE_COL=6;//G
-    public static final int MEETING_START_DATE_COL = 7;//H
-    public static final int IS_REPEATING_COL = 8;//I
-    public static final int FREQUENCY_COL = 9;//J
-    public static final int INTERVAL_COL = 10;//K
-    public static final int REPEATS_ON_DAY_COL = 11;//L
-    public static final int STATUS_COL = 12;//M
-    public static final int CENTER_ID_COL = 13;//N
-    public static final int FAILURE_COL = 14;//O
-    public static final int GROUP_NAMES_STARTING_COL = 15;//P
-    public static final int GROUP_NAMES_ENDING_COL = 250;//IQ
+    // Column indices
+    public static final int CENTER_NAME_COL = 0;// A
+    public static final int OFFICE_NAME_COL = 1;// B
+    public static final int STAFF_NAME_COL = 2;// C
+    public static final int EXTERNAL_ID_COL = 3;// D
+    public static final int ACTIVE_COL = 4;// E
+    public static final int ACTIVATION_DATE_COL = 5;// F
+    public static final int SUBMITTED_ON_DATE_COL = 6;// G
+    public static final int MEETING_START_DATE_COL = 7;// H
+    public static final int IS_REPEATING_COL = 8;// I
+    public static final int FREQUENCY_COL = 9;// J
+    public static final int INTERVAL_COL = 10;// K
+    public static final int REPEATS_ON_DAY_COL = 11;// L
+    public static final int STATUS_COL = 12;// M
+    public static final int CENTER_ID_COL = 13;// N
+    public static final int FAILURE_COL = 14;// O
+    public static final int GROUP_NAMES_STARTING_COL = 15;// P
+    public static final int GROUP_NAMES_ENDING_COL = 250;// IQ
     public static final int LOOKUP_OFFICE_NAME_COL = 251;
     public static final int LOOKUP_OFFICE_OPENING_DATE_COL = 252;
     public static final int LOOKUP_REPEAT_NORMAL_COL = 253;
     public static final int LOOKUP_REPEAT_MONTHLY_COL = 254;
     public static final int LOOKUP_IF_REPEAT_WEEKLY_COL = 255;
-
-
-
-
 
 }

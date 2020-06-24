@@ -108,8 +108,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] {
-                PortfolioProductType.LOAN.getValue(), loanProductId });
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+                new Object[] { PortfolioProductType.LOAN.getValue(), loanProductId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
 
@@ -194,8 +194,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] {
-                PortfolioProductType.SAVING.getValue(), savingsProductId });
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+                new Object[] { PortfolioProductType.SAVING.getValue(), savingsProductId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
 
@@ -255,8 +255,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is not null";
 
-        final List<Map<String, Object>> paymentTypeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, new Object[] {
-                portfolioProductType.getValue(), loanProductId });
+        final List<Map<String, Object>> paymentTypeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm,
+                new Object[] { portfolioProductType.getValue(), loanProductId });
 
         List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
         for (final Map<String, Object> productToGLAccountMap : paymentTypeToFundSourceMappingsList) {
@@ -308,8 +308,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             sql = sql + " 0";
         }
 
-        final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, new Object[] {
-                portfolioProductType.getValue(), loanProductId });
+        final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm,
+                new Object[] { portfolioProductType.getValue(), loanProductId });
         List<ChargeToGLAccountMapper> chargeToGLAccountMappers = null;
         for (final Map<String, Object> chargeToIncomeAccountMap : chargeToFundSourceMappingsList) {
             if (chargeToGLAccountMappers == null) {
@@ -337,8 +337,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] {
-                PortfolioProductType.SHARES.getValue(), productId });
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+                new Object[] { PortfolioProductType.SHARES.getValue(), productId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
             for (final Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {

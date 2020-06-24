@@ -24,8 +24,8 @@ public enum ChargeCalculationType {
     FLAT(1, "chargeCalculationType.flat"), //
     PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount"), //
     PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest"), //
-    PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest"),
-    PERCENT_OF_DISBURSEMENT_AMOUNT(5,"chargeCalculationType.percent.of.disbursement.amount");
+    PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest"), PERCENT_OF_DISBURSEMENT_AMOUNT(5,
+            "chargeCalculationType.percent.of.disbursement.amount");
 
     private final Integer value;
     private final String code;
@@ -46,7 +46,7 @@ public enum ChargeCalculationType {
     public static Object[] validValuesForLoan() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
                 ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(), ChargeCalculationType.PERCENT_OF_INTEREST.getValue(),
-                ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
+                ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
     }
 
     public static Object[] validValuesForSavings() {
@@ -65,8 +65,8 @@ public enum ChargeCalculationType {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
 
-    public static Object[] validValuesForTrancheDisbursement(){
-        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
+    public static Object[] validValuesForTrancheDisbursement() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
     }
 
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
@@ -116,10 +116,11 @@ public enum ChargeCalculationType {
     }
 
     public boolean isPercentageBased() {
-        return isPercentageOfAmount() || isPercentageOfAmountAndInterest() || isPercentageOfInterest() || isPercentageOfDisbursementAmount();
+        return isPercentageOfAmount() || isPercentageOfAmountAndInterest() || isPercentageOfInterest()
+                || isPercentageOfDisbursementAmount();
     }
 
-    public boolean isPercentageOfDisbursementAmount(){
+    public boolean isPercentageOfDisbursementAmount() {
         return this.value.equals(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
     }
 }

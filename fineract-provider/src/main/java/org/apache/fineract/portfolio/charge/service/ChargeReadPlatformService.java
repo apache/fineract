@@ -56,8 +56,7 @@ public interface ChargeReadPlatformService {
     Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes);
 
     /**
-     * Returns all charges applicable for a given loan product (filter based on
-     * Currency of Selected Loan Product)
+     * Returns all charges applicable for a given loan product (filter based on Currency of Selected Loan Product)
      *
      * @param excludeChargeTimes
      *            Excludes Given List of Charge Types from the response
@@ -121,5 +120,5 @@ public interface ChargeReadPlatformService {
      */
     Collection<ChargeData> retrieveSharesApplicableCharges();
 
-    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) ;
+    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId);
 }

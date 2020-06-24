@@ -175,8 +175,8 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
                     break;
                 }
             }
-            return TaxComponentData.instance(id, name, percentage, debitAccountType, debitAccountData, creditAccountType,
-                    creditAccountData, startDate, historyDatas);
+            return TaxComponentData.instance(id, name, percentage, debitAccountType, debitAccountData, creditAccountType, creditAccountData,
+                    startDate, historyDatas);
         }
 
         public String getSchema() {

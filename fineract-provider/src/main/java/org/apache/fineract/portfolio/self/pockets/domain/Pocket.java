@@ -27,8 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "m_pocket", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "app_user_id" }, name = "unique_app_user") })
+@Table(name = "m_pocket", uniqueConstraints = { @UniqueConstraint(columnNames = { "app_user_id" }, name = "unique_app_user") })
 public class Pocket extends AbstractPersistableCustom {
 
     @Column(name = "app_user_id", length = 20, nullable = false)
@@ -42,8 +41,7 @@ public class Pocket extends AbstractPersistableCustom {
         this.appUserId = appUserId;
     }
 
-    protected Pocket() {
-    }
+    protected Pocket() {}
 
     private Pocket(final Long appUserId) {
         this.appUserId = appUserId;

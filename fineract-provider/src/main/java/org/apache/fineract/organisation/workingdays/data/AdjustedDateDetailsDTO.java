@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.workingdays.data;
 
 import org.joda.time.LocalDate;
 
-
 public class AdjustedDateDetailsDTO {
 
     /**
@@ -28,8 +27,8 @@ public class AdjustedDateDetailsDTO {
      */
     LocalDate changedScheduleDate;
     /**
-     * Variable tracks If the meeting has been changed , i.e future schedule
-     * also changes along with the current repayments date.
+     * Variable tracks If the meeting has been changed , i.e future schedule also changes along with the current
+     * repayments date.
      */
     LocalDate changedActualRepaymentDate;
 

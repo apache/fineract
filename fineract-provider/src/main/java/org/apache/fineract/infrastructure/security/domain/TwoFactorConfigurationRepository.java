@@ -24,10 +24,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Profile("twofactor")
-public interface TwoFactorConfigurationRepository extends
-        JpaRepository<TwoFactorConfiguration, Long>, JpaSpecificationExecutor<TwoFactorConfiguration> {
+public interface TwoFactorConfigurationRepository
+        extends JpaRepository<TwoFactorConfiguration, Long>, JpaSpecificationExecutor<TwoFactorConfiguration> {
 
     TwoFactorConfiguration findByName(final String name);
 
+    @Override
     List<TwoFactorConfiguration> findAll();
 }

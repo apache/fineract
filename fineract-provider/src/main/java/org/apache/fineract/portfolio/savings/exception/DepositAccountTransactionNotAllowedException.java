@@ -23,13 +23,14 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 
 /**
- * A {@link RuntimeException} thrown when deposit account transaction not
- * allowed.
+ * A {@link RuntimeException} thrown when deposit account transaction not allowed.
  */
 public class DepositAccountTransactionNotAllowedException extends AbstractPlatformServiceUnavailableException {
 
     public DepositAccountTransactionNotAllowedException(final Long accountId, final String action, final DepositAccountType type) {
-        super("error.msg." + type.resourceName() + ".account.trasaction." + action + ".notallowed", SavingsEnumerations.depositType(type)
-                .getValue() + "account " + action + " transaction not allowed with account identifier " + accountId, accountId);
+        super("error.msg." + type.resourceName() + ".account.trasaction." + action + ".notallowed",
+                SavingsEnumerations.depositType(type).getValue() + "account " + action + " transaction not allowed with account identifier "
+                        + accountId,
+                accountId);
     }
 }

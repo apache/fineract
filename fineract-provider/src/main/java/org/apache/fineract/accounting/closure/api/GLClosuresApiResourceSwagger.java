@@ -23,18 +23,19 @@ import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.LocalDate;
 
 final class GLClosuresApiResourceSwagger {
+
     private GLClosuresApiResourceSwagger() {
         // don't allow to instantiate; use only for live API documentation
     }
 
     /**
-     * TODO: describe where this belongs: {@link GLClosuresApiResource }
-     * {@Link GLClosuresApiResource}
+     * TODO: describe where this belongs: {@link GLClosuresApiResource } {@Link GLClosuresApiResource}
      */
     // Check !!
 
     @ApiModel(value = "GetGLClosureResponse")
     public static final class GetGlClosureResponse {
+
         private GetGlClosureResponse() {
             // dont allow to initiatiate
         }
@@ -68,9 +69,11 @@ final class GLClosuresApiResourceSwagger {
 
     @ApiModel(value = "PostGLCLosuresRequest")
     public static final class PostGlClosuresRequest {
+
         private PostGlClosuresRequest() {
             // don't allow to instantiate; use only for live API documentation
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "06 December 2012")
@@ -85,9 +88,11 @@ final class GLClosuresApiResourceSwagger {
 
     @ApiModel(value = "PostGlClosuresResponse")
     public static final class PostGlClosuresResponse {
+
         private PostGlClosuresResponse() {
             // don't allow to instantiate; use only for live API documentation
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "9")
@@ -96,18 +101,22 @@ final class GLClosuresApiResourceSwagger {
 
     @ApiModel(value = "PutGlClosuresRequest")
     public static final class PutGlClosuresRequest {
+
         private PutGlClosuresRequest() {
             // don't allow to instantiate; use only for live API documentation
         }
+
         @ApiModelProperty(example = "All transactions verified by Johnny Cash")
         public String comments;
     }
 
     @ApiModel(value = "PutGlClosuresResponse")
-    public static final class PutGlClosuresResponse{
+    public static final class PutGlClosuresResponse {
+
         private PutGlClosuresResponse() {
             // don't allow to instantiate; use only for live API documentation
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "9")
@@ -117,8 +126,9 @@ final class GLClosuresApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteGlClosuresResponse")
-    public static final class DeleteGlClosuresResponse{
-        private DeleteGlClosuresResponse(){
+    public static final class DeleteGlClosuresResponse {
+
+        private DeleteGlClosuresResponse() {
 
         }
 

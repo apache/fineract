@@ -35,9 +35,8 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
 @Table(name = "interop_identifier", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = {"account_id", "type"}),
-        @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = {"type", "a_value", "sub_value_or_type"})
-})
+        @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = { "account_id", "type" }),
+        @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = { "type", "a_value", "sub_value_or_type" }) })
 public class InteropIdentifier extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
@@ -68,12 +67,10 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     @Column(name = "modified_on")
     private Date modifiedOn;
 
-
-    protected InteropIdentifier() {
-    }
+    protected InteropIdentifier() {}
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value,
-                                   String subValueOrType, @NotNull String createdBy, @NotNull Date createdOn) {
+            String subValueOrType, @NotNull String createdBy, @NotNull Date createdOn) {
         this.account = account;
         this.type = type;
         this.value = value;
@@ -83,7 +80,7 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     }
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String createdBy,
-                                   @NotNull Date createdOn) {
+            @NotNull Date createdOn) {
         this(account, type, null, null, createdBy, createdOn);
     }
 
@@ -91,16 +88,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return account;
     }
 
-    private void setAccount(SavingsAccount account) {
-        this.account = account;
-    }
-
     public InteropIdentifierType getType() {
         return type;
-    }
-
-    private void setType(InteropIdentifierType type) {
-        this.type = type;
     }
 
     public String getValue() {
@@ -123,16 +112,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return createdBy;
     }
 
-    private void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    private void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     public String geModifiedBy() {
@@ -156,7 +137,7 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof InteropIdentifier)) {
             return false;
         }
 

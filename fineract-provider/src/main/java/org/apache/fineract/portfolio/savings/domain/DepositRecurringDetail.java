@@ -29,9 +29,8 @@ import javax.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
 /**
- * DepositRecurringDetail encapsulates all the details of a
- * {@link RecurringDepositProduct} that are also used and persisted by a
- * {@link RecurringDepositAccount}.
+ * DepositRecurringDetail encapsulates all the details of a {@link RecurringDepositProduct} that are also used and
+ * persisted by a {@link RecurringDepositAccount}.
  */
 @Embeddable
 public class DepositRecurringDetail {

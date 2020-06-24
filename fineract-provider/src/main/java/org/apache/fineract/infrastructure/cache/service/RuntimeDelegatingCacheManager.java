@@ -30,28 +30,26 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.ehcache.EhCacheCacheManager;
+import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.stereotype.Component;
 
 /**
- * At present this implementation of {@link CacheManager} just delegates to the
- * real {@link CacheManager} to use.
+ * At present this implementation of {@link CacheManager} just delegates to the real {@link CacheManager} to use.
  *
- * By default it is {@link NoOpCacheManager} but we can change that by checking
- * some persisted configuration in the database on startup and allow user to
- * switch implementation through UI/API
+ * By default it is {@link NoOpCacheManager} but we can change that by checking some persisted configuration in the
+ * database on startup and allow user to switch implementation through UI/API
  */
 @Component(value = "runtimeDelegatingCacheManager")
 public class RuntimeDelegatingCacheManager implements CacheManager {
 
-    private final EhCacheCacheManager ehcacheCacheManager;
+    private final JCacheCacheManager jcacheCacheManager;
     private final CacheManager noOpCacheManager = new NoOpCacheManager();
     private CacheManager currentCacheManager;
 
     @Autowired
-    public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
-        this.ehcacheCacheManager = ehCacheCacheManager;
+    public RuntimeDelegatingCacheManager(final JCacheCacheManager jcacheCacheManager) {
+        this.jcacheCacheManager = jcacheCacheManager;
         this.currentCacheManager = this.noOpCacheManager;
     }
 
@@ -68,7 +66,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     public Collection<CacheData> retrieveAll() {
 
         final boolean noCacheEnabled = this.currentCacheManager instanceof NoOpCacheManager;
-        final boolean ehcacheEnabled = this.currentCacheManager instanceof EhCacheCacheManager;
+        final boolean ehcacheEnabled = this.currentCacheManager instanceof JCacheCacheManager;
 
         // final boolean distributedCacheEnabled = false;
 
@@ -107,7 +105,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
                     changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
                     clearEhCache();
                 }
-                this.currentCacheManager = this.ehcacheCacheManager;
+                this.currentCacheManager = this.jcacheCacheManager;
             break;
             case MULTI_NODE:
                 if (!distributedCacheEnabled) {
@@ -120,6 +118,10 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     }
 
     private void clearEhCache() {
-        this.ehcacheCacheManager.getCacheManager().clearAll();
+        javax.cache.CacheManager cacheManager = this.jcacheCacheManager.getCacheManager();
+        Iterable<String> cacheNames = cacheManager.getCacheNames();
+        for (String cacheName : cacheNames) {
+            cacheManager.getCache(cacheName).clear();
+        }
     }
 }
