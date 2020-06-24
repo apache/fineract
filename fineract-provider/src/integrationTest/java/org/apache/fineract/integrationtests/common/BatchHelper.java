@@ -73,7 +73,7 @@ public final class BatchHelper {
      * Returns the converted string response into JSON.
      *
      * @param json
-     * @return List<BatchResponse>
+     * @return {@code List<BatchResponse>}
      */
     private static List<BatchResponse> fromJsonString(final String json) {
         return new Gson().fromJson(json, new TypeToken<List<BatchResponse>>() {}.getType());
@@ -113,7 +113,7 @@ public final class BatchHelper {
      * Returns a BatchResponse based on the given BatchRequest, by posting the request to the server.
      *
      * @param BatchRequest
-     * @return List<BatchResponse>
+     * @return {@code List<BatchResponse>}
      */
     public static List<BatchResponse> postWithSingleRequest(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final BatchRequest br) {
