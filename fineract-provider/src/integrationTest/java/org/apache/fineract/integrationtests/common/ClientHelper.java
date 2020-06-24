@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClientHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

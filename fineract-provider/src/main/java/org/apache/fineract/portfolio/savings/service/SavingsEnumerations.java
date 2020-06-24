@@ -288,8 +288,6 @@ public class SavingsEnumerations {
                         SavingsAccountStatusType.MATURED.getCode(), "Matured", submittedAndPendingApproval, isApproved, isRejected,
                         isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
-            default:
-            break;
         }
         return optionData;
     }

@@ -35,8 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link ClientIdentifierCommandFromApiJsonDeserializer} 's.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link ClientIdentifierCommandFromApiJsonDeserializer} 's.
  */
 @Component
 public final class ClientIdentifierCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<ClientIdentifierCommand> {

@@ -22,7 +22,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 import java.math.BigDecimal;
 
 @SuppressWarnings("unused")
-public class ObligeeData {
+public final class ObligeeData {
 
     private final String firstName;
     private final String lastName;

@@ -59,8 +59,6 @@ public class ClientEnumerations {
                 optionData = new EnumOptionData(ClientStatus.TRANSFER_ON_HOLD.getValue().longValue(),
                         ClientStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
             break;
-            default:
-            break;
         }
 
         return optionData;

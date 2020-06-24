@@ -37,8 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link CollectionSheetBulkRepaymentCommand}'s.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link CollectionSheetBulkRepaymentCommand}'s.
  */
 @Component
 public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer

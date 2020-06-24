@@ -29,8 +29,7 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 /**
  * Immutable object representing a General Ledger Account
  *
- * Note: no getter/setters required as google-gson will produce json from fields
- * of object.
+ * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
 public class AccountingRuleData {
 

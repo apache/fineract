@@ -68,7 +68,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements ProvisioningEntriesWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     private final LoanProductRepository loanProductRepository;
@@ -133,7 +133,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private void validateForCreateJournalEntry(ProvisioningEntryData existingEntry, ProvisioningEntry requested) {
         Date existingDate = existingEntry.getCreatedDate();
         Date requestedDate = requested.getCreatedDate();
-        if (existingDate.after(requestedDate) || existingDate.equals(requestedDate)) {
+        if (existingDate.after(requestedDate) || existingDate.compareTo(requestedDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
             throw new ProvisioningJournalEntriesCannotbeCreatedException(existingEntry.getCreatedDate(), requestedDate);
         }
     }

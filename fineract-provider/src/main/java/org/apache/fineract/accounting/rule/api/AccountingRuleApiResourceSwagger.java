@@ -117,7 +117,7 @@ final class AccountingRuleApiResourceSwagger {
 
         }
 
-        public class PutAccountingRulesResponsechangesSwagger {
+        public static class PutAccountingRulesResponsechangesSwagger {
 
             public PutAccountingRulesResponsechangesSwagger() {}
 

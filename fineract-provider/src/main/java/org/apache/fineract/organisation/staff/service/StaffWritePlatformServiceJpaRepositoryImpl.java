@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
 
     private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
@@ -117,8 +117,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleStaffDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 

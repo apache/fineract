@@ -26,7 +26,7 @@ import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateEntity;
 import org.apache.fineract.template.domain.TemplateType;
 
-public class TemplateData {
+public final class TemplateData {
 
     @SuppressWarnings("unused")
     private final List<Map<String, Object>> entities;

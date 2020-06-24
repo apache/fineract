@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class RecalculateInterestPoster implements Callable<Void> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
 
     private Collection<Long> loanIds;
     private LoanWritePlatformService loanWritePlatformService;

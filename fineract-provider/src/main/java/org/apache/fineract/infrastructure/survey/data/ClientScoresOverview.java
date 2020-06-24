@@ -26,19 +26,19 @@ import org.joda.time.LocalDate;
 public class ClientScoresOverview {
 
     @SuppressWarnings("unused")
-    final private String surveyName;
+    private final String surveyName;
     @SuppressWarnings("unused")
-    final private long id;
+    private final long id;
     @SuppressWarnings("unused")
-    final private String likelihoodCode;
+    private final String likelihoodCode;
     @SuppressWarnings("unused")
-    final private String likelihoodName;
+    private final String likelihoodName;
     @SuppressWarnings("unused")
-    final private long score;
+    private final long score;
     @SuppressWarnings("unused")
-    final private Double povertyLine;
+    private final Double povertyLine;
     @SuppressWarnings("unused")
-    final private LocalDate date;
+    private final LocalDate date;
 
     public ClientScoresOverview(final String likelihoodCode, final String likelihoodName, final long score, final Double povertyLine,
             final LocalDate date, final long resourceId, final String surveyName) {

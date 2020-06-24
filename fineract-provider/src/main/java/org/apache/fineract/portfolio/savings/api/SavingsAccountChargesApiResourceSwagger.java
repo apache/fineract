@@ -30,11 +30,11 @@ final class SavingsAccountChargesApiResourceSwagger {
     private SavingsAccountChargesApiResourceSwagger() {}
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesResponse")
-    public final static class GetSavingsAccountsSavingsAccountIdChargesResponse {
+    public static final class GetSavingsAccountsSavingsAccountIdChargesResponse {
 
         private GetSavingsAccountsSavingsAccountIdChargesResponse() {}
 
-        final class GetChargesCurrencyResponse {
+        static final class GetChargesCurrencyResponse {
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -50,7 +50,7 @@ final class SavingsAccountChargesApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetChargesChargeCalculationType {
+        static final class GetChargesChargeCalculationType {
 
             private GetChargesChargeCalculationType() {}
 
@@ -62,7 +62,7 @@ final class SavingsAccountChargesApiResourceSwagger {
             public String value;
         }
 
-        final class GetChargesChargeTimeType {
+        static final class GetChargesChargeTimeType {
 
             private GetChargesChargeTimeType() {}
 
@@ -106,15 +106,15 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesTemplateResponse")
-    public final static class GetSavingsAccountsSavingsAccountIdChargesTemplateResponse {
+    public static final class GetSavingsAccountsSavingsAccountIdChargesTemplateResponse {
 
         private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {}
 
-        final class GetSavingsChargesOptions {
+        static final class GetSavingsChargesOptions {
 
             private GetSavingsChargesOptions() {}
 
-            final class GetSavingsChargesChargeTimeType {
+            static final class GetSavingsChargesChargeTimeType {
 
                 private GetSavingsChargesChargeTimeType() {}
 
@@ -126,7 +126,7 @@ final class SavingsAccountChargesApiResourceSwagger {
                 public String value;
             }
 
-            final class GetChargesAppliesTo {
+            static final class GetChargesAppliesTo {
 
                 private GetChargesAppliesTo() {}
 
@@ -166,7 +166,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
@@ -200,7 +200,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesRequest")
-    public final static class PostSavingsAccountsSavingsAccountIdChargesRequest {
+    public static final class PostSavingsAccountsSavingsAccountIdChargesRequest {
 
         private PostSavingsAccountsSavingsAccountIdChargesRequest() {}
 
@@ -217,7 +217,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesResponse")
-    public final static class PostSavingsAccountsSavingsAccountIdChargesResponse {
+    public static final class PostSavingsAccountsSavingsAccountIdChargesResponse {
 
         private PostSavingsAccountsSavingsAccountIdChargesResponse() {}
 
@@ -232,7 +232,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
-    public final static class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
+    public static final class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
 
         private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
 
@@ -247,11 +247,11 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
-        final class PutSavingsChanges {
+        static final class PutSavingsChanges {
 
             private PutSavingsChanges() {}
 
@@ -277,7 +277,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
-    public final static class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
+    public static final class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
 
         private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
 
@@ -292,7 +292,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
@@ -307,7 +307,7 @@ final class SavingsAccountChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
-    public final static class DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
+    public static final class DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
         private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 

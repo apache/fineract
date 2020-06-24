@@ -21,8 +21,7 @@ package org.apache.fineract.accounting.glaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when an error is encountered during
- * updating a GL Account
+ * A {@link RuntimeException} thrown when an error is encountered during updating a GL Account
  */
 public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleException {
 

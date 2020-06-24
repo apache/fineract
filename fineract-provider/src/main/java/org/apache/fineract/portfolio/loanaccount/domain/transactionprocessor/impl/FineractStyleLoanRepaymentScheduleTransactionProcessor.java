@@ -31,13 +31,11 @@ import org.joda.time.LocalDate;
 /**
  * Old style {@link LoanRepaymentScheduleTransactionProcessor}.
  *
- * For ALL types of transactions, pays off components in order of interest, then
- * principal.
+ * For ALL types of transactions, pays off components in order of interest, then principal.
  *
- * Other formulas exist on fineract where you can choose 'Declining-Balance
- * Interest Recalculation' which simply means, recalculate the interest
- * component based on the how much principal is outstanding at a point in time;
- * but this isnt trying to model that option only the basic one for now.
+ * Other formulas exist on fineract where you can choose 'Declining-Balance Interest Recalculation' which simply means,
+ * recalculate the interest component based on the how much principal is outstanding at a point in time; but this isnt
+ * trying to model that option only the basic one for now.
  */
 @SuppressWarnings("unused")
 public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
@@ -52,8 +50,7 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
     }
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time
-     * payments, interest first then principal.
+     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
@@ -66,8 +63,7 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,

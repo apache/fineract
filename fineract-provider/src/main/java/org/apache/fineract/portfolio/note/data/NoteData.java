@@ -22,8 +22,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.DateTime;
 
 /**
- * Immutable data object represent note or case information about a client, loan
- * or loan transaction.
+ * Immutable data object represent note or case information about a client, loan or loan transaction.
  */
 public class NoteData {
 

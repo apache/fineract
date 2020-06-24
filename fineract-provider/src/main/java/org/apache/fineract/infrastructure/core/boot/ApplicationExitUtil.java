@@ -28,7 +28,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 public abstract class ApplicationExitUtil {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
 
     private ApplicationExitUtil() {}
 

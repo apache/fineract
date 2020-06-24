@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodTyp
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.joda.time.LocalDate;
 
-public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
+public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
 
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;

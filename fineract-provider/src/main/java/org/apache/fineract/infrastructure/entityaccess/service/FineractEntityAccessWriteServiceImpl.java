@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FineractEntityAccessWriteServiceImpl implements FineractEntityAccessWriteService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
     private final FineractEntityAccessRepository entityAccessRepository;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
@@ -184,13 +184,11 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     /*
-     * @Override public CommandProcessingResult updateEntityAccess(Long
-     * entityAccessId, JsonCommand command) { // TODO Auto-generated method stub
-     * return null; }
+     * @Override public CommandProcessingResult updateEntityAccess(Long entityAccessId, JsonCommand command) { // TODO
+     * Auto-generated method stub return null; }
      *
-     * @Override public CommandProcessingResult removeEntityAccess(String
-     * entityType, Long entityId, Long accessType, String secondEntityType, Long
-     * secondEntityId) { // TODO Auto-generated method stub return null; }
+     * @Override public CommandProcessingResult removeEntityAccess(String entityType, Long entityId, Long accessType,
+     * String secondEntityType, Long secondEntityId) { // TODO Auto-generated method stub return null; }
      */
 
 }

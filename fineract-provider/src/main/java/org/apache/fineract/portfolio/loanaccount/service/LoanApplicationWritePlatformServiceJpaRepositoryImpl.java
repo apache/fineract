@@ -149,7 +149,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
@@ -774,8 +774,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .fetchDisbursementData(command.parsedJson().getAsJsonObject());
 
             /**
-             * Stores all charges which are passed in during modify loan
-             * application
+             * Stores all charges which are passed in during modify loan application
              **/
             final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson(),
                     disbursementDetails);
@@ -788,8 +787,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             /**
-             * If there are any charges already present, which are now not
-             * passed in as a part of the request, deem the charges as modified
+             * If there are any charges already present, which are now not passed in as a part of the request, deem the
+             * charges as modified
              **/
             if (!possiblyModifedLoanCharges.isEmpty()) {
                 if (!possiblyModifedLoanCharges.containsAll(existingCharges)) {
@@ -798,8 +797,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             /**
-             * If any new charges are added or values of existing charges are
-             * modified
+             * If any new charges are added or values of existing charges are modified
              **/
             for (LoanCharge loanCharge : possiblyModifedLoanCharges) {
                 if (loanCharge.getId() == null) {
@@ -1223,8 +1221,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 

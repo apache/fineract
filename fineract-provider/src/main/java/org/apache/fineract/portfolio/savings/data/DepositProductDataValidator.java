@@ -259,13 +259,9 @@ public class DepositProductDataValidator {
                 .isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
 
         /*
-         * if
-         * (fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName
-         * , element)) { final BigDecimal minOpeningBalance =
-         * fromApiJsonHelper.extractBigDecimalWithLocaleNamed
-         * (minRequiredOpeningBalanceParamName, element);
-         * baseDataValidator.reset
-         * ().parameter(minRequiredOpeningBalanceParamName
+         * if (fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName , element)) { final BigDecimal
+         * minOpeningBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed (minRequiredOpeningBalanceParamName,
+         * element); baseDataValidator.reset ().parameter(minRequiredOpeningBalanceParamName
          * ).value(minOpeningBalance).zeroOrPositiveAmount(); }
          */
 

@@ -54,7 +54,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GroupImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupImportHandler.class);
     private List<GroupGeneralData> groups;
     private List<CalendarData> meetings;
     private Workbook workbook;

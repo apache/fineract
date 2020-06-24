@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanAccrualPlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanAccrualPlatformServiceImpl.class);
 
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanAccrualWritePlatformService loanAccrualWritePlatformService;

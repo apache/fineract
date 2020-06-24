@@ -41,12 +41,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Group Test for checking Group: Creation, Activation, Client Association,
- * Updating & Deletion
+ * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
  */
 public class GroupTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GroupTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;

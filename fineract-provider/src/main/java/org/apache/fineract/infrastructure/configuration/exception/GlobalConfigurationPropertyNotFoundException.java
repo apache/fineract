@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.configuration.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when global configuration properties are
- * not found.
+ * A {@link RuntimeException} thrown when global configuration properties are not found.
  */
 public class GlobalConfigurationPropertyNotFoundException extends AbstractPlatformResourceNotFoundException {
 

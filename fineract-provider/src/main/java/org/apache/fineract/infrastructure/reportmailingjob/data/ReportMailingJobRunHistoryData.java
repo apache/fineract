@@ -23,7 +23,7 @@ import org.joda.time.DateTime;
 /**
  * Immutable data object representing report mailing job run history data.
  **/
-public class ReportMailingJobRunHistoryData {
+public final class ReportMailingJobRunHistoryData {
 
     private final Long id;
     private final Long reportMailingJobId;

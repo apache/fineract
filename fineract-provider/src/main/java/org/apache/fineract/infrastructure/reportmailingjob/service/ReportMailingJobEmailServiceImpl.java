@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
     private final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService;
     private Collection<ReportMailingJobConfigurationData> reportMailingJobConfigurationDataCollection;
 
@@ -101,8 +101,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     }
 
     /**
-     * get a report mailing job configuration object by name from collection of
-     * objects
+     * get a report mailing job configuration object by name from collection of objects
      *
      * @param name
      *            -- the value of the name property

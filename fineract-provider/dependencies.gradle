@@ -20,7 +20,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-    spotbugs 'com.github.spotbugs:spotbugs:4.0.4'
+    spotbugs 'com.github.spotbugs:spotbugs:4.0.6'
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -76,7 +76,7 @@ dependencies {
 
              'javax.cache:cache-api',
 
-             'com.github.spotbugs:spotbugs-annotations',
+             'com.github.spotbugs:spotbugs-annotations'
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
         exclude group: 'javax.validation'
@@ -108,6 +108,7 @@ dependencies {
     runtimeOnly(
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
+            'org.webjars.npm:swagger-ui-dist',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
@@ -123,6 +124,10 @@ dependencies {
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
     )
+    testImplementation('org.mock-server:mockserver-junit-jupiter') {
+        exclude group: 'com.sun.mail', module: 'mailapi'
+        exclude group: 'javax.servlet', module: 'javax.servlet-api'
+    }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'

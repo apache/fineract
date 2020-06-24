@@ -79,7 +79,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsAccountAssembler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
@@ -109,9 +109,8 @@ public class SavingsAccountAssembler {
     }
 
     /**
-     * Assembles a new {@link SavingsAccount} from JSON details passed in
-     * request inheriting details where relevant from chosen
-     * {@link SavingsProduct}.
+     * Assembles a new {@link SavingsAccount} from JSON details passed in request inheriting details where relevant from
+     * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy) {
 
@@ -158,7 +157,6 @@ public class SavingsAccountAssembler {
         }
 
         if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isGSIM") != null) {
-            LOG.info("setting system to gsim");
             if (command.booleanPrimitiveValueOfParameterNamed("isGSIM")) {
                 accountType = AccountType.GSIM;
             }
@@ -320,9 +318,8 @@ public class SavingsAccountAssembler {
     }
 
     /**
-     * Assembles a new {@link SavingsAccount} from JSON details passed in
-     * request inheriting details where relevant from chosen
-     * {@link SavingsProduct}.
+     * Assembles a new {@link SavingsAccount} from JSON details passed in request inheriting details where relevant from
+     * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(final Client client, final Group group, final Long productId, final LocalDate appliedonDate,
             final AppUser appliedBy) {

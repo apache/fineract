@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class RolesTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RolesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RolesTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 

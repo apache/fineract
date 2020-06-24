@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
 
-public class GroupSavingsIndividualMonitoringAccountData {
+public final class GroupSavingsIndividualMonitoringAccountData {
 
     private final BigDecimal gsimId;
 

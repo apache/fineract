@@ -21,8 +21,7 @@ package org.apache.fineract.organisation.office.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when office mismatch
- * occurs
+ * {@link AbstractPlatformDomainRuleException} thrown when office mismatch occurs
  */
 public class InvalidOfficeException extends AbstractPlatformDomainRuleException {
 

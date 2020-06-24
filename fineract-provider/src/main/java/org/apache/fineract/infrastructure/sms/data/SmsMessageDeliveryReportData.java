@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.sms.data;
 
 /**
- * Immutable data object representing an outbound SMS message delivery report
- * data
+ * Immutable data object representing an outbound SMS message delivery report data
  **/
 public class SmsMessageDeliveryReportData {
 

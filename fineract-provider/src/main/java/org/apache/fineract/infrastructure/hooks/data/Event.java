@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.hooks.data;
 
 import java.io.Serializable;
 
-public class Event implements Serializable {
+public final class Event implements Serializable {
 
     private final String actionName;
     private final String entityName;

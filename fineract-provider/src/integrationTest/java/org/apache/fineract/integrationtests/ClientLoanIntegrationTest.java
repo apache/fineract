@@ -62,14 +62,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client Loan Integration Test for checking Loan Application Repayments
- * Schedule, loan charges, penalties, loan repayments and verifying accounting
- * transactions
+ * Client Loan Integration Test for checking Loan Application Repayments Schedule, loan charges, penalties, loan
+ * repayments and verifying accounting transactions
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClientLoanIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
 
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
@@ -1249,8 +1248,7 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking CashBasedAccounting functionality adding charges
-     * with calculation type flat
+     * Test case for checking CashBasedAccounting functionality adding charges with calculation type flat
      */
     @Test
     public void loanWithFlatCahargesAndCashBasedAccountingEnabled() {
@@ -1426,8 +1424,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking CashBasedAccounting functionality adding charges
-     * with calculation type percentage of amount
+     * Test case for checking CashBasedAccounting functionality adding charges with calculation type percentage of
+     * amount
      */
     @Test
     public void loanWithCahargesOfTypeAmountPercentageAndCashBasedAccountingEnabled() {
@@ -1606,8 +1604,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking CashBasedAccounting functionality adding charges
-     * with calculation type percentage of amount plus interest
+     * Test case for checking CashBasedAccounting functionality adding charges with calculation type percentage of
+     * amount plus interest
      */
     @Test
     public void loanWithCahargesOfTypeAmountPlusInterestPercentageAndCashBasedAccountingEnabled() {
@@ -1787,8 +1785,7 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking AccuralUpfrontAccounting functionality adding
-     * charges with calculation type flat
+     * Test case for checking AccuralUpfrontAccounting functionality adding charges with calculation type flat
      */
     @Test
     public void loanWithFlatCahargesAndUpfrontAccrualAccountingEnabled() {
@@ -1981,8 +1978,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking AccuralUpfrontAccounting functionality adding
-     * charges with calculation type percentage of amount
+     * Test case for checking AccuralUpfrontAccounting functionality adding charges with calculation type percentage of
+     * amount
      */
     @Test
     public void loanWithCahargesAndUpfrontAccrualAccountingEnabled() {
@@ -2171,8 +2168,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking AccuralUpfrontAccounting functionality adding
-     * charges with calculation type percentage of amount plus interest
+     * Test case for checking AccuralUpfrontAccounting functionality adding charges with calculation type percentage of
+     * amount plus interest
      */
     @Test
     public void loanWithCahargesOfTypeAmountPlusInterestPercentageAndUpfrontAccrualAccountingEnabled() {
@@ -2368,8 +2365,7 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking AccuralPeriodicAccounting functionality adding
-     * charges with calculation type flat
+     * Test case for checking AccuralPeriodicAccounting functionality adding charges with calculation type flat
      */
     @Test
     public void loanWithFlatChargesAndPeriodicAccrualAccountingEnabled() throws InterruptedException {
@@ -2467,14 +2463,10 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "100.00", "50.0", "50.0");
 
         /*
-         * this.journalEntryHelper.checkJournalEntryForAssetAccount(
-         * assetAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("50.0"),
-         * JournalEntry.TransactionType.CREDIT));
-         * this.journalEntryHelper.checkJournalEntryForExpenseAccount
-         * (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("50.0"),
-         * JournalEntry.TransactionType.DEBIT));
+         * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
+         * JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.CREDIT));
+         * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
+         * JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.DEBIT));
          */
         final String jobName = "Add Accrual Transactions";
 
@@ -2561,8 +2553,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /**
-     * Test case for checking AccuralPeriodicAccounting functionality adding
-     * charges with calculation type percentage of amount
+     * Test case for checking AccuralPeriodicAccounting functionality adding charges with calculation type percentage of
+     * amount
      */
     @Test
     public void loanWithChargesOfTypeAmountPercentageAndPeriodicAccrualAccountingEnabled() throws InterruptedException {
@@ -2663,14 +2655,10 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "61.19", "29.11", "29.70");
 
         /*
-         * this.journalEntryHelper.checkJournalEntryForAssetAccount(
-         * assetAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("29.7"),
-         * JournalEntry.TransactionType.CREDIT));
-         * this.journalEntryHelper.checkJournalEntryForExpenseAccount
-         * (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("29.7"),
-         * JournalEntry.TransactionType.DEBIT));
+         * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
+         * JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.CREDIT));
+         * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
+         * JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.DEBIT));
          */
 
         final String jobName = "Add Accrual Transactions";
@@ -2758,8 +2746,8 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case for checking AccuralPeriodicAccounting functionality adding
-     * charges with calculation type percentage of amount and interest
+     * Test case for checking AccuralPeriodicAccounting functionality adding charges with calculation type percentage of
+     * amount and interest
      */
     @Test
     public void loanWithChargesOfTypeAmountPlusInterestPercentageAndPeriodicAccrualAccountingEnabled() throws InterruptedException {
@@ -2861,13 +2849,10 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "63.02", "31.51", "31.51");
 
         /*
-         * this.journalEntryHelper.checkJournalEntryForAssetAccount(
-         * assetAccount, "20 September 2011", new JournalEntry(
-         * Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
-         * this.journalEntryHelper.checkJournalEntryForExpenseAccount
-         * (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("31.51"),
-         * JournalEntry.TransactionType.DEBIT));
+         * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
+         * JournalEntry( Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
+         * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
+         * JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.DEBIT));
          */
 
         final String jobName = "Add Accrual Transactions";
@@ -3032,8 +3017,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("0.00", String.valueOf(firstInstallment.get("totalOutstandingForPeriod")));
 
         /***
-         * Verify 2nd and 3rd repayments dues before making excess payment for
-         * installment no 2
+         * Verify 2nd and 3rd repayments dues before making excess payment for installment no 2
          */
         HashMap secondInstallment = loanSchedule.get(2);
         HashMap thirdInstallment = loanSchedule.get(3);
@@ -3051,18 +3035,15 @@ public class ClientLoanIntegrationTest {
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         /***
-         * Verify 2nd and 3rd repayments after making excess payment for
-         * installment no 2
+         * Verify 2nd and 3rd repayments after making excess payment for installment no 2
          */
         secondInstallment = loanSchedule.get(2);
         validateNumberForEqual("0.00", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
 
         /***
-         * According to RBI Excess payment should go to principal portion of
-         * next installment, but as interest recalculation is not implemented,
-         * it wont make any difference to schedule even though if we made excess
-         * payment, so excess payments will behave the same as regular payment
-         * with the excess amount
+         * According to RBI Excess payment should go to principal portion of next installment, but as interest
+         * recalculation is not implemented, it wont make any difference to schedule even though if we made excess
+         * payment, so excess payments will behave the same as regular payment with the excess amount
          */
         thirdInstallment = loanSchedule.get(3);
         validateNumberForEqual("3200", String.valueOf(thirdInstallment.get("totalOutstandingForPeriod")));
@@ -3072,16 +3053,14 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("100.00", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         /***
-         * Make payment with due amount of 3rd installment on 4th installment
-         * date
+         * Make payment with due amount of 3rd installment on 4th installment date
          */
         this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
 
         /***
-         * Verify overdue interests are deducted first and then remaining amount
-         * for interest portion of due installment
+         * Verify overdue interests are deducted first and then remaining amount for interest portion of due installment
          */
         thirdInstallment = loanSchedule.get(3);
         HashMap fourthInstallment = loanSchedule.get(4);
@@ -4948,8 +4927,8 @@ public class ClientLoanIntegrationTest {
                 .withMoratorium("2", "3").withLoanProductConfiguration(loanProductConfigurationAsFalse).build(null));
         LOG.info("-------------------LOAN PRODUCT CREATED WITH ATTRIBUTE CONFIGURATION AS FALSE---------------------- {}", loanProductID);
         /*
-         * Try to override attribute values in loan account when attribute
-         * configurations are set to false at product level
+         * Try to override attribute values in loan account when attribute configurations are set to false at product
+         * level
          */
         loanID = applyForLoanApplicationWithProductConfigurationAsFalse(clientID, loanProductID, proposedAmount);
         LOG.info("--------------------------LOAN CREATED WITH ID------------------------- {}", loanID);

@@ -31,15 +31,15 @@ final class RecurringDepositProductsApiResourceSwagger {
     private RecurringDepositProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostRecurringDepositProductsRequest")
-    public final static class PostRecurringDepositProductsRequest {
+    public static final class PostRecurringDepositProductsRequest {
 
         private PostRecurringDepositProductsRequest() {}
 
-        final class PostRecurringDepositProductsCharts {
+        static final class PostRecurringDepositProductsCharts {
 
             private PostRecurringDepositProductsCharts() {}
 
-            final class PostRecurringDepositProductsChartSlabs {
+            static final class PostRecurringDepositProductsChartSlabs {
 
                 private PostRecurringDepositProductsChartSlabs() {}
 
@@ -116,7 +116,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositProductsResponse")
-    public final static class PostRecurringDepositProductsResponse {
+    public static final class PostRecurringDepositProductsResponse {
 
         private PostRecurringDepositProductsResponse() {}
 
@@ -125,7 +125,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositProductsRequest")
-    public final static class PutRecurringDepositProductsRequest {
+    public static final class PutRecurringDepositProductsRequest {
 
         private PutRecurringDepositProductsRequest() {}
 
@@ -140,11 +140,11 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositProductsResponse")
-    public final static class PutRecurringDepositProductsResponse {
+    public static final class PutRecurringDepositProductsResponse {
 
         private PutRecurringDepositProductsResponse() {}
 
-        final class PutRecurringDepositProductsChanges {
+        static final class PutRecurringDepositProductsChanges {
 
             private PutRecurringDepositProductsChanges() {}
 
@@ -160,11 +160,11 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositProductsResponse")
-    public final static class GetRecurringDepositProductsResponse {
+    public static final class GetRecurringDepositProductsResponse {
 
         private GetRecurringDepositProductsResponse() {}
 
-        final class GetRecurringDepositProductsCurrency {
+        static final class GetRecurringDepositProductsCurrency {
 
             private GetRecurringDepositProductsCurrency() {}
 
@@ -184,7 +184,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringDepositProductsMinDepositTermType {
+        static final class GetRecurringDepositProductsMinDepositTermType {
 
             private GetRecurringDepositProductsMinDepositTermType() {}
 
@@ -196,7 +196,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsMaxDepositTermType {
+        static final class GetRecurringDepositProductsMaxDepositTermType {
 
             private GetRecurringDepositProductsMaxDepositTermType() {}
 
@@ -208,7 +208,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsInterestCompoundingPeriodType {
+        static final class GetRecurringDepositProductsInterestCompoundingPeriodType {
 
             private GetRecurringDepositProductsInterestCompoundingPeriodType() {}
 
@@ -220,7 +220,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsInterestPostingPeriodType {
+        static final class GetRecurringDepositProductsInterestPostingPeriodType {
 
             private GetRecurringDepositProductsInterestPostingPeriodType() {}
 
@@ -232,7 +232,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsInterestCalculationType {
+        static final class GetRecurringDepositProductsInterestCalculationType {
 
             private GetRecurringDepositProductsInterestCalculationType() {}
 
@@ -244,7 +244,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsInterestCalculationDaysInYearType {
+        static final class GetRecurringDepositProductsInterestCalculationDaysInYearType {
 
             private GetRecurringDepositProductsInterestCalculationDaysInYearType() {}
 
@@ -256,7 +256,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsAccountingRule {
+        static final class GetRecurringDepositProductsAccountingRule {
 
             private GetRecurringDepositProductsAccountingRule() {}
 
@@ -268,7 +268,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsRecurringDepositFrequencyType {
+        static final class GetRecurringDepositProductsRecurringDepositFrequencyType {
 
             private GetRecurringDepositProductsRecurringDepositFrequencyType() {}
 
@@ -310,11 +310,11 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositProductsProductIdResponse")
-    public final static class GetRecurringDepositProductsProductIdResponse {
+    public static final class GetRecurringDepositProductsProductIdResponse {
 
         private GetRecurringDepositProductsProductIdResponse() {}
 
-        final class GetRecurringDepositProductsProductIdCurrency {
+        static final class GetRecurringDepositProductsProductIdCurrency {
 
             private GetRecurringDepositProductsProductIdCurrency() {}
 
@@ -332,7 +332,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetRecurringDepositProductsProductIdInterestCompoundingPeriodType {
+        static final class GetRecurringDepositProductsProductIdInterestCompoundingPeriodType {
 
             private GetRecurringDepositProductsProductIdInterestCompoundingPeriodType() {}
 
@@ -344,11 +344,11 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsProductIdAccountingMappings {
+        static final class GetRecurringDepositProductsProductIdAccountingMappings {
 
             private GetRecurringDepositProductsProductIdAccountingMappings() {}
 
-            final class GetRecurringDepositProductsProductIdSavingsReferenceAccount {
+            static final class GetRecurringDepositProductsProductIdSavingsReferenceAccount {
 
                 private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {}
 
@@ -360,7 +360,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetRecurringDepositProductsProductIdIncomeFromFeeAccount {
+            static final class GetRecurringDepositProductsProductIdIncomeFromFeeAccount {
 
                 private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {}
 
@@ -372,7 +372,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount {
+            static final class GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount {
 
                 private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
@@ -384,7 +384,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetRecurringDepositProductsProductIdInterestOnSavingsAccount {
+            static final class GetRecurringDepositProductsProductIdInterestOnSavingsAccount {
 
                 private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {}
 
@@ -396,7 +396,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetRecurringDepositProductsProductIdSavingsControlAccount {
+            static final class GetRecurringDepositProductsProductIdSavingsControlAccount {
 
                 private GetRecurringDepositProductsProductIdSavingsControlAccount() {}
 
@@ -408,7 +408,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetRecurringDepositProductsProductIdTransfersInSuspenseAccount {
+            static final class GetRecurringDepositProductsProductIdTransfersInSuspenseAccount {
 
                 private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {}
 
@@ -428,11 +428,11 @@ final class RecurringDepositProductsApiResourceSwagger {
             public GetRecurringDepositProductsProductIdTransfersInSuspenseAccount transfersInSuspenseAccount;
         }
 
-        final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings {
+        static final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings {
 
             private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings() {}
 
-            final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
+            static final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
 
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
@@ -446,7 +446,7 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Boolean penalty;
             }
 
-            final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
+            static final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
 
                 private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
@@ -462,11 +462,11 @@ final class RecurringDepositProductsApiResourceSwagger {
             public GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
         }
 
-        final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings {
+        static final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings {
 
             private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings() {}
 
-            final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
+            static final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
 
                 private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
@@ -484,7 +484,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public GetRecurringDepositProductsProductIdAccountingMappings.GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount incomeAccount;
         }
 
-        final class GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType {
+        static final class GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType {
 
             private GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
@@ -496,7 +496,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsProductIdMinDepositTermType {
+        static final class GetRecurringDepositProductsProductIdMinDepositTermType {
 
             private GetRecurringDepositProductsProductIdMinDepositTermType() {}
 
@@ -508,7 +508,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsProductIdMaxDepositTermType {
+        static final class GetRecurringDepositProductsProductIdMaxDepositTermType {
 
             private GetRecurringDepositProductsProductIdMaxDepositTermType() {}
 
@@ -520,15 +520,15 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetRecurringDepositProductsProductIdActiveChart {
+        static final class GetRecurringDepositProductsProductIdActiveChart {
 
             private GetRecurringDepositProductsProductIdActiveChart() {}
 
-            final class GetRecurringDepositProductsProductIdChartSlabs {
+            static final class GetRecurringDepositProductsProductIdChartSlabs {
 
                 private GetRecurringDepositProductsProductIdChartSlabs() {}
 
-                final class GetRecurringDepositProductsProductIdPeriodType {
+                static final class GetRecurringDepositProductsProductIdPeriodType {
 
                     private GetRecurringDepositProductsProductIdPeriodType() {}
 
@@ -600,7 +600,7 @@ final class RecurringDepositProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteRecurringDepositProductsProductIdResponse")
-    public final static class DeleteRecurringDepositProductsProductIdResponse {
+    public static final class DeleteRecurringDepositProductsProductIdResponse {
 
         private DeleteRecurringDepositProductsProductIdResponse() {}
 

@@ -155,7 +155,7 @@ final class ReportMailingJobApiResourceSwagger {
 
         }
 
-        final class PutReportMailingJobsResponseChanges {
+        static final class PutReportMailingJobsResponseChanges {
 
             private PutReportMailingJobsResponseChanges() {}
 

@@ -57,10 +57,12 @@
             <property name="ignoreComments" value="false" />
         </module>
         <module name="EqualsHashCode"/>
+        <module name="FinalClass"/>
         <module name="SeparatorWrap">
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
         </module>
+        <module name="NoFinalizer"/>
         <module name="FallThrough"/>
         <module name="IllegalThrows" />
         <module name="RedundantImport"/>
@@ -113,6 +115,7 @@
             <!-- No PACKAGE_DEF token, as we like our license header to be glue to "package" statement, to save 1 line screen space -->
             <property name="tokens" value="IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
         </module>
+        <module name="MultipleVariableDeclarations"/>
         <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
             <message key="name.invalidPattern"
@@ -158,6 +161,7 @@
             <message key="name.invalidPattern"
              value="Method name ''{0}'' must match pattern ''{1}''."/>
         </module>
+          <module name="MutableException"/>
             <module name="WhitespaceAround">
             <property name="allowEmptyConstructors" value="true"/>
             <property name="allowEmptyMethods" value="true"/>
@@ -169,6 +173,7 @@
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
         <module name="ParenPad" />
+        <module name="ModifierOrder"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -177,13 +182,13 @@
             <property name="ignoreSetter" value="true" />
             <property name="setterCanReturnItsClass" value="true" />
         </module>
-        <module name="FinalClass"/>
+
         <module name="HideUtilityClassConstructor"/>
 
         < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
         <module name="IllegalCatch"/>
 
-        <module name="MutableException"/>
+
         <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck" />
 
 
@@ -197,12 +202,12 @@
 
 
 
-        <module name="MultipleVariableDeclarations"/>
+
 
         <module name="MissingSwitchDefault"/>
 
 
-        <module name="ModifierOrder"/>
+
         <module name="RedundantModifier"/>
 
         <module name="MemberName">
@@ -229,7 +234,7 @@
         </module>
 
         <module name="ConstantName" />
-        <module name="NoFinalizer"/>
+
 
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>

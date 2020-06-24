@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CenterHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CenterHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CenterHelper.class);
     private static final String CENTERS_URL = "/fineract-provider/api/v1/centers";
 
     public static final String CREATED_DATE = "29 December 2014";

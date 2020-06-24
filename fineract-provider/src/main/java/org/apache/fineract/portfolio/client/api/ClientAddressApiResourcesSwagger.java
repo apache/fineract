@@ -29,7 +29,7 @@ final class ClientAddressApiResourcesSwagger {
     private ClientAddressApiResourcesSwagger() {}
 
     @ApiModel(value = "PostClientClientIdAddressesRequest")
-    public final static class PostClientClientIdAddressesRequest {
+    public static final class PostClientClientIdAddressesRequest {
 
         private PostClientClientIdAddressesRequest() {}
 
@@ -52,7 +52,7 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PostClientClientIdAddressesResponse")
-    public final static class PostClientClientIdAddressesResponse {
+    public static final class PostClientClientIdAddressesResponse {
 
         private PostClientClientIdAddressesResponse() {}
 
@@ -61,7 +61,7 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "GetClientClientIdAddressesResponse")
-    public final static class GetClientClientIdAddressesResponse {
+    public static final class GetClientClientIdAddressesResponse {
 
         private GetClientClientIdAddressesResponse() {}
 
@@ -106,7 +106,7 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PutClientClientIdAddressesRequest")
-    public final static class PutClientClientIdAddressesRequest {
+    public static final class PutClientClientIdAddressesRequest {
 
         private PutClientClientIdAddressesRequest() {}
 
@@ -117,7 +117,7 @@ final class ClientAddressApiResourcesSwagger {
     }
 
     @ApiModel(value = "PutClientClientIdAddressesResponse")
-    public final static class PutClientClientIdAddressesResponse {
+    public static final class PutClientClientIdAddressesResponse {
 
         private PutClientClientIdAddressesResponse() {}
 

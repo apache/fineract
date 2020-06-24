@@ -41,8 +41,7 @@ public interface SmsMessageScheduledJobService {
     public void sendTriggeredMessages(Map<SmsCampaign, Collection<SmsMessage>> smsDataMap);
 
     /**
-     * Sends a triggered batch of SMS messages to SMS gateway using specified
-     * provider.
+     * Sends a triggered batch of SMS messages to SMS gateway using specified provider.
      *
      * @param smsMessage
      *            the SMS messages to queue for sending.

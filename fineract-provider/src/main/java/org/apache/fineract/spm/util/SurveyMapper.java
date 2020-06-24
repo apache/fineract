@@ -29,7 +29,7 @@ import org.apache.fineract.spm.domain.Question;
 import org.apache.fineract.spm.domain.Response;
 import org.apache.fineract.spm.domain.Survey;
 
-public class SurveyMapper {
+public final class SurveyMapper {
 
     private SurveyMapper() {
         super();

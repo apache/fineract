@@ -511,12 +511,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
 
         /*
-         * // withdraw deposit amount before closing the account final Money
-         * transactionAmountMoney = Money.of(this.currency,
-         * this.getAccountBalance()); final SavingsAccountTransaction withdraw =
-         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail,
-         * closedDate, transactionAmountMoney, new Date());
-         * this.transactions.add(withdraw);
+         * // withdraw deposit amount before closing the account final Money transactionAmountMoney =
+         * Money.of(this.currency, this.getAccountBalance()); final SavingsAccountTransaction withdraw =
+         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail, closedDate, transactionAmountMoney, new
+         * Date()); this.transactions.add(withdraw);
          */
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -611,12 +609,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
 
         /*
-         * // withdraw deposit amount before closing the account final Money
-         * transactionAmountMoney = Money.of(this.currency,
-         * this.getAccountBalance()); final SavingsAccountTransaction withdraw =
-         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail,
-         * closedDate, transactionAmountMoney, new Date());
-         * this.transactions.add(withdraw);
+         * // withdraw deposit amount before closing the account final Money transactionAmountMoney =
+         * Money.of(this.currency, this.getAccountBalance()); final SavingsAccountTransaction withdraw =
+         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail, closedDate, transactionAmountMoney, new
+         * Date()); this.transactions.add(withdraw);
          */
 
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
@@ -944,11 +940,10 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     /**
-     * This method is responsible for checking if the current transaction is 'an
-     * advance/early payment' based on the details passed through.
+     * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
+     * details passed through.
      *
-     * Default implementation is check transaction date is before installment
-     * due date.
+     * Default implementation is check transaction date is before installment due date.
      */
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<RecurringDepositScheduleInstallment> installments, final LocalDate transactionDate) {
@@ -1042,8 +1037,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         // FIXME: Handle this scenario
         /*
-         * //final boolean recurringFrequencyBeforeDepositPeriod =
-         * recurringFrequencyBeforeDepositPeriod();
+         * //final boolean recurringFrequencyBeforeDepositPeriod = recurringFrequencyBeforeDepositPeriod();
          *
          * if (!recurringFrequencyBeforeDepositPeriod) {
          * baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
@@ -1087,8 +1081,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         /**
-         * final boolean recurringFrequencyBeforeDepositPeriod =
-         * recurringFrequencyBeforeDepositPeriod();
+         * final boolean recurringFrequencyBeforeDepositPeriod = recurringFrequencyBeforeDepositPeriod();
          *
          * if (!recurringFrequencyBeforeDepositPeriod) {
          * baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
@@ -1255,7 +1248,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         return this.recurringDetail;
     }
 
-    class RecurringDepositScheduleInstallmentComparator implements Comparator<RecurringDepositScheduleInstallment> {
+    static class RecurringDepositScheduleInstallmentComparator implements Comparator<RecurringDepositScheduleInstallment> {
 
         @Override
         public int compare(final RecurringDepositScheduleInstallment o1, final RecurringDepositScheduleInstallment o2) {

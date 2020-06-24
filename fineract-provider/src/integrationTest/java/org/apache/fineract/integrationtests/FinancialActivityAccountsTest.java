@@ -83,15 +83,13 @@ public class FinancialActivityAccountsTest {
         Assertions.assertNotNull(financialActivityAccountId);
 
         /***
-         * Fetch Created Financial Activity to Account Mapping and validate
-         * created values
+         * Fetch Created Financial Activity to Account Mapping and validate created values
          **/
         assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
                 liabilityTransferAccount);
 
         /**
-         * Update Existing Financial Activity to Account Mapping and assert
-         * changes
+         * Update Existing Financial Activity to Account Mapping and assert changes
          **/
         Account newLiabilityTransferAccount = accountHelper.createLiabilityAccount();
         Assertions.assertNotNull(newLiabilityTransferAccount);
@@ -120,8 +118,7 @@ public class FinancialActivityAccountsTest {
                 duplicateFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /**
-         * Associating incorrect GL account types with a financial activity
-         * should fail
+         * Associating incorrect GL account types with a financial activity should fail
          **/
         List<HashMap> invalidFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper.updateFinancialActivityAccount(
                 financialActivityAccountId, assetTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(),

@@ -106,7 +106,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_ACCOUNT_APPROVE, new ShareAccountApprovedListener());
     }
 
-    private abstract class NotificationBusinessEventAdapter implements BusinessEventListner {
+    private abstract static class NotificationBusinessEventAdapter implements BusinessEventListner {
 
         @Override
         public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {}

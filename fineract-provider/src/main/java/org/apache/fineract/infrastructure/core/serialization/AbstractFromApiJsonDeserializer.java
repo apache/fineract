@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.core.serialization;
 
 /**
- * Abstract implementation of {@link FromApiJsonDeserializer} that can be
- * extended for specific commands.
+ * Abstract implementation of {@link FromApiJsonDeserializer} that can be extended for specific commands.
  */
 public abstract class AbstractFromApiJsonDeserializer<T> implements FromApiJsonDeserializer<T> {
 

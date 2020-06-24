@@ -57,13 +57,13 @@ import org.slf4j.LoggerFactory;
 
 public class InteropTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(InteropTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InteropTest.class);
 
-    private final static String MIN_INTEREST_CALCULATON_BALANCE = null;
-    private final static String MIN_REQUIRED_BALANCE = null;
-    private final static String MIN_OPENING_BALANCE = "100000.0";
-    private final static boolean ENFORCE_MIN_REQUIRED_BALANCE = false;
-    private final static MathContext MATHCONTEXT = new MathContext(12, RoundingMode.HALF_EVEN);
+    private static final String MIN_INTEREST_CALCULATON_BALANCE = null;
+    private static final String MIN_REQUIRED_BALANCE = null;
+    private static final String MIN_OPENING_BALANCE = "100000.0";
+    private static final boolean ENFORCE_MIN_REQUIRED_BALANCE = false;
+    private static final MathContext MATHCONTEXT = new MathContext(12, RoundingMode.HALF_EVEN);
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

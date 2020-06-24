@@ -37,7 +37,7 @@ import org.joda.time.MonthDay;
 /**
  * Immutable data object for charge data.
  */
-public class ChargeData implements Comparable<ChargeData>, Serializable {
+public final class ChargeData implements Comparable<ChargeData>, Serializable {
 
     private final Long id;
     private final String name;

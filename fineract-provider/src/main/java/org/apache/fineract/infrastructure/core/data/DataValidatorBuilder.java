@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -159,9 +160,8 @@ public class DataValidatorBuilder {
 
     /*** FIXME: Vishwas, why does this method have a parameter? Seems wrong ***/
     /*
-     * This method is not meant for validation, if you have mandatory boolean
-     * param and if it has invalid value or value not passed then call this
-     * method, this method is always used with input as false
+     * This method is not meant for validation, if you have mandatory boolean param and if it has invalid value or value
+     * not passed then call this method, this method is always used with input as false
      */
     public DataValidatorBuilder trueOrFalseRequired1(final boolean trueOfFalseFieldProvided) {
         if (!trueOfFalseFieldProvided && !this.ignoreNullValue) {
@@ -951,7 +951,7 @@ public class DataValidatorBuilder {
         if (this.value == null && this.ignoreNullValue) {
             return this;
         }
-        final String[] inputs = validInputs.split(VALID_INPUT_SEPERATOR);
+        final Iterable<String> inputs = Splitter.onPattern(VALID_INPUT_SEPERATOR).split(validInputs);
         boolean validationErr = true;
         for (final String input : inputs) {
             if (input.equalsIgnoreCase(this.value.toString().trim())) {
@@ -981,9 +981,8 @@ public class DataValidatorBuilder {
         }
         boolean validationErr = true;
         /*
-         * supports numbers, parentheses(), hyphens and may contain + sign in
-         * the beginning and can contain whitespaces in between and length
-         * allowed is 0-25 chars.
+         * supports numbers, parentheses(), hyphens and may contain + sign in the beginning and can contain whitespaces
+         * in between and length allowed is 0-25 chars.
          */
         final String regex = "^\\+?[0-9. ()-]{0,25}$";
         final Pattern pattern = Pattern.compile(regex);

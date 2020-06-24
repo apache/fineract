@@ -66,9 +66,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     }
 
     /*
-     * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days
-     * between disbursal date and first repayment is set as 7. system should
-     * allow to create this loan and allow to disburse
+     * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days between disbursal date and first repayment
+     * is set as 7. system should allow to create this loan and allow to disburse
      */
     @Test
     public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_GREATER_THAN_MIN_DAY_CRITERIA() {
@@ -112,9 +111,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     }
 
     /*
-     * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days
-     * between disbursal date and first repayment is set as 7. system should
-     * allow to create this loan and allow to disburse
+     * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days between disbursal date and first repayment
+     * is set as 7. system should allow to create this loan and allow to disburse
      */
     @SuppressWarnings("unchecked")
     @Test

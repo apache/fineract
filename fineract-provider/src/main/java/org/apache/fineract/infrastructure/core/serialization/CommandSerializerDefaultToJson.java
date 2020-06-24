@@ -22,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link CommandSerializer} that serializes the commands into
- * JSON using google-gson.
+ * Implementation of {@link CommandSerializer} that serializes the commands into JSON using google-gson.
  */
 @Component
 public class CommandSerializerDefaultToJson implements CommandSerializer {

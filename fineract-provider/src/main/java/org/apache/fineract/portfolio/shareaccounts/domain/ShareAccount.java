@@ -215,7 +215,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setSubmittedDate(final Date submittedDate) {
         boolean toReturn = false;
-        if (!this.submittedDate.equals(submittedDate)) {
+        if (this.submittedDate.compareTo(submittedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.submittedDate = submittedDate;
             toReturn = true;
         }
@@ -224,7 +224,7 @@ public class ShareAccount extends AbstractPersistableCustom {
 
     public boolean setApprovedDate(final Date approvedDate) {
         boolean toReturn = false;
-        if (!this.approvedDate.equals(approvedDate)) {
+        if (this.approvedDate.compareTo(approvedDate) == 0 ? Boolean.FALSE : Boolean.TRUE) {
             this.approvedDate = approvedDate;
             toReturn = true;
         }
@@ -520,10 +520,11 @@ public class ShareAccount extends AbstractPersistableCustom {
     public ShareAccountTransaction getShareAccountTransaction(final ShareAccountTransaction transaction) {
         ShareAccountTransaction returnTrans = null;
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {
-            if (tran.getPurchasedDate().equals(transaction.getPurchasedDate()) && tran.getTotalShares().equals(transaction.getTotalShares())
-                    && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0 ? Boolean.TRUE
-                            : Boolean.FALSE && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
-                                    && tran.getTransactionType().equals(transaction.getTransactionType())) {
+            if (tran.getPurchasedDate().compareTo(transaction.getPurchasedDate()) == 0 ? Boolean.TRUE
+                    : Boolean.FALSE && tran.getTotalShares().equals(transaction.getTotalShares())
+                            && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0 ? Boolean.TRUE
+                                    : Boolean.FALSE && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
+                                            && tran.getTransactionType().equals(transaction.getTransactionType())) {
                 returnTrans = tran;
                 break;
             }

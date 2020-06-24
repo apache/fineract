@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class S3ContentRepository implements ContentRepository {
 
-    private final static Logger LOG = LoggerFactory.getLogger(S3ContentRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(S3ContentRepository.class);
 
     private final String s3BucketName;
     private final AmazonS3 s3Client;

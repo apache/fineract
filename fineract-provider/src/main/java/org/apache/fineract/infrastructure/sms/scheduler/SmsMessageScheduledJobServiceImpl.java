@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
@@ -61,8 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Scheduled job services that send SMS messages and get delivery reports for
- * the sent SMS messages
+ * Scheduled job services that send SMS messages and get delivery reports for the sent SMS messages
  **/
 @Service
 public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJobService {
@@ -194,7 +192,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             if (!smsDataMap.isEmpty()) {
                 List<SmsMessage> toSaveMessages = new ArrayList<>();
                 List<SmsMessage> toSendNotificationMessages = new ArrayList<>();
-                for (Entry<SmsCampaign, Collection<SmsMessage>> entry : smsDataMap.entrySet()) {
+                for (Map.Entry<SmsCampaign, Collection<SmsMessage>> entry : smsDataMap.entrySet()) {
                     Iterator<SmsMessage> smsMessageIterator = entry.getValue().iterator();
                     Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
                     StringBuilder request = new StringBuilder();
@@ -249,8 +247,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     }
 
     /**
-     * get SMS message delivery reports from the SMS gateway (or intermediate
-     * gateway)
+     * get SMS message delivery reports from the SMS gateway (or intermediate gateway)
      **/
     @Override
     @Transactional

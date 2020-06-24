@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.address.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -47,12 +46,4 @@ public class FieldConfiguration extends AbstractPersistableCustom {
 
     }
 
-    private static FieldConfiguration fromJson(final JsonCommand command) {
-        final String entity = command.stringValueOfParameterNamed("entity");
-        final String table = command.stringValueOfParameterNamed("table");
-        final String field = command.stringValueOfParameterNamed("field");
-        final boolean is_enabled = command.booleanPrimitiveValueOfParameterNamed("implementationKey");
-
-        return new FieldConfiguration(entity, table, field, is_enabled);
-    }
 }

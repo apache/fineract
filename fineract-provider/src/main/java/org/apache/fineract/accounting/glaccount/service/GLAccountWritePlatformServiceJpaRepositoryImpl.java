@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccountWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GLAccountWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GLAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLAccountRepository glAccountRepository;
     private final JournalEntryRepository glJournalEntryRepository;
@@ -151,8 +151,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             }
 
             /**
-             * a detail account cannot be changed to a header account if
-             * transactions are already logged against it
+             * a detail account cannot be changed to a header account if transactions are already logged against it
              **/
             if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue())) {
                 if (glAccount.isHeaderAccount()) {

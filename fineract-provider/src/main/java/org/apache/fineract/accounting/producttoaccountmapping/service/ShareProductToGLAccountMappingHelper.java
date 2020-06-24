@@ -149,15 +149,12 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             break;
             case ACCRUAL_UPFRONT:
             break;
-            default:
-            break;
         }
         return changes;
     }
 
     /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
+     * Examines and updates each account mapping for given loan product with changes passed in from the Json element
      *
      * @param sharesProductId
      * @param changes
@@ -191,8 +188,6 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             case ACCRUAL_PERIODIC:
             break;
             case ACCRUAL_UPFRONT:
-            break;
-            default:
             break;
         }
     }

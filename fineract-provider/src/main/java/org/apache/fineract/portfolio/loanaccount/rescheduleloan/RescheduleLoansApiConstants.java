@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class RescheduleLoansApiConstants {
 
-    public final static String ENTITY_NAME = "RESCHEDULELOAN";
+    public static final String ENTITY_NAME = "RESCHEDULELOAN";
 
     public static final String LOAN_RESCHEDULE_REASON = "LoanRescheduleReason";
 

@@ -57,7 +57,7 @@ public class SelfAccountTransferReadServiceImpl implements SelfAccountTransferRe
         return this.jdbcTemplate.query(sql.toString(), mapper, new Object[] { user.getId(), user.getId() });
     }
 
-    private final class SelfAccountTemplateMapper implements RowMapper<SelfAccountTemplateData> {
+    private static final class SelfAccountTemplateMapper implements RowMapper<SelfAccountTemplateData> {
 
         @Override
         public SelfAccountTemplateData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {

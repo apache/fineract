@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
 public class RecurringDepositTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private RecurringDepositProductHelper recurringDepositProductHelper;
@@ -122,8 +122,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for Recurring Deposit Account premature closure with
-     * transaction type withdrawal and Cash Based accounting enabled
+     * Test case for Recurring Deposit Account premature closure with transaction type withdrawal and Cash Based
+     * accounting enabled
      */
     @Test
     public void testRecurringDepositAccountWithPrematureClosureTypeWithdrawal() {
@@ -208,8 +208,7 @@ public class RecurringDepositTest {
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
@@ -272,9 +271,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for Recurring Deposit Account premature closure with
-     * transaction transfers to savings account and Cash Based accounting
-     * enabled
+     * Test case for Recurring Deposit Account premature closure with transaction transfers to savings account and Cash
+     * Based accounting enabled
      */
     @Test
     public void testRecurringDepositAccountWithPrematureClosureTypeTransferToSavings() {
@@ -388,8 +386,7 @@ public class RecurringDepositTest {
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
@@ -451,9 +448,8 @@ public class RecurringDepositTest {
                 recurringDepositAccountId);
         Float maturityAmount = Float.valueOf(recurringDepositAccountData.get("maturityAmount").toString());
         /***
-         * Verify journal entry transactions for preclosure transaction As this
-         * transaction is an account transfer you should get financial account
-         * mapping details and verify amounts
+         * Verify journal entry transactions for preclosure transaction As this transaction is an account transfer you
+         * should get financial account mapping details and verify amounts
          */
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE,
                 new JournalEntry(maturityAmount, JournalEntry.TransactionType.CREDIT),
@@ -592,8 +588,7 @@ public class RecurringDepositTest {
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
@@ -656,9 +651,8 @@ public class RecurringDepositTest {
                 recurringDepositAccountId);
         Float maturityAmount = Float.valueOf(recurringDepositAccountData.get("maturityAmount").toString());
         /***
-         * Verify journal entry transactions for preclosure transaction As this
-         * transaction is an account transfer you should get financial account
-         * mapping details and verify amounts
+         * Verify journal entry transactions for preclosure transaction As this transaction is an account transfer you
+         * should get financial account mapping details and verify amounts
          */
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE,
                 new JournalEntry(maturityAmount, JournalEntry.TransactionType.CREDIT),
@@ -804,8 +798,7 @@ public class RecurringDepositTest {
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -20);
@@ -846,8 +839,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for Recurring Deposit Account premature closure with
-     * transaction type ReInvest and Cash Based accounting enabled
+     * Test case for Recurring Deposit Account premature closure with transaction type ReInvest and Cash Based
+     * accounting enabled
      */
     @Test
     public void testRecurringDepositAccountWithPrematureClosureTypeReinvest() {
@@ -941,8 +934,7 @@ public class RecurringDepositTest {
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
@@ -981,8 +973,7 @@ public class RecurringDepositTest {
                 .calculatePrematureAmountForRecurringDeposit(recurringDepositAccountId, CLOSED_ON_DATE);
 
         /***
-         * Expected to get an error response from api because re-invest option
-         * is not supported for account preClosure
+         * Expected to get an error response from api because re-invest option is not supported for account preClosure
          */
         ArrayList<HashMap> errorResponse = (ArrayList<HashMap>) recurringDepositAccountHelperValidationError
                 .prematureCloseForRecurringDeposit(recurringDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_REINVEST, null,
@@ -1130,8 +1121,7 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for Closure of Recurring Deposit Account(Withdrawn by
-     * applicant)
+     * Test case for Closure of Recurring Deposit Account(Withdrawn by applicant)
      */
     @Test
     public void testRecurringDepositAccountWithdrawnByClientAndClosed() {
@@ -1298,8 +1288,7 @@ public class RecurringDepositTest {
         Float balanceBefore = (Float) recurringDepositSummaryBefore.get("accountBalance");
 
         /***
-         * Perform Deposit transaction and verify journal entries are posted for
-         * the transaction
+         * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, DEPOSIT_DATE);
@@ -1351,8 +1340,7 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with monthly compounding and monthly
-     * posting with 365 days in year
+     * Test case for verify maturity amount with monthly compounding and monthly posting with 365 days in year
      */
     @Test
     public void testMaturityAmountForMonthlyCompoundingAndMonthlyPosting_With_365_Days() {
@@ -1429,8 +1417,7 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with monthly compounding and monthly
-     * posting with 360 days in year
+     * Test case for verify maturity amount with monthly compounding and monthly posting with 360 days in year
      */
     @Test
     public void testMaturityAmountForMonthlyCompoundingAndMonthlyPosting_With_360_Days() {
@@ -1606,8 +1593,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with penal interest for
-     * whole term with closure transaction type withdrawal and 365 days in year
+     * Test case for verify premature closure amount with penal interest for whole term with closure transaction type
+     * withdrawal and 365 days in year
      */
     @Test
     public void testPrematureClosureAmountWithPenalInterestForWholeTerm_With_365_Days() {
@@ -1731,8 +1718,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with penal interest for
-     * whole term with closure transaction type withdrawal and 360 days in year
+     * Test case for verify premature closure amount with penal interest for whole term with closure transaction type
+     * withdrawal and 360 days in year
      */
     @Test
     public void testPrematureClosureAmountWithPenalInterestForWholeTerm_With_360_Days() {
@@ -1861,9 +1848,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with penal interest till
-     * maturity date with closure transaction type withdrawal and 365 days in
-     * year
+     * Test case for verify premature closure amount with penal interest till maturity date with closure transaction
+     * type withdrawal and 365 days in year
      */
     @Test
     public void testPrematureClosureAmountWithPenalInterestTillPrematureWithdrawal_With_365_Days() {
@@ -1999,9 +1985,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case verify premature closure amount with penal interest till
-     * maturity date with closure transaction type withdrawal and 360 days in
-     * year
+     * Test case verify premature closure amount with penal interest till maturity date with closure transaction type
+     * withdrawal and 360 days in year
      */
     @Test
     public void testPrematureClosureAmountWithPenalInterestTillPrematureWithdrawal_With_360_Days() {
@@ -2142,8 +2127,7 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with daily compounding and monthly
-     * posting with 365 days in year
+     * Test case for verify maturity amount with daily compounding and monthly posting with 365 days in year
      */
     @Test
     public void testMaturityAmountForDailyCompoundingAndMonthlyPosting_With_365_Days() {
@@ -2224,8 +2208,7 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with daily compounding and monthly
-     * posting with 360 days in year
+     * Test case for verify maturity amount with daily compounding and monthly posting with 360 days in year
      */
     @Test
     public void testMaturityAmountForDailyCompoundingAndMonthlyPosting_With_360_Days() {
@@ -2307,8 +2290,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with Bi-annual interest
-     * compounding and Bi-annual interest posting with 365 days in year
+     * Test case for verify premature closure amount with Bi-annual interest compounding and Bi-annual interest posting
+     * with 365 days in year
      */
     @Test
     public void testRecurringDepositWithBi_AnnualCompoundingAndPosting_365_Days() {
@@ -2397,8 +2380,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with Bi-annual interest
-     * compounding and Bi-annual interest posting with 360 days in year
+     * Test case for verify premature closure amount with Bi-annual interest compounding and Bi-annual interest posting
+     * with 360 days in year
      */
     @Test
     public void testRecurringDepositWithBi_AnnualCompoundingAndPosting_360_Days() {
@@ -2487,8 +2470,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with Daily interest compounding and
-     * annual interest posting with 365 days in year
+     * Test case for verify maturity amount with Daily interest compounding and annual interest posting with 365 days in
+     * year
      */
     @Test
     public void testMaturityAmountForDailyCompoundingAndAnnuallyPosting_With_365_Days() {
@@ -2577,8 +2560,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify maturity amount with Daily interest compounding and
-     * annual interest posting with 360 days in year
+     * Test case for verify maturity amount with Daily interest compounding and annual interest posting with 360 days in
+     * year
      */
     @Test
     public void testMaturityAmountForDailyCompoundingAndAnnuallyPosting_With_360_Days() {
@@ -2667,8 +2650,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with Quarterly interest
-     * compounding and Quarterly interest posting with 365 days in year
+     * Test case for verify premature closure amount with Quarterly interest compounding and Quarterly interest posting
+     * with 365 days in year
      */
     @Test
     public void testRecurringDepositQuarterlyCompoundingAndQuarterlyPosting_365_Days() {
@@ -2757,8 +2740,8 @@ public class RecurringDepositTest {
     }
 
     /***
-     * Test case for verify premature closure amount with Quarterly interest
-     * compounding and Quarterly interest posting with 360 days in year
+     * Test case for verify premature closure amount with Quarterly interest compounding and Quarterly interest posting
+     * with 360 days in year
      */
     @Test
     public void testRecurringDepositQuarterlyCompoundingAndQuarterlyPosting_360_Days() {
@@ -3112,8 +3095,7 @@ public class RecurringDepositTest {
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         final Account financialAccount;
         /***
-         * if no financial activities are defined for account transfers, create
-         * liability financial accounting mappings
+         * if no financial activities are defined for account transfers, create liability financial accounting mappings
          */
         if (financialActivities.isEmpty()) {
             financialAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);

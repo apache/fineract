@@ -60,15 +60,11 @@ public class DividendsIntegrationTests {
     public void testCreateDividends() {
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         final Integer productId = createShareProduct();
-        ArrayList<Integer> clients = new ArrayList<>();
-        ArrayList<Integer> savingAccounts = new ArrayList<>();
         ArrayList<Integer> shareAccounts = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            clients.add(clientId);
             Assertions.assertNotNull(clientId);
             Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-            savingAccounts.add(savingsAccountId);
             Assertions.assertNotNull(savingsAccountId);
             final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, dates[i], shares[i]);
             shareAccounts.add(shareAccountId);

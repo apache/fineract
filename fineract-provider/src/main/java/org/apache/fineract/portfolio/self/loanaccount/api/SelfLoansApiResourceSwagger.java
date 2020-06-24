@@ -31,11 +31,11 @@ final class SelfLoansApiResourceSwagger {
     private SelfLoansApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfLoansLoanIdResponse")
-    public final static class GetSelfLoansLoanIdResponse {
+    public static final class GetSelfLoansLoanIdResponse {
 
         private GetSelfLoansLoanIdResponse() {}
 
-        final class GetLoansLoanIdStatus {
+        static final class GetLoansLoanIdStatus {
 
             private GetLoansLoanIdStatus() {}
 
@@ -63,7 +63,7 @@ final class SelfLoansApiResourceSwagger {
             public Boolean overpaid;
         }
 
-        final class GetLoansLoanIdLoanType {
+        static final class GetLoansLoanIdLoanType {
 
             private GetLoansLoanIdLoanType() {}
 
@@ -75,7 +75,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdCurrency {
+        static final class GetLoansLoanIdCurrency {
 
             private GetLoansLoanIdCurrency() {}
 
@@ -93,7 +93,7 @@ final class SelfLoansApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoansLoanIdTermPeriodFrequencyType {
+        static final class GetLoansLoanIdTermPeriodFrequencyType {
 
             private GetLoansLoanIdTermPeriodFrequencyType() {}
 
@@ -105,7 +105,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdRepaymentFrequencyType {
+        static final class GetLoansLoanIdRepaymentFrequencyType {
 
             private GetLoansLoanIdRepaymentFrequencyType() {}
 
@@ -117,7 +117,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestRateFrequencyType {
+        static final class GetLoansLoanIdInterestRateFrequencyType {
 
             private GetLoansLoanIdInterestRateFrequencyType() {}
 
@@ -129,7 +129,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdAmortizationType {
+        static final class GetLoansLoanIdAmortizationType {
 
             private GetLoansLoanIdAmortizationType() {}
 
@@ -141,7 +141,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestType {
+        static final class GetLoansLoanIdInterestType {
 
             private GetLoansLoanIdInterestType() {}
 
@@ -153,7 +153,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestCalculationPeriodType {
+        static final class GetLoansLoanIdInterestCalculationPeriodType {
 
             private GetLoansLoanIdInterestCalculationPeriodType() {}
 
@@ -165,7 +165,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdTimeline {
+        static final class GetLoansLoanIdTimeline {
 
             private GetLoansLoanIdTimeline() {}
 
@@ -199,16 +199,16 @@ final class SelfLoansApiResourceSwagger {
             public LocalDate expectedMaturityDate;
         }
 
-        final class GetLoansLoanIdSummary {
+        static final class GetLoansLoanIdSummary {
 
             private GetLoansLoanIdSummary() {}
 
-            final class GetLoansLoanIdEmiVariations {
+            static final class GetLoansLoanIdEmiVariations {
 
                 private GetLoansLoanIdEmiVariations() {}
             }
 
-            final class GetLoansLoanIdLinkedAccount {
+            static final class GetLoansLoanIdLinkedAccount {
 
                 private GetLoansLoanIdLinkedAccount() {}
 
@@ -218,7 +218,7 @@ final class SelfLoansApiResourceSwagger {
                 public Long accountNo;
             }
 
-            final class GetLoansLoanIdDisbursementDetails {
+            static final class GetLoansLoanIdDisbursementDetails {
 
                 private GetLoansLoanIdDisbursementDetails() {}
 
@@ -232,11 +232,11 @@ final class SelfLoansApiResourceSwagger {
                 public Float approvedPrincipal;
             }
 
-            final class GetLoansLoanIdOverdueCharges {
+            static final class GetLoansLoanIdOverdueCharges {
 
                 private GetLoansLoanIdOverdueCharges() {}
 
-                final class GetLoansLoanIdChargeTimeType {
+                static final class GetLoansLoanIdChargeTimeType {
 
                     private GetLoansLoanIdChargeTimeType() {}
 
@@ -248,7 +248,7 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargeCalculationType {
+                static final class GetLoansLoanIdChargeCalculationType {
 
                     private GetLoansLoanIdChargeCalculationType() {}
 
@@ -260,7 +260,7 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargePaymentMode {
+                static final class GetLoansLoanIdChargePaymentMode {
 
                     private GetLoansLoanIdChargePaymentMode() {}
 
@@ -272,7 +272,7 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdFeeFrequency {
+                static final class GetLoansLoanIdFeeFrequency {
 
                     private GetLoansLoanIdFeeFrequency() {}
 
@@ -284,7 +284,7 @@ final class SelfLoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoanCurrency {
+                static final class GetLoanCurrency {
 
                     private GetLoanCurrency() {}
 
@@ -302,7 +302,7 @@ final class SelfLoansApiResourceSwagger {
                     public String displayLabel;
                 }
 
-                final class GetLoanChargeTemplateChargeAppliesTo {
+                static final class GetLoanChargeTemplateChargeAppliesTo {
 
                     private GetLoanChargeTemplateChargeAppliesTo() {}
 
@@ -469,11 +469,11 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
+    public static final class GetSelfLoansLoanIdTransactionsTransactionIdResponse {
 
         private GetSelfLoansLoanIdTransactionsTransactionIdResponse() {}
 
-        final class GetSelfLoansLoanIdTransactionsType {
+        static final class GetSelfLoansLoanIdTransactionsType {
 
             private GetSelfLoansLoanIdTransactionsType() {}
 
@@ -516,11 +516,11 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansLoanIdChargesResponse")
-    public final static class GetSelfLoansLoanIdChargesResponse {
+    public static final class GetSelfLoansLoanIdChargesResponse {
 
         private GetSelfLoansLoanIdChargesResponse() {}
 
-        final class GetSelfLoansChargeTimeType {
+        static final class GetSelfLoansChargeTimeType {
 
             private GetSelfLoansChargeTimeType() {}
 
@@ -532,7 +532,7 @@ final class SelfLoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfLoansChargeCalculationType {
+        static final class GetSelfLoansChargeCalculationType {
 
             private GetSelfLoansChargeCalculationType() {}
 
@@ -574,11 +574,11 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfLoansTemplateResponse")
-    public final static class GetSelfLoansTemplateResponse {
+    public static final class GetSelfLoansTemplateResponse {
 
         private GetSelfLoansTemplateResponse() {}
 
-        final class GetSelfLoansTimeline {
+        static final class GetSelfLoansTimeline {
 
             private GetSelfLoansTimeline() {}
 
@@ -586,7 +586,7 @@ final class SelfLoansApiResourceSwagger {
             public LocalDate expectedDisbursementDate;
         }
 
-        final class GetSelfLoansProductOptions {
+        static final class GetSelfLoansProductOptions {
 
             private GetSelfLoansProductOptions() {}
 
@@ -607,11 +607,11 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansRequest")
-    public final static class PostSelfLoansRequest {
+    public static final class PostSelfLoansRequest {
 
         private PostSelfLoansRequest() {}
 
-        final class PostSelfLoansDisbursementData {
+        static final class PostSelfLoansDisbursementData {
 
             private PostSelfLoansDisbursementData() {}
 
@@ -623,11 +623,11 @@ final class SelfLoansApiResourceSwagger {
             public Long approvedPrincipal;
         }
 
-        final class PostSelfLoansDatatables {
+        static final class PostSelfLoansDatatables {
 
             private PostSelfLoansDatatables() {}
 
-            final class PostSelfLoansData {
+            static final class PostSelfLoansData {
 
                 private PostSelfLoansData() {}
 
@@ -691,7 +691,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansResponse")
-    public final static class PostSelfLoansResponse {
+    public static final class PostSelfLoansResponse {
 
         private PostSelfLoansResponse() {}
 
@@ -706,7 +706,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdRequest")
-    public final static class PutSelfLoansLoanIdRequest {
+    public static final class PutSelfLoansLoanIdRequest {
 
         private PutSelfLoansLoanIdRequest() {}
 
@@ -743,11 +743,11 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfLoansLoanIdResponse")
-    public final static class PutSelfLoansLoanIdResponse {
+    public static final class PutSelfLoansLoanIdResponse {
 
         private PutSelfLoansLoanIdResponse() {}
 
-        final class PutSelfLoansChanges {
+        static final class PutSelfLoansChanges {
 
             private PutSelfLoansChanges() {}
 
@@ -769,7 +769,7 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdRequest")
-    public final static class PostSelfLoansLoanIdRequest {
+    public static final class PostSelfLoansLoanIdRequest {
 
         private PostSelfLoansLoanIdRequest() {}
 
@@ -784,15 +784,15 @@ final class SelfLoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfLoansLoanIdResponse")
-    public final static class PostSelfLoansLoanIdResponse {
+    public static final class PostSelfLoansLoanIdResponse {
 
         private PostSelfLoansLoanIdResponse() {}
 
-        final class PostSelfLoansLoanIdChanges {
+        static final class PostSelfLoansLoanIdChanges {
 
             private PostSelfLoansLoanIdChanges() {}
 
-            final class PostSelfLoansLoanIdStatus {
+            static final class PostSelfLoansLoanIdStatus {
 
                 private PostSelfLoansLoanIdStatus() {}
 

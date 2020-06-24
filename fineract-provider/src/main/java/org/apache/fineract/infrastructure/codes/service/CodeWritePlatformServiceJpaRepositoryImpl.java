@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final CodeRepository codeRepository;
@@ -139,8 +139,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleCodeDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("code_name")) {

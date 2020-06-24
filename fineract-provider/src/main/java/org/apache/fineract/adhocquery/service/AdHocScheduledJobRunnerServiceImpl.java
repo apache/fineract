@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service(value = "adHocScheduledJobRunnerService")
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
 
@@ -55,6 +55,7 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     @Transactional
     @Override
     @CronTarget(jobName = JobName.GENERATE_ADHOCCLIENT_SCEHDULE)
+    @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
     public void generateClientSchedule() {
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
         if (adhocs.size() > 0) {
@@ -89,7 +90,6 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             default:
                                 throw new IllegalStateException();
                         }
-
                     }
                 }
 

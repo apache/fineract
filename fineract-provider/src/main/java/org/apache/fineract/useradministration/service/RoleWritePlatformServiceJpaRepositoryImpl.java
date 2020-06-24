@@ -50,7 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -100,8 +100,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
-public class CreditBureauData {
+public final class CreditBureauData {
 
     private final long creditBureauId;
 

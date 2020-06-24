@@ -92,7 +92,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanRescheduleRequestWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final PlatformSecurityContext platformSecurityContext;
@@ -156,8 +156,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     /**
-     * create a new instance of the LoanRescheduleRequest object from the
-     * JsonCommand object and persist
+     * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
      *
      * @return CommandProcessingResult object
      **/
@@ -435,17 +434,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             /*
              * for (LoanTermVariationsData loanTermVariation :
-             * loanApplicationTerms.getLoanTermVariations().getDueDateVariation(
-             * )) { if (rescheduleFromDate.isBefore(loanTermVariation.
-             * getTermApplicableFrom())) { LocalDate applicableDate =
-             * this.scheduledDateGenerator.generateNextRepaymentDate(
-             * rescheduleFromDate, loanApplicationTerms, false,
+             * loanApplicationTerms.getLoanTermVariations().getDueDateVariation( )) { if
+             * (rescheduleFromDate.isBefore(loanTermVariation. getTermApplicableFrom())) { LocalDate applicableDate =
+             * this.scheduledDateGenerator.generateNextRepaymentDate( rescheduleFromDate, loanApplicationTerms, false,
              * loanApplicationTerms.getHolidayDetailDTO()); if
-             * (loanTermVariation.getTermApplicableFrom().equals(applicableDate)
-             * ) { LocalDate adjustedDate =
-             * this.scheduledDateGenerator.generateNextRepaymentDate(
-             * adjustedApplicableDate, loanApplicationTerms, false,
-             * loanApplicationTerms.getHolidayDetailDTO());
+             * (loanTermVariation.getTermApplicableFrom().equals(applicableDate) ) { LocalDate adjustedDate =
+             * this.scheduledDateGenerator.generateNextRepaymentDate( adjustedApplicableDate, loanApplicationTerms,
+             * false, loanApplicationTerms.getHolidayDetailDTO());
              * loanTermVariation.setApplicableFromDate(adjustedDate); } } }
              */
 
@@ -586,8 +581,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     /**
-     * handles the data integrity violation exception for loan reschedule write
-     * services
+     * handles the data integrity violation exception for loan reschedule write services
      *
      * @param dve
      *            data integrity violation exception

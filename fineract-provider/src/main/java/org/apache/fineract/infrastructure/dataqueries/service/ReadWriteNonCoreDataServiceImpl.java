@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -85,16 +86,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
-    private final static String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
+    private static final String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
-    private final static String CODE_VALUES_TABLE = "m_code_value";
+    private static final String CODE_VALUES_TABLE = "m_code_value";
 
-    private final static Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
-    private final static ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
+    private static final Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
+    private static final ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
             .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "DATETIME")
             .put("text", "TEXT").put("dropdown", "INT").build();
 
-    private final static List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
+    private static final List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
             "mediumblob", "mediumtext", "longblob", "longtext");
 
     private final JdbcTemplate jdbcTemplate;
@@ -325,16 +326,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public String getDataTableName(String url) {
 
-        String[] urlParts = url.split("/");
+        List<String> urlParts = Splitter.on('/').splitToList(url);
 
-        return urlParts[3];
+        return urlParts.get(3);
 
     }
 
     @Override
     public String getTableName(String url) {
-        String[] urlParts = url.split("/");
-        return urlParts[4];
+        List<String> urlParts = Splitter.on('/').splitToList(url);
+        return urlParts.get(4);
     }
 
     @Transactional
@@ -570,11 +571,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
 
             /***
-             * In cases of tables storing hierarchical entities (like m_group),
-             * different entities would end up being stored in the same table.
+             * In cases of tables storing hierarchical entities (like m_group), different entities would end up being
+             * stored in the same table.
              *
-             * Ex: Centers are a specific type of group, add abstractions for
-             * the same
+             * Ex: Centers are a specific type of group, add abstractions for the same
              ***/
             final String actualAppTableName = mapToActualAppTable(apptableName);
 
@@ -849,8 +849,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     /**
-     * Update data table, set column value to empty string where current value
-     * is NULL. Run update SQL only if the "mandatory" property is set to true
+     * Update data table, set column value to empty string where current value is NULL. Run update SQL only if the
+     * "mandatory" property is set to true
      *
      * @param datatableName
      *            Name of data table
@@ -1302,18 +1302,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private String dataScopedSQL(final String appTable, final Long appTableId) {
         /*
-         * unfortunately have to, one way or another, be able to restrict data
-         * to the users office hierarchy. Here, a few key tables are done. But
-         * if additional fields are needed on other tables the same pattern
-         * applies
+         * unfortunately have to, one way or another, be able to restrict data to the users office hierarchy. Here, a
+         * few key tables are done. But if additional fields are needed on other tables the same pattern applies
          */
 
         final AppUser currentUser = this.context.authenticatedUser();
         String scopedSQL = null;
         /*
-         * m_loan and m_savings_account are connected to an m_office thru either
-         * an m_client or an m_group If both it means it relates to an m_client
-         * that is in a group (still an m_client account)
+         * m_loan and m_savings_account are connected to an m_office thru either an m_client or an m_group If both it
+         * means it relates to an m_client that is in a group (still an m_client account)
          */
         if (appTable.equalsIgnoreCase("m_loan")) {
             scopedSQL = "select  distinctrow x.* from ("
@@ -1487,8 +1484,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     /**
-     * This method is used special for ppi cases Where the score need to be
-     * computed
+     * This method is used special for ppi cases Where the score need to be computed
      *
      * @param columnHeaders
      * @param datatable

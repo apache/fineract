@@ -144,8 +144,8 @@ public class DepositProductData {
     }
 
     /**
-     * Returns a {@link DepositProductData} that contains and exist
-     * {@link DepositProductData} data with further template data for dropdowns.
+     * Returns a {@link DepositProductData} that contains and exist {@link DepositProductData} data with further
+     * template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO

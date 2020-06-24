@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 public class ActuatorIntegrationTest {
 
-    private final static String INFO_URL = "/fineract-provider/actuator/info";
+    private static final String INFO_URL = "/fineract-provider/actuator/info";
 
     @Test
     public void testActuatorGitBuildInfo() {

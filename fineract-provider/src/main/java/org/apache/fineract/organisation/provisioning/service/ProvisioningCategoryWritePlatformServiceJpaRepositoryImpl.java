@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implements ProvisioningCategoryWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCategoryRepository provisioningCategoryRepository;
 
@@ -116,8 +116,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 

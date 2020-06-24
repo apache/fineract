@@ -71,7 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StandingInstructionWritePlatformServiceImpl implements StandingInstructionWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(StandingInstructionWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StandingInstructionWritePlatformServiceImpl.class);
 
     private final StandingInstructionDataValidator standingInstructionDataValidator;
     private final StandingInstructionAssembler standingInstructionAssembler;

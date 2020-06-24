@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing loan reschedule request data.
  **/
-public class LoanRescheduleRequestData {
+public final class LoanRescheduleRequestData {
 
     private final Long id;
     private final Long loanId;

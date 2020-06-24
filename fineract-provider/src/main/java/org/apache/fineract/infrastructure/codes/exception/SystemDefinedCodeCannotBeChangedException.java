@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.codes.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link AbstractPlatformDomainRuleException} thrown when someone attempts to
- * update or delete a system defined code.
+ * A {@link AbstractPlatformDomainRuleException} thrown when someone attempts to update or delete a system defined code.
  */
 public class SystemDefinedCodeCannotBeChangedException extends AbstractPlatformDomainRuleException {
 

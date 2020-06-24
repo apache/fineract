@@ -31,11 +31,11 @@ final class LoansApiResourceSwagger {
     private LoansApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansTemplateResponse")
-    public final static class GetLoansTemplateResponse {
+    public static final class GetLoansTemplateResponse {
 
         private GetLoansTemplateResponse() {}
 
-        final class GetLoansTemplateTimeline {
+        static final class GetLoansTemplateTimeline {
 
             private GetLoansTemplateTimeline() {}
 
@@ -43,7 +43,7 @@ final class LoansApiResourceSwagger {
             public LocalDate expectedDisbursementDate;
         }
 
-        final class GetLoansTemplateProductOptions {
+        static final class GetLoansTemplateProductOptions {
 
             private GetLoansTemplateProductOptions() {}
 
@@ -64,11 +64,11 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansLoanIdResponse")
-    public final static class GetLoansLoanIdResponse {
+    public static final class GetLoansLoanIdResponse {
 
         private GetLoansLoanIdResponse() {}
 
-        final class GetLoansLoanIdStatus {
+        static final class GetLoansLoanIdStatus {
 
             private GetLoansLoanIdStatus() {}
 
@@ -96,7 +96,7 @@ final class LoansApiResourceSwagger {
             public Boolean overpaid;
         }
 
-        final class GetLoansLoanIdLoanType {
+        static final class GetLoansLoanIdLoanType {
 
             private GetLoansLoanIdLoanType() {}
 
@@ -108,7 +108,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdCurrency {
+        static final class GetLoansLoanIdCurrency {
 
             private GetLoansLoanIdCurrency() {}
 
@@ -126,7 +126,7 @@ final class LoansApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetLoansLoanIdTermPeriodFrequencyType {
+        static final class GetLoansLoanIdTermPeriodFrequencyType {
 
             private GetLoansLoanIdTermPeriodFrequencyType() {}
 
@@ -138,7 +138,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdRepaymentFrequencyType {
+        static final class GetLoansLoanIdRepaymentFrequencyType {
 
             private GetLoansLoanIdRepaymentFrequencyType() {}
 
@@ -150,7 +150,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestRateFrequencyType {
+        static final class GetLoansLoanIdInterestRateFrequencyType {
 
             private GetLoansLoanIdInterestRateFrequencyType() {}
 
@@ -162,7 +162,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdAmortizationType {
+        static final class GetLoansLoanIdAmortizationType {
 
             private GetLoansLoanIdAmortizationType() {}
 
@@ -174,7 +174,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestType {
+        static final class GetLoansLoanIdInterestType {
 
             private GetLoansLoanIdInterestType() {}
 
@@ -186,7 +186,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdInterestCalculationPeriodType {
+        static final class GetLoansLoanIdInterestCalculationPeriodType {
 
             private GetLoansLoanIdInterestCalculationPeriodType() {}
 
@@ -198,7 +198,7 @@ final class LoansApiResourceSwagger {
             public String value;
         }
 
-        final class GetLoansLoanIdTimeline {
+        static final class GetLoansLoanIdTimeline {
 
             private GetLoansLoanIdTimeline() {}
 
@@ -232,16 +232,16 @@ final class LoansApiResourceSwagger {
             public LocalDate expectedMaturityDate;
         }
 
-        final class GetLoansLoanIdSummary {
+        static final class GetLoansLoanIdSummary {
 
             private GetLoansLoanIdSummary() {}
 
-            final class GetLoansLoanIdEmiVariations {
+            static final class GetLoansLoanIdEmiVariations {
 
                 private GetLoansLoanIdEmiVariations() {}
             }
 
-            final class GetLoansLoanIdLinkedAccount {
+            static final class GetLoansLoanIdLinkedAccount {
 
                 private GetLoansLoanIdLinkedAccount() {}
 
@@ -251,7 +251,7 @@ final class LoansApiResourceSwagger {
                 public Long accountNo;
             }
 
-            final class GetLoansLoanIdDisbursementDetails {
+            static final class GetLoansLoanIdDisbursementDetails {
 
                 private GetLoansLoanIdDisbursementDetails() {}
 
@@ -265,11 +265,11 @@ final class LoansApiResourceSwagger {
                 public Float approvedPrincipal;
             }
 
-            final class GetLoansLoanIdOverdueCharges {
+            static final class GetLoansLoanIdOverdueCharges {
 
                 private GetLoansLoanIdOverdueCharges() {}
 
-                final class GetLoansLoanIdChargeTimeType {
+                static final class GetLoansLoanIdChargeTimeType {
 
                     private GetLoansLoanIdChargeTimeType() {}
 
@@ -281,7 +281,7 @@ final class LoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargeCalculationType {
+                static final class GetLoansLoanIdChargeCalculationType {
 
                     private GetLoansLoanIdChargeCalculationType() {}
 
@@ -293,7 +293,7 @@ final class LoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdChargePaymentMode {
+                static final class GetLoansLoanIdChargePaymentMode {
 
                     private GetLoansLoanIdChargePaymentMode() {}
 
@@ -305,7 +305,7 @@ final class LoansApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetLoansLoanIdFeeFrequency {
+                static final class GetLoansLoanIdFeeFrequency {
 
                     private GetLoansLoanIdFeeFrequency() {}
 
@@ -472,7 +472,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansResponse")
-    public final static class GetLoansResponse {
+    public static final class GetLoansResponse {
 
         private GetLoansResponse() {}
 
@@ -523,7 +523,7 @@ final class LoansApiResourceSwagger {
 
         private PostLoansResponse() {}
 
-        final class PostLoansRepaymentSchedulePeriods {
+        static final class PostLoansRepaymentSchedulePeriods {
 
             private PostLoansRepaymentSchedulePeriods() {}
 
@@ -580,7 +580,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoansLoanIdRequest")
-    public final static class PutLoansLoanIdRequest {
+    public static final class PutLoansLoanIdRequest {
 
         private PutLoansLoanIdRequest() {}
 
@@ -617,11 +617,11 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoansLoanIdResponse")
-    public final static class PutLoansLoanIdResponse {
+    public static final class PutLoansLoanIdResponse {
 
         private PutLoansLoanIdResponse() {}
 
-        final class PutLoansLoanIdChanges {
+        static final class PutLoansLoanIdChanges {
 
             private PutLoansLoanIdChanges() {}
 
@@ -658,7 +658,7 @@ final class LoansApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdRequest")
-    public final static class PostLoansLoanIdRequest {
+    public static final class PostLoansLoanIdRequest {
 
         private PostLoansLoanIdRequest() {}
 

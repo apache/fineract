@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object represent a savings product.
  */
-public class SavingsProductData implements Serializable {
+public final class SavingsProductData implements Serializable {
 
     private final Long id;
     private final String name;
@@ -162,8 +162,8 @@ public class SavingsProductData implements Serializable {
     }
 
     /**
-     * Returns a {@link SavingsProductData} that contains and exist
-     * {@link SavingsProductData} data with further template data for dropdowns.
+     * Returns a {@link SavingsProductData} that contains and exist {@link SavingsProductData} data with further
+     * template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO

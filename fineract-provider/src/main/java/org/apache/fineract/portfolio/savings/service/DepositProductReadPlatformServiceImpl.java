@@ -126,7 +126,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
         return depositProduct;
     }
 
-    private static abstract class DepositProductMapper implements RowMapper<DepositProductData> {
+    private abstract static class DepositProductMapper implements RowMapper<DepositProductData> {
 
         private final String schemaSql;
 

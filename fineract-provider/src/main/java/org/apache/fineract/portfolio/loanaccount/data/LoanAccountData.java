@@ -58,7 +58,7 @@ import org.springframework.util.CollectionUtils;
  * Immutable data object representing loan account data.
  */
 @SuppressWarnings("unused")
-public class LoanAccountData {
+public final class LoanAccountData {
 
     // basic loan details
 
@@ -463,8 +463,7 @@ public class LoanAccountData {
     }
 
     /**
-     * Used to produce a {@link LoanAccountData} with only collateral options
-     * for now.
+     * Used to produce a {@link LoanAccountData} with only collateral options for now.
      */
     public static LoanAccountData collateralTemplate(final Collection<CodeValueData> loanCollateralOptions) {
         final Long id = null;
@@ -607,8 +606,7 @@ public class LoanAccountData {
     }
 
     /**
-     * Used to produce a {@link LoanAccountData} with only client information
-     * defaulted.
+     * Used to produce a {@link LoanAccountData} with only client information defaulted.
      */
     public static LoanAccountData clientDefaults(final Long clientId, final String clientAccountNo, final String clientName,
             final Long clientOfficeId, final LocalDate expectedDisbursementDate) {
@@ -780,8 +778,7 @@ public class LoanAccountData {
     }
 
     /**
-     * Used to produce a {@link LoanAccountData} with only group information
-     * defaulted.
+     * Used to produce a {@link LoanAccountData} with only group information defaulted.
      */
     public static LoanAccountData groupDefaults(final GroupGeneralData group, final LocalDate expectedDisbursementDate) {
 
@@ -1174,8 +1171,7 @@ public class LoanAccountData {
     }
 
     /*
-     * Used to send back loan account data with the basic details coming from
-     * query.
+     * Used to send back loan account data with the basic details coming from query.
      */
     public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
             final String externalId, final Long clientId, final String clientAccountNo, final String clientName, final Long clientOfficeId,
@@ -1265,8 +1261,7 @@ public class LoanAccountData {
     }
 
     /*
-     * Used to combine the associations and template data on top of exist loan
-     * account data
+     * Used to combine the associations and template data on top of exist loan account data
      */
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final LoanScheduleData repaymentSchedule,
             final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
@@ -1872,8 +1867,7 @@ public class LoanAccountData {
     }
 
     /**
-     * Used to produce a {@link LoanAccountData} with only collateral options
-     * for now.
+     * Used to produce a {@link LoanAccountData} with only collateral options for now.
      *
      * @return {@link LoanAccountData} object
      */

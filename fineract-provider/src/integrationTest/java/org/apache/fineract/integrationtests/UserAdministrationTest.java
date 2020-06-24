@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class UserAdministrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private List<Integer> transientUsers = new ArrayList<>();

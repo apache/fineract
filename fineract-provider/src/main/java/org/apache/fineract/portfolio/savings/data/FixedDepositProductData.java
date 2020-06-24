@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a Fixed Deposit product.
  */
-public class FixedDepositProductData extends DepositProductData {
+public final class FixedDepositProductData extends DepositProductData {
 
     // additional fields
     private boolean preClosurePenalApplicable;
@@ -134,9 +134,8 @@ public class FixedDepositProductData extends DepositProductData {
     }
 
     /**
-     * Returns a {@link FixedDepositProductData} that contains and exist
-     * {@link FixedDepositProductData} data with further template data for
-     * dropdowns.
+     * Returns a {@link FixedDepositProductData} that contains and exist {@link FixedDepositProductData} data with
+     * further template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO

@@ -218,10 +218,9 @@ public class Calendar extends AbstractAuditableCustom {
             this.startDate = newMeetingStartDate.toDate();
 
             /*
-             * If meeting start date is changed then there is possibilities of
-             * recurring day may change, so derive the recurring day and update
-             * it if it is changed. For weekly type is weekday and for monthly
-             * type it is day of the month
+             * If meeting start date is changed then there is possibilities of recurring day may change, so derive the
+             * recurring day and update it if it is changed. For weekly type is weekday and for monthly type it is day
+             * of the month
              */
 
             CalendarFrequencyType calendarFrequencyType = CalendarUtils.getFrequency(this.recurrence);
@@ -326,10 +325,8 @@ public class Calendar extends AbstractAuditableCustom {
 
             throw new CalendarParameterUpdateNotSupportedException("meeting.type", defaultUserMessage, newMeetingType, oldMeeingType);
             /*
-             * final Integer newValue =
-             * command.integerValueSansLocaleOfParameterNamed(typeParamName);
-             * actualChanges.put(typeParamName, newValue); this.typeId =
-             * newValue;
+             * final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
+             * actualChanges.put(typeParamName, newValue); this.typeId = newValue;
              */
         }
 
@@ -360,8 +357,8 @@ public class Calendar extends AbstractAuditableCustom {
         final String newRecurrence = Calendar.constructRecurrence(command, this);
         if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
             /*
-             * If active entities like JLG loan or RD accounts are synced to the
-             * calendar then do not allow to change meeting frequency
+             * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to change
+             * meeting frequency
              */
 
             if (areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
@@ -370,8 +367,8 @@ public class Calendar extends AbstractAuditableCustom {
             }
 
             /*
-             * If active entities like JLG loan or RD accounts are synced to the
-             * calendar then do not allow to change meeting interval
+             * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to change
+             * meeting interval
              */
 
             if (areActiveEntitiesSynced && !CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {

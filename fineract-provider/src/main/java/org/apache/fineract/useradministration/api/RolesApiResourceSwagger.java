@@ -108,7 +108,7 @@ final class RolesApiResourceSwagger {
 
         }
 
-        final class PutRolesRoleIdResponseChanges {
+        static final class PutRolesRoleIdResponseChanges {
 
             private PutRolesRoleIdResponseChanges() {}
 
@@ -141,7 +141,7 @@ final class RolesApiResourceSwagger {
 
         }
 
-        final class GetRolesRoleIdPermissionsResponsePermissionData {
+        static final class GetRolesRoleIdPermissionsResponsePermissionData {
 
             private GetRolesRoleIdPermissionsResponsePermissionData() {
 
@@ -176,7 +176,7 @@ final class RolesApiResourceSwagger {
 
         }
 
-        final class PostRolesRoleIdPermissionsResponsePermissions {
+        static final class PostRolesRoleIdPermissionsResponsePermissions {
 
             private PostRolesRoleIdPermissionsResponsePermissions() {
 
@@ -197,7 +197,7 @@ final class RolesApiResourceSwagger {
 
         }
 
-        final class PostRolesRoleIdPermissionsResponsePermissions {
+        static final class PostRolesRoleIdPermissionsResponsePermissions {
 
             private PostRolesRoleIdPermissionsResponsePermissions() {
 

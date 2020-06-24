@@ -32,11 +32,11 @@ final class SavingsProductsApiResourceSwagger {
     private SavingsProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostSavingsProductsRequest")
-    public final static class PostSavingsProductsRequest {
+    public static final class PostSavingsProductsRequest {
 
         private PostSavingsProductsRequest() {}
 
-        final class PostSavingsCharges {
+        static final class PostSavingsCharges {
 
             private PostSavingsCharges() {}
 
@@ -74,7 +74,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsProductsResponse")
-    public final static class PostSavingsProductsResponse {
+    public static final class PostSavingsProductsResponse {
 
         private PostSavingsProductsResponse() {}
 
@@ -83,7 +83,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsProductsProductIdRequest")
-    public final static class PutSavingsProductsProductIdRequest {
+    public static final class PutSavingsProductsProductIdRequest {
 
         private PutSavingsProductsProductIdRequest() {}
 
@@ -96,11 +96,11 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsProductsProductIdResponse")
-    public final static class PutSavingsProductsProductIdResponse {
+    public static final class PutSavingsProductsProductIdResponse {
 
         private PutSavingsProductsProductIdResponse() {}
 
-        final class PutSavingsChanges {
+        static final class PutSavingsChanges {
 
             private PutSavingsChanges() {}
 
@@ -118,11 +118,11 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsResponse")
-    public final static class GetSavingsProductsResponse {
+    public static final class GetSavingsProductsResponse {
 
         private GetSavingsProductsResponse() {}
 
-        final class GetSavingsCurrency {
+        static final class GetSavingsCurrency {
 
             private GetSavingsCurrency() {}
 
@@ -140,7 +140,7 @@ final class SavingsProductsApiResourceSwagger {
             public String displayLabel;
         }
 
-        final class GetSavingsProductsInterestCompoundingPeriodType {
+        static final class GetSavingsProductsInterestCompoundingPeriodType {
 
             private GetSavingsProductsInterestCompoundingPeriodType() {}
 
@@ -152,7 +152,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsInterestPostingPeriodType {
+        static final class GetSavingsProductsInterestPostingPeriodType {
 
             private GetSavingsProductsInterestPostingPeriodType() {}
 
@@ -164,7 +164,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsInterestCalculationType {
+        static final class GetSavingsProductsInterestCalculationType {
 
             private GetSavingsProductsInterestCalculationType() {}
 
@@ -176,7 +176,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsInterestCalculationDaysInYearType {
+        static final class GetSavingsProductsInterestCalculationDaysInYearType {
 
             private GetSavingsProductsInterestCalculationDaysInYearType() {}
 
@@ -188,7 +188,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsAccountingRule {
+        static final class GetSavingsProductsAccountingRule {
 
             private GetSavingsProductsAccountingRule() {}
 
@@ -221,15 +221,15 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsProductIdResponse")
-    public final static class GetSavingsProductsProductIdResponse {
+    public static final class GetSavingsProductsProductIdResponse {
 
         private GetSavingsProductsProductIdResponse() {}
 
-        final class GetSavingsProductsAccountingMappings {
+        static final class GetSavingsProductsAccountingMappings {
 
             private GetSavingsProductsAccountingMappings() {}
 
-            final class GetSavingsProductsSavingsReferenceAccount {
+            static final class GetSavingsProductsSavingsReferenceAccount {
 
                 private GetSavingsProductsSavingsReferenceAccount() {}
 
@@ -241,7 +241,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetSavingsProductsIncomeFromFeeAccount {
+            static final class GetSavingsProductsIncomeFromFeeAccount {
 
                 private GetSavingsProductsIncomeFromFeeAccount() {}
 
@@ -253,7 +253,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetSavingsProductsIncomeFromPenaltyAccount {
+            static final class GetSavingsProductsIncomeFromPenaltyAccount {
 
                 private GetSavingsProductsIncomeFromPenaltyAccount() {}
 
@@ -265,7 +265,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetSavingsProductsInterestOnSavingsAccount {
+            static final class GetSavingsProductsInterestOnSavingsAccount {
 
                 private GetSavingsProductsInterestOnSavingsAccount() {}
 
@@ -277,7 +277,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetSavingsProductsSavingsControlAccount {
+            static final class GetSavingsProductsSavingsControlAccount {
 
                 private GetSavingsProductsSavingsControlAccount() {}
 
@@ -289,7 +289,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Integer glCode;
             }
 
-            final class GetSavingsProductsTransfersInSuspenseAccount {
+            static final class GetSavingsProductsTransfersInSuspenseAccount {
 
                 private GetSavingsProductsTransfersInSuspenseAccount() {}
 
@@ -309,11 +309,11 @@ final class SavingsProductsApiResourceSwagger {
             public GetSavingsProductsTransfersInSuspenseAccount transfersInSuspenseAccount;
         }
 
-        final class GetSavingsProductsPaymentChannelToFundSourceMappings {
+        static final class GetSavingsProductsPaymentChannelToFundSourceMappings {
 
             private GetSavingsProductsPaymentChannelToFundSourceMappings() {}
 
-            final class GetSavingsProductsPaymentType {
+            static final class GetSavingsProductsPaymentType {
 
                 private GetSavingsProductsPaymentType() {}
 
@@ -323,7 +323,7 @@ final class SavingsProductsApiResourceSwagger {
                 public String name;
             }
 
-            final class GetSavingsProductsFundSourceAccount {
+            static final class GetSavingsProductsFundSourceAccount {
 
                 private GetSavingsProductsFundSourceAccount() {}
 
@@ -339,11 +339,11 @@ final class SavingsProductsApiResourceSwagger {
             public GetSavingsProductsFundSourceAccount fundSourceAccount;
         }
 
-        final class GetSavingsProductsFeeToIncomeAccountMappings {
+        static final class GetSavingsProductsFeeToIncomeAccountMappings {
 
             private GetSavingsProductsFeeToIncomeAccountMappings() {}
 
-            final class GetSavingsProductsFeeToIncomeAccountMappingsCharge {
+            static final class GetSavingsProductsFeeToIncomeAccountMappingsCharge {
 
                 private GetSavingsProductsFeeToIncomeAccountMappingsCharge() {}
 
@@ -357,7 +357,7 @@ final class SavingsProductsApiResourceSwagger {
                 public Boolean penalty;
             }
 
-            final class GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount {
+            static final class GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount {
 
                 private GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount() {}
 
@@ -373,11 +373,11 @@ final class SavingsProductsApiResourceSwagger {
             public GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
         }
 
-        final class GetSavingsProductsPenaltyToIncomeAccountMappings {
+        static final class GetSavingsProductsPenaltyToIncomeAccountMappings {
 
             private GetSavingsProductsPenaltyToIncomeAccountMappings() {}
 
-            final class GetSavingsProductsPenaltyToIncomeAccountMappingsCharge {
+            static final class GetSavingsProductsPenaltyToIncomeAccountMappingsCharge {
 
                 private GetSavingsProductsPenaltyToIncomeAccountMappingsCharge() {}
 
@@ -422,11 +422,11 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsTemplateResponse")
-    public final static class GetSavingsProductsTemplateResponse {
+    public static final class GetSavingsProductsTemplateResponse {
 
         private GetSavingsProductsTemplateResponse() {}
 
-        final class GetSavingsProductsTemplateAccountingRule {
+        static final class GetSavingsProductsTemplateAccountingRule {
 
             private GetSavingsProductsTemplateAccountingRule() {}
 
@@ -438,7 +438,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsLockinPeriodFrequencyTypeOptions {
+        static final class GetSavingsProductsLockinPeriodFrequencyTypeOptions {
 
             private GetSavingsProductsLockinPeriodFrequencyTypeOptions() {}
 
@@ -450,7 +450,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsWithdrawalFeeTypeOptions {
+        static final class GetSavingsProductsWithdrawalFeeTypeOptions {
 
             private GetSavingsProductsWithdrawalFeeTypeOptions() {}
 
@@ -462,7 +462,7 @@ final class SavingsProductsApiResourceSwagger {
             public String value;
         }
 
-        final class GetSavingsProductsPaymentTypeOptions {
+        static final class GetSavingsProductsPaymentTypeOptions {
 
             private GetSavingsProductsPaymentTypeOptions() {}
 
@@ -474,15 +474,15 @@ final class SavingsProductsApiResourceSwagger {
             public Integer position;
         }
 
-        final class GetSavingsProductsAccountingMappingOptions {
+        static final class GetSavingsProductsAccountingMappingOptions {
 
             private GetSavingsProductsAccountingMappingOptions() {}
 
-            final class GetSavingsProductsLiabilityAccountOptions {
+            static final class GetSavingsProductsLiabilityAccountOptions {
 
                 private GetSavingsProductsLiabilityAccountOptions() {}
 
-                final class GetSavingsProductsLiabilityType {
+                static final class GetSavingsProductsLiabilityType {
 
                     private GetSavingsProductsLiabilityType() {}
 
@@ -494,7 +494,7 @@ final class SavingsProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetSavingsProductsLiabilityUsage {
+                static final class GetSavingsProductsLiabilityUsage {
 
                     private GetSavingsProductsLiabilityUsage() {}
 
@@ -506,7 +506,7 @@ final class SavingsProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetSavingsProductsLiabilityTagId {
+                static final class GetSavingsProductsLiabilityTagId {
 
                     private GetSavingsProductsLiabilityTagId() {}
 
@@ -531,11 +531,11 @@ final class SavingsProductsApiResourceSwagger {
                 public GetSavingsProductsLiabilityTagId tagId;
             }
 
-            final class GetSavingsProductsAssetAccountOptions {
+            static final class GetSavingsProductsAssetAccountOptions {
 
                 private GetSavingsProductsAssetAccountOptions() {}
 
-                final class GetSavingsAssetLiabilityType {
+                static final class GetSavingsAssetLiabilityType {
 
                     private GetSavingsAssetLiabilityType() {}
 
@@ -547,7 +547,7 @@ final class SavingsProductsApiResourceSwagger {
                     public String value;
                 }
 
-                final class GetSavingsAssetTagId {
+                static final class GetSavingsAssetTagId {
 
                     private GetSavingsAssetTagId() {}
                 }
@@ -567,11 +567,11 @@ final class SavingsProductsApiResourceSwagger {
                 public GetSavingsAssetTagId tagId;
             }
 
-            final class GetSavingsProductsExpenseAccountOptions {
+            static final class GetSavingsProductsExpenseAccountOptions {
 
                 private GetSavingsProductsExpenseAccountOptions() {}
 
-                final class GetSavingsProductsExpenseType {
+                static final class GetSavingsProductsExpenseType {
 
                     private GetSavingsProductsExpenseType() {}
 
@@ -598,11 +598,11 @@ final class SavingsProductsApiResourceSwagger {
                 public GetSavingsProductsAssetAccountOptions.GetSavingsAssetTagId tagId;
             }
 
-            final class GetSavingsProductsIncomeAccountOptions {
+            static final class GetSavingsProductsIncomeAccountOptions {
 
                 private GetSavingsProductsIncomeAccountOptions() {}
 
-                final class GetSavingsProductsIncomeType {
+                static final class GetSavingsProductsIncomeType {
 
                     private GetSavingsProductsIncomeType() {}
 
@@ -636,11 +636,11 @@ final class SavingsProductsApiResourceSwagger {
             public Set<GetSavingsProductsIncomeAccountOptions> incomeAccountOptions;
         }
 
-        final class GetSavingsProductsChargeOptions {
+        static final class GetSavingsProductsChargeOptions {
 
             private GetSavingsProductsChargeOptions() {}
 
-            final class GetSavingsChargeTimeType {
+            static final class GetSavingsChargeTimeType {
 
                 private GetSavingsChargeTimeType() {}
 
@@ -652,7 +652,7 @@ final class SavingsProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsProductsChargeAppliesTo {
+            static final class GetSavingsProductsChargeAppliesTo {
 
                 private GetSavingsProductsChargeAppliesTo() {}
 
@@ -664,7 +664,7 @@ final class SavingsProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsChargeCalculationType {
+            static final class GetSavingsChargeCalculationType {
 
                 private GetSavingsChargeCalculationType() {}
 
@@ -676,7 +676,7 @@ final class SavingsProductsApiResourceSwagger {
                 public String value;
             }
 
-            final class GetSavingsChargePaymentMode {
+            static final class GetSavingsChargePaymentMode {
 
                 private GetSavingsChargePaymentMode() {}
 
@@ -725,7 +725,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSavingsProductsProductIdResponse")
-    public final static class DeleteSavingsProductsProductIdResponse {
+    public static final class DeleteSavingsProductsProductIdResponse {
 
         private DeleteSavingsProductsProductIdResponse() {}
 

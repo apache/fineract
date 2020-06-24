@@ -90,8 +90,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
                 break;
-                default:
-                break;
             }
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId);
@@ -161,8 +159,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
-            break;
-            default:
             break;
         }
 
@@ -386,8 +382,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
             sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
             /*
-             * if (currencyCode != null) { sql += " and la.currency_code = ?";
-             * sqlParams = new Object[] {accountId , accountId,currencyCode }; }
+             * if (currencyCode != null) { sql += " and la.currency_code = ?"; sqlParams = new Object[] {accountId ,
+             * accountId,currencyCode }; }
              */
 
             accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);

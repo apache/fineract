@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import org.joda.time.LocalDate;
 
-public class SavingsAccountAnnualFeeData {
+public final class SavingsAccountAnnualFeeData {
 
     private final Long id;
     private final Long accountId;

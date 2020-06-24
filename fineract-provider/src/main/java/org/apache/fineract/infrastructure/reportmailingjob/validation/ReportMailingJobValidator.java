@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.validation;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -278,7 +279,7 @@ public class ReportMailingJobValidator {
         Set<String> emailRecipientsSet = new HashSet<>();
 
         if (emailRecipients != null) {
-            String[] split = emailRecipients.split(",");
+            Iterable<String> split = Splitter.on(',').split(emailRecipients);
 
             for (String emailAddress : split) {
                 emailAddress = emailAddress.trim();
@@ -317,8 +318,7 @@ public class ReportMailingJobValidator {
     }
 
     /**
-     * throw a PlatformApiDataValidationException exception if there are
-     * validation errors
+     * throw a PlatformApiDataValidationException exception if there are validation errors
      *
      * @param dataValidationErrors
      *            -- list of ApiParameterError objects

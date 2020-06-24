@@ -22,10 +22,9 @@ import java.math.BigDecimal;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object for representing loan with dues (example: loan is due
- * for disbursement, repayments).
+ * Immutable data object for representing loan with dues (example: loan is due for disbursement, repayments).
  */
-public class SavingsDueData {
+public final class SavingsDueData {
 
     @SuppressWarnings("unused")
     private final Long savingsId;

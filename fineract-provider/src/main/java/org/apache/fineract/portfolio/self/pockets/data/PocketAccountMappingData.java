@@ -23,7 +23,7 @@ import java.util.Collection;
 import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping;
 
 @SuppressWarnings("unused")
-public class PocketAccountMappingData {
+public final class PocketAccountMappingData {
 
     private final Collection<PocketAccountMapping> loanAccounts;
     private final Collection<PocketAccountMapping> savingsAccounts;

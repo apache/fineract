@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
  * Immutable data object that represents a period of a loan schedule.
  *
  */
-public class LoanSchedulePeriodData {
+public final class LoanSchedulePeriodData {
 
     private final Integer period;
     private final LocalDate fromDate;
@@ -134,8 +134,7 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * constructor used for creating period on loan schedule that is only a
-     * disbursement (typically first period)
+     * constructor used for creating period on loan schedule that is only a disbursement (typically first period)
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
@@ -201,8 +200,7 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * used for repayment only period when creating an empty loan schedule for
-     * preview etc
+     * used for repayment only period when creating an empty loan schedule for preview etc
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final BigDecimal principalOriginalDue, final BigDecimal principalOutstanding,
@@ -264,8 +262,8 @@ public class LoanSchedulePeriodData {
     }
 
     /*
-     * Used for creating loan schedule periods with full information on expected
-     * principal, interest & charges along with what portion of each is paid.
+     * Used for creating loan schedule periods with full information on expected principal, interest & charges along
+     * with what portion of each is paid.
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,

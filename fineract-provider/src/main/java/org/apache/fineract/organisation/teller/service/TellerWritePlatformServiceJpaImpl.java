@@ -63,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -165,8 +165,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * used to restrict modifying operations to office that are either the users
-     * office or lower (child) in the office hierarchy
+     * used to restrict modifying operations to office that are either the users office or lower (child) in the office
+     * hierarchy
      */
     private Teller validateUserPriviledgeOnTellerAndRetrieve(final AppUser currentUser, final Long tellerId) {
 
@@ -202,8 +202,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleTellerDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -345,9 +344,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * @Override public CommandProcessingResult inwardCashToCashier (final Long
-     * cashierId, final CashierTransaction cashierTxn) { CashierTxnType txnType
-     * = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
+     * @Override public CommandProcessingResult inwardCashToCashier (final Long cashierId, final CashierTransaction
+     * cashierTxn) { CashierTxnType txnType = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
      * office hierarchy this.cashierTxnRepository.save(cashierTxn); }
      */
 

@@ -21,10 +21,10 @@ package org.apache.fineract.infrastructure.bulkimport.constants;
 public class TemplatePopulateImportConstants {
 
     // columns sizes
-    public final static int SMALL_COL_SIZE = 4000;
-    public final static int MEDIUM_COL_SIZE = 6000;
-    public final static int LARGE_COL_SIZE = 8000;
-    public final static int EXTRALARGE_COL_SIZE = 10000;
+    public static final int SMALL_COL_SIZE = 4000;
+    public static final int MEDIUM_COL_SIZE = 6000;
+    public static final int LARGE_COL_SIZE = 8000;
+    public static final int EXTRALARGE_COL_SIZE = 10000;
 
     // Sheet names
     public static final String OFFICE_SHEET_NAME = "Offices";
@@ -53,19 +53,19 @@ public class TemplatePopulateImportConstants {
     public static final String ROLES_SHEET_NAME = "Roles";
     public static final String USER_SHEET_NAME = "Users";
 
-    public final static int ROWHEADER_INDEX = 0;
-    public final static short ROW_HEADER_HEIGHT = 500;
-    public final static int FIRST_COLUMN_INDEX = 0;
+    public static final int ROWHEADER_INDEX = 0;
+    public static final short ROW_HEADER_HEIGHT = 500;
+    public static final int FIRST_COLUMN_INDEX = 0;
 
     // Status column
-    public final static String STATUS_CELL_IMPORTED = "Imported";
-    public final static String STATUS_CREATION_FAILED = "Creation failed";
-    public final static String STATUS_APPROVAL_FAILED = "Approval failed";
-    public final static String STATUS_ACTIVATION_FAILED = "Activation failed";
-    public final static String STATUS_MEETING_FAILED = "Meeting failed";
-    public final static String STATUS_DISBURSAL_FAILED = "Disbursal failed";
-    public final static String STATUS_DISBURSAL_REPAYMENT_FAILED = "Repayment failed";
-    public final static String STATUS_COLUMN_HEADER = "Status";
+    public static final String STATUS_CELL_IMPORTED = "Imported";
+    public static final String STATUS_CREATION_FAILED = "Creation failed";
+    public static final String STATUS_APPROVAL_FAILED = "Approval failed";
+    public static final String STATUS_ACTIVATION_FAILED = "Activation failed";
+    public static final String STATUS_MEETING_FAILED = "Meeting failed";
+    public static final String STATUS_DISBURSAL_FAILED = "Disbursal failed";
+    public static final String STATUS_DISBURSAL_REPAYMENT_FAILED = "Repayment failed";
+    public static final String STATUS_COLUMN_HEADER = "Status";
 
     // Frequency Calender
     public static final String FREQUENCY_DAILY = "Daily";

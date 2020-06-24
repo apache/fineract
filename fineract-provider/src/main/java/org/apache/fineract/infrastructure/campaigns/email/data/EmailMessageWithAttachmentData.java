@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 import java.io.File;
 import java.util.List;
 
-public class EmailMessageWithAttachmentData {
+public final class EmailMessageWithAttachmentData {
 
     private final String to;
     private final String text;

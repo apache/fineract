@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerJobHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification response200Spec;
     private final ResponseSpecification response202Spec;
@@ -142,9 +142,7 @@ public class SchedulerJobHelper {
      * Launches a Job and awaits its completion.
      *
      * @param jobName
-     *            displayName (see
-     *            {@link org.apache.fineract.infrastructure.jobs.service.JobName})
-     *            of Scheduler Job
+     *            displayName (see {@link org.apache.fineract.infrastructure.jobs.service.JobName}) of Scheduler Job
      *
      * @author Michael Vorburger.ch
      */

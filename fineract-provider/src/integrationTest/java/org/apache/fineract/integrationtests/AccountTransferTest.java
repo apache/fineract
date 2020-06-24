@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unused" })
 public class AccountTransferTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);
     public static final String MINIMUM_OPENING_BALANCE = "30000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String ACCOUNT_TRANSFER_AMOUNT = "15000.0";

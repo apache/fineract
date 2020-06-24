@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class WorkingDaysHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {

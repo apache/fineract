@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.bulkimport.data;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.context.ApplicationEvent;
 
-public class BulkImportEvent extends ApplicationEvent {
+public final class BulkImportEvent extends ApplicationEvent {
 
     private final String tenantIdentifier;
 

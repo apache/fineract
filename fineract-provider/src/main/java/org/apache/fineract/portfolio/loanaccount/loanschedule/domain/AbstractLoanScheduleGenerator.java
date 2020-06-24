@@ -1248,8 +1248,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * this method calculates the principal amount for generating the repayment
-     * schedule.
+     * this method calculates the principal amount for generating the repayment schedule.
      */
     private Money getPrincipalToBeScheduled(final LoanApplicationTerms loanApplicationTerms) {
         Money principalToBeScheduled;
@@ -1298,9 +1297,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * Method calculates interest on not paid outstanding principal and interest
-     * (if compounding is enabled) till current date and adds new repayment
-     * schedule detail
+     * Method calculates interest on not paid outstanding principal and interest (if compounding is enabled) till
+     * current date and adds new repayment schedule detail
      *
      * @param compoundingMap
      *            TODO
@@ -1522,8 +1520,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * Identifies all the past date principal changes and apply them on
-     * outstanding balance for future calculations
+     * Identifies all the past date principal changes and apply them on outstanding balance for future calculations
      */
     private Money updateBalanceForInterestCalculation(final Map<LocalDate, Money> principalPortionMap, final LocalDate scheduledDueDate,
             final Money outstandingBalanceAsPerRest, boolean addMapDetails) {
@@ -1591,9 +1588,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * this Method updates late/ not paid installment components to Map with
-     * effective date as per REST(for principal portion ) and compounding
-     * (interest or fee or interest and fee portions) frequency
+     * this Method updates late/ not paid installment components to Map with effective date as per REST(for principal
+     * portion ) and compounding (interest or fee or interest and fee portions) frequency
      *
      */
     private void updateLatePaymentsToMap(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
@@ -1802,8 +1798,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * This Method updates principal paid component to map with effective date
-     * as per the REST
+     * This Method updates principal paid component to map with effective date as per the REST
      *
      */
     private void updatePrincipalPaidPortionToMap(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
@@ -1819,9 +1814,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * merges all the applicable amounts(compounding dates, disbursements, late
-     * payment compounding and principal change as per rest) changes to single
-     * map for interest calculation
+     * merges all the applicable amounts(compounding dates, disbursements, late payment compounding and principal change
+     * as per rest) changes to single map for interest calculation
      *
      */
     private TreeMap<LocalDate, Money> mergeVariationsToMap(final LoanScheduleParams params) {
@@ -2049,8 +2043,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * Method preprocess the installments and transactions and sets the required
-     * fields to generate the schedule
+     * Method preprocess the installments and transactions and sets the required fields to generate the schedule
      */
     @Override
     public LoanScheduleDTO rescheduleNextInstallments(final MathContext mc, final LoanApplicationTerms loanApplicationTerms, Loan loan,
@@ -2395,8 +2388,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * Method identifies the early paid amounts for a installment and update the
-     * principal map for further calculations
+     * Method identifies the early paid amounts for a installment and update the principal map for further calculations
      */
     private Money updateEarlyPaidAmountsToMap(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
@@ -2493,8 +2485,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     /**
-     * Method identifies early paid amount and applies the early payment
-     * strategy
+     * Method identifies early paid amount and applies the early payment strategy
      */
     private Money fetchEarlyPaidAmount(final Money principalPortion, final Money principalPortionCalculated, final Money reducePrincipal,
             final LoanApplicationTerms applicationTerms, final Money totalCumulativePrincipal, int periodNumber, final MathContext mc) {
@@ -2639,7 +2630,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
     }
 
-    private final class LoanTermVariationParams {
+    private static final class LoanTermVariationParams {
 
         private final boolean skipPeriod;
         private final boolean recalculateAmounts;
@@ -2672,7 +2663,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     }
 
-    private final class ScheduleCurrentPeriodParams {
+    private static final class ScheduleCurrentPeriodParams {
 
         Money earlyPaidAmount;
         LoanScheduleModelPeriod lastInstallment;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
+import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientPersonImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientPersonImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientPersonImportHandler.class);
     private Workbook workbook;
     private List<ClientData> clients;
 
@@ -104,25 +105,25 @@ public class ClientPersonImportHandler implements ImportHandler {
         String clientType = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;
         if (clientType != null) {
-            String[] clientTypeAr = clientType.split("-");
-            if (clientTypeAr.length > 1 && clientTypeAr[1] != null) {
-                clientTypeId = Long.parseLong(clientTypeAr[1]);
+            List<String> clientTypeAr = Splitter.on('-').splitToList(clientType);
+            if (clientTypeAr.size() > 1 && clientTypeAr.get(1) != null) {
+                clientTypeId = Long.parseLong(clientTypeAr.get(1));
             }
         }
         String gender = ImportHandlerUtils.readAsString(ClientPersonConstants.GENDER_COL, row);
         Long genderId = null;
         if (gender != null) {
-            String[] genderAr = gender.split("-");
-            if (genderAr.length > 1 && genderAr[1] != null) {
-                genderId = Long.parseLong(genderAr[1]);
+            List<String> genderAr = Splitter.on('-').splitToList(gender);
+            if (genderAr.size() > 1 && genderAr.get(1) != null) {
+                genderId = Long.parseLong(genderAr.get(1));
             }
         }
         String clientClassification = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
         Long clientClassificationId = null;
         if (clientClassification != null) {
-            String[] clientClassificationAr = clientClassification.split("-");
-            if (clientClassificationAr.length > 1 && clientClassificationAr[1] != null) {
-                clientClassificationId = Long.parseLong(clientClassificationAr[1]);
+            List<String> clientClassificationAr = Splitter.on('-').splitToList(clientClassification);
+            if (clientClassificationAr.size() > 1 && clientClassificationAr.get(1) != null) {
+                clientClassificationId = Long.parseLong(clientClassificationAr.get(1));
             }
         }
         Boolean isStaff = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_STAFF_COL, row);
@@ -133,10 +134,10 @@ public class ClientPersonImportHandler implements ImportHandler {
             String addressType = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_TYPE_COL, row);
             Long addressTypeId = null;
             if (addressType != null) {
-                String[] addressTypeAr = addressType.split("-");
+                List<String> addressTypeAr = Splitter.on('-').splitToList(addressType);
 
-                if (addressTypeAr.length > 1 && addressTypeAr[1] != null) {
-                    addressTypeId = Long.parseLong(addressTypeAr[1]);
+                if (addressTypeAr.size() > 1 && addressTypeAr.get(1) != null) {
+                    addressTypeId = Long.parseLong(addressTypeAr.get(1));
                 }
             }
             String street = ImportHandlerUtils.readAsString(ClientPersonConstants.STREET_COL, row);
@@ -151,20 +152,20 @@ public class ClientPersonImportHandler implements ImportHandler {
             String stateProvince = ImportHandlerUtils.readAsString(ClientPersonConstants.STATE_PROVINCE_COL, row);
             Long stateProvinceId = null;
             if (stateProvince != null) {
-                String[] stateProvinceAr = stateProvince.split("-");
+                List<String> stateProvinceAr = Splitter.on('-').splitToList(stateProvince);
                 // Arkansas-AL <-- expected format of the cell
                 // but probably it's either an empty cell or it is missing a
                 // hyphen
-                if (stateProvinceAr.length > 1 && stateProvinceAr[1] != null) {
-                    stateProvinceId = Long.parseLong(stateProvinceAr[1]);
+                if (stateProvinceAr.size() > 1 && stateProvinceAr.get(1) != null) {
+                    stateProvinceId = Long.parseLong(stateProvinceAr.get(1));
                 }
             }
             String country = ImportHandlerUtils.readAsString(ClientPersonConstants.COUNTRY_COL, row);
             Long countryId = null;
             if (country != null) {
-                String[] countryAr = country.split("-");
-                if (countryAr.length > 1 && countryAr[1] != null) {
-                    countryId = Long.parseLong(countryAr[1]);
+                List<String> countryAr = Splitter.on('-').splitToList(country);
+                if (countryAr.size() > 1 && countryAr.get(1) != null) {
+                    countryId = Long.parseLong(countryAr.get(1));
                 }
             }
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3, city, postalCode,

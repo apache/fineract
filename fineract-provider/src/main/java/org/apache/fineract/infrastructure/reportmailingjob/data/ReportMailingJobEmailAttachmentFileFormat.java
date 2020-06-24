@@ -147,8 +147,7 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     }
 
     /**
-     * get a {@link EnumOptionData} representation of the
-     * {@link ReportMailingJobEmailAttachmentFileFormat} object
+     * get a {@link EnumOptionData} representation of the {@link ReportMailingJobEmailAttachmentFileFormat} object
      *
      * @return {@link EnumOptionData} object
      */
@@ -160,8 +159,8 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     }
 
     /**
-     * get the {@link EnumOptionData} representation of all valid
-     * {@link ReportMailingJobEmailAttachmentFileFormat} objects
+     * get the {@link EnumOptionData} representation of all valid {@link ReportMailingJobEmailAttachmentFileFormat}
+     * objects
      *
      * @return List of {@link EnumOptionData} objects
      */

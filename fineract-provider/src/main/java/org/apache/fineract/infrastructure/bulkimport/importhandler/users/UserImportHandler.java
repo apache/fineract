@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(UserImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserImportHandler.class);
     private Workbook workbook;
     private List<AppUserData> users;
     private List<String> statuses;

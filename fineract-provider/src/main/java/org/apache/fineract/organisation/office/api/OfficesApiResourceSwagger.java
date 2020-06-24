@@ -122,7 +122,7 @@ final class OfficesApiResourceSwagger {
 
         }
 
-        final class PutOfficesOfficeIdResponseChanges {
+        static final class PutOfficesOfficeIdResponseChanges {
 
             private PutOfficesOfficeIdResponseChanges() {
 

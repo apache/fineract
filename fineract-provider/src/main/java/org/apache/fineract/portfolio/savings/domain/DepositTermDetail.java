@@ -41,8 +41,7 @@ import org.joda.time.Weeks;
 import org.joda.time.Years;
 
 /**
- * DepositTermDetail encapsulates all the details of a
- * {@link FixedDepositProduct} that are also used and persisted by a
+ * DepositTermDetail encapsulates all the details of a {@link FixedDepositProduct} that are also used and persisted by a
  * {@link FixedDepositAccount}.
  */
 @Embeddable

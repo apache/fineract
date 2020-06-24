@@ -111,9 +111,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
         Map<String, List<EnumOptionData>> accountNumberPrefixTypeOptions = new HashMap<>();
         /***
-         * If an Account type is passed in, return prefixes only for the passed
-         * in account type, else return all allowed prefixes keyed by all
-         * possible entity type
+         * If an Account type is passed in, return prefixes only for the passed in account type, else return all allowed
+         * prefixes keyed by all possible entity type
          **/
         if (entityAccountTypeForTemplate != null) {
             determinePrefixTypesForAccounts(accountNumberPrefixTypeOptions, entityAccountTypeForTemplate);

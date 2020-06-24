@@ -63,7 +63,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookServiceImpl.class);
     private final ApplicationContext applicationContext;
     private final PlatformSecurityContext securityContext;
     private final DocumentWritePlatformService documentWritePlatformService;

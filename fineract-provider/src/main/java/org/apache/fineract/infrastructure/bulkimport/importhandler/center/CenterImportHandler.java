@@ -54,7 +54,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CenterImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CenterImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CenterImportHandler.class);
     private List<CenterData> centers;
     private List<CalendarData> meetings;
     private List<String> statuses;

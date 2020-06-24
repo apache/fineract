@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.transfer.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when not supported loan
- * template type is sent.
+ * {@link AbstractPlatformDomainRuleException} thrown when not supported loan template type is sent.
  */
 public class TransferNotSupportedException extends AbstractPlatformDomainRuleException {
 

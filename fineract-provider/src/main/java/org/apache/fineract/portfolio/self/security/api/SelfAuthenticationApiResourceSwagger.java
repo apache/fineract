@@ -31,11 +31,11 @@ final class SelfAuthenticationApiResourceSwagger {
     private SelfAuthenticationApiResourceSwagger() {}
 
     @ApiModel(value = "PostSelfAuthenticationResponse")
-    public final static class PostSelfAuthenticationResponse {
+    public static final class PostSelfAuthenticationResponse {
 
         private PostSelfAuthenticationResponse() {}
 
-        final class GetSelfUserDetailsOrganisationalRole {
+        static final class GetSelfUserDetailsOrganisationalRole {
 
             private GetSelfUserDetailsOrganisationalRole() {}
 
@@ -47,7 +47,7 @@ final class SelfAuthenticationApiResourceSwagger {
             public String value;
         }
 
-        final class GetSelfUserDetailsRoles {
+        static final class GetSelfUserDetailsRoles {
 
             private GetSelfUserDetailsRoles() {}
 

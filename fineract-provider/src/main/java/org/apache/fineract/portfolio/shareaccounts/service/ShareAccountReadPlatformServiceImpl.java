@@ -244,7 +244,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         return savingsCharges;
     }
 
-    private final static class ShareAccountMapper implements RowMapper<AccountData> {
+    private static final class ShareAccountMapper implements RowMapper<AccountData> {
 
         private final Collection<ShareAccountChargeData> charges;
         private final Collection<ShareAccountTransactionData> purchasedShares;
@@ -374,7 +374,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-    private final static class ShareAccountMapperForDividents implements RowMapper<ShareAccountData> {
+    private static final class ShareAccountMapperForDividents implements RowMapper<ShareAccountData> {
 
         private final String schema;
         final PurchasedSharesDataRowMapper purchasedSharesDataRowMapper = new PurchasedSharesDataRowMapper();
@@ -439,7 +439,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-    private final static class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
+    private static final class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
         private final String schema;
 
@@ -475,7 +475,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-    private final static class ShareAccountDividendRowMapper implements RowMapper<ShareAccountDividendData> {
+    private static final class ShareAccountDividendRowMapper implements RowMapper<ShareAccountDividendData> {
 
         private final String schema;
 

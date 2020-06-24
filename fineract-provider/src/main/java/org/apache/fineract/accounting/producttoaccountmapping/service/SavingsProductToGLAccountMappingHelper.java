@@ -172,15 +172,12 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             break;
             case ACCRUAL_UPFRONT:
             break;
-            default:
-            break;
         }
         return changes;
     }
 
     /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
+     * Examines and updates each account mapping for given loan product with changes passed in from the Json element
      *
      * @param savingsProductId
      * @param changes
@@ -236,8 +233,6 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             case ACCRUAL_PERIODIC:
             break;
             case ACCRUAL_UPFRONT:
-            break;
-            default:
             break;
         }
     }

@@ -47,7 +47,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
     private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private final static Logger LOG = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
 
     @Autowired
     public FinancialActivityAccountWritePlatformServiceImpl(
@@ -89,8 +89,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     }
 
     /**
-     * Validate that the GL Account is appropriate for the particular Financial
-     * Activity Type
+     * Validate that the GL Account is appropriate for the particular Financial Activity Type
      **/
     private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
         FinancialActivity financialActivity = FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());

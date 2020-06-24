@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosureWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
@@ -124,8 +124,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
                 .orElseThrow(() -> new GLClosureNotFoundException(glClosureId));
 
         /**
-         * check if any closures are present for this branch at a later date
-         * than this closure date
+         * check if any closures are present for this branch at a later date than this closure date
          **/
         final Date closureDate = glClosure.getClosingDate();
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(glClosure.getOffice().getId());

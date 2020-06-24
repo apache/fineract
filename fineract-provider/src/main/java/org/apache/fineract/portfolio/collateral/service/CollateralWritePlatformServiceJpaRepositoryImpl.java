@@ -51,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CollateralWritePlatformServiceJpaRepositoryImpl implements CollateralWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CollateralWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CollateralWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
@@ -86,8 +86,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
             final LoanCollateral collateral = LoanCollateral.fromJson(loan, collateralType, command);
 
             /**
-             * Collaterals may be added only when the loan associated with them
-             * are yet to be approved
+             * Collaterals may be added only when the loan associated with them are yet to be approved
              **/
             if (!loan.status().isSubmittedAndPendingApproval()) {
                 throw new CollateralCannotBeCreatedException(
@@ -133,8 +132,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
             }
 
             /**
-             * Collaterals may be updated only when the loan associated with
-             * them are yet to be approved
+             * Collaterals may be updated only when the loan associated with them are yet to be approved
              **/
             if (!loan.status().isSubmittedAndPendingApproval()) {
                 throw new CollateralCannotBeUpdatedException(
@@ -167,8 +165,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         }
 
         /**
-         * Collaterals may be deleted only when the loan associated with them
-         * are yet to be approved
+         * Collaterals may be deleted only when the loan associated with them are yet to be approved
          **/
         if (!loan.status().isSubmittedAndPendingApproval()) {
             throw new CollateralCannotBeDeletedException(

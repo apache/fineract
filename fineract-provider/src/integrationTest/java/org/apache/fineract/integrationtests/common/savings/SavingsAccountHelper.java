@@ -48,7 +48,7 @@ public class SavingsAccountHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsAccountHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountHelper.class);
 
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
     private static final String APPROVE_SAVINGS_COMMAND = "approve";

@@ -200,7 +200,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
         }
     }
 
-    private final static class ShareProductRowMapper implements RowMapper<ProductData> {
+    private static final class ShareProductRowMapper implements RowMapper<ProductData> {
 
         Collection<ShareProductMarketPriceData> shareMarketCollection;
         Collection<ChargeData> charges;

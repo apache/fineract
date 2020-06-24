@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes" })
 public class HolidayHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HolidayHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HolidayHelper.class);
     private static final String HOLIDAYS_URL = "/fineract-provider/api/v1/holidays";
     private static final String CREATE_HOLIDAY_URL = HOLIDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
 

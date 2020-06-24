@@ -30,17 +30,17 @@ final class LoanScheduleApiResourceSwagger {
     private LoanScheduleApiResourceSwagger() {}
 
     @ApiModel(value = "PostLoansLoanIdScheduleRequest")
-    public final static class PostLoansLoanIdScheduleRequest {
+    public static final class PostLoansLoanIdScheduleRequest {
 
         private PostLoansLoanIdScheduleRequest() {}
     }
 
     @ApiModel(value = "PostLoansLoanIdScheduleResponse")
-    public final static class PostLoansLoanIdScheduleResponse {
+    public static final class PostLoansLoanIdScheduleResponse {
 
         private PostLoansLoanIdScheduleResponse() {}
 
-        final class PostLoanChanges {
+        static final class PostLoanChanges {
 
             private PostLoanChanges() {}
 

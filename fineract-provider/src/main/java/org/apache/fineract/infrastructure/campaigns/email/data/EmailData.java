@@ -26,7 +26,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a SMS message.
  */
-public class EmailData {
+public final class EmailData {
 
     private final Long id;
     private final Long groupId;

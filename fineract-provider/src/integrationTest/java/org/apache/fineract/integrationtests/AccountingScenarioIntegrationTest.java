@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 public class AccountingScenarioIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
     private static RequestSpecification requestSpec;
     private static ResponseSpecification responseSpec;
 

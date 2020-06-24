@@ -44,11 +44,12 @@ buildscript {
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.3.0"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.3"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:4.3.1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:4.4.0"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.2"
     }
 }
 
@@ -71,7 +72,7 @@ apply plugin: 'jacoco'
 apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: "net.ltgt.errorprone"
 apply plugin: "com.diffplug.gradle.spotless"
-// apply plugin: 'pmd'
+apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 
 dependencyManagement {
     imports {
@@ -109,10 +110,14 @@ dependencyManagement {
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'org.mockito:mockito-core:3.3.3'
         dependency 'org.mockito:mockito-junit-jupiter:3.3.3'
-        dependency 'io.github.classgraph:classgraph:4.8.86'
+        dependency 'io.github.classgraph:classgraph:4.8.87'
         dependency 'org.awaitility:awaitility:4.0.3'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.6'
         dependency 'javax.cache:cache-api:1.1.1'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.10.0'
+
+        // If this is upgraded, you need to change path in WebFrontEndConfiguration
+        dependency 'org.webjars.npm:swagger-ui-dist:3.27.0'
 
         dependency ('org.dom4j:dom4j:2.1.3') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
@@ -181,6 +186,18 @@ openjpa {
     }
 }
 
+// Configuration for Swagger documentation generation task
+// https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
+resolve {
+    outputFileName = 'fineract'
+    outputFormat = 'JSON'
+    prettyPrint = 'TRUE'
+    classpath = sourceSets.main.runtimeClasspath
+    outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
+}
+
+// Configuration for JaCoCo code coverage task
+// https://www.eclemma.org/jacoco/
 jacoco {
     toolVersion = jacocoVersion
     reportsDir = file("$buildDir/reports/jacoco")
@@ -210,11 +227,42 @@ spotless {
     eclipse().configFile '../config/fineractdev-formatter.xml'
     endWithNewline()
     trimTrailingWhitespace()
+
+    // Enforce style modifier order
+      custom 'Modifier ordering', {
+        def modifierRanking = [
+                public      : 1,
+                protected   : 2,
+                private     : 3,
+                abstract    : 4,
+                default     : 5,
+                static      : 6,
+                final       : 7,
+                transient   : 8,
+                volatile    : 9,
+                synchronized: 10,
+                native      : 11,
+                strictfp    : 12]
+        // Find any instance of multiple modifiers. Lead with a non-word character to avoid
+        // accidental matching against for instance, "an alternative default value"
+        it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+          // Do not replace the leading non-word character.  Identify the modifiers
+          it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+            // Sort the modifiers according to the ranking above
+            it.split().sort({ modifierRanking[it] }).join(' ') + ' '
+          }
+          )
+        }
+        )
+      }
+
   }
 
-  lineEndings 'UNIX'
+    lineEndings 'UNIX'
 }
 
+// Configuration for Apache Release Audit Tool task
+// https://github.com/eskatos/creadur-rat-gradle
 rat {
     verbose = false
     reportDir = new File(buildDir,'reports/rat')
@@ -245,7 +293,7 @@ rat {
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
         // Swagger License
-        '**/src/main/resources/swagger-ui/**',
+        '**/src/main/resources/static/swagger-ui/**',
         // gradle
         '**/.gradle/**',
         '**/gradlew',
@@ -335,15 +383,22 @@ tasks.withType(JavaCompile) {
         //Todo Remove necessary checks from this list
         disable(
                 "UnusedVariable",
-                "ClassCanBeStatic",
-                "StringSplitter",
-                "ImmutableEnumChecker",
-                "BadImport",
-                "UnusedMethod",
-                "ModifiedButNotUsed",
                 "TypeParameterUnusedInFormals",
-                "UnusedNestedClass",
-                "UndefinedEquals",
+                "JdkObsolete",
+                "EmptyBlockTag",
+                "MissingSummary",
+                "MutablePublicArray",
+                "InvalidParam",
+                "ReturnFromVoid",
+                "AlmostJavadoc",
+                "PublicConstructorForAbstractClass",
+                "ProtectedMembersInFinalClass",
+                "StaticAssignmentInConstructor",
+                "UnescapedEntity",
+                "InvalidBlockTag",
+                "ModifyCollectionInEnhancedForLoop",
+                "NonCanonicalType",
+                "InvalidInlineTag",
         )
         //TODO gradually enable these checks
         error(
@@ -362,6 +417,7 @@ tasks.withType(JavaCompile) {
                 "MixedArrayDimensions",
                 "PackageLocation",
                 "UseBinds",
+                "BadImport",
                 "IntLongMath",
                 "FloatCast",
                 "ReachabilityFenceUsage",
@@ -372,14 +428,18 @@ tasks.withType(JavaCompile) {
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
+                "StringSplitter",
                 "AssertThrowsMultipleStatements",
                 "BoxedPrimitiveConstructor",
+                "EmptyCatch",
                 "BoxedPrimitiveEquality",
                 "SynchronizeOnNonFinalField",
                 "WildcardImport",
                 "FutureReturnValueIgnored",
                 "PrivateConstructorForNoninstantiableModule",
+                "ClassCanBeStatic",
                 "ClassNewInstance",
+                "UnnecessaryStaticImport",
                 "UnsafeFinalization",
                 "JodaPlusMinusLong",
                 "MutableMethodReturnType",
@@ -387,26 +447,27 @@ tasks.withType(JavaCompile) {
                 "VarTypeName",
                 "ArgumentSelectionDefectChecker",
                 "CompareToZero",
+                "InjectOnConstructorOfAbstractClass",
                 "ImmutableEnumChecker",
                 "NarrowingCompoundAssignment",
                 "MissingCasesInEnumSwitch",
                 "ReferenceEquality",
+                "UndefinedEquals",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
-                "JdkObsolete",
                 "DoubleBraceInitialization",
+                "UnnecessaryDefaultInEnumSwitch",
+                "UnusedNestedClass",
+                "UnusedMethod",
+                "ModifiedButNotUsed",
                 "InconsistentCapitalization",
                 "MissingOverride",
-//                "ReturnMissingNullable",
+//                "InvalidBlockTag",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",
 //                "Var",
 //                "ConstantField",
-//                "UnnecessaryStaticImport",
-//                "ConstructorInvokesOverridable",
-//                "InjectOnConstructorOfAbstractClass",
-//                "StringSplitter",
 //                "UnnecessaryDefaultInEnumSwitch",
 //                "FieldCanBeFinal"
         )
@@ -481,6 +542,7 @@ modernizer {
 compileJava{
     dependsOn rat
     dependsOn spotlessCheck
+    finalizedBy resolve
 }
 /*
 pmd {
@@ -515,7 +577,7 @@ license {
         "**/*.mustache",
         "**/package-info.java",
         "**/keystore.jks",
-        "**/swagger-ui/**",
+        "**/static/swagger-ui/**",
         "**/api-docs/**",
     ])
     strictCheck true
@@ -536,7 +598,7 @@ dependencies {
 }
 
 dependencies {
-    errorprone "com.google.errorprone:error_prone_core:2.3.4"
+    errorprone "com.google.errorprone:error_prone_core:2.4.0"
 }
 cargo {
   containerId "tomcat9x"

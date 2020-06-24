@@ -92,7 +92,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InteropServiceImpl implements InteropService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(InteropServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InteropServiceImpl.class);
 
     private final PlatformSecurityContext securityContext;
     private final InteropDataValidator dataValidator;

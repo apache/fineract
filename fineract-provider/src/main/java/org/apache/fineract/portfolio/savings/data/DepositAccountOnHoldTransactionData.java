@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-public class DepositAccountOnHoldTransactionData {
+public final class DepositAccountOnHoldTransactionData {
 
     @SuppressWarnings("unused")
     private final Long id;

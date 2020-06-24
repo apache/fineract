@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object represent a Recurring Deposit product.
  */
-public class RecurringDepositProductData extends DepositProductData {
+public final class RecurringDepositProductData extends DepositProductData {
 
     private boolean preClosurePenalApplicable;
     private BigDecimal preClosurePenalInterest;
@@ -142,9 +142,8 @@ public class RecurringDepositProductData extends DepositProductData {
     }
 
     /**
-     * Returns a {@link RecurringDepositProductData} that contains and exist
-     * {@link RecurringDepositProductData} data with further template data for
-     * dropdowns.
+     * Returns a {@link RecurringDepositProductData} that contains and exist {@link RecurringDepositProductData} data
+     * with further template data for dropdowns.
      *
      * @param taxGroupOptions
      *            TODO

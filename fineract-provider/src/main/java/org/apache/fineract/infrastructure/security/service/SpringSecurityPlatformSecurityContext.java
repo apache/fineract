@@ -37,14 +37,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * Wrapper around spring security's {@link SecurityContext} for extracted the
- * current authenticated {@link AppUser}.
+ * Wrapper around spring security's {@link SecurityContext} for extracted the current authenticated {@link AppUser}.
  */
 
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
-    // private final static Logger LOG =
+    // private static final Logger LOG =
     // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
 
     private final ConfigurationDomainService configurationDomainService;

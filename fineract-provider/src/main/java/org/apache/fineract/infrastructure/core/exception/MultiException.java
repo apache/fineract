@@ -31,14 +31,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Exception with multiple root causes.
  *
- * Intended to be used in places where N operations are performed in a loop over
- * something, each of which could fail, but where we don't want to fail
- * immediately but continue, and then fail at end.
+ * Intended to be used in places where N operations are performed in a loop over something, each of which could fail,
+ * but where we don't want to fail immediately but continue, and then fail at end.
  *
  * <p>
- * The failures should typically also each be logged within the loop, as they
- * occur; this exception is only thrown to propagate the failure, and the caller
- * may or may not log this with the details.
+ * The failures should typically also each be logged within the loop, as they occur; this exception is only thrown to
+ * propagate the failure, and the caller may or may not log this with the details.
  *
  * <p>
  * Originally inspired by org.junit.runners.model.MultipleFailureException
@@ -49,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MultiException extends Exception {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MultiException.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MultiException.class);
     private final List<Throwable> throwables;
 
     public MultiException(List<Throwable> problems) {

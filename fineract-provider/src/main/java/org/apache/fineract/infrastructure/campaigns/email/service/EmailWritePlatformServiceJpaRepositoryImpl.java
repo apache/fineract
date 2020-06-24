@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
 
     private final EmailMessageAssembler assembler;
     private final EmailMessageRepository repository;
@@ -117,8 +117,7 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
             final DataIntegrityViolationException dve) {

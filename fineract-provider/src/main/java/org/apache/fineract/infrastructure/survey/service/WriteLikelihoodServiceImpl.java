@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
     private final PlatformSecurityContext context;
     private final LikelihoodDataValidator likelihoodDataValidator;
     private final LikelihoodRepository repository;
@@ -89,8 +89,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 

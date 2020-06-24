@@ -63,8 +63,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                 createJournalEntriesForDisbursements(loanDTO, loanTransactionDTO, office);
             }
             /***
-             * Logic for repayments, repayments at disbursement and reversal of
-             * Repayments and Repayments at disbursement
+             * Logic for repayments, repayments at disbursement and reversal of Repayments and Repayments at
+             * disbursement
              ***/
             else if (loanTransactionDTO.getTransactionType().isRepayment()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()
@@ -82,9 +82,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                 createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
             }
             /***
-             * Only principal write off affects cash based accounting (interest
-             * and fee write off need not be considered). Debit losses written
-             * off and credit Loan Portfolio
+             * Only principal write off affects cash based accounting (interest and fee write off need not be
+             * considered). Debit losses written off and credit Loan Portfolio
              **/
             else if (loanTransactionDTO.getTransactionType().isWriteOff()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
@@ -109,8 +108,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     /**
      * Debit loan Portfolio and credit Fund source for a Disbursement <br/>
      *
-     * All debits are turned into credits and vice versa in case of disbursement
-     * reversals
+     * All debits are turned into credits and vice versa in case of disbursement reversals
      *
      *
      * @param loanDTO
@@ -149,8 +147,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     /**
      * Debit loan Portfolio and credit Fund source for a Disbursement <br/>
      *
-     * All debits are turned into credits and vice versa in case of disbursement
-     * reversals
+     * All debits are turned into credits and vice versa in case of disbursement reversals
      *
      *
      * @param loanDTO
@@ -182,13 +179,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     /**
-     * Create a single Debit to fund source and multiple credits if applicable
-     * (loan portfolio for principal repayments, Interest on loans for interest
-     * repayments, Income from fees for fees payment and Income from penalties
-     * for penalty payment)
+     * Create a single Debit to fund source and multiple credits if applicable (loan portfolio for principal repayments,
+     * Interest on loans for interest repayments, Income from fees for fees payment and Income from penalties for
+     * penalty payment)
      *
-     * In case the loan transaction is a reversal, all debits are turned into
-     * credits and vice versa
+     * In case the loan transaction is a reversal, all debits are turned into credits and vice versa
      */
     private void createJournalEntriesForRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
@@ -256,11 +251,9 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     /**
-     * Create a single Debit to fund source and a single credit to "Income from
-     * Recovery"
+     * Create a single Debit to fund source and a single credit to "Income from Recovery"
      *
-     * In case the loan transaction is a reversal, all debits are turned into
-     * credits and vice versa
+     * In case the loan transaction is a reversal, all debits are turned into credits and vice versa
      */
     private void createJournalEntriesForRecoveryRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
@@ -283,12 +276,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     /**
-     * Credit loan Portfolio and Debit Suspense Account for a Transfer
-     * Initiation. A Transfer acceptance would be treated the opposite i.e Debit
-     * Loan Portfolio and Credit Suspense Account <br/>
+     * Credit loan Portfolio and Debit Suspense Account for a Transfer Initiation. A Transfer acceptance would be
+     * treated the opposite i.e Debit Loan Portfolio and Credit Suspense Account <br/>
      *
-     * All debits are turned into credits and vice versa in case of Transfer
-     * Initiation disbursals
+     * All debits are turned into credits and vice versa in case of Transfer Initiation disbursals
      *
      *
      * @param loanDTO

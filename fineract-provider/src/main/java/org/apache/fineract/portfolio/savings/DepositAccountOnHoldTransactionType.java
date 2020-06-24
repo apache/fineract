@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.savings;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 /**
- * An enumeration of on hold transactions that can occur on a
- * {@link SavingsAccount}.
+ * An enumeration of on hold transactions that can occur on a {@link SavingsAccount}.
  */
 public enum DepositAccountOnHoldTransactionType {
 

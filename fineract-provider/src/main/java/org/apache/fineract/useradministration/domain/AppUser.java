@@ -61,7 +61,7 @@ import org.springframework.security.core.userdetails.User;
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AppUser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppUser.class);
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;
@@ -338,8 +338,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     /**
-     * Delete is a <i>soft delete</i>. Updates flag so it wont appear in
-     * query/report results.
+     * Delete is a <i>soft delete</i>. Updates flag so it wont appear in query/report results.
      *
      * Any fields with unique constraints and prepended with id of record.
      */

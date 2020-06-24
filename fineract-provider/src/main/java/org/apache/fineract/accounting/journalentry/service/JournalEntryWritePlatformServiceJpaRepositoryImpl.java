@@ -88,7 +88,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements JournalEntryWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final GLAccountRepository glAccountRepository;
@@ -226,8 +226,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
             final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
         /**
-         * If a glaccount is assigned for a rule the credits or debits array
-         * should have only one entry and it must be same as existing account
+         * If a glaccount is assigned for a rule the credits or debits array should have only one entry and it must be
+         * same as existing account
          */
         if (creditOrDebits.length != 1) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null);
@@ -305,8 +305,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
         /***
-         * validate that the account allows manual adjustments and is not
-         * disabled
+         * validate that the account allows manual adjustments and is not disabled
          **/
         if (creditOrDebitAccountHead.isDisabled()) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.GL_ACCOUNT_DISABLED, null,
@@ -347,7 +346,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
         if (latestGLClosureByBranch != null) {
             if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
-                    || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
+                    || latestGLClosureByBranch.getClosingDate().compareTo(journalEntriesTransactionDate) == 0 ? Boolean.TRUE
+                            : Boolean.FALSE) {
                 final String accountName = null;
                 final String accountGLCode = null;
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED,
@@ -598,7 +598,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) {
+            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0
+                    ? Boolean.TRUE
+                    : Boolean.FALSE) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }
@@ -644,8 +646,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     /**
-     * TODO: Need a better implementation with guaranteed uniqueness (but not a
-     * long UUID)...maybe something tied to system clock..
+     * TODO: Need a better implementation with guaranteed uniqueness (but not a long UUID)...maybe something tied to
+     * system clock..
      */
     private String generateTransactionId(final Long officeId) {
         final AppUser user = this.context.authenticatedUser();
@@ -782,7 +784,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         accountingProcessorForClientTransactions.createJournalEntriesForClientTransaction(clientTransactionDTO);
     }
 
-    private class OfficeCurrencyKey {
+    private static class OfficeCurrencyKey {
 
         Office office;
         String currency;

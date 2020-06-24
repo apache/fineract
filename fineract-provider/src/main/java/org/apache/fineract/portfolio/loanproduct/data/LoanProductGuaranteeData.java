@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class LoanProductGuaranteeData implements Serializable {
+public final class LoanProductGuaranteeData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;

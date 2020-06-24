@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
 
     private final SmsMessageAssembler assembler;
     private final SmsMessageRepository repository;
@@ -117,8 +117,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
             final DataIntegrityViolationException dve) {

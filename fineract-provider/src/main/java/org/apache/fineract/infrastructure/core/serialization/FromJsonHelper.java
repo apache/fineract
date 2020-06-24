@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -103,10 +102,10 @@ public class FromJsonHelper {
             throw new InvalidParameterException();
         }
 
-        final Set<Entry<String, JsonElement>> entries = object.entrySet();
+        final Set<Map.Entry<String, JsonElement>> entries = object.entrySet();
         final List<String> unsupportedParameterList = new ArrayList<>();
 
-        for (final Entry<String, JsonElement> providedParameter : entries) {
+        for (final Map.Entry<String, JsonElement> providedParameter : entries) {
             if (!supportedParams.contains(providedParameter.getKey())) {
                 unsupportedParameterList.add(providedParameter.getKey());
             }
@@ -119,10 +118,9 @@ public class FromJsonHelper {
 
     /**
      * @param parentPropertyName
-     *            The full json path to this property,the value is appended to
-     *            the parameter name while generating an error message <br>
-     *            Ex: property "name" in Object "person" would be named as
-     *            "person.name"
+     *            The full json path to this property,the value is appended to the parameter name while generating an
+     *            error message <br>
+     *            Ex: property "name" in Object "person" would be named as "person.name"
      * @param object
      * @param supportedParams
      */

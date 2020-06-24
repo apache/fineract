@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
@@ -70,8 +70,8 @@ public class HookIntegrationTest {
         try {
 
             /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
+             * sleep for a three seconds after each failure to increase the likelihood of the previous request for
+             * creating office completing
              **/
 
             for (int i = 0; i < 6; i++) {

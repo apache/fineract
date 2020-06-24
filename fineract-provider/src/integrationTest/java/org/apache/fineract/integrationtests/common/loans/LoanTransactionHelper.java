@@ -47,7 +47,7 @@ public class LoanTransactionHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
-    private final static Logger LOG = LoggerFactory.getLogger(LoanTransactionHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanTransactionHelper.class);
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
     private static final String APPLY_LOAN_URL = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
@@ -237,7 +237,6 @@ public class LoanTransactionHelper {
                 undoLastDisburseJson);
     }
 
-    // glimtesting
     public HashMap approveGlimAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final List<Map<String, Object>> approvalFormData, final Integer glimID) {
         String approvalForm = new LoanApplicationTestBuilder() //

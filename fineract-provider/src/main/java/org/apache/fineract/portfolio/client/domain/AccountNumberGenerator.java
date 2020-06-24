@@ -31,21 +31,20 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.springframework.stereotype.Component;
 
 /**
- * Example {@link AccountNumberGenerator} for clients that takes an entities
- * auto generated database id and zero fills it ensuring the identifier is
- * always of a given <code>maxLength</code>.
+ * Example {@link AccountNumberGenerator} for clients that takes an entities auto generated database id and zero fills
+ * it ensuring the identifier is always of a given <code>maxLength</code>.
  */
 @Component
 public class AccountNumberGenerator {
 
-    private final static int maxLength = 9;
+    private static final int maxLength = 9;
 
-    private final static String ID = "id";
-    private final static String CLIENT_TYPE = "clientType";
-    private final static String OFFICE_NAME = "officeName";
-    private final static String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
-    private final static String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
-    private final static String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
+    private static final String ID = "id";
+    private static final String CLIENT_TYPE = "clientType";
+    private static final String OFFICE_NAME = "officeName";
+    private static final String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
+    private static final String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
+    private static final String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
@@ -101,9 +100,6 @@ public class AccountNumberGenerator {
 
                 case SAVINGS_PRODUCT_SHORT_NAME:
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
-                break;
-
-                default:
                 break;
 
             }

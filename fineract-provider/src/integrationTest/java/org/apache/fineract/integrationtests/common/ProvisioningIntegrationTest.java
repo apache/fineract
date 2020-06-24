@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ProvisioningIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";
-    private final static int LOANPRODUCTS_SIZE = 10;
+    private static final int LOANPRODUCTS_SIZE = 10;
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -74,7 +74,6 @@ public class ProvisioningIntegrationTest {
     public void testCreateProvisioningCriteria() {
         ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
         ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
-        List<Integer> loans = new ArrayList<>();
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         for (int i = 0; i < LOANPRODUCTS_SIZE; i++) {
@@ -90,7 +89,6 @@ public class ProvisioningIntegrationTest {
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-            loans.add(loanID);
             Assertions.assertNotNull(loanID);
         }
 

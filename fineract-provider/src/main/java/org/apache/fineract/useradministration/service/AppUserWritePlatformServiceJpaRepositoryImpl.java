@@ -73,7 +73,7 @@ import org.springframework.util.ObjectUtils;
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final UserDomainService userDomainService;
@@ -263,8 +263,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     * encode the new submitted password retrieve the last n used password check
-     * if the current submitted password, match with one of them
+     * encode the new submitted password retrieve the last n used password check if the current submitted password,
+     * match with one of them
      *
      * @param user
      * @param command
@@ -333,8 +333,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("'username_org'")) {

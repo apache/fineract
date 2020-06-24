@@ -96,7 +96,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ClientRepositoryWrapper clientRepository;
@@ -196,8 +196,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -365,8 +364,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /**
-     * This method extracts ClientNonPerson details from Client command and
-     * creates a new ClientNonPerson record
+     * This method extracts ClientNonPerson details from Client command and creates a new ClientNonPerson record
      *
      * @param client
      * @param command
@@ -680,9 +678,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (staffId != null) {
             staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientForUpdate.getOffice().getHierarchy());
             /**
-             * TODO Vishwas: We maintain history of chage of loan officer w.r.t
-             * loan in a history table, should we do the same for a client?
-             * Especially useful when the change happens due to a transfer etc
+             * TODO Vishwas: We maintain history of chage of loan officer w.r.t loan in a history table, should we do
+             * the same for a client? Especially useful when the change happens due to a transfer etc
              **/
             clientForUpdate.assignStaff(staff);
         }
@@ -804,8 +801,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /*
-     * To become a part of a group, group may have set of criteria to be m et
-     * before client can become member of it.
+     * To become a part of a group, group may have set of criteria to be m et before client can become member of it.
      */
     private void validateParentGroupRulesBeforeClientActivation(Client client) {
         Integer minNumberOfClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
@@ -813,8 +809,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (client.getGroups() != null && maxNumberOfClients != null) {
             for (Group group : client.getGroups()) {
                 /**
-                 * Since this Client has not yet been associated with the group,
-                 * reduce maxNumberOfClients by 1
+                 * Since this Client has not yet been associated with the group, reduce maxNumberOfClients by 1
                  **/
                 final boolean validationsuccess = group.isGroupsClientCountWithinMaxRange(maxNumberOfClients - 1);
                 if (!validationsuccess) {

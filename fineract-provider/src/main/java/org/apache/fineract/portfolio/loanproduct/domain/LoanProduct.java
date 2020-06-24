@@ -65,11 +65,10 @@ import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.joda.time.LocalDate;
 
 /**
- * Loan products allow for categorisation of an organisations loans into
- * something meaningful to them.
+ * Loan products allow for categorisation of an organisations loans into something meaningful to them.
  *
- * They provide a means of simplifying creation/maintenance of loans. They can
- * also allow for product comparison to take place when reporting.
+ * They provide a means of simplifying creation/maintenance of loans. They can also allow for product comparison to take
+ * place when reporting.
  *
  * They allow for constraints to be added at product level.
  */

@@ -25,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * Wrapper for {@link OfficeRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link OfficeRepository} that adds NULL checking and Error handling capabilities
  * </p>
  */
 @Service

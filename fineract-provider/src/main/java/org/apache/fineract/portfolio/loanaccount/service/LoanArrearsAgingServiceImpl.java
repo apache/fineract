@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, BusinessEventListner {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final JdbcTemplate jdbcTemplate;
@@ -438,19 +438,14 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
             while (rs.next()) {
                 Long loanId = rs.getLong("loanId");
-                List<LoanSchedulePeriodData> periodDatas = new ArrayList<>();
-                LoanSchedulePeriodData loanSchedulePeriodData = fetchLoanSchedulePeriodData(rs);
-                periodDatas.add(loanSchedulePeriodData);
-                while (rs.next()) {
-                    Long tempLoanId = rs.getLong("loanId");
-                    if (loanId.equals(tempLoanId)) {
-                        periodDatas.add(fetchLoanSchedulePeriodData(rs));
-                    } else {
-                        rs.previous();
-                        break;
-                    }
+
+                List<LoanSchedulePeriodData> periodDatas = scheduleDate.get(loanId);
+                if (periodDatas == null) {
+                    periodDatas = new ArrayList<>();
+                    scheduleDate.put(loanId, periodDatas);
                 }
-                scheduleDate.put(loanId, periodDatas);
+
+                periodDatas.add(fetchLoanSchedulePeriodData(rs));
             }
 
             return scheduleDate;

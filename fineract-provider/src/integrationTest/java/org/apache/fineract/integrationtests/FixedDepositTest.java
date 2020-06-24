@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
 public class FixedDepositTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private FixedDepositProductHelper fixedDepositProductHelper;
@@ -121,8 +121,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account premature closure with transaction
-     * type withdrawal and Cash Based accounting enabled
+     * Test case for Fixed Deposit Account premature closure with transaction type withdrawal and Cash Based accounting
+     * enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeWithdrawal() {
@@ -202,8 +202,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -336,8 +335,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -479,8 +477,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -686,8 +683,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for FD Account premature closure with transaction transfers to
-     * savings account and Cash Based accounting enabled
+     * Test case for FD Account premature closure with transaction transfers to savings account and Cash Based
+     * accounting enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeTransferToSavings() {
@@ -777,8 +774,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -834,9 +830,8 @@ public class FixedDepositTest {
         Float prematurityAmount = (Float) fixedDepositData.get("maturityAmount");
 
         /***
-         * Verify journal entry transactions for preclosure transaction As this
-         * transaction is an account transfer you should get financial account
-         * mapping details and verify amounts
+         * Verify journal entry transactions for preclosure transaction As this transaction is an account transfer you
+         * should get financial account mapping details and verify amounts
          */
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE,
                 new JournalEntry(prematurityAmount, JournalEntry.TransactionType.CREDIT),
@@ -855,8 +850,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account premature closure with transaction
-     * type ReInvest and Cash Based accounting enabled
+     * Test case for Fixed Deposit Account premature closure with transaction type ReInvest and Cash Based accounting
+     * enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeReinvest() {
@@ -930,8 +925,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -2376,8 +2370,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account rollover with maturity instruction as
-     * re invest maturity amount(principal+interest)
+     * Test case for Fixed Deposit Account rollover with maturity instruction as re invest maturity
+     * amount(principal+interest)
      */
     @Test
     public void testFixedDepositAccountWithRolloverMaturityAmount() {
@@ -2457,8 +2451,7 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account rollover with maturity instruction as
-     * re invest principal only
+     * Test case for Fixed Deposit Account rollover with maturity instruction as re invest principal only
      */
     @Test
     public void testFixedDepositAccountWithRolloverPrincipal() {
@@ -2648,8 +2641,7 @@ public class FixedDepositTest {
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         final Account financialAccount;
         /***
-         * if no financial activities are defined for account transfers, create
-         * liability financial accounting mappings
+         * if no financial activities are defined for account transfers, create liability financial accounting mappings
          */
         if (financialActivities.isEmpty()) {
             financialAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);

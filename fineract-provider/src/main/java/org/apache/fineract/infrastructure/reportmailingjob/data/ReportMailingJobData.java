@@ -26,7 +26,7 @@ import org.joda.time.DateTime;
 /**
  * Immutable data object representing report mailing job data.
  **/
-public class ReportMailingJobData {
+public final class ReportMailingJobData {
 
     private final Long id;
     private final String name;

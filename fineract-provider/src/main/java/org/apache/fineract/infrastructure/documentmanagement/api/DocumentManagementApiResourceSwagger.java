@@ -80,7 +80,7 @@ final class DocumentManagementApiResourceSwagger {
 
         }
 
-        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
+        public static final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
 
             private PutEntityTypeEntityIdDocumentsResponseChangesSwagger() {
 
@@ -102,7 +102,7 @@ final class DocumentManagementApiResourceSwagger {
 
         }
 
-        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
+        public static final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
 
             private PutEntityTypeEntityIdDocumentsResponseChangesSwagger() {
 

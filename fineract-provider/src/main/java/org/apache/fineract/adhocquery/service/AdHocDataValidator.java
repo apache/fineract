@@ -139,12 +139,9 @@ public final class AdHocDataValidator {
             baseDataValidator.reset().parameter("reportRunEvery").value(reportRunEvery).integerGreaterThanZero();
         }
         /*
-         * if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-         * final Integer isActive =
-         * this.fromApiJsonHelper.extractIntegerNamed("isActive", element,
-         * Locale.getDefault());
-         * baseDataValidator.reset().parameter("isActive").value(isActive).
-         * notNull().inMinMaxRange(1, 2); }
+         * if (this.fromApiJsonHelper.parameterExists("isActive", element)) { final Integer isActive =
+         * this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());
+         * baseDataValidator.reset().parameter("isActive").value(isActive). notNull().inMinMaxRange(1, 2); }
          */
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

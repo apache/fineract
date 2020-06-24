@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class ShareAccountHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ShareAccountHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShareAccountHelper.class);
     private static final String LOCALE = "en_GB";
 
     private String clientId;

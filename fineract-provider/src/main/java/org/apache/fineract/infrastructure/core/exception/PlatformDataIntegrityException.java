@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when data integrity problems happen due to
- * state modifying actions.
+ * A {@link RuntimeException} thrown when data integrity problems happen due to state modifying actions.
  */
 public class PlatformDataIntegrityException extends RuntimeException {
 

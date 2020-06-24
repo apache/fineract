@@ -23,9 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * A wrapper class for the ReportRepository that provides a method that returns
- * a Report entity if it exists, else throws "ReportNotFoundException" exception
- * if the Report does not exist
+ * A wrapper class for the ReportRepository that provides a method that returns a Report entity if it exists, else
+ * throws "ReportNotFoundException" exception if the Report does not exist
  **/
 @Service
 public class ReportRepositoryWrapper {

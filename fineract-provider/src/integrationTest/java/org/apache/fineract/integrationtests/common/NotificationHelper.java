@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class NotificationHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(NotificationHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import org.joda.time.LocalDate;
 
-public class ClosingOfSavingsAccounts {
+public final class ClosingOfSavingsAccounts {
 
     private final transient Integer rowIndex;
 

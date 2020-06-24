@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.survey.data;
 
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 
-public class SurveyDataTableData {
+public final class SurveyDataTableData {
 
     @SuppressWarnings("unused")
     private final DatatableData datatableData;

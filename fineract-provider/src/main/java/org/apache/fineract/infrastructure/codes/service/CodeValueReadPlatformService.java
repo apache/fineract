@@ -31,13 +31,11 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
  * </ol>
  *
  * <p>
- * System defined codes cannot be altered or removed but their code values may
- * be allowed to be added to or removed.
+ * System defined codes cannot be altered or removed but their code values may be allowed to be added to or removed.
  * </p>
  *
  * <p>
- * User defined codes can be changed in any way by application users with system
- * permissions.
+ * User defined codes can be changed in any way by application users with system permissions.
  * </p>
  */
 public interface CodeValueReadPlatformService {

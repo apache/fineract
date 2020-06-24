@@ -30,14 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * Wrapper for {@link SavingsAccountRepository} that is responsible for checking
- * if {@link SavingsAccount} is returned when using <code>findOne</code>
- * repository method and throwing an appropriate not found exception.
+ * Wrapper for {@link SavingsAccountRepository} that is responsible for checking if {@link SavingsAccount} is returned
+ * when using <code>findOne</code> repository method and throwing an appropriate not found exception.
  * </p>
  *
  * <p>
- * This is to avoid need for checking and throwing in multiple areas of code
- * base where {@link SavingsAccountRepository} is required.
+ * This is to avoid need for checking and throwing in multiple areas of code base where {@link SavingsAccountRepository}
+ * is required.
  * </p>
  */
 @Service

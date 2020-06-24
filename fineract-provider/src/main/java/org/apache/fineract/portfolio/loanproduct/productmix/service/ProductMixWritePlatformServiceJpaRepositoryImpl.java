@@ -49,7 +49,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductMixWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final ProductMixDataValidator fromApiJsonDeserializer;
     private final ProductMixRepository productMixRepository;
@@ -150,8 +150,8 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             }
 
             /*
-             * if restrictedProducts array is not empty delete the duplicate ids
-             * which are already exists and update existedProductMixes
+             * if restrictedProducts array is not empty delete the duplicate ids which are already exists and update
+             * existedProductMixes
              */
             final List<ProductMix> productMixesToRemove = updateRestrictedIds(restrictedIds, existedProductMixes);
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);

@@ -22,8 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Provides the domain repository for accessing, adding, modifying or deleting
- * cashiers.
+ * Provides the domain repository for accessing, adding, modifying or deleting cashiers.
  *
  * @author Markus Geiss
  * @see org.apache.fineract.organisation.teller.domain.Cashier

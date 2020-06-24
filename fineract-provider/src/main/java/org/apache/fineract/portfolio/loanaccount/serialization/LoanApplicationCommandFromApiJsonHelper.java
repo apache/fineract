@@ -993,9 +993,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 numberOfRepayments, repaymentEvery, repaymentEveryType);
 
         /**
-         * For multi-disbursal loans where schedules are auto-generated based on
-         * a fixed EMI, ensure the number of repayments is within the
-         * permissible range defined by the loan product
+         * For multi-disbursal loans where schedules are auto-generated based on a fixed EMI, ensure the number of
+         * repayments is within the permissible range defined by the loan product
          **/
         if (loan.getFixedEmiAmount() != null) {
             Integer minimumNoOfRepayments = loan.loanProduct().getMinNumberOfRepayments();

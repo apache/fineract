@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 
 public class SavingsImportHandlerTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

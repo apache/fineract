@@ -36,11 +36,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor'
- * environment profile is not active.
+ * A dummy {@link TwoFactorAuthenticationFilter} filter used when 'twofactor' environment profile is not active.
  *
- * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated
- * platform user.
+ * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated platform user.
  */
 @Service(value = "twoFactorAuthFilter")
 @Profile("!twofactor")
