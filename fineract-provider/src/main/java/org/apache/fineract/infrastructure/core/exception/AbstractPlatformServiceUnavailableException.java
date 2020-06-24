@@ -27,7 +27,7 @@ public abstract class AbstractPlatformServiceUnavailableException extends Runtim
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public AbstractPlatformServiceUnavailableException(final String globalisationMessageCode, final String defaultUserMessage,
+    protected AbstractPlatformServiceUnavailableException(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
