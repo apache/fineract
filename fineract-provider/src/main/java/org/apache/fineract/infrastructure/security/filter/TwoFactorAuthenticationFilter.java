@@ -113,7 +113,7 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         chain.doFilter(req, res);
     }
 
-    @SuppressWarnings("deprecation") // TODO FINERACT-1012
+    @Bean // FINERACT-1012
     private Authentication createUpdatedAuthentication(final Authentication currentAuthentication,
             final List<GrantedAuthority> updatedAuthorities) {
 

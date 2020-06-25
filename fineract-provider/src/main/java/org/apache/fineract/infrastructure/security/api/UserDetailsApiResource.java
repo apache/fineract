@@ -60,7 +60,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Api(tags = { "Fetch authenticated user details" })
 @SwaggerDefinition(tags = { @Tag(name = "Fetch authenticated user details", description = "") })
-@SuppressWarnings("deprecation") // TODO FINERACT-1012
+
+@EnableResourceServer // FINERACT-1012
 public class UserDetailsApiResource {
 
     private final ResourceServerTokenServices tokenServices;
