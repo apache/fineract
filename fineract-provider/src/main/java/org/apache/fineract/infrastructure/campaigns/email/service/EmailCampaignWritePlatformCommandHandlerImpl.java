@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -444,8 +445,10 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
         resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
         // loop changes array date to string date
-        for (HashMap<String, Object> entry : resultList) {
-            for (Map.Entry<String, Object> map : entry.entrySet()) {
+        for (Iterator<HashMap<String, Object>> it = resultList.iterator(); it.hasNext();) {
+            HashMap<String, Object> entry = it.next();
+            for (Iterator<Map.Entry<String, Object>> iter = entry.entrySet().iterator(); iter.hasNext();) {
+                Map.Entry<String, Object> map = iter.next();
                 String key = map.getKey();
                 Object ob = map.getValue();
                 if (ob instanceof ArrayList && ((ArrayList) ob).size() == 3) {
