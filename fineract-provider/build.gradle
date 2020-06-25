@@ -395,7 +395,6 @@ tasks.withType(JavaCompile) {
                 "ProtectedMembersInFinalClass",
                 "StaticAssignmentInConstructor",
                 "InvalidBlockTag",
-                "ModifyCollectionInEnhancedForLoop",
                 "NonCanonicalType",
                 "InvalidInlineTag",
         )
@@ -453,6 +452,7 @@ tasks.withType(JavaCompile) {
                 "UndefinedEquals",
                 "PublicConstructorForAbstractClass",
                 "UnescapedEntity",
+                "ModifyCollectionInEnhancedForLoop",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
