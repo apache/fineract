@@ -349,5 +349,37 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         return this.loanProductProvisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 whereClauseItemsitems, mapper);
     }
+    @Override
+	public Page<ProvisioningEntryData> retrieveAllProvisioningEntriesByDate(Integer offset, Integer limit,
+			String filterDate) {
+		Date filterdate = null;
+		if (filterDate != null) {
+			try {
+				SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH);
+				filterdate = format.parse(filterDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		  ProvisioningEntryDataMapper mapper = new ProvisioningEntryDataMapper();
+	        StringBuilder sqlBuilder = new StringBuilder();
+	        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+	        sqlBuilder.append(mapper.getSchema());
+	        sqlBuilder.append("where created_date= ?");
+	        sqlBuilder.append(" order by entry.created_date");
+	        if(limit != null ) {
+	            sqlBuilder.append(" limit ").append(limit);    
+	        }
+	        if(offset != null) {
+	            sqlBuilder.append(" offset ").append(offset);    
+	        }
+	        
+	        final String sqlCountRows = "SELECT FOUND_ROWS()";
+	        Object[] whereClauseItemsitems = new Object[] {filterdate};
+	        return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
+	                whereClauseItemsitems, mapper );
+		
+	}
 
 }

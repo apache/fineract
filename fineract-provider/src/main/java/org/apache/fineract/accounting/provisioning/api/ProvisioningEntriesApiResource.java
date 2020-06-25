@@ -172,13 +172,19 @@ public class ProvisioningEntriesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List all Provisioning Entries")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class, responseContainer = "list") })
-    public String retrieveAllProvisioningEntries(@QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @Context final UriInfo uriInfo) {
+    public String retrieveAllProvisioningEntries(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @Context final UriInfo uriInfo ,@QueryParam("filterDate")  String filterDate) {
         platformSecurityContext.authenticatedUser();
-        Page<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        Page<ProvisioningEntryData> data;
+        if (filterDate!=null) {
+            data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntriesByDate(offset, limit,filterDate);
+
+        }
+        else {
+         data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);
+        }
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
         return this.entriesApiJsonSerializer.serialize(settings, data, ALL_PROVISIONING_ENTRIES);
     }
 }

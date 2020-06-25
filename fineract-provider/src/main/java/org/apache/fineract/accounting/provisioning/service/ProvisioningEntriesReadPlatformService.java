@@ -40,4 +40,7 @@ public interface ProvisioningEntriesReadPlatformService {
     public ProvisioningEntryData retrieveExistingProvisioningIdDateWithJournals();
 
     public Page<LoanProductProvisioningEntryData> retrieveProvisioningEntries(SearchParameters searchParams);
+    
+	Page<ProvisioningEntryData> retrieveAllProvisioningEntriesByDate(Integer offset, Integer limit, String filterDate);
+
 }
