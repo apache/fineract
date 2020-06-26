@@ -109,8 +109,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleFundDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("fund_externalid_org")) {

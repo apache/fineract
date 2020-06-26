@@ -193,8 +193,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                         defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
             }
             /**
-             * For Weekly fee feeOnDay is ISO standard day of the week.
-             * Monday=1, Tuesday=2
+             * For Weekly fee feeOnDay is ISO standard day of the week. Monday=1, Tuesday=2
              */
             this.feeOnDay = dueDate.getDayOfWeek();
         } else {
@@ -707,13 +706,17 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return Objects.equals(penaltyCharge, that.penaltyCharge) && Objects.equals(paid, that.paid) && Objects.equals(waived, that.waived)
                 && Objects.equals(status, that.status) && Objects.equals(savingsAccount, that.savingsAccount)
                 && Objects.equals(charge, that.charge) && Objects.equals(chargeTime, that.chargeTime)
-                && Objects.equals(dueDate, that.dueDate) && Objects.equals(feeOnMonth, that.feeOnMonth)
-                && Objects.equals(feeOnDay, that.feeOnDay) && Objects.equals(feeInterval, that.feeInterval)
-                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
-                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) && Objects.equals(amount, that.amount)
-                && Objects.equals(amountPaid, that.amountPaid) && Objects.equals(amountWaived, that.amountWaived)
-                && Objects.equals(amountWrittenOff, that.amountWrittenOff) && Objects.equals(amountOutstanding, that.amountOutstanding)
-                && Objects.equals(inactivationDate, that.inactivationDate);
+                && dueDate.compareTo(that.dueDate) == 0
+                        ? Boolean.TRUE
+                        : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
+                                && Objects.equals(feeInterval, that.feeInterval)
+                                && Objects.equals(chargeCalculation, that.chargeCalculation) && Objects.equals(percentage, that.percentage)
+                                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
+                                && Objects.equals(amount, that.amount) && Objects.equals(amountPaid, that.amountPaid)
+                                && Objects.equals(amountWaived, that.amountWaived)
+                                && Objects.equals(amountWrittenOff, that.amountWrittenOff)
+                                && Objects.equals(amountOutstanding, that.amountOutstanding)
+                                && inactivationDate.compareTo(that.inactivationDate) == 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override
@@ -858,11 +861,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     /**
-     * This method is to identify the charges which can override the savings
-     * rules(for example if there is a minimum enforced balance of 1000 on
-     * savings account with account balance of 1000, still these charges can be
-     * collected as these charges are initiated by system and it can bring down
-     * the balance below the enforced minimum balance).
+     * This method is to identify the charges which can override the savings rules(for example if there is a minimum
+     * enforced balance of 1000 on savings account with account balance of 1000, still these charges can be collected as
+     * these charges are initiated by system and it can bring down the balance below the enforced minimum balance).
      *
      */
     public boolean canOverriteSavingAccountRules() {

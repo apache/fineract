@@ -436,10 +436,9 @@ public final class PostingPeriod {
         }
         boolean notInRange = true;
         /*
-         * if strt date is 2016-10-05 if financial year set to 4 then applicable
-         * month will be march and september that is (3,9) if start date fall in
-         * month of oct,nov or dec then month will be 10, 11 or 12 so period end
-         * date should be taken from next year for march month
+         * if strt date is 2016-10-05 if financial year set to 4 then applicable month will be march and september that
+         * is (3,9) if start date fall in month of oct,nov or dec then month will be 10, 11 or 12 so period end date
+         * should be taken from next year for march month
          */
 
         for (Integer month : monthSet) {

@@ -172,8 +172,8 @@ public class ImagesApiResource {
     }
 
     /**
-     * This method is added only for consistency with other URL patterns and for
-     * maintaining consistency of usage of the HTTP "verb" at the client side
+     * This method is added only for consistency with other URL patterns and for maintaining consistency of usage of the
+     * HTTP "verb" at the client side
      */
     @PUT
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
@@ -185,8 +185,8 @@ public class ImagesApiResource {
     }
 
     /**
-     * This method is added only for consistency with other URL patterns and for
-     * maintaining consistency of usage of the HTTP "verb" at the client side
+     * This method is added only for consistency with other URL patterns and for maintaining consistency of usage of the
+     * HTTP "verb" at the client side
      *
      * Upload image as a Data URL (essentially a base64 encoded stream)
      */

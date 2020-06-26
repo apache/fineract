@@ -131,13 +131,12 @@ public class DocumentManagementApiResource {
             @FormDataParam("description") @Parameter(description = "description") final String description) {
 
         /**
-         * TODO: also need to have a backup and stop reading from stream after
-         * max size is reached to protect against malicious clients
+         * TODO: also need to have a backup and stop reading from stream after max size is reached to protect against
+         * malicious clients
          **/
 
         /**
-         * TODO: need to extract the actual file type and determine if they are
-         * permissable
+         * TODO: need to extract the actual file type and determine if they are permissable
          **/
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
@@ -171,8 +170,7 @@ public class DocumentManagementApiResource {
         modifiedParams.add("description");
 
         /***
-         * Populate Document command based on whether a file has also been
-         * passed in as a part of the update
+         * Populate Document command based on whether a file has also been passed in as a part of the update
          ***/
         DocumentCommand documentCommand = null;
         if (inputStream != null && fileDetails.getFileName() != null) {
@@ -187,8 +185,7 @@ public class DocumentManagementApiResource {
                     null);
         }
         /***
-         * TODO: does not return list of changes, should be done for consistency
-         * with rest of API
+         * TODO: does not return list of changes, should be done for consistency with rest of API
          **/
         final CommandProcessingResult identifier = this.documentWritePlatformService.updateDocument(documentCommand, inputStream);
 

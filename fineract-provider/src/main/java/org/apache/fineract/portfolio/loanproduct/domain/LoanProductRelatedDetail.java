@@ -42,8 +42,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculat
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 /**
- * LoanRepaymentScheduleDetail encapsulates all the details of a
- * {@link LoanProduct} that are also used and persisted by a {@link Loan}.
+ * LoanRepaymentScheduleDetail encapsulates all the details of a {@link LoanProduct} that are also used and persisted by
+ * a {@link Loan}.
  */
 @Embeddable
 public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentScheduleRelatedDetail {

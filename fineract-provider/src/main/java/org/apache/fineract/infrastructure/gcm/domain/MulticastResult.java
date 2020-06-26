@@ -112,8 +112,7 @@ public final class MulticastResult implements Serializable {
     }
 
     /**
-     * Gets the number of successful messages that also returned a canonical
-     * registration id.
+     * Gets the number of successful messages that also returned a canonical registration id.
      */
     public int getCanonicalIds() {
         return canonicalIds;

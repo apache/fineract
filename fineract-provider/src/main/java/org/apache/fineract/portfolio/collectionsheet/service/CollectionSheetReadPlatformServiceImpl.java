@@ -120,9 +120,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     }
 
     /*
-     * Reads all the loans which are due for disbursement or collection and
-     * builds hierarchical data structure for collections sheet with hierarchy
-     * Groups >> Clients >> Loans.
+     * Reads all the loans which are due for disbursement or collection and builds hierarchical data structure for
+     * collections sheet with hierarchy Groups >> Clients >> Loans.
      */
     @SuppressWarnings("null")
     private JLGCollectionSheetData buildJLGCollectionSheet(final LocalDate dueDate,

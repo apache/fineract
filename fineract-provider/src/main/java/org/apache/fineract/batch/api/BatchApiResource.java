@@ -49,12 +49,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * Provides a REST resource for Batch Requests. This class acts as a proxy to
- * {@link org.apache.fineract.batch.service.BatchApiService} and de-serializes
- * the incoming JSON string to a list of
- * {@link org.apache.fineract.batch.domain .BatchRequest} type. This list is
- * forwarded to BatchApiService which finally returns a list of
- * {@link org.apache.fineract.batch.domain.BatchResponse} type which is then
- * serialized into JSON response by this Resource class.
+ * {@link org.apache.fineract.batch.service.BatchApiService} and de-serializes the incoming JSON string to a list of
+ * {@link org.apache.fineract.batch.domain .BatchRequest} type. This list is forwarded to BatchApiService which finally
+ * returns a list of {@link org.apache.fineract.batch.domain.BatchResponse} type which is then serialized into JSON
+ * response by this Resource class.
  *
  * @author Rishabh Shukla
  *
@@ -80,8 +78,7 @@ public class BatchApiResource {
     private final BatchRequestJsonHelper batchRequestJsonHelper;
 
     /**
-     * Constructs a 'BatchApiService' with context, toApiJsonSerializer, service
-     * and batchRequestJsonHelper.
+     * Constructs a 'BatchApiService' with context, toApiJsonSerializer, service and batchRequestJsonHelper.
      *
      * @param context
      * @param toApiJsonSerializer
@@ -99,8 +96,7 @@ public class BatchApiResource {
     }
 
     /**
-     * Rest assured POST method to get {@link BatchRequest} and returns back the
-     * consolidated {@link BatchResponse}
+     * Rest assured POST method to get {@link BatchRequest} and returns back the consolidated {@link BatchResponse}
      *
      * @param jsonRequestString
      * @param enclosingTransaction

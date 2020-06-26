@@ -547,7 +547,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         @Override
         public abstract DepositAccountData mapRow(ResultSet rs, int rowNum) throws SQLException;
 
-        public DepositAccountMapper() {
+        protected DepositAccountMapper() {
             final StringBuilder selectFieldsSqlBuilder = new StringBuilder(400);
             selectFieldsSqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
             selectFieldsSqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
@@ -1083,7 +1083,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         private final ClientData client;
         private final GroupGeneralData group;
 
-        public DepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
+        protected DepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             this.client = client;
             this.group = group;
 

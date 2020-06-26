@@ -88,8 +88,7 @@ public class ReportMailingJobDateUtil {
     }
 
     /**
-     * get date as string based on the value of the
-     * {@link ReportMailingJobStretchyReportParamDateOption} object
+     * get date as string based on the value of the {@link ReportMailingJobStretchyReportParamDateOption} object
      *
      * @param reportMailingJobStretchyReportParamDateOption
      *            {@link ReportMailingJobStretchyReportParamDateOption} Enum

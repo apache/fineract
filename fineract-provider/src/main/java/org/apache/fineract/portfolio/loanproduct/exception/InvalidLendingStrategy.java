@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when lending strategy
- * mismatch occurs
+ * {@link AbstractPlatformDomainRuleException} thrown when lending strategy mismatch occurs
  */
 public class InvalidLendingStrategy extends AbstractPlatformDomainRuleException {
 

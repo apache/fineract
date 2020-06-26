@@ -102,8 +102,7 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a loan product
+     * Enum of all accounting related input parameter names used while creating/updating a loan product
      ***/
     public static enum LoanProductAccountingParams {
 
@@ -201,8 +200,7 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a savings product
+     * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
     public static enum SavingProductAccountingParams {
 
@@ -374,8 +372,7 @@ public class AccountingConstants {
     }
 
     /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a savings product
+     * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
     public static enum SharesProductAccountingParams {
 

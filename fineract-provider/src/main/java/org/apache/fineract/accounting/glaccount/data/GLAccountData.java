@@ -30,8 +30,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Immutable object representing a General Ledger Account
  *
- * Note: no getter/setters required as google-gson will produce json from fields
- * of object.
+ * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
 public class GLAccountData implements Serializable {
 

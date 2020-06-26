@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * A {@link RuntimeException} thrown when resources that are queried for are not
- * found.
+ * A {@link RuntimeException} thrown when resources that are queried for are not found.
  */
 public abstract class AbstractPlatformResourceNotFoundException extends RuntimeException {
 
@@ -28,11 +30,31 @@ public abstract class AbstractPlatformResourceNotFoundException extends RuntimeE
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public AbstractPlatformResourceNotFoundException(final String globalisationMessageCode, final String defaultUserMessage,
+    protected AbstractPlatformResourceNotFoundException(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
+        super(findThrowableCause(defaultUserMessageArgs));
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
+        this.defaultUserMessageArgs = filterThrowableCause(defaultUserMessageArgs);
+    }
+
+    private static Throwable findThrowableCause(Object[] defaultUserMessageArgs) {
+        for (Object defaultUserMessageArg : defaultUserMessageArgs) {
+            if (defaultUserMessageArg instanceof Throwable) {
+                return (Throwable) defaultUserMessageArg;
+            }
+        }
+        return null;
+    }
+
+    private static Object[] filterThrowableCause(Object[] defaultUserMessageArgs) {
+        List<Object> filteredDefaultUserMessageArgs = new ArrayList<>(defaultUserMessageArgs.length);
+        for (Object defaultUserMessageArg : defaultUserMessageArgs) {
+            if (!(defaultUserMessageArg instanceof Throwable)) {
+                filteredDefaultUserMessageArgs.add(defaultUserMessageArg);
+            }
+        }
+        return filteredDefaultUserMessageArgs.toArray();
     }
 
     public String getGlobalisationMessageCode() {

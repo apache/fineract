@@ -66,9 +66,8 @@ public class ClientChargesTest {
         Assertions.assertNotNull(clientId);
 
         /**
-         * create a charge for loan and try to associate to client created in
-         * the above lines.it will be an invalid scenario the reason is client
-         * is not allowed to have only client charge.
+         * create a charge for loan and try to associate to client created in the above lines.it will be an invalid
+         * scenario the reason is client is not allowed to have only client charge.
          *
          */
         final Integer loanChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -80,8 +79,7 @@ public class ClientChargesTest {
         Assertions.assertNull(clientLoanChargeId);
 
         /**
-         * associates a clientCharge to a client and pay client charge for 10
-         * USD--success scenario
+         * associates a clientCharge to a client and pay client charge for 10 USD--success scenario
          **/
         final Integer clientChargeId = ClientHelper.addChargesForClient(this.requestSpec, this.responseSpec, clientId,
                 ClientHelper.getSpecifiedDueDateChargesClientAsJSON(chargeId.toString(), "29 October 2011"));
@@ -93,16 +91,15 @@ public class ClientChargesTest {
                 (float) 190.0);
 
         /**
-         * Revert the paid client charge transaction by passing the
-         * clientChargePaidTransactionId and ensure the same is reverted.
+         * Revert the paid client charge transaction by passing the clientChargePaidTransactionId and ensure the same is
+         * reverted.
          */
         final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
                 clientChargePaidTransactionId);
         Assertions.assertNotNull(undoTrxnId);
         isReversedTransaction(clientId.toString(), undoTrxnId.toString());
         /**
-         * Now pay client charge for 20 USD and ensure the outstanding amount is
-         * updated properly
+         * Now pay client charge for 20 USD and ensure the outstanding amount is updated properly
          */
         ResponseSpecification responseSpecFailure = new ResponseSpecBuilder().expectStatusCode(400).build();
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -119,32 +116,28 @@ public class ClientChargesTest {
         Assertions.assertNotNull(waiveOffClientChargeTransactionId);
 
         /**
-         * Revert the waived off client charge transaction by passing the
-         * waiveOffClientChargeTransactionId and ensured the transaction is
-         * reversed.
+         * Revert the waived off client charge transaction by passing the waiveOffClientChargeTransactionId and ensured
+         * the transaction is reversed.
          */
         final Integer undoWaiveTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
                 waiveOffClientChargeTransactionId);
         Assertions.assertNotNull(undoWaiveTrxnId);
         isReversedTransaction(clientId.toString(), undoWaiveTrxnId.toString());
         /**
-         * pay client charge before client activation date and ensured its a
-         * failure test case
+         * pay client charge before client activation date and ensured its a failure test case
          */
 
         final String responseId_activationDate_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
                 clientChargeId, ClientHelper.getPayChargeJSON("30 September 2011", "20"));
         Assertions.assertNull(responseId_activationDate_failure);
         /**
-         * pay client charge more than outstanding amount amount and ensured its
-         * a failure test case
+         * pay client charge more than outstanding amount amount and ensured its a failure test case
          */
         final String responseId_moreAmount_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
                 clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "300"));
         Assertions.assertNull(responseId_moreAmount_failure);
         /**
-         * pay client charge for 10 USD and ensure outstanding amount is updated
-         * properly
+         * pay client charge for 10 USD and ensure outstanding amount is updated properly
          */
         final String chargePaid_responseId = ClientHelper.payChargesForClients(this.requestSpec, this.responseSpec, clientId,
                 clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "100"));
@@ -168,8 +161,8 @@ public class ClientChargesTest {
     }
 
     /**
-     * Check whether the outStandingAmount is equal to expected Amount or not
-     * after paying or after waiving off the client charge.
+     * Check whether the outStandingAmount is equal to expected Amount or not after paying or after waiving off the
+     * client charge.
      *
      * @param outStandingAmount
      * @param expectedAmount

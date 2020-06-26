@@ -37,9 +37,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * Global job Listener class to set Tenant details to
- * {@link ThreadLocalContextUtil} for batch Job and stores the batch job status
- * to database after the execution
+ * Global job Listener class to set Tenant details to {@link ThreadLocalContextUtil} for batch Job and stores the batch
+ * job status to database after the execution
  *
  */
 @Component

@@ -22,8 +22,7 @@ import java.io.Serializable;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the important time-line events of a loan
- * application and loan.
+ * Immutable data object represent the important time-line events of a loan application and loan.
  */
 @SuppressWarnings("unused")
 public class ClientTimelineData implements Serializable {

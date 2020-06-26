@@ -33,20 +33,18 @@ import org.joda.time.LocalDate;
  *
  * From https://mifosforge.jira.com/browse/MIFOS-5636:
  *
- * Per RBI regulations, all interest must be paid (both current and overdue)
- * before principal is paid.
+ * Per RBI regulations, all interest must be paid (both current and overdue) before principal is paid.
  *
- * For example on a loan with two installments due (one current and one overdue)
- * of 220 each (200 principal + 20 interest):
+ * For example on a loan with two installments due (one current and one overdue) of 220 each (200 principal + 20
+ * interest):
  *
- * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal
- * remaining) 20 Payment to interest on Installment #2 (200 principal remaining)
+ * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal remaining) 20 Payment to interest on
+ * Installment #2 (200 principal remaining)
  */
 public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
-     * For creocore, early is defined as any date before the installment due
-     * date
+     * For creocore, early is defined as any date before the installment due date
      */
     @SuppressWarnings("unused")
     @Override
@@ -73,8 +71,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     }
 
     /**
-     * For late repayments, pay off in the same way as on-time payments,
-     * interest first then principal.
+     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,

@@ -30,12 +30,11 @@ public class CompoundInterestHelper {
      * @param currency
      * @param allPeriods
      * @param lockUntil
-     *            - account locked date used with the combination of
-     *            immediateWithdrawalOfInterest to avoid exclusion of
+     *            - account locked date used with the combination of immediateWithdrawalOfInterest to avoid exclusion of
      *            interestEarned
      * @param interestTransferEnabled
-     *            - boolean flag used to avoid addition of interest to next
-     *            posting period as income while calculating interest
+     *            - boolean flag used to avoid addition of interest to next posting period as income while calculating
+     *            interest
      * @return
      */
     public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,

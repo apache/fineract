@@ -80,10 +80,8 @@ public class AccountNumberFormatDataValidator {
                     .parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixType).notNull().integerGreaterThanZero();
 
             /**
-             * Permitted values for prefix type vary based on the actual
-             * selected accountType, carry out this validation only if data
-             * validation errors do not exist for both entity type and prefix
-             * type
+             * Permitted values for prefix type vary based on the actual selected accountType, carry out this validation
+             * only if data validation errors do not exist for both entity type and prefix type
              **/
             boolean areAccountTypeAndPrefixTypeValid = true;
             for (ApiParameterError apiParameterError : dataValidationErrors) {

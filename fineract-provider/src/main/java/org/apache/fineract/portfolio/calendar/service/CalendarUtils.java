@@ -588,9 +588,8 @@ public class CalendarUtils {
         /*
          * Recurring dates should follow loanRepaymentInterval.
          *
-         * e.g. The weekly meeting will have interval of 1, if the loan product
-         * with fortnightly frequency will have interval of 2, to generate right
-         * set of meeting dates reset interval same as loan repayment interval.
+         * e.g. The weekly meeting will have interval of 1, if the loan product with fortnightly frequency will have
+         * interval of 2, to generate right set of meeting dates reset interval same as loan repayment interval.
          */
 
         Recur.Builder recurBuilder = getRecurBuilder(recur);
@@ -598,10 +597,9 @@ public class CalendarUtils {
         recurBuilder = recurBuilder.interval(loanRepaymentInterval);
 
         /*
-         * Recurring dates should follow loanRepayment frequency. //e.g. daily
-         * meeting frequency should support all loan products with any type of
-         * frequency. to generate right set of meeting dates reset frequency
-         * same as loan repayment frequency.
+         * Recurring dates should follow loanRepayment frequency. //e.g. daily meeting frequency should support all loan
+         * products with any type of frequency. to generate right set of meeting dates reset frequency same as loan
+         * repayment frequency.
          */
 
         if (recur.getFrequency().equals(Recur.Frequency.DAILY)) {
@@ -676,8 +674,7 @@ public class CalendarUtils {
     }
 
     /**
-     * function returns a comma separated list of calendar_type_enum values ex.
-     * 1,2,3,4
+     * function returns a comma separated list of calendar_type_enum values ex. 1,2,3,4
      *
      * @param calendarTypeOptions
      * @return
@@ -725,8 +722,7 @@ public class CalendarUtils {
         LocalDate date = startDate;
         final LocalDate seedDate = calendar.getStartDateLocalDate();
         /**
-         * if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) {
-         * date = date.plusDays(1); }
+         * if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) { date = date.plusDays(1); }
          **/
 
         final LocalDate scheduleDate = getNextRecurringDate(recur, seedDate, date);
@@ -801,9 +797,8 @@ public class CalendarUtils {
         /*
          * Recurring dates should follow loanRepaymentInterval.
          *
-         * e.g. The weekly meeting will have interval of 1, if the loan product
-         * with fortnightly frequency will have interval of 2, to generate right
-         * set of meeting dates reset interval same as loan repayment interval.
+         * e.g. The weekly meeting will have interval of 1, if the loan product with fortnightly frequency will have
+         * interval of 2, to generate right set of meeting dates reset interval same as loan repayment interval.
          */
         int meetingInterval = recur.getInterval();
         if (meetingInterval < 1) {
@@ -812,10 +807,9 @@ public class CalendarUtils {
         int rep = repaymentInterval < meetingInterval ? 1 : repaymentInterval / meetingInterval;
 
         /*
-         * Recurring dates should follow loanRepayment frequency. //e.g. daily
-         * meeting frequency should support all loan products with any type of
-         * frequency. to generate right set of meeting dates reset frequency
-         * same as loan repayment frequency.
+         * Recurring dates should follow loanRepayment frequency. //e.g. daily meeting frequency should support all loan
+         * products with any type of frequency. to generate right set of meeting dates reset frequency same as loan
+         * repayment frequency.
          */
 
         Recur.Builder recurBuilder = getRecurBuilder(recur);
@@ -873,9 +867,8 @@ public class CalendarUtils {
         final Integer interval = 4;
         Integer repaymentInterval = loanRepaymentInterval;
         /*
-         * check loanRepaymentInterval equal to 1, if repayments frequency is
-         * monthly and meeting frequency is weekly, then generate repayments
-         * schedule as every 4 weeks
+         * check loanRepaymentInterval equal to 1, if repayments frequency is monthly and meeting frequency is weekly,
+         * then generate repayments schedule as every 4 weeks
          */
         if (frequency.equals(Recur.Frequency.MONTHLY.name()) && recur.getFrequency().equals(Recur.Frequency.WEEKLY)) {
             repaymentInterval = loanRepaymentInterval * interval;

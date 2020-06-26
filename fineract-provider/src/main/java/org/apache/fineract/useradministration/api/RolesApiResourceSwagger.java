@@ -185,7 +185,7 @@ final class RolesApiResourceSwagger {
             public String ALL_FUNCTIONS_READ;
         }
 
-        public PostRolesRoleIdPermissionsResponsePermissions permissions;
+        public PutRolesRoleIdPermissionsRequest.PostRolesRoleIdPermissionsResponsePermissions permissions;
 
     }
 
@@ -208,7 +208,7 @@ final class RolesApiResourceSwagger {
 
         @Schema(example = "8")
         public Long resourceId;
-        public PostRolesRoleIdPermissionsResponsePermissions permissions;
+        public PutRolesRoleIdPermissionsRequest.PostRolesRoleIdPermissionsResponsePermissions permissions;
 
     }
 

@@ -23,8 +23,7 @@ import java.util.Objects;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the important time-line events of a
- * group/center.
+ * Immutable data object represent the important time-line events of a group/center.
  *
  */
 @SuppressWarnings("unused")

@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.entityaccess.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when valid api request end up violating
- * some domain rule.
+ * A {@link RuntimeException} thrown when valid api request end up violating some domain rule.
  */
 public class NotOfficeSpecificProductException extends AbstractPlatformDomainRuleException {
 

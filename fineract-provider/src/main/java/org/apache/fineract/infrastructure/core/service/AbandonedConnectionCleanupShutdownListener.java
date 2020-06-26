@@ -34,8 +34,8 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
     private static final Logger LOG = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
     /**
-     * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc
-     *      re. why we use ContextClosedEvent instead of ContextStoppedEvent
+     * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc re. why we use ContextClosedEvent instead
+     *      of ContextStoppedEvent
      */
     @Override
     public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {
@@ -46,12 +46,9 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
         /*
          * try {
          *
-         * AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with
-         * mysql connector. With Drizzle not required
-         * LOG.info("Shut-down of AbandonedConnectionCleanupThread successful");
-         * } catch (Throwable t) { LOG.
-         * error("Exception occurred while shut-down of AbandonedConnectionCleanupThread"
-         * , t); }
+         * AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not
+         * required LOG.info("Shut-down of AbandonedConnectionCleanupThread successful"); } catch (Throwable t) { LOG.
+         * error("Exception occurred while shut-down of AbandonedConnectionCleanupThread" , t); }
          */
 
         // This manually deregisters JDBC driver, which prevents Tomcat 7 from

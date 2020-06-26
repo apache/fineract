@@ -47,25 +47,21 @@ import org.springframework.stereotype.Component;
 /**
  * TODO Vishwas find a better approach for validation
  *
- * Currently, validation of the passed in JSON is done before calling save or
- * update method on the target resource (in our case the loan Product)
+ * Currently, validation of the passed in JSON is done before calling save or update method on the target resource (in
+ * our case the loan Product)
  *
- * However, in the case of a loan product it would be difficult to validate the
- * passed in JSON for valid {@link LoanProduct} to {@link GLAccount} mappings
- * during update because of the following scenario
+ * However, in the case of a loan product it would be difficult to validate the passed in JSON for valid
+ * {@link LoanProduct} to {@link GLAccount} mappings during update because of the following scenario
  *
- * The accounting rule type may be changed in the update command, so we would
- * have to validate if all required account heads for a particular account type
- * have been passed in (would be different for CASH and Accrual based). However,
- * till we have access to the domain object it would not be possible to detect
- * if an accounting rule has actually been changed
+ * The accounting rule type may be changed in the update command, so we would have to validate if all required account
+ * heads for a particular account type have been passed in (would be different for CASH and Accrual based). However,
+ * till we have access to the domain object it would not be possible to detect if an accounting rule has actually been
+ * changed
  *
- * Hence, method {@link #validateForLoanProductCreate(String)} from this class
- * is called separately for validation only if an accounting rule change is
- * detected by {@link ProductToGLAccountMappingWritePlatformService}
+ * Hence, method {@link #validateForLoanProductCreate(String)} from this class is called separately for validation only
+ * if an accounting rule change is detected by {@link ProductToGLAccountMappingWritePlatformService}
  *
- * Also, the class is probably named wrong (*FromApiJsonDeserializer) should
- * probably be named as (*Validator) instead
+ * Also, the class is probably named wrong (*FromApiJsonDeserializer) should probably be named as (*Validator) instead
  *
  */
 @Component

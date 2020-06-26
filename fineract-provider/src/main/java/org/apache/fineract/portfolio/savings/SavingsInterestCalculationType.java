@@ -30,8 +30,7 @@ import java.util.List;
  * </ul>
  *
  * <p>
- * The interest calculation must be based on a point in time for determining the
- * balance in the account, such as:
+ * The interest calculation must be based on a point in time for determining the balance in the account, such as:
  * </p>
  * <ul>
  * <li>beginning-of-day balance</li>
@@ -40,8 +39,7 @@ import java.util.List;
  * </ul>
  *
  * <p>
- * Any one of the three may be used, but must be applied consistently.
- * End-of-day balance is used by default at present.
+ * Any one of the three may be used, but must be applied consistently. End-of-day balance is used by default at present.
  * </p>
  */
 public enum SavingsInterestCalculationType {

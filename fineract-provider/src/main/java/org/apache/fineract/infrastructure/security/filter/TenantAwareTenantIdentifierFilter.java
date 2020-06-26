@@ -45,17 +45,14 @@ import org.springframework.web.filter.GenericFilterBean;
 
 /**
  *
- * This filter is responsible for extracting multi-tenant from the request and
- * setting Cross-Origin details to response.
+ * This filter is responsible for extracting multi-tenant from the request and setting Cross-Origin details to response.
  *
- * If multi-tenant are valid, the details of the tenant are stored in
- * {@link FineractPlatformTenant} and stored in a {@link ThreadLocal} variable
- * for this request using {@link ThreadLocalContextUtil}.
+ * If multi-tenant are valid, the details of the tenant are stored in {@link FineractPlatformTenant} and stored in a
+ * {@link ThreadLocal} variable for this request using {@link ThreadLocalContextUtil}.
  *
  * If multi-tenant are invalid, a http error response is returned.
  *
- * Used to support Oauth2 authentication and the service is loaded only when
- * "oauth" profile is active.
+ * Used to support Oauth2 authentication and the service is loaded only when "oauth" profile is active.
  */
 @Service(value = "tenantIdentifierProcessingFilter")
 @Profile("oauth")

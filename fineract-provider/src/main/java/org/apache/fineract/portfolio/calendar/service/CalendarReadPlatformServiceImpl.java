@@ -324,16 +324,13 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         CalendarData applicableCalendarData = calendarData;
         LocalDate nextEligibleMeetingDate = null;
         /**
-         * The next available meeting date for collection should be taken from
-         * application calendar for that time period. e.g. If the previous
-         * calendar details has weekly meeting starting from 1st of Oct 2013 on
-         * every Tuesday, then meeting dates for collection are 1,8,15,22,29..
+         * The next available meeting date for collection should be taken from application calendar for that time
+         * period. e.g. If the previous calendar details has weekly meeting starting from 1st of Oct 2013 on every
+         * Tuesday, then meeting dates for collection are 1,8,15,22,29..
          *
-         * If meeting schedule has changed from Tuesday to Friday with effective
-         * from 15th of Oct (calendar update has made on 2nd of Oct) , then
-         * application should allow to generate collection sheet on 8th of Oct
-         * which is still on Tuesday and next collection sheet date should be on
-         * 18th of Oct as per current calendar
+         * If meeting schedule has changed from Tuesday to Friday with effective from 15th of Oct (calendar update has
+         * made on 2nd of Oct) , then application should allow to generate collection sheet on 8th of Oct which is still
+         * on Tuesday and next collection sheet date should be on 18th of Oct as per current calendar
          */
 
         Integer numberOfDays = 0;
@@ -350,8 +347,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         }
 
         /**
-         * If nextEligibleMeetingDate is on or after current calendar startdate
-         * then regenerate the nextEligible meeting date based on
+         * If nextEligibleMeetingDate is on or after current calendar startdate then regenerate the nextEligible meeting
+         * date based on
          */
         if (nextEligibleMeetingDate == null) {
             final LocalDate seedDate = (lastMeetingDate != null) ? lastMeetingDate : calendarData.getStartDate();

@@ -34,9 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides methods to create dependency map among the various batchRequests. It
- * also provides method that takes care of dependency resolution among related
- * requests.
+ * Provides methods to create dependency map among the various batchRequests. It also provides method that takes care of
+ * dependency resolution among related requests.
  *
  * @author Rishabh Shukla
  * @see BatchApiServiceImpl
@@ -85,10 +84,9 @@ public class ResolutionHelper {
     }
 
     /**
-     * Returns a map containing requests that are divided in accordance of
-     * dependency relations among them. Each different list is identified with a
-     * "Key" which is the "requestId" of the request at topmost level in
-     * dependency hierarchy of that particular list.
+     * Returns a map containing requests that are divided in accordance of dependency relations among them. Each
+     * different list is identified with a "Key" which is the "requestId" of the request at topmost level in dependency
+     * hierarchy of that particular list.
      *
      * @param batchRequests
      * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
@@ -122,10 +120,8 @@ public class ResolutionHelper {
     }
 
     /**
-     * Returns a BatchRequest after dependency resolution. It takes a request
-     * and the response of the request it is dependent upon as its arguments and
-     * change the body or relativeUrl of the request according to parent
-     * Request.
+     * Returns a BatchRequest after dependency resolution. It takes a request and the response of the request it is
+     * dependent upon as its arguments and change the body or relativeUrl of the request according to parent Request.
      *
      * @param request
      * @param parentResponse

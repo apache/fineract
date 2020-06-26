@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -409,8 +410,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         // calculate new trigger date and insert into next trigger date
 
         /**
-         * next run time has to be in the future if not calculate a new future
-         * date
+         * next run time has to be in the future if not calculate a new future date
          */
         LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(),
                 smsCampaign.getNextTriggerDate().toLocalDate(), nextTriggerDate.toLocalDate());
@@ -460,9 +460,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         } else if (smsCampaign.isSchedule()) {
 
             /**
-             * if recurrence start date is in the future calculate next trigger
-             * date if not use recurrence start date us next trigger date when
-             * activating
+             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
+             * next trigger date when activating
              */
             LocalDate nextTriggerDate = null;
             if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
@@ -484,8 +483,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         }
 
         /*
-         * if campaign is direct insert campaign message into sms outbound table
-         * else if its a schedule create a job process for it
+         * if campaign is direct insert campaign message into sms outbound table else if its a schedule create a job
+         * process for it
          */
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -545,8 +544,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             return resultList;
         }
         // loop changes array date to string date
-        for (HashMap<String, Object> entry : resultList) {
-            for (Map.Entry<String, Object> map : entry.entrySet()) {
+        for (Iterator<HashMap<String, Object>> iter = resultList.iterator(); iter.hasNext();) {
+            HashMap<String, Object> entry = iter.next();
+            for (Iterator<Map.Entry<String, Object>> it = entry.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, Object> map = it.next();
                 String key = map.getKey();
                 Object ob = map.getValue();
                 if (ob instanceof ArrayList && ((ArrayList) ob).size() == 3) {
@@ -621,9 +622,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         } else if (smsCampaign.isSchedule()) {
 
             /**
-             * if recurrence start date is in the future calculate next trigger
-             * date if not use recurrence start date us next trigger date when
-             * activating
+             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
+             * next trigger date when activating
              */
             LocalDate nextTriggerDate = null;
             if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {

@@ -19,8 +19,7 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when resources that are queried for are not
- * found.
+ * A {@link RuntimeException} thrown when resources that are queried for are not found.
  */
 public abstract class AbstractPlatformServiceUnavailableException extends RuntimeException {
 
@@ -28,7 +27,7 @@ public abstract class AbstractPlatformServiceUnavailableException extends Runtim
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public AbstractPlatformServiceUnavailableException(final String globalisationMessageCode, final String defaultUserMessage,
+    protected AbstractPlatformServiceUnavailableException(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;

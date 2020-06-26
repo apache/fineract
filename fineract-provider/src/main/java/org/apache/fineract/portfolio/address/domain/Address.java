@@ -43,8 +43,8 @@ import org.joda.time.format.DateTimeFormatter;
 public class Address extends AbstractPersistableCustom {
 
     /*
-     * @OneToMany(mappedBy = "address", cascade = CascadeType.ALL) private
-     * List<ClientAddress> clientaddress = new ArrayList<>();
+     * @OneToMany(mappedBy = "address", cascade = CascadeType.ALL) private List<ClientAddress> clientaddress = new
+     * ArrayList<>();
      */
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL)

@@ -43,8 +43,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
             List<LoanRepaymentScheduleInstallment> installments);
 
     /**
-     * Used in interest recalculation to introduce new interest only
-     * installment.
+     * Used in interest recalculation to introduce new interest only installment.
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
 

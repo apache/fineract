@@ -288,16 +288,15 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
-         * Variable tracks all accounting mapping properties that have been
-         * updated
+         * Variable tracks all accounting mapping properties that have been updated
          ***/
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
         /***
-         * If the accounting rule has been changed, delete all existing mapping
-         * for the product and recreate a new set of mappings
+         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+         * of mappings
          ***/
         if (accountingRuleChanged) {
             this.deserializer.validateForLoanProductCreate(command.json());
@@ -319,16 +318,15 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
         /***
-         * Variable tracks all accounting mapping properties that have been
-         * updated
+         * Variable tracks all accounting mapping properties that have been updated
          ***/
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
         /***
-         * If the accounting rule has been changed, delete all existing mapping
-         * for the product and recreate a new set of mappings
+         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+         * of mappings
          ***/
         if (accountingRuleChanged) {
             this.deserializer.validateForSavingsProductCreate(command.json(), accountType);
@@ -351,16 +349,15 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     public Map<String, Object> updateShareProductToGLAccountMapping(final Long shareProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
-         * Variable tracks all accounting mapping properties that have been
-         * updated
+         * Variable tracks all accounting mapping properties that have been updated
          ***/
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
         /***
-         * If the accounting rule has been changed, delete all existing mapping
-         * for the product and recreate a new set of mappings
+         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+         * of mappings
          ***/
         if (accountingRuleChanged) {
             this.shareProductToGLAccountMappingHelper.deleteSharesProductToGLAccountMapping(shareProductId);

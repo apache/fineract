@@ -33,8 +33,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
- * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a
- * tenants details by a <code>tenantIdentifier</code>.
+ * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a tenants details by a
+ * <code>tenantIdentifier</code>.
  */
 @Service
 public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetailsService {

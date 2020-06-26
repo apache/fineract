@@ -186,8 +186,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                         .findByEntityIdAndEntityTypeIdAndCalendarTypeId(parent.getId(), centerEntityTypeId,
                                 CalendarType.COLLECTION.getValue());
                 /*
-                 * If calendar is created by parent group, then it cannot be
-                 * edited by the child group
+                 * If calendar is created by parent group, then it cannot be edited by the child group
                  */
                 if (collectionCalendarInstance != null) {
                     final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
@@ -223,8 +222,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 loanStatuses);
 
         /*
-         * areActiveEntitiesSynced is set to true, if there are any active loans
-         * synced to this calendar.
+         * areActiveEntitiesSynced is set to true, if there are any active loans synced to this calendar.
          */
 
         if (numberOfActiveLoansSyncedWithThisCalendar > 0) {
@@ -246,19 +244,15 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         /*
          * System allows to change the meeting date by two means,
          *
-         * Option 1: reschedulebasedOnMeetingDates = false or
-         * reschedulebasedOnMeetingDates is not passed By directly editing the
-         * recurring day with effective from date and system decides the next
-         * meeting date based on some sensible logic (i.e., number of minimum
-         * days between two repayments)
+         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed By directly
+         * editing the recurring day with effective from date and system decides the next meeting date based on some
+         * sensible logic (i.e., number of minimum days between two repayments)
          *
          *
-         * Option 2: reschedulebasedOnMeetingDates = true By providing
-         * alternative meeting date for one of future meeting date and derive
-         * the day of recurrence from the new meeting date. Ex: User proposes
-         * new meeting date say "14/Nov/2014" for present meeting date
-         * "12/Nov/2014", based on this input other values re derived and loans
-         * are rescheduled
+         * Option 2: reschedulebasedOnMeetingDates = true By providing alternative meeting date for one of future
+         * meeting date and derive the day of recurrence from the new meeting date. Ex: User proposes new meeting date
+         * say "14/Nov/2014" for present meeting date "12/Nov/2014", based on this input other values re derived and
+         * loans are rescheduled
          *
          */
 
@@ -271,8 +265,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.PRESENT_MEETING_DATE.getValue());
 
             /*
-             * New meeting date proposed will become the new start date for the
-             * updated calendar
+             * New meeting date proposed will become the new start date for the updated calendar
              */
 
             changes = calendarForUpdate.updateStartDateAndDerivedFeilds(newMeetingDate);

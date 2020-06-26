@@ -33,11 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Util for RestAssured tests. This class here in src/test is copy/pasted :(
- * from and identical to the one in src/integrationTest; please keep it in sync.
- * The cunning plan is that, now that we have Spring Boot + MariaDB4j,
- * eventually do completely away with src/integrationTest and have only
- * src/test.. can you help? ;)
+ * Util for RestAssured tests. This class here in src/test is copy/pasted :( from and identical to the one in
+ * src/integrationTest; please keep it in sync. The cunning plan is that, now that we have Spring Boot + MariaDB4j,
+ * eventually do completely away with src/integrationTest and have only src/test.. can you help? ;)
  */
 @SuppressWarnings("unchecked")
 public class Utils {

@@ -29,12 +29,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link AccessDeniedException} thrown by
- * platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link AccessDeniedException} thrown by platform into a HTTP API friendly format.
  *
- * The {@link AccessDeniedException} is thrown by spring security on platform
- * when an attempt is made to use functionality for which the user does have
- * sufficient privileges.
+ * The {@link AccessDeniedException} is thrown by spring security on platform when an attempt is made to use
+ * functionality for which the user does have sufficient privileges.
  */
 @Provider
 @Component

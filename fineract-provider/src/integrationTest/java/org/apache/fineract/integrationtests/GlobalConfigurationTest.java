@@ -160,8 +160,7 @@ public class GlobalConfigurationTest {
                 Assertions.assertNotNull(configId);
 
                 /*
-                 * Update force-password-reset-days with value as 0 and Enable
-                 * as true - failure case
+                 * Update force-password-reset-days with value as 0 and Enable as true - failure case
                  */
                 ArrayList error = (ArrayList) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(this.requestSpec,
                         this.httpStatusForidden, configId, newValue, newBooleanValue, CommonConstants.RESPONSE_ERROR);
@@ -172,8 +171,7 @@ public class GlobalConfigurationTest {
                         "Force Password Reset days value must be greater than zero.");
 
                 /*
-                 * Update force-password-reset-days with value as 50 and Enable
-                 * as true - success case
+                 * Update force-password-reset-days with value as 50 and Enable as true - success case
                  */
                 final HashMap updateSuccess = (HashMap) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
                         this.requestSpec, this.responseSpec, configId, "50", newBooleanValue, "changes");
@@ -185,8 +183,7 @@ public class GlobalConfigurationTest {
                 Assertions.assertNotNull(updateSuccess1);
 
                 /*
-                 * Update without sending value and Enable as true - failure
-                 * case
+                 * Update without sending value and Enable as true - failure case
                  */
                 ArrayList failure = (ArrayList) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(this.requestSpec,
                         this.httpStatusForidden, configId, null, newBooleanValue, CommonConstants.RESPONSE_ERROR);

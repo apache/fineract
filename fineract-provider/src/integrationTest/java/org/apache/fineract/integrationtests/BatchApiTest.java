@@ -41,10 +41,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for
- * {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests
- * the response provided by commandStrategy by injecting it with a
- * {@code BatchRequest}.
+ * Test class for {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests the response provided by
+ * commandStrategy by injecting it with a {@code BatchRequest}.
  *
  * @author RishabhShukla
  *
@@ -57,9 +55,8 @@ public class BatchApiTest {
     private RequestSpecification requestSpec;
 
     /**
-     * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
-     * jUnit.
+     * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
+     * annotation provided by jUnit.
      */
     @BeforeEach
     public void setup() {
@@ -70,9 +67,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests for the unimplemented command Strategies by returning 501 status
-     * code. For a unknownRequest a statusCode 501 is returned back with
-     * response.
+     * Tests for the unimplemented command Strategies by returning 501 status code. For a unknownRequest a statusCode
+     * 501 is returned back with response.
      *
      * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
      */
@@ -93,9 +89,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests for the successful response for a createClient request from
-     * createClientCommand. A successful response with statusCode '200' is
-     * returned back.
+     * Tests for the successful response for a createClient request from createClientCommand. A successful response with
+     * statusCode '200' is returned back.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      */
@@ -113,10 +108,9 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests for an erroneous response with statusCode '501' if transaction
-     * fails. If Query Parameter 'enclosingTransaction' is set to 'true' and if
-     * one of the request in BatchRequest fails then all transactions are rolled
-     * back.
+     * Tests for an erroneous response with statusCode '501' if transaction fails. If Query Parameter
+     * 'enclosingTransaction' is set to 'true' and if one of the request in BatchRequest fails then all transactions are
+     * rolled back.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      * @see org.apache.fineract.batch.api.BatchApiResource
@@ -156,9 +150,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that a client information was successfully updated through
-     * updateClientCommand. A 'changes' parameter is returned in the response
-     * after successful update of client information.
+     * Tests that a client information was successfully updated through updateClientCommand. A 'changes' parameter is
+     * returned in the response after successful update of client information.
      *
      * @see org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy
      */
@@ -190,10 +183,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that a ApplyLoanCommand was successfully executed and returned a
-     * 200(OK) status. It creates a new client and apply a loan to that client.
-     * This also verifies the successful resolution of dependencies among two
-     * requests.
+     * Tests that a ApplyLoanCommand was successfully executed and returned a 200(OK) status. It creates a new client
+     * and apply a loan to that client. This also verifies the successful resolution of dependencies among two requests.
      *
      * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
      */
@@ -240,9 +231,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that a new savings accounts was applied to an existing client and a
-     * 200(OK) status was returned. It first creates a new client and a savings
-     * product, then uses the cliendId and ProductId to apply a savings account.
+     * Tests that a new savings accounts was applied to an existing client and a 200(OK) status was returned. It first
+     * creates a new client and a savings product, then uses the cliendId and ProductId to apply a savings account.
      *
      * @see org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy
      */
@@ -282,10 +272,9 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that a new charge was added to a newly created loan and charges are
-     * Collected properly 200(OK) status was returned for successful responses.
-     * It first creates a new client and apply a loan, then creates a new charge
-     * for the create loan and then fetches all the applied charges
+     * Tests that a new charge was added to a newly created loan and charges are Collected properly 200(OK) status was
+     * returned for successful responses. It first creates a new client and apply a loan, then creates a new charge for
+     * the create loan and then fetches all the applied charges
      *
      * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
      * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
@@ -334,10 +323,9 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that batch repayment for loans is happening properly. Collected
-     * properly 200(OK) status was returned for successful responses. It first
-     * creates a new loan and then makes two repayments for it and then verifies
-     * that 200(OK) is returned for the repayment requests.
+     * Tests that batch repayment for loans is happening properly. Collected properly 200(OK) status was returned for
+     * successful responses. It first creates a new loan and then makes two repayments for it and then verifies that
+     * 200(OK) is returned for the repayment requests.
      *
      * @see org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy
      */
@@ -398,9 +386,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Test for the successful activation of a pending client using
-     * 'ActivateClientCommandStrategy'. A '200' status code is expected on
-     * successful activation.
+     * Test for the successful activation of a pending client using 'ActivateClientCommandStrategy'. A '200' status code
+     * is expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy
      */
@@ -428,9 +415,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Test for the successful approval and disbursal of a loan using
-     * 'ApproveLoanCommandStrategy' and 'DisburseLoanCommandStrategy'. A '200'
-     * status code is expected on successful activation.
+     * Test for the successful approval and disbursal of a loan using 'ApproveLoanCommandStrategy' and
+     * 'DisburseLoanCommandStrategy'. A '200' status code is expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
@@ -483,9 +469,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Test for the successful create client, apply loan,approval and disbursal
-     * of a loan using Batch API with enclosingTransaction. A '200' status code
-     * is expected on successful activation.
+     * Test for the successful create client, apply loan,approval and disbursal of a loan using Batch API with
+     * enclosingTransaction. A '200' status code is expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy

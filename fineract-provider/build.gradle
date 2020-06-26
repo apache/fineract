@@ -44,7 +44,7 @@ buildscript {
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.1"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.3"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
@@ -92,7 +92,7 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-email:1.5'
         dependency 'commons-io:commons-io:2.7'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-        dependency 'com.github.librepdf:openpdf:1.3.19'
+        dependency 'com.github.librepdf:openpdf:1.3.20'
         dependency 'org.mnode.ical4j:ical4j:3.0.19'
         dependency 'org.flywaydb:flyway-core:6.4.4'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
@@ -110,11 +110,11 @@ dependencyManagement {
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'org.mockito:mockito-core:3.3.3'
         dependency 'org.mockito:mockito-junit-jupiter:3.3.3'
-        dependency 'io.github.classgraph:classgraph:4.8.86'
+        dependency 'io.github.classgraph:classgraph:4.8.87'
         dependency 'org.awaitility:awaitility:4.0.3'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.6'
         dependency 'javax.cache:cache-api:1.1.1'
-        dependency 'org.mock-server:mockserver-junit-jupiter:5.10'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.10.0'
 
         // If this is upgraded, you need to change path in WebFrontEndConfiguration
         dependency 'org.webjars.npm:swagger-ui-dist:3.27.0'
@@ -218,7 +218,7 @@ jacocoTestReport{
 spotless {
   format 'misc', {
    target '**/*.md', '**/*.properties', '**/*.gradle', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-   targetExclude '**/build/**', '**/bin/**', '**/.settings/**'
+   targetExclude '**/build/**', '**/bin/**', '**/.settings/**','**/.idea/**'
    indentWithSpaces(4)
    endWithNewline()
    trimTrailingWhitespace()
@@ -386,12 +386,7 @@ tasks.withType(JavaCompile) {
         //Todo Remove necessary checks from this list
         disable(
                 "UnusedVariable",
-                "SameNameButDifferent",
-                "UnusedMethod",
-                "ModifiedButNotUsed",
                 "TypeParameterUnusedInFormals",
-                "UnusedNestedClass",
-                "UndefinedEquals",
                 "JdkObsolete",
                 "EmptyBlockTag",
                 "MissingSummary",
@@ -399,12 +394,9 @@ tasks.withType(JavaCompile) {
                 "InvalidParam",
                 "ReturnFromVoid",
                 "AlmostJavadoc",
-                "PublicConstructorForAbstractClass",
                 "ProtectedMembersInFinalClass",
                 "StaticAssignmentInConstructor",
-                "UnescapedEntity",
                 "InvalidBlockTag",
-                "ModifyCollectionInEnhancedForLoop",
                 "NonCanonicalType",
                 "InvalidInlineTag",
         )
@@ -432,6 +424,7 @@ tasks.withType(JavaCompile) {
                 "StreamResourceLeak",
                 "TruthIncompatibleType",
                 "ByteBufferBackingArray",
+                "SameNameButDifferent",
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
@@ -459,10 +452,18 @@ tasks.withType(JavaCompile) {
                 "NarrowingCompoundAssignment",
                 "MissingCasesInEnumSwitch",
                 "ReferenceEquality",
+                "UndefinedEquals",
+                "PublicConstructorForAbstractClass",
+                "UnescapedEntity",
+                "ModifyCollectionInEnhancedForLoop",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
                 "DoubleBraceInitialization",
+                "UnnecessaryDefaultInEnumSwitch",
+                "UnusedNestedClass",
+                "UnusedMethod",
+                "ModifiedButNotUsed",
                 "InconsistentCapitalization",
                 "MissingOverride",
 //                "InvalidBlockTag",

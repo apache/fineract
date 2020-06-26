@@ -28,8 +28,7 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  * GCM message.
  *
  * <p>
- * Instances of this class are immutable and should be created using a
- * {@link Builder}. Examples:
+ * Instances of this class are immutable and should be created using a {@link Builder}. Examples:
  *
  * <strong>Simplest message:</strong>
  *

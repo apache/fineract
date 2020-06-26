@@ -21,10 +21,9 @@ package org.apache.fineract.batch.domain;
 import java.util.Set;
 
 /**
- * Provides an object for separate HTTP responses in the Batch Response for
- * Batch API. It contains all the information about a particular HTTP response
- * in the Batch Response. Getter and Setter functions are also included to
- * access response data fields.
+ * Provides an object for separate HTTP responses in the Batch Response for Batch API. It contains all the information
+ * about a particular HTTP response in the Batch Response. Getter and Setter functions are also included to access
+ * response data fields.
  *
  * @author Rishabh Shukla
  *
@@ -40,8 +39,7 @@ public class BatchResponse {
     private String body;
 
     /**
-     * Constructs a 'BatchResponse' with requestId, statusCode, headers and body
-     * of the HTTP requests.
+     * Constructs a 'BatchResponse' with requestId, statusCode, headers and body of the HTTP requests.
      *
      * @param requestId
      * @param statusCode
@@ -110,8 +108,7 @@ public class BatchResponse {
     }
 
     /**
-     * Sets the value of 'headers' of {@link Header} type of an object of this
-     * class.
+     * Sets the value of 'headers' of {@link Header} type of an object of this class.
      *
      * @param headers
      *            of {@link Header} Type

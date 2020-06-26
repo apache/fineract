@@ -22,8 +22,7 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
- * Immutable data object for clients with loans due for disbursement or
- * collection.
+ * Immutable data object for clients with loans due for disbursement or collection.
  */
 public final class JLGClientData {
 
@@ -48,10 +47,9 @@ public final class JLGClientData {
     }
 
     /*
-     * public JLGClientData(final Long clientId, final String clientName, final
-     * Collection<LoanDueData> loans, final EnumOptionData attendanceType) {
-     * this.clientId = clientId; this.clientName = clientName; this.loans =
-     * loans; this.attendanceType = attendanceType; }
+     * public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans, final
+     * EnumOptionData attendanceType) { this.clientId = clientId; this.clientName = clientName; this.loans = loans;
+     * this.attendanceType = attendanceType; }
      */
 
     public static JLGClientData withAttendance(final Long clientId, final String clientName, final EnumOptionData attendanceType) {

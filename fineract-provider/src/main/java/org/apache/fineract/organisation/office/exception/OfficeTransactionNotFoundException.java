@@ -21,8 +21,7 @@ package org.apache.fineract.organisation.office.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when office transaction resources are not
- * found.
+ * A {@link RuntimeException} thrown when office transaction resources are not found.
  */
 public class OfficeTransactionNotFoundException extends AbstractPlatformResourceNotFoundException {
 

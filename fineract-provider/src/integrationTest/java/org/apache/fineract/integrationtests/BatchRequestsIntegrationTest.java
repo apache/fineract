@@ -40,9 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Test class for testing the integration of Batch API with custom batch
- * requests and various user defined workflow. Like in the case of mifos
- * community-app
+ * Test class for testing the integration of Batch API with custom batch requests and various user defined workflow.
+ * Like in the case of mifos community-app
  *
  * @author Rishabh Shukla
  */
@@ -57,9 +56,8 @@ public class BatchRequestsIntegrationTest {
     }
 
     /**
-     * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
-     * jUnit.
+     * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
+     * annotation provided by jUnit.
      */
     @BeforeEach
     public void setup() {
@@ -72,12 +70,10 @@ public class BatchRequestsIntegrationTest {
 
     @Test
     /**
-     * Tests that a loan is successfully applied to client members of a group.
-     * Firstly, it'll create a few new clients and then will add those clients
-     * to the group. Then a few loans will be created and one of those loans
-     * will be chosen at random and similarily a few of the created clients will
-     * be chosen on random. Now, the selected loan will be applied to these
-     * clients through Batch - API ApplyLoanCommandStrategy.
+     * Tests that a loan is successfully applied to client members of a group. Firstly, it'll create a few new clients
+     * and then will add those clients to the group. Then a few loans will be created and one of those loans will be
+     * chosen at random and similarily a few of the created clients will be chosen on random. Now, the selected loan
+     * will be applied to these clients through Batch - API ApplyLoanCommandStrategy.
      */
     public void shouldReturnOkStatusForLoansAppliedToSelectedClients() {
 

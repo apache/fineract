@@ -34,10 +34,9 @@ public class LoanScheduleTestDataHelper {
      *
      * For example: with firstDueDate = 02 July 2011
      *
-     * Date Principal Interest Interest Waived
-     * ==================================
-     * ================================================ 02 July 2011 1,000 200 0
-     * 02 August 2011 1,000 200 0 02 September 2011 1,000 200 0
+     * Date Principal Interest Interest Waived ==================================
+     * ================================================ 02 July 2011 1,000 200 0 02 August 2011 1,000 200 0 02 September
+     * 2011 1,000 200 0
      */
     public static List<LoanRepaymentScheduleInstallment> createSimpleLoanSchedule(final LocalDate firstDueDate,
             final MonetaryCurrency currency) {
@@ -58,12 +57,9 @@ public class LoanScheduleTestDataHelper {
      *
      * For example: with firstDueDate = 02 July 2011
      *
-     * Date Principal Interest Interest Waived Completed
-     * ========================
-     * ==================================================
-     * ====================================== 02 July 2011 1,000 200 0 true
-     * (principal paid, interest paid) 02 August 2011 1,000 200 0 false 02
-     * September 2011 1,000 200 0 false
+     * Date Principal Interest Interest Waived Completed ========================
+     * ================================================== ====================================== 02 July 2011 1,000 200
+     * 0 true (principal paid, interest paid) 02 August 2011 1,000 200 0 false 02 September 2011 1,000 200 0 false
      */
     public static List<LoanRepaymentScheduleInstallment> createSimpleLoanScheduleWithFirstInstallmentFullyPaid(final LocalDate firstDueDate,
             final MonetaryCurrency currency) {

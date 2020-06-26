@@ -25,13 +25,12 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * Used to process the query parameters provided in a API request to see
- * features of the RESTful API are being asked for such as:
+ * Used to process the query parameters provided in a API request to see features of the RESTful API are being asked for
+ * such as:
  * </p>
  * <ul>
  * <li>Pretty printing through pretty=true, defaults to false</li>
- * <li>Partial response through fields=id, name etc, when empty, the full data
- * is returned by default.</li>
+ * <li>Partial response through fields=id, name etc, when empty, the full data is returned by default.</li>
  * </ul>
  */
 @Component

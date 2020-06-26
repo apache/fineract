@@ -35,11 +35,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
-     * #notifyBusinessEventToBeExecuted
-     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents, org.springframework.data.jpa.domain.AbstractPersistable)
+     * @see org.apache.fineract.portfolio.common.service.BusinessEventNotifierService #notifyBusinessEventToBeExecuted
+     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants .BusinessEvents,
+     * org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
     public void notifyBusinessEventToBeExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity) {
@@ -54,11 +52,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
-     * #notifyBusinessEventWasExecuted
-     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents, org.springframework.data.jpa.domain.AbstractPersistable)
+     * @see org.apache.fineract.portfolio.common.service.BusinessEventNotifierService #notifyBusinessEventWasExecuted
+     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants .BusinessEvents,
+     * org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
     public void notifyBusinessEventWasExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity) {
@@ -73,11 +69,8 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
-     * #addBusinessEventPreListners
-     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents,
+     * @see org.apache.fineract.portfolio.common.service.BusinessEventNotifierService #addBusinessEventPreListners
+     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants .BusinessEvents,
      * org.apache.fineract.portfolio.common.service.BusinessEventListner)
      */
     @Override
@@ -88,11 +81,8 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
-     * #addBusinessEventPostListners
-     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents,
+     * @see org.apache.fineract.portfolio.common.service.BusinessEventNotifierService #addBusinessEventPostListners
+     * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants .BusinessEvents,
      * org.apache.fineract.portfolio.common.service.BusinessEventListner)
      */
     @Override

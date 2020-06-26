@@ -21,8 +21,7 @@ package org.apache.fineract.organisation.monetary.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when trying to delete a currency that is
- * still in use.
+ * A {@link RuntimeException} thrown when trying to delete a currency that is still in use.
  */
 public class CurrencyInUseException extends AbstractPlatformDomainRuleException {
 

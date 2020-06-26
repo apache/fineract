@@ -146,8 +146,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
             }
             /**
-             * Handle Interest Applications and reversals of Interest
-             * Applications
+             * Handle Interest Applications and reversals of Interest Applications
              **/
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting() && savingsTransactionDTO.isOverdraftTransaction()) {
                 // Post journal entry if earned interest amount is greater than

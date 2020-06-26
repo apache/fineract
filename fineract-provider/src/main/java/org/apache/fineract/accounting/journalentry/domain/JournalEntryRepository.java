@@ -46,13 +46,11 @@ public interface JournalEntryRepository
      * @Query("select journalEntry from JournalEntry journalEntry where glAccount.id= :accountId and transactionId= :transactionId and transactionDate= :transactionDate"
      * +
      * " and type= :journalEntryType and entityType=1 and entityId= :loanId and loanTransaction.id= :loanTransactionId"
-     * ) JournalEntry findLOANJournalEntryWith(@Param("accountId") Long
-     * accountId, @Param("transactionId") String transactionId,
+     * ) JournalEntry findLOANJournalEntryWith(@Param("accountId") Long accountId, @Param("transactionId") String
+     * transactionId,
      *
-     * @Param("transactionDate") Date
-     * transactionDate, @Param("journalEntryType") Integer journalEntryType,
+     * @Param("transactionDate") Date transactionDate, @Param("journalEntryType") Integer journalEntryType,
      *
-     * @Param("loanId") Long loanId, @Param("loanTransactionId") Long
-     * loanTransactionId);
+     * @Param("loanId") Long loanId, @Param("loanTransactionId") Long loanTransactionId);
      */
 }

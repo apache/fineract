@@ -23,8 +23,8 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 
 /**
- * An interface for various Command Strategies. It contains a single function
- * which returns appropriate response from a particular command strategy.
+ * An interface for various Command Strategies. It contains a single function which returns appropriate response from a
+ * particular command strategy.
  *
  * @author Rishabh Shukla
  *
@@ -33,10 +33,8 @@ import org.apache.fineract.batch.domain.BatchResponse;
 public interface CommandStrategy {
 
     /**
-     * Returns an object of type
-     * {@link org.apache.fineract.batch.domain.BatchResponse}. This takes
-     * {@link org.apache.fineract.batch.domain.BatchRequest} as it's single
-     * argument and provides appropriate response.
+     * Returns an object of type {@link org.apache.fineract.batch.domain.BatchResponse}. This takes
+     * {@link org.apache.fineract.batch.domain.BatchRequest} as it's single argument and provides appropriate response.
      *
      * @param batchRequest
      * @param uriInfo

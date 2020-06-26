@@ -96,8 +96,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 

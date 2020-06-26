@@ -636,9 +636,8 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     /**
      * @param percentageOf
-     * @returns a minimum cap or maximum cap set on charges if the criteria fits
-     *          else it returns the percentageOf if the amount is within min and
-     *          max cap
+     * @returns a minimum cap or maximum cap set on charges if the criteria fits else it returns the percentageOf if the
+     *          amount is within min and max cap
      */
     private BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf) {
         BigDecimal minMaxCap = BigDecimal.ZERO;
@@ -808,18 +807,15 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     /*
-     * @Override public boolean equals(final Object obj) { if (obj == null) {
-     * return false; } if (obj == this) { return true; } if (obj.getClass() !=
-     * getClass()) { return false; } final LoanCharge rhs = (LoanCharge) obj;
-     * return new EqualsBuilder().appendSuper(super.equals(obj)) //
-     * .append(getId(), rhs.getId()) // .append(this.charge.getId(),
-     * rhs.charge.getId()) // .append(this.amount, rhs.amount) //
-     * .append(getDueLocalDate(), rhs.getDueLocalDate()) // .isEquals(); }
+     * @Override public boolean equals(final Object obj) { if (obj == null) { return false; } if (obj == this) { return
+     * true; } if (obj.getClass() != getClass()) { return false; } final LoanCharge rhs = (LoanCharge) obj; return new
+     * EqualsBuilder().appendSuper(super.equals(obj)) // .append(getId(), rhs.getId()) // .append(this.charge.getId(),
+     * rhs.charge.getId()) // .append(this.amount, rhs.amount) // .append(getDueLocalDate(), rhs.getDueLocalDate()) //
+     * .isEquals(); }
      *
      * @Override public int hashCode() { return 1;
      *
-     * return new HashCodeBuilder(3, 5) // .append(getId()) //
-     * .append(this.charge.getId()) //
+     * return new HashCodeBuilder(3, 5) // .append(getId()) // .append(this.charge.getId()) //
      * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
      *
      * }

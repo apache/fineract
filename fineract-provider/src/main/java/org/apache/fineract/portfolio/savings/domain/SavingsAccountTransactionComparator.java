@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.util.Comparator;
 
 /**
- * Sort savings account transactions by transaction date and transaction type
- * placing
+ * Sort savings account transactions by transaction date and transaction type placing
  */
 public class SavingsAccountTransactionComparator implements Comparator<SavingsAccountTransaction> {
 

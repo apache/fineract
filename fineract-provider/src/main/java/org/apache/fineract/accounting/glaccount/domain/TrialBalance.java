@@ -100,8 +100,9 @@ public class TrialBalance extends AbstractPersistableCustom {
         }
         TrialBalance other = (TrialBalance) obj;
         return Objects.equals(other.officeId, officeId) && Objects.equals(other.glAccountId, glAccountId)
-                && Objects.equals(other.amount, amount) && Objects.equals(other.entryDate, entryDate)
-                && Objects.equals(other.transactionDate, transactionDate) && Objects.equals(other.closingBalance, closingBalance);
+                && Objects.equals(other.amount, amount) && other.entryDate.compareTo(entryDate) == 0 ? Boolean.TRUE
+                        : Boolean.FALSE && other.transactionDate.compareTo(transactionDate) == 0 ? Boolean.TRUE
+                                : Boolean.FALSE && Objects.equals(other.closingBalance, closingBalance);
     }
 
     @Override
