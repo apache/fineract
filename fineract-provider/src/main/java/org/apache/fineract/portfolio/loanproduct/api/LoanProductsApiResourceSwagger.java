@@ -272,9 +272,9 @@ final class LoanProductsApiResourceSwagger {
             public Integer id;
             @ApiModelProperty(example = "1")
             public Integer productId;
-            public GetLoanProductsInterestRecalculationCompoundingType interestRecalculationCompoundingType;
+            public GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingType interestRecalculationCompoundingType;
             public GetLoanProductsInterestRecalculationCompoundingFrequencyType interestRecalculationCompoundingFrequencyType;
-            public GetLoanProductsRescheduleStrategyType rescheduleStrategyType;
+            public GetLoanProductsInterestRecalculationData.GetLoanProductsRescheduleStrategyType rescheduleStrategyType;
             public GetLoanProductsInterestRecalculationCompoundingFrequencyType recalculationRestFrequencyType;
             public GetLoanProductsPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
             @ApiModelProperty(example = "true")
@@ -327,7 +327,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @ApiModelProperty(example = "15.000000")
         public Float interestRatePerPeriod;
-        public GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
+        public GetLoanProductsResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @ApiModelProperty(example = "15.000000")
         public Float annualInterestRate;
         public GetLoanProductsAmortizationType amortizationType;
@@ -348,7 +348,7 @@ final class LoanProductsApiResourceSwagger {
         @ApiModelProperty(example = "true")
         public Boolean isInterestRecalculationEnabled;
         public GetLoanProductsInterestRecalculationData interestRecalculationData;
-        public GetLoanProductsAccountingRule accountingRule;
+        public GetLoanProductsResponse.GetLoanProductsAccountingRule accountingRule;
         @ApiModelProperty(example = "0")
         public Integer principalThresholdForLastInstalment;
     }
@@ -478,8 +478,8 @@ final class LoanProductsApiResourceSwagger {
                 public String value;
             }
 
-            public GetLoanProductsInterestRecalculationCompoundingType interestRecalculationCompoundingType;
-            public GetLoanProductsRescheduleStrategyType rescheduleStrategyType;
+            public GetLoanProductsInterestRecalculationTemplateData.GetLoanProductsInterestRecalculationCompoundingType interestRecalculationCompoundingType;
+            public GetLoanProductsInterestRecalculationTemplateData.GetLoanProductsRescheduleStrategyType rescheduleStrategyType;
             public GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
         }
 
@@ -780,7 +780,7 @@ final class LoanProductsApiResourceSwagger {
         public List<Integer> interestRateVariationsForBorrowerCycle;
         @ApiModelProperty(example = "[]")
         public List<Integer> numberOfRepaymentVariationsForBorrowerCycle;
-        public GetLoanProductsAccountingRule accountingRule;
+        public GetLoanProductsTemplateResponse.GetLoanProductsAccountingRule accountingRule;
         public GetLoansProductsDaysInMonthTemplateType daysInMonthType;
         public GetLoanProductsDaysInYearTemplateType daysInYearType;
         @ApiModelProperty(example = "false")
@@ -1041,7 +1041,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsResponse.GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @ApiModelProperty(example = "5.000000")
         public Float interestRatePerPeriod;
-        public GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
+        public GetLoanProductsProductIdResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @ApiModelProperty(example = "60.000000")
         public Float annualInterestRate;
         public GetLoanProductsResponse.GetLoanProductsAmortizationType amortizationType;

@@ -383,7 +383,6 @@ tasks.withType(JavaCompile) {
         //Todo Remove necessary checks from this list
         disable(
                 "UnusedVariable",
-                "SameNameButDifferent",
                 "TypeParameterUnusedInFormals",
                 "JdkObsolete",
                 "EmptyBlockTag",
@@ -425,6 +424,7 @@ tasks.withType(JavaCompile) {
                 "StreamResourceLeak",
                 "TruthIncompatibleType",
                 "ByteBufferBackingArray",
+                "SameNameButDifferent",
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
