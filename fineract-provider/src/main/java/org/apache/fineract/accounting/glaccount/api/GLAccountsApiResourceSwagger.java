@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.glaccount.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -35,57 +34,57 @@ final class GLAccountsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetGLAccountsResponse")
+    @Schema(description = "GetGLAccountsResponse")
     public static final class GetGLAccountsResponse {
 
         private GetGLAccountsResponse() {
 
         }
 
-        @ApiModelProperty(example = "16")
+        @Schema(example = "16")
         public Long id;
 
-        @ApiModelProperty(example = "Cash")
+        @Schema(example = "Cash")
         public String name;
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long parentId;
 
-        @ApiModelProperty(example = "100001")
+        @Schema(example = "100001")
         public String glCode;
 
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean disabled;
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean manualEntriesAllowed;
 
         public EnumOptionData type;
         public EnumOptionData usage;
 
-        @ApiModelProperty(example = "Desc")
+        @Schema(example = "Desc")
         public String description;
 
-        @ApiModelProperty(example = "....Cash")
+        @Schema(example = "....Cash")
         public String nameDecorated;
 
         public CodeValueData tagId;
 
-        @ApiModelProperty(example = "118437")
+        @Schema(example = "118437")
         public Long organizationRunningBalance;
     }
 
-    @ApiModel(value = "GetGLAccountsTemplateResponse")
+    @Schema(description = "GetGLAccountsTemplateResponse")
     public static final class GetGLAccountsTemplateResponse {
 
         private GetGLAccountsTemplateResponse() {
 
         }
 
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean disabled;
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean manualEntriesAllowed;
 
         public EnumOptionData type;
@@ -104,83 +103,83 @@ final class GLAccountsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PostGLAccountsRequest")
+    @Schema(description = "PostGLAccountsRequest")
     public static final class PostGLAccountsRequest {
 
         private PostGLAccountsRequest() {
 
         }
 
-        @ApiModelProperty(example = "Cash at Bangalore")
+        @Schema(example = "Cash at Bangalore")
         public String name;
 
-        @ApiModelProperty(example = "100001")
+        @Schema(example = "100001")
         public String glCode;
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean manualEntriesAllowed;
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public String type;
 
-        @ApiModelProperty(example = "10")
+        @Schema(example = "10")
         public String tagId;
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long parentId;
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public EnumOptionData usage;
 
-        @ApiModelProperty(example = "Desc")
+        @Schema(example = "Desc")
         public String description;
 
     }
 
-    @ApiModel(value = "PostGLAccountsResponse")
+    @Schema(description = "PostGLAccountsResponse")
     public static final class PostGLAccountsResponse {
 
         private PostGLAccountsResponse() {
 
         }
 
-        @ApiModelProperty(example = "22")
+        @Schema(example = "22")
         public int resourceId;
     }
 
-    @ApiModel(value = "PutGLAccountsRequest")
+    @Schema(description = "PutGLAccountsRequest")
     public static final class PutGLAccountsRequest {
 
         private PutGLAccountsRequest() {
 
         }
 
-        @ApiModelProperty(example = "Cash at Bangalore")
+        @Schema(example = "Cash at Bangalore")
         public String name;
     }
 
-    @ApiModel(value = "PutGLAccountsResponse")
+    @Schema(description = "PutGLAccountsResponse")
     public static final class PutGLAccountsResponse {
 
         private PutGLAccountsResponse() {
 
         }
 
-        @ApiModel
+        @Schema
         public static final class PutGLAccountsResponsechangesSwagger {
 
             private PutGLAccountsResponsechangesSwagger() {}
 
-            @ApiModelProperty(example = "Cash at Bangalore")
+            @Schema(example = "Cash at Bangalore")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public int resourceId;
         public PutGLAccountsResponsechangesSwagger changes;
     }
 
-    @ApiModel(value = "DeleteGLAccountsRequest")
+    @Schema(description = "DeleteGLAccountsRequest")
     public static final class DeleteGLAccountsRequest {
 
         private DeleteGLAccountsRequest() {
@@ -193,7 +192,7 @@ final class GLAccountsApiResourceSwagger {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public int resourceId;
 
         private DeleteGLAccountsRequestchangesSwagger changes;

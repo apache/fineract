@@ -19,9 +19,7 @@
 
 package org.apache.fineract.portfolio.self.registration.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,8 +36,8 @@ import org.springframework.stereotype.Component;
 @Path("/self/registration")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Service Registration" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Service Registration", description = "") })
+
+@Tag(name = "Self Service Registration", description = "")
 public class SelfServiceRegistrationApiResource {
 
     private final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService;

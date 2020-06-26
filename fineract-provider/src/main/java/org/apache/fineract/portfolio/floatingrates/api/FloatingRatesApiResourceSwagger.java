@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.floatingrates.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -29,7 +28,7 @@ final class FloatingRatesApiResourceSwagger {
 
     private FloatingRatesApiResourceSwagger() {}
 
-    @ApiModel(value = "PostFloatingRatesRequest")
+    @Schema(description = "PostFloatingRatesRequest")
     public static final class PostFloatingRatesRequest {
 
         private PostFloatingRatesRequest() {}
@@ -38,58 +37,58 @@ final class FloatingRatesApiResourceSwagger {
 
             private PostFloatingRatesRatePeriods() {}
 
-            @ApiModelProperty(example = "19 November 2015")
+            @Schema(example = "19 November 2015")
             public String fromDate;
-            @ApiModelProperty(example = "10")
+            @Schema(example = "10")
             public Double interestRate;
-            @ApiModelProperty(example = "en")
+            @Schema(example = "en")
             public String locale;
-            @ApiModelProperty(example = "dd MMMM yyyy")
+            @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
         }
 
-        @ApiModelProperty(example = "Floating Rate 1")
+        @Schema(example = "Floating Rate 1")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isBaseLendingRate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
         public Set<PostFloatingRatesRatePeriods> ratePeriods;
     }
 
-    @ApiModel(value = "PostFloatingRatesResponse")
+    @Schema(description = "PostFloatingRatesResponse")
     public static final class PostFloatingRatesResponse {
 
         private PostFloatingRatesResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetFloatingRatesResponse")
+    @Schema(description = "GetFloatingRatesResponse")
     public static final class GetFloatingRatesResponse {
 
         private GetFloatingRatesResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "Floating Rate 1")
+        @Schema(example = "Floating Rate 1")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isBaseLendingRate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdBy;
-        @ApiModelProperty(example = "Nov 18, 2015")
+        @Schema(example = "Nov 18, 2015")
         public String createdOn;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String modifiedBy;
-        @ApiModelProperty(example = "Nov 18, 2015")
+        @Schema(example = "Nov 18, 2015")
         public String modifiedOn;
     }
 
-    @ApiModel(value = "GetFloatingRatesFloatingRateIdResponse")
+    @Schema(description = "GetFloatingRatesFloatingRateIdResponse")
     public static final class GetFloatingRatesFloatingRateIdResponse {
 
         private GetFloatingRatesFloatingRateIdResponse() {}
@@ -98,60 +97,60 @@ final class FloatingRatesApiResourceSwagger {
 
             private GetFloatingRatesRatePeriods() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Dec 15, 2015")
+            @Schema(example = "Dec 15, 2015")
             public String fromDate;
-            @ApiModelProperty(example = "11")
+            @Schema(example = "11")
             public Double interestRate;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean isDifferentialToBaseLendingRate;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean isActive;
-            @ApiModelProperty(example = "mifos")
+            @Schema(example = "mifos")
             public String createdBy;
-            @ApiModelProperty(example = "Nov 18, 2015")
+            @Schema(example = "Nov 18, 2015")
             public String createdOn;
-            @ApiModelProperty(example = "mifos")
+            @Schema(example = "mifos")
             public String modifiedBy;
-            @ApiModelProperty(example = "Nov 18, 2015")
+            @Schema(example = "Nov 18, 2015")
             public String modifiedOn;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "Floating Rate 1")
+        @Schema(example = "Floating Rate 1")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isBaseLendingRate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdBy;
-        @ApiModelProperty(example = "Nov 18, 2015")
+        @Schema(example = "Nov 18, 2015")
         public String createdOn;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String modifiedBy;
-        @ApiModelProperty(example = "Nov 18, 2015")
+        @Schema(example = "Nov 18, 2015")
         public String modifiedOn;
         public Set<GetFloatingRatesRatePeriods> ratePeriods;
     }
 
-    @ApiModel(value = "PutFloatingRatesFloatingRateIdRequest")
+    @Schema(description = "PutFloatingRatesFloatingRateIdRequest")
     public static final class PutFloatingRatesFloatingRateIdRequest {
 
         private PutFloatingRatesFloatingRateIdRequest() {}
 
-        @ApiModelProperty(example = "Floating Rate 1")
+        @Schema(example = "Floating Rate 1")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isBaseLendingRate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
         public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
     }
 
-    @ApiModel(value = "PutFloatingRatesFloatingRateIdResponse")
+    @Schema(description = "PutFloatingRatesFloatingRateIdResponse")
     public static final class PutFloatingRatesFloatingRateIdResponse {
 
         private PutFloatingRatesFloatingRateIdResponse() {}
@@ -163,7 +162,7 @@ final class FloatingRatesApiResourceSwagger {
             public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutFloatingRatesChanges changes;
     }

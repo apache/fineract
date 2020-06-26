@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
-import io.swagger.annotations.Api;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -45,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Path("/likelihood")
 @Component
 @Scope("singleton")
-@Api(value = "Likelihood")
+
 public class LikelihoodApiResource {
 
     private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;

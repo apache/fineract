@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.useradministration.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 22/8/17.
@@ -30,33 +29,33 @@ final class PermissionsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetPermissionsResponse")
+    @Schema(description = "GetPermissionsResponse")
     public static final class GetPermissionsResponse {
 
         private GetPermissionsResponse() {
 
         }
 
-        @ApiModelProperty(example = "authorisation")
+        @Schema(example = "authorisation")
         public String grouping;
-        @ApiModelProperty(example = "READ_PERMISSION")
+        @Schema(example = "READ_PERMISSION")
         public String code;
-        @ApiModelProperty(example = "PERMISSION")
+        @Schema(example = "PERMISSION")
         public String entityName;
-        @ApiModelProperty(example = "READ")
+        @Schema(example = "READ")
         public String actionName;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean selected;
     }
 
-    @ApiModel(value = "PutPermissionsRequest")
+    @Schema(description = "PutPermissionsRequest")
     public static final class PutPermissionsRequest {
 
         private PutPermissionsRequest() {
 
         }
 
-        @ApiModelProperty(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+        @Schema(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
         public String permissions;
     }
 }

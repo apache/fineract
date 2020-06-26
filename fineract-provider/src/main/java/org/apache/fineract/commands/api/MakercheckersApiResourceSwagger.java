@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.commands.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
@@ -35,7 +34,7 @@ final class MakercheckersApiResourceSwagger {
         // only to initialize swagger documentation
     }
 
-    @ApiModel(value = "GetMakerCheckerResponse")
+    @Schema(description = "GetMakerCheckerResponse")
     public static final class GetMakerCheckerResponse {
 
         private GetMakerCheckerResponse() {
@@ -65,7 +64,7 @@ final class MakercheckersApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetMakerCheckersSearchTemplateResponse")
+    @Schema(description = "GetMakerCheckersSearchTemplateResponse")
     public static final class GetMakerCheckersSearchTemplateResponse {
 
         private GetMakerCheckersSearchTemplateResponse() {
@@ -78,14 +77,14 @@ final class MakercheckersApiResourceSwagger {
         public Collection<ProcessingResultLookup> processingResults;
     }
 
-    @ApiModel(value = "PostMakerCheckersResponse")
+    @Schema(description = "PostMakerCheckersResponse")
     public static final class PostMakerCheckersResponse {
 
         private PostMakerCheckersResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long auditId;
 
     }

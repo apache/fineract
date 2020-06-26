@@ -102,7 +102,7 @@ dependencyManagement {
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:4.5.12'
-        dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
+        dependency 'io.swagger.core.v3:swagger-annotations:2.1.2'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
         dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
@@ -179,6 +179,8 @@ eclipse
     }
 }
 
+System.setProperty("openjpa.Log", "commons")
+
 openjpa {
     includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
     enhance {
@@ -189,6 +191,7 @@ openjpa {
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 resolve {
+    logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
     outputFormat = 'JSON'
     prettyPrint = 'TRUE'
@@ -626,6 +629,7 @@ cargoRunLocal.dependsOn bootWar
 cargoStartLocal.dependsOn bootWar
 cargoStartLocal.mustRunAfter "integrationTestClasses"
 cargoStartLocal.mustRunAfter "enhance"
+cargoStartLocal.mustRunAfter "resolve"
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir

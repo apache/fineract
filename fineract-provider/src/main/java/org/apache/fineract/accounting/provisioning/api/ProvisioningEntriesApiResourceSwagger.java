@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.provisioning.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 25/7/17.
@@ -30,23 +29,23 @@ final class ProvisioningEntriesApiResourceSwagger {
         // only for Swagger Documentation
     }
 
-    @ApiModel(value = "PostProvisioningEntriesRequest")
+    @Schema(description = "PostProvisioningEntriesRequest")
     public static final class PostProvisioningEntriesRequest {
 
         private PostProvisioningEntriesRequest() {
 
         }
 
-        @ApiModelProperty(example = "16 October 2015")
+        @Schema(example = "16 October 2015")
         public String date;
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
 
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public String createjournalentries;
 
         public String provisioningentry;
@@ -54,36 +53,36 @@ final class ProvisioningEntriesApiResourceSwagger {
         public String entries;
     }
 
-    @ApiModel(value = "PostProvisioningEntriesResponse")
+    @Schema(description = "PostProvisioningEntriesResponse")
     public static final class PostProvisioningEntriesResponse {
 
         private PostProvisioningEntriesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutProvisioningEntriesRequest")
+    @Schema(description = "PutProvisioningEntriesRequest")
     public static final class PutProvisioningEntriesRequest {
 
         private PutProvisioningEntriesRequest() {
 
         }
 
-        @ApiModelProperty(example = "recreateprovisioningentry")
+        @Schema(example = "recreateprovisioningentry")
         public String command;
     }
 
-    @ApiModel(value = "PutProvisioningEntriesResponse")
+    @Schema(description = "PutProvisioningEntriesResponse")
     public static final class PutProvisioningEntriesResponse {
 
         private PutProvisioningEntriesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 }

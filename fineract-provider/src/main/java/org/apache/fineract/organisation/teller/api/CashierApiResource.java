@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.organisation.teller.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import java.util.Date;
 import javax.ws.rs.Consumes;
@@ -41,8 +39,8 @@ import org.springframework.stereotype.Component;
 @Path("cashiers")
 @Component
 @Scope("singleton")
-@Api(tags = { "Cashiers" })
-@SwaggerDefinition(tags = { @Tag(name = "Cashiers", description = "") })
+
+@Tag(name = "Cashiers", description = "")
 public class CashierApiResource {
 
     private final DefaultToApiJsonSerializer<CashierData> jsonSerializer;

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.account.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -32,7 +31,7 @@ final class StandingInstructionApiResourceSwagger {
         // this class is only for Swagger Live Documentation
     }
 
-    @ApiModel(value = "GetStandingInstructionsTemplateResponse")
+    @Schema(description = "GetStandingInstructionsTemplateResponse")
     public static final class GetStandingInstructionsTemplateResponse {
 
         private GetStandingInstructionsTemplateResponse() {}
@@ -41,17 +40,17 @@ final class StandingInstructionApiResourceSwagger {
 
             private GetFromOfficeResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long id;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String name;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String decoratedName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer externalId;
-            @ApiModelProperty(example = "[2009, 1, 1]")
+            @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
-            @ApiModelProperty(example = ".")
+            @Schema(example = ".")
             public String hierarchy;
         }
 
@@ -59,23 +58,23 @@ final class StandingInstructionApiResourceSwagger {
 
             private GetFromAccountTypeResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Long id;
-            @ApiModelProperty(example = "accountType.savings")
+            @Schema(example = "accountType.savings")
             public String code;
-            @ApiModelProperty(example = "Savings Account")
-            public String value;
+            @Schema(example = "Savings Account")
+            public String description;
         }
 
         static final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
 
             private GetFromOfficeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long id;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String name;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String nameDecorated;
         }
 
@@ -83,13 +82,13 @@ final class StandingInstructionApiResourceSwagger {
 
             private GetFromClientOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long id;
-            @ApiModelProperty(example = "Client_FirstName_2VRAG Client_LastName_9QCY")
+            @Schema(example = "Client_FirstName_2VRAG Client_LastName_9QCY")
             public String displayName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long officeId;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String officeName;
         }
 
@@ -97,23 +96,23 @@ final class StandingInstructionApiResourceSwagger {
 
             private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Long id;
-            @ApiModelProperty(example = "accountType.savings")
+            @Schema(example = "accountType.savings")
             public String code;
-            @ApiModelProperty(example = "Savings Account")
-            public String value;
+            @Schema(example = "Savings Account")
+            public String description;
         }
 
         static final class GetToOfficeOptionsResponseStandingInstructionSwagger {
 
             private GetToOfficeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String name;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String nameDecorated;
         }
 
@@ -121,84 +120,84 @@ final class StandingInstructionApiResourceSwagger {
 
             private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "accountType.loan")
+            @Schema(example = "accountType.loan")
             public String code;
-            @ApiModelProperty(example = "Loan Account")
-            public String value;
+            @Schema(example = "Loan Account")
+            public String description;
         }
 
         static final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
 
             private GetTransferTypeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "accountTransferType.account.transfer")
+            @Schema(example = "accountTransferType.account.transfer")
             public String code;
-            @ApiModelProperty(example = "Account Transfer")
-            public String value;
+            @Schema(example = "Account Transfer")
+            public String description;
         }
 
         static final class GetStatusOptionsResponseStandingInstructionSwagger {
 
             private GetStatusOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "standingInstructionStatus.active")
+            @Schema(example = "standingInstructionStatus.active")
             public String code;
-            @ApiModelProperty(example = "Active")
-            public String value;
+            @Schema(example = "Active")
+            public String description;
         }
 
         static final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
 
             private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "standingInstructionType.fixed")
+            @Schema(example = "standingInstructionType.fixed")
             public String code;
-            @ApiModelProperty(example = "Fixed")
-            public String value;
+            @Schema(example = "Fixed")
+            public String description;
         }
 
         static final class GetPriorityOptionsResponseStandingInstructionSwagger {
 
             private GetPriorityOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "standingInstructionPriority.urgent")
+            @Schema(example = "standingInstructionPriority.urgent")
             public String code;
-            @ApiModelProperty(example = "Urgent Priority")
-            public String value;
+            @Schema(example = "Urgent Priority")
+            public String description;
         }
 
         static final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
 
             private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "accountTransferRecurrenceType.periodic")
+            @Schema(example = "accountTransferRecurrenceType.periodic")
             public String code;
-            @ApiModelProperty(example = "Periodic Recurrence")
-            public String value;
+            @Schema(example = "Periodic Recurrence")
+            public String description;
         }
 
         static final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
 
             private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {}
 
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer id;
-            @ApiModelProperty(example = "frequencyperiodFrequencyType.days")
+            @Schema(example = "frequencyperiodFrequencyType.days")
             public String code;
-            @ApiModelProperty(example = "Days")
-            public String value;
+            @Schema(example = "Days")
+            public String description;
         }
 
         public GetFromOfficeResponseStandingInstructionSwagger fromOffice;
@@ -216,18 +215,18 @@ final class StandingInstructionApiResourceSwagger {
         public Set<GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger> recurrenceFrequencyOptions;
     }
 
-    @ApiModel(value = "PostStandingInstructionsResponse")
+    @Schema(description = "PostStandingInstructionsResponse")
     public static final class PostStandingInstructionsResponse {
 
         private PostStandingInstructionsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long clientId;
-        @ApiModelProperty(example = "65")
+        @Schema(example = "65")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetStandingInstructionsResponse")
+    @Schema(description = "GetStandingInstructionsResponse")
     public static final class GetStandingInstructionsResponse {
 
         private GetStandingInstructionsResponse() {}
@@ -238,9 +237,9 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetFromOfficeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long id;
-                @ApiModelProperty(example = "Head Office")
+                @Schema(example = "Head Office")
                 public String name;
             }
 
@@ -248,13 +247,13 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetFromClientStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long id;
-                @ApiModelProperty(example = "Test test")
+                @Schema(example = "Test test")
                 public String displayName;
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long officeId;
-                @ApiModelProperty(example = "Head Office")
+                @Schema(example = "Head Office")
                 public String officeName;
             }
 
@@ -262,25 +261,25 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetFromAccountTypeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.savings")
+                @Schema(example = "accountType.savings")
                 public String code;
-                @ApiModelProperty(example = "Savings Account")
-                public String value;
+                @Schema(example = "Savings Account")
+                public String description;
             }
 
             static final class GetFromAccountStandingInstructionSwagger {
 
                 private GetFromAccountStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "14")
+                @Schema(example = "14")
                 public Long id;
-                @ApiModelProperty(example = "000000014")
+                @Schema(example = "000000014")
                 public Long accountNo;
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long productId;
-                @ApiModelProperty(example = "savings old")
+                @Schema(example = "savings old")
                 public String productName;
             }
 
@@ -288,9 +287,9 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetToOfficeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long id;
-                @ApiModelProperty(example = "Head Office")
+                @Schema(example = "Head Office")
                 public String name;
             }
 
@@ -298,13 +297,13 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetToClientStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long id;
-                @ApiModelProperty(example = "Test test")
+                @Schema(example = "Test test")
                 public String displayName;
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Long officeId;
-                @ApiModelProperty(example = "Head Office")
+                @Schema(example = "Head Office")
                 public String officeName;
             }
 
@@ -312,25 +311,25 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetToAccountTypeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.savings")
+                @Schema(example = "accountType.savings")
                 public String code;
-                @ApiModelProperty(example = "Savings Account")
-                public String value;
+                @Schema(example = "Savings Account")
+                public String description;
             }
 
             static final class GetToAccountStandingInstructionSwagger {
 
                 private GetToAccountStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "3")
+                @Schema(example = "3")
                 public Long id;
-                @ApiModelProperty(example = "000000003")
+                @Schema(example = "000000003")
                 public Long accountNo;
-                @ApiModelProperty(example = "4")
+                @Schema(example = "4")
                 public Long productId;
-                @ApiModelProperty(example = "account overdraft")
+                @Schema(example = "account overdraft")
                 public String productName;
             }
 
@@ -338,79 +337,79 @@ final class StandingInstructionApiResourceSwagger {
 
                 private GetTransferTypeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "accountTransferType.account.transfer")
+                @Schema(example = "accountTransferType.account.transfer")
                 public String code;
-                @ApiModelProperty(example = "Account Transfer")
-                public String value;
+                @Schema(example = "Account Transfer")
+                public String description;
             }
 
             static final class GetPriorityStandingInstructionSwagger {
 
                 private GetPriorityStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "3")
+                @Schema(example = "3")
                 public Integer id;
-                @ApiModelProperty(example = "standingInstructionPriority.medium")
+                @Schema(example = "standingInstructionPriority.medium")
                 public String code;
-                @ApiModelProperty(example = "Medium Priority")
-                public String value;
+                @Schema(example = "Medium Priority")
+                public String description;
             }
 
             static final class GetInstructionTypeStandingInstructionSwagger {
 
                 private GetInstructionTypeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "standingInstructionType.fixed")
+                @Schema(example = "standingInstructionType.fixed")
                 public String code;
-                @ApiModelProperty(example = "Fixed")
-                public String value;
+                @Schema(example = "Fixed")
+                public String description;
             }
 
             static final class GetStatusStandingInstructionSwagger {
 
                 private GetStatusStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "standingInstructionStatus.deleted")
+                @Schema(example = "standingInstructionStatus.deleted")
                 public String code;
-                @ApiModelProperty(example = "Deleted")
-                public String value;
+                @Schema(example = "Deleted")
+                public String description;
             }
 
             static final class GetRecurrenceTypeStandingInstructionSwagger {
 
                 private GetRecurrenceTypeStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "accountTransferRecurrenceType.periodic")
+                @Schema(example = "accountTransferRecurrenceType.periodic")
                 public String code;
-                @ApiModelProperty(example = "Periodic Recurrence")
-                public String value;
+                @Schema(example = "Periodic Recurrence")
+                public String description;
             }
 
             static final class GetRecurrenceFrequencyStandingInstructionSwagger {
 
                 private GetRecurrenceFrequencyStandingInstructionSwagger() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "frequencyperiodFrequencyType.months")
+                @Schema(example = "frequencyperiodFrequencyType.months")
                 public String code;
-                @ApiModelProperty(example = "Months")
-                public String value;
+                @Schema(example = "Months")
+                public String description;
             }
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long id;
-            @ApiModelProperty(example = "6")
+            @Schema(example = "6")
             public Long accountDetailId;
-            @ApiModelProperty(example = "test standing")
+            @Schema(example = "test standing")
             public String name;
             public GetFromOfficeStandingInstructionSwagger fromOffice;
             public GetFromClientStandingInstructionSwagger fromClient;
@@ -424,84 +423,84 @@ final class StandingInstructionApiResourceSwagger {
             public GetPriorityStandingInstructionSwagger priority;
             public GetInstructionTypeStandingInstructionSwagger instructionType;
             public GetStatusStandingInstructionSwagger status;
-            @ApiModelProperty(example = "150.000000")
+            @Schema(example = "150.000000")
             public float amount;
-            @ApiModelProperty(example = "[2014, 4, 3]")
+            @Schema(example = "[2014, 4, 3]")
             public LocalDate validFrom;
             public GetRecurrenceTypeStandingInstructionSwagger recurrenceType;
             public GetRecurrenceFrequencyStandingInstructionSwagger recurrenceFrequency;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer recurrenceInterval;
-            @ApiModelProperty(example = "[4, 3]")
+            @Schema(example = "[4, 3]")
             public LocalDate recurrenceOnMonthDay;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer totalFilteredRecords;
         public Set<GetPageItemsStandingInstructionSwagger> pageItems;
     }
 
-    @ApiModel(value = "PostStandingInstructionsRequest")
+    @Schema(description = "PostStandingInstructionsRequest")
     public static final class PostStandingInstructionsRequest {
 
         private PostStandingInstructionsRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long fromOfficeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long fromClientId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer fromAccountType;
-        @ApiModelProperty(example = "standing instruction")
+        @Schema(example = "standing instruction")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer transferType;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer priority;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer status;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long fromAccountId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long toOfficeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long toClientId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer toAccountType;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Long toAccountId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer instructionType;
-        @ApiModelProperty(example = "221")
+        @Schema(example = "221")
         public Integer amount;
-        @ApiModelProperty(example = "08 April 2014")
+        @Schema(example = "08 April 2014")
         public String validFrom;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurrenceType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurrenceInterval;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer recurrenceFrequency;
-        @ApiModelProperty(value = "en")
+        @Schema(description = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "02 April")
+        @Schema(example = "02 April")
         public String recurrenceOnMonthDay;
-        @ApiModelProperty(example = "dd MMMM")
+        @Schema(example = "dd MMMM")
         public String monthDayFormat;
     }
 
-    @ApiModel(value = "GetStandingInstructionsStandingInstructionIdResponse")
+    @Schema(description = "GetStandingInstructionsStandingInstructionIdResponse")
     public static final class GetStandingInstructionsStandingInstructionIdResponse {
 
         private GetStandingInstructionsStandingInstructionIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "6")
+        @Schema(example = "6")
         public Long accountDetailId;
-        @ApiModelProperty(example = "test standing")
+        @Schema(example = "test standing")
         public String name;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetFromOfficeStandingInstructionSwagger fromOffice;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetFromClientStandingInstructionSwagger fromClient;
@@ -515,40 +514,40 @@ final class StandingInstructionApiResourceSwagger {
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetPriorityStandingInstructionSwagger priority;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetInstructionTypeStandingInstructionSwagger instructionType;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetStatusStandingInstructionSwagger status;
-        @ApiModelProperty(example = "150.000000")
+        @Schema(example = "150.000000")
         public float amount;
-        @ApiModelProperty(example = "[2014, 4, 3]")
+        @Schema(example = "[2014, 4, 3]")
         public LocalDate validFrom;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetRecurrenceTypeStandingInstructionSwagger recurrenceType;
         public GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetRecurrenceFrequencyStandingInstructionSwagger recurrenceFrequency;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer recurrenceInterval;
-        @ApiModelProperty(example = "[4, 3]")
+        @Schema(example = "[4, 3]")
         public LocalDate recurrenceOnMonthDay;
     }
 
-    @ApiModel(value = "PutStandingInstructionsStandingInstructionIdResponse")
+    @Schema(description = "PutStandingInstructionsStandingInstructionIdResponse")
     public static final class PutStandingInstructionsStandingInstructionIdResponse {
 
         private PutStandingInstructionsStandingInstructionIdResponse() {}
 
         static final class PutUpdateStandingInstructionChanges {
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer recurrenceInterval;
         }
 
-        @ApiModelProperty(example = "20")
+        @Schema(example = "20")
         public Integer resourceId;
         public PutUpdateStandingInstructionChanges changes;
     }
 
-    @ApiModel(value = "PutStandingInstructionsStandingInstructionIdRequest")
+    @Schema(description = "PutStandingInstructionsStandingInstructionIdRequest")
     public static final class PutStandingInstructionsStandingInstructionIdRequest {
 
         private PutStandingInstructionsStandingInstructionIdRequest() {}
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer recurrenceInterval;
     }
 }

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.paymenttype.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by Chirag Gupta on 01/01/18.
@@ -28,94 +27,94 @@ final class PaymentTypeApiResourceSwagger {
 
     private PaymentTypeApiResourceSwagger() {}
 
-    @ApiModel(value = "GetPaymentTypesResponse")
+    @Schema(description = "GetPaymentTypesResponse")
     public static final class GetPaymentTypesResponse {
 
         private GetPaymentTypesResponse() {}
 
-        @ApiModelProperty(example = "24")
+        @Schema(example = "24")
         public Integer id;
-        @ApiModelProperty(example = "PTC")
+        @Schema(example = "PTC")
         public String name;
-        @ApiModelProperty(example = "Cash")
+        @Schema(example = "Cash")
         public String description;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isCashPayment;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer position;
     }
 
-    @ApiModel(value = "GetPaymentTypesPaymentTypeIdResponse")
+    @Schema(description = "GetPaymentTypesPaymentTypeIdResponse")
     public static final class GetPaymentTypesPaymentTypeIdResponse {
 
         private GetPaymentTypesPaymentTypeIdResponse() {}
 
-        @ApiModelProperty(example = "13")
+        @Schema(example = "13")
         public Integer id;
-        @ApiModelProperty(example = "cash")
+        @Schema(example = "cash")
         public String name;
-        @ApiModelProperty(example = "cash Payment")
+        @Schema(example = "cash Payment")
         public String description;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isCashPayment;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer position;
     }
 
-    @ApiModel(value = "PostPaymentTypesRequest")
+    @Schema(description = "PostPaymentTypesRequest")
     public static final class PostPaymentTypesRequest {
 
         private PostPaymentTypesRequest() {}
 
-        @ApiModelProperty(example = "cash")
+        @Schema(example = "cash")
         public String name;
-        @ApiModelProperty(example = "cash payment type")
+        @Schema(example = "cash payment type")
         public String description;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isCashPayment;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer position;
     }
 
-    @ApiModel(value = "PostPaymentTypesResponse")
+    @Schema(description = "PostPaymentTypesResponse")
     public static final class PostPaymentTypesResponse {
 
         private PostPaymentTypesResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutPaymentTypesPaymentTypeIdRequest")
+    @Schema(description = "PutPaymentTypesPaymentTypeIdRequest")
     public static final class PutPaymentTypesPaymentTypeIdRequest {
 
         private PutPaymentTypesPaymentTypeIdRequest() {}
 
-        @ApiModelProperty(example = "mPay")
+        @Schema(example = "mPay")
         public String name;
-        @ApiModelProperty(example = "not a cash payment type")
+        @Schema(example = "not a cash payment type")
         public String description;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean isCashPayment;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer position;
     }
 
-    @ApiModel(value = "PutPaymentTypesPaymentTypeIdResponse")
+    @Schema(description = "PutPaymentTypesPaymentTypeIdResponse")
     public static final class PutPaymentTypesPaymentTypeIdResponse {
 
         private PutPaymentTypesPaymentTypeIdResponse() {}
 
-        @ApiModelProperty(example = "13")
+        @Schema(example = "13")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "DeletePaymentTypesPaymentTypeIdResponse")
+    @Schema(description = "DeletePaymentTypesPaymentTypeIdResponse")
     public static final class DeletePaymentTypesPaymentTypeIdResponse {
 
         private DeletePaymentTypesPaymentTypeIdResponse() {}
 
-        @ApiModelProperty(example = "13")
+        @Schema(example = "13")
         public Integer resourceId;
     }
 }
