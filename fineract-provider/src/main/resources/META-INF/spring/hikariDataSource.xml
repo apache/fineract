@@ -58,7 +58,6 @@
                 <prop key="cacheServerConfiguration">true</prop>
                 <prop key="elideSetAutoCommits">true</prop>
                 <prop key="maintainTimeStats">false</prop>
-
                 <!-- https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj -->
                 <!-- TODO FINERACT-890: <prop key="logger">com.mysql.cj.log.Slf4JLogger</prop>  -->
                 <prop key="logSlowQueries">true</prop>

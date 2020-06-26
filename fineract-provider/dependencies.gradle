@@ -30,7 +30,8 @@ dependencies {
     //
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
-
+            'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.6.RELEASE',
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-cache',
