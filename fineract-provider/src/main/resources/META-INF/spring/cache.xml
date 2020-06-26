@@ -34,6 +34,6 @@
         p:cacheManager-ref="ehcacheInstance" />
 
     <bean id="ehcacheInstance"
-        class="org.springframework.cache.jcache.JCacheManagerFactoryBean"/>
+        class="org.springframework.cache.jcache.JCacheManagerFactoryBean" p:cacheManagerUri="classpath:/META-INF/spring/ehcache.xml"/>
 
 </beans>

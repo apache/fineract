@@ -72,6 +72,7 @@ dependencies {
 
              // JAX-B dependencies for JDK 9+
              'jakarta.xml.bind:jakarta.xml.bind-api',
+
              'org.dom4j:dom4j',
 
              'javax.cache:cache-api',
@@ -98,8 +99,9 @@ dependencies {
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
     }
-    implementation ('org.ehcache:ehcache') {
-        exclude group: 'org.glassfish.jaxb', module: 'jaxb-runtime'
+
+    runtimeOnly('org.ehcache:ehcache') {
+        exclude group: 'com.sun.activation'
     }
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
@@ -129,6 +131,7 @@ dependencies {
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
+        exclude group: 'com.sun.xml.bind'
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

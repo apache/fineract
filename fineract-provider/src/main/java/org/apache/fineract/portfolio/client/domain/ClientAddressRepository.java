@@ -27,8 +27,8 @@ import org.springframework.data.repository.query.Param;
 public interface ClientAddressRepository extends JpaRepository<ClientAddress, Long>, JpaSpecificationExecutor<ClientAddress> {
 
     @Query("SELECT clientAddress FROM ClientAddress clientAddress WHERE clientAddress.client.id = :clientId AND clientAddress.addressType = :addressType AND clientAddress.isActive = :isActive ")
-    ClientAddress findByClientIdAndAddressTypeAndIsActive(@Param("clientId") final long clientId, final CodeValue addressType,
-            @Param("isActive") final boolean isActive);
+    ClientAddress findByClientIdAndAddressTypeAndIsActive(@Param("clientId") final long clientId,
+            @Param("addressType") final CodeValue addressType, @Param("isActive") final boolean isActive);
 
     @Query("SELECT clientAddress FROM ClientAddress clientAddress WHERE clientAddress.client.id = :clientId AND clientAddress.address.id = :addressId ")
     ClientAddress findByClientIdAndAddressId(@Param("clientId") final long clientId, @Param("addressId") final long addressId);
