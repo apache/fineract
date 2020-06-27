@@ -69,6 +69,7 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
