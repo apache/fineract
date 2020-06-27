@@ -96,7 +96,6 @@ public class AddressCommandFromApiJsonDeserializer {
             enabledFieldList.add("locale");
             enabledFieldList.add("dateFormat");
             supportedParameters = new HashSet<>(enabledFieldList);
-            // enabledFieldList.add("address");
 
             madatoryFieldsMap.put("addressTypeId", true);
 
@@ -108,23 +107,9 @@ public class AddressCommandFromApiJsonDeserializer {
             madatoryFieldsMap.put("addressId", true);
             supportedParameters = new HashSet<>(enabledFieldList);
         }
-        // final Set<String> supportedParameters = new
-        // HashSet<>(enabledFieldList);
+
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final String street = this.fromApiJsonHelper.extractStringNamed("street", element);
-
-        if (enabledFieldsMap.get("street")) {
-            if (madatoryFieldsMap.get("street") && fromNewClient) {
-
-                baseDataValidator.reset().parameter("street").value(street).notBlank();
-
-            }
-            if (!regexFieldsMap.get("street").isEmpty()) {
-                baseDataValidator.reset().parameter("street").value(street).matchesRegularExpression(regexFieldsMap.get("street"));
-            }
-
-        }
         final String addressLine1 = this.fromApiJsonHelper.extractStringNamed("addressLine1", element);
         if (enabledFieldsMap.get("addressLine1")) {
             if (madatoryFieldsMap.get("addressLine1") && fromNewClient) {
