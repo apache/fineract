@@ -49,7 +49,7 @@ buildscript {
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:4.4.0"
-        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.2"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.3"
     }
 }
 
