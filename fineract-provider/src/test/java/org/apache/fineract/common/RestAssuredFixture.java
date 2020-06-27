@@ -48,12 +48,10 @@ public class RestAssuredFixture {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
     public <T> T httpGet(String apiPath, String jsonAttributeToGetBack) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, getApiPath(apiPath), jsonAttributeToGetBack);
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
     public <T> T httpGet(String apiPath) {
         return httpGet(apiPath, "");
     }

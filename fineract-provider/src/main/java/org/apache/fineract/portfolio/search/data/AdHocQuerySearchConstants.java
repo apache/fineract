@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.search.data;
 
+import java.util.Arrays;
+import java.util.List;
+
 public interface AdHocQuerySearchConstants {
 
     public static final String AD_HOC_SEARCH_QUERY_RESOURCE_NAME = "adHocQuery";
@@ -53,6 +56,6 @@ public interface AdHocQuerySearchConstants {
     public static final String closedLoanStatusOption = "closed";
     public static final String writeoffLoanStatusOption = "writeoff";
 
-    public static final Object[] entityTypeOptions = { "clients", "groups", "loans", "clientIdentifiers" };
+    public static final List<Object> entityTypeOptions = List.copyOf(Arrays.asList("clients", "groups", "loans", "clientIdentifiers"));
 
 }
