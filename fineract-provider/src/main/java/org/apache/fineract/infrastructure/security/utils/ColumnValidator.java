@@ -54,7 +54,7 @@ public class ColumnValidator {
             connection = this.jdbcTemplate.getDataSource().getConnection();
             DatabaseMetaData dbMetaData = connection.getMetaData();
             ResultSet resultSet = null;
-            for (HashMap.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
+            for (Map.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
                 Set<String> columns = entry.getValue();
                 resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null);
                 Set<String> tableColumns = getTableColumns(resultSet);
