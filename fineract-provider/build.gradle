@@ -397,7 +397,6 @@ tasks.withType(JavaCompile) {
                 "ProtectedMembersInFinalClass",
                 "StaticAssignmentInConstructor",
                 "InvalidBlockTag",
-                "InvalidInlineTag",
         )
         //TODO gradually enable these checks
         error(
@@ -456,6 +455,7 @@ tasks.withType(JavaCompile) {
                 "UnescapedEntity",
                 "ModifyCollectionInEnhancedForLoop",
                 "NonCanonicalType",
+                "InvalidInlineTag",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
