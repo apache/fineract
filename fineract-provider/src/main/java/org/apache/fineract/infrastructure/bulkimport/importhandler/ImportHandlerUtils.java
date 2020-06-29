@@ -23,11 +23,7 @@ import com.google.common.collect.Iterables;
 import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -278,21 +274,9 @@ public class ImportHandlerUtils {
     }
 
     public static String getErrorMessage(RuntimeException re) {
-        if (re instanceof AbstractPlatformDomainRuleException) {
-            AbstractPlatformDomainRuleException abstractPlatformDomainRuleException = (AbstractPlatformDomainRuleException) re;
-            return abstractPlatformDomainRuleException.getDefaultUserMessage();
-        } else if (re instanceof AbstractPlatformResourceNotFoundException) {
-            AbstractPlatformResourceNotFoundException abstractPlatformResourceNotFoundException = (AbstractPlatformResourceNotFoundException) re;
-            return abstractPlatformResourceNotFoundException.getDefaultUserMessage();
-        } else if (re instanceof AbstractPlatformServiceUnavailableException) {
-            AbstractPlatformServiceUnavailableException abstractPlatformServiceUnavailableException = (AbstractPlatformServiceUnavailableException) re;
-            return abstractPlatformServiceUnavailableException.getDefaultUserMessage();
-        } else if (re instanceof PlatformDataIntegrityException) {
-            PlatformDataIntegrityException platformDataIntegrityException = (PlatformDataIntegrityException) re;
-            return platformDataIntegrityException.getDefaultUserMessage();
-        } else if (re instanceof PlatformApiDataValidationException) {
-            PlatformApiDataValidationException platformApiDataValidationException = (PlatformApiDataValidationException) re;
-            return getDefaultUserMessages(platformApiDataValidationException.getErrors());
+        if (re instanceof AbstractPlatformException) {
+            AbstractPlatformException abstractPlatformException = (AbstractPlatformException) re;
+            return abstractPlatformException.getDefaultUserMessage();
         } else if (re instanceof UnsupportedParameterException) {
             UnsupportedParameterException unsupportedParameterException = (UnsupportedParameterException) re;
             return getErrorList(unsupportedParameterException.getUnsupportedParameters());
