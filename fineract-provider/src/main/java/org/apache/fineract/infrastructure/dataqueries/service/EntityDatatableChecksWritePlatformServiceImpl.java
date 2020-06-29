@@ -107,7 +107,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
             final boolean columnExist = datatableData.hasColumn(foreignKeyColumnName);
 
-            LOG.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
+            LOG.info("{} has column {} ? {}", datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist);
 
             if (!columnExist) {
                 throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity);
@@ -237,7 +237,6 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 try {
                     this.readWriteNonCoreDataService.createNewDatatableEntry(datatableName, entityId, datatableData.toString());
                 } catch (PlatformApiDataValidationException e) {
-                    List<ApiParameterError> errors = e.getErrors();
                     for (ApiParameterError error : e.getErrors()) {
                         error.setParameterName("datatables." + datatableName + "." + error.getParameterName());
                     }
