@@ -23,8 +23,8 @@ package org.apache.fineract.infrastructure.core.exception;
  */
 public final class GeneralPlatformDomainRuleException extends AbstractPlatformDomainRuleException {
 
-    public GeneralPlatformDomainRuleException(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+    public GeneralPlatformDomainRuleException(String globalisationMessageCode, String defaultUserMessage,
+            Object... defaultUserMessageArgs) {
         super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 }
