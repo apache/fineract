@@ -32,24 +32,25 @@ public abstract class AbstractPlatformException extends RuntimeException {
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    protected AbstractPlatformException(String globalisationMessageCode, String defaultUserMessage, Object[] defaultUserMessageArgs) {
-        super(findThrowableCause(defaultUserMessageArgs));
-        this.globalisationMessageCode = globalisationMessageCode;
-        this.defaultUserMessage = defaultUserMessage;
-        this.defaultUserMessageArgs = AbstractPlatformException.filterThrowableCause(defaultUserMessageArgs);
-    }
-
     protected AbstractPlatformException(String globalisationMessageCode, String defaultUserMessage) {
+        super(defaultUserMessage);
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.defaultUserMessageArgs = NO_ARGS;
     }
 
     protected AbstractPlatformException(String globalisationMessageCode, String defaultUserMessage, Throwable cause) {
-        super(cause);
+        super(defaultUserMessage, cause);
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.defaultUserMessageArgs = NO_ARGS;
+    }
+
+    protected AbstractPlatformException(String globalisationMessageCode, String defaultUserMessage, Object[] defaultUserMessageArgs) {
+        super(defaultUserMessage, findThrowableCause(defaultUserMessageArgs));
+        this.globalisationMessageCode = globalisationMessageCode;
+        this.defaultUserMessage = defaultUserMessage;
+        this.defaultUserMessageArgs = AbstractPlatformException.filterThrowableCause(defaultUserMessageArgs);
     }
 
     private static Throwable findThrowableCause(Object[] defaultUserMessageArgs) {
