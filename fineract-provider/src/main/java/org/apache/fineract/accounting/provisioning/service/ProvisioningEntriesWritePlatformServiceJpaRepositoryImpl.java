@@ -167,7 +167,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
-            LOG.error("{}", peace.getDefaultUserMessage());
+            LOG.error("Provisioning Entry already created", peace);
         } catch (DataIntegrityViolationException dive) {
             LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dive);
         }
