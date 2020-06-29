@@ -56,8 +56,6 @@ public class ApiParameterError {
      */
     private List<ApiErrorMessageArg> args = new ArrayList<>();
 
-    private final transient SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
     public static ApiParameterError generalError(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
@@ -89,6 +87,7 @@ public class ApiParameterError {
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
                 if (object instanceof Date) {
+                    final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
                     final String formattedDate = dateFormatter.format(object);
                     messageArgs.add(ApiErrorMessageArg.from(formattedDate));
                 } else {
