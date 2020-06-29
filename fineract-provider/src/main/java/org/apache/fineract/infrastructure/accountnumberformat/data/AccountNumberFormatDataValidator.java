@@ -44,6 +44,7 @@ import org.springframework.stereotype.Component;
 public class AccountNumberFormatDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
 
@@ -56,7 +57,6 @@ public class AccountNumberFormatDataValidator {
     }
 
     public void validateForCreate(final String json) {
-
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -136,7 +136,6 @@ public class AccountNumberFormatDataValidator {
     }
 
     public void validateForUpdate(final String json, EntityAccountType entityAccountType) {
-
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -166,12 +165,10 @@ public class AccountNumberFormatDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
-            //
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
