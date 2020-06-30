@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.integrationtests.useradministration.users;
 
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Assertions;
 
 public class UserHelper {
 
@@ -42,6 +46,20 @@ public class UserHelper {
             int roleId, int staffId, int clientId, String attribute) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
                 getTestCreateUserAsJSONForSelfService(roleId, staffId, clientId), attribute);
+    }
+
+    public static Integer getUserId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String userName) {
+        String json = Utils.performServerGet(requestSpec, responseSpec, CREATE_USER_URL, null);
+        Assertions.assertNotNull(json);
+        List<HashMap<String, Object>> userList = JsonPath.from(json).getList("$");
+
+        for (HashMap<String, Object> user : userList) {
+            if (user.get("username").equals(userName)) {
+                return (Integer) user.get("id");
+            }
+        }
+
+        return null;
     }
 
     public static String getTestCreateUserAsJSON(int roleId, int staffId) {
