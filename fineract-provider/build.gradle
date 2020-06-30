@@ -39,7 +39,7 @@ buildscript {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
                 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10',
-                'org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE'
+                'org.springframework.boot:spring-boot-gradle-plugin:2.3.1.RELEASE'
         // below
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
@@ -108,6 +108,7 @@ dependencyManagement {
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
         dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+        dependency 'jakarta.validation:jakarta.validation-api:2.0.2'
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'org.mockito:mockito-core:3.3.3'
