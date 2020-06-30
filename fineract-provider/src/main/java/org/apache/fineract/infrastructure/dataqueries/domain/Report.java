@@ -111,7 +111,7 @@ public final class Report extends AbstractPersistableCustom {
         return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
     }
 
-    protected Report() {
+    Report() {
         //
     }
 

@@ -130,7 +130,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @JoinColumn(name = "savings_account_transaction_id", referencedColumnName = "id")
     private List<Note> notes = new ArrayList<>();
 
-    protected SavingsAccountTransaction() {
+    SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
         this.createdDate = null;

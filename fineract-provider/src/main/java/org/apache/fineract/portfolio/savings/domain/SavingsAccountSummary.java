@@ -82,7 +82,7 @@ public final class SavingsAccountSummary {
     @Column(name = "last_interest_calculation_date")
     private Date lastInterestCalculationDate;
 
-    protected SavingsAccountSummary() {
+    SavingsAccountSummary() {
         //
     }
 
