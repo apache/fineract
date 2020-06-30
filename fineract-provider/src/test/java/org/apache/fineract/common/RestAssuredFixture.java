@@ -19,7 +19,6 @@
 package org.apache.fineract.common;
 
 import com.google.common.base.Preconditions;
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -33,16 +32,14 @@ import io.restassured.specification.ResponseSpecification;
  */
 public class RestAssuredFixture {
 
-    private final int httpPort;
+    private final int httpPort = 8443;
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    public RestAssuredFixture(int httpPort) {
+    public RestAssuredFixture() {
         super();
-        this.httpPort = httpPort;
         Utils.initializeRESTAssured();
-        RestAssured.port = httpPort;
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
