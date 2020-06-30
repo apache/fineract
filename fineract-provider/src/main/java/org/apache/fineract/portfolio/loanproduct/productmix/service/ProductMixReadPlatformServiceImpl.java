@@ -111,9 +111,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
                 extractedData.put(this.productId, productMixData);
                 return extractedData;
             }
-            /* move the cursor to starting of resultset */
-            rs.beforeFirst();
-            while (rs.next()) {
+            do {
                 final Long productId = rs.getLong("productId");
                 final String name = rs.getString("name");
                 final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService
@@ -122,7 +120,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
                         .retrieveAllowedProductsForMix(productId);
                 final ProductMixData productMixData = ProductMixData.withDetails(productId, name, restrictedProducts, allowedProducts);
                 extractedData.put(productId, productMixData);
-            }
+            } while (rs.next());
             return extractedData;
         }
     }
