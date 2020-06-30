@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
@@ -33,76 +32,76 @@ final class ProvisioningCriteriaApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PostProvisioningCriteriaRequest")
+    @Schema(description = "PostProvisioningCriteriaRequest")
     public static final class PostProvisioningCriteriaRequest {
 
         private PostProvisioningCriteriaRequest() {
 
         }
 
-        @ApiModelProperty(example = "High Risk Products Criteria")
+        @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
         public Collection<LoanProductData> loanProducts;
         public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
     }
 
-    @ApiModel(value = "PostProvisioningCriteriaResponse")
+    @Schema(description = "PostProvisioningCriteriaResponse")
     public static final class PostProvisioningCriteriaResponse {
 
         private PostProvisioningCriteriaResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 
-    @ApiModel(value = "GetProvisioningCriteriaResponse")
+    @Schema(description = "GetProvisioningCriteriaResponse")
     public static final class GetProvisioningCriteriaResponse {
 
         private GetProvisioningCriteriaResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long criteriaId;
-        @ApiModelProperty(example = "High Risk Products Criteria")
+        @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdBy;
     }
 
-    @ApiModel(value = "GetProvisioningCriteriaCriteriaIdResponse")
+    @Schema(description = "GetProvisioningCriteriaCriteriaIdResponse")
     public static final class GetProvisioningCriteriaCriteriaIdResponse {
 
         private GetProvisioningCriteriaCriteriaIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long criteriaId;
-        @ApiModelProperty(example = "High Risk Products Criteria")
+        @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdBy;
         public Collection<LoanProductData> loanProducts;
         public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
     }
 
-    @ApiModel(value = "PutProvisioningCriteriaRequest")
+    @Schema(description = "PutProvisioningCriteriaRequest")
     public static final class PutProvisioningCriteriaRequest {
 
         private PutProvisioningCriteriaRequest() {
 
         }
 
-        @ApiModelProperty(example = "High Risk Products Criteria")
+        @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
         public Collection<LoanProductData> loanProducts;
         public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
     }
 
-    @ApiModel(value = "PutProvisioningCriteriaResponse")
+    @Schema(description = "PutProvisioningCriteriaResponse")
     public static final class PutProvisioningCriteriaResponse {
 
         private PutProvisioningCriteriaResponse() {
@@ -113,23 +112,23 @@ final class ProvisioningCriteriaApiResourceSwagger {
 
             private PutProvisioningCriteriaResponseChanges() {}
 
-            @ApiModelProperty(example = "High Risk Products Criteria")
+            @Schema(example = "High Risk Products Criteria")
             public String criteriaName;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
         public PutProvisioningCriteriaResponseChanges changes;
     }
 
-    @ApiModel(value = "DeleteProvisioningCriteriaResponse")
+    @Schema(description = "DeleteProvisioningCriteriaResponse")
     public static final class DeleteProvisioningCriteriaResponse {
 
         private DeleteProvisioningCriteriaResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 }

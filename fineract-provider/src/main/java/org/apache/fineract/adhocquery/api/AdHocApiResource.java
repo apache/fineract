@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.adhocquery.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,8 +52,7 @@ import org.springframework.stereotype.Component;
 @Path("/adhocquery")
 @Component
 @Scope("singleton")
-@Api(tags = { "AdhocQuery Api" })
-@SwaggerDefinition(tags = { @Tag(name = "AdhocQuery Api", description = "") })
+@Tag(name = "AdhocQuery Api", description = "")
 public class AdHocApiResource {
 
     /**
@@ -122,7 +119,7 @@ public class AdHocApiResource {
     @Path("{adHocId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId,
+    public String retrieveAdHocQuery(@PathParam("adHocId") @Parameter(description = "adHocId") final Long adHocId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser();
@@ -138,7 +135,7 @@ public class AdHocApiResource {
     @Path("{adHocId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId, final String apiRequestBodyAsJson) {
+    public String update(@PathParam("adHocId") @Parameter(description = "adHocId") final Long adHocId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateAdHoc(adHocId) //
@@ -160,7 +157,7 @@ public class AdHocApiResource {
     @Path("{adHocId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId) {
+    public String deleteAdHocQuery(@PathParam("adHocId") @Parameter(description = "adHocId") final Long adHocId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteAdHoc(adHocId) //

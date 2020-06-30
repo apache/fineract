@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.portfolio.self.security.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -40,8 +40,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(tags = { "Self User Details" })
-@SwaggerDefinition(tags = { @Tag(name = "Self User Details", description = "") })
+
+@Tag(name = "Self User Details", description = "")
 public class SelfUserDetailsApiResource {
 
     private final UserDetailsApiResource userDetailsApiResource;
@@ -53,11 +53,12 @@ public class SelfUserDetailsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n"
+    @Operation(summary = "Fetch authenticated user details", description = "Checks the Authentication and returns the set roles and permissions allowed\n\n"
             + "For more info visit this link - https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#selfoauth")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class) })
-    public String fetchAuthenticatedUserData(@QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class))) })
+    public String fetchAuthenticatedUserData(
+            @QueryParam("access_token") @Parameter(description = "äccess_token") final String accessToken) {
         return this.userDetailsApiResource.fetchAuthenticatedUserData(accessToken);
     }
 }

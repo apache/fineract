@@ -112,6 +112,4 @@
     </bean>
 
     <import resource="spmContext.xml"/>
-
-    <import resource="swagger.xml"/>
 </beans>

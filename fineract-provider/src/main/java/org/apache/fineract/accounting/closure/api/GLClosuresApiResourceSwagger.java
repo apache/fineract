@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.closure.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.joda.time.LocalDate;
 
 final class GLClosuresApiResourceSwagger {
@@ -33,108 +32,108 @@ final class GLClosuresApiResourceSwagger {
      */
     // Check !!
 
-    @ApiModel(value = "GetGLClosureResponse")
+    @Schema(description = "GetGLClosureResponse")
     public static final class GetGlClosureResponse {
 
         private GetGlClosureResponse() {
             // dont allow to initiatiate
         }
 
-        @ApiModelProperty(example = "7")
+        @Schema(example = "7")
         public Long id;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "2013,1,2")
+        @Schema(example = "2013,1,2")
         public LocalDate closingDate;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean deleted;
-        @ApiModelProperty(example = "2013,1,3")
+        @Schema(example = "2013,1,3")
         public LocalDate createdDate;
-        @ApiModelProperty(example = "2013,1,3")
+        @Schema(example = "2013,1,3")
         public LocalDate lastUpdatedDate;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long createdByUserId;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdByUsername;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long lastUpdatedByUserId;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String lastUpdatedByUsername;
-        @ApiModelProperty(example = "closed")
+        @Schema(example = "closed")
         public String comments;
 
     }
 
-    @ApiModel(value = "PostGLCLosuresRequest")
+    @Schema(description = "PostGLCLosuresRequest")
     public static final class PostGlClosuresRequest {
 
         private PostGlClosuresRequest() {
             // don't allow to instantiate; use only for live API documentation
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "06 December 2012")
+        @Schema(example = "06 December 2012")
         public LocalDate closingDate;
-        @ApiModelProperty(example = "The accountants are heading for a carribean vacation")
+        @Schema(example = "The accountants are heading for a carribean vacation")
         public String comments;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
     }
 
-    @ApiModel(value = "PostGlClosuresResponse")
+    @Schema(description = "PostGlClosuresResponse")
     public static final class PostGlClosuresResponse {
 
         private PostGlClosuresResponse() {
             // don't allow to instantiate; use only for live API documentation
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "9")
+        @Schema(example = "9")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutGlClosuresRequest")
+    @Schema(description = "PutGlClosuresRequest")
     public static final class PutGlClosuresRequest {
 
         private PutGlClosuresRequest() {
             // don't allow to instantiate; use only for live API documentation
         }
 
-        @ApiModelProperty(example = "All transactions verified by Johnny Cash")
+        @Schema(example = "All transactions verified by Johnny Cash")
         public String comments;
     }
 
-    @ApiModel(value = "PutGlClosuresResponse")
+    @Schema(description = "PutGlClosuresResponse")
     public static final class PutGlClosuresResponse {
 
         private PutGlClosuresResponse() {
             // don't allow to instantiate; use only for live API documentation
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "9")
+        @Schema(example = "9")
         public Long resourceId;
-        @ApiModelProperty(example = "All transactions verified by Johnny Cash")
+        @Schema(example = "All transactions verified by Johnny Cash")
         public String comments;
     }
 
-    @ApiModel(value = "DeleteGlClosuresResponse")
+    @Schema(description = "DeleteGlClosuresResponse")
     public static final class DeleteGlClosuresResponse {
 
         private DeleteGlClosuresResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "9")
+        @Schema(example = "9")
         public Long resourceId;
     }
 }

@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.portfolio.note.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,8 +61,8 @@ import org.springframework.stereotype.Component;
 @Path("/{resourceType}/{resourceId}/notes")
 @Component
 @Scope("singleton")
-@Api(tags = { "Notes" })
-@SwaggerDefinition(tags = { @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.") })
+
+@Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
 public class NotesApiResource {
 
     private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
@@ -89,13 +89,13 @@ public class NotesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Resource's Notes", httpMethod = "GET", notes = "Retrieves a Resource's Notes\n\n"
+    @Operation(summary = "Retrieve a Resource's description", description = "Retrieves a Resource's Notes\n\n"
             + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n"
             + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class) })
-    public String retrieveNotesByResource(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
-            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class)))) })
+    public String retrieveNotesByResource(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -117,15 +117,15 @@ public class NotesApiResource {
     @Path("{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Resource Note", httpMethod = "GET", notes = "Retrieves a Resource Note\n\n" + "Example Requests:\n"
-            + "\n" + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n"
+    @Operation(summary = "Retrieve a Resource Note", description = "Retrieves a Resource Note\n\n" + "Example Requests:\n" + "\n"
+            + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n"
             + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n"
             + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class) })
-    public String retrieveNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
-            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class))) })
+    public String retrieveNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
+            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -146,15 +146,14 @@ public class NotesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add a Resource Note", httpMethod = "POST", notes = "Adds a new note to a supported resource.\n\n"
-            + "Example Requests:\n" + "\n" + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class) })
+    @Operation(summary = "Add a Resource Note", description = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n"
+            + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class) })
-    public String addNewNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
-            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class))) })
+    public String addNewNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -175,15 +174,14 @@ public class NotesApiResource {
     @Path("{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Resource Note", httpMethod = "PUT", notes = "Updates a Resource Note")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class) })
+    @Operation(summary = "Update a Resource Note", description = "Updates a Resource Note")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class) })
-    public String updateNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
-            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class))) })
+    public String updateNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
+            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -205,12 +203,12 @@ public class NotesApiResource {
     @Path("{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Resource Note", httpMethod = "DELETE", notes = "Deletes a Resource Note")
+    @Operation(summary = "Delete a Resource Note", description = "Deletes a Resource Note")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class) })
-    public String deleteNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
-            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class))) })
+    public String deleteNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
+            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 

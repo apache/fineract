@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.fund.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by Chirag Gupta on 12/08/17.
@@ -28,50 +27,50 @@ final class FundsApiResourceSwagger {
 
     private FundsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetFundsResponse")
+    @Schema(description = "GetFundsResponse")
     public static final class GetFundsResponse {
 
         private GetFundsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "EU Agri Fund")
+        @Schema(example = "EU Agri Fund")
         public String name;
     }
 
-    @ApiModel(value = "PostFundsRequest")
+    @Schema(description = "PostFundsRequest")
     public static final class PostFundsRequest {
 
         private PostFundsRequest() {}
 
-        @ApiModelProperty(example = "EU Agri Fund")
+        @Schema(example = "EU Agri Fund")
         public String name;
     }
 
-    @ApiModel(value = "PostFundsResponse")
+    @Schema(description = "PostFundsResponse")
     public static final class PostFundsResponse {
 
         private PostFundsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutFundsFundIdRequest")
+    @Schema(description = "PutFundsFundIdRequest")
     public static final class PutFundsFundIdRequest {
 
         private PutFundsFundIdRequest() {}
 
-        @ApiModelProperty(example = "EU Agri Fund (2010-2020)")
+        @Schema(example = "EU Agri Fund (2010-2020)")
         public String name;
     }
 
-    @ApiModel(value = "PutFundsFundIdResponse")
+    @Schema(description = "PutFundsFundIdResponse")
     public static final class PutFundsFundIdResponse {
 
         private PutFundsFundIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutFundsFundIdRequest changes;
     }

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 25/7/17.
@@ -28,39 +27,39 @@ final class JournalEntriesApiResourceSwagger {
 
     private JournalEntriesApiResourceSwagger() {}
 
-    @ApiModel(value = "PostJournalEntriesResponse")
+    @Schema(description = "PostJournalEntriesResponse")
     public static final class PostJournalEntriesResponse {
 
         private PostJournalEntriesResponse() {
 
         }
 
-        @ApiModelProperty(value = "1")
+        @Schema(description = "1")
         public Long officeId;
-        @ApiModelProperty(value = "RS9MCISID4WK1ZM")
+        @Schema(description = "RS9MCISID4WK1ZM")
         public String transactionId;
 
     }
 
-    @ApiModel(value = "PostJournalEntriesTransactionIdRequest")
+    @Schema(description = "PostJournalEntriesTransactionIdRequest")
     public static final class PostJournalEntriesTransactionIdRequest {
 
         private PostJournalEntriesTransactionIdRequest() {
 
         }
 
-        @ApiModelProperty(value = "1")
+        @Schema(description = "1")
         public Long officeId;
     }
 
-    @ApiModel(value = "PostJournalEntriesTransactionIdResponse")
+    @Schema(description = "PostJournalEntriesTransactionIdResponse")
     public static final class PostJournalEntriesTransactionIdResponse {
 
         private PostJournalEntriesTransactionIdResponse() {
 
         }
 
-        @ApiModelProperty(value = "1")
+        @Schema(description = "1")
         public Long officeId;
     }
 }

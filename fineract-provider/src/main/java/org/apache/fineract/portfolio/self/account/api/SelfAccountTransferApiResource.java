@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.account.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
@@ -61,8 +62,8 @@ import org.springframework.stereotype.Component;
 @Path("/self/accounttransfers")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Account Transfer" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Account transfer", description = "") })
+
+@Tag(name = "Self Account transfer", description = "")
 public class SelfAccountTransferApiResource {
 
     private final PlatformSecurityContext context;
@@ -99,11 +100,12 @@ public class SelfAccountTransferApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Account Transfer Template", httpMethod = "GET", notes = "Returns list of loan/savings accounts that can be used for account transfer\n"
+    @Operation(summary = "Retrieve Account Transfer Template", description = "Returns list of loan/savings accounts that can be used for account transfer\n"
             + "\n" + "\n" + "Example Requests:\n" + "\n" + "self/accounttransfers/template\n")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.GetAccountTransferTemplateResponse.class) })
-    public String template(@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfAccountTransferApiResourceSwagger.GetAccountTransferTemplateResponse.class)))) })
+    public String template(@DefaultValue("") @QueryParam("type") @Parameter(name = "type") final String type,
+            @Context final UriInfo uriInfo) {
 
         AppUser user = this.context.authenticatedUser();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -121,11 +123,12 @@ public class SelfAccountTransferApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create new Transfer", httpMethod = "POST", notes = "Ability to create new transfer of monetary funds from one account to another.\n"
+    @Operation(summary = "Create new Transfer", description = "Ability to create new transfer of monetary funds from one account to another.\n"
             + "\n" + "\n" + "Example Requests:\n" + "\n" + " self/accounttransfers/\n")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.PostNewTransferResponse.class) })
-    public String create(@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type, final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfAccountTransferApiResourceSwagger.PostNewTransferResponse.class)))) })
+    public String create(@DefaultValue("") @QueryParam("type") @Parameter(name = "type") final String type,
+            final String apiRequestBodyAsJson) {
         Map<String, Object> params = this.dataValidator.validateCreate(type, apiRequestBodyAsJson);
         if (type.equals("tpt")) {
             checkForLimits(params);

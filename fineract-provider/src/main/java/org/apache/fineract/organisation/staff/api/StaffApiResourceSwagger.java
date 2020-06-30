@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.organisation.staff.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.joda.time.LocalDate;
 
 /**
@@ -32,94 +31,94 @@ final class StaffApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PostStaffRequest")
+    @Schema(description = "PostStaffRequest")
     public static final class PostStaffRequest {
 
         private PostStaffRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "John")
+        @Schema(example = "John")
         public String firstname;
-        @ApiModelProperty(example = "Doe")
+        @Schema(example = "Doe")
         public String lastname;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isLoanOfficer;
-        @ApiModelProperty(example = "17H")
+        @Schema(example = "17H")
         public String externalId;
-        @ApiModelProperty(example = "+353851239876")
+        @Schema(example = "+353851239876")
         public String mobileNo;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "01 January 2009")
+        @Schema(example = "01 January 2009")
         public LocalDate joiningDate;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
 
     }
 
-    @ApiModel(value = "PostStaffResponse")
+    @Schema(description = "PostStaffResponse")
     public static final class PostStaffResponse {
 
         private PostStaffResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 
-    @ApiModel(value = "GetStaffResponse")
+    @Schema(description = "GetStaffResponse")
     public static final class GetStaffResponse {
 
         private GetStaffResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "John")
+        @Schema(example = "John")
         public String firstname;
-        @ApiModelProperty(example = "Doe")
+        @Schema(example = "Doe")
         public String lastname;
-        @ApiModelProperty(example = "Doe, John")
+        @Schema(example = "Doe, John")
         public String displayName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isLoanOfficer;
-        @ApiModelProperty(example = "17H")
+        @Schema(example = "17H")
         public String externalId;
-        @ApiModelProperty(example = "+353851239876")
+        @Schema(example = "+353851239876")
         public Boolean isActive;
-        @ApiModelProperty(example = "[2009,8,1]")
+        @Schema(example = "[2009,8,1]")
         public LocalDate joiningDate;
 
     }
 
-    @ApiModel(value = "PutStaffRequest")
+    @Schema(description = "PutStaffRequest")
     public static final class PutStaffRequest {
 
         private PutStaffRequest() {
 
         }
 
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean isLoanOfficer;
-        @ApiModelProperty(example = "17Hbb")
+        @Schema(example = "17Hbb")
         public String externalId;
 
     }
 
-    @ApiModel(value = "PutStaffResponse")
+    @Schema(description = "PutStaffResponse")
     public static final class PutStaffResponse {
 
         private PutStaffResponse() {
@@ -130,15 +129,15 @@ final class StaffApiResourceSwagger {
 
             private PutStaffResponseChanges() {}
 
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean isLoanOfficer;
-            @ApiModelProperty(example = "17Hbb")
+            @Schema(example = "17Hbb")
             public String externalId;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
 
     }

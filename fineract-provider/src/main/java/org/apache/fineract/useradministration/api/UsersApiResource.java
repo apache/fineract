@@ -20,15 +20,15 @@ package org.apache.fineract.useradministration.api;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,8 +69,8 @@ import org.springframework.stereotype.Component;
 @Path("/users")
 @Component
 @Scope("singleton")
-@Api(tags = { "Users" })
-@SwaggerDefinition(tags = { @Tag(name = "Users", description = "An API capability to support administration of application users.") })
+
+@Tag(name = "Users", description = "An API capability to support administration of application users.")
 public class UsersApiResource {
 
     /**
@@ -108,10 +108,10 @@ public class UsersApiResource {
     }
 
     @GET
-    @ApiOperation(value = "Retrieve list of users", notes = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n"
+    @Operation(summary = "Retrieve list of users", description = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n"
             + "users?fields=id,username,email,officeName")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersResponse.class, responseContainer = "List") })
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersResponse.class)))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
@@ -126,12 +126,13 @@ public class UsersApiResource {
 
     @GET
     @Path("{userId}")
-    @ApiOperation(value = "Retrieve a User", notes = "Example Requests:\n" + "\n" + "users/1\n" + "\n" + "\n" + "users/1?template=true\n"
-            + "\n" + "\n" + "users/1?fields=username,officeName")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersUserIdResponse.class) })
+    @Operation(summary = "Retrieve a User", description = "Example Requests:\n" + "\n" + "users/1\n" + "\n" + "\n"
+            + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersUserIdResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("userId") @ApiParam(value = "userId") final Long userId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam("userId") @Parameter(description = "userId") final Long userId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions, userId);
 
@@ -148,9 +149,10 @@ public class UsersApiResource {
 
     @GET
     @Path("template")
-    @ApiOperation(value = "Retrieve User Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "users/template")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersTemplateResponse.class) })
+    @Operation(summary = "Retrieve User Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "users/template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersTemplateResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@Context final UriInfo uriInfo) {
@@ -164,16 +166,16 @@ public class UsersApiResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a User", notes = "Adds new application user.\n" + "\n"
+    @Operation(summary = "Create a User", description = "Adds new application user.\n" + "\n"
             + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n"
             + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n"
             + "Optional Fields: \n" + "staffId,passwordNeverExpires,isSelfServiceUser,clients")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PostUsersRequest.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PostUsersResponse.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createUser() //
@@ -187,14 +189,14 @@ public class UsersApiResource {
 
     @PUT
     @Path("{userId}")
-    @ApiOperation(value = "Update a User", notes = "When updating a password you must provide the repeatPassword parameter also.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PutUsersUserIdRequest.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PutUsersUserIdResponse.class) })
+    @Operation(summary = "Update a User", description = "When updating a password you must provide the repeatPassword parameter also.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("userId") @ApiParam(value = "userId") final Long userId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String update(@PathParam("userId") @Parameter(description = "userId") final Long userId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateUser(userId) //
@@ -208,11 +210,12 @@ public class UsersApiResource {
 
     @DELETE
     @Path("{userId}")
-    @ApiOperation(value = "Delete a User", notes = "Removes the user and the associated roles and permissions.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class) })
+    @Operation(summary = "Delete a User", description = "Removes the user and the associated roles and permissions.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("userId") @ApiParam(value = "userId") final Long userId) {
+    public String delete(@PathParam("userId") @Parameter(description = "userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteUser(userId) //

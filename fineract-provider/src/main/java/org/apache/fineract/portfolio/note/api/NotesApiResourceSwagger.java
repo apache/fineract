@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.note.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.joda.time.DateTime;
 
 /**
@@ -29,7 +28,7 @@ final class NotesApiResourceSwagger {
 
     private NotesApiResourceSwagger() {}
 
-    @ApiModel(value = "GetResourceTypeResourceIdNotesResponse")
+    @Schema(description = "GetResourceTypeResourceIdNotesResponse")
     public static final class GetResourceTypeResourceIdNotesResponse {
 
         private GetResourceTypeResourceIdNotesResponse() {}
@@ -38,93 +37,93 @@ final class NotesApiResourceSwagger {
 
             private GetNotesNoteType() {}
 
-            @ApiModelProperty(example = "100")
+            @Schema(example = "100")
             public Integer id;
-            @ApiModelProperty(example = "noteType.client")
+            @Schema(example = "noteType.client")
             public String code;
-            @ApiModelProperty(example = "Client note")
-            public String value;
+            @Schema(example = "Client note")
+            public String description;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer id;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
         public GetNotesNoteType noteType;
-        @ApiModelProperty(example = "First note edited")
+        @Schema(example = "First note edited")
         public String note;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer createdById;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdByUsername;
-        @ApiModelProperty(example = "1342498505000")
+        @Schema(example = "1342498505000")
         public DateTime createdOn;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer updatedById;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String updatedByUsername;
-        @ApiModelProperty(example = "1342498517000")
+        @Schema(example = "1342498517000")
         public DateTime updatedOn;
     }
 
-    @ApiModel(value = "GetResourceTypeResourceIdNotesNoteIdResponse")
+    @Schema(description = "GetResourceTypeResourceIdNotesNoteIdResponse")
     public static final class GetResourceTypeResourceIdNotesNoteIdResponse {
 
         private GetResourceTypeResourceIdNotesNoteIdResponse() {}
 
-        @ApiModelProperty(example = "76")
+        @Schema(example = "76")
         public Integer id;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
         public GetResourceTypeResourceIdNotesResponse.GetNotesNoteType noteType;
-        @ApiModelProperty(example = "a note about the client")
+        @Schema(example = "a note about the client")
         public String note;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer createdById;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String createdByUsername;
-        @ApiModelProperty(example = "1359463135000")
+        @Schema(example = "1359463135000")
         public DateTime createdOn;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer updatedById;
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String updatedByUsername;
-        @ApiModelProperty(example = "1359463135000")
+        @Schema(example = "1359463135000")
         public DateTime updatedOn;
     }
 
-    @ApiModel(value = "PostResourceTypeResourceIdNotesRequest")
+    @Schema(description = "PostResourceTypeResourceIdNotesRequest")
     public static final class PostResourceTypeResourceIdNotesRequest {
 
         private PostResourceTypeResourceIdNotesRequest() {}
 
-        @ApiModelProperty(example = "a note about the client")
+        @Schema(example = "a note about the client")
         public String note;
     }
 
-    @ApiModel(value = "PostResourceTypeResourceIdNotesResponse")
+    @Schema(description = "PostResourceTypeResourceIdNotesResponse")
     public static final class PostResourceTypeResourceIdNotesResponse {
 
         private PostResourceTypeResourceIdNotesResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "76")
+        @Schema(example = "76")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdRequest")
+    @Schema(description = "PutResourceTypeResourceIdNotesNoteIdRequest")
     public static final class PutResourceTypeResourceIdNotesNoteIdRequest {
 
         private PutResourceTypeResourceIdNotesNoteIdRequest() {}
 
-        @ApiModelProperty(example = "a note about the client")
+        @Schema(example = "a note about the client")
         public String note;
     }
 
-    @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdResponse")
+    @Schema(description = "PutResourceTypeResourceIdNotesNoteIdResponse")
     public static final class PutResourceTypeResourceIdNotesNoteIdResponse {
 
         private PutResourceTypeResourceIdNotesNoteIdResponse() {}
@@ -133,25 +132,25 @@ final class NotesApiResourceSwagger {
 
             private PutNotesChanges() {}
 
-            @ApiModelProperty(example = "a note about the client")
+            @Schema(example = "a note about the client")
             public String note;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "76")
+        @Schema(example = "76")
         public Integer resourceId;
         public PutNotesChanges changes;
     }
 
-    @ApiModel(value = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
+    @Schema(description = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
     public static final class DeleteResourceTypeResourceIdNotesNoteIdResponse {
 
         private DeleteResourceTypeResourceIdNotesNoteIdResponse() {}
 
-        @ApiModelProperty(example = "76")
+        @Schema(example = "76")
         public Integer resourceId;
     }
 }

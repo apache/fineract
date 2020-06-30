@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.self.security.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class SelfAuthenticationApiResourceSwagger {
 
     private SelfAuthenticationApiResourceSwagger() {}
 
-    @ApiModel(value = "PostSelfAuthenticationResponse")
+    @Schema(description = "PostSelfAuthenticationResponse")
     public static final class PostSelfAuthenticationResponse {
 
         private PostSelfAuthenticationResponse() {}
@@ -39,49 +38,49 @@ final class SelfAuthenticationApiResourceSwagger {
 
             private GetSelfUserDetailsOrganisationalRole() {}
 
-            @ApiModelProperty(example = "100")
+            @Schema(example = "100")
             public Integer id;
-            @ApiModelProperty(example = "staffOrganisationalRoleType.programDirector")
+            @Schema(example = "staffOrganisationalRoleType.programDirector")
             public String code;
-            @ApiModelProperty(example = "Program Director")
-            public String value;
+            @Schema(example = "Program Director")
+            public String description;
         }
 
         static final class GetSelfUserDetailsRoles {
 
             private GetSelfUserDetailsRoles() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Super user")
+            @Schema(example = "Super user")
             public String name;
-            @ApiModelProperty(example = "This role provides all application permissions.")
+            @Schema(example = "This role provides all application permissions.")
             public String description;
         }
 
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String username;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer userId;
-        @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
+        @Schema(example = "bWlmb3M6cGFzc3dvcmQ=")
         public String base64EncodedAuthenticationKey;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean authenticated;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer staffId;
-        @ApiModelProperty(example = "Director, Program")
+        @Schema(example = "Director, Program")
         public String staffDisplayName;
         public GetSelfUserDetailsOrganisationalRole organisationalRole;
         public Set<GetSelfUserDetailsRoles> roles;
-        @ApiModelProperty(example = "ALL_FUNCTIONS")
+        @Schema(example = "ALL_FUNCTIONS")
         public List<String> permissions;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isSelfServiceUser;
-        @ApiModelProperty(example = "1, 2, 3")
+        @Schema(example = "1, 2, 3")
         public List<Integer> clients;
     }
 }

@@ -91,9 +91,9 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-email:1.5'
         dependency 'commons-io:commons-io:2.7'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-        dependency 'com.github.librepdf:openpdf:1.3.19'
+        dependency 'com.github.librepdf:openpdf:1.3.20'
         dependency 'org.mnode.ical4j:ical4j:3.0.19'
-        dependency 'org.flywaydb:flyway-core:6.4.4'
+        dependency 'org.flywaydb:flyway-core:6.5.0'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.804'
         dependency 'org.ehcache:ehcache:3.8.1'
@@ -101,7 +101,7 @@ dependencyManagement {
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:4.5.12'
-        dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
+        dependency 'io.swagger.core.v3:swagger-annotations:2.1.2'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
         dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
@@ -178,6 +178,8 @@ eclipse
     }
 }
 
+System.setProperty("openjpa.Log", "commons")
+
 openjpa {
     includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
     enhance {
@@ -188,6 +190,7 @@ openjpa {
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 resolve {
+    logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
     outputFormat = 'JSON'
     prettyPrint = 'TRUE'
@@ -214,7 +217,7 @@ jacocoTestReport{
 spotless {
   format 'misc', {
    target '**/*.md', '**/*.properties', '**/*.gradle', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-   targetExclude '**/build/**', '**/bin/**', '**/.settings/**'
+   targetExclude '**/build/**', '**/bin/**', '**/.settings/**','**/.idea/**'
    indentWithSpaces(4)
    endWithNewline()
    trimTrailingWhitespace()
@@ -382,7 +385,6 @@ tasks.withType(JavaCompile) {
         //Todo Remove necessary checks from this list
         disable(
                 "UnusedVariable",
-                "SameNameButDifferent",
                 "TypeParameterUnusedInFormals",
                 "JdkObsolete",
                 "EmptyBlockTag",
@@ -391,12 +393,9 @@ tasks.withType(JavaCompile) {
                 "InvalidParam",
                 "ReturnFromVoid",
                 "AlmostJavadoc",
-                "PublicConstructorForAbstractClass",
                 "ProtectedMembersInFinalClass",
                 "StaticAssignmentInConstructor",
-                "UnescapedEntity",
                 "InvalidBlockTag",
-                "ModifyCollectionInEnhancedForLoop",
                 "NonCanonicalType",
                 "InvalidInlineTag",
         )
@@ -424,6 +423,7 @@ tasks.withType(JavaCompile) {
                 "StreamResourceLeak",
                 "TruthIncompatibleType",
                 "ByteBufferBackingArray",
+                "SameNameButDifferent",
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
@@ -452,6 +452,9 @@ tasks.withType(JavaCompile) {
                 "MissingCasesInEnumSwitch",
                 "ReferenceEquality",
                 "UndefinedEquals",
+                "PublicConstructorForAbstractClass",
+                "UnescapedEntity",
+                "ModifyCollectionInEnhancedForLoop",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
@@ -625,6 +628,7 @@ cargoRunLocal.dependsOn bootWar
 cargoStartLocal.dependsOn bootWar
 cargoStartLocal.mustRunAfter "integrationTestClasses"
 cargoStartLocal.mustRunAfter "enhance"
+cargoStartLocal.mustRunAfter "resolve"
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir

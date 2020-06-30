@@ -77,11 +77,9 @@ dependencies {
 
              'javax.cache:cache-api',
 
-             'com.github.spotbugs:spotbugs-annotations'
+             'com.github.spotbugs:spotbugs-annotations',
+             'io.swagger.core.v3:swagger-annotations'
     )
-    implementation ('io.swagger:swagger-jersey-jaxrs') {
-        exclude group: 'javax.validation'
-    }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
