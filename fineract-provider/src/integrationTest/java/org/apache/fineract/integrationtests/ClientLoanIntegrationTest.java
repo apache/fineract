@@ -4365,6 +4365,14 @@ public class ClientLoanIntegrationTest {
         Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
 
+        // FINERACT-885: If the loan starts on day 27-31th of month and not all months have that
+        // many days, then loan payment will get reset to a day of month less than today's day
+        // and 4th payment will be in the past. In such case, start the loan a few days later,
+        // so that 4th payment is guaranteed to be in the future.
+        if (fourMonthsfromNowCalendar.get(Calendar.DAY_OF_MONTH) > 27) {
+            fourMonthsfromNowCalendar.add(Calendar.DAY_OF_MONTH, 4);
+        }
+
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -4477,7 +4485,9 @@ public class ClientLoanIntegrationTest {
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
 
-        fourMonthsfromNowCalendar.add(Calendar.MONTH, 1);
+        // FINERACT-885: As loan may not have started exactly four months ago,
+        // make final payment today and not four months from start (as that may be in the future)
+        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4525,6 +4535,14 @@ public class ClientLoanIntegrationTest {
 
         Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
+
+        // FINERACT-885: If the loan starts on day 27-31th of month and not all months have that
+        // many days, then loan payment will get reset to a day of month less than today's day
+        // and 4th payment will be in the past. In such case, start the loan a few days later,
+        // so that 4th payment is guaranteed to be in the future.
+        if (fourMonthsfromNowCalendar.get(Calendar.DAY_OF_MONTH) > 27) {
+            fourMonthsfromNowCalendar.add(Calendar.DAY_OF_MONTH, 4);
+        }
 
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
@@ -4636,7 +4654,9 @@ public class ClientLoanIntegrationTest {
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
 
-        fourMonthsfromNowCalendar.add(Calendar.MONTH, 1);
+        // FINERACT-885: As loan may not have started exactly four months ago,
+        // make final payment today and not four months from start (as that may be in the future)
+        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4683,6 +4703,14 @@ public class ClientLoanIntegrationTest {
 
         Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
+
+        // FINERACT-885: If the loan starts on day 27-31th of month and not all months have that
+        // many days, then loan payment will get reset to a day of month less than today's day
+        // and 4th payment will be in the past. In such case, start the loan a few days later,
+        // so that 4th payment is guaranteed to be in the future.
+        if (fourMonthsfromNowCalendar.get(Calendar.DAY_OF_MONTH) > 27) {
+            fourMonthsfromNowCalendar.add(Calendar.DAY_OF_MONTH, 4);
+        }
 
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
@@ -4817,7 +4845,9 @@ public class ClientLoanIntegrationTest {
 
         Float TRANSFER_AMOUNT = 20f;
 
-        fourMonthsfromNowCalendar.add(Calendar.MONTH, 1);
+        // FINERACT-885: As loan may not have started exactly four months ago,
+        // make final payment today and not four months from start (as that may be in the future)
+        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         final String FROM_LOAN_ACCOUNT_TYPE = "1";
