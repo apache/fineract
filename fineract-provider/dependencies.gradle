@@ -52,7 +52,7 @@ dependencies {
             'com.squareup.retrofit:retrofit',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
-
+            'jakarta.validation:jakarta.validation-api',
             'com.squareup.okhttp:okhttp',
             'com.squareup.okhttp:okhttp-urlconnection',
 
