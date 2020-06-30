@@ -395,7 +395,6 @@ tasks.withType(JavaCompile) {
                 "InvalidParam",
                 "ReturnFromVoid",
                 "AlmostJavadoc",
-                "ProtectedMembersInFinalClass",
                 "InvalidBlockTag",
         )
         //TODO gradually enable these checks
@@ -458,6 +457,7 @@ tasks.withType(JavaCompile) {
                 "InvalidInlineTag",
                 "MutablePublicArray",
                 "StaticAssignmentInConstructor",
+                "ProtectedMembersInFinalClass",
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",

@@ -132,7 +132,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
-    protected LoanRepaymentScheduleInstallment() {
+    LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
         this.dueDate = null;
