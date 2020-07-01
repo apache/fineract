@@ -80,14 +80,16 @@ dependencyManagement {
     }
 
     dependencies {
-        // As much as possible, we avoid fixed versions, and prefer inheriting them from the Spring BOM, thus NOT listing versions here.
-        // (The :+ seems to mean latest available version available on Maven Central, which we should also avoid, as it's not isolated?)
+        // We use fixed versions, instead of inheriting them from the Spring BOM, to be able to be on more recent ones.
+        // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
+        // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
         dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
-        dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
+        dependency 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated above in buildscript!
         dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.7.5'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
+        dependency 'com.google.guava:guava:28.2-jre'
         dependency 'com.google.code.gson:gson:2.8.6'
         dependency 'org.apache.commons:commons-email:1.5'
         dependency 'commons-io:commons-io:2.7'
