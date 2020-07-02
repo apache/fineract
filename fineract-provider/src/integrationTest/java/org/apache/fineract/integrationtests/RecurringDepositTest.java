@@ -105,10 +105,11 @@ public class RecurringDepositTest {
     // TODO Given the difference in calculation methods in test vs application,
     // the exact values
     // returned may differ enough to cause differences in rounding. Given this,
-    // we only compare the full
-    // digits. A proper solution would be to implement the exact interest
+    // we only compare that the result is within THRESHOLD of the expected amount.
+    // A proper solution would be to implement the exact interest
     // calculation in this test,
     // and then to compare the exact results
+    public static final Float THRESHOLD = 1.0f;
 
     @BeforeEach
     public void setup() {
@@ -467,10 +468,11 @@ public class RecurringDepositTest {
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
-        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
+        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
+        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        Assertions.assertEquals(expectedSavingsBalance, balanceAfter, "Verifying Savings Account Balance after Premature Closure");
+        Assertions.assertTrue(Math.abs(expectedSavingsBalance - balanceAfter) < THRESHOLD,
+                "Verifying Savings Account Balance after Premature Closure");
 
     }
 
@@ -675,10 +677,11 @@ public class RecurringDepositTest {
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
-        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
+        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
+        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        Assertions.assertEquals(expectedSavingsBalance, balanceAfter, "Verifying Savings Account Balance after Premature Closure");
+        Assertions.assertTrue(Math.abs(expectedSavingsBalance - balanceAfter) < THRESHOLD,
+                "Verifying Savings Account Balance after Premature Closure");
 
     }
 
@@ -1410,10 +1413,8 @@ public class RecurringDepositTest {
         principal = RecurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount, depositPeriod,
                 interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Recurring Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Recurring Deposit Account");
     }
 
     /***
@@ -1492,10 +1493,8 @@ public class RecurringDepositTest {
         principal = RecurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount, depositPeriod,
                 interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Recurring Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Recurring Deposit Account");
     }
 
     /***
@@ -1574,7 +1573,7 @@ public class RecurringDepositTest {
         Float interestToBePosted = (float) (interestPerDay * principal * daysInMonth);
         principal += interestToBePosted;
 
-        Float expectedBalanceAfter = (float) Math.floor(principal);
+        Float expectedBalanceAfter = principal;
         LOG.info("{}", expectedBalanceAfter.toString());
 
         Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
@@ -1582,13 +1581,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(transactionIdForPostInterest);
 
         HashMap recurringDepositAccountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
-        Float interestAmountPosted = (float) Math.floor((Float) recurringDepositAccountSummary.get("totalInterestPosted"));
-        Float principalAfter = (float) Math.floor((Float) recurringDepositAccountSummary.get("accountBalance"));
-        interestToBePosted = (float) Math.floor(interestToBePosted);
+        Float interestAmountPosted = (Float) recurringDepositAccountSummary.get("totalInterestPosted");
+        Float principalAfter = (Float) recurringDepositAccountSummary.get("accountBalance");
 
-        Assertions.assertEquals(interestToBePosted, interestAmountPosted,
+        Assertions.assertTrue(Math.abs(interestToBePosted - interestAmountPosted) < THRESHOLD,
                 "Verifying Amount of Interest Posted to Recurring Deposit Account");
-        Assertions.assertEquals(expectedBalanceAfter, principalAfter, "Verifying Principal Amount after Interest Posting");
+        Assertions.assertTrue(Math.abs(expectedBalanceAfter - principalAfter) < THRESHOLD,
+                "Verifying Principal Amount after Interest Posting");
 
     }
 
@@ -1710,10 +1709,9 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1840,10 +1838,9 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1977,10 +1974,9 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2119,10 +2115,9 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2200,10 +2195,8 @@ public class RecurringDepositTest {
         principal = RecurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Recurring Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Recurring Deposit Account");
 
     }
 
@@ -2282,10 +2275,8 @@ public class RecurringDepositTest {
         principal = RecurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Recurring Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Recurring Deposit Account");
 
     }
 
@@ -2372,10 +2363,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2462,10 +2453,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2552,10 +2543,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2642,10 +2633,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2732,10 +2723,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2822,10 +2813,10 @@ public class RecurringDepositTest {
         recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
