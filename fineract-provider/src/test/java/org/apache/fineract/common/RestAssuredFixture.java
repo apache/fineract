@@ -32,14 +32,16 @@ import io.restassured.specification.ResponseSpecification;
  */
 public class RestAssuredFixture {
 
-    private final int httpPort = 8443;
+    private final int httpPort;
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    public RestAssuredFixture() {
+    public RestAssuredFixture(int http) {
         super();
+        this.httpPort = http;
         Utils.initializeRESTAssured();
+        Utils.initializeRESTAssuredPort(http);
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
