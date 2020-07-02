@@ -101,7 +101,8 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        LOG.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+                        LOG.info("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
+                                result);
 
                         this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
@@ -111,7 +112,7 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                 }
             });
         } else {
-            LOG.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
+            LOG.info("{}: Nothing to update by generateClientSchedule", ThreadLocalContextUtil.getTenant().getName());
         }
 
     }
