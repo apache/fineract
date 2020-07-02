@@ -104,10 +104,11 @@ public class FixedDepositTest {
     // TODO Given the difference in calculation methods in test vs application,
     // the exact values
     // returned may differ enough to cause differences in rounding. Given this,
-    // we only compare the full
-    // digits. A proper solution would be to implement the exact interest
+    // we only compare that the result is within THRESHOLD of the expected amount.
+    // A proper solution would be to implement the exact interest
     // calculation in this test,
     // and then to compare the exact results
+    public static final Float THRESHOLD = 1.0f;
 
     @BeforeEach
     public void setup() {
@@ -1224,10 +1225,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1296,10 +1295,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1396,10 +1393,9 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1482,7 +1478,7 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
-
+        currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         LOG.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
@@ -1501,10 +1497,9 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1611,10 +1606,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1725,10 +1720,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Float expectedPrematureAmount = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1799,10 +1794,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
 
     }
 
@@ -1957,10 +1950,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2040,10 +2033,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2121,10 +2114,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2202,10 +2195,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2283,10 +2276,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
     }
 
     @Test
@@ -2363,10 +2356,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
     }
 
     /***
