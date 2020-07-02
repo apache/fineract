@@ -175,7 +175,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Records affected by updateLoanSummaryDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Transactional
@@ -210,7 +210,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Records affected by updateLoanPaidInAdvance: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -234,7 +234,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
-        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), annualFeeData.size());
+        LOG.info("{}: Records affected by applyAnnualFeeForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
+                annualFeeData.size());
     }
 
     @Override
@@ -259,7 +260,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 LOG.error("Apply Charges due for savings failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
-        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
+        LOG.info("{}: Records affected by applyDueChargesForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
+                chargesDueData.size());
         if (!exceptions.isEmpty()) {
             throw new JobExecutionException(exceptions);
         }
@@ -297,7 +299,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        LOG.info("{} : Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Records affected by updateNPA: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -321,7 +323,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
-        LOG.info("{}: Deposit accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), depositAccounts.size());
+        LOG.info("{}: Records affected by updateMaturityDetailsOfDepositAccounts: {}", ThreadLocalContextUtil.getTenant().getName(),
+                depositAccounts.size());
     }
 
     @Override
@@ -442,7 +445,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
             final int result = jdbcTemplate.update(sqlBuilder.toString(), formattedDate);
-            LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+            LOG.info("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
 
         // Updating closing balance

@@ -126,7 +126,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             result += i;
         }
 
-        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Records affected by updateLoanArrearsAgeingDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
