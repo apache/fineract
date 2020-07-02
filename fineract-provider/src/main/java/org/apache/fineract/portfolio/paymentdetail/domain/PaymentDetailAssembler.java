@@ -51,6 +51,8 @@ public class PaymentDetailAssembler {
         final String routingCode = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.routingCodeParamName, json);
         final String receiptNumber = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.receiptNumberParamName, json);
         final String bankNumber = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.bankNumberParamName, json);
-        return PaymentDetail.instance(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+        final String voucherNumber = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.voucherNumberParamName, json);
+        final String paymentDescription = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.paymentDescriptionParamName, json);
+        return PaymentDetail.instance(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber, voucherNumber, paymentDescription);
     }
 }

@@ -70,8 +70,8 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append("c.id as clientId, c.account_no as accountNo, ccpb.client_charge_id as clientChargeId, ");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode,  ");
-            sqlBuilder.append(
-                    "tr.currency_code as currencyCode, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("pd.voucher_number as voucherNumber, pd.payment_description as paymentDescription,  ");
+            sqlBuilder.append("tr.currency_code as currencyCode, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode,  ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol,  ");
             sqlBuilder.append("pt.value as paymentTypeName  ");
@@ -114,8 +114,10 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                     final String routingCode = rs.getString("routingCode");
                     final String receiptNumber = rs.getString("receiptNumber");
                     final String bankNumber = rs.getString("bankNumber");
+                    final String voucherNumber = rs.getString("voucherNumber");
+                    final String paymentDescription = rs.getString("paymentDescription");
                     paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                            bankNumber);
+                            bankNumber, voucherNumber, paymentDescription);
                 }
             }
 

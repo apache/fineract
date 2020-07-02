@@ -124,6 +124,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 sb.append(" ,pd.receipt_number as receiptNumber, ").append(" pd.check_number as checkNumber, ")
                         .append(" pd.account_number as accountNumber, ").append(" pt.value as paymentTypeName, ")
                         .append(" pd.payment_type_id as paymentTypeId,").append(" pd.bank_number as bankNumber, ")
+                        .append(" pd.voucher_number as voucherNumber,").append(" pd.payment_description as paymentDescription, ")
                         .append(" pd.routing_code as routingCode, ").append(" note.id as noteId, ")
                         .append(" note.note as transactionNote, ").append(" lt.transaction_type_enum as loanTransactionType, ")
                         .append(" st.transaction_type_enum as savingsTransactionType ");
@@ -206,8 +207,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     final String routingCode = rs.getString("routingCode");
                     final String receiptNumber = rs.getString("receiptNumber");
                     final String bankNumber = rs.getString("bankNumber");
+                    final String voucherNumber = rs.getString("voucherNumber");
+                    final String paymentDescription = rs.getString("paymentDescription");
                     paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                            bankNumber);
+                            bankNumber,voucherNumber,paymentDescription);
                 }
                 NoteData noteData = null;
                 final Long noteId = JdbcSupport.getLong(rs, "noteId");

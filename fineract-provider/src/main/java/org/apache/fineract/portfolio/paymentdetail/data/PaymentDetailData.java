@@ -41,6 +41,10 @@ public class PaymentDetailData implements Serializable {
     private final String receiptNumber;
     @SuppressWarnings("unused")
     private final String bankNumber;
+    @SuppressWarnings("unused")
+    private String voucherNumber;
+    @SuppressWarnings("unused")
+    private String paymentDescription;
 
     public PaymentDetailData(final Long id, final PaymentTypeData paymentType, final String accountNumber, final String checkNumber,
             final String routingCode, final String receiptNumber, final String bankNumber) {
@@ -51,6 +55,13 @@ public class PaymentDetailData implements Serializable {
         this.routingCode = routingCode;
         this.receiptNumber = receiptNumber;
         this.bankNumber = bankNumber;
+    }
+
+    public PaymentDetailData(final Long id, final PaymentTypeData paymentType, final String accountNumber, final String checkNumber,
+                             final String routingCode, final String receiptNumber, final String bankNumber,final String voucherNumber, final String paymentDescription) {
+        this(id,paymentType,accountNumber,checkNumber,routingCode,receiptNumber,bankNumber);
+        this.voucherNumber = voucherNumber;
+        this.paymentDescription = paymentDescription;
     }
 
     @Override
@@ -65,7 +76,8 @@ public class PaymentDetailData implements Serializable {
         return Objects.equals(id, that.id) && Objects.equals(paymentType, that.paymentType)
                 && Objects.equals(accountNumber, that.accountNumber) && Objects.equals(checkNumber, that.checkNumber)
                 && Objects.equals(routingCode, that.routingCode) && Objects.equals(receiptNumber, that.receiptNumber)
-                && Objects.equals(bankNumber, that.bankNumber);
+                && Objects.equals(bankNumber, that.bankNumber) && Objects.equals(voucherNumber, that.voucherNumber)
+                && Objects.equals(paymentDescription, that.paymentDescription) ;
     }
 
     @Override
