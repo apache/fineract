@@ -149,6 +149,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
             final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
             Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+        final Boolean isLoanOverpaymentEnabled = configuration.isEnabled();
+
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_MAKE_REPAYMENT,
@@ -167,6 +173,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
+
+        final Money outstandingBalance = Money.of(loan.getCurrency(), loan.getSummary().getTotalOutstanding());
+
+        if(outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
+            baseDataValidator.reset().failWithCode("Repayment exceeding outstanding balance");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
         LoanTransaction newRepaymentTransaction = null;
         final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
         if (isRecoveryRepayment) {
