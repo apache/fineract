@@ -74,6 +74,7 @@ dependencies {
 dependencyManagement {
   imports {
     mavenBom 'org.springframework:spring-framework-bom:5.2.3.RELEASE'
+    mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Hoxton.RELEASE'
   }
 
   dependencies {
@@ -143,6 +144,8 @@ dependencies {
     compile(
         [group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.4.5.RELEASE']
     )
+    compile 'org.springframework.cloud:spring-cloud-starter-zipkin'
+
 }
 
 /* define the valid syntax level for source files */
