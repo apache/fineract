@@ -89,7 +89,7 @@ dependencyManagement {
         dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.7.5'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
-        dependency 'com.google.guava:guava:28.2-jre'
+        dependency 'com.google.guava:guava:29.0-jre'
         dependency 'com.google.code.gson:gson:2.8.6'
         dependency 'org.apache.commons:commons-email:1.5'
         dependency 'commons-io:commons-io:2.7'
