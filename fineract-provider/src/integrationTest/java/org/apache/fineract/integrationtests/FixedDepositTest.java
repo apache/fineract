@@ -1478,7 +1478,6 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
-        currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         LOG.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
