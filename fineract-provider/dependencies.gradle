@@ -71,16 +71,16 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
-             // JAX-B dependencies for JDK 9+
-             'jakarta.xml.bind:jakarta.xml.bind-api',
+            // JAX-B dependencies for JDK 9+
+            'jakarta.xml.bind:jakarta.xml.bind-api',
 
-             'org.dom4j:dom4j',
+            'org.dom4j:dom4j',
 
-             'javax.cache:cache-api',
+            'javax.cache:cache-api',
 
-             'com.github.spotbugs:spotbugs-annotations',
-             'io.swagger.core.v3:swagger-annotations'
-    )
+            'com.github.spotbugs:spotbugs-annotations',
+            'io.swagger.core.v3:swagger-annotations'
+            )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
@@ -114,7 +114,7 @@ dependencies {
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient',
-    )
+            )
 
     // testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
@@ -124,7 +124,7 @@ dependencies {
             'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
-    )
+            )
     testImplementation('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
