@@ -20,9 +20,16 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
+group = 'org.apache.fineract'
+buildDir = new File(rootProject.projectDir, "../build")
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
 project.ext.jerseyVersion = '1.19.4'
 ext["groovy.version"] = '3.0.3'
-
 
 buildscript {
     ext {
@@ -36,11 +43,10 @@ buildscript {
 
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
-        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
-                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
-                'org.zeroturnaround:gradle-jrebel-plugin:1.1.10',
-                'org.springframework.boot:spring-boot-gradle-plugin:2.3.1.RELEASE'
-        // below
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
+        classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.1.RELEASE'
+        classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0'
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
@@ -56,7 +62,7 @@ buildscript {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
-apply plugin: 'license'
+apply plugin: 'com.github.hierynomus.license'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'eclipse'
@@ -158,16 +164,6 @@ sourceCompatibility = JavaVersion.VERSION_11
 /* define binary compatibility version */
 targetCompatibility = JavaVersion.VERSION_11
 
-project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
-
-group = 'org.apache.fineract'
-buildDir = new File(rootProject.projectDir, "../build")
-repositories {
-    jcenter()
-    // mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
-}
-
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
 // set the classes directory to point to Eclipse's default build directory
 if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
@@ -182,6 +178,8 @@ eclipse
     }
 }
 
+// Configuration for the OpenJPA enhance task
+// https://github.com/radcortez/openjpa-gradle-plugin
 System.setProperty("openjpa.Log", "commons")
 
 openjpa {
@@ -210,17 +208,18 @@ resolve {
 jacoco {
     toolVersion = jacocoVersion
     reportsDir = file("$buildDir/reports/jacoco")
-
 }
 
-jacocoTestReport{
-    reports{
+jacocoTestReport {
+    reports {
         html.enabled=true
         xml.enabled=true
         html.destination file("${buildDir}/code-coverage")
     }
 }
 
+// Configuration for the spotless plugin
+// https://github.com/diffplug/spotless/tree/main/plugin-gradle
 spotless {
     format 'misc', {
         target '**/*.md', '**/*.properties', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
@@ -272,7 +271,6 @@ spotless {
             }
             )
         }
-
     }
 
     lineEndings 'UNIX'
@@ -306,7 +304,7 @@ rat {
         '**/.gitignore',
         '**/.gitkeep',
         '**/*.iml',
-        //Notice files
+        // Notice files
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
         // Swagger License
@@ -321,7 +319,7 @@ rat {
         '**/native/**',
         '**/wrapper/**',
         '**/build/**',
-        //Api Docs
+        // Api Docs
         '**/api-docs/*.*',
         '**/docs/system-architecture/.htaccess',
         '**/docs/system-architecture/404.html',
@@ -329,10 +327,10 @@ rat {
         '**/docs/system-architecture/**/*.xml',
         '**/bootstrap-3.0.0/assets/application.js',
         '**/system-architecture/js/plugins.js',
-        //Apache License
+        // Apache License
         '**/bootstrap-3.0.0/assets/less.js',
         '**/css/bootstrap-3.0.0/**/*.*',
-        //Public Domain See http://www.JSON.org/js.html
+        // Public Domain See http://www.JSON.org/js.html
         '**/bootstrap-3.0.0/assets/json2.js.htm',
         // MIT License
         '**/modernizr-2.6.2.min.js',
@@ -348,9 +346,9 @@ rat {
         '**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
         '**/assets/respond.min.js',
         '**/assets/html5shiv.js',
-        //BSD License
+        // BSD License
         '**/assets/uglify.js',
-        //Ignore out folder
+        // Ignore out folder
         '**/out/**',
         // Git build info
         "**/git.properties",
@@ -554,6 +552,8 @@ if (project.hasProperty('security') && project.getProperty('security') == 'oauth
     }
 }
 
+// Configuration for the modernizer plugin
+// https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
     includeTestClasses = true
     failOnViolations = true
@@ -581,11 +581,6 @@ compileJava{
     dependsOn spotlessCheck
     finalizedBy resolve
 }
-/*
- pmd {
- sourceSets = [sourceSets.main]
- }
- */
 
 war {
     from('../licenses/binary/') {
@@ -610,6 +605,8 @@ war {
     war.finalizedBy(bootWar)
 }
 
+// Configuration for Gradle license plug-in
+// https://github.com/hierynomus/license-gradle-plugin
 license {
     header rootProject.file('../APACHE_LICENSETEXT.md')
     excludes([
@@ -633,6 +630,14 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
 }
 licenseFormat.dependsOn licenseFormatBuildScripts
 
+// Configuration for the errorprone plugin
+// https://github.com/tbroyer/gradle-errorprone-plugin
+dependencies {
+    errorprone "com.google.errorprone:error_prone_core:2.4.0"
+}
+
+// Configuration for the Gradle Cargo plugin
+// https://github.com/bmuschko/gradle-cargo-plugin
 configurations
 {
     tomcat
@@ -642,9 +647,6 @@ dependencies {
     tomcat "org.apache.tomcat:tomcat:9.0.36@zip"
 }
 
-dependencies {
-    errorprone "com.google.errorprone:error_prone_core:2.4.0"
-}
 cargo {
     containerId "tomcat9x"
 
@@ -734,19 +736,25 @@ test {
     }
 }
 
+// Configuration for the Checkstyle plugin
+// https://docs.gradle.org/current/userguide/checkstyle_plugin.html
+dependencies {
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.34'
+    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
+}
 
+// Configuration for SQL tasks
+// https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html
 import groovy.sql.Sql
 
-repositories {
-    mavenCentral()
-}
+project.ext.mysqlUser='root'
+project.ext.mysqlPassword='mysql'
+
 configurations {
     driver
 }
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.34'
-    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -790,6 +798,9 @@ bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+// Configuration for spotbugs plugin
+// https://github.com/spotbugs/spotbugs-gradle-plugin
+
 // To generate an HTML report instead of XML
 spotbugs {
     reportLevel = 'high'
@@ -821,6 +832,8 @@ spotbugsIntegrationTest {
     }
 }
 
+// Configuration for git properties gradle plugin
+// https://github.com/n0mer/gradle-git-properties
 gitProperties {
     gitPropertiesResourceDir = "$buildDir/classes/java/main/resources"
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
