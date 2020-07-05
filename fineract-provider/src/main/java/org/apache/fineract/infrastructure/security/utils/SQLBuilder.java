@@ -48,6 +48,12 @@ public class SQLBuilder {
     // args
     private final ArrayList<String> crts = new ArrayList<String>();
 
+    // These variables holds the value for limit, orderBy and offset
+    // Their value is null by default, and is only added to query if not null
+    private Object limitVal = null;
+    private Object orderByVal = null;
+    private Object offsetVal = null;
+
     /**
      * Adds a criteria for a SQL WHERE clause. All criteria are appended by AND (support for OR, or nesting, can be
      * added when needed).
@@ -63,6 +69,7 @@ public class SQLBuilder {
             throw new IllegalArgumentException("criteria cannot be null");
         }
         String trimmedCriteria = criteria.trim();
+
         if (trimmedCriteria.isEmpty()) {
             throw new IllegalArgumentException("criteria cannot be null");
         }
@@ -111,15 +118,74 @@ public class SQLBuilder {
     }
 
     /**
+     *
+     *
+     * @param limit
+     *            The value that will be used as limit
+     */
+    public void setLimit(Object limit) {
+        this.limitVal = limit;
+    }
+
+    /**
+     *
+     * @param offset
+     *            The value that will be used as offset
+     */
+    public void setOffset(Object offset) {
+        this.offsetVal = offset;
+    }
+
+    /**
+     *
+     * @param orderBy
+     *            The value that will be used as orderBy
+     */
+    public void setOrderBy(Object orderBy) {
+        this.orderByVal = orderBy;
+    }
+
+    /**
      * Returns a SQL WHERE clause, created from the {@link #addCriteria(String, Object)}, with '?' placeholders.
      *
      * @return SQL WHERE clause, almost always starting with " WHERE ..." (unless no criteria, then empty)
      */
     public String getSQLTemplate() {
+
+        final String limitOrderByClause = getLimitandOrderByClause();
         if (sb.length() > 0) {
-            return " WHERE  " + sb.toString();
+            if (limitOrderByClause.isEmpty()) {
+                return " WHERE  " + sb.toString();
+            } else {
+                return " WHERE  " + sb.toString() + limitOrderByClause;
+            }
         }
         return "";
+    }
+
+    /**
+     * Returns a SQL limit and orderBy clause if set.
+     */
+    private String getLimitandOrderByClause() {
+
+        StringBuilder lo = new StringBuilder();
+
+        if (this.orderByVal != null) {
+            lo.append(" ORDER BY ? ");
+            args.add(orderByVal);
+        }
+
+        if (this.limitVal != null) {
+            lo.append(" LIMIT ? ");
+            args.add(limitVal);
+        }
+
+        if (this.offsetVal != null) {
+            lo.append(" OFFSET ? ");
+            args.add(offsetVal);
+        }
+
+        return lo.toString();
     }
 
     /**
