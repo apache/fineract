@@ -2199,9 +2199,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append(" )asq on asq.loan_id = ls.loan_id and asq.datedue = ls.duedate");
             sqlBuilder.append(" GROUP BY ls.duedate");
             sqlBuilder.append(",ls.principal_amount,ls.principal_completed_derived,ls.principal_writtenoff_derived");
-            sqlBuilder.append(",ls.interest_amount,ls.interest_completed_derived,ls.interest_waived_derived,ls.interest_writtenoff_derived");
-            sqlBuilder.append(",ls.fee_charges_amount,ls.fee_charges_completed_derived, ls.fee_charges_writtenoff_derived, ls.fee_charges_waived_derived");
-            sqlBuilder.append(",ls.penalty_charges_amount, ls.penalty_charges_completed_derived, ls.penalty_charges_writtenoff_derived, ls.penalty_charges_waived_derived");
+            sqlBuilder
+                    .append(",ls.interest_amount,ls.interest_completed_derived,ls.interest_waived_derived,ls.interest_writtenoff_derived");
+            sqlBuilder.append(
+                    ",ls.fee_charges_amount,ls.fee_charges_completed_derived, ls.fee_charges_writtenoff_derived, ls.fee_charges_waived_derived");
+            sqlBuilder.append(
+                    ",ls.penalty_charges_amount, ls.penalty_charges_completed_derived, ls.penalty_charges_writtenoff_derived, ls.penalty_charges_waived_derived");
             return sqlBuilder.toString();
 
         }
