@@ -152,7 +152,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Loan-Overpayment");
         final Boolean isLoanOverpaymentEnabled = configuration.isEnabled();
 
         AppUser currentUser = getAppUserIfPresent();
@@ -176,9 +177,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final Money outstandingBalance = Money.of(loan.getCurrency(), loan.getSummary().getTotalOutstanding());
 
-        if(outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
+        if (outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
             baseDataValidator.reset().failWithCode("Repayment exceeding outstanding balance");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         LoanTransaction newRepaymentTransaction = null;
