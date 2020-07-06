@@ -152,8 +152,17 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+<<<<<<< HEAD
         final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+=======
+<<<<<<< HEAD
+        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+=======
+        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+>>>>>>> aca88cb24cbcbd05d53c461118a8013fe7674ac3
+>>>>>>> 6cfea8faee5a514186e3a37ed5a55952848fe1de
         final Boolean isLoanOverpaymentEnabled = configuration.isEnabled();
 
         AppUser currentUser = getAppUserIfPresent();
@@ -177,11 +186,23 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final Money outstandingBalance = Money.of(loan.getCurrency(), loan.getSummary().getTotalOutstanding());
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 6cfea8faee5a514186e3a37ed5a55952848fe1de
         if (outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
             baseDataValidator.reset().failWithCode("Repayment exceeding outstanding balance");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
+<<<<<<< HEAD
+=======
+=======
+        if(outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
+            baseDataValidator.reset().failWithCode("Repayment exceeding outstanding balance");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+>>>>>>> aca88cb24cbcbd05d53c461118a8013fe7674ac3
+>>>>>>> 6cfea8faee5a514186e3a37ed5a55952848fe1de
         }
 
         LoanTransaction newRepaymentTransaction = null;
