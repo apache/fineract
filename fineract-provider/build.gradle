@@ -576,10 +576,15 @@ modernizer {
     ]
 }
 
-compileJava{
+compileJava {
     dependsOn rat
-    dependsOn spotlessCheck
     finalizedBy resolve
+
+    if (project.hasProperty("automatedBuild")) {
+        dependsOn(spotlessCheck)
+    } else {
+        dependsOn(spotlessApply)
+    }
 }
 
 war {

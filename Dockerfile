@@ -22,7 +22,7 @@ RUN apt-get update -qq && apt-get install -y wget
 COPY . fineract
 WORKDIR /fineract
 
-RUN ./gradlew --no-daemon -q -x rat -x test bootJar
+RUN ./gradlew -PautomatedBuild=true --no-daemon -q -x rat -x test bootJar
 
 WORKDIR /fineract/target
 RUN jar -xf /fineract/build/libs/fineract-provider.jar
