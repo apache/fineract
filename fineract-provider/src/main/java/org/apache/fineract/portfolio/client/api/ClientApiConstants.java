@@ -121,6 +121,8 @@ public class ClientApiConstants {
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
+    public static final String voucherNumberParamName = "voucherNumber";
+    public static final String paymentDescriptionParamName = "paymentDescription";
 
     // request parameters for client non person
     public static final String clientNonPersonDetailsParamName = "clientNonPersonDetails";

@@ -125,6 +125,8 @@ public class SavingsApiConstants {
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
+    public static final String voucherNumberParamName = "voucherNumber";
+    public static final String paymentDescriptionParamName = "paymentDescription";
     public static final String allowOverdraftParamName = "allowOverdraft";
     public static final String overdraftLimitParamName = "overdraftLimit";
     public static final String nominalAnnualInterestRateOverdraftParamName = "nominalAnnualInterestRateOverdraft";
