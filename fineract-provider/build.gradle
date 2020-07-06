@@ -578,7 +578,7 @@ modernizer {
 
 compileJava{
     dependsOn rat
-    dependsOn spotlessApply
+    dependsOn spotlessCheck
     finalizedBy resolve
 }
 
