@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.boot;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebMvc
@@ -40,5 +41,11 @@ public class WebFrontEndConfiguration implements WebMvcConfigurer {
                 "classpath:/META-INF/resources/webjars/swagger-ui-dist/3.26.0/" };
 
         registry.addResourceHandler("/swagger-ui/**").addResourceLocations(SWAGGER_RESOURCE_LOCATIONS);
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/swagger-ui", "/swagger-ui/index.html");
+        registry.addRedirectViewController("/swagger-ui/", "/swagger-ui/index.html");
     }
 }
