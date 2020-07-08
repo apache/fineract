@@ -16,9 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-spring.profiles.default=basicauth
-spring.profiles.active=oauth
-management.health.jms.enabled=false
-spring.zipkin.baseUrl=http://zipkin:9411/
-spring.zipkin.service.name=w-fineract-server
+spring.cloud.config:
+  uri: http://localhost:8888
+  name: fineract-server
+  profile: default

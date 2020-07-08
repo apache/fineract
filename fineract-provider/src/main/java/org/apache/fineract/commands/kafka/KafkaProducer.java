@@ -40,7 +40,7 @@ public class KafkaProducer {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public KafkaProducer(@Qualifier("custom-kafka-template") final KafkaTemplate<String, String> kafkaTemplate) {
+    public KafkaProducer(final KafkaTemplate<String, String> kafkaTemplate) {
 
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
