@@ -14,3 +14,4 @@ build
 .idea
 gradle
 catalina.base_IS_UNDEFINED/
+logs/
