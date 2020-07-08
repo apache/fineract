@@ -52,9 +52,28 @@
 
 	<appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
 		<destination>${LOGSTASH_URL:-logstash:6000}</destination>
-		<keepAliveDuration>5 minutes</keepAliveDuration>
-		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
-			<customFields>{"appname": "w-fineract-server", "environment": "default"}</customFields>
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp>
+					<timeZone>UTC</timeZone>
+				</timestamp>
+				<pattern>
+					<pattern>
+						{
+						"appname": "w-fineract-server",
+						"timestamp": "@timestamp",
+						"severity": "%level",
+						"service": "${springAppName:-}",
+						"trace": "%X{traceId:-}",
+						"span": "%X{spanId:-}",
+						"pid": "${PID:-}",
+						"thread": "%thread",
+						"class": "%logger{40}",
+						"rest": "%message"
+						}
+					</pattern>
+				</pattern>
+			</providers>
 		</encoder>
 	</appender>
 

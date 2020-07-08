@@ -62,7 +62,7 @@
 
         <property name="license" value="Apache 2.0" />
         <property name="schemes" value="https" />
-        <property name="host" value="https://demo.mifos.io" />
+        <property name="host" value="localhost" />
         <property name="basePath" value="fineract-provider/api/v1"/>
         <property name="termsOfServiceUrl" value="https://demo.mifos.io/api-docs/apiLive.htm"/>
         <property name="contact" value="https://gitter.im/openMF/mifos"/>

@@ -322,6 +322,10 @@ final class SavingsAccountsApiResourceSwagger {
         public String locale;
         @ApiModelProperty(example = "05 September 2014")
         public String unassignedDate;
+        @ApiModelProperty()
+        public String approvedOnDate;
+        @ApiModelProperty()
+        public String activatedOnDate;
     }
 
     @ApiModel(value = "PostSavingsAccountsAccountIdResponse")
