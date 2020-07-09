@@ -25,6 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -100,6 +101,31 @@ public class AuditIntegrationTest {
         int officeId = officeHelper.createOffice("22 June 2020");
         auditsRecieved = auditHelper.getAuditDetails(officeId, "CREATE", "OFFICE");
         auditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
+    }
+
+    /**
+     *
+     * Here we test that audit request with limit x only returns x entries
+     */
+    @Test
+    public void checkAuditsWithLimit() {
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+
+        // The following loop would ensure database have atleast 8 audits.
+        for (int i = 0; i < 4; i++) {
+            // Close client
+            this.clientHelper.closeClient(clientId);
+            // Activate client
+            this.clientHelper.reactivateClient(clientId);
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < 3; i++) {
+            // limit contains a number between 1-8
+            int limit = rand.nextInt(7) + 1;
+            auditHelper.verifyLimitParameterfor(limit);
+        }
     }
 
 }
