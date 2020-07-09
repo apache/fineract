@@ -25,6 +25,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,15 @@ public class AuditHelper {
                 + "&actionName=" + actionName + "&orderBy=id&sortBy=DSC&" + Utils.TENANT_IDENTIFIER;
         List<HashMap<String, Object>> responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
         return responseAudits;
+    }
+
+    public List getAuditDetails(final int limit) {
+
+        final String AUDIT_URL = "/fineract-provider/api/v1/audits?paged=true&limit=" + Integer.toString(limit) + "&"
+                + Utils.TENANT_IDENTIFIER;
+        LinkedHashMap responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
+        return (List) responseAudits.get("pageItems");
+
     }
 
     /**
@@ -84,6 +94,10 @@ public class AuditHelper {
                 + auditToCheck.get("resourceId").toString();
         String expected = actionName + " is done on " + entityType + " with id " + id;
         assertEquals(expected, actual, "Error in creating audit!");
+    }
+
+    public void verifyLimitParameterfor(final int limit) {
+        assertEquals(limit, getAuditDetails(limit).size(), "Incorrect number of audits recieved for limit: " + Integer.toString(limit));
     }
 
 }
