@@ -18,15 +18,22 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public interface CreditBureauLoanProductMappingRepository
-        extends JpaRepository<CreditBureauLoanProductMapping, Long>, JpaSpecificationExecutor<CreditBureauLoanProductMapping> {
+@Service
+public class CreditBureauConfigurationRepositoryWrapper {
 
-    CreditBureauLoanProductMapping findOneByLoanProduct(LoanProduct loanProduct);
+    private final CreditBureauConfigurationRepository creditBureauConfigurationRepository;
 
-    CreditBureauLoanProductMapping findOneByLoanProductId(Long loanProductID);
+    @Autowired
+    public CreditBureauConfigurationRepositoryWrapper(final CreditBureauConfigurationRepository creditBureauConfigurationRepository) {
+
+        this.creditBureauConfigurationRepository = creditBureauConfigurationRepository;
+    }
+
+    public CreditBureauConfiguration getCreditBureauConfigData(final Integer creditBureauID, final String parameterName) {
+        return this.creditBureauConfigurationRepository.getCreditBureauConfigData(creditBureauID, parameterName);
+    }
 
 }

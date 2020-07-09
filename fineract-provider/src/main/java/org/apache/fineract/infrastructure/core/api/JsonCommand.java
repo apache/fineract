@@ -444,6 +444,12 @@ public final class JsonCommand {
         return value;
     }
 
+    public Map<String, Object> mapObjectValueOfParameterNamed(final String json) {
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> value = this.fromApiJsonHelper.extractObjectMap(typeOfMap, json);
+        return value;
+    }
+
     public boolean isChangeInBigDecimalParameterNamedDefaultingZeroToNull(final String parameterName, final BigDecimal existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
