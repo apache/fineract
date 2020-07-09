@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.3",
+  "info": {
+    "version": "1.4.0",
+    "title": "Apache Fineract",
+    "description": "Apache Fineract is a secure, multi-tenanted microfinance platform\n\nThe goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform<br>The [reference app](https://cui.fineract.dev) (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation\n\n- The API is organized around [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)\n- Find out more about Apache Fineract [here](/fineract-provider/api-docs/apiLive.htm#top)\n- You can [Try The API From Your Browser](/fineract-provider/api-docs/apiLive.htm#interact)\n- The Generic Options are available [here](/fineract-provider/api-docs/apiLive.htm#genopts)\n- Find out more about [Updating Dates and Numbers](/fineract-provider/api-docs/apiLive.htm#dates_and_numbers)\n- For the Authentication and the Basic of HTTP and HTTPS refer [here](/fineract-provider/api-docs/apiLive.htm#authentication_overview)\n- Check about ERROR codes [here](/fineract-provider/api-docs/apiLive.htm#errors)\n\nPlease refer to the [old documentation](/fineract-provider/api-docs/apiLive.htm) for any documentation queries",
+    "termsOfService": "https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm",
+    "contact": {
+      "email": "dev@fineract.apache.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  }
+}
