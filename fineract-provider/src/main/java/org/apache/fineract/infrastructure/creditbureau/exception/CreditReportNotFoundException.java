@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.domain;
 
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+package org.apache.fineract.infrastructure.creditbureau.exception;
 
-public interface CreditBureauLoanProductMappingRepository
-        extends JpaRepository<CreditBureauLoanProductMapping, Long>, JpaSpecificationExecutor<CreditBureauLoanProductMapping> {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-    CreditBureauLoanProductMapping findOneByLoanProduct(LoanProduct loanProduct);
+public class CreditReportNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    CreditBureauLoanProductMapping findOneByLoanProductId(Long loanProductID);
+    public CreditReportNotFoundException(final Long searchId) {
+        super("error.msg.creditreport.identifier.not.found", "CreditReport with identifier `" + searchId + "` does not exist", searchId);
+    }
 
 }

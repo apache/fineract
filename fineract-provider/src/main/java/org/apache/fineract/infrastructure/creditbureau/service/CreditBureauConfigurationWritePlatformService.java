@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.domain;
+package org.apache.fineract.infrastructure.creditbureau.service;
 
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-public interface CreditBureauLoanProductMappingRepository
-        extends JpaRepository<CreditBureauLoanProductMapping, Long>, JpaSpecificationExecutor<CreditBureauLoanProductMapping> {
+public interface CreditBureauConfigurationWritePlatformService {
 
-    CreditBureauLoanProductMapping findOneByLoanProduct(LoanProduct loanProduct);
+    CommandProcessingResult addCreditBureauConfiguration(Long creditBureauId, JsonCommand command);
 
-    CreditBureauLoanProductMapping findOneByLoanProductId(Long loanProductID);
+    CommandProcessingResult updateCreditBureauConfiguration(Long configurationId, JsonCommand command);
 
 }

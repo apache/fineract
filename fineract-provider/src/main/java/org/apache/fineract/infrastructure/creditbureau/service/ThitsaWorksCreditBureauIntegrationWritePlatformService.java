@@ -16,17 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.domain;
+package org.apache.fineract.infrastructure.creditbureau.service;
 
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.io.File;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
+import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauToken;
 
-public interface CreditBureauLoanProductMappingRepository
-        extends JpaRepository<CreditBureauLoanProductMapping, Long>, JpaSpecificationExecutor<CreditBureauLoanProductMapping> {
+public interface ThitsaWorksCreditBureauIntegrationWritePlatformService {
 
-    CreditBureauLoanProductMapping findOneByLoanProduct(LoanProduct loanProduct);
+    CreditBureauToken createToken(Long creditBureauID);
 
-    CreditBureauLoanProductMapping findOneByLoanProductId(Long loanProductID);
+    Long extractUniqueId(String jsonResult);
+
+    String okHttpConnectionMethod(String userName, String password, String subscriptionKey, String subscriptionId, String url, String token,
+            File report, Long uniqueId, String nrcId, String process);
+
+    CreditBureauReportData getCreditReportFromThitsaWorks(JsonCommand command);
 
 }
