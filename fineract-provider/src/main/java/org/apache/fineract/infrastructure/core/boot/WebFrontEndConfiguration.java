@@ -18,14 +18,19 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.webjars.WebJarAssetLocator;
 
 @EnableWebMvc
 @Configuration
 public class WebFrontEndConfiguration implements WebMvcConfigurer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WebFrontEndConfiguration.class);
 
     private static final String[] CLASSPATH_RESOURCE_LOCATIONS = { "classpath:/static/", "classpath:/public/" };
 
@@ -35,9 +40,12 @@ public class WebFrontEndConfiguration implements WebMvcConfigurer {
             registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
         }
 
-        // TODO: The below path should be version agnostic
-        String[] SWAGGER_RESOURCE_LOCATIONS = { "classpath:/static/swagger-ui/",
-                "classpath:/META-INF/resources/webjars/swagger-ui-dist/3.26.0/" };
+        WebJarAssetLocator locator = new WebJarAssetLocator();
+        String fullPathToSwaggerUiJs = locator.getFullPath("swagger-ui.js");
+        LOG.info("Found Swagger UI at {}", fullPathToSwaggerUiJs);
+        String fullPathToSwaggerUi = fullPathToSwaggerUiJs.substring(0, fullPathToSwaggerUiJs.lastIndexOf("/") + 1);
+
+        String[] SWAGGER_RESOURCE_LOCATIONS = { "classpath:/static/swagger-ui/", "classpath:" + fullPathToSwaggerUi };
 
         registry.addResourceHandler("/swagger-ui/**").addResourceLocations(SWAGGER_RESOURCE_LOCATIONS);
     }

@@ -79,7 +79,8 @@ dependencies {
             'javax.cache:cache-api',
 
             'com.github.spotbugs:spotbugs-annotations',
-            'io.swagger.core.v3:swagger-annotations'
+            'io.swagger.core.v3:swagger-annotations',
+            'org.webjars:webjars-locator-core'
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
