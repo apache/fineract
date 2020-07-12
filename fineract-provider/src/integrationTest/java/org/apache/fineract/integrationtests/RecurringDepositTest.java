@@ -3114,16 +3114,16 @@ public class RecurringDepositTest {
         return financialAccount;
     }
 
-    private Account createLiabilityFinancialAccountTransferType(final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID) {
+    private Account createLiabilityFinancialAccountTransferType(final Integer liabilityTransferFinancialActivityId) {
         /***
          * Create and verify financial account transfer type is created
          */
         final Account liabilityAccountForMapping = this.accountHelper.createLiabilityAccount();
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping.getAccountID(), this.responseSpec,
+                liabilityTransferFinancialActivityId, liabilityAccountForMapping.getAccountID(), this.responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assertions.assertNotNull(financialActivityAccountId);
-        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
+        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId,
                 liabilityAccountForMapping);
         return liabilityAccountForMapping;
     }

@@ -102,58 +102,58 @@ public class SavingsAccountHelper {
         return sdf.format(calendar.getTime());
     }
 
-    public Integer applyForSavingsApplication(final Integer ID, final Integer savingsProductID, final String accountType) {
-        return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, CREATED_DATE);
+    public Integer applyForSavingsApplication(final Integer id, final Integer savingsProductID, final String accountType) {
+        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationOnDate(final Integer id, final Integer savingsProductID, final String accountType,
             final String submittedOnDate) {
-        return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, null, false, submittedOnDate);
+        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, null, false, submittedOnDate);
     }
 
-    public Integer applyForSavingsApplicationWithExternalId(final Integer ID, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationWithExternalId(final Integer id, final Integer savingsProductID, final String accountType,
             String externalId, boolean withdrawalFeeForTransfers) {
-        return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, externalId, withdrawalFeeForTransfers, CREATED_DATE);
+        return applyForSavingsApplicationOnDate(id, savingsProductID, accountType, externalId, withdrawalFeeForTransfers, CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationOnDate(final Integer id, final Integer savingsProductID, final String accountType,
             String externalId, boolean withdrawalFeeForTransfers, final String submittedOnDate) {
         LOG.info("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withExternalId(externalId) //
                 .withWithdrawalFeeForTransfers(withdrawalFeeForTransfers) //
                 .withSubmittedOnDate(submittedOnDate) //
-                .build(ID.toString(), savingsProductID.toString(), accountType);
+                .build(id.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
     }
 
-    public Integer applyForSavingsApplicationWithDatatables(final Integer ID, final Integer savingsProductID, final String accountType,
+    public Integer applyForSavingsApplicationWithDatatables(final Integer id, final Integer savingsProductID, final String accountType,
             final String submittedOnDate, final String datatableName) {
         LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES----------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withDatatables(getTestDatatableAsJson(datatableName)) //
-                .build(ID.toString(), savingsProductID.toString(), accountType);
+                .build(id.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
     }
 
-    public Object applyForSavingsApplicationWithFailure(final Integer ID, final Integer savingsProductID, final String accountType,
+    public Object applyForSavingsApplicationWithFailure(final Integer id, final Integer savingsProductID, final String accountType,
             final String submittedOnDate, final String responseAttribute) {
         LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
-                .build(ID.toString(), savingsProductID.toString(), accountType);
+                .build(id.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, responseAttribute);
     }
 
-    public HashMap updateSavingsAccount(final Integer ID, final Integer savingsProductID, final Integer savingsId,
+    public HashMap updateSavingsAccount(final Integer id, final Integer savingsProductID, final Integer savingsId,
             final String accountType) {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(CREATED_DATE_PLUS_ONE) //
-                .build(ID.toString(), savingsProductID.toString(), accountType);
+                .build(id.toString(), savingsProductID.toString(), accountType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec,
                 SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON,
@@ -591,13 +591,13 @@ public class SavingsAccountHelper {
     }
 
     private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
-            final Boolean IS_BLOCK) {
+            final Boolean isBlock) {
         HashMap status = null;
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
                 CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");
-            if (IS_BLOCK != null && IS_BLOCK) {
+            if (isBlock != null && isBlock) {
                 status = (HashMap) response.get("subStatus");
             }
         }
