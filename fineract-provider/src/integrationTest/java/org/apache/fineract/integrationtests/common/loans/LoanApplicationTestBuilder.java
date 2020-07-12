@@ -98,14 +98,14 @@ public class LoanApplicationTestBuilder {
         return build(map, loanProductId, savingsID);
     }
 
-    public String build(final String ID, final String loanProductId, final String savingsID) {
+    public String build(final String id, final String loanProductId, final String savingsID) {
 
         final HashMap<String, Object> map = new HashMap<>();
 
         if ("group".equals(this.loanType)) {
-            map.put("groupId", ID);
+            map.put("groupId", id);
         } else {
-            map.put("clientId", ID);
+            map.put("clientId", id);
         }
         return build(map, loanProductId, savingsID);
     }
