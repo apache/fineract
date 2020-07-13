@@ -155,7 +155,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
@@ -183,7 +183,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -212,12 +212,12 @@ public class RecurringDepositTest {
          * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                depositAmount, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
 
         /***
@@ -305,7 +305,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
@@ -361,7 +361,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -390,12 +390,12 @@ public class RecurringDepositTest {
          * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                depositAmount, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
 
         /***
@@ -507,7 +507,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
@@ -564,7 +564,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -593,12 +593,12 @@ public class RecurringDepositTest {
          * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                depositAmount, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
 
         /***
@@ -716,7 +716,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
@@ -775,7 +775,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -878,7 +878,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
@@ -911,7 +911,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -940,12 +940,12 @@ public class RecurringDepositTest {
          * Perform Deposit transaction and verify journal entries are posted for the transaction
          */
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, expectedFirstDepositOnDate,
                 new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
 
         /***
@@ -1007,7 +1007,7 @@ public class RecurringDepositTest {
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1018,7 +1018,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         todaysDate.add(Calendar.DATE, -1);
@@ -1051,7 +1051,7 @@ public class RecurringDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1062,7 +1062,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1099,7 +1099,7 @@ public class RecurringDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String REJECTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1110,7 +1110,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1145,7 +1145,7 @@ public class RecurringDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String WITHDRAWN_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1156,7 +1156,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1189,7 +1189,7 @@ public class RecurringDepositTest {
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1200,7 +1200,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1243,7 +1243,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         final String DEPOSIT_DATE = dateFormat.format(todaysDate.getTime());
@@ -1266,7 +1266,7 @@ public class RecurringDepositTest {
          * Apply for RD account with created product and verify status
          */
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1367,7 +1367,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1378,7 +1378,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1442,7 +1442,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1453,13 +1453,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -1520,7 +1520,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1531,7 +1531,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1555,7 +1555,7 @@ public class RecurringDepositTest {
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
@@ -1617,7 +1617,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1635,7 +1635,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1661,7 +1661,7 @@ public class RecurringDepositTest {
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
@@ -1684,9 +1684,9 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(calendar.getTime()));
 
-        EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(transactionIdForDeposit);
 
         currentDate = currentDate - 1;
@@ -1741,7 +1741,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1759,13 +1759,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -1790,7 +1790,7 @@ public class RecurringDepositTest {
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
@@ -1813,9 +1813,9 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(calendar.getTime()));
 
-        EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(transactionIdForDeposit);
 
         currentDate = currentDate - 1;
@@ -1871,7 +1871,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
@@ -1890,7 +1890,7 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, TILL_PREMATURE_WITHDRAWAL, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, TILL_PREMATURE_WITHDRAWAL, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
@@ -1925,7 +1925,7 @@ public class RecurringDepositTest {
         Integer depositedPeriod = Months.monthsBetween(start, end).getMonths();
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(depositTransactionId);
 
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
@@ -1949,9 +1949,9 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(calendar.getTime()));
 
-        EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(transactionIdForDeposit);
 
         currentDate = currentDate - 1;
@@ -2007,7 +2007,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
@@ -2026,13 +2026,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, TILL_PREMATURE_WITHDRAWAL, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, TILL_PREMATURE_WITHDRAWAL, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, TILL_PREMATURE_WITHDRAWAL, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2066,7 +2066,7 @@ public class RecurringDepositTest {
         Integer depositedPeriod = Months.monthsBetween(start, end).getMonths();
 
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(transactionIdForDeposit);
 
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
@@ -2090,9 +2090,9 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(calendar.getTime()));
 
-        EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
+        expectedFirstDepositOnDate = dateFormat.format(calendar.getTime());
         Integer newTransactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
-                DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
         Assertions.assertNotNull(newTransactionIdForDeposit);
 
         currentDate = currentDate - 1;
@@ -2146,7 +2146,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2156,13 +2156,13 @@ public class RecurringDepositTest {
         Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, accountingRule);
         Assertions.assertNotNull(recurringDepositProductId);
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_365, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, MONTHLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2225,7 +2225,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2236,13 +2236,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, MONTHLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2313,7 +2313,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2324,13 +2324,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_365, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, BI_ANNUALLY, BI_ANNUALLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2403,7 +2403,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2414,13 +2414,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, BI_ANNUALLY, BI_ANNUALLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2492,7 +2492,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2503,13 +2503,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_365, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, ANNUALLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2582,7 +2582,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2593,13 +2593,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, ANNUALLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2673,7 +2673,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2684,13 +2684,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_365, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, QUARTERLY, QUARTERLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -2763,7 +2763,7 @@ public class RecurringDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2774,13 +2774,13 @@ public class RecurringDepositTest {
         Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, expectedFirstDepositOnDate);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap modificationsHashMap = this.recurringDepositAccountHelper.updateInterestCalculationConfigForRecurringDeposit(
                 clientId.toString(), recurringDepositProductId.toString(), recurringDepositAccountId.toString(), SUBMITTED_ON_DATE,
                 VALID_FROM, VALID_TO, DAYS_360, WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, QUARTERLY, QUARTERLY,
-                EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                expectedFirstDepositOnDate);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
                 .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());

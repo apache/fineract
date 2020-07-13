@@ -3195,8 +3195,8 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         validateNumberForEqualWithMsg("verify pre-close amount", "3551.93", prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3289,8 +3289,8 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3385,8 +3385,8 @@ public class ClientLoanIntegrationTest {
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3496,8 +3496,8 @@ public class ClientLoanIntegrationTest {
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -3613,8 +3613,8 @@ public class ClientLoanIntegrationTest {
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -3731,8 +3731,8 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3946,8 +3946,8 @@ public class ClientLoanIntegrationTest {
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -4189,8 +4189,8 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, Float.valueOf(prepayAmount), loanID);
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -4843,7 +4843,7 @@ public class ClientLoanIntegrationTest {
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
 
-        Float TRANSFER_AMOUNT = 20f;
+        Float transferAmountValue = 20f;
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
@@ -4854,13 +4854,13 @@ public class ClientLoanIntegrationTest {
         final String TO_SAVINGS_ACCOUNT_TYPE = "2";
 
         this.accountTransferHelper.refundLoanByTransfer(now, clientID, loanID, clientID, savingsId, FROM_LOAN_ACCOUNT_TYPE,
-                TO_SAVINGS_ACCOUNT_TYPE, TRANSFER_AMOUNT.toString());
+                TO_SAVINGS_ACCOUNT_TYPE, transferAmountValue.toString());
 
         Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        toSavingsBalance += TRANSFER_AMOUNT;
+        toSavingsBalance += transferAmountValue;
 
         // Verifying toSavings Account Balance after Account Transfer
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
@@ -4884,14 +4884,14 @@ public class ClientLoanIntegrationTest {
         // refund 2000 means paid: principal 0, interest 220, fees 50, penalty 0
         // final String now = Utils.convertDate(fourMonthsfromNowCalendar);
 
-        TRANSFER_AMOUNT = 2000f;
+        transferAmountValue = 2000f;
 
         this.accountTransferHelper.refundLoanByTransfer(now, clientID, loanID, clientID, savingsId, FROM_LOAN_ACCOUNT_TYPE,
-                TO_SAVINGS_ACCOUNT_TYPE, TRANSFER_AMOUNT.toString());
+                TO_SAVINGS_ACCOUNT_TYPE, transferAmountValue.toString());
 
         toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        toSavingsBalance += TRANSFER_AMOUNT;
+        toSavingsBalance += transferAmountValue;
 
         // Verifying toSavings Account Balance after Account Transfer
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),

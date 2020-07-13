@@ -977,7 +977,7 @@ public class FixedDepositTest {
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         monthDayFormat.format(todaysDate.getTime());
-        String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String submittedOnDate = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
@@ -990,13 +990,13 @@ public class FixedDepositTest {
         FixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
-                SUBMITTED_ON_DATE, WHOLE_TERM);
+                submittedOnDate, WHOLE_TERM);
         Assertions.assertNotNull(fixedDepositAccountId);
 
         todaysDate.add(Calendar.DATE, -1);
-        SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        submittedOnDate = dateFormat.format(todaysDate.getTime());
         HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateFixedDepositAccount(clientId.toString(),
-                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, SUBMITTED_ON_DATE);
+                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, submittedOnDate);
         Assertions.assertTrue(modificationsHashMap.containsKey("submittedOnDate"));
 
     }
