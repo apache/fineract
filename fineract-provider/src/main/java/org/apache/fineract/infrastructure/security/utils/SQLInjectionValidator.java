@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.security.utils;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 
 public class SQLInjectionValidator {
 
@@ -33,6 +34,9 @@ public class SQLInjectionValidator {
     private static final String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
     public static final void validateSQLInput(final String sqlSearch) {
+        if (StringUtils.isBlank(sqlSearch)) {
+            return;
+        }
         String lowerCaseSQL = sqlSearch.toLowerCase();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.contains(ddl)) {
@@ -118,6 +122,9 @@ public class SQLInjectionValidator {
     }
 
     public static final void validateAdhocQuery(final String sqlSearch) {
+        if (StringUtils.isBlank(sqlSearch)) {
+            return;
+        }
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.startsWith(ddl)) {
