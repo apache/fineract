@@ -46,9 +46,9 @@ public class WebFrontEndConfiguration implements WebMvcConfigurer {
         LOG.info("Found Swagger UI at {}", fullPathToSwaggerUiJs);
         String fullPathToSwaggerUi = fullPathToSwaggerUiJs.substring(0, fullPathToSwaggerUiJs.lastIndexOf("/") + 1);
 
-        String[] SWAGGER_RESOURCE_LOCATIONS = { "classpath:/static/swagger-ui/", "classpath:" + fullPathToSwaggerUi };
+        final String[] swaggerResourceLocations = { "classpath:/static/swagger-ui/", "classpath:" + fullPathToSwaggerUi };
 
-        registry.addResourceHandler("/swagger-ui/**").addResourceLocations(SWAGGER_RESOURCE_LOCATIONS);
+        registry.addResourceHandler("/swagger-ui/**").addResourceLocations(swaggerResourceLocations);
     }
 
     @Override
