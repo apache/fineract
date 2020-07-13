@@ -17,6 +17,6 @@
 # under the License.
 #
 spring.cloud.config:
-  uri: http://localhost:8888
+  uri: http://fineract-cn-cloud-config-server:8888
   name: fineract-server
   profile: default
