@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-spring.profiles.default=basicauth
-spring.profiles.active=oauth
-management.health.jms.enabled=false
+spring.cloud.config:
+  uri: http://fineract-cn-cloud-config-server:8888
+  name: fineract-server
+  profile: default

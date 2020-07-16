@@ -18,43 +18,32 @@
  */
 package org.apache.fineract.commands.kafka;
 
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.kafka.core.KafkaAdmin;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
 public class KafkaTopicConfig {
 
-    @Autowired
-    private Environment env;
-
-    private String bootstrapAddress = env.getProperty("KAFKA_BOOTSTRAP_ADDRESS", "http://localhost:9092");
-    private Integer partitions = Integer.valueOf(env.getProperty("KAFKA_PARTITIONS"));
-    private Short replicaFactor = Short.valueOf(env.getProperty("KAFKA_REPLICA_FACTOR"));
-
     @Bean
-    public KafkaAdmin kafkaAdmin() {
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        return new KafkaAdmin(configs);
+    public NewTopic topicClients(
+            @Value("${kafka.partitions}") int partitions,
+            @Value("${kafka.replicas}") int replicas) {
+        return TopicBuilder.name(KafkaTopicConstants.TOPIC_CLIENTS)
+                .partitions(partitions)
+                .replicas(replicas)
+                .build();
     }
 
     @Bean
-    public NewTopic topicClients() {
-        return new NewTopic(KafkaTopicConstants.TOPIC_CLIENTS, partitions, replicaFactor);
+    public NewTopic topicDeathLetters(
+            @Value("${kafka.partitions}") int partitions,
+            @Value("${kafka.replicas}") int replicas) {
+        return TopicBuilder.name(KafkaTopicConstants.TOPIC_DEATH_LETTER)
+                .partitions(partitions)
+                .replicas(replicas)
+                .build();
     }
-
-    @Bean
-    public NewTopic topicDeathLetter() {
-        return new NewTopic(KafkaTopicConstants.TOPIC_DEATH_LETTER, partitions, replicaFactor);
-    }
-
-
 }

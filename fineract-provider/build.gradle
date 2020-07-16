@@ -69,14 +69,17 @@ apply plugin: 'checkstyle'
 
 dependencies {
     compile 'net.logstash.logback:logstash-logback-encoder:4.11'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 }
 
 dependencyManagement {
   imports {
     mavenBom 'org.springframework:spring-framework-bom:5.2.3.RELEASE'
+    mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Hoxton.RELEASE'
   }
 
   dependencies {
+
      dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
      dependency 'org.apache.openjpa:openjpa:3.1.0'
      dependency 'com.squareup.retrofit:retrofit:1.6.1'
@@ -111,7 +114,7 @@ dependencyManagement {
      dependency 'com.mockrunner:mockrunner-jms:2.0.1'
      dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
 
-     dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
+      dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
          entry 'jersey-core'
          entry 'jersey-servlet'
          entry 'jersey-server'
@@ -143,6 +146,8 @@ dependencies {
     compile(
         [group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.4.5.RELEASE']
     )
+    compile 'org.springframework.cloud:spring-cloud-starter-zipkin'
+
 }
 
 /* define the valid syntax level for source files */
@@ -280,35 +285,35 @@ if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
 }
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
-if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/oauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/oauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
-}  else {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/basicauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/basicauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
-}
+//if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
+//    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
+//        copy {
+//            from './properties/oauth/twofactor/'
+//            into 'src/main/resources/'
+//            include '*.properties'
+//        }
+//    } else {
+//        copy {
+//            from './properties/oauth/'
+//            into 'src/main/resources/'
+//            include '*.properties'
+//        }
+//    }
+//}  else {
+//    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
+//        copy {
+//            from './properties/basicauth/twofactor/'
+//            into 'src/main/resources/'
+//            include '*.properties'
+//        }
+//    } else {
+//        copy {
+//            from './properties/basicauth/'
+//            into 'src/main/resources/'
+//            include '*.properties'
+//        }
+//    }
+//}
 
 task dist(type:Zip){
 	baseName = 'fineractplatform'

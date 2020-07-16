@@ -16,9 +16,17 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-spring.profiles.default=basicauth
-spring.profiles.active=oauth
-management.health.jms.enabled=false
-spring.zipkin.baseUrl=http://zipkin:9411/
-spring.zipkin.service.name=w-fineract-server
+spring:
+  profiles.active: oauth
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  zipkin:
+    baseUrl: http://localhost:9411/
+    service.name: fineract-server
+management.health.jms.enabled: false
+kafka:
+  partitions: 1
+  replicas: 1
