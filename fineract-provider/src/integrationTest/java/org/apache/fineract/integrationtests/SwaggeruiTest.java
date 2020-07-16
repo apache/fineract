@@ -43,7 +43,7 @@ public class SwaggeruiTest {
     }
 
     @Test
-    public void testSwaggerUAccess() {
+    public void testSwaggeruiAccess() {
         Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/swagger-ui", null);
         Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/swagger-ui/index.html", null);
     }
