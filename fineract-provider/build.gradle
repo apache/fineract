@@ -74,7 +74,7 @@ project.ext.jerseyVersion = '1.17'
 
 def app =[
         group: 'com.r2' ,
-        name: 'fineract-server',
+        name: 'fineract-provider',
         version: '0.22.0',
         versionType: 'SNAPSHOT'
 ]
