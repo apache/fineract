@@ -39,7 +39,7 @@
     window.onload = function() {
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
-        url: "fineract.json",
+        url: "fineract.yaml",
         dom_id: '#swagger-ui',
         deepLinking: true,
          filter: '',
@@ -50,11 +50,15 @@
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl
         ],
-        layout: "BaseLayout"
+        layout: "BaseLayout",
+        onComplete: function() {
+         ui.preauthorizeBasic("basicAuth", "mifos", "password");
+         ui.preauthorizeApiKey("tenantid", "default");
+    } 
       })
       // End Swagger UI call region
-
       window.ui = ui
+
     }
   </script>
   </body>

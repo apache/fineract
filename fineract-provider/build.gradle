@@ -196,11 +196,11 @@ openjpa {
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
-    outputFormat = 'JSON'
+    outputFormat = 'YAML'
     prettyPrint = 'TRUE'
     classpath = sourceSets.main.runtimeClasspath
     outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
-    openApiFile = file("config/swagger/fineract-input.json")
+    openApiFile = file("config/swagger/fineract-input.yaml")
 }
 
 // Configuration for JaCoCo code coverage task
