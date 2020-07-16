@@ -23,6 +23,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -103,12 +104,8 @@ public class AuditIntegrationTest {
         auditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
     }
 
-    /**
-     *
-     * Here we test that audit request with limit x only returns x entries
-     */
     @Test
-    public void checkAuditsWithLimit() {
+    public void checkAuditsWithLimitParam() {
         // Create client
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
 
@@ -126,6 +123,18 @@ public class AuditIntegrationTest {
             int limit = rand.nextInt(7) + 1;
             auditHelper.verifyLimitParameterfor(limit);
         }
+    }
+
+    @Test
+    public void checkIfOrderBySupported() {
+        final List<String> shouldBeSupportedFor = Arrays.asList("checkedOnDate", "officeName", "resourceId", "clientId", "processingResult",
+                "clientName", "maker", "subresourceId", "checker", "savingsAccountNo", "loanAccountNo", "groupName", "entityName",
+                "madeOnDate", "id", "loanId", "actionName");
+
+        for (int i = 0; i < shouldBeSupportedFor.size(); i++) {
+            auditHelper.verifyOrderBysupported(shouldBeSupportedFor.get(i));
+        }
+
     }
 
 }

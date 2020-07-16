@@ -100,4 +100,9 @@ public class AuditHelper {
         assertEquals(limit, getAuditDetails(limit).size(), "Incorrect number of audits recieved for limit: " + Integer.toString(limit));
     }
 
+    public void verifyOrderBysupported(final String orderByValue) {
+        final String AUDIT_URL = "/fineract-provider/api/v1/audits/?paged=true&orderBy=" + orderByValue + "&" + Utils.TENANT_IDENTIFIER;
+        Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
+    }
+
 }
