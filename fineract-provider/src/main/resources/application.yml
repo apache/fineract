@@ -30,3 +30,8 @@ management.health.jms.enabled: false
 kafka:
   partitions: 1
   replicas: 1
+drizzle:
+  driver-classname: org.drizzle.jdbc.DrizzleDriver
+  protocol: jdbc
+  subprotocol: mysql:thin
+  port: 3306
