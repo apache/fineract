@@ -1,1 +1,1 @@
-pipelinesingle(AppId: 'fineract-server')
+pipelinesingle(AppId: 'fineract', builderImage: 'registry.dev.redbee.io/gradlebuild:4.10.2')
