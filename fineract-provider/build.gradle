@@ -261,7 +261,10 @@ rat {
 	//BSD License
 	'**/assets/uglify.js',
          //Ignore out folder
-         '**/out/**'
+         '**/out/**',
+
+    //Jenkinsfile
+    'Jenkinsfile'
 	]
 }
 
