@@ -38,6 +38,8 @@ services:
     build:
       context: .
       target: fineract
+    volumes:
+      - fineract-home:/root/.fineract
     ports: 
       - 8443:8443
     depends_on:
@@ -63,6 +65,8 @@ services:
     ports:
       - 9090:80
 
+volumes:
+  fineract-home:
 
 # https://issues.apache.org/jira/browse/FINERACT-762
 # To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
