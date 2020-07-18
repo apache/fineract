@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:8 AS builder
+FROM registry.dev.redbee.io/waas-gradle-builder:1.4 AS builder
 
 # COPY . fineract is slow e.g. when using Podman instead of Docker (because it doesn't honor .dockerignore and copies all of .git/** into the container..), so let's explicitly list only what we need:
 COPY fineract-provider/src/main fineract/fineract-provider/src/main/
@@ -33,7 +33,7 @@ COPY *NOTICE* fineract/
 
 WORKDIR fineract
 # RUN find .
-RUN ./gradlew clean -x rat -x test -Psecurity=oauth war
+RUN gradle clean -x rat -x test -Psecurity=oauth war
 
 # =========================================
 
