@@ -114,8 +114,8 @@ public class ClientNonPerson extends AbstractPersistableCustom {
         validateIncorpValidityTillDate(client, dataValidationErrors);
 
         if (this.constitution == null) {
-            dataValidationErrors.add(ApiParameterError.parameterError("error.msg.clients.constitutionid.is.null", "Constitution ID may not be null",
-                    ClientApiConstants.constitutionIdParamName));
+            dataValidationErrors.add(ApiParameterError.parameterError("error.msg.clients.constitutionid.is.null",
+                    "Constitution ID may not be null", ClientApiConstants.constitutionIdParamName));
         }
 
         if (!dataValidationErrors.isEmpty()) {
