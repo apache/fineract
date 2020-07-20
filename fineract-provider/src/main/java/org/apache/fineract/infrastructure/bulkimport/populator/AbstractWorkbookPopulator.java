@@ -66,9 +66,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
         try {
             SimpleDateFormat formatinDB = null;
             if (value.matches("\\d{4}-\\d{1,2}-\\d{1,2}")) {
-                formatinDB = new SimpleDateFormat("yyyy-mm-dd");
+                formatinDB = new SimpleDateFormat("yyyy-MM-dd");
             } else if (value.matches("\\d{1,2}/\\d{1,2}/\\d{4}")) {
-                formatinDB = new SimpleDateFormat("dd/mm/yyyy");
+                formatinDB = new SimpleDateFormat("dd/MM/yyyy");
             } else if (value.matches("\\d{1,2} \\w{3,12} \\d{4}")) {
                 formatinDB = new SimpleDateFormat("dd MMMM yyyy");
             }

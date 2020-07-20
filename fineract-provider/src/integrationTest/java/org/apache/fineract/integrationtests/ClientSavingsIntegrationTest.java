@@ -866,7 +866,7 @@ public class ClientSavingsIntegrationTest {
         // yyyy",Locale.US);
         Calendar transactionDate = Calendar.getInstance();
         transactionDate.set(Calendar.DAY_OF_MONTH, 2);
-        String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        String transactionDateValue = dateFormat.format(transactionDate.getTime());
 
         /***
          * Perform Deposit transaction on last day of month and verify account balance.
@@ -907,7 +907,7 @@ public class ClientSavingsIntegrationTest {
         accountDetailsPostInterestPosted = Float.valueOf(decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
 
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         HashMap accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
         Float accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -931,9 +931,9 @@ public class ClientSavingsIntegrationTest {
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
         transactionDate.set(Calendar.DAY_OF_MONTH, 3);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
 
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
         accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -961,9 +961,9 @@ public class ClientSavingsIntegrationTest {
         Calendar transactionCalendarDateFormat = Calendar.getInstance();
         transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
         transactionDate.set(Calendar.DAY_OF_MONTH, 22);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
         if (Calendar.DAY_OF_MONTH >= 22) {
-            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
             accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -989,11 +989,11 @@ public class ClientSavingsIntegrationTest {
         DateFormat lastTransactionDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar postedLastDate = Calendar.getInstance();
         int numberOfDateOfMonth = postedLastDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        TRANSACTION_DATE = lastTransactionDateFormat.format(transactionDate.getTime());
+        transactionDateValue = lastTransactionDateFormat.format(transactionDate.getTime());
 
         if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
 
-            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
             accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1018,8 +1018,8 @@ public class ClientSavingsIntegrationTest {
 
         }
         transactionDate.set(Calendar.DAY_OF_MONTH, 1);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
         accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1117,7 +1117,7 @@ public class ClientSavingsIntegrationTest {
         // yyyy", Locale.US);
         Calendar transactionDate = Calendar.getInstance();
         transactionDate.set(Calendar.DAY_OF_MONTH, 2);
-        String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        String transactionDateValue = dateFormat.format(transactionDate.getTime());
 
         /***
          * Perform withdraw transaction, verify account balance(account balance will go to negative as no deposits are
@@ -1169,7 +1169,7 @@ public class ClientSavingsIntegrationTest {
         accountDetailsPostInterestPosted = Float.valueOf(decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
 
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         HashMap accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
         Float accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1193,9 +1193,9 @@ public class ClientSavingsIntegrationTest {
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
         transactionDate.set(Calendar.DAY_OF_MONTH, 3);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
 
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
         accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1223,9 +1223,9 @@ public class ClientSavingsIntegrationTest {
         Calendar transactionCalendarDateFormat = Calendar.getInstance();
         transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
         transactionDate.set(Calendar.DAY_OF_MONTH, 22);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
         if (Calendar.DAY_OF_MONTH >= 22) {
-            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
             accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1251,11 +1251,11 @@ public class ClientSavingsIntegrationTest {
         DateFormat lastTransactionDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar postedLastDate = Calendar.getInstance();
         int numberOfDateOfMonth = postedLastDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        TRANSACTION_DATE = lastTransactionDateFormat.format(transactionDate.getTime());
+        transactionDateValue = lastTransactionDateFormat.format(transactionDate.getTime());
 
         if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
 
-            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+            this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
             accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
             accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1280,8 +1280,8 @@ public class ClientSavingsIntegrationTest {
 
         }
         transactionDate.set(Calendar.DAY_OF_MONTH, 1);
-        TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, TRANSACTION_DATE);
+        transactionDateValue = dateFormat.format(transactionDate.getTime());
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
         accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1790,9 +1790,9 @@ public class ClientSavingsIntegrationTest {
         final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
         LocalDate transactionDate = new LocalDate();
         for (int i = 0; i < 4; i++) {
-            String TRANSACTION_DATE = formatter.print(transactionDate);
+            String transactionDateValue = formatter.print(transactionDate);
             Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
-                    TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                    transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
             transactionDate = transactionDate.minusDays(30);
         }
 
@@ -1821,9 +1821,9 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        String TRANSACTION_DATE = formatter.print(new LocalDate());
+        String transactionDateValue = formatter.print(new LocalDate());
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
-                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
@@ -1840,9 +1840,9 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        TRANSACTION_DATE = formatter.print(new LocalDate());
+        transactionDateValue = formatter.print(new LocalDate());
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
-                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));

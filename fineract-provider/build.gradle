@@ -91,7 +91,7 @@ dependencyManagement {
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
         dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
-        dependency 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated above in buildscript!
+        dependency 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated above in buildscript!
         dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.7.5'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
@@ -117,14 +117,14 @@ dependencyManagement {
         dependency 'jakarta.validation:jakarta.validation-api:2.0.2'
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
-        dependency 'org.mockito:mockito-core:3.4.0'
-        dependency 'org.mockito:mockito-junit-jupiter:3.4.0'
+        dependency 'org.mockito:mockito-core:3.4.3'
+        dependency 'org.mockito:mockito-junit-jupiter:3.4.4'
         dependency 'io.github.classgraph:classgraph:4.8.87'
         dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.0.6'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.10.0'
-        dependency 'org.webjars.npm:swagger-ui-dist:3.29.0'
+        dependency 'org.webjars.npm:swagger-ui-dist:3.30.0'
         dependency 'org.webjars:webjars-locator-core:0.46'
 
         dependency ('org.dom4j:dom4j:2.1.3') {
@@ -196,11 +196,11 @@ openjpa {
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
-    outputFormat = 'JSON'
+    outputFormat = 'YAML'
     prettyPrint = 'TRUE'
     classpath = sourceSets.main.runtimeClasspath
     outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
-    openApiFile = file("config/swagger/fineract-input.json")
+    openApiFile = file("config/swagger/fineract-input.yaml")
 }
 
 // Configuration for JaCoCo code coverage task
