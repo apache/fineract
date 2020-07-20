@@ -129,6 +129,7 @@ dependencies {
     testImplementation('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'javax.validation'
     }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
