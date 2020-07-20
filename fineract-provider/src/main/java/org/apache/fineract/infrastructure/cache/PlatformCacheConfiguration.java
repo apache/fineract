@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
 
 @SuppressWarnings("deprecation")
 @Configuration
-@EnableCaching
+//@EnableCaching - deshabilitado aca, habilitado en CacheConfiguration
 public class PlatformCacheConfiguration implements CachingConfigurer {
 
     @Autowired

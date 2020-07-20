@@ -46,7 +46,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class,
-    MessagingConfiguration.class, WebTwoFactorXmlConfiguration.class})
+    MessagingConfiguration.class, WebTwoFactorXmlConfiguration.class, CacheConfiguration.class})
 @ImportResource({ "classpath*:META-INF/spring/appContext.xml" })
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class,

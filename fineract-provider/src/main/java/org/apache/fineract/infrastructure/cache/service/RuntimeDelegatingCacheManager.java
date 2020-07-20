@@ -28,10 +28,12 @@ import org.apache.fineract.infrastructure.cache.data.CacheData;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,13 +47,13 @@ import org.springframework.stereotype.Component;
 @Component(value = "runtimeDelegatingCacheManager")
 public class RuntimeDelegatingCacheManager implements CacheManager {
 
-    private final EhCacheCacheManager ehcacheCacheManager;
+    private final RedisCacheManager redisCacheManager;
     private final CacheManager noOpCacheManager = new NoOpCacheManager();
     private CacheManager currentCacheManager;
 
     @Autowired
-    public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
-        this.ehcacheCacheManager = ehCacheCacheManager;
+    public RuntimeDelegatingCacheManager(@Qualifier(value = "cacheManager") final RedisCacheManager redisCacheManager) {
+        this.redisCacheManager = redisCacheManager;
         this.currentCacheManager = this.noOpCacheManager;
     }
 
@@ -68,7 +70,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     public Collection<CacheData> retrieveAll() {
 
         final boolean noCacheEnabled = this.currentCacheManager instanceof NoOpCacheManager;
-        final boolean ehcacheEnabled = this.currentCacheManager instanceof EhCacheCacheManager;
+        final boolean redisCacheEnabled = this.currentCacheManager instanceof RedisCacheManager;
 
         // final boolean distributedCacheEnabled = false;
 
@@ -78,7 +80,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
         // CacheEnumerations.cacheType(CacheType.MULTI_NODE);
 
         final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
-        final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehcacheEnabled);
+        final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, redisCacheEnabled);
         // final CacheData distributedCache =
         // CacheData.instance(multiNodeCacheType, distributedCacheEnabled);
 
@@ -86,12 +88,12 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
         return caches;
     }
 
-    public Map<String, Object> switchToCache(final boolean ehcacheEnabled, final CacheType toCacheType) {
+    public Map<String, Object> switchToCache(final boolean redisCacheEnabled, final CacheType toCacheType) {
 
         final Map<String, Object> changes = new HashMap<>();
 
-        final boolean noCacheEnabled = !ehcacheEnabled;
-        final boolean distributedCacheEnabled = !ehcacheEnabled;
+        final boolean noCacheEnabled = !redisCacheEnabled;
+        final boolean distributedCacheEnabled = !redisCacheEnabled;
 
         switch (toCacheType) {
             case INVALID:
@@ -103,11 +105,11 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
                 this.currentCacheManager = this.noOpCacheManager;
             break;
             case SINGLE_NODE:
-                if (!ehcacheEnabled) {
+                if (!redisCacheEnabled) {
                     changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
-                    clearEhCache();
+                    clearCache();
                 }
-                this.currentCacheManager = this.ehcacheCacheManager;
+                this.currentCacheManager = this.redisCacheManager;
             break;
             case MULTI_NODE:
                 if (!distributedCacheEnabled) {
@@ -119,7 +121,9 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
         return changes;
     }
 
-    private void clearEhCache() {
-        this.ehcacheCacheManager.getCacheManager().clearAll();
+    private void clearCache() {
+        redisCacheManager.getCacheNames()
+                .parallelStream()
+                .forEach(n -> redisCacheManager.getCache(n).clear());
     }
 }

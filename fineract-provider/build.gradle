@@ -81,6 +81,8 @@ dependencyManagement {
   dependencies {
 
      dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
+     dependency 'org.springframework.boot:spring-boot-starter-data-redis:2.3.1.RELEASE'
+     dependency 'redis.clients:jedis:2.7.0'
      dependency 'org.apache.openjpa:openjpa:3.1.0'
      dependency 'com.squareup.retrofit:retrofit:1.6.1'
      dependency 'com.squareup.okhttp:okhttp:2.0.0'
@@ -97,7 +99,6 @@ dependencyManagement {
      dependency 'com.googlecode.flyway:flyway-core:2.1.1'
      dependency 'org.quartz-scheduler:quartz:+'
      dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
-     dependency 'net.sf.ehcache:ehcache:+'
      dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
      dependency 'com.jayway.jsonpath:json-path:0.9.1'
      dependency 'org.apache.tika:tika-core:1.9'

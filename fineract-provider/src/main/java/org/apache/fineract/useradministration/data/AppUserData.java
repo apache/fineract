@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.useradministration.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 /**
  * Immutable data object for application user data.
  */
-public class AppUserData {
+public class AppUserData implements Serializable {
 
     private final Long id;
     private final String username;
