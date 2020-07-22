@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.joda.time.DateTime;
@@ -33,7 +32,7 @@ final class SurveyApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetSurveyResponse")
+    @Schema(description = "GetSurveyResponse")
     public static final class GetSurveyResponse {
 
         private GetSurveyResponse() {
@@ -46,65 +45,65 @@ final class SurveyApiResourceSwagger {
 
             }
 
-            @ApiModelProperty(example = "m_client")
+            @Schema(example = "m_client")
             public String applicationTableName;
-            @ApiModelProperty(example = "ppi_kenya_2005")
+            @Schema(example = "ppi_kenya_2005")
             public String registeredTableName;
             public List<ResultsetColumnHeaderData> columnHeaderData;
         }
 
         public GetSurveyResponseDatatableData datatableData;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean enabled;
     }
 
-    @ApiModel(value = "PostSurveySurveyNameApptableIdRequest")
+    @Schema(description = "PostSurveySurveyNameApptableIdRequest")
     public static final class PostSurveySurveyNameApptableIdRequest {
 
         private PostSurveySurveyNameApptableIdRequest() {
 
         }
 
-        @ApiModelProperty(example = "167")
+        @Schema(example = "167")
         public Long ppi_household_members_cd_q1_householdmembers;
-        @ApiModelProperty(example = "174")
+        @Schema(example = "174")
         public Long ppi_highestschool_cd_q2_highestschool;
-        @ApiModelProperty(example = "180")
+        @Schema(example = "180")
         public Long ppi_businessoccupation_cd_q3_businessoccupation;
-        @ApiModelProperty(example = "184")
+        @Schema(example = "184")
         public Long ppi_habitablerooms_cd_q4_habitablerooms;
-        @ApiModelProperty(example = "188")
+        @Schema(example = "188")
         public Long ppi_floortype_cd_q5_floortype;
-        @ApiModelProperty(example = "190")
+        @Schema(example = "190")
         public Long ppi_lightingsource_cd_q6_lightingsource;
-        @ApiModelProperty(example = "193")
+        @Schema(example = "193")
         public Long ppi_irons_cd_q7_irons;
-        @ApiModelProperty(example = "195")
+        @Schema(example = "195")
         public Long ppi_mosquitonets_cd_q8_mosquitonets;
-        @ApiModelProperty(example = "198")
+        @Schema(example = "198")
         public Long ppi_towels_cd_q9_towels;
-        @ApiModelProperty(example = "201")
+        @Schema(example = "201")
         public Long ppi_fryingpans_cd_q10_fryingpans;
-        @ApiModelProperty(example = "2014-12-02 20:30:00")
+        @Schema(example = "2014-12-02 20:30:00")
         public DateTime Date;
-        @ApiModelProperty(example = "Y-m-d H:i:s")
+        @Schema(example = "Y-m-d H:i:s")
         public DateTime dateFormat;
-        @ApiModelProperty(example = "en_GB")
+        @Schema(example = "en_GB")
         public String locale;
     }
 
-    @ApiModel(value = "PostSurveySurveyNameApptableIdResponse")
+    @Schema(description = "PostSurveySurveyNameApptableIdResponse")
     public static final class PostSurveySurveyNameApptableIdResponse {
 
         private PostSurveySurveyNameApptableIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Long officeId;
-        @ApiModelProperty(example = "87")
+        @Schema(example = "87")
         public Long clientId;
-        @ApiModelProperty(example = "87")
+        @Schema(example = "87")
         public Long resourceId;
     }
 }

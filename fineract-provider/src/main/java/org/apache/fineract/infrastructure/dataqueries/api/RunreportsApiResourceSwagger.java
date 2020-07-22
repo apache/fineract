@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 
@@ -31,7 +31,7 @@ final class RunreportsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetReportNameResponse")
+    @Schema(description = "GetReportNameResponse")
     public static final class GetReportNameResponse {
 
         private GetReportNameResponse() {

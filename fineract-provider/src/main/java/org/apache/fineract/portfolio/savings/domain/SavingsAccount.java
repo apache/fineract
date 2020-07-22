@@ -117,6 +117,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 @Entity
@@ -126,6 +128,8 @@ import org.springframework.util.CollectionUtils;
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 public class SavingsAccount extends AbstractPersistableCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
 
     @Version
     int version;
@@ -2383,7 +2387,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             case YEARS:
                 lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
+            break;
         }
 
         return lockedInUntilLocalDate;

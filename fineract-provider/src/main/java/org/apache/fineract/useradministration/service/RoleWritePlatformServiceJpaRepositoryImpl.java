@@ -235,7 +235,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 
@@ -269,7 +269,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 
@@ -292,7 +292,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 }

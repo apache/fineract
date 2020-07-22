@@ -604,7 +604,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             LOG.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
     }
 

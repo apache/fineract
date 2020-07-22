@@ -106,7 +106,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new GLClosureNotFoundException(glClosureId);
+            throw new GLClosureNotFoundException(glClosureId, e);
         }
     }
 

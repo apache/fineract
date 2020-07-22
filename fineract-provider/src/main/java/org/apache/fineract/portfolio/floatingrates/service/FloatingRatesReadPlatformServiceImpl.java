@@ -74,7 +74,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final String sql = "select " + rateMapper.schema() + " where rate.id = ?";
             return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new FloatingRateNotFoundException(floatingRateId);
+            throw new FloatingRateNotFoundException(floatingRateId, e);
         }
     }
 
@@ -84,7 +84,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             FloatingInterestRatePeriodRowMapper mapper = new FloatingInterestRatePeriodRowMapper();
             return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product");
+            throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product", e);
         }
     }
 
@@ -95,7 +95,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final String sql = "select " + rateMapper.schema() + " where rate.is_base_lending_rate = 1 and rate.is_active = 1";
             return this.jdbcTemplate.queryForObject(sql, rateMapper);
         } catch (final EmptyResultDataAccessException e) {
-            throw new FloatingRateNotFoundException("error.msg.floatingrate.base.lending.rate.not.found");
+            throw new FloatingRateNotFoundException("error.msg.floatingrate.base.lending.rate.not.found", e);
         }
     }
 

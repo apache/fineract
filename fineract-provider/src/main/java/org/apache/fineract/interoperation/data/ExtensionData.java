@@ -23,13 +23,14 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_VALUE;
 
 import com.google.gson.JsonObject;
 import java.util.Arrays;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 
 public class ExtensionData {
 
-    public static final String[] PARAMS = { PARAM_KEY, PARAM_VALUE };
+    public static final List<String> PARAMS = List.copyOf(Arrays.asList(PARAM_KEY, PARAM_VALUE));
 
     @NotNull
     private final String key;
@@ -58,7 +59,7 @@ public class ExtensionData {
             return null;
         }
 
-        jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
+        jsonHelper.checkForUnsupportedParameters(element, PARAMS);
 
         String key = jsonHelper.extractStringNamed(PARAM_KEY, element);
         DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_KEY).value(key).notBlank();

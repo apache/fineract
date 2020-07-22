@@ -38,7 +38,7 @@ public final class Image extends AbstractPersistableCustom {
         this.storageType = storageType.getValue();
     }
 
-    protected Image() {
+    Image() {
 
     }
 

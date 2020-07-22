@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 30/7/17.
@@ -30,16 +29,16 @@ final class ExternalServicesConfigurationApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PutExternalServiceRequest")
+    @Schema(description = "PutExternalServiceRequest")
     public static final class PutExternalServiceRequest {
 
         private PutExternalServiceRequest() {
 
         }
 
-        @ApiModelProperty(example = "test@mifos.org")
+        @Schema(example = "test@mifos.org")
         public String username;
-        @ApiModelProperty(example = "XXXX")
+        @Schema(example = "XXXX")
         public String password;
     }
 }

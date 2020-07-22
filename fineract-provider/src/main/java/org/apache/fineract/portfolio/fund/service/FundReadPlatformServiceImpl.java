@@ -86,7 +86,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 
             return selectedFund;
         } catch (final EmptyResultDataAccessException e) {
-            throw new FundNotFoundException(fundId);
+            throw new FundNotFoundException(fundId, e);
         }
     }
 }

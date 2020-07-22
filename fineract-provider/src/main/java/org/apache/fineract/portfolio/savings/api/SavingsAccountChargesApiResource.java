@@ -23,15 +23,15 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -67,11 +67,9 @@ import org.springframework.stereotype.Component;
 @Path("/savingsaccounts/{savingsAccountId}/charges")
 @Component
 @Scope("singleton")
-@Api(tags = { "Savings Charges" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "Savings Charges", description = "Its typical for MFIs to add maintenance and operating charges. They can be either Fees or Penalties.\n"
-                + "\n"
-                + "Savings Charges are instances of Charges and represent either fees and penalties for savings products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Savings account) are described here") })
+@Tag(name = "Savings Charges", description = "Its typical for MFIs to add maintenance and operating charges. They can be either Fees or Penalties.\n"
+        + "\n"
+        + "Savings Charges are instances of Charges and represent either fees and penalties for savings products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Savings account) are described here")
 public class SavingsAccountChargesApiResource {
 
     private final PlatformSecurityContext context;
@@ -103,15 +101,15 @@ public class SavingsAccountChargesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Savings Charges", httpMethod = "GET", notes = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n"
+    @Operation(summary = "List Savings Charges", description = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n"
             + "savingsaccounts/1/charges\n" + "\n" + "savingsaccounts/1/charges?chargeStatus=all\n" + "\n"
             + "savingsaccounts/1/charges?chargeStatus=inactive\n" + "\n" + "savingsaccounts/1/charges?chargeStatus=active\n" + "\n"
             + "savingsaccounts/1/charges?fields=name,amountOrPercentage")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesResponse.class)))) })
     public String retrieveAllSavingsAccountCharges(
-            @PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @DefaultValue("all") @QueryParam("chargeStatus") @ApiParam(value = "chargeStatus") final String chargeStatus,
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
@@ -132,11 +130,12 @@ public class SavingsAccountChargesApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Savings Charges Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "savingsaccounts/1/charges/template")
+    @Operation(summary = "Retrieve Savings Charges Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n"
+            + "savingsaccounts/1/charges/template")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesTemplateResponse.class) })
-    public String retrieveTemplate(@PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesTemplateResponse.class))) })
+    public String retrieveTemplate(@PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
@@ -154,14 +153,13 @@ public class SavingsAccountChargesApiResource {
     @Path("{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Savings account Charge", httpMethod = "GET", notes = "Retrieves a Savings account Charge\n\n"
-            + "Example Requests:\n" + "\n" + "/savingsaccounts/1/charges/5\n" + "\n" + "\n"
-            + "/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+    @Operation(summary = "Retrieve a Savings account Charge", description = "Retrieves a Savings account Charge\n\n" + "Example Requests:\n"
+            + "\n" + "/savingsaccounts/1/charges/5\n" + "\n" + "\n" + "/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
     public String retrieveSavingsAccountCharge(
-            @PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId,
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @PathParam("savingsAccountChargeId") @Parameter(description = "savingsAccountChargeId") final Long savingsAccountChargeId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
@@ -177,15 +175,15 @@ public class SavingsAccountChargesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a Savings account Charge", httpMethod = "POST", notes = "Creates a Savings account Charge\n\n"
+    @Operation(summary = "Create a Savings account Charge", description = "Creates a Savings account Charge\n\n"
             + "Mandatory Fields for Savings account Charges: chargeId, amount\n\n" + "chargeId, amount, dueDate, dateFormat, locale\n\n"
             + "chargeId, amount, feeOnMonthDay, monthDayFormat, locale")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesResponse.class) })
-    public String addSavingsAccountCharge(@PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesResponse.class))) })
+    public String addSavingsAccountCharge(
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccountCharge(savingsAccountId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -199,15 +197,14 @@ public class SavingsAccountChargesApiResource {
     @Path("{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Savings account Charge", httpMethod = "PUT", notes = "Currently Savings account Charges may be updated only if the Savings account is not yet approved.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsAccountChargesApiResourceSwagger.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest.class) })
+    @Operation(summary = "Update a Savings account Charge", description = "Currently Savings account Charges may be updated only if the Savings account is not yet approved.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
     public String updateSavingsAccountCharge(
-            @PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @PathParam("savingsAccountChargeId") @Parameter(description = "savingsAccountChargeId") final Long savingsAccountChargeId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder()
                 .updateSavingsAccountCharge(savingsAccountId, savingsAccountChargeId).withJson(apiRequestBodyAsJson).build();
@@ -221,21 +218,20 @@ public class SavingsAccountChargesApiResource {
     @Path("{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Pay a Savings account Charge | Waive off a Savings account Charge | Inactivate a Savings account Charge", httpMethod = "POST", notes = "Pay a Savings account Charge:\n\n"
+    @Operation(summary = "Pay a Savings account Charge | Waive off a Savings account Charge | Inactivate a Savings account Charge", description = "Pay a Savings account Charge:\n\n"
             + "An active charge will be paid when savings account is active and having sufficient balance.\n\n"
             + "Waive off a Savings account Charge:\n\n" + "Outstanding charge amount will be waived off.\n\n"
             + "Inactivate a Savings account Charge:\n\n"
             + "A charge will be allowed to inactivate when savings account is active and not having any dues as of today. If charge is overpaid, corresponding charge payment transactions will be reversed.\n\n"
             + "Showing request/response for 'Pay a Savings account Charge'")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
     public String payOrWaiveSavingsAccountCharge(
-            @PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId,
-            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @PathParam("savingsAccountChargeId") @Parameter(description = "savingsAccountChargeId") final Long savingsAccountChargeId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         String json = "";
         if (is(commandParam, COMMAND_WAIVE_CHARGE)) {
@@ -271,12 +267,12 @@ public class SavingsAccountChargesApiResource {
     @Path("{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Savings account Charge", httpMethod = "DELETE", notes = "Note: Currently, A Savings account Charge may only be removed from Savings that are not yet approved.")
+    @Operation(summary = "Delete a Savings account Charge", description = "Note: Currently, A Savings account Charge may only be removed from Savings that are not yet approved.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SavingsAccountChargesApiResourceSwagger.DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
     public String deleteSavingsAccountCharge(
-            @PathParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Long savingsAccountId,
-            @PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId) {
+            @PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
+            @PathParam("savingsAccountChargeId") @Parameter(description = "savingsAccountChargeId") final Long savingsAccountChargeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder()
                 .deleteSavingsAccountCharge(savingsAccountId, savingsAccountChargeId).build();

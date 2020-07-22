@@ -40,7 +40,7 @@ public final class ReportParameterUsage extends AbstractPersistableCustom {
     @Column(name = "report_parameter_name")
     private String reportParameterName;
 
-    protected ReportParameterUsage() {
+    ReportParameterUsage() {
         //
     }
 

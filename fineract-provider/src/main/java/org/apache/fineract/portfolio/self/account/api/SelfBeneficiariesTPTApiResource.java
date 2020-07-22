@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.portfolio.self.account.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,8 +62,8 @@ import org.springframework.stereotype.Component;
 @Path("/self/beneficiaries/tpt")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Third Party Transfer" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Third Party Transfer", description = "") })
+
+@Tag(name = "Self Third Party Transfer", description = "")
 public class SelfBeneficiariesTPTApiResource {
 
     private final PlatformSecurityContext context;
@@ -93,10 +93,10 @@ public class SelfBeneficiariesTPTApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Beneficiary Third Party Transfer Template", httpMethod = "GET", notes = "Returns Account Type enumerations. Self User is expected to know office name and account number to be able to add beneficiary.\n"
+    @Operation(summary = "Beneficiary Third Party Transfer Template", description = "Returns Account Type enumerations. Self User is expected to know office name and account number to be able to add beneficiary.\n"
             + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/template")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTTemplateResponse.class) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTTemplateResponse.class))) })
     public String template(@Context final UriInfo uriInfo) {
 
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
@@ -113,17 +113,16 @@ public class SelfBeneficiariesTPTApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add TPT Beneficiary", httpMethod = "POST", notes = "Api to add third party beneficiary linked to current user.\n"
-            + "\n" + "Parameter Definitions\n" + "\n" + "name : Nick name for beneficiary, should be unique for an self service user\n"
-            + "\n" + "officeName : Office Name of beneficiary(not id)\n" + "\n" + "accountNumber : Account Number of beneficiary(not id)\n"
-            + "\n" + "transferLimit : Each transfer initiated to this account will not exceed this amount\n" + "\n" + "Example Requests:\n"
-            + "\n" + "/self/beneficiaries/tpt\n\n" + "Mandatory Fields: name, officeName, accountNumber, accountType\n\n"
+    @Operation(summary = "Add TPT Beneficiary", description = "Api to add third party beneficiary linked to current user.\n" + "\n"
+            + "Parameter Definitions\n" + "\n" + "name : Nick name for beneficiary, should be unique for an self service user\n" + "\n"
+            + "officeName : Office Name of beneficiary(not id)\n" + "\n" + "accountNumber : Account Number of beneficiary(not id)\n" + "\n"
+            + "transferLimit : Each transfer initiated to this account will not exceed this amount\n" + "\n" + "Example Requests:\n" + "\n"
+            + "/self/beneficiaries/tpt\n\n" + "Mandatory Fields: name, officeName, accountNumber, accountType\n\n"
             + "Optional Fields: transferLimit")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTResponse.class) })
-    public String add(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTResponse.class))) })
+    public String add(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().addSelfServiceBeneficiaryTPT().withJson(apiRequestBodyAsJson)
                 .build();
@@ -135,14 +134,13 @@ public class SelfBeneficiariesTPTApiResource {
     @Path("{beneficiaryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update TPT Beneficiary", httpMethod = "PUT", notes = "Api to update third party beneficiary linked to current user.\n"
-            + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}\n\n" + "Optional Fields: name, transferLimit")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdRequest.class) })
+    @Operation(summary = "Update TPT Beneficiary", description = "Api to update third party beneficiary linked to current user.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}\n\n" + "Optional Fields: name, transferLimit")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdResponse.class) })
-    public String update(@PathParam("beneficiaryId") @ApiParam(value = "beneficiaryId") final Long beneficiaryId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdResponse.class))) })
+    public String update(@PathParam("beneficiaryId") @Parameter(description = "beneficiaryId") final Long beneficiaryId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSelfServiceBeneficiaryTPT(beneficiaryId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -154,11 +152,12 @@ public class SelfBeneficiariesTPTApiResource {
     @Path("{beneficiaryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete TPT Beneficiary", httpMethod = "DELETE", notes = "Api to delete third party beneficiary linked to current user.\n"
-            + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}")
+    @Operation(summary = "Delete TPT Beneficiary", description = "Api to delete third party beneficiary linked to current user.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.DeleteSelfBeneficiariesTPTBeneficiaryIdResponse.class) })
-    public String delete(@PathParam("beneficiaryId") final Long beneficiaryId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.DeleteSelfBeneficiariesTPTBeneficiaryIdResponse.class))) })
+    public String delete(@PathParam("beneficiaryId") final Long beneficiaryId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSelfServiceBeneficiaryTPT(beneficiaryId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -169,10 +168,10 @@ public class SelfBeneficiariesTPTApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get All TPT Beneficiary", httpMethod = "GET", notes = "Api to get all third party beneficiary linked to current user.\n"
-            + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt")
+    @Operation(summary = "Get All TPT Beneficiary", description = "Api to get all third party beneficiary linked to current user.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTResponse.class, responseContainer = "List") })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(SelfBeneficiariesTPTApiConstants.BENEFICIARY_ENTITY_NAME);

@@ -184,7 +184,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             }
             return accountingRuleData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountingRuleNotFoundException(accountingRuleId);
+            throw new AccountingRuleNotFoundException(accountingRuleId, e);
         }
     }
 

@@ -279,7 +279,7 @@ public final class Client extends AbstractPersistableCustom {
                 savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
     }
 
-    protected Client() {
+    Client() {
         this.setLegalForm(null);
     }
 

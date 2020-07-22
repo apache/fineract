@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.productmix.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when no product mixes found with the productId.
@@ -27,6 +28,10 @@ public class ProductMixNotFoundException extends AbstractPlatformResourceNotFoun
 
     public ProductMixNotFoundException(final Long productId) {
         super("error.msg.no.product.mixes.exists", "No product mixes are defined with the productId `" + productId + "`.", productId);
+    }
+
+    public ProductMixNotFoundException(Long productId, EmptyResultDataAccessException e) {
+        super("error.msg.no.product.mixes.exists", "No product mixes are defined with the productId `" + productId + "`.", productId, e);
     }
 
 }

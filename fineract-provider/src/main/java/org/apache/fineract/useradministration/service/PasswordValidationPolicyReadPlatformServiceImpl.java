@@ -56,7 +56,7 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
             final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
             return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
         } catch (final EmptyResultDataAccessException e) {
-            throw new PasswordValidationPolicyNotFoundException();
+            throw new PasswordValidationPolicyNotFoundException(e);
         }
     }
 

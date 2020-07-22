@@ -133,7 +133,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new HolidayNotFoundException(holidayId);
+            throw new HolidayNotFoundException(holidayId, e);
         }
     }
 

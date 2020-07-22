@@ -22,8 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InterestRateChartEnumerations {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InterestRateChartEnumerations.class);
 
     public static EnumOptionData periodType(final Integer type) {
         return periodType(PeriodFrequencyType.fromInt(type));
@@ -52,7 +56,10 @@ public class InterestRateChartEnumerations {
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(), PeriodFrequencyType.YEARS.getCode(),
                         "Years");
             break;
-            default:
+            case WHOLE_TERM:
+                optionData = new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
+                        PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole Term");
+            break;
         }
 
         return optionData;

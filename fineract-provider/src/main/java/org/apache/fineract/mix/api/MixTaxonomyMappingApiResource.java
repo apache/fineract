@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.mix.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,8 +47,8 @@ import org.springframework.stereotype.Component;
 @Path("/mixmapping")
 @Component
 @Scope("singleton")
-@Api(tags = { "Mix Mapping " })
-@SwaggerDefinition(tags = { @Tag(name = "Mix Mapping", description = "") })
+
+@Tag(name = "Mix Mapping", description = "")
 public class MixTaxonomyMappingApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));

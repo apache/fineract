@@ -243,10 +243,10 @@ public class CalendarUtils {
             recur = rrule.getRecur();
         } catch (final ValidationException e) {
             throw new PlatformDataIntegrityException("error.msg.invalid.recurring.rule",
-                    "The Recurring Rule value: " + recurringRule + " is not valid.", "recurrence", recurringRule);
+                    "The Recurring Rule value: " + recurringRule + " is not valid.", "recurrence", recurringRule, e);
         } catch (final ParseException e) {
             throw new PlatformDataIntegrityException("error.msg.recurring.rule.parsing.error",
-                    "Error in pasring the Recurring Rule value: " + recurringRule, "recurrence", recurringRule);
+                    "Error in pasring the Recurring Rule value: " + recurringRule, "recurrence", recurringRule, e);
         }
 
         if (recur == null) {

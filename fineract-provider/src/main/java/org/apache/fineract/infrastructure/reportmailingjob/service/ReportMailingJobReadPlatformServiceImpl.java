@@ -109,7 +109,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         }
 
         catch (final EmptyResultDataAccessException ex) {
-            throw new ReportMailingJobNotFoundException(reportMailingJobId);
+            throw new ReportMailingJobNotFoundException(reportMailingJobId, ex);
         }
     }
 

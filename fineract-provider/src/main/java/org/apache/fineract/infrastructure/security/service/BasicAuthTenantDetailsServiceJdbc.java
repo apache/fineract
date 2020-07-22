@@ -140,7 +140,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
         } catch (final EmptyResultDataAccessException e) {
-            throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.");
+            throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.", e);
         }
     }
 }

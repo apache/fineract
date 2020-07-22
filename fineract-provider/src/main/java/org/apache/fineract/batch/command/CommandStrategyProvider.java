@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.command;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class CommandStrategyProvider {
 
     private final ApplicationContext applicationContext;
-    private final ConcurrentHashMap<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
+    private final Map<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
 
     /**
      * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initialize
@@ -68,7 +69,7 @@ public class CommandStrategyProvider {
             return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(commandContext));
         }
 
-        for (ConcurrentHashMap.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
+        for (Map.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
             if (commandContext.matcher(entry.getKey())) {
                 return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(entry.getKey()));
             }

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +30,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
     private RecurringDepositAccountTransactionsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
+    @Schema(description = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
     public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
@@ -40,33 +39,33 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
             private GetRecurringTransactionType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "savingsAccountTransactionType.deposit")
+            @Schema(example = "savingsAccountTransactionType.deposit")
             public String code;
-            @ApiModelProperty(example = "Deposit")
-            public String value;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "Deposit")
+            public String description;
+            @Schema(example = "true")
             public Boolean deposit;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean withdrawal;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean interestPosting;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean feeDeduction;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean initiateTransfer;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean approveTransfer;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean withdrawTransfer;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean rejectTransfer;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean overdraftInterest;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean writtenoff;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean overdraftFee;
         }
 
@@ -74,41 +73,41 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
             private GetRecurringCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "4")
+            @Schema(example = "4")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "100")
+            @Schema(example = "100")
             public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
         public GetRecurringTransactionType transactionType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer accountId;
-        @ApiModelProperty(example = "000000001")
+        @Schema(example = "000000001")
         public String accountNo;
-        @ApiModelProperty(example = "[2014, 6, 25]")
+        @Schema(example = "[2014, 6, 25]")
         public LocalDate date;
         public GetRecurringCurrency currency;
-        @ApiModelProperty(example = "100000.000000")
+        @Schema(example = "100000.000000")
         public BigDecimal amount;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean reversed;
-        @ApiModelProperty(example = "[]")
+        @Schema(example = "[]")
         public List<Integer> paymentTypeOptions;
     }
 
-    @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
+    @Schema(description = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
     public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
@@ -117,19 +116,19 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
             private GetRecurringTransactionsCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
@@ -137,19 +136,19 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
             private GetRecurringTransactionsTransactionType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "savingsAccountTransactionType.withdrawal")
+            @Schema(example = "savingsAccountTransactionType.withdrawal")
             public String code;
-            @ApiModelProperty(example = "Withdrawal")
-            public String value;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "Withdrawal")
+            public String description;
+            @Schema(example = "false")
             public Boolean deposit;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean withdrawal;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean interestPosting;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean feeDeduction;
         }
 
@@ -161,74 +160,74 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
                 private GetRecurringPaymentType() {}
 
-                @ApiModelProperty(example = "11")
+                @Schema(example = "11")
                 public Integer id;
-                @ApiModelProperty(example = "cash")
+                @Schema(example = "cash")
                 public String name;
             }
 
-            @ApiModelProperty(example = "62")
+            @Schema(example = "62")
             public Integer id;
             public GetRecurringPaymentType paymentType;
-            @ApiModelProperty(example = "")
+            @Schema(example = "")
             public Integer accountNumber;
-            @ApiModelProperty(example = "")
+            @Schema(example = "")
             public Integer checkNumber;
-            @ApiModelProperty(example = "")
+            @Schema(example = "")
             public Integer routingCode;
-            @ApiModelProperty(example = "")
+            @Schema(example = "")
             public Integer receiptNumber;
-            @ApiModelProperty(example = "")
+            @Schema(example = "")
             public Integer bankNumber;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
         public GetRecurringTransactionsTransactionType transactionType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer accountId;
-        @ApiModelProperty(example = "000000001")
+        @Schema(example = "000000001")
         public String accountNo;
-        @ApiModelProperty(example = "[2013, 8, 7]")
+        @Schema(example = "[2013, 8, 7]")
         public LocalDate date;
         public GetRecurringTransactionsCurrency currency;
         public GetRecurringPaymentDetailData paymentDetailData;
-        @ApiModelProperty(example = "5000")
+        @Schema(example = "5000")
         public Float amount;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer runningBalance;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean reversed;
     }
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
+    @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "27 May 2013")
+        @Schema(example = "27 May 2013")
         public String transactionDate;
-        @ApiModelProperty(example = "500")
+        @Schema(example = "500")
         public Double transactionAmount;
-        @ApiModelProperty(example = "14")
+        @Schema(example = "14")
         public Integer paymentTypeId;
-        @ApiModelProperty(example = "acc123")
+        @Schema(example = "acc123")
         public String accountNumber;
-        @ApiModelProperty(example = "che123")
+        @Schema(example = "che123")
         public String checkNumber;
-        @ApiModelProperty(example = "rou123")
+        @Schema(example = "rou123")
         public String routingCode;
-        @ApiModelProperty(example = "rec123")
+        @Schema(example = "rec123")
         public String receiptNumber;
-        @ApiModelProperty(example = "ban123")
+        @Schema(example = "ban123")
         public String bankNumber;
     }
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
+    @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
@@ -237,41 +236,41 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
             private PostRecurringChanges() {}
 
-            @ApiModelProperty(example = "acc123")
+            @Schema(example = "acc123")
             public String accountNumber;
-            @ApiModelProperty(example = "che123")
+            @Schema(example = "che123")
             public String checkNumber;
-            @ApiModelProperty(example = "rou123")
+            @Schema(example = "rou123")
             public String routingCode;
-            @ApiModelProperty(example = "rec123")
+            @Schema(example = "rec123")
             public String receiptNumber;
-            @ApiModelProperty(example = "ban123")
+            @Schema(example = "ban123")
             public String bankNumber;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsId;
-        @ApiModelProperty(example = "47")
+        @Schema(example = "47")
         public Integer resourceId;
         public PostRecurringChanges changes;
     }
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
+    @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsId;
-        @ApiModelProperty(example = "48")
+        @Schema(example = "48")
         public Integer resourceId;
         public PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse.PostRecurringChanges changes;
     }

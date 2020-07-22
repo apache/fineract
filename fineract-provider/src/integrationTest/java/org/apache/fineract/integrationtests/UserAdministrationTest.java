@@ -32,6 +32,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
+import org.apache.fineract.useradministration.service.AppUserConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,4 +156,19 @@ public class UserAdministrationTest {
                 reason.get("defaultUserMessage"));
     }
 
+    @Test
+    public void testDeleteSystemUser() {
+        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
+        Assertions.assertNotNull(userId);
+
+        UserHelper.deleteUser(requestSpec, expectStatusCode(403), userId.intValue());
+    }
+
+    @Test
+    public void testModifySystemUser() {
+        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
+        Assertions.assertNotNull(userId);
+
+        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
+    }
 }

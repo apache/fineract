@@ -55,7 +55,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     @Column(name = "bank_number", length = 50)
     private String bankNumber;
 
-    protected PaymentDetail() {
+    PaymentDetail() {
 
     }
 

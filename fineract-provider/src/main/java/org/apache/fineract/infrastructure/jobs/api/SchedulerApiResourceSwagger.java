@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 12/8/17.
@@ -30,14 +29,14 @@ final class SchedulerApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetSchedulerResponse")
+    @Schema(description = "GetSchedulerResponse")
     public static final class GetSchedulerResponse {
 
         private GetSchedulerResponse() {
 
         }
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean active;
     }
 

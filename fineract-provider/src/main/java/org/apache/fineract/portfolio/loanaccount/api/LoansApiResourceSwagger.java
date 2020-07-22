@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class LoansApiResourceSwagger {
 
     private LoansApiResourceSwagger() {}
 
-    @ApiModel(value = "GetLoansTemplateResponse")
+    @Schema(description = "GetLoansTemplateResponse")
     public static final class GetLoansTemplateResponse {
 
         private GetLoansTemplateResponse() {}
@@ -39,7 +38,7 @@ final class LoansApiResourceSwagger {
 
             private GetLoansTemplateTimeline() {}
 
-            @ApiModelProperty(example = "[2013, 3, 8]")
+            @Schema(example = "[2013, 3, 8]")
             public LocalDate expectedDisbursementDate;
         }
 
@@ -47,23 +46,23 @@ final class LoansApiResourceSwagger {
 
             private GetLoansTemplateProductOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Kampala Product (with cash accounting)")
+            @Schema(example = "Kampala Product (with cash accounting)")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long clientId;
-        @ApiModelProperty(example = "Kampala first Client")
+        @Schema(example = "Kampala first Client")
         public String clientName;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer clientOfficeId;
         public GetLoansTemplateTimeline timeline;
         public Set<GetLoansTemplateProductOptions> productOptions;
     }
 
-    @ApiModel(value = "GetLoansLoanIdResponse")
+    @Schema(description = "GetLoansLoanIdResponse")
     public static final class GetLoansLoanIdResponse {
 
         private GetLoansLoanIdResponse() {}
@@ -72,27 +71,27 @@ final class LoansApiResourceSwagger {
 
             private GetLoansLoanIdStatus() {}
 
-            @ApiModelProperty(example = "300")
+            @Schema(example = "300")
             public Integer id;
-            @ApiModelProperty(example = "loanStatusType.active")
+            @Schema(example = "loanStatusType.active")
             public String code;
-            @ApiModelProperty(example = "Active")
-            public String value;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "Active")
+            public String description;
+            @Schema(example = "false")
             public Boolean pendingApproval;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean waitingForDisbursal;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean active;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean closedObligationsMet;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean closedWrittenOff;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean closedRescheduled;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean closed;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean overpaid;
         }
 
@@ -100,29 +99,29 @@ final class LoansApiResourceSwagger {
 
             private GetLoansLoanIdLoanType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "loanType.individual")
+            @Schema(example = "loanType.individual")
             public String code;
-            @ApiModelProperty(example = "Individual")
-            public String value;
+            @Schema(example = "Individual")
+            public String description;
         }
 
         static final class GetLoansLoanIdCurrency {
 
             private GetLoansLoanIdCurrency() {}
 
-            @ApiModelProperty(example = "UGX")
+            @Schema(example = "UGX")
             public String code;
-            @ApiModelProperty(example = "Uganda Shilling")
+            @Schema(example = "Uganda Shilling")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "USh")
+            @Schema(example = "USh")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.UGX")
+            @Schema(example = "currency.UGX")
             public String nameCode;
-            @ApiModelProperty(example = "Uganda Shilling (USh)")
+            @Schema(example = "Uganda Shilling (USh)")
             public String displayLabel;
         }
 
@@ -130,105 +129,105 @@ final class LoansApiResourceSwagger {
 
             private GetLoansLoanIdTermPeriodFrequencyType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "termFrequency.periodFrequencyType.months")
+            @Schema(example = "termFrequency.periodFrequencyType.months")
             public String code;
-            @ApiModelProperty(example = "Months")
-            public String value;
+            @Schema(example = "Months")
+            public String description;
         }
 
         static final class GetLoansLoanIdRepaymentFrequencyType {
 
             private GetLoansLoanIdRepaymentFrequencyType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "repaymentFrequency.periodFrequencyType.months")
+            @Schema(example = "repaymentFrequency.periodFrequencyType.months")
             public String code;
-            @ApiModelProperty(example = "Months")
-            public String value;
+            @Schema(example = "Months")
+            public String description;
         }
 
         static final class GetLoansLoanIdInterestRateFrequencyType {
 
             private GetLoansLoanIdInterestRateFrequencyType() {}
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "interestRateFrequency.periodFrequencyType.years")
+            @Schema(example = "interestRateFrequency.periodFrequencyType.years")
             public String code;
-            @ApiModelProperty(example = "Per year")
-            public String value;
+            @Schema(example = "Per year")
+            public String description;
         }
 
         static final class GetLoansLoanIdAmortizationType {
 
             private GetLoansLoanIdAmortizationType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "amortizationType.equal.installments")
+            @Schema(example = "amortizationType.equal.installments")
             public String code;
-            @ApiModelProperty(example = "Equal installments")
-            public String value;
+            @Schema(example = "Equal installments")
+            public String description;
         }
 
         static final class GetLoansLoanIdInterestType {
 
             private GetLoansLoanIdInterestType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "interestType.flat")
+            @Schema(example = "interestType.flat")
             public String code;
-            @ApiModelProperty(example = "Flat")
-            public String value;
+            @Schema(example = "Flat")
+            public String description;
         }
 
         static final class GetLoansLoanIdInterestCalculationPeriodType {
 
             private GetLoansLoanIdInterestCalculationPeriodType() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "interestCalculationPeriodType.same.as.repayment.period")
+            @Schema(example = "interestCalculationPeriodType.same.as.repayment.period")
             public String code;
-            @ApiModelProperty(example = "Same as repayment period")
-            public String value;
+            @Schema(example = "Same as repayment period")
+            public String description;
         }
 
         static final class GetLoansLoanIdTimeline {
 
             private GetLoansLoanIdTimeline() {}
 
-            @ApiModelProperty(example = "[2012, 4, 3]")
+            @Schema(example = "[2012, 4, 3]")
             public LocalDate submittedOnDate;
-            @ApiModelProperty(example = "admin")
+            @Schema(example = "admin")
             public String submittedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String submittedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String submittedByLastname;
-            @ApiModelProperty(example = "[2012, 4, 3]")
+            @Schema(example = "[2012, 4, 3]")
             public LocalDate approvedOnDate;
-            @ApiModelProperty(example = "admin")
+            @Schema(example = "admin")
             public String approvedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String approvedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String approvedByLastname;
-            @ApiModelProperty(example = "[2012, 4, 10]")
+            @Schema(example = "[2012, 4, 10]")
             public LocalDate expectedDisbursementDate;
-            @ApiModelProperty(example = "[2012, 4, 10]")
+            @Schema(example = "[2012, 4, 10]")
             public LocalDate actualDisbursementDate;
-            @ApiModelProperty(example = "admin")
+            @Schema(example = "admin")
             public String disbursedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String disbursedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String disbursedByLastname;
-            @ApiModelProperty(example = "[2012, 4, 10]")
+            @Schema(example = "[2012, 4, 10]")
             public LocalDate expectedMaturityDate;
         }
 
@@ -245,9 +244,9 @@ final class LoansApiResourceSwagger {
 
                 private GetLoansLoanIdLinkedAccount() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "000000001")
+                @Schema(example = "000000001")
                 public Long accountNo;
             }
 
@@ -255,13 +254,13 @@ final class LoansApiResourceSwagger {
 
                 private GetLoansLoanIdDisbursementDetails() {}
 
-                @ApiModelProperty(example = "71")
+                @Schema(example = "71")
                 public Integer id;
-                @ApiModelProperty(example = "[2013, 11, 1]")
+                @Schema(example = "[2013, 11, 1]")
                 public LocalDate expectedDisbursementDate;
-                @ApiModelProperty(example = "22000.000000")
+                @Schema(example = "22000.000000")
                 public Float principal;
-                @ApiModelProperty(example = "22000.000000")
+                @Schema(example = "22000.000000")
                 public Float approvedPrincipal;
             }
 
@@ -273,252 +272,252 @@ final class LoansApiResourceSwagger {
 
                     private GetLoansLoanIdChargeTimeType() {}
 
-                    @ApiModelProperty(example = "9")
+                    @Schema(example = "9")
                     public Integer id;
-                    @ApiModelProperty(example = "chargeTimeType.overdueInstallment")
+                    @Schema(example = "chargeTimeType.overdueInstallment")
                     public String code;
-                    @ApiModelProperty(example = "overdue fees")
-                    public String value;
+                    @Schema(example = "overdue fees")
+                    public String description;
                 }
 
                 static final class GetLoansLoanIdChargeCalculationType {
 
                     private GetLoansLoanIdChargeCalculationType() {}
 
-                    @ApiModelProperty(example = "2")
+                    @Schema(example = "2")
                     public Integer id;
-                    @ApiModelProperty(example = "chargeCalculationType.percent.of.amount")
+                    @Schema(example = "chargeCalculationType.percent.of.amount")
                     public String code;
-                    @ApiModelProperty(example = "% Amount")
-                    public String value;
+                    @Schema(example = "% Amount")
+                    public String description;
                 }
 
                 static final class GetLoansLoanIdChargePaymentMode {
 
                     private GetLoansLoanIdChargePaymentMode() {}
 
-                    @ApiModelProperty(example = "0")
+                    @Schema(example = "0")
                     public Integer id;
-                    @ApiModelProperty(example = "chargepaymentmode.regular")
+                    @Schema(example = "chargepaymentmode.regular")
                     public String code;
-                    @ApiModelProperty(example = "Regular")
-                    public String value;
+                    @Schema(example = "Regular")
+                    public String description;
                 }
 
                 static final class GetLoansLoanIdFeeFrequency {
 
                     private GetLoansLoanIdFeeFrequency() {}
 
-                    @ApiModelProperty(example = "1")
+                    @Schema(example = "1")
                     public Integer id;
-                    @ApiModelProperty(example = "feeFrequencyperiodFrequencyType.weeks")
+                    @Schema(example = "feeFrequencyperiodFrequencyType.weeks")
                     public String code;
-                    @ApiModelProperty(example = "Weeks")
-                    public String value;
+                    @Schema(example = "Weeks")
+                    public String description;
                 }
 
-                @ApiModelProperty(example = "20")
+                @Schema(example = "20")
                 public Integer id;
-                @ApiModelProperty(example = "overdraft penality")
+                @Schema(example = "overdraft penality")
                 public String name;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "true")
                 public Boolean active;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "true")
                 public Boolean penalty;
                 public LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.GetLoanChargeCurrency currency;
-                @ApiModelProperty(example = "3.000000")
+                @Schema(example = "3.000000")
                 public Float amount;
                 public GetLoansLoanIdChargeTimeType chargeTimeType;
                 public LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.GetLoanChargeTemplateChargeOptions.GetLoanChargeTemplateChargeAppliesTo chargeAppliesTo;
                 public GetLoansLoanIdChargeCalculationType chargeCalculationType;
                 public GetLoansLoanIdChargePaymentMode chargePaymentMode;
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer feeInterval;
                 public GetLoansLoanIdFeeFrequency feeFrequency;
             }
 
             public GetLoansLoanIdCurrency currency;
-            @ApiModelProperty(example = "1000000")
+            @Schema(example = "1000000")
             public Long principalDisbursed;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long principalPaid;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long principalWrittenOff;
-            @ApiModelProperty(example = "1000000")
+            @Schema(example = "1000000")
             public Long principalOutstanding;
-            @ApiModelProperty(example = "833333.3")
+            @Schema(example = "833333.3")
             public Double principalOverdue;
-            @ApiModelProperty(example = "240000")
+            @Schema(example = "240000")
             public Long interestCharged;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long interestPaid;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long interestWaived;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long interestWrittenOff;
-            @ApiModelProperty(example = "240000")
+            @Schema(example = "240000")
             public Long interestOutstanding;
-            @ApiModelProperty(example = "200000")
+            @Schema(example = "200000")
             public Long interestOverdue;
-            @ApiModelProperty(example = "18000")
+            @Schema(example = "18000")
             public Long feeChargesCharged;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesDueAtDisbursementCharged;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesPaid;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesWaived;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesWrittenOff;
-            @ApiModelProperty(example = "18000")
+            @Schema(example = "18000")
             public Long feeChargesOutstanding;
-            @ApiModelProperty(example = "15000")
+            @Schema(example = "15000")
             public Long feeChargesOverdue;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesCharged;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesPaid;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesWaived;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesWrittenOff;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesOutstanding;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long penaltyChargesOverdue;
-            @ApiModelProperty(example = "1258000")
+            @Schema(example = "1258000")
             public Long totalExpectedRepayment;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalRepayment;
-            @ApiModelProperty(example = "258000")
+            @Schema(example = "258000")
             public Long totalExpectedCostOfLoan;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalCostOfLoan;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalWaived;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalWrittenOff;
-            @ApiModelProperty(example = "1258000")
+            @Schema(example = "1258000")
             public Long totalOutstanding;
-            @ApiModelProperty(example = "1048333.3")
+            @Schema(example = "1048333.3")
             public Double totalOverdue;
-            @ApiModelProperty(example = "[2012, 5, 10]")
+            @Schema(example = "[2012, 5, 10]")
             public LocalDate overdueSinceDate;
             public GetLoansLoanIdLinkedAccount linkedAccount;
             public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
-            @ApiModelProperty(example = "1100.000000")
+            @Schema(example = "1100.000000")
             public Float fixedEmiAmount;
-            @ApiModelProperty(example = "35000")
+            @Schema(example = "35000")
             public Long maxOutstandingLoanBalance;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean canDisburse;
             public Set<GetLoansLoanIdEmiVariations> emiAmountVariations;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean inArrears;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean isNPA;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "000000001")
+        @Schema(example = "000000001")
         public Long accountNo;
         public GetLoansLoanIdStatus status;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "Kampala first Client")
+        @Schema(example = "Kampala first Client")
         public String clientName;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer clientOfficeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanProductId;
-        @ApiModelProperty(example = "Kampala Product (with cash accounting)")
+        @Schema(example = "Kampala Product (with cash accounting)")
         public String loanProductName;
-        @ApiModelProperty(example = "Typical Kampala loan product with cash accounting enabled for testing.")
+        @Schema(example = "Typical Kampala loan product with cash accounting enabled for testing.")
         public String loanProductDescription;
-        @ApiModelProperty(example = "22")
+        @Schema(example = "22")
         public Integer loanPurposeId;
-        @ApiModelProperty(example = "option.HousingImprovement")
+        @Schema(example = "option.HousingImprovement")
         public String loanPurposeName;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer loanOfficerId;
-        @ApiModelProperty(example = "LoanOfficer, Kampala")
+        @Schema(example = "LoanOfficer, Kampala")
         public String loanOfficerName;
         public GetLoansLoanIdLoanType loanType;
         public GetLoansLoanIdCurrency currency;
-        @ApiModelProperty(example = "1000000")
+        @Schema(example = "1000000")
         public Long principal;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer termFrequency;
         public GetLoansLoanIdTermPeriodFrequencyType termPeriodFrequencyType;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer numberOfRepayments;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer repaymentEvery;
         public GetLoansLoanIdRepaymentFrequencyType repaymentFrequencyType;
-        @ApiModelProperty(example = "24")
+        @Schema(example = "24")
         public Integer interestRatePerPeriod;
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
-        @ApiModelProperty(example = "24")
+        @Schema(example = "24")
         public Integer annualInterestRate;
         public GetLoansLoanIdAmortizationType amortizationType;
         public GetLoansLoanIdInterestType interestType;
         public GetLoansLoanIdInterestCalculationPeriodType interestCalculationPeriodType;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer transactionProcessingStrategyId;
         public GetLoansLoanIdTimeline timeline;
         public GetLoansLoanIdSummary summary;
     }
 
-    @ApiModel(value = "GetLoansResponse")
+    @Schema(description = "GetLoansResponse")
     public static final class GetLoansResponse {
 
         private GetLoansResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer totalFilteredRecords;
         public Set<GetLoansLoanIdResponse> pageItems;
     }
 
-    @ApiModel(value = "PostLoansRequest")
+    @Schema(description = "PostLoansRequest")
     public static final class PostLoansRequest {
 
         private PostLoansRequest() {}
 
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "en_GB")
+        @Schema(example = "en_GB")
         public String locale;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer productId;
-        @ApiModelProperty(example = "100,000.00")
+        @Schema(example = "100,000.00")
         public Double principal;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer loanTermFrequency;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer loanTermFrequencyType;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer numberOfRepayments;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer repaymentEvery;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer repaymentFrequencyType;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer interestRatePerPeriod;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer amortizationType;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer interestType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer interestCalculationPeriodType;
-        @ApiModelProperty(example = "20 September 2011")
+        @Schema(example = "20 September 2011")
         public String expectedDisbursementDate;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer transactionProcessingStrategyId;
     }
 
-    @ApiModel(value = "PostLoansResponse")
+    @Schema(description = "PostLoansResponse")
     public static final class PostLoansResponse {
 
         private PostLoansResponse() {}
@@ -527,96 +526,96 @@ final class LoansApiResourceSwagger {
 
             private PostLoansRepaymentSchedulePeriods() {}
 
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer period;
-            @ApiModelProperty(example = "[2011, 9, 20]")
+            @Schema(example = "[2011, 9, 20]")
             public LocalDate dueDate;
-            @ApiModelProperty(example = "100000")
+            @Schema(example = "100000")
             public Long principalDisbursed;
-            @ApiModelProperty(example = "100000")
+            @Schema(example = "100000")
             public Long principalLoanBalanceOutstanding;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesDue;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long feeChargesOutstanding;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalOriginalDueForPeriod;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalDueForPeriod;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalOutstandingForPeriod;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalOverdue;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Long totalActualCostOfLoanForPeriod;
         }
 
         public GetLoansLoanIdResponse.GetLoansLoanIdCurrency currency;
-        @ApiModelProperty(example = "366")
+        @Schema(example = "366")
         public Integer loanTermInDays;
-        @ApiModelProperty(example = "100000")
+        @Schema(example = "100000")
         public Long totalPrincipalDisbursed;
-        @ApiModelProperty(example = "100000")
+        @Schema(example = "100000")
         public Long totalPrincipalExpected;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalPrincipalPaid;
-        @ApiModelProperty(example = "13471.52")
+        @Schema(example = "13471.52")
         public Double totalInterestCharged;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalFeeChargesCharged;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalPenaltyChargesCharged;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalWaived;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalWrittenOff;
-        @ApiModelProperty(example = "113471.52")
+        @Schema(example = "113471.52")
         public Double totalRepaymentExpected;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalRepayment;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Long totalOutstanding;
         public Set<PostLoansRepaymentSchedulePeriods> periods;
     }
 
-    @ApiModel(value = "PutLoansLoanIdRequest")
+    @Schema(description = "PutLoansLoanIdRequest")
     public static final class PutLoansLoanIdRequest {
 
         private PutLoansLoanIdRequest() {}
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer productId;
-        @ApiModelProperty(example = "5000")
+        @Schema(example = "5000")
         public Long principal;
-        @ApiModelProperty(example = "10")
+        @Schema(example = "10")
         public Integer loanTermFrequency;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer loanTermFrequencyType;
-        @ApiModelProperty(example = "10")
+        @Schema(example = "10")
         public Integer numberOfRepayments;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer repaymentEvery;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer repaymentFrequencyType;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer interestRatePerPeriod;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer interestType;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer interestCalculationPeriodType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer amortizationType;
-        @ApiModelProperty(example = "04 March 2014")
+        @Schema(example = "04 March 2014")
         public String expectedDisbursementDate;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer transactionProcessingStrategyId;
     }
 
-    @ApiModel(value = "PutLoansLoanIdResponse")
+    @Schema(description = "PutLoansLoanIdResponse")
     public static final class PutLoansLoanIdResponse {
 
         private PutLoansLoanIdResponse() {}
@@ -625,67 +624,67 @@ final class LoansApiResourceSwagger {
 
             private PutLoansLoanIdChanges() {}
 
-            @ApiModelProperty(example = "5000")
+            @Schema(example = "5000")
             public Long principal;
-            @ApiModelProperty(example = "en")
+            @Schema(example = "en")
             public String locale;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutLoansLoanIdChanges changes;
     }
 
-    @ApiModel(value = "DeleteLoansLoanIdResponse")
+    @Schema(description = "DeleteLoansLoanIdResponse")
     public static final class DeleteLoansLoanIdResponse {
 
         private DeleteLoansLoanIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PostLoansLoanIdRequest")
+    @Schema(description = "PostLoansLoanIdRequest")
     public static final class PostLoansLoanIdRequest {
 
         private PostLoansLoanIdRequest() {}
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer toLoanOfficerId;
-        @ApiModelProperty(example = "02 September 2014")
+        @Schema(example = "02 September 2014")
         public String assignmentDate;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public Integer fromLoanOfficerId;
     }
 
-    @ApiModel(value = "PostLoansLoanIdResponse")
+    @Schema(description = "PostLoansLoanIdResponse")
     public static final class PostLoansLoanIdResponse {
 
         private PostLoansLoanIdResponse() {}
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
-        @ApiModelProperty(example = "6")
+        @Schema(example = "6")
         public Integer clientId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer loanId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer resourceId;
     }
 }

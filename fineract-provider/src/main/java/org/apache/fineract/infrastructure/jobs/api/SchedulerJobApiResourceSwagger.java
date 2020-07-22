@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
@@ -33,47 +32,47 @@ final class SchedulerJobApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetJobsResponse")
+    @Schema(description = "GetJobsResponse")
     public static final class GetJobsResponse {
 
         private GetJobsResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long jobId;
-        @ApiModelProperty(example = "Update loan Summary")
+        @Schema(example = "Update loan Summary")
         public String displayName;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public Date nextRunTime;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public String initializingError;
-        @ApiModelProperty(example = "0 0 22 1/1 * ? *")
+        @Schema(example = "0 0 22 1/1 * ? *")
         public String cronExpression;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean active;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean currentlyRunning;
         public JobDetailHistoryData lastRunHistory;
     }
 
-    @ApiModel(value = "PutJobsJobsIDRequest")
+    @Schema(description = "PutJobsJobsIDRequest")
     public static final class PutJobsJobIDRequest {
 
         private PutJobsJobIDRequest() {
 
         }
 
-        @ApiModelProperty(example = "Update loan Summary")
+        @Schema(example = "Update loan Summary")
         public String displayName;
-        @ApiModelProperty(example = "0 0 22 1/1 * ? *")
+        @Schema(example = "0 0 22 1/1 * ? *")
         public String cronExpression;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public boolean active;
 
     }
 
-    @ApiModel(value = "GetJobsJobIDJobRunHistoryResponse")
+    @Schema(description = "GetJobsJobIDJobRunHistoryResponse")
     public static final class GetJobsJobIDJobRunHistoryResponse {
 
         private GetJobsJobIDJobRunHistoryResponse() {
@@ -84,19 +83,19 @@ final class SchedulerJobApiResourceSwagger {
 
             private JobDetailHistoryDataSwagger() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Long version;
-            @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
+            @Schema(example = "Jul 16, 2013 12:00:00 PM")
             public Date jobRunStartTime;
-            @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
+            @Schema(example = "Jul 16, 2013 12:00:00 PM")
             public Date jobRunEndTime;
-            @ApiModelProperty(example = "success")
+            @Schema(example = "success")
             public String status;
-            @ApiModelProperty(example = "cron")
+            @Schema(example = "cron")
             public String triggerType;
         }
 
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public int totalFilteredRecords;
         public List<JobDetailHistoryDataSwagger> pageItems;
 

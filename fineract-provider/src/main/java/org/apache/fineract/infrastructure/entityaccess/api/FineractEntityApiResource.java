@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.api;
 
-import io.swagger.annotations.Api;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -51,7 +50,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-@Api(value = "DomainName/api/v1/entitytoentitymapping", description = "") // https://github.com/swagger-api/swagger-ui/issues/1655
+
 public class FineractEntityApiResource {
 
     private final PlatformSecurityContext context;

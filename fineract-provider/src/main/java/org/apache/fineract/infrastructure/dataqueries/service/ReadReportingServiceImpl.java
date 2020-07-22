@@ -116,7 +116,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     // out.flush();
                     // out.close();
                 } catch (final Exception e) {
-                    throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+                    throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
                 }
             }
         };
@@ -313,7 +313,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return genaratePdf;
         } catch (final Exception e) {
             LOG.error("error.msg.reporting.error:", e);
-            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
         }
     }
 

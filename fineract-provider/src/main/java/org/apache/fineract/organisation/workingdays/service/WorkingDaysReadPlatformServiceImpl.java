@@ -86,7 +86,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
             Collection<EnumOptionData> repaymentRescheduleOptions = repaymentRescheduleTypeOptions();
             return new WorkingDaysData(data, repaymentRescheduleOptions);
         } catch (final EmptyResultDataAccessException e) {
-            throw new WorkingDaysNotFoundException();
+            throw new WorkingDaysNotFoundException(e);
         }
     }
 

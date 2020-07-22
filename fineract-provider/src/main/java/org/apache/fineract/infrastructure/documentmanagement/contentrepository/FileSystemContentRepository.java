@@ -84,7 +84,7 @@ public class FileSystemContentRepository implements ContentRepository {
             out.flush();
             out.close();
         } catch (final IOException ioe) {
-            throw new ContentManagementException(imageName, ioe.getMessage());
+            throw new ContentManagementException(imageName, ioe.getMessage(), ioe);
         } catch (IllegalArgumentException iae) {
             LOG.error("IllegalArgumentException due to invalid Base64 encoding: {}", base64EncodedImageString, iae);
             throw iae;
@@ -173,7 +173,7 @@ public class FileSystemContentRepository implements ContentRepository {
         } catch (final IOException ioException) {
             LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)",
                     ioException);
-            throw new ContentManagementException(fileName, ioException.getMessage());
+            throw new ContentManagementException(fileName, ioException.getMessage(), ioException);
         }
     }
 }

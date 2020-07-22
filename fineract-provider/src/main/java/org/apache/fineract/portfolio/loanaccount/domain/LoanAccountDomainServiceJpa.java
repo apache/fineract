@@ -242,7 +242,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -265,7 +265,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -289,7 +289,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -517,7 +517,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
             } catch (MultiException e) {
                 String globalisationMessageCode = "error.msg.accrual.exception";
-                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage());
+                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);
             }
         }
     }

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.self.registration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class SelfServiceApiConstants {
@@ -43,7 +44,8 @@ public class SelfServiceApiConstants {
                     mobileNumberParamName, lastNameParamName, emailParamName, authenticationModeParamName)));
     public static final Set<String> CREATE_USER_REQUEST_DATA_PARAMETERS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(requestIdParamName, authenticationTokenParamName)));
-    public static final Object[] SUPPORTED_AUTHENTICATION_MODE_PARAMETERS = new Object[] { emailModeParamName, mobileModeParamName };
+    public static final List<Object> SUPPORTED_AUTHENTICATION_MODE_PARAMETERS = List
+            .copyOf(Arrays.asList(emailModeParamName, mobileModeParamName));
     public static final String SELF_SERVICE_USER_ROLE = "Self Service User";
 
 }

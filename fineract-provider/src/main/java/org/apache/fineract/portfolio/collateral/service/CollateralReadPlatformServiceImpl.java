@@ -109,7 +109,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
             sql += " where lc.loan_id=? and lc.id = ?";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, collateralId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new CollateralNotFoundException(loanId, collateralId);
+            throw new CollateralNotFoundException(loanId, collateralId, e);
         }
 
     }

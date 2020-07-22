@@ -66,10 +66,10 @@ public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements Working
                     .build();
         } catch (final ValidationException e) {
             throw new PlatformDataIntegrityException("error.msg.invalid.recurring.rule",
-                    "The Recurring Rule value: " + recurrence + " is not valid.", "recurrence", recurrence);
+                    "The Recurring Rule value: " + recurrence + " is not valid.", "recurrence", recurrence, e);
         } catch (final IllegalArgumentException | ParseException e) {
             throw new PlatformDataIntegrityException("error.msg.recurring.rule.parsing.error",
-                    "Error in passing the Recurring Rule value: " + recurrence, "recurrence", e.getMessage());
+                    "Error in passing the Recurring Rule value: " + recurrence, "recurrence", e.getMessage(), e);
         }
     }
 

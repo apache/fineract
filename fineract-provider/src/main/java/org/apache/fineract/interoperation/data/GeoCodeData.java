@@ -23,13 +23,14 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_LONGITUD
 
 import com.google.gson.JsonObject;
 import java.util.Arrays;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 
 public class GeoCodeData {
 
-    public static final String[] PARAMS = { PARAM_LATITUDE, PARAM_LONGITUDE };
+    public static final List<String> PARAMS = List.copyOf(Arrays.asList(PARAM_LATITUDE, PARAM_LONGITUDE));
 
     @NotNull
     private final String latitude;
@@ -54,7 +55,7 @@ public class GeoCodeData {
             return null;
         }
 
-        jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
+        jsonHelper.checkForUnsupportedParameters(element, PARAMS);
 
         String latitude = jsonHelper.extractStringNamed(PARAM_LATITUDE, element);
         DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_LATITUDE).value(latitude).notBlank();

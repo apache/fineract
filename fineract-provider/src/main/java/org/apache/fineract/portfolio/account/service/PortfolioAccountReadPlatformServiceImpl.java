@@ -92,7 +92,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 break;
             }
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(accountId);
+            throw new AccountTransferNotFoundException(accountId, e);
         }
 
         return accountData;
@@ -389,7 +389,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(accountId);
+            throw new AccountTransferNotFoundException(accountId, e);
         }
 
         return accountData;

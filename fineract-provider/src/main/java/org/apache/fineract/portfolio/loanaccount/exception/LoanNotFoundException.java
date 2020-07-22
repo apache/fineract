@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when loan resources are not found.
@@ -27,5 +28,9 @@ public class LoanNotFoundException extends AbstractPlatformResourceNotFoundExcep
 
     public LoanNotFoundException(final Long id) {
         super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id);
+    }
+
+    public LoanNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id, e);
     }
 }

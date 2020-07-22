@@ -27,6 +27,8 @@ import org.apache.fineract.infrastructure.cache.CacheEnumerations;
 import org.apache.fineract.infrastructure.cache.data.CacheData;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -42,6 +44,8 @@ import org.springframework.stereotype.Component;
  */
 @Component(value = "runtimeDelegatingCacheManager")
 public class RuntimeDelegatingCacheManager implements CacheManager {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeDelegatingCacheManager.class);
 
     private final JCacheCacheManager jcacheCacheManager;
     private final CacheManager noOpCacheManager = new NoOpCacheManager();
@@ -106,6 +110,10 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
                     clearEhCache();
                 }
                 this.currentCacheManager = this.jcacheCacheManager;
+
+                if (this.currentCacheManager.getCacheNames().size() == 0) {
+                    LOG.error("No caches configured for activated CacheManager {}", this.currentCacheManager);
+                }
             break;
             case MULTI_NODE:
                 if (!distributedCacheEnabled) {

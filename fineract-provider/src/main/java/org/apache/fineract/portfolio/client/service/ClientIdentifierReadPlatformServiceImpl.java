@@ -81,7 +81,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
 
             return clientIdentifierData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientIdentifierNotFoundException(clientIdentifierId);
+            throw new ClientIdentifierNotFoundException(clientIdentifierId, e);
         }
 
     }

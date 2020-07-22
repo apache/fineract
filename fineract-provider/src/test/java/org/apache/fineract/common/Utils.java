@@ -53,6 +53,10 @@ public class Utils {
         RestAssured.useRelaxedHTTPSValidation();
     }
 
+    public static void initializeRESTAssuredPort(int http) {
+        RestAssured.port = http;
+    }
+
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
             LOG.info("-----------------------------------LOGIN-----------------------------------------");

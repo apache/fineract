@@ -802,10 +802,10 @@ public class AccountingScenarioIntegrationTest {
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
-        float INTEREST_4_DAYS = totalInterest / totalDaysInPeriod * 4;
-        INTEREST_4_DAYS = Float.valueOf(numberFormat.format(INTEREST_4_DAYS));
+        float interest4Days = totalInterest / totalDaysInPeriod * 4;
+        interest4Days = Float.valueOf(numberFormat.format(interest4Days));
 
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(currentDate), INTEREST_4_DAYS, FEE_PORTION,
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(currentDate), interest4Days, FEE_PORTION,
                 PENALTY_PORTION, loanID);
 
     }
@@ -906,15 +906,15 @@ public class AccountingScenarioIntegrationTest {
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
-        float INTEREST_3_DAYS = totalInterest / totalDaysInPeriod * 3;
-        INTEREST_3_DAYS = Float.valueOf(numberFormat.format(INTEREST_3_DAYS));
-        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), INTEREST_3_DAYS, FEE_PORTION,
+        float interest3Days = totalInterest / totalDaysInPeriod * 3;
+        interest3Days = Float.valueOf(numberFormat.format(interest3Days));
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interest3Days, FEE_PORTION,
                 PENALTY_PORTION, loanID);
 
         runOndate = dateFormat.format(todayDate.getTime());
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
-        float interestPerDay = (totalInterest / totalDaysInPeriod * 4) - INTEREST_3_DAYS;
+        float interestPerDay = (totalInterest / totalDaysInPeriod * 4) - interest3Days;
         interestPerDay = Float.valueOf(numberFormat.format(interestPerDay));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
                 NEXT_PENALTY_PORTION, loanID);

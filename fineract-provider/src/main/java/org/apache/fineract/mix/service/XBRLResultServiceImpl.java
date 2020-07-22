@@ -166,7 +166,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             }
         } catch (final ScriptException e) {
             LOG.error("Problem occurred in processMappingString function", e);
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
 
         return new BigDecimal(eval);

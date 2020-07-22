@@ -27,4 +27,9 @@ public class ConnectionFailureException extends AbstractPlatformServiceUnavailab
                 "Unable to connect to the server with connection name - " + connectionName, connectionName);
     }
 
+    public ConnectionFailureException(String connectionName, Exception e) {
+        super("error.msg.unable.to.connect.to.intermediate.server",
+                "Unable to connect to the server with connection name - " + connectionName, connectionName, e);
+    }
+
 }

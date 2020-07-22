@@ -140,7 +140,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     // apiQueueResourceDatas).start();
                 }
             } catch (Exception e) {
-                throw new ConnectionFailureException(SmsCampaignConstants.SMS);
+                throw new ConnectionFailureException(SmsCampaignConstants.SMS, e);
             }
             page++;
             totalRecords = pendingMessages.getTotalPages();

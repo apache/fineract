@@ -19,9 +19,7 @@
 
 package org.apache.fineract.portfolio.self.spm.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -39,8 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/self/surveys")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Spm" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Spm", description = "") })
+
+@Tag(name = "Self Spm", description = "")
 public class SelfSpmApiResource {
 
     private final PlatformSecurityContext securityContext;
