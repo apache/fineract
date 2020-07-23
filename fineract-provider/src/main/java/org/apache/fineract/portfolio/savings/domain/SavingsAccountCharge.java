@@ -26,6 +26,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMon
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
@@ -39,7 +40,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
