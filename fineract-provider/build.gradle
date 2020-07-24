@@ -198,7 +198,7 @@ openjpa {
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
-    outputFormat = 'YAML'
+    outputFormat = 'JSON'
     prettyPrint = 'TRUE'
     classpath = sourceSets.main.runtimeClasspath
     outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
@@ -861,7 +861,7 @@ dependencies {
 
 swaggerSources {
     fineract {
-        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.yaml')
+        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.json')
         code {
             language = 'java'
         }
