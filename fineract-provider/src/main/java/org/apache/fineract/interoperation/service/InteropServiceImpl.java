@@ -22,6 +22,7 @@ import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_ROUTING_CODE;
 import static org.springframework.data.jpa.domain.Specification.where;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.Date;
@@ -32,7 +33,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
