@@ -1,4 +1,4 @@
-openapi: 2.0
+swagger: 2.0
 info:
   version: 1.4.0
   title: Apache Fineract
