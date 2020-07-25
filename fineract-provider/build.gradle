@@ -861,7 +861,7 @@ dependencies {
 
 swaggerSources {
     fineract {
-        inputFile = file('C:\\Users\\chinm\\Desktop\\Open Source\\Google Summer of Code 2020 - The Mifos Initiative\\fineract\\build\\classes\\java\\main\\static\\swagger-ui\\fineract.json')
+        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.json')
         code {
             language = 'java'
             configFile = file('config.json')
