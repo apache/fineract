@@ -861,7 +861,7 @@ dependencies {
 
 swaggerSources {
     fineract {
-        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.json')
+        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.yaml')
         code {
             language = 'java'
             configFile = file('config.json')
