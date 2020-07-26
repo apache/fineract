@@ -1,0 +1,11 @@
+{
+    "library": "retrofit2",
+    "modelPackage": "org.mifos.models",
+    "apiPackage": "org.mifos.services",
+    "invokerPackage": "org.mifos",
+    "groupId": "org.mifos",
+    "artifactId": "fineract-client",
+    "artifactVersion": "1.0.0",
+    "artifactDescription": "artifactDescription",
+    "dateLibrary": "joda"
+}
