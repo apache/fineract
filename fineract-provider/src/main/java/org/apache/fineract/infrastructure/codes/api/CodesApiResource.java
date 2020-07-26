@@ -67,7 +67,7 @@ public class CodesApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "systemDefined"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "systemDefined"));
     private final String resourceNameForPermissions = "CODE";
 
     private final PlatformSecurityContext context;
@@ -100,7 +100,7 @@ public class CodesApiResource {
         final Collection<CodeData> codes = this.readPlatformService.retrieveAllCodes();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codes, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, codes, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -132,7 +132,7 @@ public class CodesApiResource {
         final CodeData code = this.readPlatformService.retrieveCode(codeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, code, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

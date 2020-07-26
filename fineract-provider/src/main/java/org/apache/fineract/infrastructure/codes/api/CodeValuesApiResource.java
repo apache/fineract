@@ -69,9 +69,10 @@ public class CodeValuesApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CodevalueJSONinputParams.CODEVALUE_ID.getValue(),
-            CodevalueJSONinputParams.NAME.getValue(), CodevalueJSONinputParams.POSITION.getValue(),
-            CodevalueJSONinputParams.IS_MANDATORY.getValue(), CodevalueJSONinputParams.DESCRIPTION.getValue()));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(CodevalueJSONinputParams.CODEVALUE_ID.getValue(), CodevalueJSONinputParams.NAME.getValue(),
+                    CodevalueJSONinputParams.POSITION.getValue(), CodevalueJSONinputParams.IS_MANDATORY.getValue(),
+                    CodevalueJSONinputParams.DESCRIPTION.getValue()));
     private final String resourceNameForPermissions = "CODEVALUE";
 
     private final PlatformSecurityContext context;
@@ -106,7 +107,7 @@ public class CodeValuesApiResource {
         final Collection<CodeValueData> codeValues = this.readPlatformService.retrieveAllCodeValues(codeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValues, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, codeValues, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -125,7 +126,7 @@ public class CodeValuesApiResource {
         final CodeValueData codeValue = this.readPlatformService.retrieveCodeValue(codeValueId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValue, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, codeValue, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

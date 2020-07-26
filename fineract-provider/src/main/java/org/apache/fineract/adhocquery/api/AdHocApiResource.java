@@ -58,8 +58,8 @@ public class AdHocApiResource {
     /**
      * The set of parameters that are supported in response for {@link AdhocData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName", "tableField",
-            "isActive", "createdBy", "createdOn", "createdById", "updatedById", "updatedOn", "email"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName",
+            "tableField", "isActive", "createdBy", "createdOn", "createdById", "updatedById", "updatedOn", "email"));
 
     private final PlatformSecurityContext context;
     private final AdHocReadPlatformService adHocReadPlatformService;
@@ -86,7 +86,7 @@ public class AdHocApiResource {
         this.context.authenticatedUser();
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllAdHocQuery();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, adhocs, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, adhocs, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -97,7 +97,7 @@ public class AdHocApiResource {
         this.context.authenticatedUser();
         final AdHocData user = this.adHocReadPlatformService.retrieveNewAdHocDetails();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -128,7 +128,7 @@ public class AdHocApiResource {
 
         final AdHocData adhoc = this.adHocReadPlatformService.retrieveOne(adHocId);
 
-        return this.toApiJsonSerializer.serialize(settings, adhoc, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, adhoc, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

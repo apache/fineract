@@ -27,7 +27,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 @SuppressWarnings("rawtypes")
 public class VariableIntallmentsTransactionHelper {
 
-    private final String URL = "https://localhost:8443/fineract-provider/api/v1/loans/";
+    private static final String URL = "https://localhost:8443/fineract-provider/api/v1/loans/";
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
