@@ -74,8 +74,8 @@ public class AccountNumberPreferencesTest {
     private Integer savingsAccountNumberPreferenceId;
     private Integer groupsAccountNumberPreferenceId;
     private Integer centerAccountNumberPreferenceId;
-    private final String MINIMUM_OPENING_BALANCE = "1000.0";
-    private final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    private static final String MINIMUM_OPENING_BALANCE = "1000.0";
+    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private Boolean isAccountPreferenceSetUp = false;
     private Integer clientTypeCodeId;
     private String clientCodeValueName;
@@ -447,7 +447,7 @@ public class AccountNumberPreferencesTest {
                 .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
                 //
                 .withMinRequiredBalance(minRequiredBalance).withEnforceMinRequiredBalance(enforceMinRequiredBalance)
-                .withMinimumOpenningBalance(this.MINIMUM_OPENING_BALANCE).build();
+                .withMinimumOpenningBalance(MINIMUM_OPENING_BALANCE).build();
         this.savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
         LOG.info("Sucessfully created savings product (ID: {} )", this.savingsProductId);
 

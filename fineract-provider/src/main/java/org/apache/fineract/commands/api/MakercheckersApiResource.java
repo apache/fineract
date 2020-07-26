@@ -62,7 +62,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Maker Checker (or 4-eye) functionality")
 public class MakercheckersApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
             "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
             "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
 
@@ -115,7 +115,7 @@ public class MakercheckersApiResource {
         final Collection<AuditData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked(extraCriteria,
                 settings.isIncludeJson());
 
-        return this.toApiJsonSerializerAudit.serialize(settings, entries, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET

@@ -34,9 +34,9 @@ import org.junit.jupiter.api.Test;
 
 public class TemplateIntegrationTest {
 
-    private final String GET_TEMPLATES_URL = "/fineract-provider/api/v1/templates?tenantIdentifier=default";
-    private final String GET_TEMPLATE_ID_URL = "/fineract-provider/api/v1/templates/%s?tenantIdentifier=default";
-    private final String RESPONSE_ATTRIBUTE_NAME = "name";
+    private static final String GET_TEMPLATES_URL = "/fineract-provider/api/v1/templates?tenantIdentifier=default";
+
+    private static final String RESPONSE_ATTRIBUTE_NAME = "name";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -61,22 +61,21 @@ public class TemplateIntegrationTest {
         map.put("text", "Hello {{template}}");
         map.put("mappers", metadata);
 
-        ArrayList<?> get = Utils.performServerGet(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL, "");
+        ArrayList<?> get = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, "");
         final int entriesBeforeTest = get.size();
 
-        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL, new Gson().toJson(map),
+        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, new Gson().toJson(map),
                 "resourceId");
 
-        final String templateUrlForId = String.format(this.GET_TEMPLATE_ID_URL, id);
+        final String templateUrlForId = String.format("/fineract-provider/api/v1/templates/%s?tenantIdentifier=default", id);
 
-        final String getrequest2 = Utils.performServerGet(this.requestSpec, this.responseSpec, templateUrlForId,
-                this.RESPONSE_ATTRIBUTE_NAME);
+        final String getrequest2 = Utils.performServerGet(this.requestSpec, this.responseSpec, templateUrlForId, RESPONSE_ATTRIBUTE_NAME);
 
         Assertions.assertTrue(getrequest2.equals("foo"));
 
         Utils.performServerDelete(this.requestSpec, this.responseSpec, templateUrlForId, "");
 
-        get = Utils.performServerGet(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL, "");
+        get = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, "");
         final int entriesAfterTest = get.size();
 
         Assertions.assertEquals(entriesBeforeTest, entriesAfterTest);

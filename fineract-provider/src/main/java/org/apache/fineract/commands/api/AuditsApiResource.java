@@ -63,7 +63,7 @@ import org.springframework.stereotype.Component;
         + "Data Scope: A user can only see audits that are within their data scope. However, 'head office' users can see all audits including those that aren't office/branch related e.g. Loan Product changes.\")")
 public class AuditsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
             "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
             "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId", "url"));
 
@@ -127,13 +127,13 @@ public class AuditsApiResource {
         if (parameters.isPaged()) {
             final Page<AuditData> auditEntries = this.auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria,
                     settings.isIncludeJson(), parameters);
-            return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
+            return this.toApiJsonSerializer.serialize(settings, auditEntries, RESPONSE_DATA_PARAMETERS);
         }
 
         final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries(extraCriteria,
                 settings.isIncludeJson());
 
-        return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, auditEntries, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -152,7 +152,7 @@ public class AuditsApiResource {
         final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntry(auditId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, auditEntry, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, auditEntry, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
