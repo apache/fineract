@@ -46,7 +46,3 @@ RUN keytool -genkey -keyalg RSA -alias tomcat -keystore /opt/bitnami/tomcat/tomc
 COPY ./docker/server.xml /opt/bitnami/tomcat/conf
 RUN chmod 664 /opt/bitnami/tomcat/conf/server.xml
 
-WORKDIR /opt/bitnami/tomcat/lib
-# org.drizzle.jdbc.DrizzleDriver is used in docker/server.xml for jdbc/mifosplatform-tenants DataSource
-# (But note that connections to individual tenant DBs may use another driver...)
-RUN wget https://repo1.maven.org/maven2/org/drizzle/jdbc/drizzle-jdbc/1.4/drizzle-jdbc-1.4.jar
