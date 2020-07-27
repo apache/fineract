@@ -277,7 +277,7 @@ The client code will be generated in the directory `build/swagger-code-fineract`
 
 To build the generated code:
 
-- Navigate to **build/swagger-code-fineract** directory
+- Navigate to `build/swagger-code-fineract` directory (`cd`)
 - **./gradlew build**
 
 To customize the generated code:
