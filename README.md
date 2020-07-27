@@ -273,7 +273,7 @@ To generate code, execute the following commands:
 - **./gradlew build**
 - **./gradlew generateSwaggerCode**
 
-The client code will be generated in the directory **build/swagger-code-fineract**
+The client code will be generated in the directory `build/swagger-code-fineract`.
 
 To build the generated code:
 
