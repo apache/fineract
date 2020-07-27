@@ -72,12 +72,6 @@ gradle clean tomcatrunwar
 
 project.ext.jerseyVersion = '1.17'
 
-def app =[
-        group: 'com.r2' ,
-        name: 'fineract-provider',
-        version: '0.22.0',
-        versionType: 'SNAPSHOT'
-]
 dependencies {
     compile 'net.logstash.logback:logstash-logback-encoder:4.11'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
