@@ -30,7 +30,7 @@ public class CreateTellerTransactionCommandHandler implements NewCommandSourceHa
 
     @Autowired
     public CreateTellerTransactionCommandHandler(final TellerTransactionWritePlatformService writePlatformService) {
-        super();
+
         this.writePlatformService = writePlatformService;
     }
 

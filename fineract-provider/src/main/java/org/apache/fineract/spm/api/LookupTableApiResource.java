@@ -62,7 +62,7 @@ public class LookupTableApiResource {
     @Autowired
     public LookupTableApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
             final LookupTableService lookupTableService) {
-        super();
+
         this.securityContext = securityContext;
         this.spmService = spmService;
         this.lookupTableService = lookupTableService;

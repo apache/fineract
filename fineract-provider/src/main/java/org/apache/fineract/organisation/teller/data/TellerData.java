@@ -60,7 +60,7 @@ public final class TellerData implements Serializable {
     private TellerData(final Long id, final Long officeId, final Long debitAccountId, final Long creditAccountId, final String name,
             final String description, final LocalDate startDate, final LocalDate endDate, final TellerStatus status,
             final Boolean hasTransactions, final Boolean hasMappedCashiers) {
-        super();
+
         this.id = id;
         this.officeId = officeId;
         this.debitAccountId = debitAccountId;

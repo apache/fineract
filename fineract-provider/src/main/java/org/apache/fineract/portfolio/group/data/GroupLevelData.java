@@ -36,7 +36,7 @@ public class GroupLevelData {
     public GroupLevelData(final Long levelId, final String levelName, final Long parentLevelId, final String parentLevelName,
             final Long childLevelId, final String childLevelName, final boolean superParent, final boolean recursable,
             final boolean canHaveClients) {
-        super();
+
         this.levelId = levelId;
         this.levelName = levelName;
         this.parentLevelId = parentLevelId;

@@ -50,7 +50,7 @@ public class LookupTable extends AbstractPersistableCustom {
     private Double score;
 
     public LookupTable() {
-        super();
+
     }
 
     public Survey getSurvey() {

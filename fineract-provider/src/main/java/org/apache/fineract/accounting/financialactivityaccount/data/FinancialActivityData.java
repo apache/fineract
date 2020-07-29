@@ -39,7 +39,7 @@ public class FinancialActivityData {
     }
 
     public FinancialActivityData(Integer id, String name, GLAccountType mappedGLAccountType) {
-        super();
+
         this.id = id;
         this.name = name;
         this.mappedGLAccountType = mappedGLAccountType;

@@ -58,7 +58,7 @@ public class Question extends AbstractPersistableCustom {
     private Integer sequenceNo;
 
     public Question() {
-        super();
+
     }
 
     public Survey getSurvey() {

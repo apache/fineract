@@ -43,7 +43,7 @@ public class ReportingProcessServiceProvider implements ApplicationContextAware 
     Map<String, String> reportingProcessServices = null;
 
     ReportingProcessServiceProvider() {
-        super();
+
     }
 
     public ReportingProcessService findReportingProcessService(final String reportType) {

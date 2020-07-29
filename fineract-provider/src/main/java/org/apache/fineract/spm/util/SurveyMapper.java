@@ -32,7 +32,7 @@ import org.apache.fineract.spm.domain.Survey;
 public final class SurveyMapper {
 
     private SurveyMapper() {
-        super();
+
     }
 
     public static SurveyData map(final Survey survey) {
