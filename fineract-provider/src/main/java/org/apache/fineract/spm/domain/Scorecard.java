@@ -65,7 +65,7 @@ public class Scorecard extends AbstractPersistableCustom {
     private Integer value;
 
     public Scorecard() {
-        super();
+
     }
 
     public Survey getSurvey() {

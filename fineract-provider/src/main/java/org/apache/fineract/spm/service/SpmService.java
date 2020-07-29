@@ -47,7 +47,7 @@ public class SpmService {
     @Autowired
     public SpmService(final PlatformSecurityContext securityContext, final SurveyRepository surveyRepository,
             final SurveyValidator surveyValidator) {
-        super();
+
         this.securityContext = securityContext;
         this.surveyRepository = surveyRepository;
         this.surveyValidator = surveyValidator;

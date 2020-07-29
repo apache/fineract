@@ -76,7 +76,7 @@ public class Teller extends AbstractPersistableCustom {
     private Set<Cashier> cashiers;
 
     public Teller() {
-        super();
+
     }
 
     private Teller(final Office staffOffice, final String name, final String description, final LocalDate startDate,

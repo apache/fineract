@@ -47,7 +47,7 @@ public class UpdateCashierAllocationCommandHandler implements NewCommandSourceHa
      */
     @Autowired
     public UpdateCashierAllocationCommandHandler(final TellerWritePlatformService writePlatformService) {
-        super();
+
         this.writePlatformService = writePlatformService;
     }
 

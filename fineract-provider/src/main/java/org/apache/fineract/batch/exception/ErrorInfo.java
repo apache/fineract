@@ -39,7 +39,7 @@ public final class ErrorInfo {
      * @param message
      */
     public ErrorInfo(final Integer statusCode, final Integer errorCode, final String message) {
-        super();
+
         this.statusCode = statusCode;
         this.errorCode = errorCode;
         this.message = message;
@@ -49,7 +49,7 @@ public final class ErrorInfo {
      * Constructor so JSON serialization will work with out special Serialiazer
      */
     ErrorInfo() {
-        super();
+
     }
 
     /**

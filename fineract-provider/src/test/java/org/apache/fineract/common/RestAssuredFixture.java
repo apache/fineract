@@ -38,7 +38,7 @@ public class RestAssuredFixture {
     private RequestSpecification requestSpec;
 
     public RestAssuredFixture(int http) {
-        super();
+
         this.httpPort = http;
         Utils.initializeRESTAssured();
         Utils.initializeRESTAssuredPort(http);

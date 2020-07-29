@@ -55,7 +55,7 @@ public class ErrorHandler extends RuntimeException {
      * Sole Constructor
      */
     ErrorHandler() {
-        super();
+
     }
 
     /**

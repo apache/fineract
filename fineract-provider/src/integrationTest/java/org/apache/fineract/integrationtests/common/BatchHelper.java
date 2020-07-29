@@ -46,7 +46,7 @@ public final class BatchHelper {
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
 
     private BatchHelper() {
-        super();
+
     }
 
     /**

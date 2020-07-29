@@ -302,7 +302,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
             final PaymentDetail paymentDetail, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
-        super();
+
         this.loan = loan;
         this.typeOf = typeOf;
         this.dateOf = dateOf;

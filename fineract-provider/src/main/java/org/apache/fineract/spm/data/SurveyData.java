@@ -34,12 +34,12 @@ public class SurveyData {
     private Date validTo;
 
     public SurveyData() {
-        super();
+
     }
 
     public SurveyData(final Long id, final List<ComponentData> componentDatas, final List<QuestionData> questionDatas, final String key,
             final String name, final String description, final String countryCode, final Date validFrom, final Date validTo) {
-        super();
+
         this.id = id;
         this.componentDatas = componentDatas;
         this.questionDatas = questionDatas;
