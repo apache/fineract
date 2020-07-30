@@ -266,24 +266,10 @@ API clients (Web UIs, Mobile, etc.)
 Generate Apache Fineract API Client
 ============
 
-Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen). Project supports [all clients](https://github.com/swagger-api/swagger-codegen#overview) supported by Swagger Codegen. It uses [OpenAPI Specification Version 3.0.3](https://swagger.io/specification/).
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification Version 3.0.3](https://swagger.io/specification/).
 
-To generate code, execute the following commands:
+For more instructions on how to generate the client code, check `docs/developers/swagger/client.md`
 
-- **./gradlew build**
-- **./gradlew generateSwaggerCode**
-
-The client code will be generated in the directory `build/swagger-code-fineract`.
-
-To build the generated code:
-
-- Navigate to `build/swagger-code-fineract` directory (`cd`)
-- Run `/gradlew build`
-
-To customize the generated code:
-
-- Open **fineract-provider/config/swagger/config.json**
-- Refer to [this](https://gist.github.com/Grandolf49/2d222c3d1d0b834ad8f02b5fde8b4c14) for available options in config.json
 
 Online Demos
 ============
