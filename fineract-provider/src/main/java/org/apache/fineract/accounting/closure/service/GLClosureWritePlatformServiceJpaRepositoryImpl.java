@@ -41,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,8 +93,9 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withEntityId(glClosure.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGLClosureIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGLClosureIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -141,9 +144,9 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
     /**
      * @param command
      * @param dve
+     * @param dve
      */
-    private void handleGLClosureIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleGLClosureIntegrityIssues(final JsonCommand command, final Throwable realCause, NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("office_id_closing_date")) {
             throw new GLClosureDuplicateException(command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()),
                     new LocalDate(command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue())));

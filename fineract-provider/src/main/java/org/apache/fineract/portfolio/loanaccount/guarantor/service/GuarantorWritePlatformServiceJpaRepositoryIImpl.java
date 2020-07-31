@@ -58,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,8 +176,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             this.guarantorRepository.save(guarantor);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantor.getOfficeId())
                     .withEntityId(guarantor.getId()).withLoanId(loan.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGuarantorDataIntegrityIssues(dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGuarantorDataIntegrityIssues(throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -244,8 +247,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())
                     .withEntityId(guarantorForUpdate.getId()).withOfficeId(guarantorForUpdate.getLoanId()).with(changesOnly).build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGuarantorDataIntegrityIssues(dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGuarantorDataIntegrityIssues(throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -343,8 +347,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         }
     }
 
-    private void handleGuarantorDataIntegrityIssues(final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleGuarantorDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.guarantor.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Guarantor: " + realCause.getMessage());

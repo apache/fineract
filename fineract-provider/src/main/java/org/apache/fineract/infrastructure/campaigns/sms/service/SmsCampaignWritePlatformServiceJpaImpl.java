@@ -89,6 +89,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,8 +186,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     .withEntityId(resourceId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(command, throwable);
             return CommandProcessingResult.empty();
         }
 
@@ -670,8 +672,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         }
     }
 
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause) {
 
         throw new PlatformDataIntegrityException("error.msg.sms.campaign.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

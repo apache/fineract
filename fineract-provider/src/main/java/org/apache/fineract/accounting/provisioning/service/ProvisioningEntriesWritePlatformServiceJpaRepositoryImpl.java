@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -168,8 +169,8 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
             LOG.error("Provisioning Entry already created", peace);
-        } catch (DataIntegrityViolationException dive) {
-            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dive);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dve);
         }
     }
 
@@ -186,7 +187,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
             ProvisioningEntry requestedEntry = createProvsioningEntry(createdDate, addJournalEntries);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             return CommandProcessingResult.empty();
         }
     }

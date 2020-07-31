@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -81,8 +83,9 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(likelihood.getId()).build();
 
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(throwable, dve);
             return CommandProcessingResult.empty();
         }
 
@@ -91,9 +94,8 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.likelihood.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

@@ -68,6 +68,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,8 +129,9 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
 
             return CommandProcessingResult.empty();
         }
@@ -217,8 +220,9 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
                     .with(changes).build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
 
             return CommandProcessingResult.empty();
         }
@@ -407,8 +411,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      *            -- data integrity exception object
      *
      **/
-    private void handleDataIntegrityIssues(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleDataIntegrityIssues(final JsonCommand jsonCommand, final Throwable realCause,
+            final NonTransientDataAccessException dve) {
 
         if (realCause.getMessage().contains(ReportMailingJobConstants.NAME_PARAM_NAME)) {
             final String name = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME);

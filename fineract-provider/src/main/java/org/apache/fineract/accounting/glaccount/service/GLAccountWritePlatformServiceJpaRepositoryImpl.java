@@ -50,7 +50,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,8 +110,9 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             this.glAccountRepository.save(glAccount);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGLAccountDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGLAccountDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -169,8 +172,9 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).with(changesOnly)
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGLAccountDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGLAccountDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -229,8 +233,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
      * @param command
      * @param dve
      */
-    private void handleGLAccountDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleGLAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("acc_gl_code")) {
             final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
             throw new GLAccountDuplicateException(glCode);

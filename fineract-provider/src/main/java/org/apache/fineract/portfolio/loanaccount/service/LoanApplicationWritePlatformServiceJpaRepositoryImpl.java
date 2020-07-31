@@ -142,6 +142,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -583,7 +584,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withClientId(newLoanApplication.getClientId()) //
                     .withGroupId(newLoanApplication.getGroupId()) //
                     .withLoanId(newLoanApplication.getId()).withGlimId(newLoanApplication.getGlimId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -1210,7 +1211,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withGroupId(existingLoanApplication.getGroupId()) //
                     .withLoanId(existingLoanApplication.getId()) //
                     .with(changes).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -1685,7 +1686,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
             }
             this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.application");

@@ -45,6 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,7 +102,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
                     .withLoanId(loan.getId())//
                     .withEntityId(collateral.getId()) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleCollateralDataIntegrityViolation(dve);
             return CommandProcessingResult.empty();
         }
@@ -149,7 +151,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
                     .withEntityId(collateralId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleCollateralDataIntegrityViolation(dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
@@ -176,14 +178,9 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         return new CommandProcessingResultBuilder().withCommandId(commandId).withLoanId(loanId).withEntityId(collateralId).build();
     }
 
-    private void handleCollateralDataIntegrityViolation(final DataIntegrityViolationException dve) {
-        logAsErrorUnexpectedDataIntegrityException(dve);
+    private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.collateral.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        LOG.error("Error occured.", dve);
-    }
-
 }

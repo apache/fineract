@@ -88,6 +88,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -250,7 +251,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .setRollbackTransaction(rollbackTransaction)//
                     .build();
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -340,7 +341,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withGroupId(groupId) //
                     .withEntityId(groupId) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -478,7 +479,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .with(actualChanges) //
                     .build();
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -600,7 +601,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withGroupId(groupForDelete.officeId()) //
                     .withEntityId(groupForDelete.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             LOG.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
