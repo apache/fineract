@@ -121,7 +121,7 @@ dependencyManagement {
         dependency 'org.mockito:mockito-junit-jupiter:3.4.6'
         dependency 'io.github.classgraph:classgraph:4.8.87'
         dependency 'org.awaitility:awaitility:4.0.3'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.6'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.1.1'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.11.0'
         dependency 'org.webjars.npm:swagger-ui-dist:3.30.2'
