@@ -59,6 +59,7 @@ import org.joda.time.Months;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -397,6 +398,7 @@ public class FixedDepositTest {
 
     }
 
+    @Disabled
     @Test
     public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
