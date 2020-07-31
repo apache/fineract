@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,8 +83,9 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withEntityId(code.getId()) //
                     .withSubEntityId(codeValue.getId())//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleCodeValueDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleCodeValueDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
@@ -92,8 +95,8 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("code_value")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label",
@@ -127,8 +130,9 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withEntityId(codeValueId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleCodeValueDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleCodeValueDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
@@ -157,7 +161,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withEntityId(codeId) //
                     .withSubEntityId(codeValueId)//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
             final Throwable realCause = dve.getMostSpecificCause();
             if (realCause.getMessage().contains("code_value")) {

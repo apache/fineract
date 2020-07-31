@@ -90,6 +90,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -187,7 +188,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             LOG.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
@@ -353,7 +354,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(rollbackTransaction)//
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -565,7 +566,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withEntityId(clientId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -603,7 +604,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withSavingsId(result.getSavingsId())//
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
@@ -758,7 +759,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }

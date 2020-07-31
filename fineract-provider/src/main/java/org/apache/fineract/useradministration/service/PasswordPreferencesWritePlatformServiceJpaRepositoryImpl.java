@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +90,7 @@ public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements
                     .withCommandId(command.commandId()) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.password.validation.policy.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.", dve);

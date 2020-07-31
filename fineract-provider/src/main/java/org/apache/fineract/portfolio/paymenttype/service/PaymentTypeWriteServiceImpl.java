@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -81,15 +82,15 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
         try {
             this.repository.delete(paymentType);
             this.repository.flush();
-        } catch (final DataIntegrityViolationException e) {
-            handleDataIntegrityIssues(e);
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            final Throwable throwable = e.getMostSpecificCause();
+            handleDataIntegrityIssues(throwable, e);
         }
         return new CommandProcessingResultBuilder().withEntityId(paymentType.getId()).build();
     }
 
-    private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("acc_product_mapping")) {
             throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
                     "cannot.delete.payment.type.with.association");

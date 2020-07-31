@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.openjpa.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,25 +59,24 @@ public class DeviceRegistrationWritePlatformServiceImpl implements DeviceRegistr
             this.deviceRegistrationRepository.save(deviceRegistration);
             return deviceRegistration;
         } catch (final EntityExistsException dve) {
-            handleDataIntegrityIssues(registrationId, dve, dve);
+            handleDataIntegrityIssues(registrationId, dve);
             return null;
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(registrationId, dve.getMostSpecificCause(), dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(registrationId, dve.getMostSpecificCause());
             return null;
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(registrationId, throwable, dve);
+            handleDataIntegrityIssues(registrationId, throwable);
             return null;
         } catch (final Exception dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(registrationId, throwable, dve);
+            handleDataIntegrityIssues(registrationId, throwable);
             return null;
         }
 
     }
 
-    private void handleDataIntegrityIssues(final String registrationId, final Throwable realCause,
-            @SuppressWarnings("unused") final Exception dve) {
+    private void handleDataIntegrityIssues(final String registrationId, final Throwable realCause) {
 
         if (realCause.getMessage().contains("registration_key")) {
             throw new PlatformDataIntegrityException("error.msg.duplicate.device.registration.id",

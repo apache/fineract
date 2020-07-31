@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,7 +110,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             this.fineractEntityToEntityMappingRepository.save(newMap);
 
             return new CommandProcessingResultBuilder().withEntityId(newMap.getId()).withCommandId(command.commandId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -142,7 +143,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             }
             return new CommandProcessingResultBuilder(). //
                     withEntityId(mapForUpdate.getId()).withCommandId(command.commandId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {

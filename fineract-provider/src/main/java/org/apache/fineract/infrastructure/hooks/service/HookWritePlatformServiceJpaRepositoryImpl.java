@@ -64,6 +64,7 @@ import org.apache.fineract.template.exception.TemplateNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit.RetrofitError;
@@ -118,7 +119,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             this.hookRepository.save(hook);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(hook.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -179,7 +180,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
                     .withEntityId(hookId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -198,7 +199,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
         final Hook hook = retrieveHookBy(hookId);
         try {
             this.hookRepository.delete(hook);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
