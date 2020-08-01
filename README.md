@@ -263,6 +263,14 @@ API clients (Web UIs, Mobile, etc.)
 * https://github.com/openMF has more related proejcts
 
 
+Generate Apache Fineract API Client
+============
+
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification Version 3.0.3](https://swagger.io/specification/).
+
+For more instructions on how to generate the client code, check `docs/developers/swagger/client.md`
+
+
 Online Demos
 ============
 

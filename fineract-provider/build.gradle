@@ -56,6 +56,7 @@ buildscript {
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:5.1.0"
         classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.4"
+        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
     }
 }
 
@@ -79,6 +80,7 @@ apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: "net.ltgt.errorprone"
 apply plugin: "com.diffplug.spotless"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
+apply plugin: "org.hidetake.swagger.generator"
 
 dependencyManagement {
     imports {
@@ -848,3 +850,18 @@ gitProperties {
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
+
+//This is for swagger code generation
+dependencies {
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.20'
+}
+
+swaggerSources {
+    fineract {
+        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.yaml')
+        code {
+            language = 'java'
+            configFile = file('config/swagger/config.json')
+        }
+    }
+}
