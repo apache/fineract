@@ -398,7 +398,7 @@ public class FixedDepositTest {
 
     }
 
-    @Disabled
+    @Disabled // FINERACT-1099
     @Test
     public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
