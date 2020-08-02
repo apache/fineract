@@ -853,7 +853,7 @@ generateGitProperties.outputs.upToDateWhen { false }
 
 //This is for swagger code generation
 dependencies {
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.18'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
 }
 
 swaggerSources {
