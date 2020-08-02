@@ -80,7 +80,4 @@ script:
   
   # Generate and Build Swagger Code
   - ./gradlew generateSwaggerCode
-  - |
-  cd build/swagger-code-fineract
-  # ./gradlew build
-  mvn clean package
+  - cd build/swagger-code-fineract && mvn test
