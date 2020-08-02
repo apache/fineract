@@ -56,7 +56,7 @@ buildscript {
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:5.1.0"
         classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.4"
-        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
+        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2"
     }
 }
 
