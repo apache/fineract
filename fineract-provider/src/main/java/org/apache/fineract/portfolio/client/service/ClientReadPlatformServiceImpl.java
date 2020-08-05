@@ -30,8 +30,10 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -90,6 +92,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
+    private final List<String> supportedStatusvalues = new ArrayList<String>(
+            Arrays.asList("pending", "active", "withdrawn", "closed", "rejected", "transfer_on_hold", "transfer_in_progreess"));
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -176,6 +180,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     // @Transactional(readOnly=true)
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
+        if (searchParameters != null && searchParameters.getStatus() != null
+                && !supportedStatusvalues.contains(searchParameters.getStatus())) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final String defaultUserMessage = "The Status value '" + searchParameters.getStatus()
+                    + "' is not supported. The supported status values are " + supportedStatusvalues.toString();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.client.status.value.is.not.supported",
+                    defaultUserMessage, "status", searchParameters.getStatus(), supportedStatusvalues.toString());
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
         final String appUserID = String.valueOf(context.authenticatedUser().getId());
@@ -232,6 +247,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String displayName = searchParameters.getName();
         final String firstname = searchParameters.getFirstname();
         final String lastname = searchParameters.getLastname();
+        final String status = searchParameters.getStatus();
 
         String extraCriteria = "";
         if (sqlSearch != null) {
@@ -256,6 +272,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             // if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
             paramList.add("%" + displayName + "%");
             extraCriteria += " and c.display_name like ? ";
+        }
+
+        if (status != null) {
+            ClientStatus clientStatus = ClientStatus.fromString(status);
+            extraCriteria += " and c.status_enum = " + clientStatus.getValue().toString() + " ";
         }
 
         if (firstname != null) {
