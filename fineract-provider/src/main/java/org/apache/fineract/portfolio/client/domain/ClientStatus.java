@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Enum representation of client status states.
  */
@@ -61,6 +63,33 @@ public enum ClientStatus {
 
         }
         return enumeration;
+    }
+
+    public static ClientStatus fromString(final String clientString) {
+
+        ClientStatus clientStatus = ClientStatus.INVALID;
+
+        if (StringUtils.isEmpty(clientString)) {
+            return clientStatus;
+        }
+
+        if (clientString.equalsIgnoreCase(ClientStatus.PENDING.toString())) {
+            clientStatus = ClientStatus.PENDING;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.ACTIVE.toString())) {
+            clientStatus = ClientStatus.ACTIVE;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.TRANSFER_IN_PROGRESS.toString())) {
+            clientStatus = ClientStatus.TRANSFER_IN_PROGRESS;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.WITHDRAWN.toString())) {
+            clientStatus = ClientStatus.WITHDRAWN;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.CLOSED.toString())) {
+            clientStatus = ClientStatus.CLOSED;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.TRANSFER_ON_HOLD.toString())) {
+            clientStatus = ClientStatus.TRANSFER_ON_HOLD;
+        } else if (clientString.equalsIgnoreCase(ClientStatus.REJECTED.toString())) {
+            clientStatus = ClientStatus.REJECTED;
+        }
+
+        return clientStatus;
     }
 
     private ClientStatus(final Integer value, final String code) {

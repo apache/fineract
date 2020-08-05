@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
@@ -42,12 +46,12 @@ public class ClientTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
+        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
     public void testClientStatus() {
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
 
@@ -80,7 +84,6 @@ public class ClientTest {
     @Test
     public void testClientAsPersonStatus() {
 
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
 
@@ -113,7 +116,6 @@ public class ClientTest {
     @Test
     public void testClientAsEntityStatus() {
 
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
 
@@ -141,6 +143,38 @@ public class ClientTest {
         clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testPendingOnlyClientRequest() {
+
+        Random rand = new Random();
+        // Add a few clients to the server and activate a random amount of them
+        for (int i = 0; i < 15; i++) {
+            final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
+            if (rand.nextInt(10) % 2 == 0) {
+                // Takes Client to pending status
+                this.clientHelper.closeClient(clientId);
+                this.clientHelper.reactivateClient(clientId);
+            }
+            // Other clients stay in Active status
+        }
+        List<HashMap<String, Object>> clientsRecieved = (List<HashMap<String, Object>>) clientHelper.getClientWithStatus(50, "pending");
+        assertNotEquals(clientsRecieved.size(), 0);
+        for (int i = 0; i < clientsRecieved.size(); i++) {
+            HashMap<String, Object> clientStatus = ClientHelper.getClientStatus(requestSpec, responseSpec,
+                    String.valueOf(clientsRecieved.get(i).get("id")));
+            ClientStatusChecker.verifyClientPending(clientStatus);
+        }
+
+        clientsRecieved = (List<HashMap<String, Object>>) clientHelper.getClientWithStatus(50, "active");
+        assertNotEquals(clientsRecieved.size(), 0);
+        for (int i = 0; i < clientsRecieved.size(); i++) {
+            HashMap<String, Object> clientStatus = ClientHelper.getClientStatus(requestSpec, responseSpec,
+                    String.valueOf(clientsRecieved.get(i).get("id")));
+            ClientStatusChecker.verifyClientIsActive(clientStatus);
+        }
     }
 
 }
