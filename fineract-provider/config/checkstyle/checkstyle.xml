@@ -193,6 +193,7 @@
              value="Local variable name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="AvoidNoArgumentSuperConstructorCall"/>
+        <module name="AvoidDoubleBraceInitialization"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
