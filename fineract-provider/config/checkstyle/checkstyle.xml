@@ -29,6 +29,7 @@
     <!--
         You can learn more about individual checkstyles at: https://checkstyle.sourceforge.io/
         Checks related to LineLength and Indentation are only handled by Spotless
+        Checks included in MissingSwitchDefault are handled by ErrorProne
     -->
 
     <module name="FileTabCharacter">
@@ -224,7 +225,7 @@
 
 
 
-        <module name="MissingSwitchDefault"/>
+
 
 
 
