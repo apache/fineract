@@ -27,15 +27,26 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ActiveProfiles("basicauth")
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
+@TestPropertySource(properties = {
+        "spring.redis.host=localhost",
+        "spring.redis.port=6379",
+        "drizzle.driver-classname=org.drizzle.jdbc.DrizzleDriver",
+        "drizzle.protocol=jdbc",
+        "drizzle.subprotocol=mysql:thin",
+        "drizzle.port=3306"
+})
 public class CommandHandlerProviderTest {
 
     @Autowired
