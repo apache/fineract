@@ -94,7 +94,7 @@
 
 	<import resource="securityContext.xml" />
 
-	<import resource="cache.xml" />
+	<!--import resource="cache.xml" /-->
 
 	<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">
 		<property name="taskExecutor">

@@ -42,8 +42,8 @@ public class PlatformCache extends AbstractPersistableCustom<Long> {
         return CacheType.fromInt(this.cacheType).isNoCache();
     }
 
-    public boolean isEhcacheEnabled() {
-        return CacheType.fromInt(this.cacheType).isEhcache();
+    public boolean isCacheEnabled() {
+        return CacheType.fromInt(this.cacheType).isCache();
     }
 
     public boolean isDistributedCacheEnabled() {

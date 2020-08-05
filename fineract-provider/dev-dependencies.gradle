@@ -47,6 +47,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-data-jpa',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-actuator',
+            'org.springframework.boot:spring-boot-starter-data-redis:2.3.1.RELEASE',
             //'org.eclipse.persistence:javax.persistence',
 
 

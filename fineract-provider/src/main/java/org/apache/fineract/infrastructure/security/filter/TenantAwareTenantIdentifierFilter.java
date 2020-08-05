@@ -133,8 +133,8 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                             .replace(request.getRequestURI(), request.getContextPath() + apiUri);
                     System.setProperty("baseUrl", baseUrl);
 
-                    final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
-                    if (ehcacheEnabled) {
+                    final boolean cacheEnabled = this.configurationDomainService.isCacheEnabled();
+                    if (cacheEnabled) {
                         this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
                     } else {
                         this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);

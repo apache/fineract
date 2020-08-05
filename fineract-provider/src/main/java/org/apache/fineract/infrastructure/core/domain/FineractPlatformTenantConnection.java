@@ -19,11 +19,13 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 
+import java.io.Serializable;
+
 /**
  * Holds DB server connection details.
  *
  */
-public class FineractPlatformTenantConnection {
+public class FineractPlatformTenantConnection implements Serializable {
 
     private final Long connectionId;
     private final String schemaServer;

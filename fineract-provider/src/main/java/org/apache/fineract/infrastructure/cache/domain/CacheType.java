@@ -69,7 +69,7 @@ public enum CacheType {
         return NO_CACHE.getValue().equals(this.value);
     }
 
-    public boolean isEhcache() {
+    public boolean isCache() {
         return SINGLE_NODE.getValue().equals(this.value);
     }
 

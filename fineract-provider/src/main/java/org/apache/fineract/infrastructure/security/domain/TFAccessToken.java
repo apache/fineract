@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,7 +38,7 @@ import org.joda.time.LocalDateTime;
 @Entity
 @Table(name = "twofactor_access_token",
         uniqueConstraints = {@UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE")})
-public class TFAccessToken extends AbstractPersistableCustom<Long> {
+public class TFAccessToken extends AbstractPersistableCustom<Long> implements Serializable {
 
     @Column(name = "token", nullable = false, length = 32)
     private String token;

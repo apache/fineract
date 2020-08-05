@@ -26,7 +26,17 @@ spring:
   zipkin:
     baseUrl: http://localhost:9411/
     service.name: fineract-server
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379
 management.health.jms.enabled: false
 kafka:
   partitions: 1
   replicas: 1
+drizzle:
+  driver-classname: org.drizzle.jdbc.DrizzleDriver
+  protocol: jdbc
+  subprotocol: mysql:thin
+  port: 3306
