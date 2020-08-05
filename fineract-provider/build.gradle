@@ -82,7 +82,6 @@ dependencyManagement {
 
      dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
      dependency 'org.springframework.boot:spring-boot-starter-data-redis:2.3.1.RELEASE'
-     dependency 'redis.clients:jedis:2.7.0'
      dependency 'org.apache.openjpa:openjpa:3.1.0'
      dependency 'com.squareup.retrofit:retrofit:1.6.1'
      dependency 'com.squareup.okhttp:okhttp:2.0.0'
