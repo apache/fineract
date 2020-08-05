@@ -16,12 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = '''\
-Run as:
-gradle clean tomcatrunwar
-'''
-
-project.ext.jerseyVersion = '1.17'
 
 buildscript {
   ext {
@@ -49,7 +43,10 @@ buildscript {
       classpath 'com.google.guava:guava:28.1-jre'
   }
 }
-
+plugins {
+    // Sonar
+    id "org.sonarqube" version "2.8"
+}
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
@@ -64,8 +61,16 @@ apply plugin: 'java-library'
 apply plugin: 'openjpa'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
+apply plugin: 'org.sonarqube'
+apply plugin: 'jacoco'
 // apply plugin: 'pmd'
 
+description = '''\
+Run as:
+gradle clean tomcatrunwar
+'''
+
+project.ext.jerseyVersion = '1.17'
 
 dependencies {
     compile 'net.logstash.logback:logstash-logback-encoder:4.11'
@@ -79,7 +84,6 @@ dependencyManagement {
   }
 
   dependencies {
-
      dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
      dependency 'org.springframework.boot:spring-boot-starter-data-redis:2.3.1.RELEASE'
      dependency 'org.apache.openjpa:openjpa:3.1.0'
@@ -114,7 +118,7 @@ dependencyManagement {
      dependency 'com.mockrunner:mockrunner-jms:2.0.1'
      dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
 
-      dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
+     dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
          entry 'jersey-core'
          entry 'jersey-servlet'
          entry 'jersey-server'
@@ -251,7 +255,10 @@ rat {
 	//BSD License
 	'**/assets/uglify.js',
          //Ignore out folder
-         '**/out/**'
+         '**/out/**',
+
+    //Jenkinsfile
+    'Jenkinsfile'
 	]
 }
 
@@ -548,4 +555,52 @@ tasks.withType(SpotBugsTask) {
     reports.xml.enabled = false
     reports.html.enabled = true
     reportLevel = "high"
+}
+
+configurations {
+    jaxb
+}
+
+// Sonar settings
+sonarqube {
+    properties {
+        //  Encoding
+        property "sonar.sourceEncoding", "UTF-8"
+        //  ReportsjacocoReport
+        property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/jacoco/jacoco.xml"
+        property "sonar.java.coveragePlugin", "jacoco"
+        //  Binaries
+        // property "sonar.java.binaries", s"${buildDir}/classes/java/main"
+        property "sonar.groovy.test.binaries", "${project.buildDir}/classes/groovy/test"
+
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/jacoco/jacocoHtml")
+        xml.destination file("${buildDir}/jacoco/jacoco.xml")
+    }
+}
+
+// ==== Test
+test{
+    include '**/*Test.*'
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpDir = file("$buildDir/jacoco/classpathdumps")
+    }
+    finalizedBy jacocoTestReport
+
+    testLogging {
+        exceptionFormat = 'full'
+        events "PASSED", "FAILED", "SKIPPED"
+    }
 }
