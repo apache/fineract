@@ -122,7 +122,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
 
             if (!changes.isEmpty()) {
                 validateFinancialActivityAndAccountMapping(financialActivityAccount);
-                this.financialActivityAccountRepository.save(financialActivityAccount);
+                this.financialActivityAccountRepository.saveAndFlush(financialActivityAccount);
             }
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

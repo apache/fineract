@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "rawtypes" })
-public class RatesTest { // OK
+public class RatesTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

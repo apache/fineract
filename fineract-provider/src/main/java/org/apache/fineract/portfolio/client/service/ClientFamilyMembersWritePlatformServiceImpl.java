@@ -145,7 +145,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
                 mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
 
-        this.clientFamilyRepository.save(clientFamilyMembers);
+        this.clientFamilyRepository.saveAndFlush(clientFamilyMembers);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMembers.getId()).build();
 
@@ -257,7 +257,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             familyMember = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification, mobileNumber, age,
                     isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
 
-            this.clientFamilyRepository.save(familyMember);
+            this.clientFamilyRepository.saveAndFlush(familyMember);
 
         }
 
@@ -370,7 +370,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         // middleName, lastName, qualification, relationship, maritalStatus,
         // gender, dateOfBirth, profession);
 
-        this.clientFamilyRepository.save(clientFamilyMember);
+        this.clientFamilyRepository.saveAndFlush(clientFamilyMember);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
     }

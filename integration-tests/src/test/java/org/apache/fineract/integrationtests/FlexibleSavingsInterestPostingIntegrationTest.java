@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
-public class FlexibleSavingsInterestPostingIntegrationTest { // NOK - EntityDatatablesCheck error.
+public class FlexibleSavingsInterestPostingIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";

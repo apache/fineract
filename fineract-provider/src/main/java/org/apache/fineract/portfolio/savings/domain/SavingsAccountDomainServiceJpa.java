@@ -201,7 +201,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {
-        this.savingsAccountTransactionRepository.save(transaction);
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
         return transaction.getId();
     }
 

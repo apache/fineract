@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class LoanDisbursementDetailsIntegrationTest { // NOK - EntityDatatablesCheck error.
+public class LoanDisbursementDetailsIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanDisbursementDetailsIntegrationTest.class);
     private ResponseSpecification responseSpec;

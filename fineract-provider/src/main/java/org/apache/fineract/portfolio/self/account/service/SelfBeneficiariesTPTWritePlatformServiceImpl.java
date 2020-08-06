@@ -112,7 +112,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
                 AppUser user = this.context.authenticatedUser();
                 SelfBeneficiariesTPT beneficiary = new SelfBeneficiariesTPT(user.getId(), name, officeId, clientId, accountId, accountType,
                         transferLimit);
-                this.repository.save(beneficiary);
+                this.repository.saveAndFlush(beneficiary);
                 return new CommandProcessingResultBuilder().withEntityId(beneficiary.getId()).build();
             } catch (DataAccessException dae) {
                 handleDataIntegrityIssues(command, dae);
@@ -136,7 +136,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
             Map<String, Object> changes = beneficiary.update(name, transferLimit);
             if (!changes.isEmpty()) {
                 try {
-                    this.repository.save(beneficiary);
+                    this.repository.saveAndFlush(beneficiary);
 
                     return new CommandProcessingResultBuilder() //
                             .withEntityId(beneficiary.getId()) //

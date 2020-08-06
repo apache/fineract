@@ -412,11 +412,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                         journalEntry.getShareTransactionId());
             }
             // save the reversal entry
-            this.glJournalEntryRepository.save(reversalJournalEntry);
+            this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
             journalEntry.setReversalJournalEntry(reversalJournalEntry);
             journalEntry.setReversed(true);
             // save the updated journal entry
-            this.glJournalEntryRepository.save(journalEntry);
+            this.glJournalEntryRepository.saveAndFlush(journalEntry);
         }
         return reversalTransactionId;
 
@@ -581,11 +581,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                             journalEntry.getShareTransactionId());
                 }
                 // save the reversal entry
-                this.glJournalEntryRepository.save(reversalJournalEntry);
+                this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
                 journalEntry.setReversalJournalEntry(reversalJournalEntry);
                 journalEntry.setReversed(true);
                 // save the updated journal entry
-                this.glJournalEntryRepository.save(journalEntry);
+                this.glJournalEntryRepository.saveAndFlush(journalEntry);
             }
         }
     }

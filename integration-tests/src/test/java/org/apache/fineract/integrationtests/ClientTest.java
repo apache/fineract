@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ClientTest { // NOK - EntityDatatablesCheck error.
+public class ClientTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

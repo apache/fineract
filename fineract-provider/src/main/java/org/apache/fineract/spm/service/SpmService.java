@@ -125,7 +125,7 @@ public class SpmService {
         final ZonedDateTime dateTime = getStartOfToday().minus(1, ChronoUnit.MILLIS);
         survey.setValidTo(Date.from(dateTime.toInstant()));
 
-        this.surveyRepository.save(survey);
+        this.surveyRepository.saveAndFlush(survey);
     }
 
     public void activateSurvey(final Long id) {
@@ -139,7 +139,7 @@ public class SpmService {
         survey.setValidFrom(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         survey.setValidTo(cal.getTime());
 
-        this.surveyRepository.save(survey);
+        this.surveyRepository.saveAndFlush(survey);
     }
 
     public static ZonedDateTime getStartOfToday() {

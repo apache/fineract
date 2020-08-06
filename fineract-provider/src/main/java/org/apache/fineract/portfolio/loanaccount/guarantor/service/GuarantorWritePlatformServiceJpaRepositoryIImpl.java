@@ -172,9 +172,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             }
 
             if (accountAssociations != null) {
-                this.accountAssociationsRepository.save(accountAssociations);
+                this.accountAssociationsRepository.saveAndFlush(accountAssociations);
             }
-            this.guarantorRepository.save(guarantor);
+            this.guarantorRepository.saveAndFlush(guarantor);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantor.getOfficeId())
                     .withEntityId(guarantor.getId()).withLoanId(loan.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -243,7 +243,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             }
 
             if (!changesOnly.isEmpty()) {
-                this.guarantorRepository.save(guarantorForUpdate);
+                this.guarantorRepository.saveAndFlush(guarantorForUpdate);
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())

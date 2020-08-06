@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
-public class LoanRepaymentRescheduleAtDisbursementTest { // NOK - EntityDatatablesCheck error.
+public class LoanRepaymentRescheduleAtDisbursementTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentRescheduleAtDisbursementTest.class);
     private ResponseSpecification responseSpec;

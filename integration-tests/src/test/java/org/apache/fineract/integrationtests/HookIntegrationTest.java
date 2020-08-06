@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HookIntegrationTest { // NOK - OK
+public class HookIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;

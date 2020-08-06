@@ -26,7 +26,9 @@ import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
 import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements GroupSavingsIndividualMonitoringWritePlatformService {
 

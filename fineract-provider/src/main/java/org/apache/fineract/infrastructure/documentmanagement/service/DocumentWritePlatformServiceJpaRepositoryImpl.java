@@ -77,7 +77,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
                     documentCommand.getDescription(), fileLocation, contentRepository.getStorageType());
 
-            this.documentRepository.save(document);
+            this.documentRepository.saveAndFlush(document);
 
             return document.getId();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

@@ -127,7 +127,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             requestedEntry.setJournalEntryCreated(Boolean.TRUE);
         }
 
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         this.journalEntryWritePlatformService.createProvisioningJournalEntries(requestedEntry);
     }
 
@@ -209,7 +209,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                     .retrieveExistingProvisioningIdDateWithJournals();
             revertAndAddJournalEntries(exisProvisioningEntryData, requestedEntry);
         } else {
-            this.provisioningEntryRepository.save(requestedEntry);
+            this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         }
         return requestedEntry;
     }
@@ -219,10 +219,10 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
                 .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
         requestedEntry.getLoanProductProvisioningEntries().clear();
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, requestedEntry.getCreatedDate());
         requestedEntry.setProvisioningEntries(entries);
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
     }
 

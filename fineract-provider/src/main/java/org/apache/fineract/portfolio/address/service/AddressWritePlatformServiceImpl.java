@@ -152,7 +152,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 }
 
                 clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
-                this.clientAddressRepository.save(clientAddressobj);
+                this.clientAddressRepository.saveAndFlush(clientAddressobj);
 
             }
         }

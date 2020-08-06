@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoanImportHandlerTest {
+public class LoanImportHandlerTest { // NOK
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandlerTest.class);
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;

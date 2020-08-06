@@ -129,7 +129,7 @@ public class SchedulerJobsTest {
     }
 
     @Test
-    public void testTriggeringManualExecutionOfAllSchedulerJobs() {
+    public void testTriggeringManualExecutionOfAllSchedulerJobs() { // NOK
         for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
             schedulerJobHelper.executeAndAwaitJob(jobName);
         }

@@ -49,7 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ProvisioningIntegrationTest {
+public class ProvisioningIntegrationTest { // NOK
 
     private static final Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";

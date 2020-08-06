@@ -32,6 +32,7 @@
             <property name="eclipselink.weaving" value="static" />
             <property name="eclipselink.weaving.eager" value="true" />
             <property name="eclipselink.logging.level" value="FINE" />
+            <property name="eclipselink.target-database" value="MySQL" />
             <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
             <property name="eclipselink.ddl-generation.index-foreign-keys" value="true" />
         </properties>

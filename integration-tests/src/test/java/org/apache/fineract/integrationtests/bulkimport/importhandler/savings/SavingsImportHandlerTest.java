@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SavingsImportHandlerTest {
+public class SavingsImportHandlerTest { // NOK
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
 

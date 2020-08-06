@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unchecked" })
 
-public class GlobalConfigurationTest { // OK
+public class GlobalConfigurationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

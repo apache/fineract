@@ -187,7 +187,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         if (!changedPermissions.isEmpty()) {
             changes.put("permissions", changedPermissions);
-            this.roleRepository.save(role);
+            this.roleRepository.saveAndFlush(role);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -265,7 +265,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Disabling the role
              */
             role.disableRole();
-            this.roleRepository.save(role);
+            this.roleRepository.saveAndFlush(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
@@ -288,7 +288,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             // if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
 
             role.enableRole();
-            this.roleRepository.save(role);
+            this.roleRepository.saveAndFlush(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException e) {

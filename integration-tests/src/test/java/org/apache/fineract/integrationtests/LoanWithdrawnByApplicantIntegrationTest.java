@@ -34,7 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("rawtypes")
-public class LoanWithdrawnByApplicantIntegrationTest { // NOK - EntityDatatablesCheck error.
+public class LoanWithdrawnByApplicantIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

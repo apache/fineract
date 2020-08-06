@@ -107,7 +107,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
             glAccount.generateHierarchy();
 
-            this.glAccountRepository.save(glAccount);
+            this.glAccountRepository.saveAndFlush(glAccount);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

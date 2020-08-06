@@ -41,7 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("rawtypes")
-public class FinancialActivityAccountsTest { // NOK - OK
+public class FinancialActivityAccountsTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForValidationError;

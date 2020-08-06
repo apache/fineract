@@ -54,7 +54,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoanReschedulingWithinCenterTest { // NOK - EntityDatatablesCheck error.
+public class LoanReschedulingWithinCenterTest { // NOK
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
     private RequestSpecification requestSpec;

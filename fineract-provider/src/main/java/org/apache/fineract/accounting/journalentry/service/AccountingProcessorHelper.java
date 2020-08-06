@@ -1083,7 +1083,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
-        this.glJournalEntryRepository.save(journalEntry);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     private void createCreditJournalEntryForShares(final Office office, final String currencyCode, final GLAccount account,
@@ -1102,7 +1102,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
-        this.glJournalEntryRepository.save(journalEntry);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     public GLAccount getLinkedGLAccountForLoanProduct(final Long loanProductId, final int accountMappingTypeId, final Long paymentTypeId) {

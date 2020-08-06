@@ -89,7 +89,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
 
             final FixedDepositProduct product = this.depositProductAssembler.assembleFixedDepositProduct(command);
 
-            this.fixedDepositProductRepository.save(product);
+            this.fixedDepositProductRepository.saveAndFlush(product);
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
@@ -152,7 +152,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
-                this.fixedDepositProductRepository.save(product);
+                this.fixedDepositProductRepository.saveAndFlush(product);
             }
 
             return new CommandProcessingResultBuilder() //

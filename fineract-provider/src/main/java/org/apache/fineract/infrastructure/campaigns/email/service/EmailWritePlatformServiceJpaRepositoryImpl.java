@@ -67,7 +67,7 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
             // TODO: decision to be made on wheter we 'wait' for response or use
             // 'future/promise' to capture response and update the EmailMessage
             // table
-            this.repository.save(message);
+            this.repository.saveAndFlush(message);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

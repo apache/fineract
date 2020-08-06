@@ -58,7 +58,7 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
         Long position = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
 
         PaymentType newPaymentType = PaymentType.create(name, description, isCashPayment, position);
-        this.repository.saveAndFlush(newPaymentType); // OK
+        this.repository.saveAndFlush(newPaymentType);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(newPaymentType.getId()).build();
     }
 

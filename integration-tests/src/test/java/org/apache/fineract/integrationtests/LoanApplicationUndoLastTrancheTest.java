@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
-public class LoanApplicationUndoLastTrancheTest { // OK
+public class LoanApplicationUndoLastTrancheTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
     private ResponseSpecification responseSpec;

@@ -283,8 +283,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     decimalValue, dueDate, endDate, emi);
 
             // create a new entry in the m_loan_reschedule_request table
-            this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
-            this.loanRepositoryWrapper.save(loan);
+            this.loanRescheduleRequestRepository.saveAndFlush(loanRescheduleRequest);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequest.getId())
                     .withLoanId(loan.getId()).withClientId(loan.getClientId()).withOfficeId(loan.getOfficeId())

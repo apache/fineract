@@ -54,7 +54,7 @@ public class ShareAccountSchedularServiceImpl implements ShareAccountSchedularSe
         SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountDomainService.handleDividendPayout(savingsAccount,
                 DateUtils.getLocalDateOfTenant(), shareAccountDividendDetails.getAmount());
         shareAccountDividendDetails.update(ShareAccountDividendStatusType.POSTED.getValue(), savingsAccountTransaction.getId());
-        this.shareAccountDividendRepository.save(shareAccountDividendDetails);
+        this.shareAccountDividendRepository.saveAndFlush(shareAccountDividendDetails);
     }
 
 }

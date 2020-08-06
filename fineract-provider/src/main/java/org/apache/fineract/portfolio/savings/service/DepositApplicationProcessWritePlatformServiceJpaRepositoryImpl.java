@@ -210,7 +210,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
-            this.fixedDepositAccountRepository.save(account);
+            this.fixedDepositAccountRepository.saveAndFlush(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);

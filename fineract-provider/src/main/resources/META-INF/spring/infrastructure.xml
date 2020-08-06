@@ -34,7 +34,9 @@
         <property name="dataSource" ref="routingDataSource" />
         <property name="persistenceUnitName" value="jpa-pu" />
         <property name="jpaVendorAdapter">
-            <bean class="org.apache.fineract.infrastructure.openjpa.OpenJpaVendorAdapter"/>
+            <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+                <property name="showSql" value="false" />
+            </bean>
         </property>
     </bean>
 

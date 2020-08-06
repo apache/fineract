@@ -78,7 +78,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     public CommandProcessingResult createShareProduct(JsonCommand jsonCommand) {
         try {
             ShareProduct product = this.serializer.validateAndCreate(jsonCommand);
-            this.repository.save(product);
+            this.repository.saveAndFlush(product);
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createShareProductToGLAccountMapping(product.getId(), jsonCommand);

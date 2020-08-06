@@ -68,7 +68,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unchecked" })
 
-public class SchedulerJobsTestResults {
+public class SchedulerJobsTestResults { // NOK
 
     private static final String FROM_ACCOUNT_TYPE_LOAN = "1";
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";

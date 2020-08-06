@@ -70,7 +70,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
 
             AccountNumberFormat accountNumberFormat = new AccountNumberFormat(entityAccountType, accountNumberPrefixType);
 
-            this.accountNumberFormatRepository.save(accountNumberFormat);
+            this.accountNumberFormatRepository.saveAndFlush(accountNumberFormat);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(accountNumberFormat.getId()) //

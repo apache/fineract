@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
  */
-public class GroupTest { // NOK - EntityDatatablesCheck error.
+public class GroupTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
