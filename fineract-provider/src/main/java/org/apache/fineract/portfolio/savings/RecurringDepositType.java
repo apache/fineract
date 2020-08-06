@@ -32,7 +32,7 @@ public enum RecurringDepositType {
     private final Integer value;
     private final String code;
 
-    private RecurringDepositType(final Integer value, final String code) {
+    RecurringDepositType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

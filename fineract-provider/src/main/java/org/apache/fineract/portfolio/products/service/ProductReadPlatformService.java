@@ -25,13 +25,13 @@ import org.apache.fineract.portfolio.products.data.ProductData;
 
 public interface ProductReadPlatformService {
 
-    public Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit);
+    Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit);
 
-    public ProductData retrieveOne(final Long productId, boolean includeTemplate);
+    ProductData retrieveOne(Long productId, boolean includeTemplate);
 
-    public ProductData retrieveTemplate();
+    ProductData retrieveTemplate();
 
-    public Set<String> getResponseDataParams();
+    Set<String> getResponseDataParams();
 
-    public Collection<ProductData> retrieveAllForLookup();
+    Collection<ProductData> retrieveAllForLookup();
 }

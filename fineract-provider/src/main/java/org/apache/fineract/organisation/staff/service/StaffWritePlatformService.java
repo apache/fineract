@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface StaffWritePlatformService {
 
-    CommandProcessingResult createStaff(final JsonCommand command);
+    CommandProcessingResult createStaff(JsonCommand command);
 
-    CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command);
+    CommandProcessingResult updateStaff(Long staffId, JsonCommand command);
 }

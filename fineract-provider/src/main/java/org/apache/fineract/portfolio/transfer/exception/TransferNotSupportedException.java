@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class TransferNotSupportedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons for invalid Journal Entry **/
-    public static enum TransferNotSupportedReason {
+    public enum TransferNotSupportedReason {
 
         CLIENT_DESTINATION_GROUP_NOT_SPECIFIED, CLIENT_BELONGS_TO_MULTIPLE_GROUPS, SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, ACTIVE_SAVINGS_ACCOUNT, BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, DESTINATION_GROUP_HAS_NO_MEETING;
 

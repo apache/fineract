@@ -93,7 +93,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
             return "pm.product_id as productId, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }
 
-        public ProductMixDataExtractor(final LoanProductReadPlatformService loanProductReadPlatformService, final Long productId) {
+        ProductMixDataExtractor(final LoanProductReadPlatformService loanProductReadPlatformService, final Long productId) {
             this.loanProductReadPlatformService = loanProductReadPlatformService;
             this.productId = productId;
         }

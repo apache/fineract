@@ -42,7 +42,7 @@ public enum DaysInYearType {
     private final Integer value;
     private final String code;
 
-    private DaysInYearType(final Integer value, final String code) {
+    DaysInYearType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -44,7 +44,7 @@ public enum AccountTransferRecurrenceType {
         return enumeration;
     }
 
-    private AccountTransferRecurrenceType(final Integer value, final String code) {
+    AccountTransferRecurrenceType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

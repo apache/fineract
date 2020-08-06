@@ -28,7 +28,7 @@ public enum LoanProductParamType {
     private final Integer value;
     private final String code;
 
-    private LoanProductParamType(final Integer value, final String code) {
+    LoanProductParamType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

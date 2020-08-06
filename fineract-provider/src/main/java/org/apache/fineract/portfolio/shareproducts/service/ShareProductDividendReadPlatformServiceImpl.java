@@ -95,7 +95,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
 
         private final String sql;
 
-        public ShareProductDividendMapper() {
+        ShareProductDividendMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append(" pod.id as id, pod.amount as amount,");
             sb.append(" pod.status as status, pod.dividend_period_start_date as startDate,");

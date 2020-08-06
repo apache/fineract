@@ -40,11 +40,11 @@ public interface DepositAccountWritePlatformService {
 
     CommandProcessingResult depositToRDAccount(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult withdrawal(Long savingsId, JsonCommand command, final DepositAccountType depositAccountType);
+    CommandProcessingResult withdrawal(Long savingsId, JsonCommand command, DepositAccountType depositAccountType);
 
-    CommandProcessingResult calculateInterest(Long savingsId, final DepositAccountType depositAccountType);
+    CommandProcessingResult calculateInterest(Long savingsId, DepositAccountType depositAccountType);
 
-    CommandProcessingResult postInterest(Long savingsId, final DepositAccountType depositAccountType);
+    CommandProcessingResult postInterest(Long savingsId, DepositAccountType depositAccountType);
 
     CommandProcessingResult undoFDTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
@@ -62,32 +62,32 @@ public interface DepositAccountWritePlatformService {
 
     CommandProcessingResult prematureCloseRDAccount(Long savingsId, JsonCommand command);
 
-    SavingsAccountTransaction initiateSavingsTransfer(Long accountId, LocalDate transferDate, final DepositAccountType depositAccountType);
+    SavingsAccountTransaction initiateSavingsTransfer(Long accountId, LocalDate transferDate, DepositAccountType depositAccountType);
 
-    SavingsAccountTransaction withdrawSavingsTransfer(Long accountId, LocalDate transferDate, final DepositAccountType depositAccountType);
+    SavingsAccountTransaction withdrawSavingsTransfer(Long accountId, LocalDate transferDate, DepositAccountType depositAccountType);
 
-    void rejectSavingsTransfer(Long accountId, final DepositAccountType depositAccountType);
+    void rejectSavingsTransfer(Long accountId, DepositAccountType depositAccountType);
 
     SavingsAccountTransaction acceptSavingsTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff staff,
-            final DepositAccountType depositAccountType);
+            DepositAccountType depositAccountType);
 
-    CommandProcessingResult addSavingsAccountCharge(JsonCommand command, final DepositAccountType depositAccountType);
+    CommandProcessingResult addSavingsAccountCharge(JsonCommand command, DepositAccountType depositAccountType);
 
-    CommandProcessingResult updateSavingsAccountCharge(JsonCommand command, final DepositAccountType depositAccountType);
+    CommandProcessingResult updateSavingsAccountCharge(JsonCommand command, DepositAccountType depositAccountType);
 
     CommandProcessingResult deleteSavingsAccountCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command,
-            final DepositAccountType depositAccountType);
+            DepositAccountType depositAccountType);
 
-    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId, final DepositAccountType depositAccountType);
+    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId, DepositAccountType depositAccountType);
 
     CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command,
-            final DepositAccountType depositAccountType);
+            DepositAccountType depositAccountType);
 
-    void applyChargeDue(final Long savingsAccountChargeId, final Long accountId, final DepositAccountType depositAccountType);
+    void applyChargeDue(Long savingsAccountChargeId, Long accountId, DepositAccountType depositAccountType);
 
-    void updateMaturityDetails(final Long depositAccountId, final DepositAccountType depositAccountType);
+    void updateMaturityDetails(Long depositAccountId, DepositAccountType depositAccountType);
 
     void transferInterestToSavings() throws JobExecutionException;
 
-    SavingsAccountTransaction mandatorySavingsAccountDeposit(final SavingsAccountTransactionDTO accountTransactionDTO);
+    SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingsAccountTransactionDTO accountTransactionDTO);
 }

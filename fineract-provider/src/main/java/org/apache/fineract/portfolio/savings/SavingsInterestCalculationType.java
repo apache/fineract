@@ -51,7 +51,7 @@ public enum SavingsInterestCalculationType {
     private final Integer value;
     private final String code;
 
-    private SavingsInterestCalculationType(final Integer value, final String code) {
+    SavingsInterestCalculationType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

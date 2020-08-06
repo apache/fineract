@@ -39,7 +39,7 @@ public interface TellerWritePlatformService {
      * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
      * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
-    public CommandProcessingResult createTeller(JsonCommand command);
+    CommandProcessingResult createTeller(JsonCommand command);
 
     /**
      * Modifies a new teller.
@@ -53,7 +53,7 @@ public interface TellerWritePlatformService {
      * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
      * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
-    public CommandProcessingResult modifyTeller(Long tellerId, JsonCommand command);
+    CommandProcessingResult modifyTeller(Long tellerId, JsonCommand command);
 
     /**
      * deletes a new teller.
@@ -64,7 +64,7 @@ public interface TellerWritePlatformService {
      * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
      * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
-    public CommandProcessingResult deleteTeller(Long tellerId);
+    CommandProcessingResult deleteTeller(Long tellerId);
 
     /**
      * Allocates a cashier to an existing teller. The allocation can be for a duration from a date to a date from a
@@ -76,11 +76,11 @@ public interface TellerWritePlatformService {
      * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
      * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
-    public CommandProcessingResult allocateCashierToTeller(Long tellerId, JsonCommand command);
+    CommandProcessingResult allocateCashierToTeller(Long tellerId, JsonCommand command);
 
     CommandProcessingResult updateCashierAllocation(Long tellerId, Long cashierId, JsonCommand command);
 
-    CommandProcessingResult deleteCashierAllocation(final Long tellerId, Long cashierId, JsonCommand command);
+    CommandProcessingResult deleteCashierAllocation(Long tellerId, Long cashierId, JsonCommand command);
 
     CommandProcessingResult allocateCashToCashier(Long cashierId, JsonCommand command);
 

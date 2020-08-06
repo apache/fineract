@@ -108,7 +108,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
 
         private final String sql;
 
-        public ShareAccountDividendMapper() {
+        ShareAccountDividendMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append(" sadd.id as id, sadd.amount as amount,");
             sb.append(" sadd.status as status, sadd.savings_transaction_id as savingsTransactionId,");

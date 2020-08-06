@@ -517,7 +517,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         private final String schemaSql;
 
-        public StandingInstructionLoanDuesMapper() {
+        StandingInstructionLoanDuesMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("max(ls.duedate) as dueDate,sum(ls.principal_amount) as principalAmount,");

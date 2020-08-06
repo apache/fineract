@@ -205,7 +205,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
         private final String schemaSql;
 
-        public SavingsAccountChargeDueMapper() {
+        SavingsAccountChargeDueMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("sac.id as id, ");
             sqlBuilder.append("sa.id as accountId, ");

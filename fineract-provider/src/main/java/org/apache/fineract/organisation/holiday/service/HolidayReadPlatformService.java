@@ -26,9 +26,9 @@ import org.apache.fineract.organisation.holiday.data.HolidayData;
 
 public interface HolidayReadPlatformService {
 
-    Collection<HolidayData> retrieveAllHolidaysBySearchParamerters(final Long officeId, Date fromDate, Date toDate);
+    Collection<HolidayData> retrieveAllHolidaysBySearchParamerters(Long officeId, Date fromDate, Date toDate);
 
-    HolidayData retrieveHoliday(final Long holidayId);
+    HolidayData retrieveHoliday(Long holidayId);
 
     List<EnumOptionData> retrieveRepaymentScheduleUpdationTyeOptions();
 }

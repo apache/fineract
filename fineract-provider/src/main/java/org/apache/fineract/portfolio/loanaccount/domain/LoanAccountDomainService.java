@@ -28,9 +28,8 @@ import org.joda.time.LocalDate;
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidatDetailDto,
-            Boolean isHolidayValidationDone);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId, boolean isRecoveryRepayment,
+            boolean isAccountTransfer, HolidayDetailDTO holidatDetailDto, Boolean isHolidayValidationDone);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
@@ -63,7 +62,7 @@ public interface LoanAccountDomainService {
 
     void saveLoanWithDataIntegrityViolationChecks(Loan loan);
 
-    Map<String, Object> foreCloseLoan(final Loan loan, final LocalDate foreClourseDate, String noteText);
+    Map<String, Object> foreCloseLoan(Loan loan, LocalDate foreClourseDate, String noteText);
 
     /**
      * Disables all standing instructions linked to a closed loan

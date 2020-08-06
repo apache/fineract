@@ -356,7 +356,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final String schema;
 
-        public ClientMembersOfGroupMapper() {
+        ClientMembersOfGroupMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
             sqlBuilder.append(
@@ -545,7 +545,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final String schema;
 
-        public ClientMapper() {
+        ClientMapper() {
             final StringBuilder builder = new StringBuilder(400);
 
             builder.append(

@@ -60,7 +60,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
         private final String schemaSql;
 
-        public ClientTransactionMapper() {
+        ClientTransactionMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType,  ");

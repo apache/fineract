@@ -63,7 +63,7 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
 
         private final String schema;
 
-        public ShareAccountChargeMapper() {
+        ShareAccountChargeMapper() {
             StringBuilder buff = new StringBuilder().append("sc.id as id, c.id as chargeId, sc.account_id as accountId, c.name as name, ")
                     .append("sc.amount as amountDue, sc.amount_paid_derived as amountPaid, ")
                     .append("sc.amount_waived_derived as amountWaived, sc.amount_writtenoff_derived as amountWrittenOff, ")

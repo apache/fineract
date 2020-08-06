@@ -24,7 +24,7 @@ public class JournalEntry {
 
         CREDIT("CREDIT"), DEBIT("DEBIT");
 
-        private TransactionType(final String type) {
+        TransactionType(final String type) {
             this.type = type;
         }
 

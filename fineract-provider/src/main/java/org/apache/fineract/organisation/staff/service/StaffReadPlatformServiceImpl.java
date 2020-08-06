@@ -134,7 +134,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         private final String schemaSql;
 
-        public StaffLookupMapper() {
+        StaffLookupMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(100);
             sqlBuilder.append("s.id as id, s.display_name as displayName ");

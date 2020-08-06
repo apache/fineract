@@ -382,7 +382,7 @@ public class CalendarUtils {
         return (recurDate == null || recurDate.isEmpty()) ? false : recurDate.contains(date);
     }
 
-    public static enum DayNameEnum {
+    public enum DayNameEnum {
 
         MO(1, "Monday"), TU(2, "Tuesday"), WE(3, "Wednesday"), TH(4, "Thursday"), FR(5, "Friday"), SA(6, "Saturday"), SU(7, "Sunday");
 

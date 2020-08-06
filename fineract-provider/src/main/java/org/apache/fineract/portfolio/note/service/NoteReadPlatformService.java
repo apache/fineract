@@ -23,7 +23,7 @@ import org.apache.fineract.portfolio.note.data.NoteData;
 
 public interface NoteReadPlatformService {
 
-    NoteData retrieveNote(final Long noteId, Long resourceId, Integer noteTypeId);
+    NoteData retrieveNote(Long noteId, Long resourceId, Integer noteTypeId);
 
-    Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId);
+    Collection<NoteData> retrieveNotesByResource(Long resourceId, Integer noteTypeId);
 }

@@ -115,7 +115,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
         private final String schema;
         private TaxComponentHistoryDataMapper componentHistoryDataMapper = new TaxComponentHistoryDataMapper();
 
-        public TaxComponentMapper() {
+        TaxComponentMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("tc.id as id, tc.name as name,");
             sb.append("tc.percentage as percentage, tc.start_date as startDate,");
@@ -202,7 +202,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
         private final String schema;
         private final TaxGroupMappingsDataMapper taxGroupMappingsDataMapper = new TaxGroupMappingsDataMapper();
 
-        public TaxGroupMapper() {
+        TaxGroupMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("tg.id as id, tg.name as name,");
             sb.append("tgm.id as mappingId,");
@@ -257,7 +257,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
         private final String schema;
 
-        public TaxComponentLookUpMapper() {
+        TaxComponentLookUpMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("tc.id as id, tc.name as name ");
             sb.append(" from m_tax_component tc ");
@@ -281,7 +281,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
         private final String schema;
 
-        public TaxGroupLookUpMapper() {
+        TaxGroupLookUpMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("tg.id as id, tg.name as name ");
             sb.append(" from m_tax_group tg ");

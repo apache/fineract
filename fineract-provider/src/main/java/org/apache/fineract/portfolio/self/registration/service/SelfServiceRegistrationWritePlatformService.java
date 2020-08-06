@@ -23,7 +23,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface SelfServiceRegistrationWritePlatformService {
 
-    public SelfServiceRegistration createRegistrationRequest(String apiRequestBodyAsJson);
+    SelfServiceRegistration createRegistrationRequest(String apiRequestBodyAsJson);
 
-    public AppUser createUser(String apiRequestBodyAsJson);
+    AppUser createUser(String apiRequestBodyAsJson);
 }

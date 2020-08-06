@@ -25,19 +25,19 @@ import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 
 public interface AccountDetailsReadPlatformService {
 
-    public AccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId);
+    AccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
-    public AccountSummaryCollectionData retrieveGroupAccountDetails(final Long groupId);
+    AccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
 
-    public Collection<LoanAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(final Long clientId, final Long loanOfficerId);
+    Collection<LoanAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId);
 
-    public Collection<LoanAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(final Long groupId, final Long loanOfficerId);
+    Collection<LoanAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
 
-    public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId);
+    Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(Long clientId);
 
-    public List<LoanAccountSummaryData> retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(Long groupId, final String glimAccount);
+    List<LoanAccountSummaryData> retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(Long groupId, String glimAccount);
 
-    public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId);
+    Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(Long groupId);
 
     AccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId, Long gsimId);
 }

@@ -165,7 +165,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
 
         private final String schemaSql;
 
-        public StandingInstructionHistoryMapper() {
+        StandingInstructionHistoryMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("atsi.id as id,atsi.name as name, ");
             sqlBuilder.append("atsih.status as status, atsih.execution_time as executionTime, ");

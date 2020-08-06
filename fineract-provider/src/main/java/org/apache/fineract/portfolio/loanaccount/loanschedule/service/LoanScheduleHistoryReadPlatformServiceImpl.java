@@ -94,7 +94,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         private LocalDate lastDueDate;
         private BigDecimal outstandingLoanPrincipalBalance;
 
-        public LoanScheduleArchiveResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
+        LoanScheduleArchiveResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
                 Collection<DisbursementData> disbursementData) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();

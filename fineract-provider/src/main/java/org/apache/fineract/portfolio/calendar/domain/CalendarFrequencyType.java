@@ -31,7 +31,7 @@ public enum CalendarFrequencyType {
     private final Integer value;
     private final String code;
 
-    private CalendarFrequencyType(final Integer value, final String code) {
+    CalendarFrequencyType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

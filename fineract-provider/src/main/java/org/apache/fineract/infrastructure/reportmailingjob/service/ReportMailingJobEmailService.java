@@ -28,5 +28,5 @@ public interface ReportMailingJobEmailService {
      * @param reportMailingJobEmailData
      *            {@link ReportMailingJobEmailData} object
      */
-    void sendEmailWithAttachment(final ReportMailingJobEmailData reportMailingJobEmailData);
+    void sendEmailWithAttachment(ReportMailingJobEmailData reportMailingJobEmailData);
 }

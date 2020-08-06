@@ -110,7 +110,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 .append("FROM m_floating_rates as rate ").append("LEFT JOIN m_appuser as crappu on rate.createdby_id = crappu.id ")
                 .append("LEFT JOIN m_appuser as moappu on rate.lastmodifiedby_id = moappu.id ");
 
-        public FloatingRateRowMapper(final boolean addRatePeriods) {
+        FloatingRateRowMapper(final boolean addRatePeriods) {
             this.addRatePeriods = addRatePeriods;
         }
 

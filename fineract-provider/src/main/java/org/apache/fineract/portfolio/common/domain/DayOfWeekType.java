@@ -30,7 +30,7 @@ public enum DayOfWeekType {
     private final Integer value;
     private final String code;
 
-    private DayOfWeekType(Integer value, String code) {
+    DayOfWeekType(Integer value, String code) {
         this.value = value;
         this.code = code;
     }

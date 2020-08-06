@@ -34,7 +34,7 @@ public enum TemplateType {
     private final int id;
     private final String name;
 
-    private TemplateType(final int id, final String name) {
+    TemplateType(final int id, final String name) {
         this.id = id;
         this.name = name;
     }

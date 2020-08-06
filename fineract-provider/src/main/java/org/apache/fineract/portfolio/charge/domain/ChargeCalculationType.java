@@ -30,7 +30,7 @@ public enum ChargeCalculationType {
     private final Integer value;
     private final String code;
 
-    private ChargeCalculationType(final Integer value, final String code) {
+    ChargeCalculationType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

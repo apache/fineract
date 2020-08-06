@@ -32,7 +32,7 @@ public enum AccountType {
     private final Integer value;
     private final String code;
 
-    private AccountType(final Integer value, final String code) {
+    AccountType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

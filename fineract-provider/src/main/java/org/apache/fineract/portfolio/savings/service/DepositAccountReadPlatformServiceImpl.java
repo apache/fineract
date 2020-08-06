@@ -766,7 +766,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public FixedDepositAccountMapper() {
+        FixedDepositAccountMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.selectFieldsSql());
 
@@ -847,7 +847,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public RecurringDepositAccountMapper() {
+        RecurringDepositAccountMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(this.selectFieldsSql());
 
@@ -1129,7 +1129,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public abstract String schema();
 
         @Override
-        public abstract DepositAccountData mapRow(final ResultSet rs, final int rowNum) throws SQLException;
+        public abstract DepositAccountData mapRow(ResultSet rs, int rowNum) throws SQLException;
 
         public DepositAccountData mapRow(final ResultSet rs) throws SQLException {
 
@@ -1215,7 +1215,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public FixedDepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
+        FixedDepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             super(client, group);
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.selectFieldsSql());
@@ -1283,7 +1283,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public RecurringDepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
+        RecurringDepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             super(client, group);
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(this.selectFieldsSql());
@@ -1415,7 +1415,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public RecurringAccountDepositTransactionTemplateMapper() {
+        RecurringAccountDepositTransactionTemplateMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
             sqlBuilder.append(
