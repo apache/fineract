@@ -28,7 +28,7 @@ public enum ChargeAppliesTo {
     private final Integer value;
     private final String code;
 
-    private ChargeAppliesTo(final Integer value, final String code) {
+    ChargeAppliesTo(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -1953,7 +1953,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.sqlSchema;
         }
 
-        public LoanRepaymentWaiverMapper() {
+        LoanRepaymentWaiverMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("lrs.duedate as dueDate,lrs.interest_waived_derived interestWaived, lrs.installment as installment");
             sb.append(" from m_loan_repayment_schedule lrs ");

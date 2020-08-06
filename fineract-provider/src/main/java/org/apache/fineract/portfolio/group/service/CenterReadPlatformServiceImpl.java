@@ -191,7 +191,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         private final String schemaSql;
 
-        public CenterDataMapper() {
+        CenterDataMapper() {
 
             this.schemaSql = SQL_QUERY;
         }

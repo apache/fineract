@@ -44,7 +44,7 @@ public enum SavingsCompoundingInterestPeriodType {
     private final Integer value;
     private final String code;
 
-    private SavingsCompoundingInterestPeriodType(final Integer value, final String code) {
+    SavingsCompoundingInterestPeriodType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -35,9 +35,9 @@ public interface TemplateDomainService {
 
     Template updateTemplate(Template template);
 
-    CommandProcessingResult createTemplate(final JsonCommand command);
+    CommandProcessingResult createTemplate(JsonCommand command);
 
-    CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command);
+    CommandProcessingResult updateTemplate(Long templateId, JsonCommand command);
 
-    CommandProcessingResult removeTemplate(final Long templateId);
+    CommandProcessingResult removeTemplate(Long templateId);
 }

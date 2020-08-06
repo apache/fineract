@@ -25,7 +25,7 @@ public enum InterestMethod {
     private final Integer value;
     private final String code;
 
-    private InterestMethod(final Integer value, final String code) {
+    InterestMethod(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

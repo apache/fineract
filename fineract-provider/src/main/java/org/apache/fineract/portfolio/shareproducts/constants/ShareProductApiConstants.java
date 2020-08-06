@@ -21,9 +21,9 @@ package org.apache.fineract.portfolio.shareproducts.constants;
 public interface ShareProductApiConstants {
 
     // Command Strings
-    public final String PREIEW_DIVIDENDS_COMMAND_STRING = "previewdividends";
-    public final String POST_DIVIDENdS_COMMAND_STRING = "postdividends";
-    public final String SHARE_PRODUCT_RESOURCE_NAME = "shareproduct";
+    String PREIEW_DIVIDENDS_COMMAND_STRING = "previewdividends";
+    String POST_DIVIDENdS_COMMAND_STRING = "postdividends";
+    String SHARE_PRODUCT_RESOURCE_NAME = "shareproduct";
 
     String locale_paramname = "locale";
     String dateFormatParamName = "dateFormat";

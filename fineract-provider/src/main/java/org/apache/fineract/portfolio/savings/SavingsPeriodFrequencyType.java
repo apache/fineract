@@ -35,7 +35,7 @@ public enum SavingsPeriodFrequencyType {
     private final Integer value;
     private final String code;
 
-    private SavingsPeriodFrequencyType(final Integer value, final String code) {
+    SavingsPeriodFrequencyType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

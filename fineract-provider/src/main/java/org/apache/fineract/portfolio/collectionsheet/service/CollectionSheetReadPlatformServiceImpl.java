@@ -712,7 +712,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private final String sql;
 
-        public IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId) {
+        IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId) {
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue ");
             sb.append("from (SELECT cl.display_name As clientName, ");

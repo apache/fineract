@@ -2855,7 +2855,7 @@ public class Loan extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    private final void reverseExistingTransactions() {
+    private void reverseExistingTransactions() {
         Collection<LoanTransaction> retainTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             transaction.reverse();

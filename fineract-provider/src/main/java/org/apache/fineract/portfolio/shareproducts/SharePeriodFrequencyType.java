@@ -35,7 +35,7 @@ public enum SharePeriodFrequencyType {
     private final Integer value;
     private final String code;
 
-    private SharePeriodFrequencyType(final Integer value, final String code) {
+    SharePeriodFrequencyType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

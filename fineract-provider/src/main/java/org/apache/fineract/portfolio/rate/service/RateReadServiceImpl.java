@@ -125,7 +125,7 @@ public class RateReadServiceImpl implements RateReadService {
             return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
         }
 
-        public RateMapper() {}
+        RateMapper() {}
 
         @Override
         public RateData mapRow(ResultSet resultSet, int i) throws SQLException {

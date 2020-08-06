@@ -170,7 +170,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         private final String schemaSql;
 
-        public TellerLookupMapper() {
+        TellerLookupMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(100);
             sqlBuilder.append("t.id as id, t.name as teller_name ");

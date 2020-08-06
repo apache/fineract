@@ -731,7 +731,7 @@ public final class LoanApplicationTerms {
         return new PrincipalInterest(null, interestForInstallment, interestBroughtForwardDueToGrace);
     }
 
-    private final boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {
+    private boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {
         return periodNumber == numberOfRepayments;
     }
 

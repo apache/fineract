@@ -44,7 +44,7 @@ public enum InterestIncentiveType {
         return type;
     }
 
-    private InterestIncentiveType(final Integer value, final String code) {
+    InterestIncentiveType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

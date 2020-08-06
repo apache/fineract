@@ -32,7 +32,7 @@ public enum DepositAccountOnHoldTransactionType {
     private final Integer value;
     private final String code;
 
-    private DepositAccountOnHoldTransactionType(final Integer value, final String code) {
+    DepositAccountOnHoldTransactionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

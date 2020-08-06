@@ -433,9 +433,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * @param transactionMappings
      *            TODO
      */
-    protected abstract Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
+    protected abstract Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     /**
      * This method is responsible for checking if the current transaction is 'an advance/early payment' based on the
@@ -458,10 +458,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * @param transactionMappings
      *            TODO
      */
-    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final LocalDate transactionDate, final Money paymentInAdvance,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
+    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, LocalDate transactionDate,
+            Money paymentInAdvance, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     /**
      * For normal on-time repayments.
@@ -469,9 +468,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * @param transactionMappings
      *            TODO
      */
-    protected abstract Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
+    protected abstract Money handleTransactionThatIsOnTimePaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     /**
      * Invoked when a transaction results in an over-payment of the full loan.
@@ -562,9 +561,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      *            TODO
      *
      */
-    protected abstract Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
+    protected abstract Money handleRefundTransactionPaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+            LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings);
 
     private void undoChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,
             final Integer installmentNumber) {

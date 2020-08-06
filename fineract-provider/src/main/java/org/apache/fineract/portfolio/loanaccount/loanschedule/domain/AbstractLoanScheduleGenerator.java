@@ -2703,7 +2703,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         boolean isEmiAmountChanged;
         double interestCalculationGraceOnRepaymentPeriodFraction;
 
-        public ScheduleCurrentPeriodParams(final MonetaryCurrency currency, double interestCalculationGraceOnRepaymentPeriodFraction) {
+        ScheduleCurrentPeriodParams(final MonetaryCurrency currency, double interestCalculationGraceOnRepaymentPeriodFraction) {
             this.earlyPaidAmount = Money.zero(currency);
             this.lastInstallment = null;
             this.skipCurrentLoop = false;

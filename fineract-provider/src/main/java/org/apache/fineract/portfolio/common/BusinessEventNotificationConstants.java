@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class BusinessEventNotificationConstants {
 
-    public static enum BusinessEvents {
+    public enum BusinessEvents {
 
         LOAN_APPROVED("loan_approved"), LOAN_REJECTED("loan_reject"), LOAN_UNDO_APPROVAL("loan_undo_approval"), LOAN_UNDO_DISBURSAL(
                 "loan_undo_disbursal"), LOAN_UNDO_LASTDISBURSAL("loan_undo_lastdisbursal"), LOAN_UNDO_TRANSACTION(
@@ -89,7 +89,7 @@ public class BusinessEventNotificationConstants {
         }
     }
 
-    public static enum BusinessEntity {
+    public enum BusinessEntity {
 
         LOAN("loan"), LOAN_TRANSACTION("loan_transaction"), LOAN_CHARGE("loan_charge"), LOAN_ADJUSTED_TRANSACTION(
                 "loan_adjusted_transaction"), SAVING("saving"), CLIENT("client"), SAVINGS_TRANSACTION("Savings Transaction"), GROUP(
@@ -98,7 +98,7 @@ public class BusinessEventNotificationConstants {
 
         private final String value;
 
-        private BusinessEntity(final String value) {
+        BusinessEntity(final String value) {
             this.value = value;
         }
 

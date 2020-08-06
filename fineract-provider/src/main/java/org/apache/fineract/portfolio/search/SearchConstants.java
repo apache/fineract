@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class SearchConstants {
 
-    public static enum SearchResponseParameters {
+    public enum SearchResponseParameters {
 
         ENTITY_ID("entityId"), ENTITY_ACCOUNT_NO("entityAccountNo"), ENTITY_EXTERNAL_ID("entityExternalId"), ENTITY_NAME(
                 "entityName"), ENTITY_TYPE("entityType"), PARENT_ID(
@@ -31,7 +31,7 @@ public class SearchConstants {
 
         private final String value;
 
-        private SearchResponseParameters(final String value) {
+        SearchResponseParameters(String value) {
             this.value = value;
         }
 
@@ -56,13 +56,13 @@ public class SearchConstants {
         }
     }
 
-    public static enum SearchSupportedParameters {
+    public enum SearchSupportedParameters {
 
         QUERY("query"), RESOURCE("resource"), EXACTMATCH("exactMatch");
 
         private final String value;
 
-        private SearchSupportedParameters(final String value) {
+        SearchSupportedParameters(final String value) {
             this.value = value;
         }
 
@@ -87,13 +87,13 @@ public class SearchConstants {
         }
     }
 
-    public static enum SearchSupportedResources {
+    public enum SearchSupportedResources {
 
         CLIENTS("clients"), GROUPS("groups"), LOANS("loans"), SAVINGS("savings"), SHARES("shares"), CLIENTIDENTIFIERS("clientIdentifiers");
 
         private final String value;
 
-        private SearchSupportedResources(final String value) {
+        SearchSupportedResources(final String value) {
             this.value = value;
         }
 
@@ -118,13 +118,13 @@ public class SearchConstants {
         }
     }
 
-    public static enum SearchLoanDate {
+    public enum SearchLoanDate {
 
         APPROVAL_DATE("approvalDate"), CREATED_DATE("createdDate"), DISBURSAL_DATE("disbursalDate");
 
         private final String value;
 
-        private SearchLoanDate(final String value) {
+        SearchLoanDate(final String value) {
             this.value = value;
         }
 

@@ -44,7 +44,7 @@ public enum ClientIdentifierStatus {
         return enumeration;
     }
 
-    private ClientIdentifierStatus(final Integer value, final String code) {
+    ClientIdentifierStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -35,8 +35,7 @@ public interface SavingsAccountReadPlatformService {
 
     Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType);
 
-    public Collection<SavingsAccountData> retrieveActiveForLookup(final Long clientId, DepositAccountType depositAccountType,
-            String currencyCode);
+    Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType, String currencyCode);
 
     SavingsAccountData retrieveOne(Long savingsId);
 
@@ -59,8 +58,7 @@ public interface SavingsAccountReadPlatformService {
 
     List<Long> retrieveSavingsIdsPendingEscheat(LocalDate tenantLocalDate);
 
-    boolean isAccountBelongsToClient(final Long clientId, final Long accountId, final DepositAccountType depositAccountType,
-            final String currencyCode);
+    boolean isAccountBelongsToClient(Long clientId, Long accountId, DepositAccountType depositAccountType, String currencyCode);
 
     String retrieveAccountNumberByAccountId(Long accountId);
 

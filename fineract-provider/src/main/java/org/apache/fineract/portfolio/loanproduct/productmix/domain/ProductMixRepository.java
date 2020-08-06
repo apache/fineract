@@ -26,9 +26,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProductMixRepository extends JpaRepository<ProductMix, Long>, JpaSpecificationExecutor<ProductMix> {
 
-    public static final String GET_PRODUCTMIXES_BY_PRODUCTID_SCHEMA = "select pm from ProductMix pm where pm.product.id = :productId";
-    public static final String GET_RESTRICTED_PRODUCTIDS_SCHEMA = "Select pm.restrictedProduct.id from ProductMix pm where pm.product.id = :productId";
-    public static final String GET_RESTRICTED_PRODUCTS_SCHEMA = "select pm from ProductMix pm where pm.restrictedProduct.id = :restrictedProductId";
+    String GET_PRODUCTMIXES_BY_PRODUCTID_SCHEMA = "select pm from ProductMix pm where pm.product.id = :productId";
+    String GET_RESTRICTED_PRODUCTIDS_SCHEMA = "Select pm.restrictedProduct.id from ProductMix pm where pm.product.id = :productId";
+    String GET_RESTRICTED_PRODUCTS_SCHEMA = "select pm from ProductMix pm where pm.restrictedProduct.id = :restrictedProductId";
 
     @Query(GET_PRODUCTMIXES_BY_PRODUCTID_SCHEMA)
     List<ProductMix> findByProductId(@Param("productId") Long productId);

@@ -300,7 +300,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         private final String schemaSql;
 
-        public LoanChargeAccrualMapper() {
+        LoanChargeAccrualMapper() {
             StringBuilder sb = new StringBuilder(50);
             sb.append("lc.id as id, lc.charge_id as chargeId, ");
             sb.append("lc.amount as amountDue, ");
@@ -360,7 +360,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         private final String schemaSql;
         private final Map<Long, LoanChargeData> chargeDataMap;
 
-        public LoanChargeUnRecognizedIncomeMapper(final Collection<LoanChargeData> datas) {
+        LoanChargeUnRecognizedIncomeMapper(final Collection<LoanChargeData> datas) {
             this.chargeDataMap = new HashMap<>();
             for (LoanChargeData chargeData : datas) {
                 this.chargeDataMap.put(chargeData.getId(), chargeData);
