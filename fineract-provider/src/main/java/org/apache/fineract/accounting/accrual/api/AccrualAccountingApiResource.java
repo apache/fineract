@@ -59,10 +59,11 @@ public class AccrualAccountingApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Executes Periodic Accrual Accounting", method = "POST", description = "Mandatory Fields\n" + "\n" + "tillDate\n")
-    @Parameter(required = true, schema = @Schema(implementation = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, description = "Request Body\n"
-            + "\n" + "Field Descriptions: \n" + "tillDate: \n" + "which specifies periodic accruals should happen till the given Date"))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
-    public String executePeriodicAccrualAccounting(@Parameter(hidden = true) final String jsonRequestBody) {
+    public String executePeriodicAccrualAccounting(
+            @Parameter(required = true, schema = @Schema(implementation = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, description = "Request Body\n"
+                    + "\n" + "Field Descriptions: \n" + "tillDate: \n"
+                    + "which specifies periodic accruals should happen till the given Date")) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().excuteAccrualAccounting().withJson(jsonRequestBody).build();
 
