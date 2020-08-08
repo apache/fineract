@@ -183,6 +183,11 @@
              <message key="ws.notPreceded"
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+             value="Member name ''{0}'' must match pattern ''{1}''."/>
+        </module>
         <module name="ParenPad" />
         <module name="ModifierOrder"/>
                 <module name="LocalVariableName">
@@ -230,11 +235,7 @@
 
         <module name="RedundantModifier"/>
 
-        <module name="MemberName">
-            <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
-            <message key="name.invalidPattern"
-             value="Member name ''{0}'' must match pattern ''{1}''."/>
-        </module>
+
 
 
 

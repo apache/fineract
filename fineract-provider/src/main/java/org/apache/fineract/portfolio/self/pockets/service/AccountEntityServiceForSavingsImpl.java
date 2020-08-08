@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountEntityServiceForSavingsImpl implements AccountEntityService {
 
-    private final String KEY = EntityAccountType.SAVINGS.name();
+    private final String key = EntityAccountType.SAVINGS.name();
 
     private final PlatformSecurityContext context;
     private final AppuserSavingsMapperReadService appuserSavingsMapperReadService;
@@ -49,7 +49,7 @@ public class AccountEntityServiceForSavingsImpl implements AccountEntityService 
 
     @Override
     public String getKey() {
-        return KEY;
+        return key;
     }
 
     @Override

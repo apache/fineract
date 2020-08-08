@@ -56,7 +56,7 @@ public class ProductMixApiResource {
 
     private final String resourceNameForPermissions = "PRODUCTMIX";
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> productMixDataParameters = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final PlatformSecurityContext context;
@@ -95,7 +95,7 @@ public class ProductMixApiResource {
             final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
             productMixData = ProductMixData.withTemplateOptions(productMixData, productOptions);
         }
-        return this.toApiJsonSerializer.serialize(settings, productMixData, this.PRODUCT_MIX_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, productMixData, this.productMixDataParameters);
     }
 
     @POST

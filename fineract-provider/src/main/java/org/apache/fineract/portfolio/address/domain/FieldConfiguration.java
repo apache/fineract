@@ -32,7 +32,7 @@ public class FieldConfiguration extends AbstractPersistableCustom {
 
     private String field;
 
-    private boolean is_enabled;
+    private boolean isEnabled;
 
     public FieldConfiguration() {
 
@@ -42,7 +42,7 @@ public class FieldConfiguration extends AbstractPersistableCustom {
         this.entity = entity;
         this.table = table;
         this.field = field;
-        this.is_enabled = is_enabled;
+        this.isEnabled = is_enabled;
 
     }
 

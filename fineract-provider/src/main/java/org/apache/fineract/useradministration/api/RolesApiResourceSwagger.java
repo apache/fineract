@@ -24,6 +24,7 @@ import java.util.Collection;
 /**
  * Created by sanyam on 23/8/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class RolesApiResourceSwagger {
 
     private RolesApiResourceSwagger() {

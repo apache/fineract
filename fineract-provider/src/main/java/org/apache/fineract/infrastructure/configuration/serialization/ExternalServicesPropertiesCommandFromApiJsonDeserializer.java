@@ -36,10 +36,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
 
-    private final Set<String> S3SupportedParameters = S3JSONinputParams.getAllValues();
-    private final Set<String> SMTPSupportedParameters = SMTPJSONinputParams.getAllValues();
-    private final Set<String> SMSSupportedParameters = SMSJSONinputParams.getAllValues();
-    private final Set<String> NotificationSupportedParameters = NotificationJSONinputParams.getAllValues();
+    private final Set<String> s3SupportedParameters = S3JSONinputParams.getAllValues();
+    private final Set<String> smtpSupportedParameters = SMTPJSONinputParams.getAllValues();
+    private final Set<String> smsSupportedParameters = SMSJSONinputParams.getAllValues();
+    private final Set<String> notificationSupportedParameters = NotificationJSONinputParams.getAllValues();
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -55,19 +55,19 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         switch (externalServiceName) {
             case "S3":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.S3SupportedParameters);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.s3SupportedParameters);
             break;
 
             case "SMTP":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMTPSupportedParameters);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.smtpSupportedParameters);
             break;
 
             case "SMS":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMSSupportedParameters);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.smsSupportedParameters);
             break;
 
             case "NOTIFICATION":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.NotificationSupportedParameters);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.notificationSupportedParameters);
             break;
 
             default:

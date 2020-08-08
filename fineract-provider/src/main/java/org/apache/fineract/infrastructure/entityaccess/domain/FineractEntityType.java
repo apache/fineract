@@ -22,7 +22,7 @@ public final class FineractEntityType {
 
     private String type;
     private String description;
-    private String table_name;
+    private String tableName;
 
     public static final FineractEntityType OFFICE = new FineractEntityType("office", "Offices", "m_office");
     public static final FineractEntityType LOAN_PRODUCT = new FineractEntityType("loan_product", "Loan Products", "m_product_loan");
@@ -31,10 +31,10 @@ public final class FineractEntityType {
     public static final FineractEntityType CHARGE = new FineractEntityType("charge", "Fees/Charges", "m_charge");
     public static final FineractEntityType SHARE_PRODUCT = new FineractEntityType("shares_product", "Shares Products", "m_share_product");
 
-    private FineractEntityType(String type, String description, String table_name) {
+    private FineractEntityType(String type, String description, String tableName) {
         this.type = type;
         this.description = description;
-        this.table_name = table_name;
+        this.tableName = tableName;
     }
 
     public String getType() {
@@ -46,7 +46,7 @@ public final class FineractEntityType {
     }
 
     public String getTable() {
-        return this.table_name;
+        return this.tableName;
     }
 
     public static FineractEntityType get(String type) {

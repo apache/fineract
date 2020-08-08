@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
 public class CurrenciesApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 
     private final String resourceNameForPermissions = "CURRENCY";
 
@@ -94,7 +94,7 @@ public class CurrenciesApiResource {
         final ApplicationCurrencyConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, configurationData, this.responseDataParameters);
     }
 
     @PUT

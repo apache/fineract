@@ -198,7 +198,7 @@ import org.springframework.util.CollectionUtils;
         + "Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date")
 public class LoansApiResource {
 
-    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
+    private final Set<String> loanDataParameters = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
             "group", "loanProductId", "loanProductName", "loanProductDescription", "isLoanProductLinkedToFloatingRate", "fundId",
             "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "totalOverpaid",
             "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
@@ -217,8 +217,8 @@ public class LoansApiResource {
             LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
             LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME));
 
-    private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
-    final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
+    private final Set<String> loanApprovalDataParameters = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
+    final Set<String> glimAccountsDataParameters = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
             "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
     private final String resourceNameForPermissions = "LOAN";
 
@@ -338,7 +338,7 @@ public class LoansApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, this.LOAN_APPROVAL_DATA_PARAMETERS);
+        return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, this.loanApprovalDataParameters);
 
     }
 
@@ -457,7 +457,7 @@ public class LoansApiResource {
         newLoanAccount.setDatatables(datatableTemplates);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.LOAN_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.loanDataParameters);
     }
 
     private Collection<PortfolioAccountData> getaccountLinkingOptions(final LoanAccountData newLoanAccount, final Long clientId,
@@ -734,7 +734,7 @@ public class LoansApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
+        String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.loanDataParameters);
         return toReturn;
     }
 
@@ -764,7 +764,7 @@ public class LoansApiResource {
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, this.LOAN_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, this.loanDataParameters);
     }
 
     @POST
@@ -930,7 +930,7 @@ public class LoansApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         Collection<GlimRepaymentTemplate> glimRepaymentTemplate = this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.GLIM_ACCOUNTS_DATA_PARAMETERS);
+        return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.glimAccountsDataParameters);
     }
 
     @POST

@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Created by Chirag Gupta on 01/12/18.
  */
+@SuppressWarnings({ "MemberName" })
 final class ClientAddressApiResourcesSwagger {
 
     private ClientAddressApiResourcesSwagger() {}

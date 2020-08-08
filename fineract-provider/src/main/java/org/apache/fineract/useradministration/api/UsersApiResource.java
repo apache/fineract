@@ -76,8 +76,8 @@ public class UsersApiResource {
     /**
      * The set of parameters that are supported in response for {@link AppUserData}.
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
-            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username", "firstname",
+            "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
 
     private final String resourceNameForPermissions = "USER";
 
@@ -121,7 +121,7 @@ public class UsersApiResource {
         final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, users, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, users, this.responseDataParameters);
     }
 
     @GET
@@ -144,7 +144,7 @@ public class UsersApiResource {
             user = AppUserData.template(user, offices);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, user, this.responseDataParameters);
     }
 
     @GET
@@ -162,7 +162,7 @@ public class UsersApiResource {
         final AppUserData user = this.readPlatformService.retrieveNewUserDetails();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, user, this.responseDataParameters);
     }
 
     @POST

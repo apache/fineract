@@ -67,7 +67,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
 public class NotesApiResource {
 
-    private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> noteDataParemeters = new HashSet<>(
             Arrays.asList("id", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId", "noteType",
                     "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
 
@@ -113,7 +113,7 @@ public class NotesApiResource {
         final Collection<NoteData> notes = this.readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, notes, this.NOTE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, notes, this.noteDataParemeters);
     }
 
     @GET
@@ -143,7 +143,7 @@ public class NotesApiResource {
         final NoteData note = this.readPlatformService.retrieveNote(noteId, resourceId, noteTypeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, note, this.NOTE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, note, this.noteDataParemeters);
     }
 
     @POST

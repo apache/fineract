@@ -62,7 +62,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Reports", description = "Non-core reports can be added, updated and deleted.")
 public class ReportsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType", "reportSubType",
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "reportName", "reportType", "reportSubType",
             "reportCategory", "description", "reportSql", "coreReport", "useReport", "reportParameters"));
 
     private final String resourceNameForPermissions = "REPORT";
@@ -97,7 +97,7 @@ public class ReportsApiResource {
         final Collection<ReportData> result = this.readReportingService.retrieveReportList();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, result, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
     }
 
     @GET
@@ -119,7 +119,7 @@ public class ReportsApiResource {
         if (settings.isTemplate()) {
             result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
         }
-        return this.toApiJsonSerializer.serialize(settings, result, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
     }
 
     @GET
@@ -138,7 +138,7 @@ public class ReportsApiResource {
         result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, result, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
     }
 
     @POST

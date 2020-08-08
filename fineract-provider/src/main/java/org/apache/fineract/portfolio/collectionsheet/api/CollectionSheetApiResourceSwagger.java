@@ -24,6 +24,7 @@ import java.util.List;
 /**
  * Created by Chirag Gupta on 12/17/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class CollectionSheetApiResourceSwagger {
 
     private CollectionSheetApiResourceSwagger() {}

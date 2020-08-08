@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
         + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
 public class PermissionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
     private final String resourceNameForPermissions = "PERMISSION";
 
@@ -107,7 +107,7 @@ public class PermissionsApiResource {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.toApiJsonSerializer.serialize(settings, permissions, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, permissions, this.responseDataParameters);
     }
 
     @PUT

@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
         + "add regular expression for validation")
 public class EntityFieldConfigurationApiResources {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("clientAddressId", "client_id", "address_id", "address_type_id", "isActive", "fieldConfigurationId", "entity",
                     "table", "field", "is_enabled", "is_mandatory", "validation_regex"));
     private final String resourceNameForPermissions = "Address";
@@ -97,7 +97,7 @@ public class EntityFieldConfigurationApiResources {
         final Collection<FieldConfigurationData> fldconfig = this.readPlatformServicefld.retrieveFieldConfiguration(entityname);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerfld.serialize(settings, fldconfig, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializerfld.serialize(settings, fldconfig, this.responseDataParameters);
 
     }
 

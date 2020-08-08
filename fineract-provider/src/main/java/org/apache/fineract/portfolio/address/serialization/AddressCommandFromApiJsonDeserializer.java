@@ -84,9 +84,9 @@ public class AddressCommandFromApiJsonDeserializer {
 
         for (final FieldConfigurationData data : configurationData) {
             madatoryFieldsMap.put(data.getField(), data.isIs_mandatory());
-            enabledFieldsMap.put(data.getField(), data.isIs_enabled());
+            enabledFieldsMap.put(data.getField(), data.isisEnabled());
             regexFieldsMap.put(data.getField(), data.getValidation_regex());
-            if (data.isIs_enabled()) {
+            if (data.isisEnabled()) {
                 enabledFieldList.add(data.getField());
             }
         }

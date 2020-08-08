@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Mix Mapping", description = "")
 public class MixTaxonomyMappingApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("identifier", "config"));
 
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<MixTaxonomyMappingData> toApiJsonSerializer;
@@ -80,7 +80,7 @@ public class MixTaxonomyMappingApiResource {
         this.context.authenticatedUser();
         final MixTaxonomyMappingData mappingData = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, mappingData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, mappingData, this.responseDataParameters);
     }
 
     @PUT

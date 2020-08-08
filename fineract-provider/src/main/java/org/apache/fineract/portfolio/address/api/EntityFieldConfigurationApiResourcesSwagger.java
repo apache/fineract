@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Created by Chirag Gupta on 12/01/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class EntityFieldConfigurationApiResourcesSwagger {
 
     private EntityFieldConfigurationApiResourcesSwagger() {}

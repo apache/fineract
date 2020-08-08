@@ -65,14 +65,14 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
-    private final GLAccountRepositoryWrapper gLAccountRepository;
+    private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper gLAccountRepository,
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
             final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -81,7 +81,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.gLAccountRepository = gLAccountRepository;
+        this.glAccountRepository = glAccountRepository;
         this.taxGroupRepository = taxGroupRepository;
     }
 
@@ -98,7 +98,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             GLAccount glAccount = null;
             if (glAccountId != null) {
-                glAccount = this.gLAccountRepository.findOneWithNotFoundDetection(glAccountId);
+                glAccount = this.glAccountRepository.findOneWithNotFoundDetection(glAccountId);
             }
 
             final Long taxGroupId = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
@@ -171,7 +171,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
                 GLAccount newIncomeAccount = null;
                 if (newValue != null) {
-                    newIncomeAccount = this.gLAccountRepository.findOneWithNotFoundDetection(newValue);
+                    newIncomeAccount = this.glAccountRepository.findOneWithNotFoundDetection(newValue);
                 }
                 chargeForUpdate.setAccount(newIncomeAccount);
             }

@@ -53,8 +53,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientFamilyMembersApiResources {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName",
-            "lastName", "qualification", "relationship", "maritalStatus", "gender", "dateOfBirth", "profession", "clientFamilyMemberId"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",
+            "qualification", "relationship", "maritalStatus", "gender", "dateOfBirth", "profession", "clientFamilyMemberId"));
     private final String resourceNameForPermissions = "FamilyMembers";
     private final PlatformSecurityContext context;
     private final ClientFamilyMembersReadPlatformService readPlatformService;
@@ -87,7 +87,7 @@ public class ClientFamilyMembersApiResources {
         final ClientFamilyMembersData familyMembers = this.readPlatformService.getClientFamilyMember(familyMemberId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.responseDataParameters);
 
     }
 
@@ -101,7 +101,7 @@ public class ClientFamilyMembersApiResources {
         final Collection<ClientFamilyMembersData> familyMembers = this.readPlatformService.getClientFamilyMembers(clientId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.responseDataParameters);
 
     }
 
@@ -116,7 +116,7 @@ public class ClientFamilyMembersApiResources {
         final ClientFamilyMembersData options = this.readPlatformService.retrieveTemplate();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, options, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, options, this.responseDataParameters);
 
     }
 

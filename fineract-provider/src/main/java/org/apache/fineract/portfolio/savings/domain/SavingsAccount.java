@@ -127,6 +127,7 @@ import org.springframework.util.CollectionUtils;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
+@SuppressWarnings({ "MemberName" })
 public class SavingsAccount extends AbstractPersistableCustom {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
