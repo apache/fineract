@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
+@SuppressWarnings({ "MemberName" })
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
 public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {

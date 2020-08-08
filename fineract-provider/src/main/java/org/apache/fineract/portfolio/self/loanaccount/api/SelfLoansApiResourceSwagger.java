@@ -25,6 +25,7 @@ import java.util.Set;
 /**
  * Created by Chirag Gupta on 12/19/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class SelfLoansApiResourceSwagger {
 
     private SelfLoansApiResourceSwagger() {}

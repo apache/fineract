@@ -75,8 +75,8 @@ public class StaffApiResource {
     /**
      * The set of parameters that are supported in response for {@link StaffData}.
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "firstname", "lastname", "displayName",
-            "officeId", "officeName", "isLoanOfficer", "externalId", "mobileNo", "allowedOffices", "isActive", "joiningDate"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "firstname", "lastname", "displayName", "officeId",
+            "officeName", "isLoanOfficer", "externalId", "mobileNo", "allowedOffices", "isActive", "joiningDate"));
 
     private final String resourceNameForPermissions = "STAFF";
 
@@ -134,7 +134,7 @@ public class StaffApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, staff, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, staff, this.responseDataParameters);
     }
 
     @POST
@@ -174,7 +174,7 @@ public class StaffApiResource {
             final Collection<OfficeData> allowedOffices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
             staff = StaffData.templateData(staff, allowedOffices);
         }
-        return this.toApiJsonSerializer.serialize(settings, staff, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, staff, this.responseDataParameters);
     }
 
     @PUT

@@ -122,7 +122,7 @@ final class UsersApiResourceSwagger {
         @Schema(example = "1")
         public Long staffId;
         @Schema(example = "[2,3]")
-        public String Roles;
+        public String roles;
         @Schema(example = "true")
         public Boolean sendPasswordToEmail;
         @Schema(example = "true")

@@ -67,7 +67,7 @@ public class CalendarsApiResource {
     /**
      * The set of parameters that are supported in response for {@link Calendar}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title", "description",
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title", "description",
             "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval", "repeatsOnDay",
             "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate", "createdByUserId",
             "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates", "nextTenRecurringDates",
@@ -117,7 +117,7 @@ public class CalendarsApiResource {
         if (settings.isTemplate()) {
             calendarData = handleTemplate(calendarData);
         }
-        return this.toApiJsonSerializer.serialize(settings, calendarData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarData, this.responseDataParameters);
     }
 
     /**
@@ -155,7 +155,7 @@ public class CalendarsApiResource {
         calendarsData = this.readPlatformService.updateWithRecurringDates(calendarsData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, calendarsData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarsData, this.responseDataParameters);
     }
 
     @GET
@@ -170,7 +170,7 @@ public class CalendarsApiResource {
         calendarData = handleTemplate(calendarData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, calendarData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarData, this.responseDataParameters);
     }
 
     @POST

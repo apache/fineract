@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
+    protected static final Logger LOG = LoggerFactory.getLogger(CustomAuthenticationFailureHandler.class);
 
     private String defaultFailureUrl;
     private boolean forwardToDestination = false;
@@ -55,18 +55,18 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             final AuthenticationException exception) throws IOException, ServletException {
 
         if (this.defaultFailureUrl == null) {
-            this.LOG.debug("No failure URL set, sending 401 Unauthorized error");
+            LOG.debug("No failure URL set, sending 401 Unauthorized error");
 
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
         } else {
             saveException(request, exception);
 
             if (this.forwardToDestination) {
-                this.LOG.debug("Forwarding to {}", this.defaultFailureUrl);
+                LOG.debug("Forwarding to {}", this.defaultFailureUrl);
 
                 request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
             } else {
-                this.LOG.debug("Redirecting to {}", this.defaultFailureUrl);
+                LOG.debug("Redirecting to {}", this.defaultFailureUrl);
 
                 final String oauthToken = request.getParameter("oauth_token");
                 request.setAttribute("oauth_token", oauthToken);

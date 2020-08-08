@@ -74,7 +74,7 @@ public class OfficesApiResource {
     /**
      * The set of parameters that are supported in response for {@link OfficeData}.
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "nameDecorated", "externalId",
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "nameDecorated", "externalId",
             "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
 
     private final String resourceNameForPermissions = "OFFICE";
@@ -121,7 +121,7 @@ public class OfficesApiResource {
         final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries, searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, offices, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, offices, this.responseDataParameters);
     }
 
     @GET
@@ -142,7 +142,7 @@ public class OfficesApiResource {
         office = OfficeData.appendedTemplate(office, allowedParents);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, office, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, office, this.responseDataParameters);
     }
 
     @POST
@@ -185,7 +185,7 @@ public class OfficesApiResource {
             office = OfficeData.appendedTemplate(office, allowedParents);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, office, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, office, this.responseDataParameters);
     }
 
     @PUT

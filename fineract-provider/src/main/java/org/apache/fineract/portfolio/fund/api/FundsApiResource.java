@@ -64,7 +64,7 @@ public class FundsApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "externalId"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "externalId"));
 
     private final String resourceNameForPermissions = "FUND";
 
@@ -98,7 +98,7 @@ public class FundsApiResource {
         final Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, funds, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, funds, this.responseDataParameters);
     }
 
     @POST
@@ -132,7 +132,7 @@ public class FundsApiResource {
         final FundData fund = this.readPlatformService.retrieveFund(fundId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, fund, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, fund, this.responseDataParameters);
     }
 
     @PUT

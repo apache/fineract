@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements FixedDepositProductWritePlatformService {
 
-    private final Logger LOG;
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final FixedDepositProductRepository fixedDepositProductRepository;
     private final DepositProductDataValidator fromApiJsonDataValidator;
@@ -75,7 +75,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
         this.fixedDepositProductRepository = fixedDepositProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
         this.depositProductAssembler = depositProductAssembler;
-        this.LOG = LoggerFactory.getLogger(FixedDepositProductWritePlatformServiceJpaRepositoryImpl.class);
+
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.chartAssembler = chartAssembler;
     }
@@ -206,6 +206,6 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.LOG.error("Error occured.", dae);
+        LOG.error("Error occured.", dae);
     }
 }

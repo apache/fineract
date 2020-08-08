@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CreditBureauConfigurationAPI {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("creditBureauId", "alias", "country", "creditBureauProductId", "startDate", "endDate", "isActive"));
     private final String resourceNameForPermissions = "CreditBureau";
     private final PlatformSecurityContext context;
@@ -107,7 +107,7 @@ public class CreditBureauConfigurationAPI {
         final Collection<CreditBureauData> creditBureau = this.readPlatformService.retrieveCreditBureau();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, creditBureau, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, creditBureau, this.responseDataParameters);
 
     }
 
@@ -123,7 +123,7 @@ public class CreditBureauConfigurationAPI {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(settings, creditBureauLoanProductMapping,
-                this.RESPONSE_DATA_PARAMETERS);
+                this.responseDataParameters);
 
     }
 
@@ -138,8 +138,7 @@ public class CreditBureauConfigurationAPI {
                 .retrieveOrgCreditBureau();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerOrganisationCreditBureau.serialize(settings, organisationCreditBureau,
-                this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializerOrganisationCreditBureau.serialize(settings, organisationCreditBureau, this.responseDataParameters);
 
     }
 
@@ -170,7 +169,7 @@ public class CreditBureauConfigurationAPI {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(settings, creditBureauLoanProductMapping,
-                this.RESPONSE_DATA_PARAMETERS);
+                this.responseDataParameters);
     }
 
     @PUT

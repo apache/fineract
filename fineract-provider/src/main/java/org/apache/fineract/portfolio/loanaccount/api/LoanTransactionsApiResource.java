@@ -68,7 +68,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
 public class LoanTransactionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("id", "type", "date", "currency", "amount", "externalId"));
 
     private final String resourceNameForPermissions = "LOAN";
@@ -160,7 +160,7 @@ public class LoanTransactionsApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, transactionData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData, this.responseDataParameters);
     }
 
     @GET
@@ -185,7 +185,7 @@ public class LoanTransactionsApiResource {
             transactionData = LoanTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, transactionData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData, this.responseDataParameters);
     }
 
     @POST

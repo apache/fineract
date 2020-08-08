@@ -90,7 +90,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.")
 public class LoanProductsApiResource {
 
-    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description", "fundId",
+    private final Set<String> loanProductDataParameters = new HashSet<>(Arrays.asList("id", "name", "shortName", "description", "fundId",
             "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod",
@@ -106,7 +106,7 @@ public class LoanProductsApiResource {
             LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM,
             LoanProductConstants.RATES_PARAM_NAME));
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> productMixDataParameters = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
@@ -210,13 +210,13 @@ public class LoanProductsApiResource {
             if (associationParameters.contains("productMixes")) {
                 this.context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
                 final Collection<ProductMixData> productMixes = this.productMixReadPlatformService.retrieveAllProductMixes();
-                return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, this.PRODUCT_MIX_DATA_PARAMETERS);
+                return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, this.productMixDataParameters);
             }
         }
 
         final Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
-        return this.toApiJsonSerializer.serialize(settings, products, this.LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, products, this.loanProductDataParameters);
     }
 
     @GET
@@ -238,13 +238,13 @@ public class LoanProductsApiResource {
 
             final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
             final ProductMixData productMixData = ProductMixData.template(productOptions);
-            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, this.PRODUCT_MIX_DATA_PARAMETERS);
+            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, this.productMixDataParameters);
         }
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
 
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.loanProductDataParameters);
     }
 
     @GET
@@ -285,7 +285,7 @@ public class LoanProductsApiResource {
         if (settings.isTemplate()) {
             loanProduct = handleTemplate(loanProduct);
         }
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.loanProductDataParameters);
     }
 
     @PUT

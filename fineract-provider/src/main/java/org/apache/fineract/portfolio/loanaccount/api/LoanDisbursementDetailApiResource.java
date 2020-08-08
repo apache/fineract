@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanDisbursementDetailApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("id", "expectedDisbursementDate", "actualDisbursementDate", "principal", "approvedPrincipal"));
 
     private final String resourceNameForPermissions = "LOAN";
@@ -112,7 +112,7 @@ public class LoanDisbursementDetailApiResource {
         final DisbursementData disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetail(loanId, disbursementId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, disbursementData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, disbursementData, this.responseDataParameters);
     }
 
 }

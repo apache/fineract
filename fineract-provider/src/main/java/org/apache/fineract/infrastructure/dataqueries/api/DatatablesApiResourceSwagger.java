@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 /**
  * Created by sanyam on 31/7/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class DatatablesApiResourceSwagger {
 
     private DatatablesApiResourceSwagger() {

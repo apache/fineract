@@ -34,11 +34,11 @@ public final class OrganisationCreditBureauData {
 
     private final String creditBureauSummary;
 
-    private final boolean is_active;
+    private final boolean isActive;
 
     private OrganisationCreditBureauData(final long organisationCreditBureauId, final String alias, final long creditBureauId,
             final String creditBureauName, final String creditBureauProduct, final String creditBureauCountry,
-            final String creditBureauSummary, final boolean is_active) {
+            final String creditBureauSummary, final boolean isActive) {
         this.organisationCreditBureauId = organisationCreditBureauId;
         this.alias = alias;
         this.creditBureauId = creditBureauId;
@@ -46,14 +46,14 @@ public final class OrganisationCreditBureauData {
         this.creditBureauProduct = creditBureauProduct;
         this.creditBureauCountry = creditBureauCountry;
         this.creditBureauSummary = creditBureauSummary;
-        this.is_active = is_active;
+        this.isActive = isActive;
     }
 
     public static OrganisationCreditBureauData instance(final long organisationCreditBureauId, final String alias,
             final long creditBureauId, final String creditBureauName, final String creditBureauProduct, final String creditBureauCountry,
-            final String creditBureauSummary, final boolean is_active) {
+            final String creditBureauSummary, final boolean isActive) {
         return new OrganisationCreditBureauData(organisationCreditBureauId, alias, creditBureauId, creditBureauName, creditBureauProduct,
-                creditBureauCountry, creditBureauSummary, is_active);
+                creditBureauCountry, creditBureauSummary, isActive);
     }
 
     public long getOrganisationCreditBureauId() {
@@ -85,7 +85,7 @@ public final class OrganisationCreditBureauData {
     }
 
     public boolean isActive() {
-        return this.is_active;
+        return this.isActive;
     }
 
 }

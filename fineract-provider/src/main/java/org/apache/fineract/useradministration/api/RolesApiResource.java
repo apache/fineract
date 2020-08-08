@@ -71,13 +71,13 @@ public class RolesApiResource {
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
 
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> PERMISSIONS_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> permissionsResponseParameters = new HashSet<>(
             Arrays.asList("id", "name", "description", "permissionUsageData"));
 
     private final String resourceNameForPermissions = "ROLE";
@@ -119,7 +119,7 @@ public class RolesApiResource {
         final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, roles, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, roles, this.responseDataParameters);
     }
 
     @POST
@@ -156,7 +156,7 @@ public class RolesApiResource {
 
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
 
-        return this.toApiJsonSerializer.serialize(settings, role, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, role, this.responseDataParameters);
     }
 
     /**
@@ -233,7 +233,7 @@ public class RolesApiResource {
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
         final Collection<PermissionData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData);
-        return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, this.PERMISSIONS_RESPONSE_DATA_PARAMETERS);
+        return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, this.permissionsResponseParameters);
     }
 
     @PUT

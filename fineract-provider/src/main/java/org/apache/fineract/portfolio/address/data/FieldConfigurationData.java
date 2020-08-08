@@ -28,26 +28,26 @@ public final class FieldConfigurationData {
 
     private final String field;
 
-    private final boolean is_enabled;
+    private final boolean isEnabled;
 
-    private final boolean is_mandatory;
+    private final boolean isMandatory;
 
-    private final String validation_regex;
+    private final String validationRegex;
 
     private FieldConfigurationData(final long fieldConfigurationId, final String entity, final String subentity, final String field,
-            final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
+            final boolean isEnabled, final boolean isMandatory, final String validationRegex) {
         this.fieldConfigurationId = fieldConfigurationId;
         this.entity = entity;
         this.subentity = subentity;
         this.field = field;
-        this.is_enabled = is_enabled;
-        this.is_mandatory = is_mandatory;
-        this.validation_regex = validation_regex;
+        this.isEnabled = isEnabled;
+        this.isMandatory = isMandatory;
+        this.validationRegex = validationRegex;
     }
 
     public static FieldConfigurationData instance(final long fieldConfigurationId, final String entity, final String subentity,
-            final String field, final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
-        return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory, validation_regex);
+            final String field, final boolean isEnabled, final boolean isMandatory, final String validationRegex) {
+        return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, isEnabled, isMandatory, validationRegex);
     }
 
     public long getFieldConfigurationId() {
@@ -66,16 +66,16 @@ public final class FieldConfigurationData {
         return this.field;
     }
 
-    public boolean isIs_enabled() {
-        return this.is_enabled;
+    public boolean isisEnabled() {
+        return this.isEnabled;
     }
 
     public boolean isIs_mandatory() {
-        return this.is_mandatory;
+        return this.isMandatory;
     }
 
     public String getValidation_regex() {
-        return this.validation_regex;
+        return this.validationRegex;
     }
 
 }

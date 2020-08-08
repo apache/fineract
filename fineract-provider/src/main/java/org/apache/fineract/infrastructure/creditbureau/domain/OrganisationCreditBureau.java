@@ -37,16 +37,16 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
     @OneToOne
     private CreditBureau creditbureau;
 
-    private boolean is_active;
+    private boolean isActive;
 
     @OneToMany(mappedBy = "organisation_creditbureau", cascade = CascadeType.ALL)
     private List<CreditBureauLoanProductMapping> creditBureauLoanProductMapping = new ArrayList<>();
 
-    public OrganisationCreditBureau(String alias, CreditBureau creditbureau, boolean is_active,
+    public OrganisationCreditBureau(String alias, CreditBureau creditbureau, boolean isActive,
             List<CreditBureauLoanProductMapping> creditBureauLoanProductMapping) {
         this.alias = alias;
         this.creditbureau = creditbureau;
-        this.is_active = is_active;
+        this.isActive = isActive;
         this.creditBureauLoanProductMapping = creditBureauLoanProductMapping;
     }
 
@@ -56,9 +56,9 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
 
     public static OrganisationCreditBureau fromJson(final JsonCommand command, CreditBureau creditbureau) {
         final String alias = command.stringValueOfParameterNamed("alias");
-        final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
 
-        return new OrganisationCreditBureau(alias, creditbureau, is_active, null);
+        return new OrganisationCreditBureau(alias, creditbureau, isActive, null);
     }
 
     public String getAlias() {
@@ -78,11 +78,11 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
     }
 
     public boolean isActive() {
-        return this.is_active;
+        return this.isActive;
     }
 
-    public void setIsActive(boolean is_active) {
-        this.is_active = is_active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public List<CreditBureauLoanProductMapping> getCreditBureauLoanProductMapping() {
