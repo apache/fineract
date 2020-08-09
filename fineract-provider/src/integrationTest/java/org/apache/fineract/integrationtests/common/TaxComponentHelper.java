@@ -26,7 +26,11 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaxComponentHelper {
+public final class TaxComponentHelper {
+
+    private TaxComponentHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;

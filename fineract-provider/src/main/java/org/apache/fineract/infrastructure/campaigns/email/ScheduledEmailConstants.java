@@ -23,7 +23,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ScheduledEmailConstants {
+public final class ScheduledEmailConstants {
+
+    private ScheduledEmailConstants() {
+
+    }
 
     // define the API resource entity name
     public static final String SCHEDULED_EMAIL_ENTITY_NAME = "SCHEDULEDEMAIL";

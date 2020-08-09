@@ -31,13 +31,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CenterHelper {
+public final class CenterHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CenterHelper.class);
     private static final String CENTERS_URL = "/fineract-provider/api/v1/centers";
 
     public static final String CREATED_DATE = "29 December 2014";
     private static final String CREATE_CENTER_URL = "/fineract-provider/api/v1/centers?" + Utils.TENANT_IDENTIFIER;
+
+    private CenterHelper() {
+
+    }
 
     public static CenterDomain retrieveByID(int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;

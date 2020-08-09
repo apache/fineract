@@ -26,7 +26,11 @@ import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
-public class UserHelper {
+public final class UserHelper {
+
+    private UserHelper() {
+
+    }
 
     private static final String CREATE_USER_URL = "/fineract-provider/api/v1/users?" + Utils.TENANT_IDENTIFIER;
     private static final String USER_URL = "/fineract-provider/api/v1/users";

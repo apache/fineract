@@ -54,7 +54,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CalendarUtils {
+public final class CalendarUtils {
+
+    private CalendarUtils() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(CalendarUtils.class);
 

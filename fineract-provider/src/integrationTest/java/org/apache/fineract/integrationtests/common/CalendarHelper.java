@@ -28,7 +28,7 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CalendarHelper {
+public final class CalendarHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CalendarHelper.class);
     private static final String BASE_URL = "/fineract-provider/api/v1/";
@@ -36,6 +36,10 @@ public class CalendarHelper {
     private static final String ENITY_NAME = "/calendars";
     private static final String CENTER_ENTITY = "centers/";
     private static final String EDIT_CALENDAR = "editcalendarbasedonmeetingdates/";
+
+    private CalendarHelper() {
+
+    }
 
     public static Integer createMeetingCalendarForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {

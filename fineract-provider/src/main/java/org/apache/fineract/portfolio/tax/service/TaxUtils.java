@@ -28,7 +28,11 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 import org.joda.time.LocalDate;
 
-public class TaxUtils {
+public final class TaxUtils {
+
+    private TaxUtils() {
+
+    }
 
     public static Map<TaxComponent, BigDecimal> splitTax(final BigDecimal amount, final LocalDate date,
             final Set<TaxGroupMappings> taxGroupMappings, final int scale) {

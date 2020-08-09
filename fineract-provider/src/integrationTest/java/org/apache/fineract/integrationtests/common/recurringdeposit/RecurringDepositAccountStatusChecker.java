@@ -29,7 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
-public class RecurringDepositAccountStatusChecker {
+public final class RecurringDepositAccountStatusChecker {
+
+    private RecurringDepositAccountStatusChecker() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositAccountStatusChecker.class);
     private static final String RECURRING_DEPOSIT_ACCOUNT_URL = "/fineract-provider/api/v1/recurringdepositaccounts";

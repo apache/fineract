@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.accounting.accrual.api;
 
-public class AccrualAccountingConstants {
+public final class AccrualAccountingConstants {
+
+    private AccrualAccountingConstants() {
+
+    }
 
     public static final String accrueTillParamName = "tillDate";
     public static final String localeParamName = "locale";

@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.accountdetails.service;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 
-public class AccountEnumerations {
+public final class AccountEnumerations {
+
+    private AccountEnumerations() {
+
+    }
 
     public static EnumOptionData loanType(final Integer loanTypeId) {
         return loanType(AccountType.fromInt(loanTypeId));

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class JournalEntryConstants {
+public final class JournalEntryConstants {
+
+    private JournalEntryConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;
 

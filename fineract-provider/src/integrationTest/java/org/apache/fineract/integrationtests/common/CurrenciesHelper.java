@@ -28,7 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked" })
-public class CurrenciesHelper {
+public final class CurrenciesHelper {
+
+    private CurrenciesHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(CurrenciesHelper.class);
     private static final String CURRENCIES_URL = "/fineract-provider/api/v1/currencies";

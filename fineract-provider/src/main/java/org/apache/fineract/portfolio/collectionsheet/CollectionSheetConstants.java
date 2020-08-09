@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.collectionsheet;
 
-public class CollectionSheetConstants {
+public final class CollectionSheetConstants {
+
+    private CollectionSheetConstants() {
+
+    }
 
     public static final String COLLECTIONSHEET_RESOURCE_NAME = "collectionsheet";
 

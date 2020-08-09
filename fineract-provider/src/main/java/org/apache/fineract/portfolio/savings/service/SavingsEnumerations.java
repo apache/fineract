@@ -40,7 +40,11 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumD
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 
-public class SavingsEnumerations {
+public final class SavingsEnumerations {
+
+    private SavingsEnumerations() {
+
+    }
 
     public static final String INTEREST_COMPOUNDING_PERIOD_TYPE = "interestCompoundingPeriodType";
     public static final String INTEREST_POSTING_PERIOD_TYPE = "interestPostingPeriodType";

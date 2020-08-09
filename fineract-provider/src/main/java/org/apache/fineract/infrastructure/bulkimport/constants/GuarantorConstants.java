@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class GuarantorConstants {
+public final class GuarantorConstants {
+
+    private GuarantorConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;
     public static final int CLIENT_NAME_COL = 1;

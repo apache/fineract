@@ -26,7 +26,11 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WorkingDaysHelper {
+public final class WorkingDaysHelper {
+
+    private WorkingDaysHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";

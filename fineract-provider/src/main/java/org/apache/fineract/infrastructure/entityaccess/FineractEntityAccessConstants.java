@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.entityaccess;
 
-public class FineractEntityAccessConstants {
+public final class FineractEntityAccessConstants {
+
+    private FineractEntityAccessConstants() {
+
+    }
 
     public static final String GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS = "office-specific-products-enabled";
     public static final String GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE = "restrict-products-to-user-office";

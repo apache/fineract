@@ -20,7 +20,11 @@ package org.apache.fineract.organisation.workingdays.domain;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class WorkingDaysEnumerations {
+public final class WorkingDaysEnumerations {
+
+    private WorkingDaysEnumerations() {
+
+    }
 
     public static EnumOptionData workingDaysStatusType(final int id) {
         return repaymentRescheduleType(RepaymentRescheduleType.fromInt(id));

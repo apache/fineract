@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HolidayApiConstants {
+public final class HolidayApiConstants {
+
+    private HolidayApiConstants() {
+
+    }
 
     public static final String HOLIDAY_RESOURCE_NAME = "holiday";
 
@@ -43,7 +47,6 @@ public class HolidayApiConstants {
     public static final String status = "status";
     public static final String reschedulingType = "reschedulingType";
 
-    protected static final Set<String> HOLIDAY_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(idParamName, nameParamName, fromDateParamName, descriptionParamName, toDateParamName,
-                    repaymentsRescheduledToParamName, localeParamName, dateFormatParamName, status));
+    static final Set<String> HOLIDAY_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName, fromDateParamName,
+            descriptionParamName, toDateParamName, repaymentsRescheduledToParamName, localeParamName, dateFormatParamName, status));
 }

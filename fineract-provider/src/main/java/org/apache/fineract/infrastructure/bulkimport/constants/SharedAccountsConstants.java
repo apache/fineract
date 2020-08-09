@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class SharedAccountsConstants {
+public final class SharedAccountsConstants {
+
+    private SharedAccountsConstants() {
+
+    }
 
     public static final int CLIENT_NAME_COL = 0;
     public static final int PRODUCT_COL = 1;

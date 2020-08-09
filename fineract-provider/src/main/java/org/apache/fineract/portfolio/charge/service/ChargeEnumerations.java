@@ -24,7 +24,11 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
-public class ChargeEnumerations {
+public final class ChargeEnumerations {
+
+    private ChargeEnumerations() {
+
+    }
 
     public static EnumOptionData chargeTimeType(final int id) {
         return chargeTimeType(ChargeTimeType.fromInt(id));

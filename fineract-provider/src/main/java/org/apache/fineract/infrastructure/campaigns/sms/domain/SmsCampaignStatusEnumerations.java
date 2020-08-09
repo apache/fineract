@@ -21,7 +21,11 @@ package org.apache.fineract.infrastructure.campaigns.sms.domain;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class SmsCampaignStatusEnumerations {
+public final class SmsCampaignStatusEnumerations {
+
+    private SmsCampaignStatusEnumerations() {
+
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(SmsCampaignStatus.fromInt(statusId));

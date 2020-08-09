@@ -24,7 +24,11 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundStatusType;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 
-public class GuarantorEnumerations {
+public final class GuarantorEnumerations {
+
+    private GuarantorEnumerations() {
+
+    }
 
     public static EnumOptionData guarantorType(final int id) {
         return guarantorType(GuarantorType.fromInt(id));

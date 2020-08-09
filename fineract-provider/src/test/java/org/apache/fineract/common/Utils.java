@@ -38,7 +38,11 @@ import org.slf4j.LoggerFactory;
  * eventually do completely away with src/integrationTest and have only src/test.. can you help? ;)
  */
 @SuppressWarnings("unchecked")
-public class Utils {
+public final class Utils {
+
+    private Utils() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";

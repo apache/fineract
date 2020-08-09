@@ -24,7 +24,11 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class RolesHelper {
+public final class RolesHelper {
+
+    private RolesHelper() {
+
+    }
 
     private static final String CREATE_ROLE_URL = "/fineract-provider/api/v1/roles?" + Utils.TENANT_IDENTIFIER;
     private static final String ROLE_URL = "/fineract-provider/api/v1/roles";

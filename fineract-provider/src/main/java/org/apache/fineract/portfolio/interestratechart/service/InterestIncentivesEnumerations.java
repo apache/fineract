@@ -25,7 +25,11 @@ import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncenti
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveType;
 
-public class InterestIncentivesEnumerations {
+public final class InterestIncentivesEnumerations {
+
+    private InterestIncentivesEnumerations() {
+
+    }
 
     public static EnumOptionData attributeName(final Integer attributeName) {
         return attributeName(InterestIncentiveAttributeName.fromInt(attributeName));

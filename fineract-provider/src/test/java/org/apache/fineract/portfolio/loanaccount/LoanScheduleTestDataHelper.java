@@ -27,7 +27,11 @@ import org.joda.time.LocalDate;
 /**
  * Helper class for creating loan schedule data suitable for testing.
  */
-public class LoanScheduleTestDataHelper {
+public final class LoanScheduleTestDataHelper {
+
+    private LoanScheduleTestDataHelper() {
+
+    }
 
     /**
      * Creates brand new three installment loan:

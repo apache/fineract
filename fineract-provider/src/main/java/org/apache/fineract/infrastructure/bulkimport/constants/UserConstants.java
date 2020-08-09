@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class UserConstants {
+public final class UserConstants {
+
+    private UserConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;
     public static final int STAFF_NAME_COL = 1;

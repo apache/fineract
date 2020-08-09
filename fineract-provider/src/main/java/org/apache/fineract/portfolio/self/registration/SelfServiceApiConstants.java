@@ -24,7 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class SelfServiceApiConstants {
+public final class SelfServiceApiConstants {
+
+    private SelfServiceApiConstants() {
+
+    }
 
     public static final String accountNumberParamName = "accountNumber";
     public static final String passwordParamName = "password";

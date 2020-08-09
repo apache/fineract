@@ -25,7 +25,11 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InterestRateChartEnumerations {
+public final class InterestRateChartEnumerations {
+
+    private InterestRateChartEnumerations() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(InterestRateChartEnumerations.class);
 

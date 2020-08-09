@@ -25,7 +25,11 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DepositAccountUtils {
+public final class DepositAccountUtils {
+
+    private DepositAccountUtils() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(DepositAccountUtils.class);
 

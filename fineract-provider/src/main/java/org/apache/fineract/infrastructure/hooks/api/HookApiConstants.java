@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HookApiConstants {
+public final class HookApiConstants {
+
+    private HookApiConstants() {
+
+    }
 
     public static final String HOOK_RESOURCE_NAME = "HOOK";
 
@@ -62,10 +66,10 @@ public class HookApiConstants {
 
     public static final String templateNameParamName = "templateName";
 
-    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(nameParamName, displayNameParamName,
+    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(nameParamName, displayNameParamName,
             templateIdParamName, isActiveParamName, configParamName, eventsParamName, templateNameParamName));
 
-    protected static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(nameParamName, displayNameParamName,
+    static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(nameParamName, displayNameParamName,
             templateIdParamName, isActiveParamName, configParamName, eventsParamName, templateNameParamName));
 
 }

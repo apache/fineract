@@ -24,7 +24,11 @@ import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.joda.time.LocalDate;
 
-public class WorkingDaysUtil {
+public final class WorkingDaysUtil {
+
+    private WorkingDaysUtil() {
+
+    }
 
     public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate,
             final WorkingDays workingDays) {

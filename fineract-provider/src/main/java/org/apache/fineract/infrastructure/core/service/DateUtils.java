@@ -34,7 +34,11 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class DateUtils {
+public final class DateUtils {
+
+    private DateUtils() {
+
+    }
 
     public static DateTimeZone getDateTimeZoneOfTenant() {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();

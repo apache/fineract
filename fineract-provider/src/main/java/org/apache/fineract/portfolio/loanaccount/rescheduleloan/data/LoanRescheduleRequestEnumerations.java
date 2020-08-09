@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
-public class LoanRescheduleRequestEnumerations {
+public final class LoanRescheduleRequestEnumerations {
+
+    private LoanRescheduleRequestEnumerations() {
+
+    }
 
     public static EnumOptionData status(final LoanRescheduleRequestStatusEnumData status) {
         Long id = status.id();

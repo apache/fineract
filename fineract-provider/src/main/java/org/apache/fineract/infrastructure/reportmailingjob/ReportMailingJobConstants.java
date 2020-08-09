@@ -24,7 +24,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ReportMailingJobConstants implements Serializable {
+public final class ReportMailingJobConstants implements Serializable {
+
+    private ReportMailingJobConstants() {
+
+    }
 
     // define the API resource entity name
     public static final String REPORT_MAILING_JOB_ENTITY_NAME = "REPORTMAILINGJOB";
