@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.loanproduct.service;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.LendingStrategy;
 
-public class LendingStrategyEnumerations {
+public final class LendingStrategyEnumerations {
+
+    private LendingStrategyEnumerations() {
+
+    }
 
     public static EnumOptionData lendingStrategy(final Integer id) {
         return lendingStrategy(LendingStrategy.fromInt(id));

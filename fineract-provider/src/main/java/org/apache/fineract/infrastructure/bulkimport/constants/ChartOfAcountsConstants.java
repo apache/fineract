@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class ChartOfAcountsConstants {
+public final class ChartOfAcountsConstants {
+
+    private ChartOfAcountsConstants() {
+
+    }
 
     public static final int ACCOUNT_TYPE_COL = 0;// A
     public static final int ACCOUNT_NAME_COL = 1;// B

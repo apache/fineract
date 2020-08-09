@@ -27,7 +27,11 @@ import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class RatesHelper {
+public final class RatesHelper {
+
+    private RatesHelper() {
+
+    }
 
     private static final String RATES_URL = "/fineract-provider/api/v1/rates";
     private static final String CREATE_RATES_URL = RATES_URL + "?" + Utils.TENANT_IDENTIFIER;

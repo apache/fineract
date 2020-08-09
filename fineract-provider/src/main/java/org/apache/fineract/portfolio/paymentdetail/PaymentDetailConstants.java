@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.paymentdetail;
 
-public class PaymentDetailConstants {
+public final class PaymentDetailConstants {
+
+    private PaymentDetailConstants() {
+
+    }
 
     // Code representing Payment Details
     public static final String paymentTypeCodeName = "PaymentType";

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class LoanRepaymentConstants {
+public final class LoanRepaymentConstants {
+
+    private LoanRepaymentConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;// A
     public static final int CLIENT_NAME_COL = 1;// B

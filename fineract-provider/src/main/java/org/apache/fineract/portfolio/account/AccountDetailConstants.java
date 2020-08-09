@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.account;
 
-public class AccountDetailConstants {
+public final class AccountDetailConstants {
+
+    private AccountDetailConstants() {
+
+    }
 
     // general
     public static final String localeParamName = "locale";

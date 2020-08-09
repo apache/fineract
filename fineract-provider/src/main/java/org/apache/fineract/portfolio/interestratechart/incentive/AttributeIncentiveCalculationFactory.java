@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
-public class AttributeIncentiveCalculationFactory {
+public final class AttributeIncentiveCalculationFactory {
+
+    private AttributeIncentiveCalculationFactory() {
+
+    }
 
     public static AttributeIncentiveCalculation findAttributeIncentiveCalculation(InterestIncentiveEntityType entityType) {
         AttributeIncentiveCalculation attributeIncentiveCalculation = null;

@@ -21,7 +21,11 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ExternalServicesConstants {
+public final class ExternalServicesConstants {
+
+    private ExternalServicesConstants() {
+
+    }
 
     public static final String S3_SERVICE_NAME = "S3";
     public static final String S3_BUCKET_NAME = "s3_bucket_name";

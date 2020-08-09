@@ -23,7 +23,11 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 
-public class StandingInstructionApiConstants {
+public final class StandingInstructionApiConstants {
+
+    private StandingInstructionApiConstants() {
+
+    }
 
     public static final String STANDING_INSTRUCTION_RESOURCE_NAME = "standinginstruction";
 
@@ -40,7 +44,7 @@ public class StandingInstructionApiConstants {
     public static final String recurrenceOnMonthDayParamName = "recurrenceOnMonthDay";
     public static final String monthDayFormatParamName = "monthDayFormat";
 
-    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(AccountDetailConstants.idParamName, nameParamName, priorityParamName, instructionTypeParamName, statusParamName,
                     AccountDetailConstants.transferTypeParamName, validFromParamName, validTillParamName));
 

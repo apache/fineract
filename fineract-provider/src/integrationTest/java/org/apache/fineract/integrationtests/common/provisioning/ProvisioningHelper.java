@@ -28,7 +28,11 @@ import java.util.Random;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
-public class ProvisioningHelper {
+public final class ProvisioningHelper {
+
+    private ProvisioningHelper() {
+
+    }
 
     public static final Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
             Account expense) {

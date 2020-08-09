@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class ClientPersonConstants {
+public final class ClientPersonConstants {
+
+    private ClientPersonConstants() {
+
+    }
 
     public static final int FIRST_NAME_COL = 0;// A
     public static final int LAST_NAME_COL = 1;// B

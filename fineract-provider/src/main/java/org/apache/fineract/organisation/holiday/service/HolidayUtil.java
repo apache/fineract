@@ -23,7 +23,11 @@ import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.joda.time.LocalDate;
 
-public class HolidayUtil {
+public final class HolidayUtil {
+
+    private HolidayUtil() {
+
+    }
 
     public static LocalDate getRepaymentRescheduleDateToIfHoliday(LocalDate repaymentDate, final List<Holiday> holidays) {
 

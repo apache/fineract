@@ -24,9 +24,13 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientStatusChecker {
+public final class ClientStatusChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientStatusChecker.class);
+
+    private ClientStatusChecker() {
+
+    }
 
     public static void verifyClientIsActive(final HashMap<String, Object> clientStatusHashMap) {
         assertEquals(300, (int) clientStatusHashMap.get("id"));

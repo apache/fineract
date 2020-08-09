@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.configuration.api;
 
-public class GlobalConfigurationApiConstant {
+public final class GlobalConfigurationApiConstant {
+
+    private GlobalConfigurationApiConstant() {
+
+    }
 
     public static final String ENABLED = "enabled";
     public static final String VALUE = "value";

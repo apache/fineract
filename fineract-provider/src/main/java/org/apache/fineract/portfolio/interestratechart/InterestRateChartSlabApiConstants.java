@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.interestratechart;
 
-public class InterestRateChartSlabApiConstants {
+public final class InterestRateChartSlabApiConstants {
+
+    private InterestRateChartSlabApiConstants() {
+
+    }
 
     public static final String INTERESTRATE_CHART_SLAB_RESOURCE_NAME = "chartslab";
 

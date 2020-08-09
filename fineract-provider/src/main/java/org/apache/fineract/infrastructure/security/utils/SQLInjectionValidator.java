@@ -23,7 +23,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
-public class SQLInjectionValidator {
+public final class SQLInjectionValidator {
+
+    private SQLInjectionValidator() {
+
+    }
 
     private static final String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
 

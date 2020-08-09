@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class CenterConstants {
+public final class CenterConstants {
+
+    private CenterConstants() {
+
+    }
 
     // Column indices
     public static final int CENTER_NAME_COL = 0;// A

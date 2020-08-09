@@ -20,7 +20,11 @@ package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class EmailCampaignStatusEnumerations {
+public final class EmailCampaignStatusEnumerations {
+
+    private EmailCampaignStatusEnumerations() {
+
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(EmailCampaignStatus.fromInt(statusId));

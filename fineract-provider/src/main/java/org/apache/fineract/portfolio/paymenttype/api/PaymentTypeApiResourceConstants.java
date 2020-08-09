@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PaymentTypeApiResourceConstants {
+public final class PaymentTypeApiResourceConstants {
+
+    private PaymentTypeApiResourceConstants() {
+
+    }
 
     public static final String RESOURCE_NAME = "paymenttype";
     public static final String ENTITY_NAME = "PAYMENTTYPE";
@@ -34,5 +38,5 @@ public class PaymentTypeApiResourceConstants {
     public static final String ISCASHPAYMENT = "isCashPayment";
     public static final String POSITION = "position";
 
-    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT));
+    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT));
 }

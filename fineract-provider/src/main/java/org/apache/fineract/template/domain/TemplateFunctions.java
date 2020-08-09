@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@SuppressWarnings({ "HideUtilityClassConstructor" })
 public class TemplateFunctions {
 
     public static String now() {

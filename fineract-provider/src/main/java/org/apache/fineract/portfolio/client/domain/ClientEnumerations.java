@@ -22,7 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class ClientEnumerations {
+public final class ClientEnumerations {
+
+    private ClientEnumerations() {
+
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(ClientStatus.fromInt(statusId));

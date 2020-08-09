@@ -33,7 +33,11 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
  * This class is used to keep in one place configurations for setting up {@link LoanProductRelatedDetail} object used in
  * {@link LoanScheduleGenerator} 's
  */
-public class LoanProductRelatedDetailTestHelper {
+public final class LoanProductRelatedDetailTestHelper {
+
+    private LoanProductRelatedDetailTestHelper() {
+
+    }
 
     public static LoanProductRelatedDetail createSettingsForEqualPrincipalAmortizationQuarterly() {
 

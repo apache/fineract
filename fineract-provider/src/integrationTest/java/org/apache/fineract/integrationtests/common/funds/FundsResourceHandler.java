@@ -26,7 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class FundsResourceHandler {
+public final class FundsResourceHandler {
+
+    private FundsResourceHandler() {
+
+    }
 
     private static final String FUNDS_URL = "/fineract-provider/api/v1/funds";
     private static final String CREATE_FUNDS_URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;

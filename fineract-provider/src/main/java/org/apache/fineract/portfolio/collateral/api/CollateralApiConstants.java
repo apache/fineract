@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.collateral.api;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CollateralApiConstants {
+public final class CollateralApiConstants {
+
+    private CollateralApiConstants() {
+
+    }
 
     public static final String COLLATERAL_CODE_NAME = "LoanCollateral";
 

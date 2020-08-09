@@ -34,7 +34,11 @@ import org.springframework.jdbc.support.JdbcUtils;
  * Support for retrieving possibly null values from jdbc recordset delegating to springs {@link JdbcUtils} where
  * possible.
  */
-public class JdbcSupport {
+public final class JdbcSupport {
+
+    private JdbcSupport() {
+
+    }
 
     public static DateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
         DateTime dateTime = null;

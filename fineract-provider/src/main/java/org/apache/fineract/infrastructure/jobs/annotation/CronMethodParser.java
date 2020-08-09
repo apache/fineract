@@ -37,7 +37,11 @@ import org.springframework.util.ClassUtils;
 /**
  * Parser to find method which is marked with CronTargetMethod annotation
  */
-public class CronMethodParser {
+public final class CronMethodParser {
+
+    private CronMethodParser() {
+
+    }
 
     public static class ClassMethodNamesPair {
 

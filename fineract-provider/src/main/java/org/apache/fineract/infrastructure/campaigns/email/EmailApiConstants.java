@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EmailApiConstants {
+public final class EmailApiConstants {
+
+    private EmailApiConstants() {
+
+    }
 
     public static final String RESOURCE_NAME = "email";
 

@@ -23,7 +23,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RescheduleLoansApiConstants {
+public final class RescheduleLoansApiConstants {
+
+    private RescheduleLoansApiConstants() {
+
+    }
 
     public static final String ENTITY_NAME = "RESCHEDULELOAN";
 

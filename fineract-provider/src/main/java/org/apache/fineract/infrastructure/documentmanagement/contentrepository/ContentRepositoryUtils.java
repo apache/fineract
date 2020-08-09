@@ -29,7 +29,11 @@ import org.apache.fineract.infrastructure.core.exception.ImageUploadException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 
-public class ContentRepositoryUtils {
+public final class ContentRepositoryUtils {
+
+    private ContentRepositoryUtils() {
+
+    }
 
     private static final Random random = new Random();
 

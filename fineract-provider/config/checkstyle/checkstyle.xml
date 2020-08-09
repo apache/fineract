@@ -161,6 +161,7 @@
              <message key="ws.notPreceded"
              value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
         </module>
+        <module name="HideUtilityClassConstructor"/>
           <module name="OneTopLevelClass"/>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
@@ -203,7 +204,6 @@
             <property name="setterCanReturnItsClass" value="true" />
         </module>
 
-        <module name="HideUtilityClassConstructor"/>
 
         < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
         <module name="IllegalCatch"/>

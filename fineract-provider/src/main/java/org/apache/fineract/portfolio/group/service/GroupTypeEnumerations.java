@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.group.service;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.group.domain.GroupTypes;
 
-public class GroupTypeEnumerations {
+public final class GroupTypeEnumerations {
+
+    private GroupTypeEnumerations() {
+
+    }
 
     public static EnumOptionData groupType(final Integer id) {
         return groupType(GroupTypes.fromInt(id));

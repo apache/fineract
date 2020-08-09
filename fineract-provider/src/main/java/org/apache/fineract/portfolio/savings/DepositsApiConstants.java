@@ -23,7 +23,11 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
 
-public class DepositsApiConstants {
+public final class DepositsApiConstants {
+
+    private DepositsApiConstants() {
+
+    }
 
     // Deposit products
     public static final String FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME = "fixeddeposit";

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.transfer.api;
 
-public class TransferApiConstants {
+public final class TransferApiConstants {
+
+    private TransferApiConstants() {
+
+    }
 
     // general
     public static final String localeParamName = "locale";

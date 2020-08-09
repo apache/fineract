@@ -22,7 +22,11 @@ package org.apache.fineract.portfolio.rate.service;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 
-public class RateEnumerations {
+public final class RateEnumerations {
+
+    private RateEnumerations() {
+
+    }
 
     public static EnumOptionData rateAppliesTo(final int id) {
         return rateAppliesTo(RateAppliesTo.fromInt(id));

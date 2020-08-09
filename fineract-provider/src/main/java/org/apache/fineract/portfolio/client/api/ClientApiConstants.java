@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.portfolio.client.data.ClientData;
 
+@SuppressWarnings({ "HideUtilityClassConstructor" })
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";

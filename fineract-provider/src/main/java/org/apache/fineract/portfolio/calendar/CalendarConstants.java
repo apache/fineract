@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.calendar;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CalendarConstants {
+public final class CalendarConstants {
+
+    private CalendarConstants() {
+
+    }
 
     public static final String CALENDAR_RESOURCE_NAME = "calendar";
 
