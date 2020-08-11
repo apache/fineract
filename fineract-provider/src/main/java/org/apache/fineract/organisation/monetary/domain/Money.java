@@ -24,6 +24,7 @@ import java.util.Iterator;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Embeddable
 public class Money implements Comparable<Money> {
 

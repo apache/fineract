@@ -56,6 +56,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.api.HolidayApiConstants;
 import org.apache.fineract.organisation.office.domain.Office;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Table(name = "m_holiday", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "holiday_name") })
 public class Holiday extends AbstractPersistableCustom {

@@ -23,6 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Table(name = "m_templatemappers")
 public class TemplateMapper extends AbstractPersistableCustom {

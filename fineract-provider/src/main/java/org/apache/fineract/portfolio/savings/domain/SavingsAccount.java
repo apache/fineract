@@ -120,6 +120,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "sa_external_id_UNIQUE") })

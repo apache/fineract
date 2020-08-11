@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.monetary.domain;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Embeddable
 public class MonetaryCurrency {
 

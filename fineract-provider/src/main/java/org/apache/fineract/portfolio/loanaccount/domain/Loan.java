@@ -145,6 +145,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Component
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),

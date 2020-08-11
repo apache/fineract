@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Table(name = "m_code_value", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
