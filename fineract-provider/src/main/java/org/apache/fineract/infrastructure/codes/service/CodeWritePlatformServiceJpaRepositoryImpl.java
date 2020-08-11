@@ -95,7 +95,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             final Map<String, Object> changes = code.update(command);
 
             if (!changes.isEmpty()) {
-                this.codeRepository.save(code);
+                this.codeRepository.saveAndFlush(code);
             }
 
             return new CommandProcessingResultBuilder() //

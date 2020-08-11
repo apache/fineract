@@ -28,12 +28,18 @@
     <persistence-unit name="EclipseLink-PU" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <shared-cache-mode>NONE</shared-cache-mode>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <!-- <property name="eclipselink.id-validation" value="Null" /> -->
             <property name="eclipselink.weaving.eager" value="true" />
             <property name="eclipselink.logging.level" value="FINE" />
+            <property name="eclipselink.allow-zero-id" value="true" />
             <property name="eclipselink.target-database" value="MySQL" />
             <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+            <property name="eclipselink.cache.shared.default" value="false" />
+            <property name="eclipselink.jdbc.batch-writing.size" value="1000" />
+            <property name="eclipselink.persistence-context.flush-mode" value="auto" />
             <property name="eclipselink.ddl-generation.index-foreign-keys" value="true" />
         </properties>
     </persistence-unit>

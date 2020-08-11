@@ -63,7 +63,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 public class LoanTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_id", nullable = false)
+    @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
     private Loan loan;
 
     @ManyToOne

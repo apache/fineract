@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
 
-public class SkipRepaymentOnMonthFirstTest { // NOK
+public class SkipRepaymentOnMonthFirstTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipRepaymentOnMonthFirstTest.class);
     private ResponseSpecification responseSpec;

@@ -265,7 +265,7 @@ public class SchedulerJobsTestResults { // NOK
 
     }
 
-    @Test
+    @Test // NOK
     public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -581,7 +581,7 @@ public class SchedulerJobsTestResults { // NOK
 
     }
 
-    @Test
+    @Test // NOK
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
