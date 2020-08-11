@@ -42,7 +42,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE'
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
         classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
         classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.2.RELEASE'
