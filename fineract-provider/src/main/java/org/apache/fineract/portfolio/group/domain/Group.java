@@ -148,7 +148,7 @@ public final class Group extends AbstractPersistableCustom {
     private List<GroupLoanIndividualMonitoringAccount> glimLoan;
 
     // JPA default constructor for entity
-    protected Group() {
+    Group() {
         this.name = null;
         this.externalId = null;
         this.clientMembers = new HashSet<>();
@@ -215,8 +215,7 @@ public final class Group extends AbstractPersistableCustom {
         associateClients(clientMembers);
 
         /*
-         * Always keep status change at the bottom, as status change rule
-         * depends on the attribute's value
+         * Always keep status change at the bottom, as status change rule depends on the attribute's value
          */
 
         setStatus(activationDate, currentUser, status, dataValidationErrors);

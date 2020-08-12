@@ -40,7 +40,7 @@ public class DepositProductRecurringDetail extends AbstractPersistableCustom {
     private RecurringDepositProduct product;
 
     protected DepositProductRecurringDetail() {
-        super();
+
     }
 
     public static DepositProductRecurringDetail createNew(DepositRecurringDetail recurringDetail, SavingsProduct product) {

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class CentersApiResourceSwagger {
 
     private CentersApiResourceSwagger() {}
 
-    @ApiModel(value = "GetCentersTemplateResponse")
+    @Schema(description = "GetCentersTemplateResponse")
     public static final class GetCentersTemplateResponse {
 
         private GetCentersTemplateResponse() {}
@@ -39,11 +38,11 @@ final class CentersApiResourceSwagger {
 
             private GetCentersOfficeOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String name;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String nameDecorated;
         }
 
@@ -51,23 +50,23 @@ final class CentersApiResourceSwagger {
 
             private GetCentersStaffOptions() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "D, Mary")
+            @Schema(example = "D, Mary")
             public String displayName;
         }
 
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean active;
-        @ApiModelProperty(example = "[2013, 4, 18]")
+        @Schema(example = "[2013, 4, 18]")
         public LocalDate activationDate;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
         public Set<GetCentersOfficeOptions> officeOptions;
         public Set<GetCentersStaffOptions> staffOptions;
     }
 
-    @ApiModel(value = "GetCentersResponse")
+    @Schema(description = "GetCentersResponse")
     public static final class GetCentersResponse {
 
         private GetCentersResponse() {}
@@ -80,90 +79,90 @@ final class CentersApiResourceSwagger {
 
                 private GetCentersStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "groupingStatusType.pending")
+                @Schema(example = "groupingStatusType.pending")
                 public String code;
-                @ApiModelProperty(example = "Pending")
-                public String value;
+                @Schema(example = "Pending")
+                public String description;
             }
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
             public GetCentersStatus status;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean active;
-            @ApiModelProperty(example = "Center 1")
+            @Schema(example = "Center 1")
             public String name;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer officeId;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String officeName;
-            @ApiModelProperty(example = ".2.")
+            @Schema(example = ".2.")
             public String hierarchy;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer totalFilteredRecords;
         public Set<GetCentersPageItems> pageItems;
     }
 
-    @ApiModel(value = "GetCentersCenterIdResponse")
+    @Schema(description = "GetCentersCenterIdResponse")
     public static final class GetCentersCenterIdResponse {
 
         private GetCentersCenterIdResponse() {}
 
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer id;
         public GetCentersResponse.GetCentersPageItems.GetCentersStatus status;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean active;
-        @ApiModelProperty(example = "First Center (No groups)")
+        @Schema(example = "First Center (No groups)")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = ".8.")
+        @Schema(example = ".8.")
         public String hierarchy;
     }
 
-    @ApiModel(value = "PostCentersRequest")
+    @Schema(description = "PostCentersRequest")
     public static final class PostCentersRequest {
 
         private PostCentersRequest() {}
 
-        @ApiModelProperty(example = "First Center (No groups)")
+        @Schema(example = "First Center (No groups)")
         public String name;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean active;
     }
 
-    @ApiModel(value = "PostCentersResponse")
+    @Schema(description = "PostCentersResponse")
     public static final class PostCentersResponse {
 
         private PostCentersResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer groupId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutCentersCenterIdRequest")
+    @Schema(description = "PutCentersCenterIdRequest")
     public static final class PutCentersCenterIdRequest {
 
         private PutCentersCenterIdRequest() {}
 
-        @ApiModelProperty(example = "First Center (No groups)")
+        @Schema(example = "First Center (No groups)")
         public String name;
     }
 
-    @ApiModel(value = "PutCentersCenterIdResponse")
+    @Schema(description = "PutCentersCenterIdResponse")
     public static final class PutCentersCenterIdResponse {
 
         private PutCentersCenterIdResponse() {}
@@ -172,20 +171,20 @@ final class CentersApiResourceSwagger {
 
             private PutCentersChanges() {}
 
-            @ApiModelProperty(example = "First Center (No groups) - modified")
+            @Schema(example = "First Center (No groups) - modified")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer groupId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer resourceId;
         public PutCentersChanges changes;
     }
 
-    @ApiModel(value = "DeleteCentersCenterIdResponse")
+    @Schema(description = "DeleteCentersCenterIdResponse")
     public static final class DeleteCentersCenterIdResponse {
 
         private DeleteCentersCenterIdResponse() {}
@@ -195,36 +194,36 @@ final class CentersApiResourceSwagger {
             private DeleteCentersChanges() {}
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public DeleteCentersChanges changes;
     }
 
-    @ApiModel(value = "PostCentersCenterIdRequest")
+    @Schema(description = "PostCentersCenterIdRequest")
     public static final class PostCentersCenterIdRequest {
 
         private PostCentersCenterIdRequest() {}
 
-        @ApiModelProperty(example = "32")
+        @Schema(example = "32")
         public Integer closureReasonId;
-        @ApiModelProperty(example = "05 May 2014")
+        @Schema(example = "05 May 2014")
         public String closureDate;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
     }
 
-    @ApiModel(value = "PostCentersCenterIdResponse")
+    @Schema(description = "PostCentersCenterIdResponse")
     public static final class PostCentersCenterIdResponse {
 
         private PostCentersCenterIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetCentersCenterIdAccountsResponse")
+    @Schema(description = "GetCentersCenterIdAccountsResponse")
     public static final class GetCentersCenterIdAccountsResponse {
 
         private GetCentersCenterIdAccountsResponse() {}
@@ -237,29 +236,29 @@ final class CentersApiResourceSwagger {
 
                 private GetCentersCenterIdStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "savingsAccountStatusType.submitted.and.pending.approval")
+                @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
-                @ApiModelProperty(example = "Submitted and pending approval")
-                public String value;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "Submitted and pending approval")
+                public String description;
+                @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean approved;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean rejected;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean withdrawnByApplicant;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean prematureClosed;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean transferInProgress;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean transferOnHold;
             }
 
@@ -267,19 +266,19 @@ final class CentersApiResourceSwagger {
 
                 private GetCentersCenterIdCurrency() {}
 
-                @ApiModelProperty(example = "USD")
+                @Schema(example = "USD")
                 public String code;
-                @ApiModelProperty(example = "US Dollar")
+                @Schema(example = "US Dollar")
                 public String name;
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer decimalPlaces;
-                @ApiModelProperty(example = "0")
+                @Schema(example = "0")
                 public Integer inMultiplesOf;
-                @ApiModelProperty(example = "$")
+                @Schema(example = "$")
                 public String displaySymbol;
-                @ApiModelProperty(example = "currency.USD")
+                @Schema(example = "currency.USD")
                 public String nameCode;
-                @ApiModelProperty(example = "US Dollar ($)")
+                @Schema(example = "US Dollar ($)")
                 public String displayLabel;
             }
 
@@ -287,25 +286,25 @@ final class CentersApiResourceSwagger {
 
                 private GetCentersAccountType() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.group")
+                @Schema(example = "accountType.group")
                 public String code;
-                @ApiModelProperty(example = "Group")
-                public String value;
+                @Schema(example = "Group")
+                public String description;
             }
 
             static final class GetCentersTimeline {
 
                 private GetCentersTimeline() {}
 
-                @ApiModelProperty(example = "[2014, 5, 1]")
+                @Schema(example = "[2014, 5, 1]")
                 public LocalDate submittedOnDate;
-                @ApiModelProperty(example = "mifos")
+                @Schema(example = "mifos")
                 public String submittedByUsername;
-                @ApiModelProperty(example = "App")
+                @Schema(example = "App")
                 public String submittedByFirstname;
-                @ApiModelProperty(example = "Administrator")
+                @Schema(example = "Administrator")
                 public String submittedByLastname;
             }
 
@@ -313,21 +312,21 @@ final class CentersApiResourceSwagger {
 
                 private GetCentersDepositType() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "depositAccountType.savingsDeposit")
+                @Schema(example = "depositAccountType.savingsDeposit")
                 public String code;
-                @ApiModelProperty(example = "Savings")
-                public String value;
+                @Schema(example = "Savings")
+                public String description;
             }
 
-            @ApiModelProperty(example = "16")
+            @Schema(example = "16")
             public Integer id;
-            @ApiModelProperty(example = "000000016")
+            @Schema(example = "000000016")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "Voluntary savings")
+            @Schema(example = "Voluntary savings")
             public String productName;
             public GetCentersCenterIdStatus status;
             public GetCentersCenterIdCurrency currency;

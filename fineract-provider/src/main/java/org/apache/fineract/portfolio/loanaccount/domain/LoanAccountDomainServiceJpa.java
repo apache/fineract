@@ -76,6 +76,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,14 +158,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         // TODO: Is it required to validate transaction date with meeting dates
         // if repayments is synced with meeting?
         /*
-         * if(loan.isSyncDisbursementWithMeeting()){ // validate actual
-         * disbursement date against meeting date CalendarInstance
-         * calendarInstance =
-         * this.calendarInstanceRepository.findCalendarInstaneByLoanId
-         * (loan.getId(), CalendarEntityType.LOANS.getValue());
-         * this.loanEventApiJsonValidator
-         * .validateRepaymentDateWithMeetingDate(transactionDate,
-         * calendarInstance); }
+         * if(loan.isSyncDisbursementWithMeeting()){ // validate actual disbursement date against meeting date
+         * CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId
+         * (loan.getId(), CalendarEntityType.LOANS.getValue()); this.loanEventApiJsonValidator
+         * .validateRepaymentDateWithMeetingDate(transactionDate, calendarInstance); }
          */
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -195,11 +192,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a payment is made before the latest payment
-         * recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
+         * before the latest payment recorded against the loan)
          ***/
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -238,7 +233,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
             this.loanTransactionRepository.save(newRepaymentTransaction);
-        } catch (DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -248,7 +243,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -262,7 +257,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
             }
             this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -271,7 +266,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -286,7 +281,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
             }
             this.loanRepositoryWrapper.save(loan);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -295,7 +290,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -471,10 +466,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
-     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain.
-     * Loan)
+     * @see org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
+     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain. Loan)
      */
     @Override
     public void recalculateAccruals(Loan loan) {
@@ -525,7 +518,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
             } catch (MultiException e) {
                 String globalisationMessageCode = "error.msg.accrual.exception";
-                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage());
+                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);
             }
         }
     }
@@ -696,11 +689,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 defaultLoanLifecycleStateMachine(), scheduleGeneratorDTO, appUser);
 
         /***
-         * TODO Vishwas Batch save is giving me a
-         * HibernateOptimisticLockingFailureException, looping and saving for
-         * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a payment is made before the latest payment
-         * recorded against the loan)
+         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
+         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
+         * before the latest payment recorded against the loan)
          ***/
 
         for (LoanTransaction newTransaction : newTransactions) {

@@ -249,8 +249,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
                 }
 
                 /*
-                 * this.fromApiJsonHelper.extractDateFormatParameter(member.get(
-                 * "dateOfBirth").getAsJsonObject());
+                 * this.fromApiJsonHelper.extractDateFormatParameter(member.get( "dateOfBirth").getAsJsonObject());
                  */
 
             }
@@ -292,8 +291,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         apiJsonDeserializer.validateForUpdate(familyMemberId, command.json());
 
         /*
-         * if (command.stringValueOfParameterNamed("clientFamilyMemberId") !=
-         * null) { clientFamilyMemberId =
+         * if (command.stringValueOfParameterNamed("clientFamilyMemberId") != null) { clientFamilyMemberId =
          * command.longValueOfParameterNamed("clientFamilyMemberId"); }
          */
 

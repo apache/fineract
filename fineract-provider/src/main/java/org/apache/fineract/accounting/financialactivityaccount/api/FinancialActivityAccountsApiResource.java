@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.accounting.financialactivityaccount.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -56,11 +56,9 @@ import org.springframework.stereotype.Component;
 @Path("/financialactivityaccounts")
 @Component
 @Scope("singleton")
-@Api(tags = { "Mapping Financial Activities to Accounts" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "Mapping Financial Activities to Accounts", description = "Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. Integrated accounting takes these accounts into consideration when an Account transfer is made between a savings to loan/savings account and vice-versa\n"
-                + "\n" + "Field Descriptions\n" + "financialActivityId\n" + "The identifier of the Financial Activity\n" + "glAccountId\n"
-                + "The identifier of a GL Account ( Ledger Account) which shall be used as the default account for the selected Financial Activity") })
+@Tag(name = "Mapping Financial Activities to Accounts", description = "Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. Integrated accounting takes these accounts into consideration when an Account transfer is made between a savings to loan/savings account and vice-versa\n"
+        + "\n" + "Field Descriptions\n" + "financialActivityId\n" + "The identifier of the Financial Activity\n" + "glAccountId\n"
+        + "The identifier of a GL Account ( Ledger Account) which shall be used as the default account for the selected Financial Activity")
 public class FinancialActivityAccountsApiResource {
 
     private final FinancialActivityAccountReadPlatformService financialActivityAccountReadPlatformService;
@@ -101,10 +99,10 @@ public class FinancialActivityAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Financial Activities to Accounts Mappings", notes = "Example Requests:\n" + "\n"
+    @Operation(summary = "List Financial Activities to Accounts Mappings", description = "Example Requests:\n" + "\n"
             + "financialactivityaccounts")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class, responseContainer = "list") })
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
@@ -119,11 +117,12 @@ public class FinancialActivityAccountsApiResource {
     @Path("{mappingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Financial Activity to Account Mapping\n", notes = "Example Requests:\n" + "\n"
+    @Operation(summary = "Retrieve a Financial Activity to Account Mapping\n", description = "Example Requests:\n" + "\n"
             + "financialactivityaccounts/1")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class) })
-    public String retreive(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class))) })
+    public String retreive(@PathParam("mappingId") @Parameter(description = "mappingId") final Long mappingId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
 
@@ -141,13 +140,12 @@ public class FinancialActivityAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a new Financial Activity to Accounts Mapping", notes = "Mandatory Fields\n"
+    @Operation(summary = "Create a new Financial Activity to Accounts Mapping", description = "Mandatory Fields\n"
             + "financialActivityId, glAccountId")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "Request body", paramType = "body", dataType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class) })
+    @RequestBody(content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsResponse.class) })
-    public String createGLAccount(@ApiParam(hidden = true) final String jsonRequestBody) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsResponse.class))) })
+    public String createGLAccount(@Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createOfficeToGLAccountMapping().withJson(jsonRequestBody)
                 .build();
@@ -161,13 +159,12 @@ public class FinancialActivityAccountsApiResource {
     @Path("{mappingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Financial Activity to Account Mapping", notes = "the API updates the Ledger account linked to a Financial Activity \n")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "Request body", dataType = "body", paramType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class) })
+    @Operation(summary = "Update a Financial Activity to Account Mapping", description = "the API updates the Ledger account linked to a Financial Activity \n")
+    @RequestBody(content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.PutFinancialActivityAccountsResponse.class) })
-    public String updateGLAccount(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId,
-            @ApiParam(hidden = true) final String jsonRequestBody) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.PutFinancialActivityAccountsResponse.class))) })
+    public String updateGLAccount(@PathParam("mappingId") @Parameter(description = "mappingId") final Long mappingId,
+            @Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOfficeToGLAccountMapping(mappingId)
                 .withJson(jsonRequestBody).build();
@@ -181,10 +178,10 @@ public class FinancialActivityAccountsApiResource {
     @Path("{mappingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Financial Activity to Account Mapping")
+    @Operation(summary = "Delete a Financial Activity to Account Mapping")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = FinancialActivityAccountsApiResourceSwagger.DeleteFinancialActivityAccountsResponse.class) })
-    public String deleteGLAccount(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.DeleteFinancialActivityAccountsResponse.class))) })
+    public String deleteGLAccount(@PathParam("mappingId") @Parameter(description = "mappingId") final Long mappingId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteOfficeToGLAccountMapping(mappingId).build();
 

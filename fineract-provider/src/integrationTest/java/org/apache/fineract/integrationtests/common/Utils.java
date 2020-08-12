@@ -45,8 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Util for RestAssured tests. This class here in src/integrationTest is
- * copy/pasted to src/test; please keep them in sync.
+ * Util for RestAssured tests. This class here in src/integrationTest is copy/pasted to src/test; please keep them in
+ * sync.
  */
 @SuppressWarnings("unchecked")
 public class Utils {

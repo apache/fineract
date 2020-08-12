@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.hooks.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.Field;
@@ -37,64 +36,64 @@ final class HookApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PostHookRequest")
+    @Schema(description = "PostHookRequest")
     public static final class PostHookRequest {
 
         private PostHookRequest() {
 
         }
 
-        @ApiModelProperty(example = "Web")
+        @Schema(example = "Web")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "Kremlin")
+        @Schema(example = "Kremlin")
         public String displayName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long templateId;
         public List<Event> events;
         public List<Field> config;
     }
 
-    @ApiModel(value = "PostHookResponse")
+    @Schema(description = "PostHookResponse")
     public static final class PostHookResponse {
 
         private PostHookResponse() {
 
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
     }
 
-    @ApiModel(value = "GetHookResponse")
+    @Schema(description = "GetHookResponse")
     public static final class GetHookResponse {
 
         private GetHookResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Web")
+        @Schema(example = "Web")
         public String name;
-        @ApiModelProperty(example = "Kremlin")
+        @Schema(example = "Kremlin")
         public String displayName;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "[2014, 9, 16]")
+        @Schema(example = "[2014, 9, 16]")
         public LocalDate createdAt;
-        @ApiModelProperty(example = "[2014, 9, 16]")
+        @Schema(example = "[2014, 9, 16]")
         public LocalDate updatedAt;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long templateId;
-        @ApiModelProperty(example = "My UGD")
+        @Schema(example = "My UGD")
         public String templateName;
         public List<Event> events;
         public List<Field> config;
     }
 
-    @ApiModel(value = "GetHookTemplateResponse")
+    @Schema(description = "GetHookTemplateResponse")
     public static final class GetHookTemplateResponse {
 
         private GetHookTemplateResponse() {
@@ -105,37 +104,37 @@ final class HookApiResourceSwagger {
         public List<Grouping> groupings;
     }
 
-    @ApiModel(value = "DeleteHookResponse")
+    @Schema(description = "DeleteHookResponse")
     public static final class DeleteHookResponse {
 
         private DeleteHookResponse() {
 
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutHookRequest")
+    @Schema(description = "PutHookRequest")
     public static final class PutHookRequest {
 
         private PutHookRequest() {
 
         }
 
-        @ApiModelProperty(example = "Web")
+        @Schema(example = "Web")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean isActive;
-        @ApiModelProperty(example = "Kremlin")
+        @Schema(example = "Kremlin")
         public String displayName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long templateId;
         public List<Event> events;
         public List<Field> config;
     }
 
-    @ApiModel(value = "PutHookResponse")
+    @Schema(description = "PutHookResponse")
     public static final class PutHookResponse {
 
         private PutHookResponse() {
@@ -146,14 +145,14 @@ final class HookApiResourceSwagger {
 
             private PutHookResponseChangesSwagger() {}
 
-            @ApiModelProperty(example = "Kremlin")
+            @Schema(example = "Kremlin")
             public String displayName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public List<Event> events;
             public List<Field> config;
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
         public PutHookResponseChangesSwagger changes;
     }

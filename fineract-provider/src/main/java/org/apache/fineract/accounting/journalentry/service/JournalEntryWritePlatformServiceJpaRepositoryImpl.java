@@ -81,6 +81,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -218,16 +220,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
-        } catch (final DataIntegrityViolationException dve) {
-            throw handleJournalEntryDataIntegrityIssues(dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            throw handleJournalEntryDataIntegrityIssues(throwable, dve);
         }
     }
 
     private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
             final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
         /**
-         * If a glaccount is assigned for a rule the credits or debits array
-         * should have only one entry and it must be same as existing account
+         * If a glaccount is assigned for a rule the credits or debits array should have only one entry and it must be
+         * same as existing account
          */
         if (creditOrDebits.length != 1) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null);
@@ -305,8 +308,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
         /***
-         * validate that the account allows manual adjustments and is not
-         * disabled
+         * validate that the account allows manual adjustments and is not disabled
          **/
         if (creditOrDebitAccountHead.isDisabled()) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.GL_ACCOUNT_DISABLED, null,
@@ -347,7 +349,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
         if (latestGLClosureByBranch != null) {
             if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
-                    || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
+                    || latestGLClosureByBranch.getClosingDate().compareTo(journalEntriesTransactionDate) == 0 ? Boolean.TRUE
+                            : Boolean.FALSE) {
                 final String accountName = null;
                 final String accountGLCode = null;
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED,
@@ -598,7 +601,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) {
+            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0
+                    ? Boolean.TRUE
+                    : Boolean.FALSE) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }
@@ -644,8 +649,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     /**
-     * TODO: Need a better implementation with guaranteed uniqueness (but not a
-     * long UUID)...maybe something tied to system clock..
+     * TODO: Need a better implementation with guaranteed uniqueness (but not a long UUID)...maybe something tied to
+     * system clock..
      */
     private String generateTransactionId(final Long officeId) {
         final AppUser user = this.context.authenticatedUser();
@@ -655,8 +660,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         return transactionId;
     }
 
-    private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final Throwable realCause,
+            final NonTransientDataAccessException dve) {
         LOG.error("Error occured.", dve);
         return new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
@@ -710,8 +715,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
-        } catch (final DataIntegrityViolationException dve) {
-            throw handleJournalEntryDataIntegrityIssues(dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            throw handleJournalEntryDataIntegrityIssues(throwable, dve);
         }
     }
 

@@ -46,8 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Entity Datatable Checks Integration Test for checking Creation, Deletion and
- * Retrieval of Entity-Datatable Check
+ * Entity Datatable Checks Integration Test for checking Creation, Deletion and Retrieval of Entity-Datatable Check
  */
 public class EntityDatatableChecksIntegrationTest {
 

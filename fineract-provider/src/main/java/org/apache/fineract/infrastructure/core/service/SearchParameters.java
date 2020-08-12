@@ -478,8 +478,7 @@ public final class SearchParameters {
     }
 
     /**
-     * creates an instance of the SearchParameters from a request for the report
-     * mailing job run history
+     * creates an instance of the SearchParameters from a request for the report mailing job run history
      *
      * @return SearchParameters object
      **/
@@ -492,8 +491,7 @@ public final class SearchParameters {
     }
 
     /**
-     * creates an instance of the {@link SearchParameters} from a request for
-     * the report mailing job
+     * creates an instance of the {@link SearchParameters} from a request for the report mailing job
      *
      * @return {@link SearchParameters} object
      */

@@ -345,8 +345,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
     }
 
     /**
-     * delete the report mailing job, set the isDeleted property to 1 and alter
-     * the name
+     * delete the report mailing job, set the isDeleted property to 1 and alter the name
      *
      *
      **/

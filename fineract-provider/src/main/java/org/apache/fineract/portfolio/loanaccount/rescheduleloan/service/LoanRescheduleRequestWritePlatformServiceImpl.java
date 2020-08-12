@@ -86,6 +86,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -156,8 +158,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     /**
-     * create a new instance of the LoanRescheduleRequest object from the
-     * JsonCommand object and persist
+     * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
      *
      * @return CommandProcessingResult object
      **/
@@ -287,7 +288,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withGroupId(loan.getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -435,17 +436,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             /*
              * for (LoanTermVariationsData loanTermVariation :
-             * loanApplicationTerms.getLoanTermVariations().getDueDateVariation(
-             * )) { if (rescheduleFromDate.isBefore(loanTermVariation.
-             * getTermApplicableFrom())) { LocalDate applicableDate =
-             * this.scheduledDateGenerator.generateNextRepaymentDate(
-             * rescheduleFromDate, loanApplicationTerms, false,
+             * loanApplicationTerms.getLoanTermVariations().getDueDateVariation( )) { if
+             * (rescheduleFromDate.isBefore(loanTermVariation. getTermApplicableFrom())) { LocalDate applicableDate =
+             * this.scheduledDateGenerator.generateNextRepaymentDate( rescheduleFromDate, loanApplicationTerms, false,
              * loanApplicationTerms.getHolidayDetailDTO()); if
-             * (loanTermVariation.getTermApplicableFrom().equals(applicableDate)
-             * ) { LocalDate adjustedDate =
-             * this.scheduledDateGenerator.generateNextRepaymentDate(
-             * adjustedApplicableDate, loanApplicationTerms, false,
-             * loanApplicationTerms.getHolidayDetailDTO());
+             * (loanTermVariation.getTermApplicableFrom().equals(applicableDate) ) { LocalDate adjustedDate =
+             * this.scheduledDateGenerator.generateNextRepaymentDate( adjustedApplicableDate, loanApplicationTerms,
+             * false, loanApplicationTerms.getHolidayDetailDTO());
              * loanTermVariation.setApplicableFromDate(adjustedDate); } } }
              */
 
@@ -494,7 +491,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withOfficeId(loan.getOfficeId()).withGroupId(loan.getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -512,7 +509,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
             }
             this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -521,7 +518,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }
@@ -576,7 +573,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withGroupId(loanRescheduleRequest.getLoan().getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -586,14 +583,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     /**
-     * handles the data integrity violation exception for loan reschedule write
-     * services
+     * handles the data integrity violation exception for loan reschedule write services
      *
      * @param dve
      *            data integrity violation exception
      *
      **/
-    private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityViolation(final NonTransientDataAccessException dve) {
 
         LOG.error("Error occured.", dve);
 

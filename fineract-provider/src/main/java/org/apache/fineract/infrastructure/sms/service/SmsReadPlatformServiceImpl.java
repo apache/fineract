@@ -124,7 +124,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[] { resourceId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SmsNotFoundException(resourceId);
+            throw new SmsNotFoundException(resourceId, e);
         }
     }
 

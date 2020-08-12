@@ -37,8 +37,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * Wrapper around spring security's {@link SecurityContext} for extracted the
- * current authenticated {@link AppUser}.
+ * Wrapper around spring security's {@link SecurityContext} for extracted the current authenticated {@link AppUser}.
  */
 
 @Service

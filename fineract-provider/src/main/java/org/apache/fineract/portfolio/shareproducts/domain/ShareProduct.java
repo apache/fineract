@@ -407,7 +407,7 @@ public class ShareProduct extends AbstractAuditableCustom {
         if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
             for (ShareProductMarketPrice data : this.marketPrice) {
                 Date futureDate = data.getStartDate();
-                if (currentDate.equals(futureDate) || currentDate.after(futureDate)) {
+                if (currentDate.compareTo(futureDate) == 0 ? Boolean.TRUE : Boolean.FALSE || currentDate.after(futureDate)) {
                     marketValue = data.getPrice();
                 }
             }

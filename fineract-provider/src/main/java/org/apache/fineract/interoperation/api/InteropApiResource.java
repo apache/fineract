@@ -20,15 +20,14 @@ package org.apache.fineract.interoperation.api;
 
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_QUOTE;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_REQUEST;
-import static org.apache.fineract.interoperation.util.InteropUtil.ROOT_PATH;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.ws.rs.Consumes;
@@ -71,7 +70,7 @@ import org.springframework.stereotype.Component;
 @Path("/interoperation") // api/v1/
 @Component
 @Scope
-@Api(value = ROOT_PATH, description = "")
+
 public class InteropApiResource {
 
     private PlatformSecurityContext context;
@@ -97,8 +96,8 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("health")
-    @ApiOperation(value = "Query Interoperation Health Request", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Query Interoperation Health Request", description = "")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String health(@Context UriInfo uriInfo) {
         return "OK";
     }
@@ -107,9 +106,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("accounts/{accountId}")
-    @ApiOperation(value = "Query Interoperation Account details", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropAccountData.class) })
-    public String getAccountDetails(@PathParam("accountId") @ApiParam(value = "accountId") String accountId, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Account details", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropAccountData.class))) })
+    public String getAccountDetails(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @Context UriInfo uriInfo) {
         InteropAccountData result = interopService.getAccountDetails(accountId);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -120,13 +121,15 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("accounts/{accountId}/transactions")
-    @ApiOperation(value = "Query transactions by Account Id", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropTransactionsData.class) })
-    public String getAccountTransactions(@PathParam("accountId") @ApiParam(value = "accountId") String accountId,
-            @DefaultValue("true") @QueryParam("debit") @ApiParam(value = "debit") boolean debit,
-            @DefaultValue("false") @QueryParam("credit") @ApiParam(value = "credit") boolean credit,
-            @QueryParam("fromBookingDateTime") @ApiParam(value = "fromBookingDateTime") String fromBookingDateTime,
-            @QueryParam("toBookingDateTime") @ApiParam(value = "toBookingDateTime") String toBookingDateTime, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query transactions by Account Id", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransactionsData.class))) })
+    public String getAccountTransactions(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @DefaultValue("true") @QueryParam("debit") @Parameter(description = "debit") boolean debit,
+            @DefaultValue("false") @QueryParam("credit") @Parameter(description = "credit") boolean credit,
+            @QueryParam("fromBookingDateTime") @Parameter(description = "fromBookingDateTime") String fromBookingDateTime,
+            @QueryParam("toBookingDateTime") @Parameter(description = "toBookingDateTime") String toBookingDateTime,
+            @Context UriInfo uriInfo) {
         LocalDateTime transactionsFrom = fromBookingDateTime == null ? null
                 : LocalDateTime.parse(fromBookingDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         LocalDateTime transactionsTo = toBookingDateTime == null ? null
@@ -142,9 +145,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("accounts/{accountId}/identifiers")
-    @ApiOperation(value = "Query Interoperation secondary identifiers by Account Id", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifiersResponseData.class) })
-    public String getAccountIdentifiers(@PathParam("accountId") @ApiParam(value = "accountId") String accountId, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation secondary identifiers by Account Id", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifiersResponseData.class))) })
+    public String getAccountIdentifiers(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @Context UriInfo uriInfo) {
         InteropIdentifiersResponseData result = interopService.getAccountIdentifiers(accountId);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -155,10 +160,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}")
-    @ApiOperation(value = "Query Interoperation Account by secondary identifier", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String getAccountByIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Account by secondary identifier", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String getAccountByIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue, @Context UriInfo uriInfo) {
         InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, null);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -169,11 +175,12 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}/{subIdOrType}")
-    @ApiOperation(value = "Query Interoperation Account by secondary identifier", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String getAccountByIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
-            @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Account by secondary identifier", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String getAccountByIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue,
+            @PathParam("subIdOrType") @Parameter(description = "subIdOrType") String subIdOrType, @Context UriInfo uriInfo) {
         InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, subIdOrType);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -184,12 +191,12 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}")
-    @ApiOperation(value = "Interoperation Identifier registration", httpMethod = "POST", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropIdentifierRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String registerAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue, @ApiParam(hidden = true) String identifierJson,
+    @Operation(summary = "Interoperation Identifier registration", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropIdentifierRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String registerAccountIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue, @Parameter(hidden = true) String identifierJson,
             @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, null)
                 .withJson(identifierJson).build();
@@ -205,14 +212,14 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}/{subIdOrType}")
-    @ApiOperation(value = "Interoperation Identifier registration", httpMethod = "POST", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropIdentifierRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String registerAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
-            @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType, @ApiParam(hidden = true) String identifierJson,
-            @Context UriInfo uriInfo) {
+    @Operation(summary = "Interoperation Identifier registration", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropIdentifierRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String registerAccountIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue,
+            @PathParam("subIdOrType") @Parameter(description = "subIdOrType") String subIdOrType,
+            @Parameter(hidden = true) String identifierJson, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, subIdOrType)
                 .withJson(identifierJson).build();
 
@@ -227,12 +234,12 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}")
-    @ApiOperation(value = "Allow Interoperation Identifier registration", httpMethod = "DELETE", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropIdentifierRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String deleteAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue, @Context UriInfo uriInfo) {
+    @Operation(summary = "Allow Interoperation Identifier registration", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropIdentifierRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String deleteAccountIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, null).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
@@ -246,13 +253,13 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("parties/{idType}/{idValue}/{subIdOrType}")
-    @ApiOperation(value = "Allow Interoperation Identifier registration", httpMethod = "DELETE", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropIdentifierRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class) })
-    public String deleteAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
-            @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
-            @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType, @Context UriInfo uriInfo) {
+    @Operation(summary = "Allow Interoperation Identifier registration", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropIdentifierRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropIdentifierAccountResponseData.class))) })
+    public String deleteAccountIdentifier(@PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
+            @PathParam("idValue") @Parameter(description = "idValue") String idValue,
+            @PathParam("subIdOrType") @Parameter(description = "subIdOrType") String subIdOrType, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, subIdOrType).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
@@ -266,10 +273,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("transactions/{transactionCode}/requests/{requestCode}")
-    @ApiOperation(value = "Query Interoperation Transaction Request", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropTransactionRequestResponseData.class) })
-    public String getTransactionRequest(@PathParam("transactionCode") @ApiParam(value = "transactionCode") String transactionCode,
-            @PathParam("requestCode") @ApiParam(value = "requestCode") String requestCode, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Transaction Request", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransactionRequestResponseData.class))) })
+    public String getTransactionRequest(@PathParam("transactionCode") @Parameter(description = "transactionCode") String transactionCode,
+            @PathParam("requestCode") @Parameter(description = "requestCode") String requestCode, @Context UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_REQUEST);
 
         InteropTransactionRequestResponseData result = interopService.getTransactionRequest(transactionCode, requestCode);
@@ -282,11 +290,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("requests")
-    @ApiOperation(value = "Allow Interoperation Transaction Request", httpMethod = "POST", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropTransactionRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropTransactionRequestResponseData.class) })
-    public String createTransactionRequest(@ApiParam(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
+    @Operation(summary = "Allow Interoperation Transaction Request", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropTransactionRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransactionRequestResponseData.class))) })
+    public String createTransactionRequest(@Parameter(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().createTransactionRequest().withJson(quotesJson).build();
 
         InteropTransactionRequestResponseData result = (InteropTransactionRequestResponseData) commandsSourceService
@@ -300,10 +308,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("transactions/{transactionCode}/quotes/{quoteCode}")
-    @ApiOperation(value = "Query Interoperation Quote", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropQuoteResponseData.class) })
-    public String getQuote(@PathParam("transactionCode") @ApiParam(value = "transactionCode") String transactionCode,
-            @PathParam("quoteCode") @ApiParam(value = "quoteCode") String quoteCode, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Quote", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropQuoteResponseData.class))) })
+    public String getQuote(@PathParam("transactionCode") @Parameter(description = "transactionCode") String transactionCode,
+            @PathParam("quoteCode") @Parameter(description = "quoteCode") String quoteCode, @Context UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_QUOTE);
 
         InteropQuoteResponseData result = interopService.getQuote(transactionCode, quoteCode);
@@ -316,11 +325,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("quotes")
-    @ApiOperation(value = "Calculate Interoperation Quote", httpMethod = "POST", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropQuoteRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropQuoteResponseData.class) })
-    public String createQuote(@ApiParam(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
+    @Operation(summary = "Calculate Interoperation Quote", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropQuoteRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropQuoteResponseData.class))) })
+    public String createQuote(@Parameter(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().createQuotes().withJson(quotesJson).build();
 
         InteropQuoteResponseData result = (InteropQuoteResponseData) commandsSourceService.logCommandSource(commandRequest);
@@ -333,10 +342,11 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("transactions/{transactionCode}/transfers/{transferCode}")
-    @ApiOperation(value = "Query Interoperation Transfer", httpMethod = "GET", notes = "")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropTransferResponseData.class) })
-    public String getTransfer(@PathParam("transactionCode") @ApiParam(value = "transactionCode") String transactionCode,
-            @PathParam("transferCode") @ApiParam(value = "transferCode") String transferCode, @Context UriInfo uriInfo) {
+    @Operation(summary = "Query Interoperation Transfer", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransferResponseData.class))) })
+    public String getTransfer(@PathParam("transactionCode") @Parameter(description = "transactionCode") String transactionCode,
+            @PathParam("transferCode") @Parameter(description = "transferCode") String transferCode, @Context UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_QUOTE);
 
         InteropTransferResponseData result = interopService.getTransfer(transactionCode, transferCode);
@@ -349,12 +359,12 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("transfers")
-    @ApiOperation(value = "Prepare Interoperation Transfer", httpMethod = "POST", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InteropTransferRequestData.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = InteropTransferResponseData.class) })
-    public String performTransfer(@QueryParam("action") @ApiParam(value = "action") String action,
-            @ApiParam(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
+    @Operation(summary = "Prepare Interoperation Transfer", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InteropTransferRequestData.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransferResponseData.class))) })
+    public String performTransfer(@QueryParam("action") @Parameter(description = "action") String action,
+            @Parameter(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
         CommandWrapper commandRequest = new InteropWrapperBuilder().performTransfer(InteropTransferActionType.valueOf(action))
                 .withJson(quotesJson).build();
 

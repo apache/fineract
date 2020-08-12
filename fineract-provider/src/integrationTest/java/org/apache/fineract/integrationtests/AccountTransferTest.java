@@ -80,8 +80,8 @@ public class AccountTransferTest {
     private AccountHelper accountHelper;
     private JournalEntryHelper journalEntryHelper;
 
-    Float TRANSFER_AMOUNT = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
-    Float TRANSFER_AMOUNT_ADJUST = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
+    static Float TRANSFER_AMOUNT = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
+    static Float TRANSFER_AMOUNT_ADJUST = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
 
     private FinancialActivityAccountHelper financialActivityAccountHelper;
     private Integer financialActivityAccountId;

@@ -24,8 +24,8 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
- * A {@link RuntimeException} that is thrown in the case where a user does not
- * have sufficient authorization to execute operation on platform.
+ * A {@link RuntimeException} that is thrown in the case where a user does not have sufficient authorization to execute
+ * operation on platform.
  */
 public class ResetPasswordException extends PlatformApiDataValidationException {
 

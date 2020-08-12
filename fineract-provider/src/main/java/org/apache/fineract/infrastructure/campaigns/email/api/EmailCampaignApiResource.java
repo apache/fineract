@@ -54,8 +54,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * Created with IntelliJ IDEA. User: andrew Date: 19-5-14 Time: 15:17 To change
- * this template use File | Settings | File Templates.
+ * Created with IntelliJ IDEA. User: andrew Date: 19-5-14 Time: 15:17 To change this template use File | Settings | File
+ * Templates.
  */
 @Path("/email/campaign")
 @Consumes({ MediaType.APPLICATION_JSON })

@@ -116,8 +116,8 @@ public class Sender {
     }
 
     /**
-     * Set the underlying URLConnection's connect timeout (in milliseconds). A
-     * timeout value of 0 specifies an infinite timeout.
+     * Set the underlying URLConnection's connect timeout (in milliseconds). A timeout value of 0 specifies an infinite
+     * timeout.
      * <p>
      * Default is the system's default timeout.
      *
@@ -131,8 +131,8 @@ public class Sender {
     }
 
     /**
-     * Set the underlying URLConnection's read timeout (in milliseconds). A
-     * timeout value of 0 specifies an infinite timeout.
+     * Set the underlying URLConnection's read timeout (in milliseconds). A timeout value of 0 specifies an infinite
+     * timeout.
      * <p>
      * Default is the system's default timeout.
      *
@@ -149,15 +149,13 @@ public class Sender {
      * Sends a message to one device, retrying in case of unavailability.
      *
      * <p>
-     * <strong>Note: </strong> this method uses exponential back-off to retry in
-     * case of service unavailability and hence could block the calling thread
-     * for many seconds.
+     * <strong>Note: </strong> this method uses exponential back-off to retry in case of service unavailability and
+     * hence could block the calling thread for many seconds.
      *
      * @param message
      *            message to be sent, including the device's registration id.
      * @param to
-     *            registration token, notification key, or topic where the
-     *            message will be sent.
+     *            registration token, notification key, or topic where the message will be sent.
      * @param retries
      *            number of retries in case of service unavailability errors.
      *
@@ -197,12 +195,11 @@ public class Sender {
     }
 
     /**
-     * Sends a message without retrying in case of service unavailability. See
-     * {@link #send(Message, String, int)} for more info.
+     * Sends a message without retrying in case of service unavailability. See {@link #send(Message, String, int)} for
+     * more info.
      *
-     * @return result of the post, or {@literal null} if the GCM service was
-     *         unavailable or any network exception caused the request to fail,
-     *         or if the response contains more than one result.
+     * @return result of the post, or {@literal null} if the GCM service was unavailable or any network exception caused
+     *         the request to fail, or if the response contains more than one result.
      *
      * @throws InvalidRequestException
      *             if GCM didn't returned a 200 status.
@@ -300,9 +297,8 @@ public class Sender {
      * Sends a message to many devices, retrying in case of unavailability.
      *
      * <p>
-     * <strong>Note: </strong> this method uses exponential back-off to retry in
-     * case of service unavailability and hence could block the calling thread
-     * for many seconds.
+     * <strong>Note: </strong> this method uses exponential back-off to retry in case of service unavailability and
+     * hence could block the calling thread for many seconds.
      *
      * @param message
      *            message to be sent.
@@ -391,8 +387,7 @@ public class Sender {
     }
 
     /**
-     * Updates the status of the messages sent to devices and the list of
-     * devices that should be retried.
+     * Updates the status of the messages sent to devices and the list of devices that should be retried.
      *
      * @param unsentRegIds
      *            list of devices that are still pending an update.
@@ -424,11 +419,11 @@ public class Sender {
     }
 
     /**
-     * Sends a message without retrying in case of service unavailability. See
-     * {@link #send(Message, List, int)} for more info.
+     * Sends a message without retrying in case of service unavailability. See {@link #send(Message, List, int)} for
+     * more info.
      *
-     * @return multicast results if the message was sent successfully,
-     *         {@literal null} if it failed but could be retried.
+     * @return multicast results if the message was sent successfully, {@literal null} if it failed but could be
+     *         retried.
      *
      * @throws IllegalArgumentException
      *             if registrationIds is {@literal null} or empty.
@@ -623,9 +618,8 @@ public class Sender {
      * Makes an HTTP POST request to a given endpoint.
      *
      * <p>
-     * <strong>Note: </strong> the returned connected should not be
-     * disconnected, otherwise it would kill persistent connections made using
-     * Keep-Alive.
+     * <strong>Note: </strong> the returned connected should not be disconnected, otherwise it would kill persistent
+     * connections made using Keep-Alive.
      *
      * @param url
      *            endpoint to post the request.

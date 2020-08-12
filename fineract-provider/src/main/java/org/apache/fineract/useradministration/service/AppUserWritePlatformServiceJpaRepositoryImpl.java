@@ -177,7 +177,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
         }
     }
 
@@ -263,8 +263,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     * encode the new submitted password retrieve the last n used password check
-     * if the current submitted password, match with one of them
+     * encode the new submitted password retrieve the last n used password check if the current submitted password,
+     * match with one of them
      *
      * @param user
      * @param command
@@ -333,8 +333,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("'username_org'")) {

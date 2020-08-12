@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /**
@@ -29,13 +28,13 @@ final class LoanScheduleApiResourceSwagger {
 
     private LoanScheduleApiResourceSwagger() {}
 
-    @ApiModel(value = "PostLoansLoanIdScheduleRequest")
+    @Schema(description = "PostLoansLoanIdScheduleRequest")
     public static final class PostLoansLoanIdScheduleRequest {
 
         private PostLoansLoanIdScheduleRequest() {}
     }
 
-    @ApiModel(value = "PostLoansLoanIdScheduleResponse")
+    @Schema(description = "PostLoansLoanIdScheduleResponse")
     public static final class PostLoansLoanIdScheduleResponse {
 
         private PostLoansLoanIdScheduleResponse() {}
@@ -44,11 +43,11 @@ final class LoanScheduleApiResourceSwagger {
 
             private PostLoanChanges() {}
 
-            @ApiModelProperty(example = "[21, 22]")
+            @Schema(example = "[21, 22]")
             public List<Integer> removedEntityIds;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
         public PostLoanChanges changes;
     }

@@ -60,6 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -140,8 +142,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, null, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, null, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -187,8 +190,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withEntityId(clientCharge.getId()) //
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()).build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
 
@@ -226,8 +230,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -249,8 +254,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -258,8 +264,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     /**
      * Validates transaction to ensure that <br>
      * charge is active <br>
-     * transaction date is valid (between client activation and todays date)
-     * <br>
+     * transaction date is valid (between client activation and todays date) <br>
      * charge is not already paid or waived <br>
      * amount is not more than total due
      *
@@ -269,8 +274,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * @param transactionDate
      * @param amountPaid
      * @param requiresTransactionDateValidation
-     *            if set to false, transaction date specific validation is
-     *            skipped
+     *            if set to false, transaction date specific validation is skipped
      * @param requiresTransactionAmountValidation
      *            if set to false transaction amount validation is skipped
      * @return
@@ -387,8 +391,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     }
 
     /**
-     * Ensures that the charge transaction date (for payments) is not on a
-     * holiday or a non working day
+     * Ensures that the charge transaction date (for payments) is not on a holiday or a non working day
      *
      * @param savingsAccountCharge
      * @param fmt
@@ -443,9 +446,8 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     }
 
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final Long clientId, final Long clientChargeId,
-            final DataIntegrityViolationException dve) {
+            final Throwable realCause, final NonTransientDataAccessException dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("FK_m_client_charge_paid_by_m_client_charge")) {
 
             throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",

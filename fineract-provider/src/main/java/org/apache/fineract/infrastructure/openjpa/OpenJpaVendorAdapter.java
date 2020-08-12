@@ -30,13 +30,12 @@ import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Apache OpenJPA. Developed and tested against OpenJPA 2.2.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA. Developed and tested against
+ * OpenJPA 2.2.
  *
  * <p>
- * Exposes OpenJPA's persistence provider and EntityManager extension interface,
- * and supports {@link AbstractJpaVendorAdapter}'s common configuration
- * settings.
+ * Exposes OpenJPA's persistence provider and EntityManager extension interface, and supports
+ * {@link AbstractJpaVendorAdapter}'s common configuration settings.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -90,8 +89,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
      *
      * @param database
      *            the specified database
-     * @return the OpenJPA database dictionary name, or {@code null} if none
-     *         found
+     * @return the OpenJPA database dictionary name, or {@code null} if none found
      */
     protected String determineDatabaseDictionary(Database database) {
         switch (database) {

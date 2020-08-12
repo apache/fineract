@@ -44,7 +44,7 @@ public class CommandHandlerProviderTest {
     private CommandHandlerProvider commandHandlerProvider;
 
     public CommandHandlerProviderTest() {
-        super();
+
     }
 
     @Test

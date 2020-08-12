@@ -21,8 +21,8 @@ package org.apache.fineract.portfolio.group.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when parentGroup'd level
- * is not equal to parent level of the levelid param,.
+ * {@link AbstractPlatformDomainRuleException} thrown when parentGroup'd level is not equal to parent level of the
+ * levelid param,.
  */
 public class InvalidGroupLevelException extends AbstractPlatformDomainRuleException {
 

@@ -121,7 +121,7 @@ public final class LoanSummary {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
     }
 
-    protected LoanSummary() {
+    LoanSummary() {
         //
     }
 
@@ -170,8 +170,7 @@ public final class LoanSummary {
     }
 
     /**
-     * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be
-     * reset.
+     * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be reset.
      */
     public void zeroFields() {
         this.totalPrincipalDisbursed = BigDecimal.ZERO;

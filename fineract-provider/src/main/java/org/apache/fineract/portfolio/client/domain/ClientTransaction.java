@@ -120,7 +120,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
 
     public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionLocalDate,
             Money amount, boolean reversed, String externalId, Date createdDate, String currencyCode, AppUser appUser) {
-        super();
+
         this.client = client;
         this.office = office;
         this.paymentDetail = paymentDetail;
@@ -139,8 +139,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     }
 
     /**
-     * Converts the content of this Client Transaction to a map which can be
-     * passed to the accounting module
+     * Converts the content of this Client Transaction to a map which can be passed to the accounting module
      *
      *
      *

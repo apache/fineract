@@ -142,15 +142,13 @@ public class SchedulerJobHelper {
      * Launches a Job and awaits its completion.
      *
      * @param jobName
-     *            displayName (see
-     *            {@link org.apache.fineract.infrastructure.jobs.service.JobName})
-     *            of Scheduler Job
+     *            displayName (see {@link org.apache.fineract.infrastructure.jobs.service.JobName}) of Scheduler Job
      *
      * @author Michael Vorburger.ch
      */
     public void executeAndAwaitJob(String jobName) {
-        Duration TIMEOUT = Duration.ofSeconds(30);
-        Duration PAUSE = Duration.ofMillis(500);
+        final Duration timeout = Duration.ofSeconds(30);
+        final Duration pause = Duration.ofMillis(500);
         DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
 
@@ -164,7 +162,7 @@ public class SchedulerJobHelper {
 
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)
-        await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
+        await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
             String jobRunStartText = lastRunHistory.get("jobRunStartTime");
             if (jobRunStartText == null) {
                 return false;
@@ -175,7 +173,7 @@ public class SchedulerJobHelper {
 
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
-        Map<String, String> finalLastRunHistory = await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId),
+        Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId),
                 lastRunHistory -> {
                     String jobRunEndText = lastRunHistory.get("jobRunEndTime");
                     if (jobRunEndText == null) {

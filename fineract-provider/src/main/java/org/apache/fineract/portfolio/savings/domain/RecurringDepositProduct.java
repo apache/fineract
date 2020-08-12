@@ -55,7 +55,7 @@ public class RecurringDepositProduct extends FixedDepositProduct {
     private DepositProductRecurringDetail recurringDetail;
 
     protected RecurringDepositProduct() {
-        super();
+
     }
 
     public static RecurringDepositProduct createNew(final String name, final String shortName, final String description,

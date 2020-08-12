@@ -32,11 +32,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link UnrecognizedQueryParamException}
- * thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link UnrecognizedQueryParamException} thrown by platform into a HTTP API friendly
+ * format.
  *
- * The {@link UnrecognizedQueryParamException} is typically thrown when a
- * parameter is passed during and post or put that is not expected.
+ * The {@link UnrecognizedQueryParamException} is typically thrown when a parameter is passed during and post or put
+ * that is not expected.
  */
 @Provider
 @Component

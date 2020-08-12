@@ -40,12 +40,15 @@ import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatformService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(NoteWritePlatformServiceJpaRepositoryImpl.class);
     private final NoteRepository noteRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
@@ -446,7 +449,12 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             // break;
             case SAVING_ACCOUNT:
             break;
-            default:
+            case SHARE_ACCOUNT:
+                LOG.error("TODO Implement getNoteForDelete for SHARE_ACCOUNT");
+            break;
+            case SAVINGS_TRANSACTION:
+                LOG.error("TODO Implement getNoteForDelete for SAVINGS_TRANSACTION");
+            break;
         }
         if (noteForUpdate == null) {
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());

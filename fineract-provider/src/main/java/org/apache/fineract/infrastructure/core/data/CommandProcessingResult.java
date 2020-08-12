@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents the successful result of an REST API call that results in
- * processing a command.
+ * Represents the successful result of an REST API call that results in processing a command.
  */
 public class CommandProcessingResult implements Serializable {
 

@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.collateral.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -29,7 +28,7 @@ final class CollateralsApiResourceSwagger {
 
     private CollateralsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetLoansLoanIdCollateralsResponse")
+    @Schema(description = "GetLoansLoanIdCollateralsResponse")
     public static final class GetLoansLoanIdCollateralsResponse {
 
         private GetLoansLoanIdCollateralsResponse() {}
@@ -38,9 +37,9 @@ final class CollateralsApiResourceSwagger {
 
             private GetCollateralTypeResponse() {}
 
-            @ApiModelProperty(example = "8")
+            @Schema(example = "8")
             public Integer id;
-            @ApiModelProperty(example = "Gold")
+            @Schema(example = "Gold")
             public String name;
         }
 
@@ -48,72 +47,72 @@ final class CollateralsApiResourceSwagger {
 
             private GetCollateralCurrencyResponse() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer id;
         public GetCollateralTypeResponse type;
-        @ApiModelProperty(example = "50000")
+        @Schema(example = "50000")
         public Long value;
-        @ApiModelProperty(example = "24 Carat Gold chain weighing 12 grams")
+        @Schema(example = "24 Carat Gold chain weighing 12 grams")
         public String description;
         public GetCollateralCurrencyResponse currency;
     }
 
-    @ApiModel(value = "PostLoansLoanIdCollateralsRequest")
+    @Schema(description = "PostLoansLoanIdCollateralsRequest")
     public static final class PostLoansLoanIdCollateralsRequest {
 
         private PostLoansLoanIdCollateralsRequest() {}
 
-        @ApiModelProperty(example = "9")
+        @Schema(example = "9")
         public Integer collateralTypeId;
     }
 
-    @ApiModel(value = "PostLoansLoanIdCollateralsResponse")
+    @Schema(description = "PostLoansLoanIdCollateralsResponse")
     public static final class PostLoansLoanIdCollateralsResponse {
 
         private PostLoansLoanIdCollateralsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutLoansLoandIdCollateralsCollateralIdRequest")
+    @Schema(description = "PutLoansLoandIdCollateralsCollateralIdRequest")
     public static final class PutLoansLoandIdCollateralsCollateralIdRequest {
 
         private PutLoansLoandIdCollateralsCollateralIdRequest() {}
 
-        @ApiModelProperty(example = "22 Carat Gold chain weighing 12 grams")
+        @Schema(example = "22 Carat Gold chain weighing 12 grams")
         public String description;
     }
 
-    @ApiModel(value = "PutLoansLoanIdCollateralsCollateralIdResponse")
+    @Schema(description = "PutLoansLoanIdCollateralsCollateralIdResponse")
     public static final class PutLoansLoanIdCollateralsCollateralIdResponse {
 
         private PutLoansLoanIdCollateralsCollateralIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer resourceId;
         public PutLoansLoandIdCollateralsCollateralIdRequest changes;
     }
 
-    @ApiModel(value = "GetLoansLoanIdCollateralsTemplateResponse")
+    @Schema(description = "GetLoansLoanIdCollateralsTemplateResponse")
     public static final class GetLoansLoanIdCollateralsTemplateResponse {
 
         private GetLoansLoanIdCollateralsTemplateResponse() {}
@@ -122,25 +121,25 @@ final class CollateralsApiResourceSwagger {
 
             private GetCollateralsTemplateAllowedTypes() {}
 
-            @ApiModelProperty(example = "9")
+            @Schema(example = "9")
             public Integer id;
-            @ApiModelProperty(example = "Silver")
+            @Schema(example = "Silver")
             public String name;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer position;
         }
 
         public Set<GetCollateralsTemplateAllowedTypes> allowedCollateralTypes;
     }
 
-    @ApiModel(value = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
+    @Schema(description = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
     public static final class DeleteLoansLoanIdCollateralsCollateralIdResponse {
 
         private DeleteLoansLoanIdCollateralsCollateralIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer loanId;
-        @ApiModelProperty(example = "12")
+        @Schema(example = "12")
         public Integer resourceId;
     }
 }

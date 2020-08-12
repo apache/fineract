@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when group resources are not found.
@@ -27,6 +28,10 @@ public class CenterNotFoundException extends AbstractPlatformResourceNotFoundExc
 
     public CenterNotFoundException(final Long id) {
         super("error.msg.center.id.invalid", "Center with identifier " + id + " does not exist", id);
+    }
+
+    public CenterNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.center.id.invalid", "Center with identifier " + id + " does not exist", id, e);
     }
 
 }

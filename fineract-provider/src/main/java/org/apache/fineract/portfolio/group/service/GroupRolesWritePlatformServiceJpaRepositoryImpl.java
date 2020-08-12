@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -88,15 +90,16 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
             return new CommandProcessingResultBuilder().withClientId(client.getId()).withGroupId(group.getId())
                     .withEntityId(groupRole.getId()).build();
 
-        } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGroupDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
 
     }
 
-    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final NonTransientDataAccessException dve) {
 
         if (realCause.getMessage().contains("UNIQUE_GROUP_ROLES")) {
             final String clientId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.clientIdParamName);
@@ -150,8 +153,9 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
             this.groupRoleRepository.saveAndFlush(groupRole);
             return new CommandProcessingResultBuilder().with(actualChanges).withGroupId(group.getId()).withEntityId(groupRole.getId())
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleGroupDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
 

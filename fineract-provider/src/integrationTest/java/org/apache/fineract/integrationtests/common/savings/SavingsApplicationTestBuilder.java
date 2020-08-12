@@ -43,14 +43,14 @@ public class SavingsApplicationTestBuilder {
     private List<Map<String, Object>> clientArray = null;
     private List<Map<String, Object>> savingsArray = null;
 
-    public String build(final String ID, final String savingsProductId, final String accountType) {
+    public String build(final String id, final String savingsProductId, final String accountType) {
 
         final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         if (accountType.equals("GROUP")) {
-            map.put("groupId", ID);
+            map.put("groupId", id);
         } else {
-            map.put("clientId", ID);
+            map.put("clientId", id);
         }
         map.put("productId", savingsProductId);
         map.put("locale", LOCALE);

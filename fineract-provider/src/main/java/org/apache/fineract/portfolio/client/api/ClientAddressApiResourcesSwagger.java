@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by Chirag Gupta on 01/12/18.
@@ -28,100 +27,100 @@ final class ClientAddressApiResourcesSwagger {
 
     private ClientAddressApiResourcesSwagger() {}
 
-    @ApiModel(value = "PostClientClientIdAddressesRequest")
+    @Schema(description = "PostClientClientIdAddressesRequest")
     public static final class PostClientClientIdAddressesRequest {
 
         private PostClientClientIdAddressesRequest() {}
 
-        @ApiModelProperty(example = "Ipca")
+        @Schema(example = "Ipca")
         public String street;
-        @ApiModelProperty(example = "Kandivali")
+        @Schema(example = "Kandivali")
         public String addressLine1;
-        @ApiModelProperty(example = "plot47")
+        @Schema(example = "plot47")
         public String addressLine2;
-        @ApiModelProperty(example = "charkop")
+        @Schema(example = "charkop")
         public String addressLine3;
-        @ApiModelProperty(example = "Mumbai")
+        @Schema(example = "Mumbai")
         public String city;
-        @ApiModelProperty(example = "800")
+        @Schema(example = "800")
         public Integer stateProvinceId;
-        @ApiModelProperty(example = "802")
+        @Schema(example = "802")
         public Integer countryId;
-        @ApiModelProperty(example = "400064")
+        @Schema(example = "400064")
         public Long postalCode;
     }
 
-    @ApiModel(value = "PostClientClientIdAddressesResponse")
+    @Schema(description = "PostClientClientIdAddressesResponse")
     public static final class PostClientClientIdAddressesResponse {
 
         private PostClientClientIdAddressesResponse() {}
 
-        @ApiModelProperty(example = "15")
+        @Schema(example = "15")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetClientClientIdAddressesResponse")
+    @Schema(description = "GetClientClientIdAddressesResponse")
     public static final class GetClientClientIdAddressesResponse {
 
         private GetClientClientIdAddressesResponse() {}
 
-        @ApiModelProperty(example = "111755")
+        @Schema(example = "111755")
         public Long client_id;
-        @ApiModelProperty(example = "PERMANENT ADDRESS")
+        @Schema(example = "PERMANENT ADDRESS")
         public String addressType;
-        @ApiModelProperty(example = "14")
+        @Schema(example = "14")
         public Integer addressId;
-        @ApiModelProperty(example = "804")
+        @Schema(example = "804")
         public Integer addressTypeId;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean isActive;
-        @ApiModelProperty(example = "anki's home")
+        @Schema(example = "anki's home")
         public String street;
-        @ApiModelProperty(example = "test123")
+        @Schema(example = "test123")
         public String addressLine1;
-        @ApiModelProperty(example = "iuyt")
+        @Schema(example = "iuyt")
         public String addressLine2;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String addressLine3;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String townVillage;
-        @ApiModelProperty(example = "mumbai")
+        @Schema(example = "mumbai")
         public String city;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String countyDistrict;
-        @ApiModelProperty(example = "801")
+        @Schema(example = "801")
         public Integer stateProvinceId;
-        @ApiModelProperty(example = "UNITED STATES")
+        @Schema(example = "UNITED STATES")
         public String countryName;
-        @ApiModelProperty(example = "GUJRAT")
+        @Schema(example = "GUJRAT")
         public String stateName;
-        @ApiModelProperty(example = "807")
+        @Schema(example = "807")
         public Integer countryId;
-        @ApiModelProperty(example = "400095")
+        @Schema(example = "400095")
         public Long postalCode;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String createdBy;
-        @ApiModelProperty(example = " ")
+        @Schema(example = " ")
         public String updatedBy;
     }
 
-    @ApiModel(value = "PutClientClientIdAddressesRequest")
+    @Schema(description = "PutClientClientIdAddressesRequest")
     public static final class PutClientClientIdAddressesRequest {
 
         private PutClientClientIdAddressesRequest() {}
 
-        @ApiModelProperty(example = "67")
+        @Schema(example = "67")
         public Integer addressId;
-        @ApiModelProperty(example = "goldensource")
+        @Schema(example = "goldensource")
         public String street;
     }
 
-    @ApiModel(value = "PutClientClientIdAddressesResponse")
+    @Schema(description = "PutClientClientIdAddressesResponse")
     public static final class PutClientClientIdAddressesResponse {
 
         private PutClientClientIdAddressesResponse() {}
 
-        @ApiModelProperty(example = "67")
+        @Schema(example = "67")
         public Integer resourceId;
     }
 }

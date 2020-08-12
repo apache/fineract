@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.mix.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.sql.Date;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,8 +35,8 @@ import org.springframework.stereotype.Component;
 @Path("/mixreport")
 @Component
 @Scope("singleton")
-@Api(tags = { "Mix Report" })
-@SwaggerDefinition(tags = { @Tag(name = "Mix Report", description = "") })
+
+@Tag(name = "Mix Report", description = "")
 public class MixReportApiResource {
 
     private final XBRLResultService xbrlResultService;

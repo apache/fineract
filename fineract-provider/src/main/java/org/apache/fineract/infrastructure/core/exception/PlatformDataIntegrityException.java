@@ -19,42 +19,22 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when data integrity problems happen due to
- * state modifying actions.
+ * A {@link RuntimeException} thrown when data integrity problems happen due to state modifying actions.
  */
-public class PlatformDataIntegrityException extends RuntimeException {
+public class PlatformDataIntegrityException extends AbstractPlatformException {
 
-    private final String globalisationMessageCode;
-    private final String defaultUserMessage;
     private final String parameterName;
-    private final Object[] defaultUserMessageArgs;
 
     public PlatformDataIntegrityException(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
-        this.globalisationMessageCode = globalisationMessageCode;
-        this.defaultUserMessage = defaultUserMessage;
+        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
         this.parameterName = null;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
     }
 
     public PlatformDataIntegrityException(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
-        this.globalisationMessageCode = globalisationMessageCode;
-        this.defaultUserMessage = defaultUserMessage;
+        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
         this.parameterName = parameterName;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
-    }
-
-    public String getGlobalisationMessageCode() {
-        return this.globalisationMessageCode;
-    }
-
-    public String getDefaultUserMessage() {
-        return this.defaultUserMessage;
-    }
-
-    public Object[] getDefaultUserMessageArgs() {
-        return this.defaultUserMessageArgs;
     }
 
     public String getParameterName() {

@@ -38,11 +38,9 @@ import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Provides an Error Handler method that returns an object of type
- * {@link ErrorInfo} to the CommandStrategy which raised the exception. This
- * class uses various subclasses of RuntimeException to check the kind of
- * exception raised and provide appropriate status and error codes for each one
- * of the raised exception.
+ * Provides an Error Handler method that returns an object of type {@link ErrorInfo} to the CommandStrategy which raised
+ * the exception. This class uses various subclasses of RuntimeException to check the kind of exception raised and
+ * provide appropriate status and error codes for each one of the raised exception.
  *
  * @author Rishabh Shukla
  *
@@ -57,12 +55,11 @@ public class ErrorHandler extends RuntimeException {
      * Sole Constructor
      */
     ErrorHandler() {
-        super();
+
     }
 
     /**
-     * Returns an object of ErrorInfo type containing the information regarding
-     * the raised error.
+     * Returns an object of ErrorInfo type containing the information regarding the raised error.
      *
      * @param exception
      * @return ErrorInfo

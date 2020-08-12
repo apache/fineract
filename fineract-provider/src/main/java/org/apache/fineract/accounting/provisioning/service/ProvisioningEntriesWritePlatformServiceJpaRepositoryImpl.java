@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -133,7 +134,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private void validateForCreateJournalEntry(ProvisioningEntryData existingEntry, ProvisioningEntry requested) {
         Date existingDate = existingEntry.getCreatedDate();
         Date requestedDate = requested.getCreatedDate();
-        if (existingDate.after(requestedDate) || existingDate.equals(requestedDate)) {
+        if (existingDate.after(requestedDate) || existingDate.compareTo(requestedDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
             throw new ProvisioningJournalEntriesCannotbeCreatedException(existingEntry.getCreatedDate(), requestedDate);
         }
     }
@@ -167,9 +168,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
-            LOG.error("{}", peace.getDefaultUserMessage());
-        } catch (DataIntegrityViolationException dive) {
-            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dive);
+            LOG.error("Provisioning Entry already created", peace);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dve);
         }
     }
 
@@ -186,7 +187,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
             ProvisioningEntry requestedEntry = createProvsioningEntry(createdDate, addJournalEntries);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             return CommandProcessingResult.empty();
         }
     }

@@ -62,7 +62,7 @@ public class TellerTransaction extends AbstractPersistableCustom {
     private Date postingDate;
 
     public TellerTransaction() {
-        super();
+
     }
 
     public Office getOffice() {

@@ -59,6 +59,7 @@ import org.joda.time.Months;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,10 +105,11 @@ public class FixedDepositTest {
     // TODO Given the difference in calculation methods in test vs application,
     // the exact values
     // returned may differ enough to cause differences in rounding. Given this,
-    // we only compare the full
-    // digits. A proper solution would be to implement the exact interest
+    // we only compare that the result is within THRESHOLD of the expected amount.
+    // A proper solution would be to implement the exact interest
     // calculation in this test,
     // and then to compare the exact results
+    public static final Float THRESHOLD = 1.0f;
 
     @BeforeEach
     public void setup() {
@@ -121,8 +123,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account premature closure with transaction
-     * type withdrawal and Cash Based accounting enabled
+     * Test case for Fixed Deposit Account premature closure with transaction type withdrawal and Cash Based accounting
+     * enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeWithdrawal() {
@@ -202,8 +204,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -336,8 +337,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -398,6 +398,7 @@ public class FixedDepositTest {
 
     }
 
+    @Disabled // FINERACT-1099
     @Test
     public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
@@ -479,8 +480,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -686,8 +686,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for FD Account premature closure with transaction transfers to
-     * savings account and Cash Based accounting enabled
+     * Test case for FD Account premature closure with transaction transfers to savings account and Cash Based
+     * accounting enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeTransferToSavings() {
@@ -777,8 +777,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -834,9 +833,8 @@ public class FixedDepositTest {
         Float prematurityAmount = (Float) fixedDepositData.get("maturityAmount");
 
         /***
-         * Verify journal entry transactions for preclosure transaction As this
-         * transaction is an account transfer you should get financial account
-         * mapping details and verify amounts
+         * Verify journal entry transactions for preclosure transaction As this transaction is an account transfer you
+         * should get financial account mapping details and verify amounts
          */
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE,
                 new JournalEntry(prematurityAmount, JournalEntry.TransactionType.CREDIT),
@@ -855,8 +853,8 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account premature closure with transaction
-     * type ReInvest and Cash Based accounting enabled
+     * Test case for Fixed Deposit Account premature closure with transaction type ReInvest and Cash Based accounting
+     * enabled
      */
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeReinvest() {
@@ -930,8 +928,7 @@ public class FixedDepositTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         /***
-         * Verify journal entries posted for initial deposit transaction which
-         * happened at activation time
+         * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
@@ -982,7 +979,7 @@ public class FixedDepositTest {
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         monthDayFormat.format(todaysDate.getTime());
-        String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        String submittedOnDate = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
@@ -995,13 +992,13 @@ public class FixedDepositTest {
         FixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
-                SUBMITTED_ON_DATE, WHOLE_TERM);
+                submittedOnDate, WHOLE_TERM);
         Assertions.assertNotNull(fixedDepositAccountId);
 
         todaysDate.add(Calendar.DATE, -1);
-        SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        submittedOnDate = dateFormat.format(todaysDate.getTime());
         HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateFixedDepositAccount(clientId.toString(),
-                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, SUBMITTED_ON_DATE);
+                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, submittedOnDate);
         Assertions.assertTrue(modificationsHashMap.containsKey("submittedOnDate"));
 
     }
@@ -1230,10 +1227,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1302,10 +1297,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1402,10 +1395,9 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1488,7 +1480,6 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
         LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
-
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         LOG.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
@@ -1507,10 +1498,9 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        principal = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1617,10 +1607,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1731,10 +1721,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Float expectedPrematureAmount = (float) Math.floor(principal);
-        Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1805,10 +1795,8 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = (float) Math.floor(principal);
-        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
+        Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
 
     }
 
@@ -1963,10 +1951,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2046,10 +2034,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Maturity amount");
 
     }
 
@@ -2127,10 +2115,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2208,10 +2196,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2289,10 +2277,10 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
     }
 
     @Test
@@ -2369,15 +2357,15 @@ public class FixedDepositTest {
         fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
-        Double expectedPrematureAmount = Math.floor(principal);
-        Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
+        Float expectedPrematureAmount = principal;
+        Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
 
-        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
+        Assertions.assertTrue(Math.abs(expectedPrematureAmount - maturityAmount) < THRESHOLD, "Verifying Pre-Closure maturity amount");
     }
 
     /***
-     * Test case for Fixed Deposit Account rollover with maturity instruction as
-     * re invest maturity amount(principal+interest)
+     * Test case for Fixed Deposit Account rollover with maturity instruction as re invest maturity
+     * amount(principal+interest)
      */
     @Test
     public void testFixedDepositAccountWithRolloverMaturityAmount() {
@@ -2457,8 +2445,7 @@ public class FixedDepositTest {
     }
 
     /***
-     * Test case for Fixed Deposit Account rollover with maturity instruction as
-     * re invest principal only
+     * Test case for Fixed Deposit Account rollover with maturity instruction as re invest principal only
      */
     @Test
     public void testFixedDepositAccountWithRolloverPrincipal() {
@@ -2648,8 +2635,7 @@ public class FixedDepositTest {
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         final Account financialAccount;
         /***
-         * if no financial activities are defined for account transfers, create
-         * liability financial accounting mappings
+         * if no financial activities are defined for account transfers, create liability financial accounting mappings
          */
         if (financialActivities.isEmpty()) {
             financialAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);
@@ -2677,16 +2663,16 @@ public class FixedDepositTest {
         return financialAccount;
     }
 
-    private Account createLiabilityFinancialAccountTransferType(final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID) {
+    private Account createLiabilityFinancialAccountTransferType(final Integer liabilityTransferFinancialActivityId) {
         /***
          * Create and verify financial account transfer type is created
          */
         final Account liabilityAccountForMapping = this.accountHelper.createLiabilityAccount();
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping.getAccountID(), this.responseSpec,
+                liabilityTransferFinancialActivityId, liabilityAccountForMapping.getAccountID(), this.responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assertions.assertNotNull(financialActivityAccountId);
-        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
+        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId,
                 liabilityAccountForMapping);
         return liabilityAccountForMapping;
     }

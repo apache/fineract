@@ -25,6 +25,7 @@ import org.apache.fineract.mix.domain.MixTaxonomyMapping;
 import org.apache.fineract.mix.domain.MixTaxonomyMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,7 @@ public class MixTaxonomyMappingWritePlatformServiceImpl implements MixTaxonomyMa
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(mapping.getId()).build();
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             return CommandProcessingResult.empty();
         }
     }

@@ -500,8 +500,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
      *
      * private final Object entity ;
      *
-     * public Task(final FineractPlatformTenant tenant, final String reportName,
-     * final Object entity) { this.tenant = tenant; this.reportName = reportName
-     * ; this.entity = entity ; } }
+     * public Task(final FineractPlatformTenant tenant, final String reportName, final Object entity) { this.tenant =
+     * tenant; this.reportName = reportName ; this.entity = entity ; } }
      */
 }

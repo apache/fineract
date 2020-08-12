@@ -33,8 +33,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
- * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a
- * tenants details by a <code>tenantIdentifier</code>.
+ * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a tenants details by a
+ * <code>tenantIdentifier</code>.
  */
 @Service
 public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetailsService {
@@ -140,7 +140,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
         } catch (final EmptyResultDataAccessException e) {
-            throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.");
+            throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.", e);
         }
     }
 }

@@ -29,10 +29,6 @@ public class ApiErrorMessageArg {
         return new ApiErrorMessageArg(object);
     }
 
-    protected ApiErrorMessageArg() {
-        //
-    }
-
     public ApiErrorMessageArg(final Object object) {
         this.value = object;
     }

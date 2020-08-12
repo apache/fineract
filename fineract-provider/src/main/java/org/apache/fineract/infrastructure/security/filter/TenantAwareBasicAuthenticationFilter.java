@@ -50,17 +50,14 @@ import org.springframework.stereotype.Service;
 /**
  * A customised version of spring security's {@link BasicAuthenticationFilter}.
  *
- * This filter is responsible for extracting multi-tenant and basic auth
- * credentials from the request and checking that the details provided are
- * valid.
+ * This filter is responsible for extracting multi-tenant and basic auth credentials from the request and checking that
+ * the details provided are valid.
  *
- * If multi-tenant and basic auth credentials are valid, the details of the
- * tenant are stored in {@link FineractPlatformTenant} and stored in a
- * {@link ThreadLocal} variable for this request using
+ * If multi-tenant and basic auth credentials are valid, the details of the tenant are stored in
+ * {@link FineractPlatformTenant} and stored in a {@link ThreadLocal} variable for this request using
  * {@link ThreadLocalContextUtil}.
  *
- * If multi-tenant and basic auth credentials are invalid, a http error response
- * is returned.
+ * If multi-tenant and basic auth credentials are invalid, a http error response is returned.
  */
 @Service(value = "basicAuthenticationProcessingFilter")
 @Profile("basicauth")

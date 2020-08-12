@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -57,7 +58,7 @@ import org.springframework.stereotype.Component;
 @Path("/survey")
 @Component
 @Scope("singleton")
-@Api(value = "Survey", description = "")
+
 public class SurveyApiResource {
 
     private final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer;
@@ -84,9 +85,9 @@ public class SurveyApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve surveys", notes = "Retrieve surveys. This allows to retrieve the list of survey tables registered .")
+    @Operation(summary = "Retrieve surveys", description = "Retrieve surveys. This allows to retrieve the list of survey tables registered .")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class, responseContainer = "List") })
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SurveyApiResourceSwagger.GetSurveyResponse.class)))) })
     public String retrieveSurveys() {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
@@ -99,9 +100,10 @@ public class SurveyApiResource {
     @Path("{surveyName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve survey", notes = "Lists a registered survey table details and the Apache Fineract Core application table they are registered to.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class) })
-    public String retrieveSurvey(@PathParam("surveyName") @ApiParam(value = "surveyName") final String surveyName) {
+    @Operation(summary = "Retrieve survey", description = "Lists a registered survey table details and the Apache Fineract Core application table they are registered to.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SurveyApiResourceSwagger.GetSurveyResponse.class))) })
+    public String retrieveSurvey(@PathParam("surveyName") @Parameter(description = "surveyName") final String surveyName) {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
 
@@ -115,14 +117,14 @@ public class SurveyApiResource {
     @Path("{surveyName}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n"
-            + "\n" + "Refer Link for sample Body:  [ https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#survey_create ] ")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class) })
+    @Operation(summary = "Create an entry in the survey table", description = "Insert and entry in a survey table (full fill the survey)."
+            + "\n" + "\n"
+            + "Refer Link for sample Body:  [ https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#survey_create ] ")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class) })
-    public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable,
-            @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class))) })
+    public String createDatatableEntry(@PathParam("surveyName") @Parameter(description = "surveyName") final String datatable,
+            @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .fullFilSurvey(datatable, apptableId) //

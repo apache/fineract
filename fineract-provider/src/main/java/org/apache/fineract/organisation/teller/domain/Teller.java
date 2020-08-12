@@ -76,7 +76,7 @@ public class Teller extends AbstractPersistableCustom {
     private Set<Cashier> cashiers;
 
     public Teller() {
-        super();
+
     }
 
     private Teller(final Office staffOffice, final String name, final String description, final LocalDate startDate,
@@ -96,11 +96,10 @@ public class Teller extends AbstractPersistableCustom {
         this.office = staffOffice;
 
         /*
-         * if (StringUtils.isNotBlank(name)) { this.name = name.trim(); } else {
-         * this.name = null; }
+         * if (StringUtils.isNotBlank(name)) { this.name = name.trim(); } else { this.name = null; }
          *
-         * if (StringUtils.isNotBlank(description)) { this.description =
-         * description.trim(); } else { this.description = null; }
+         * if (StringUtils.isNotBlank(description)) { this.description = description.trim(); } else { this.description =
+         * null; }
          */
 
     }

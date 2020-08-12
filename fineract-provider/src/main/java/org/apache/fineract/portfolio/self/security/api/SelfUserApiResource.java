@@ -20,15 +20,14 @@
 package org.apache.fineract.portfolio.self.security.api;
 
 import com.google.gson.reflect.TypeToken;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,8 +46,8 @@ import org.springframework.stereotype.Component;
 
 @Path("/self/user")
 @Component
-@Api(tags = { "Self User" })
-@SwaggerDefinition(tags = { @Tag(name = "Self User", description = "") })
+
+@Tag(name = "Self User", description = "")
 public class SelfUserApiResource {
 
     private final UsersApiResource usersApiResource;
@@ -66,11 +65,11 @@ public class SelfUserApiResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update User", httpMethod = "PUT", notes = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class) })
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class) })
-    public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @Operation(summary = "Update User", description = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SelfUserApiResourceSwagger.PutSelfUserRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfUserApiResourceSwagger.PutSelfUserResponse.class))) })
+    public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         if (StringUtils.isBlank(apiRequestBodyAsJson)) {
             throw new InvalidJsonException();
         }

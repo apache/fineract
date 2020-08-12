@@ -107,7 +107,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
             final boolean columnExist = datatableData.hasColumn(foreignKeyColumnName);
 
-            LOG.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
+            LOG.info("{} has column {} ? {}", datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist);
 
             if (!columnExist) {
                 throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity);
@@ -237,7 +237,6 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 try {
                     this.readWriteNonCoreDataService.createNewDatatableEntry(datatableName, entityId, datatableData.toString());
                 } catch (PlatformApiDataValidationException e) {
-                    List<ApiParameterError> errors = e.getErrors();
                     for (ApiParameterError error : e.getErrors()) {
                         error.setParameterName("datatables." + datatableName + "." + error.getParameterName());
                     }
@@ -246,24 +245,6 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             }
         }
         return isMakerCheckerEnabled;
-    }
-
-    private List<String> getDatatableNames(Long status, String entity, Long productId) {
-        List<String> ret = new ArrayList<>();
-        List<EntityDatatableChecks> tableRequiredBeforeAction = null;
-        if (productId != null) {
-            tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndProduct(entity, status, productId);
-        }
-
-        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.size() < 1) {
-            tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndNoProduct(entity, status);
-        }
-        if (tableRequiredBeforeAction != null && tableRequiredBeforeAction.size() > 0) {
-            for (EntityDatatableChecks t : tableRequiredBeforeAction) {
-                ret.add(t.getDatatableName());
-            }
-        }
-        return ret;
     }
 
     @Transactional
@@ -281,8 +262,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleReportDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 

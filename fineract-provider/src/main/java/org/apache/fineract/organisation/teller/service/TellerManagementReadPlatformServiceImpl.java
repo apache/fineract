@@ -219,7 +219,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { tellerId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new StaffNotFoundException(tellerId);
+            throw new StaffNotFoundException(tellerId, e);
         }
     }
 
@@ -332,7 +332,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             return this.jdbcTemplate.queryForObject(sql, cm, new Object[] { cashierId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new StaffNotFoundException(cashierId);
+            throw new StaffNotFoundException(cashierId, e);
         }
     }
 

@@ -44,6 +44,7 @@ import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDat
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -86,7 +87,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(product.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (PersistenceException dve) {
@@ -117,7 +118,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withEntityId(productId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (PersistenceException dve) {
@@ -154,7 +155,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withEntityId(productId) //
                     .withSubEntityId(dividendPayOutDetails.getId())//
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
@@ -173,7 +174,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             return new CommandProcessingResultBuilder() //
                     .withEntityId(PayOutDetailId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
@@ -191,7 +192,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             return new CommandProcessingResultBuilder() //
                     .withEntityId(PayOutDetailId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }

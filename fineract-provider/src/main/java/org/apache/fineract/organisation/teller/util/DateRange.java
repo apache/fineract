@@ -36,7 +36,7 @@ public class DateRange {
     private Date endDate;
 
     public DateRange() {
-        super();
+
     }
 
     public Date getStartDate() {

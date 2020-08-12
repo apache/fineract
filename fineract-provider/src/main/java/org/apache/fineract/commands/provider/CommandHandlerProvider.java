@@ -34,12 +34,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for
- * a given entity and action. <br>
+ * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for a given entity and action. <br>
  * <br>
- * A {@link NewCommandSourceHandler} can be registered and the annotation
- * {@link CommandType} is used to determine the entity and the action the
- * handler is capable to process.
+ * A {@link NewCommandSourceHandler} can be registered and the annotation {@link CommandType} is used to determine the
+ * entity and the action the handler is capable to process.
  *
  * @author Markus Geiss
  * @version 1.0
@@ -57,14 +55,14 @@ public class CommandHandlerProvider implements ApplicationContextAware {
     private HashMap<String, String> registeredHandlers;
 
     CommandHandlerProvider() {
-        super();
+
     }
 
     /**
      * Returns a handler for the given entity and action.<br>
      * <br>
-     * Throws an {@link UnsupportedCommandException} if no handler for the given
-     * entity, action combination can be found.
+     * Throws an {@link UnsupportedCommandException} if no handler for the given entity, action combination can be
+     * found.
      *
      * @param entity
      *            the entity to lookup the handler, must be given.

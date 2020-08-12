@@ -89,9 +89,8 @@ public class GroupingTypesApiConstants {
     public static final String datatables = "datatables";
 
     /**
-     * These parameters will match the class level parameters of
-     * {@link CenterData}. Where possible, we try to get response parameters to
-     * match those of request parameters.
+     * These parameters will match the class level parameters of {@link CenterData}. Where possible, we try to get
+     * response parameters to match those of request parameters.
      */
     protected static final Set<String> CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(idParamName, nameParamName, externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName,

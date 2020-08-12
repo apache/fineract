@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.accounting.accrual.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 24/7/17.
@@ -30,18 +29,18 @@ final class AccrualAccountingApiResourceSwagger {
         // don't allow to instantiate; use only for live API documentation
     }
 
-    @ApiModel(value = "runaccrualsRequest")
+    @Schema(description = "runaccrualsRequest")
     public static final class PostRunaccrualsRequest {
 
         private PostRunaccrualsRequest() {
             // don't allow to instantiate; use only for live API documentation
         }
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "04 June 2014", notes = "which specifies periodic accruals should happen till the given Date", required = true)
+        @Schema(example = "04 June 2014", description = "which specifies periodic accruals should happen till the given Date", required = true)
         public String tillDate;
     }
 

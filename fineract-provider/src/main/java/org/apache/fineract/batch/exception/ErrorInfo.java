@@ -19,8 +19,7 @@
 package org.apache.fineract.batch.exception;
 
 /**
- * Provides members to hold the basic information about the exceptions raised in
- * commandStrategy classes.
+ * Provides members to hold the basic information about the exceptions raised in commandStrategy classes.
  *
  * @author Rishabh Shukla
  *
@@ -40,7 +39,7 @@ public final class ErrorInfo {
      * @param message
      */
     public ErrorInfo(final Integer statusCode, final Integer errorCode, final String message) {
-        super();
+
         this.statusCode = statusCode;
         this.errorCode = errorCode;
         this.message = message;
@@ -50,7 +49,7 @@ public final class ErrorInfo {
      * Constructor so JSON serialization will work with out special Serialiazer
      */
     ErrorInfo() {
-        super();
+
     }
 
     /**
@@ -90,8 +89,7 @@ public final class ErrorInfo {
     }
 
     /**
-     * Getter method to provide the message of the error for an object of this
-     * type.
+     * Getter method to provide the message of the error for an object of this type.
      *
      * @return String
      */

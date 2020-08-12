@@ -90,6 +90,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -187,17 +188,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             LOG.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -354,7 +354,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(rollbackTransaction)//
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -365,8 +365,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /**
-     * This method extracts ClientNonPerson details from Client command and
-     * creates a new ClientNonPerson record
+     * This method extracts ClientNonPerson details from Client command and creates a new ClientNonPerson record
      *
      * @param client
      * @param command
@@ -567,7 +566,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withEntityId(clientId) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -605,7 +604,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withSavingsId(result.getSavingsId())//
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
@@ -680,9 +679,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (staffId != null) {
             staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientForUpdate.getOffice().getHierarchy());
             /**
-             * TODO Vishwas: We maintain history of chage of loan officer w.r.t
-             * loan in a history table, should we do the same for a client?
-             * Especially useful when the change happens due to a transfer etc
+             * TODO Vishwas: We maintain history of chage of loan officer w.r.t loan in a history table, should we do
+             * the same for a client? Especially useful when the change happens due to a transfer etc
              **/
             clientForUpdate.assignStaff(staff);
         }
@@ -761,7 +759,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
@@ -804,8 +802,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /*
-     * To become a part of a group, group may have set of criteria to be m et
-     * before client can become member of it.
+     * To become a part of a group, group may have set of criteria to be m et before client can become member of it.
      */
     private void validateParentGroupRulesBeforeClientActivation(Client client) {
         Integer minNumberOfClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
@@ -813,8 +810,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (client.getGroups() != null && maxNumberOfClients != null) {
             for (Group group : client.getGroups()) {
                 /**
-                 * Since this Client has not yet been associated with the group,
-                 * reduce maxNumberOfClients by 1
+                 * Since this Client has not yet been associated with the group, reduce maxNumberOfClients by 1
                  **/
                 final boolean validationsuccess = group.isGroupsClientCountWithinMaxRange(maxNumberOfClients - 1);
                 if (!validationsuccess) {

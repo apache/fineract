@@ -116,7 +116,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     // out.flush();
                     // out.close();
                 } catch (final Exception e) {
-                    throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+                    throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
                 }
             }
         };
@@ -313,7 +313,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return genaratePdf;
         } catch (final Exception e) {
             LOG.error("error.msg.reporting.error:", e);
-            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
         }
     }
 
@@ -449,16 +449,12 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return sql;
 
             /*
-             * used to only return reports that the use can run as done in
-             * report UI but not necessary as there is a read_report permission
-             * which should give user access to look all reports +
-             * " where exists" + " (select 'f'" + " from m_appuser_role ur " +
-             * " join m_role r on r.id = ur.role_id" +
+             * used to only return reports that the use can run as done in report UI but not necessary as there is a
+             * read_report permission which should give user access to look all reports + " where exists" +
+             * " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id" +
              * " left join m_role_permission rp on rp.role_id = r.id" +
-             * " left join m_permission p on p.id = rp.permission_id" +
-             * " where ur.appuser_id = " + userId +
-             * " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
-             * ;
+             * " left join m_permission p on p.id = rp.permission_id" + " where ur.appuser_id = " + userId +
+             * " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) " ;
              */
         }
 
@@ -547,73 +543,56 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // This complete implementation should be moved to Pentaho Report
         // Service
         /*
-         * String outputType = "HTML"; if
-         * (StringUtils.isNotBlank(outputTypeParam)) { outputType =
-         * outputTypeParam; }
+         * String outputType = "HTML"; if (StringUtils.isNotBlank(outputTypeParam)) { outputType = outputTypeParam; }
          *
-         * if (!(outputType.equalsIgnoreCase("HTML") ||
-         * outputType.equalsIgnoreCase("PDF") ||
-         * outputType.equalsIgnoreCase("XLS") || outputType
-         * .equalsIgnoreCase("CSV"))) { throw new
-         * PlatformDataIntegrityException("error.msg.invalid.outputType",
-         * "No matching Output Type: " + outputType); }
+         * if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") ||
+         * outputType.equalsIgnoreCase("XLS") || outputType .equalsIgnoreCase("CSV"))) { throw new
+         * PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType); }
          *
-         * if (this.noPentaho) { throw new
-         * PlatformDataIntegrityException("error.msg.no.pentaho",
+         * if (this.noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho",
          * "Pentaho is not enabled", "Pentaho is not enabled"); }
          *
-         * final String reportPath =
-         * FileSystemContentRepository.FINERACT_BASE_DIR + File.separator +
-         * "pentahoReports" + File.separator + reportName + ".prpt";
-         * LOG.info("Report path: {}", reportPath);
+         * final String reportPath = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "pentahoReports" +
+         * File.separator + reportName + ".prpt"; LOG.info("Report path: {}", reportPath);
          *
-         * // load report definition final ResourceManager manager = new
-         * ResourceManager(); manager.registerDefaults(); Resource res;
+         * // load report definition final ResourceManager manager = new ResourceManager(); manager.registerDefaults();
+         * Resource res;
          *
-         * try { res = manager.createDirectly(reportPath, MasterReport.class);
-         * final MasterReport masterReport = (MasterReport) res.getResource();
-         * final DefaultReportEnvironment reportEnvironment =
+         * try { res = manager.createDirectly(reportPath, MasterReport.class); final MasterReport masterReport =
+         * (MasterReport) res.getResource(); final DefaultReportEnvironment reportEnvironment =
          * (DefaultReportEnvironment) masterReport.getReportEnvironment();
          *
-         * if (locale != null) { reportEnvironment.setLocale(locale); }
-         * addParametersToReport(masterReport, queryParams, runReportAsUser,
-         * errorLog);
+         * if (locale != null) { reportEnvironment.setLocale(locale); } addParametersToReport(masterReport, queryParams,
+         * runReportAsUser, errorLog);
          *
          * final ByteArrayOutputStream baos = new ByteArrayOutputStream();
          *
-         * if ("PDF".equalsIgnoreCase(outputType)) {
-         * PdfReportUtil.createPDF(masterReport, baos); return baos; }
+         * if ("PDF".equalsIgnoreCase(outputType)) { PdfReportUtil.createPDF(masterReport, baos); return baos; }
          *
-         * if ("XLS".equalsIgnoreCase(outputType)) {
-         * ExcelReportUtil.createXLS(masterReport, baos); return baos; }
+         * if ("XLS".equalsIgnoreCase(outputType)) { ExcelReportUtil.createXLS(masterReport, baos); return baos; }
          *
-         * if ("CSV".equalsIgnoreCase(outputType)) {
-         * CSVReportUtil.createCSV(masterReport, baos, "UTF-8"); return baos; }
+         * if ("CSV".equalsIgnoreCase(outputType)) { CSVReportUtil.createCSV(masterReport, baos, "UTF-8"); return baos;
+         * }
          *
-         * if ("HTML".equalsIgnoreCase(outputType)) {
-         * HtmlReportUtil.createStreamHTML(masterReport, baos); return baos; }
+         * if ("HTML".equalsIgnoreCase(outputType)) { HtmlReportUtil.createStreamHTML(masterReport, baos); return baos;
+         * }
          *
          * } catch (final ResourceException e) { errorLog.
          * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
          * + "exception: " + e.getMessage() + " ---------- "); throw new
-         * PlatformDataIntegrityException("error.msg.reporting.error",
-         * e.getMessage()); } catch (final ReportProcessingException e) {
-         * errorLog.
+         * PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage()); } catch (final
+         * ReportProcessingException e) { errorLog.
          * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ReportProcessingException "
          * + "exception: " + e.getMessage() + " ---------- "); throw new
-         * PlatformDataIntegrityException("error.msg.reporting.error",
-         * e.getMessage()); } catch (final IOException e) { errorLog.
-         * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw an IOException "
+         * PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage()); } catch (final IOException e) {
+         * errorLog. append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw an IOException "
          * + "exception: " + e.getMessage() + " ---------- "); throw new
-         * PlatformDataIntegrityException("error.msg.reporting.error",
-         * e.getMessage()); }
+         * PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage()); }
          *
          * errorLog.
          * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
-         * + "exception: No matching Output Type: " + outputType +
-         * " ---------- "); throw new
-         * PlatformDataIntegrityException("error.msg.invalid.outputType",
-         * "No matching Output Type: " + outputType);
+         * + "exception: No matching Output Type: " + outputType + " ---------- "); throw new
+         * PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
          *
          */
         return null;

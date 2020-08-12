@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.search.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
@@ -32,77 +31,77 @@ final class SearchApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetSearchResponse")
+    @Schema(description = "GetSearchResponse")
     public static final class GetSearchResponse {
 
         private GetSearchResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long entityId;
-        @ApiModelProperty(example = "000000001")
+        @Schema(example = "000000001")
         public Long entityAccountNo;
-        @ApiModelProperty(example = "ID_JKZGEXF")
+        @Schema(example = "ID_JKZGEXF")
         public String entityExternalId;
-        @ApiModelProperty(example = "Group_Name_HVCU5")
+        @Schema(example = "Group_Name_HVCU5")
         public String entityName;
-        @ApiModelProperty(example = "GROUP")
+        @Schema(example = "GROUP")
         public String entityType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long parentId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String parentName;
         public EnumOptionData entityStatus;
     }
 
-    @ApiModel(value = "PostAdhocQuerySearchRequest")
+    @Schema(description = "PostAdhocQuerySearchRequest")
     public static final class PostAdhocQuerySearchRequest {
 
         private PostAdhocQuerySearchRequest() {
 
         }
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "approvalDate")
+        @Schema(example = "approvalDate")
         public String loanDateOption;
-        @ApiModelProperty(example = "2013-01-01")
+        @Schema(example = "2013-01-01")
         public LocalDate loanFromDate;
-        @ApiModelProperty(example = "2014-01-27")
+        @Schema(example = "2014-01-27")
         public LocalDate loanToDate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean includeOutStandingAmountPercentage;
-        @ApiModelProperty(example = "<=")
+        @Schema(example = "<=")
         public String outStandingAmountPercentageCondition;
-        @ApiModelProperty(example = "80")
+        @Schema(example = "80")
         public Long outStandingAmountPercentage;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean includeOutstandingAmount;
-        @ApiModelProperty(example = "between")
+        @Schema(example = "between")
         public String outstandingAmountCondition;
-        @ApiModelProperty(example = "100")
+        @Schema(example = "100")
         public Long minOutstandingAmount;
-        @ApiModelProperty(example = "10000")
+        @Schema(example = "10000")
         public Long maxOutstandingAmount;
     }
 
-    @ApiModel(value = "PostAdhocQuerySearchResponse")
+    @Schema(description = "PostAdhocQuerySearchResponse")
     public static final class PostAdhocQuerySearchResponse {
 
         private PostAdhocQuerySearchResponse() {
 
         }
 
-        @ApiModelProperty(example = "HFC")
+        @Schema(example = "HFC")
         public String officeName;
-        @ApiModelProperty(example = "01 BC3M")
+        @Schema(example = "01 BC3M")
         public String loanProductName;
-        @ApiModelProperty(example = " 5692.41")
+        @Schema(example = " 5692.41")
         public Long loanOutStanding;
-        @ApiModelProperty(example = "76.4")
+        @Schema(example = "76.4")
         public Long percentage;
     }
 }

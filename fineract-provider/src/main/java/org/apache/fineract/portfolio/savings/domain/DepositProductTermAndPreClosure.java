@@ -47,7 +47,7 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
     private DepositProductAmountDetails depositProductAmountDetails;
 
     protected DepositProductTermAndPreClosure() {
-        super();
+
     }
 
     public static DepositProductTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,

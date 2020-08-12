@@ -26,13 +26,13 @@ import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionTyp
 import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionType.WITHDRAWAL;
 import static org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction.releaseAmount;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;

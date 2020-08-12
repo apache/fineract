@@ -60,8 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Scheduled job services that send SMS messages and get delivery reports for
- * the sent SMS messages
+ * Scheduled job services that send SMS messages and get delivery reports for the sent SMS messages
  **/
 @Service
 public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJobService {
@@ -141,7 +140,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     // apiQueueResourceDatas).start();
                 }
             } catch (Exception e) {
-                throw new ConnectionFailureException(SmsCampaignConstants.SMS);
+                throw new ConnectionFailureException(SmsCampaignConstants.SMS, e);
             }
             page++;
             totalRecords = pendingMessages.getTotalPages();
@@ -248,8 +247,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     }
 
     /**
-     * get SMS message delivery reports from the SMS gateway (or intermediate
-     * gateway)
+     * get SMS message delivery reports from the SMS gateway (or intermediate gateway)
      **/
     @Override
     @Transactional

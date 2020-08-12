@@ -65,7 +65,7 @@ public class Survey extends AbstractPersistableCustom {
     private Date validTo;
 
     public Survey() {
-        super();
+
     }
 
     public List<Component> getComponents() {

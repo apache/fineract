@@ -19,31 +19,12 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * A {@link RuntimeException} thrown when valid api request end up violating
- * some domain rule.
+ * A {@link RuntimeException} thrown when a valid API request ends up violating some domain rule.
  */
-public abstract class AbstractPlatformDomainRuleException extends RuntimeException {
+public abstract class AbstractPlatformDomainRuleException extends AbstractPlatformException {
 
-    private final String globalisationMessageCode;
-    private final String defaultUserMessage;
-    private final Object[] defaultUserMessageArgs;
-
-    public AbstractPlatformDomainRuleException(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        this.globalisationMessageCode = globalisationMessageCode;
-        this.defaultUserMessage = defaultUserMessage;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
-    }
-
-    public String getGlobalisationMessageCode() {
-        return this.globalisationMessageCode;
-    }
-
-    public String getDefaultUserMessage() {
-        return this.defaultUserMessage;
-    }
-
-    public Object[] getDefaultUserMessageArgs() {
-        return this.defaultUserMessageArgs;
+    protected AbstractPlatformDomainRuleException(String globalisationMessageCode, String defaultUserMessage,
+            Object... defaultUserMessageArgs) {
+        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 }

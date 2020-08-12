@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 import java.io.Serializable;
 
 /**
- * Immutable data object representing a possible value for a given resultset
- * column.
+ * Immutable data object representing a possible value for a given resultset column.
  */
 public class ResultsetColumnValueData implements Serializable {
 

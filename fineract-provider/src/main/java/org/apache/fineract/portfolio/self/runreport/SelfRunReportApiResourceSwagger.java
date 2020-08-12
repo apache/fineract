@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.self.runreport;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -30,7 +29,7 @@ final class SelfRunReportApiResourceSwagger {
 
     private SelfRunReportApiResourceSwagger() {}
 
-    @ApiModel(value = "GetRunReportResponse")
+    @Schema(description = "GetRunReportResponse")
     public static final class GetRunReportResponse {
 
         private GetRunReportResponse() {}
@@ -39,15 +38,15 @@ final class SelfRunReportApiResourceSwagger {
 
             private GetRunReportColumnHeaders() {}
 
-            @ApiModelProperty(example = "Office/Branch")
+            @Schema(example = "Office/Branch")
             public String columnName;
-            @ApiModelProperty(example = "VARCHAR")
+            @Schema(example = "VARCHAR")
             public String columnType;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean isColumnNullable;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean isColumnPrimaryKey;
-            @ApiModelProperty(example = "[]")
+            @Schema(example = "[]")
             public String columnValues;
 
         }
@@ -56,7 +55,7 @@ final class SelfRunReportApiResourceSwagger {
 
             private GetPocketData() {}
 
-            @ApiModelProperty(example = "[\"Head Office\", \"000000001\", \"John Doe\"  \"2017-03-04\", \"786YYH7\"")
+            @Schema(example = "[\"Head Office\", \"000000001\", \"John Doe\"  \"2017-03-04\", \"786YYH7\"")
             public String row;
         }
 

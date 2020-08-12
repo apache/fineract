@@ -249,7 +249,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     new Object[] { accountId, depositAccountType.getValue() });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(depositAccountType, accountId);
+            throw new DepositAccountNotFoundException(depositAccountType, accountId, e);
         }
     }
 
@@ -286,7 +286,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return account;
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(depositAccountType, accountId);
+            throw new DepositAccountNotFoundException(depositAccountType, accountId, e);
         }
     }
 
@@ -498,7 +498,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper,
                     new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId);
+            throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId, e);
         }
     }
 
@@ -547,7 +547,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         @Override
         public abstract DepositAccountData mapRow(ResultSet rs, int rowNum) throws SQLException;
 
-        public DepositAccountMapper() {
+        protected DepositAccountMapper() {
             final StringBuilder selectFieldsSqlBuilder = new StringBuilder(400);
             selectFieldsSqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
             selectFieldsSqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
@@ -1083,7 +1083,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         private final ClientData client;
         private final GroupGeneralData group;
 
-        public DepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
+        protected DepositAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             this.client = client;
             this.group = group;
 

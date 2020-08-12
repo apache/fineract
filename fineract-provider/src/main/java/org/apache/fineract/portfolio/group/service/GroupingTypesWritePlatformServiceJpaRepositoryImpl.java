@@ -88,6 +88,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -221,8 +222,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             this.groupRepository.save(newGroup);
 
             /*
-             * Generate hierarchy for a new center/group and all the child
-             * groups if they exist
+             * Generate hierarchy for a new center/group and all the child groups if they exist
              */
             newGroup.generateHierarchy();
 
@@ -251,7 +251,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .setRollbackTransaction(rollbackTransaction)//
                     .build();
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -341,7 +341,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withGroupId(groupId) //
                     .withEntityId(groupId) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -419,9 +419,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final GroupLevel groupLevel = this.groupLevelRepository.findById(groupForUpdate.getGroupLevel().getId()).orElse(null);
 
             /*
-             * Ignoring parentId param, if group for update is super parent.
-             * TODO Need to check: Ignoring is correct or need throw unsupported
-             * param
+             * Ignoring parentId param, if group for update is super parent. TODO Need to check: Ignoring is correct or
+             * need throw unsupported param
              */
             if (!groupLevel.isSuperParent()) {
 
@@ -445,10 +444,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                             throw new InvalidOfficeException("group", "attach.to.parent.group", errorMessage);
                         }
                         /*
-                         * If Group is not super parent then validate group
-                         * level's parent level is same as group parent's level
-                         * this check makes sure new group is added at immediate
-                         * next level in hierarchy
+                         * If Group is not super parent then validate group level's parent level is same as group
+                         * parent's level this check makes sure new group is added at immediate next level in hierarchy
                          */
 
                         if (!groupForUpdate.getGroupLevel().isIdentifiedByParentId(newParentGroup.getGroupLevel().getId())) {
@@ -467,12 +464,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
 
             /*
-             * final Set<Client> clientMembers = assembleSetOfClients(officeId,
-             * command); List<String> changes =
-             * groupForUpdate.updateClientMembersIfDifferent(clientMembers); if
-             * (!changes.isEmpty()) {
-             * actualChanges.put(GroupingTypesApiConstants
-             * .clientMembersParamName, changes); }
+             * final Set<Client> clientMembers = assembleSetOfClients(officeId, command); List<String> changes =
+             * groupForUpdate.updateClientMembersIfDifferent(clientMembers); if (!changes.isEmpty()) {
+             * actualChanges.put(GroupingTypesApiConstants .clientMembersParamName, changes); }
              */
 
             this.groupRepository.saveAndFlush(groupForUpdate);
@@ -485,7 +479,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .with(actualChanges) //
                     .build();
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -550,8 +544,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         if (inheritStaffForClientAccounts) {
             LocalDate loanOfficerReassignmentDate = LocalDate.now();
             /*
-             * update loan officer for client and update loan officer for
-             * clients loans and savings
+             * update loan officer for client and update loan officer for clients loans and savings
              */
             Set<Client> clients = groupForUpdate.getClientMembers();
             if (clients != null) {
@@ -608,11 +601,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withGroupId(groupForDelete.officeId()) //
                     .withEntityId(groupForDelete.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             LOG.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
     }
 
@@ -767,8 +760,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
             final GroupTypes groupLevel) {
@@ -982,8 +974,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
 
             /**
-             * Group shouldn't have a meeting when no meeting attached for
-             * center
+             * Group shouldn't have a meeting when no meeting attached for center
              */
             if (ceneterCalendar == null && groupCalendar != null) {
                 throw new GeneralPlatformDomainRuleException(
@@ -991,8 +982,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                         "Group with id " + group.getId() + " is already associated with meeting", group.getId());
             }
             /**
-             * Group meeting recurrence should match with center meeting
-             * recurrence
+             * Group meeting recurrence should match with center meeting recurrence
              */
             else if (ceneterCalendar != null && groupCalendar != null) {
 

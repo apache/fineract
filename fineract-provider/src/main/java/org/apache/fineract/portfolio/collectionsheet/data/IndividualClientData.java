@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 import java.util.Collection;
 
 /**
- * Immutable data object for clients with loans due for disbursement or
- * collection.
+ * Immutable data object for clients with loans due for disbursement or collection.
  */
 public final class IndividualClientData {
 

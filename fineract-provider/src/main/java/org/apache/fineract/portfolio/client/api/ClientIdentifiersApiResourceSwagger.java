@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -29,7 +28,7 @@ final class ClientIdentifiersApiResourceSwagger {
 
     private ClientIdentifiersApiResourceSwagger() {}
 
-    @ApiModel(value = "GetClientsClientIdIdentifiersResponse")
+    @Schema(description = "GetClientsClientIdIdentifiersResponse")
     public static final class GetClientsClientIdIdentifiersResponse {
 
         private GetClientsClientIdIdentifiersResponse() {}
@@ -38,24 +37,24 @@ final class ClientIdentifiersApiResourceSwagger {
 
             private GetClientsDocumentType() {}
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "Drivers License")
+            @Schema(example = "Drivers License")
             public String name;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer id;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
         public GetClientsDocumentType documentType;
-        @ApiModelProperty(example = "12345")
+        @Schema(example = "12345")
         public String documentKey;
-        @ApiModelProperty(example = "Issued in the year 2--7")
+        @Schema(example = "Issued in the year 2--7")
         public String description;
     }
 
-    @ApiModel(value = "GetClientsClientIdIdentifiersTemplateResponse")
+    @Schema(description = "GetClientsClientIdIdentifiersTemplateResponse")
     public static final class GetClientsClientIdIdentifiersTemplateResponse {
 
         private GetClientsClientIdIdentifiersTemplateResponse() {}
@@ -64,80 +63,80 @@ final class ClientIdentifiersApiResourceSwagger {
 
             private GetClientsAllowedDocumentTypes() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Passport")
+            @Schema(example = "Passport")
             public String name;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer position;
         }
 
         public Set<GetClientsAllowedDocumentTypes> allowedDocumentTypes;
     }
 
-    @ApiModel(value = "PostClientsClientIdIdentifiersRequest")
+    @Schema(description = "PostClientsClientIdIdentifiersRequest")
     public static final class PostClientsClientIdIdentifiersRequest {
 
         private PostClientsClientIdIdentifiersRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer documentTypeId;
-        @ApiModelProperty(example = "KA-54677")
+        @Schema(example = "KA-54677")
         public String documentKey;
-        @ApiModelProperty(example = "Document has been verified")
+        @Schema(example = "Document has been verified")
         public String description;
     }
 
-    @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
+    @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdRequest")
     public static final class PutClientsClientIdIdentifiersIdentifierIdRequest {
 
         private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Integer documentTypeId;
-        @ApiModelProperty(example = "KA-94667")
+        @Schema(example = "KA-94667")
         public String documentKey;
-        @ApiModelProperty(example = "Document has been updated")
+        @Schema(example = "Document has been updated")
         public String description;
     }
 
-    @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
+    @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")
     public static final class PutClientsClientIdIdentifiersIdentifierIdResponse {
 
         private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer resourceId;
         public PutClientsClientIdIdentifiersIdentifierIdRequest changes;
     }
 
-    @ApiModel(value = "PostClientsClientIdIdentifiersResponse")
+    @Schema(description = "PostClientsClientIdIdentifiersResponse")
     public static final class PostClientsClientIdIdentifiersResponse {
 
         private PostClientsClientIdIdentifiersResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
+    @Schema(description = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
     public static final class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
 
         private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer resourceId;
     }
 }

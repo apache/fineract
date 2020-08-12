@@ -43,12 +43,11 @@ public class UpdateCashierAllocationCommandHandler implements NewCommandSourceHa
      * Creates a new instance
      *
      * @param writePlatformService
-     *            the {@code TellerWritePlatformService} used to access the
-     *            backend
+     *            the {@code TellerWritePlatformService} used to access the backend
      */
     @Autowired
     public UpdateCashierAllocationCommandHandler(final TellerWritePlatformService writePlatformService) {
-        super();
+
         this.writePlatformService = writePlatformService;
     }
 

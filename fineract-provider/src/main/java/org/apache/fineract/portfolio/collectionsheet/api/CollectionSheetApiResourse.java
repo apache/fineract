@@ -19,13 +19,13 @@
 package org.apache.fineract.portfolio.collectionsheet.api;
 
 import com.google.gson.JsonElement;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Path("/collectionsheet")
 @Component
 @Scope("singleton")
-@Api(value = "Collection Sheet", description = "")
+
 public class CollectionSheetApiResourse {
 
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
@@ -81,16 +81,15 @@ public class CollectionSheetApiResourse {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Generate Individual Collection Sheet | Save Collection Sheet", httpMethod = "POST", notes = "Generate Individual Collection Sheet:\n\n"
+    @Operation(summary = "Generate Individual Collection Sheet | Save Collection Sheet", description = "Generate Individual Collection Sheet:\n\n"
             + "This Api retrieves repayment details of all individual loans under a office as on a specified meeting date.\n\n"
             + "Save Collection Sheet:\n\n"
             + "This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CollectionSheetApiResourceSwagger.PostCollectionSheetRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class) })
-    public String generateCollectionSheet(@QueryParam("command") @ApiParam(value = "command") final String commandParam,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class))) })
+    public String generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandProcessingResult result = null;
 

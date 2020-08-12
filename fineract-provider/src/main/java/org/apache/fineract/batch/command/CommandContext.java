@@ -19,10 +19,8 @@
 package org.apache.fineract.batch.command;
 
 /**
- * Provides an object to
- * {@link org.apache.fineract.batch.service.BatchApiService} to get the proper
- * commandStrategy for each request in BatchRequest. It uses Builder pattern to
- * create object of this type.
+ * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService} to get the proper commandStrategy for
+ * each request in BatchRequest. It uses Builder pattern to create object of this type.
  *
  * @author Rishabh Shukla
  *
@@ -69,9 +67,8 @@ public final class CommandContext {
     }
 
     /**
-     * Returns a boolean value if the relativeUrl 'matches' one of the regex
-     * keys in the available commandStrategies. It take CommandContext object as
-     * parameter which contains a 'resource' member as a regex key for available
+     * Returns a boolean value if the relativeUrl 'matches' one of the regex keys in the available commandStrategies. It
+     * take CommandContext object as parameter which contains a 'resource' member as a regex key for available
      * commandStrategies.
      *
      * @param other

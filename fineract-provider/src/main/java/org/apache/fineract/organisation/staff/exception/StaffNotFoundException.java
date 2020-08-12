@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.staff.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when staff resources are not found.
@@ -27,5 +28,9 @@ public class StaffNotFoundException extends AbstractPlatformResourceNotFoundExce
 
     public StaffNotFoundException(final Long id) {
         super("error.msg.staff.id.invalid", "Staff with identifier " + id + " does not exist", id);
+    }
+
+    public StaffNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.staff.id.invalid", "Staff with identifier " + id + " does not exist", id, e);
     }
 }

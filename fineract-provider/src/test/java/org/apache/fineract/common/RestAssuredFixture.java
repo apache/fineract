@@ -19,7 +19,6 @@
 package org.apache.fineract.common;
 
 import com.google.common.base.Preconditions;
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -27,10 +26,9 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
 /**
- * REST integration tests helper. Intended to encapsulate the current
- * RestAssured-based implementation as private. May be REST integration tests
- * should instead be written using e.g. Spring's TestRestTemplate or Square's
- * Retrofit (already used in the Mifos X Android client).
+ * REST integration tests helper. Intended to encapsulate the current RestAssured-based implementation as private. May
+ * be REST integration tests should instead be written using e.g. Spring's TestRestTemplate or Square's Retrofit
+ * (already used in the Mifos X Android client).
  */
 public class RestAssuredFixture {
 
@@ -39,11 +37,11 @@ public class RestAssuredFixture {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    public RestAssuredFixture(int httpPort) {
-        super();
-        this.httpPort = httpPort;
+    public RestAssuredFixture(int http) {
+
+        this.httpPort = http;
         Utils.initializeRESTAssured();
-        RestAssured.port = httpPort;
+        Utils.initializeRESTAssuredPort(http);
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();

@@ -114,11 +114,9 @@ public class SavingsProduct extends AbstractPersistableCustom {
     protected BigDecimal nominalAnnualInterestRate;
 
     /**
-     * The interest period is the span of time at the end of which savings in a
-     * client's account earn interest.
+     * The interest period is the span of time at the end of which savings in a client's account earn interest.
      *
-     * A value from the {@link SavingsCompoundingInterestPeriodType}
-     * enumeration.
+     * A value from the {@link SavingsCompoundingInterestPeriodType} enumeration.
      */
     @Column(name = "interest_compounding_period_enum", nullable = false)
     protected Integer interestCompoundingPeriodType;
@@ -136,8 +134,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
     protected Integer interestCalculationType;
 
     /**
-     * A value from the {@link SavingsInterestCalculationDaysInYearType}
-     * enumeration.
+     * A value from the {@link SavingsInterestCalculationDaysInYearType} enumeration.
      */
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
     protected Integer interestCalculationDaysInYearType;
@@ -312,8 +309,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
     }
 
     /**
-     * If overdrafts are allowed and the overdraft limit is not set, set the
-     * same to Zero
+     * If overdrafts are allowed and the overdraft limit is not set, set the same to Zero
      **/
     private void esnureOverdraftLimitsSetForOverdraftAccounts() {
 

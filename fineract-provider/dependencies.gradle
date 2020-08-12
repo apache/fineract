@@ -20,7 +20,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-    spotbugs 'com.github.spotbugs:spotbugs:4.0.4'
+    spotbugs 'com.github.spotbugs:spotbugs:4.1.1'
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -46,12 +46,13 @@ dependencies {
             'com.sun.jersey.contribs:jersey-multipart',
 
             'joda-time:joda-time',
+            'com.google.guava:guava',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',
             'com.squareup.retrofit:retrofit',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
-
+            'jakarta.validation:jakarta.validation-api',
             'com.squareup.okhttp:okhttp',
             'com.squareup.okhttp:okhttp-urlconnection',
 
@@ -70,17 +71,17 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
-             // JAX-B dependencies for JDK 9+
-             'jakarta.xml.bind:jakarta.xml.bind-api',
-             'org.dom4j:dom4j',
+            // JAX-B dependencies for JDK 9+
+            'jakarta.xml.bind:jakarta.xml.bind-api',
 
-             'javax.cache:cache-api',
+            'org.dom4j:dom4j',
 
-             'com.github.spotbugs:spotbugs-annotations'
-    )
-    implementation ('io.swagger:swagger-jersey-jaxrs') {
-        exclude group: 'javax.validation'
-    }
+            'javax.cache:cache-api',
+
+            'com.github.spotbugs:spotbugs-annotations',
+            'io.swagger.core.v3:swagger-annotations',
+            'org.webjars:webjars-locator-core'
+            )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
@@ -100,8 +101,9 @@ dependencies {
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
     }
-    implementation ('org.ehcache:ehcache') {
-        exclude group: 'org.glassfish.jaxb', module: 'jaxb-runtime'
+
+    runtimeOnly('org.ehcache:ehcache') {
+        exclude group: 'com.sun.activation'
     }
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
@@ -113,7 +115,7 @@ dependencies {
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient',
-    )
+            )
 
     // testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
@@ -123,14 +125,16 @@ dependencies {
             'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
-    )
+            )
     testImplementation('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'javax.validation'
     }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
+        exclude group: 'com.sun.xml.bind'
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

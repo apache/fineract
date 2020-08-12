@@ -33,8 +33,7 @@ public class ReportMailingJobRepositoryWrapper {
     }
 
     /**
-     * find report mailing job by ID, throw a "entity not found" exception if
-     * the job does not exist
+     * find report mailing job by ID, throw a "entity not found" exception if the job does not exist
      *
      * @param id
      *            -- the identifier of the report mailing job to be found

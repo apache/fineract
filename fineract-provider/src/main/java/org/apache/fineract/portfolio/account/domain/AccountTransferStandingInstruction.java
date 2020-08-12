@@ -296,8 +296,7 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     }
 
     /**
-     * delete the standing instruction by setting the status to 3 and appending
-     * "_deleted_" and the id to the name
+     * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
      **/
     public void delete() {
         this.status = StandingInstructionStatus.DELETED.getValue();

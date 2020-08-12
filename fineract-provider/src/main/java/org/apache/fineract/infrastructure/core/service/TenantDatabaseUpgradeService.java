@@ -38,8 +38,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 /**
- * A service that picks up on tenants that are configured to auto-update their
- * specific schema on application startup.
+ * A service that picks up on tenants that are configured to auto-update their specific schema on application startup.
  */
 @Service
 public class TenantDatabaseUpgradeService {
@@ -87,15 +86,14 @@ public class TenantDatabaseUpgradeService {
                 } catch (FlywayException e) {
                     String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connectionProtocol + ", username: "
                             + connection.getSchemaUsername();
-                    throw new FlywayException(betterMessage, e.getCause());
+                    throw new FlywayException(betterMessage, e);
                 }
             }
         }
     }
 
     /**
-     * Initializes, and if required upgrades (using Flyway) the Tenant DB
-     * itself.
+     * Initializes, and if required upgrades (using Flyway) the Tenant DB itself.
      */
     private void upgradeTenantDB() {
         String dbHostname = getEnvVar("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost");

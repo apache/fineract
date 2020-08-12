@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,7 +120,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     .withEntityId(teller.getId()) //
                     .withOfficeId(teller.getOffice().getId()) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -154,7 +155,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     .withOfficeId(teller.officeId()) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -165,8 +166,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * used to restrict modifying operations to office that are either the users
-     * office or lower (child) in the office hierarchy
+     * used to restrict modifying operations to office that are either the users office or lower (child) in the office
+     * hierarchy
      */
     private Teller validateUserPriviledgeOnTellerAndRetrieve(final AppUser currentUser, final Long tellerId) {
 
@@ -202,8 +203,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
+     * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleTellerDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
@@ -266,7 +266,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     .withEntityId(teller.getId()) //
                     .withSubEntityId(cashier.getId()) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -305,7 +305,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     .withSubEntityId(cashier.getId()) //
                     .with(changes) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -330,7 +330,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final Cashier cashier = validateUserPriviledgeOnCashierAndRetrieve(currentUser, tellerId, cashierId);
             this.cashierRepository.delete(cashier);
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -345,9 +345,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     }
 
     /*
-     * @Override public CommandProcessingResult inwardCashToCashier (final Long
-     * cashierId, final CashierTransaction cashierTxn) { CashierTxnType txnType
-     * = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
+     * @Override public CommandProcessingResult inwardCashToCashier (final Long cashierId, final CashierTransaction
+     * cashierTxn) { CashierTxnType txnType = CashierTxnType.INWARD_CASH_TXN; // pre save to generate id for use in
      * office hierarchy this.cashierTxnRepository.save(cashierTxn); }
      */
 
@@ -465,7 +464,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     .withEntityId(cashier.getId()) //
                     .withSubEntityId(cashierTxn.getId()) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTellerDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {

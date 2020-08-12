@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.organisation.office.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import org.joda.time.LocalDate;
 
@@ -32,90 +31,90 @@ final class OfficesApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetOfficesResponse")
+    @Schema(description = "GetOfficesResponse")
     public static final class GetOfficesResponse {
 
         private GetOfficesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String name;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String nameDecorated;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public String externalId;
-        @ApiModelProperty(example = "[2009, 1, 1]")
+        @Schema(example = "[2009, 1, 1]")
         public LocalDate openingDate;
-        @ApiModelProperty(example = ".")
+        @Schema(example = ".")
         public String hierarchy;
-        // @ApiModelProperty(example = "")
+        // @Schema(example = "")
         // public Long parentId;
-        // @ApiModelProperty(example = "")
+        // @Schema(example = "")
         // public String parentName;
     }
 
-    @ApiModel(value = "GetOfficesTemplateResponse")
+    @Schema(description = "GetOfficesTemplateResponse")
     public static final class GetOfficesTemplateResponse {
 
         private GetOfficesTemplateResponse() {
 
         }
 
-        @ApiModelProperty(example = "[2009, 1, 1]")
+        @Schema(example = "[2009, 1, 1]")
         public LocalDate openingDate;
         public Collection<GetOfficesResponse> allowedParents;
     }
 
-    @ApiModel(value = "PostOfficesRequest")
+    @Schema(description = "PostOfficesRequest")
     public static final class PostOfficesRequest {
 
         private PostOfficesRequest() {
 
         }
 
-        @ApiModelProperty(example = "Good Friday")
+        @Schema(example = "Good Friday")
         public String name;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "01 July 2007")
+        @Schema(example = "01 July 2007")
         public LocalDate openingDate;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Long parentId;
-        @ApiModelProperty(example = "SYS54-88")
+        @Schema(example = "SYS54-88")
         public String externalId;
 
     }
 
-    @ApiModel(value = "PostOfficesResponse")
+    @Schema(description = "PostOfficesResponse")
     public static final class PostOfficesResponse {
 
         private PostOfficesResponse() {
 
         }
 
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Long officeId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutOfficesOfficeIdRequest")
+    @Schema(description = "PutOfficesOfficeIdRequest")
     public static final class PutOfficesOfficeIdRequest {
 
         private PutOfficesOfficeIdRequest() {
 
         }
 
-        @ApiModelProperty(example = "Name is updated")
+        @Schema(example = "Name is updated")
         public String name;
     }
 
-    @ApiModel(value = "PutOfficesOfficeIdResponse")
+    @Schema(description = "PutOfficesOfficeIdResponse")
     public static final class PutOfficesOfficeIdResponse {
 
         private PutOfficesOfficeIdResponse() {
@@ -128,13 +127,13 @@ final class OfficesApiResourceSwagger {
 
             }
 
-            @ApiModelProperty(example = "Name is updated")
+            @Schema(example = "Name is updated")
             public String name;
         }
 
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Long officeId;
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Long resourceId;
         public PutOfficesOfficeIdResponseChanges changes;
     }

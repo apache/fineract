@@ -67,7 +67,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
             final String sql = detailMapper.schema() + " where job.id=?";
             return this.jdbcTemplate.queryForObject(sql, detailMapper, new Object[] { jobId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new JobNotFoundException(String.valueOf(jobId));
+            throw new JobNotFoundException(String.valueOf(jobId), e);
         }
     }
 

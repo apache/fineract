@@ -62,7 +62,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
         }
 
         catch (final EmptyResultDataAccessException ex) {
-            throw new ReportMailingJobConfigurationNotFoundException(name);
+            throw new ReportMailingJobConfigurationNotFoundException(name, ex);
         }
     }
 

@@ -22,8 +22,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * Thrown when an attempt is made to withdraw money that is greater than the
- * account balance.
+ * Thrown when an attempt is made to withdraw money that is greater than the account balance.
  */
 public class InsufficientAccountBalanceException extends AbstractPlatformDomainRuleException {
 

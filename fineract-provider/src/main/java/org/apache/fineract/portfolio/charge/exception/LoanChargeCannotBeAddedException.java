@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.charge.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when loan charge is not
- * allowed to be added to the loan.
+ * {@link AbstractPlatformDomainRuleException} thrown when loan charge is not allowed to be added to the loan.
  */
 public class LoanChargeCannotBeAddedException extends AbstractPlatformDomainRuleException {
 

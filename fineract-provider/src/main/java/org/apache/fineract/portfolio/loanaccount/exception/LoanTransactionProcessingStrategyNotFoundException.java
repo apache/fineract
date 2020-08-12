@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when loan transactions processing strategy
- * resources are not found.
+ * A {@link RuntimeException} thrown when loan transactions processing strategy resources are not found.
  */
 public class LoanTransactionProcessingStrategyNotFoundException extends AbstractPlatformResourceNotFoundException {
 

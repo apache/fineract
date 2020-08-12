@@ -78,7 +78,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final String sql = "select " + this.chartRowMapper.schema() + " where irc.id = ?";
             return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new InterestRateChartNotFoundException(chartId);
+            throw new InterestRateChartNotFoundException(chartId, e);
         }
     }
 

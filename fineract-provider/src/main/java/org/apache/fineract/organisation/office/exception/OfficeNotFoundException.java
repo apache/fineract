@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.office.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when office resources are not found.
@@ -27,5 +28,9 @@ public class OfficeNotFoundException extends AbstractPlatformResourceNotFoundExc
 
     public OfficeNotFoundException(final Long id) {
         super("error.msg.office.id.invalid", "Office with identifier " + id + " does not exist", id);
+    }
+
+    public OfficeNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.office.id.invalid", "Office with identifier " + id + " does not exist", id, e);
     }
 }

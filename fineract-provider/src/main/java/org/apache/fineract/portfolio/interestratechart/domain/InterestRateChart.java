@@ -264,8 +264,7 @@ public class InterestRateChart extends AbstractPersistableCustom {
                     } else {
 
                         /**
-                         * TODO: AA: Move this code to
-                         * InterestRateChartSlabAssembler
+                         * TODO: AA: Move this code to InterestRateChartSlabAssembler
                          */
                         final String description = chartSlabsCommand.stringValueOfParameterNamed(descriptionParamName);
                         final Integer periodTypeId = chartSlabsCommand.integerValueOfParameterNamed(periodTypeParamName, locale);

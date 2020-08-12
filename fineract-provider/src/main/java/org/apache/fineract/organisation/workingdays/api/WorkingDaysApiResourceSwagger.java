@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.organisation.workingdays.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
@@ -33,23 +32,23 @@ final class WorkingDaysApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetWorkingDaysResponse")
+    @Schema(description = "GetWorkingDaysResponse")
     public static final class GetWorkingDaysResponse {
 
         private GetWorkingDaysResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
+        @Schema(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
         public String recurrence;
         public EnumOptionData repaymentRescheduleType;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean extendTermForDailyRepayments;
     }
 
-    @ApiModel(value = "GetWorkingDaysTemplateResponse")
+    @Schema(description = "GetWorkingDaysTemplateResponse")
     public static final class GetWorkingDaysTemplateResponse {
 
         private GetWorkingDaysTemplateResponse() {
@@ -59,31 +58,31 @@ final class WorkingDaysApiResourceSwagger {
         public Collection<EnumOptionData> repaymentRescheduleOptions;
     }
 
-    @ApiModel(value = "PutWorkingDaysRequest")
+    @Schema(description = "PutWorkingDaysRequest")
     public static final class PutWorkingDaysRequest {
 
         private PutWorkingDaysRequest() {
 
         }
 
-        @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
+        @Schema(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
         public String recurrence;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public EnumOptionData repaymentRescheduleType;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean extendTermForDailyRepayments;
     }
 
-    @ApiModel(value = "PutWorkingDaysResponse")
+    @Schema(description = "PutWorkingDaysResponse")
     public static final class PutWorkingDaysResponse {
 
         private PutWorkingDaysResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long resourceId;
     }
 }

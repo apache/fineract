@@ -23,8 +23,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object for extracting flat data for joint liability group's
- * collection sheet.
+ * Immutable data object for extracting flat data for joint liability group's collection sheet.
  */
 public class JLGCollectionSheetFlatData {
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.command;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides an appropriate CommandStrategy using the 'method' and 'resourceUrl'.
- * CommandStrategy bean is created using Spring Application Context.
+ * Provides an appropriate CommandStrategy using the 'method' and 'resourceUrl'. CommandStrategy bean is created using
+ * Spring Application Context.
  *
  * @author Rishabh Shukla
  *
@@ -36,12 +37,11 @@ import org.springframework.stereotype.Component;
 public class CommandStrategyProvider {
 
     private final ApplicationContext applicationContext;
-    private final ConcurrentHashMap<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
+    private final Map<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
 
     /**
-     * Constructs a CommandStrategyProvider with argument of ApplicationContext
-     * type. It also initialize commandStrategies using init() function by
-     * filling it with available CommandStrategies in
+     * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initialize
+     * commandStrategies using init() function by filling it with available CommandStrategies in
      * {@link org.apache.fineract.batch.command.internal}.
      *
      * @param applicationContext
@@ -56,9 +56,8 @@ public class CommandStrategyProvider {
     }
 
     /**
-     * Returns an appropriate commandStrategy after determining it using the
-     * CommandContext of the request. If no such Strategy is found then a
-     * default strategy is returned back.
+     * Returns an appropriate commandStrategy after determining it using the CommandContext of the request. If no such
+     * Strategy is found then a default strategy is returned back.
      *
      * @param commandContext
      * @return CommandStrategy
@@ -70,7 +69,7 @@ public class CommandStrategyProvider {
             return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(commandContext));
         }
 
-        for (ConcurrentHashMap.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
+        for (Map.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
             if (commandContext.matcher(entry.getKey())) {
                 return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(entry.getKey()));
             }
@@ -80,10 +79,8 @@ public class CommandStrategyProvider {
     }
 
     /**
-     * Contains various available command strategies in
-     * {@link org.apache.fineract.batch.command.internal}. Any new command
-     * Strategy will have to be added within this function in order to initiate
-     * it within the constructor.
+     * Contains various available command strategies in {@link org.apache.fineract.batch.command.internal}. Any new
+     * command Strategy will have to be added within this function in order to initiate it within the constructor.
      */
     private void init() {
         this.commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "createClientCommandStrategy");

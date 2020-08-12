@@ -26,8 +26,7 @@ import org.joda.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 /**
- * A wrapper for dealing with side-effect free functionality related to a loans
- * transactions and repayment schedule.
+ * A wrapper for dealing with side-effect free functionality related to a loans transactions and repayment schedule.
  */
 @Component
 public final class LoanSummaryWrapper {

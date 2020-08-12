@@ -28,8 +28,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * Client Loan Integration Test for checking Loan Application Repayment
- * Schedule.
+ * Client Loan Integration Test for checking Loan Application Repayment Schedule.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SurveyIntegrationTest {

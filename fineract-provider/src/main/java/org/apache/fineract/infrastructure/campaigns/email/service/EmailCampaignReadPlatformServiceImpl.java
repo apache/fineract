@@ -132,9 +132,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final boolean useReport = rs.getBoolean("useReport");
 
             /*
-             * final ReportData stretchyReport = new ReportData(reportId,
-             * reportName, reportType, reportSubType, reportCategory,
-             * reportDescription, reportSql, coreReport, useReport, null);
+             * final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType,
+             * reportCategory, reportDescription, reportSql, coreReport, useReport, null);
              */
 
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
@@ -247,7 +246,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             EmailBusinessRulesData emailBusinessRulesData = retrieveOne.get(0);
             return emailBusinessRulesData;
         } catch (final IndexOutOfBoundsException e) {
-            throw new EmailBusinessRuleNotFound(resourceId);
+            throw new EmailBusinessRuleNotFound(resourceId, e);
         }
 
     }
@@ -259,7 +258,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final String sql = "select " + this.emailCampaignMapper.schema + " where ec.id = ? and ec.is_visible = ?";
             return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, resourceId, isVisible);
         } catch (final EmptyResultDataAccessException e) {
-            throw new EmailCampaignNotFound(resourceId);
+            throw new EmailCampaignNotFound(resourceId, e);
         }
     }
 

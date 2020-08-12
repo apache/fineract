@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
 /**
@@ -29,7 +28,7 @@ final class LoanTransactionsApiResourceSwagger {
 
     private LoanTransactionsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetLoansLoanIdTransactionsTemplateResponse")
+    @Schema(description = "GetLoansLoanIdTransactionsTemplateResponse")
     public static final class GetLoansLoanIdTransactionsTemplateResponse {
 
         private GetLoansLoanIdTransactionsTemplateResponse() {}
@@ -38,47 +37,47 @@ final class LoanTransactionsApiResourceSwagger {
 
             private GetLoansTransactionType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "loanTransactionType.repayment")
+            @Schema(example = "loanTransactionType.repayment")
             public String code;
-            @ApiModelProperty(example = "Repayment")
-            public String value;
+            @Schema(example = "Repayment")
+            public String description;
         }
 
         static final class GetLoansTotal {
 
             private GetLoansTotal() {}
 
-            @ApiModelProperty(example = "XOF")
+            @Schema(example = "XOF")
             public String currencyCode;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer digitsAfterDecimal;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer inMultiplesOf;
-            @ApiModelProperty(example = "471")
+            @Schema(example = "471")
             public Float amount;
-            @ApiModelProperty(example = "CFA Franc BCEAO")
+            @Schema(example = "CFA Franc BCEAO")
             public String defaultName;
-            @ApiModelProperty(example = "currency.XOF")
+            @Schema(example = "currency.XOF")
             public String nameCode;
-            @ApiModelProperty(example = "CFA")
+            @Schema(example = "CFA")
             public String displaySymbol;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean zero;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean greaterThanZero;
-            @ApiModelProperty(example = "471 CFA")
+            @Schema(example = "471 CFA")
             public String displaySymbolValue;
         }
 
         public GetLoansTransactionType transactionType;
-        @ApiModelProperty(example = "[2009, 8, 1]")
+        @Schema(example = "[2009, 8, 1]")
         public LocalDate date;
         public GetLoansTotal total;
     }
 
-    @ApiModel(value = "GetLoansLoanIdTransactionsTransactionIdResponse")
+    @Schema(description = "GetLoansLoanIdTransactionsTransactionIdResponse")
     public static final class GetLoansLoanIdTransactionsTransactionIdResponse {
 
         private GetLoansLoanIdTransactionsTransactionIdResponse() {}
@@ -87,27 +86,27 @@ final class LoanTransactionsApiResourceSwagger {
 
             private GetLoansType() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "loanTransactionType.repayment")
+            @Schema(example = "loanTransactionType.repayment")
             public String code;
-            @ApiModelProperty(example = "Repayment")
-            public String value;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "Repayment")
+            public String description;
+            @Schema(example = "false")
             public Boolean disbursement;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean repaymentAtDisbursement;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean repayment;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean contra;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean waiveInterest;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean waiveCharges;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean writeOff;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean recoveryRepayment;
         }
 
@@ -115,76 +114,76 @@ final class LoanTransactionsApiResourceSwagger {
 
             private GetLoansCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
-        @ApiModelProperty(example = "3")
+        @Schema(example = "3")
         public Integer id;
         public GetLoansType type;
-        @ApiModelProperty(example = "[2012, 5, 14]")
+        @Schema(example = "[2012, 5, 14]")
         public LocalDate date;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean manuallyReversed;
         public GetLoansCurrency currency;
-        @ApiModelProperty(example = "559.88")
+        @Schema(example = "559.88")
         public Double amount;
-        @ApiModelProperty(example = "559.88")
+        @Schema(example = "559.88")
         public Double interestPortion;
     }
 
-    @ApiModel(value = "PostLoansLoanIdTransactionsRequest")
+    @Schema(description = "PostLoansLoanIdTransactionsRequest")
     public static final class PostLoansLoanIdTransactionsRequest {
 
         private PostLoansLoanIdTransactionsRequest() {}
     }
 
-    @ApiModel(value = "PostLoansLoanIdTransactionsResponse")
+    @Schema(description = "PostLoansLoanIdTransactionsResponse")
     public static final class PostLoansLoanIdTransactionsResponse {
 
         private PostLoansLoanIdTransactionsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "22")
+        @Schema(example = "22")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdRequest")
+    @Schema(description = "PostLoansLoanIdTransactionsTransactionIdRequest")
     public static final class PostLoansLoanIdTransactionsTransactionIdRequest {
 
         private PostLoansLoanIdTransactionsTransactionIdRequest() {}
 
-        @ApiModelProperty(example = "en_GB")
+        @Schema(example = "en_GB")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "25 May 2012")
+        @Schema(example = "25 May 2012")
         public String transactionDate;
-        @ApiModelProperty(example = "50,000.00")
+        @Schema(example = "50,000.00")
         public Double transactionAmount;
-        @ApiModelProperty(example = "An optional note about why your adjusting or changing the transaction.")
+        @Schema(example = "An optional note about why your adjusting or changing the transaction.")
         public String note;
     }
 
-    @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdResponse")
+    @Schema(description = "PostLoansLoanIdTransactionsTransactionIdResponse")
     public static final class PostLoansLoanIdTransactionsTransactionIdResponse {
 
         private PostLoansLoanIdTransactionsTransactionIdResponse() {}
 
-        @ApiModelProperty(example = "16")
+        @Schema(example = "16")
         public Integer resourceId;
     }
 }

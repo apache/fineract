@@ -34,6 +34,8 @@ import org.apache.fineract.infrastructure.accountnumberformat.exception.AccountN
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,6 +44,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumberFormatReadPlatformService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AccountNumberFormatReadPlatformServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -101,7 +105,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
                     new Object[] { id });
             return accountNumberFormatData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountNumberFormatNotFoundException(id);
+            throw new AccountNumberFormatNotFoundException(id, e);
         }
     }
 
@@ -111,9 +115,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
         Map<String, List<EnumOptionData>> accountNumberPrefixTypeOptions = new HashMap<>();
         /***
-         * If an Account type is passed in, return prefixes only for the passed
-         * in account type, else return all allowed prefixes keyed by all
-         * possible entity type
+         * If an Account type is passed in, return prefixes only for the passed in account type, else return all allowed
+         * prefixes keyed by all possible entity type
          **/
         if (entityAccountTypeForTemplate != null) {
             determinePrefixTypesForAccounts(accountNumberPrefixTypeOptions, entityAccountTypeForTemplate);
@@ -145,7 +148,9 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             case GROUP:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;
-            default:
+            case SHARES:
+            // SHARES has no prefix
+            break;
         }
 
         Object[] array = accountNumberPrefixTypesSet.toArray();

@@ -21,8 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when document management functionality is
- * invoked for invalid Entity Types
+ * A {@link RuntimeException} thrown when document management functionality is invoked for invalid Entity Types
  */
 public class InvalidEntityTypeForDocumentManagementException extends AbstractPlatformResourceNotFoundException {
 

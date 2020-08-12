@@ -74,8 +74,8 @@ public class AccountNumberPreferencesTest {
     private Integer savingsAccountNumberPreferenceId;
     private Integer groupsAccountNumberPreferenceId;
     private Integer centerAccountNumberPreferenceId;
-    private final String MINIMUM_OPENING_BALANCE = "1000.0";
-    private final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    private static final String MINIMUM_OPENING_BALANCE = "1000.0";
+    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private Boolean isAccountPreferenceSetUp = false;
     private Integer clientTypeCodeId;
     private String clientCodeValueName;
@@ -112,8 +112,7 @@ public class AccountNumberPreferencesTest {
         this.deleteAllAccountNumberPreferences();
 
         /*
-         * Validate the default account number generation rules for clients,
-         * loans and savings accounts.
+         * Validate the default account number generation rules for clients, loans and savings accounts.
          */
         this.validateDefaultAccountNumberGeneration();
 
@@ -121,8 +120,7 @@ public class AccountNumberPreferencesTest {
         this.createAccountNumberPreference();
 
         /*
-         * Validate account number preference rules apply to Clients,Loans and
-         * Saving Accounts
+         * Validate account number preference rules apply to Clients,Loans and Saving Accounts
          */
         this.validateAccountNumberGenerationWithPreferences();
 
@@ -130,8 +128,7 @@ public class AccountNumberPreferencesTest {
         this.updateAccountNumberPreference();
 
         /*
-         * Validate account number preference rules apply to Clients,Loans and
-         * Saving Accounts after Updation
+         * Validate account number preference rules apply to Clients,Loans and Saving Accounts after Updation
          */
         this.validateAccountNumberGenerationWithPreferences();
 
@@ -450,7 +447,7 @@ public class AccountNumberPreferencesTest {
                 .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
                 //
                 .withMinRequiredBalance(minRequiredBalance).withEnforceMinRequiredBalance(enforceMinRequiredBalance)
-                .withMinimumOpenningBalance(this.MINIMUM_OPENING_BALANCE).build();
+                .withMinimumOpenningBalance(MINIMUM_OPENING_BALANCE).build();
         this.savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
         LOG.info("Sucessfully created savings product (ID: {} )", this.savingsProductId);
 

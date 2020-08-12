@@ -55,8 +55,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 /**
- * All monetary transactions against a loan are modelled through this entity.
- * Disbursements, Repayments, Waivers, Write-off etc
+ * All monetary transactions against a loan are modelled through this entity. Disbursements, Repayments, Waivers,
+ * Write-off etc
  */
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
@@ -135,9 +135,8 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     protected LoanTransaction() {
         /*
-         * this.loan = null; this.dateOf = null; this.typeOf = null;
-         * this.submittedOnDate = DateUtils.getDateOfTenant(); this.createdDate
-         * = new Date(); this.appUser = null;
+         * this.loan = null; this.dateOf = null; this.typeOf = null; this.submittedOnDate = DateUtils.getDateOfTenant();
+         * this.createdDate = new Date(); this.appUser = null;
          */
     }
 
@@ -303,7 +302,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
             final PaymentDetail paymentDetail, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
-        super();
+
         this.loan = loan;
         this.typeOf = typeOf;
         this.dateOf = dateOf;
@@ -384,11 +383,9 @@ public class LoanTransaction extends AbstractPersistableCustom {
     }
 
     /**
-     * This updates the derived fields of a loan transaction for the principal,
-     * interest and interest waived portions.
+     * This updates the derived fields of a loan transaction for the principal, interest and interest waived portions.
      *
-     * This accumulates the values passed to the already existent values for
-     * each of the portions.
+     * This accumulates the values passed to the already existent values for each of the portions.
      *
      * @param principal
      *            principal

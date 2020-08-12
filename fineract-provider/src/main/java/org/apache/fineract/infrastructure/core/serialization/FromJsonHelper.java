@@ -118,13 +118,13 @@ public class FromJsonHelper {
 
     /**
      * @param parentPropertyName
-     *            The full json path to this property,the value is appended to
-     *            the parameter name while generating an error message <br>
-     *            Ex: property "name" in Object "person" would be named as
-     *            "person.name"
+     *            The full json path to this property,the value is appended to the parameter name while generating an
+     *            error message <br>
+     *            Ex: property "name" in Object "person" would be named as "person.name"
      * @param object
      * @param supportedParams
      */
+    @SuppressWarnings("AvoidHidingCauseException")
     public void checkForUnsupportedNestedParameters(final String parentPropertyName, final JsonObject object,
             final Set<String> supportedParams) {
         try {

@@ -80,7 +80,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
      * Creates a new cashier.
      */
     public CashierTransaction() {
-        super();
+
     }
 
     public static CashierTransaction fromJson(final Cashier cashier, final JsonCommand command) {
@@ -206,8 +206,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
     /**
      * Returns the transaction type of this cashier transaction. .
      *
-     * @return the transaction type of this cashier transaction or {@code null}
-     *         if not present.
+     * @return the transaction type of this cashier transaction or {@code null} if not present.
      */
     public Integer getTxnType() {
         return txnType;

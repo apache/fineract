@@ -76,7 +76,7 @@ public class S3ContentRepository implements ContentRepository {
         try {
             deleteObjectFromS3(documentPath);
         } catch (final AmazonClientException ace) {
-            throw new ContentManagementException(documentName, ace.getMessage());
+            throw new ContentManagementException(documentName, ace.getMessage(), ace);
         }
     }
 
@@ -129,7 +129,8 @@ public class S3ContentRepository implements ContentRepository {
             fileData = new FileData(s3object.getObjectContent(), fileName, documentData.contentType());
         } catch (final AmazonClientException ace) {
             LOG.error("Error occured.", ace);
-            throw new DocumentNotFoundException(documentData.getParentEntityType(), documentData.getParentEntityId(), documentData.getId());
+            throw new DocumentNotFoundException(documentData.getParentEntityType(), documentData.getParentEntityId(), documentData.getId(),
+                    ace);
         }
         return fileData;
     }
@@ -177,7 +178,7 @@ public class S3ContentRepository implements ContentRepository {
             this.s3Client.putObject(new PutObjectRequest(this.s3BucketName, s3UploadLocation, inputStream, new ObjectMetadata()));
         } catch (final AmazonClientException ace) {
             final String message = ace.getMessage();
-            throw new ContentManagementException(filename, message);
+            throw new ContentManagementException(filename, message, ace);
         }
     }
 }

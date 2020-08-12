@@ -406,12 +406,10 @@ public class FixedDepositAccount extends SavingsAccount {
         this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
 
         /*
-         * // withdraw deposit amount before closing the account final Money
-         * transactionAmountMoney = Money.of(this.currency,
-         * this.getAccountBalance()); final SavingsAccountTransaction withdraw =
-         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail,
-         * closedDate, transactionAmountMoney, new Date());
-         * this.transactions.add(withdraw);
+         * // withdraw deposit amount before closing the account final Money transactionAmountMoney =
+         * Money.of(this.currency, this.getAccountBalance()); final SavingsAccountTransaction withdraw =
+         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail, closedDate, transactionAmountMoney, new
+         * Date()); this.transactions.add(withdraw);
          */
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());

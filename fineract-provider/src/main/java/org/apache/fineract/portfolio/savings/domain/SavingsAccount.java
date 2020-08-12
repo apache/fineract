@@ -117,6 +117,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 @Entity
@@ -126,6 +128,8 @@ import org.springframework.util.CollectionUtils;
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 public class SavingsAccount extends AbstractPersistableCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
 
     @Version
     int version;
@@ -220,11 +224,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     protected BigDecimal nominalAnnualInterestRate;
 
     /**
-     * The interest period is the span of time at the end of which savings in a
-     * client's account earn interest.
+     * The interest period is the span of time at the end of which savings in a client's account earn interest.
      *
-     * A value from the {@link SavingsCompoundingInterestPeriodType}
-     * enumeration.
+     * A value from the {@link SavingsCompoundingInterestPeriodType} enumeration.
      */
     @Column(name = "interest_compounding_period_enum", nullable = false)
     protected Integer interestCompoundingPeriodType;
@@ -242,8 +244,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     protected Integer interestCalculationType;
 
     /**
-     * A value from the {@link SavingsInterestCalculationDaysInYearType}
-     * enumeration.
+     * A value from the {@link SavingsInterestCalculationDaysInYearType} enumeration.
      */
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
     protected Integer interestCalculationDaysInYearType;
@@ -258,8 +259,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     protected Integer lockinPeriodFrequencyType;
 
     /**
-     * When account becomes <code>active</code> this field is derived if
-     * <code>lockinPeriodFrequency</code> and
+     * When account becomes <code>active</code> this field is derived if <code>lockinPeriodFrequency</code> and
      * <code>lockinPeriodFrequencyType</code> details are present.
      */
     @Temporal(TemporalType.DATE)
@@ -433,9 +433,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     /**
-     * Used after fetching/hydrating a {@link SavingsAccount} object to inject
-     * helper services/components used for update summary details after
-     * events/transactions on a {@link SavingsAccount}.
+     * Used after fetching/hydrating a {@link SavingsAccount} object to inject helper services/components used for
+     * update summary details after events/transactions on a {@link SavingsAccount}.
      */
     public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final SavingsHelper savingsHelper) {
@@ -676,16 +675,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
      *
-     * Interest calculation is performed on-the-fly over all account
-     * transactions.
+     * Interest calculation is performed on-the-fly over all account transactions.
      *
      *
-     * 1. Calculate Interest From Beginning Of Account 1a. determine the
-     * 'crediting' periods that exist for this savings acccount 1b. determine
-     * the 'compounding' periods that exist within each 'crediting' period
-     * calculate the amount of interest due at the end of each 'crediting'
-     * period check if an existing 'interest posting' transaction exists for
-     * date and matches the amount posted
+     * 1. Calculate Interest From Beginning Of Account 1a. determine the 'crediting' periods that exist for this savings
+     * acccount 1b. determine the 'compounding' periods that exist within each 'crediting' period calculate the amount
+     * of interest due at the end of each 'crediting' period check if an existing 'interest posting' transaction exists
+     * for date and matches the amount posted
      *
      * @param isInterestTransfer
      *            TODO
@@ -1109,9 +1105,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
 
             /*
-             * Loop through the onHold funds and see if we need to deduct or add
-             * to minimum required balance and the point in time the transaction
-             * was made:
+             * Loop through the onHold funds and see if we need to deduct or add to minimum required balance and the
+             * point in time the transaction was made:
              */
             if (depositAccountOnHoldTransactions != null) {
                 for (final DepositAccountOnHoldTransaction onHoldTransaction : depositAccountOnHoldTransactions) {
@@ -1171,9 +1166,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
 
             /*
-             * Loop through the onHold funds and see if we need to deduct or add
-             * to minimum required balance and the point in time the transaction
-             * was made:
+             * Loop through the onHold funds and see if we need to deduct or add to minimum required balance and the
+             * point in time the transaction was made:
              */
             if (depositAccountOnHoldTransactions != null) {
                 for (final DepositAccountOnHoldTransaction onHoldTransaction : depositAccountOnHoldTransactions) {
@@ -1453,8 +1447,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     /**
-     * If overdrafts are allowed and the overdraft limit is not set, set the
-     * same to Zero
+     * If overdrafts are allowed and the overdraft limit is not set, set the same to Zero
      **/
     private void esnureOverdraftLimitsSetForOverdraftAccounts() {
 
@@ -1468,9 +1461,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
     private void validateLockinDetails(final DataValidatorBuilder baseDataValidator) {
 
         /*
-         * final List<ApiParameterError> dataValidationErrors = new
-         * ArrayList<ApiParameterError>(); final DataValidatorBuilder
-         * baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+         * final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>(); final
+         * DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
          * .resource(resourceName);
          */
 
@@ -2187,8 +2179,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
         /*
-         * if (annualFeeSettingsSet()) {
-         * updateToNextAnnualFeeDueDateFrom(getActivationLocalDate()); }
+         * if (annualFeeSettingsSet()) { updateToNextAnnualFeeDueDateFrom(getActivationLocalDate()); }
          */
         if (this.client != null && this.client.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
@@ -2398,7 +2389,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             case YEARS:
                 lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
+            break;
         }
 
         return lockedInUntilLocalDate;

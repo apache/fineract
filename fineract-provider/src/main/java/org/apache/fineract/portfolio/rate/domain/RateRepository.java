@@ -23,8 +23,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Bowpi GT Rate repository to save on m_rate table (custom change for Credi
- * Chapin) Created by Jose on 19/07/2017.
+ * Bowpi GT Rate repository to save on m_rate table (custom change for Credi Chapin) Created by Jose on 19/07/2017.
  */
 public interface RateRepository extends JpaRepository<Rate, Long>, JpaSpecificationExecutor<Rate> {
 

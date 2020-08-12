@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.meeting.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when meeting is captured
- * against not supported resource.
+ * {@link AbstractPlatformDomainRuleException} thrown when meeting is captured against not supported resource.
  */
 public class MeetingNotSupportedResourceException extends AbstractPlatformDomainRuleException {
 

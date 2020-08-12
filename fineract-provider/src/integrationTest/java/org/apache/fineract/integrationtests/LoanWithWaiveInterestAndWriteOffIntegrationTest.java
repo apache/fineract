@@ -37,8 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client Loan Integration Test for checking Loan Disbursement with Waive
- * Interest and Write-Off.
+ * Client Loan Integration Test for checking Loan Disbursement with Waive Interest and Write-Off.
  */
 @SuppressWarnings({ "rawtypes" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
@@ -47,20 +46,20 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    private final String LP_PRINCIPAL = "12,000.00";
-    private final String LP_REPAYMENTS = "2";
-    private final String LP_REPAYMENT_PERIOD = "6";
-    private final String LP_INTEREST_RATE = "1";
-    private final String PRINCIPAL = "4,500.00";
-    private final String LOAN_TERM_FREQUENCY = "18";
-    private final String NUMBER_OF_REPAYMENTS = "9";
-    private final String REPAYMENT_PERIOD = "2";
-    private final String DISBURSEMENT_DATE = "30 October 2010";
-    private final String LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010";
-    private final String EXPECTED_DISBURSAL_DATE = "28 October 2010";
-    private final String RATE_OF_INTEREST_PER_PERIOD = "2";
-    private final String DATE_OF_JOINING = "04 March 2009";
-    private final String INTEREST_VALUE_AMOUNT = "40.00";
+    private static final String LP_PRINCIPAL = "12,000.00";
+    private static final String LP_REPAYMENTS = "2";
+    private static final String LP_REPAYMENT_PERIOD = "6";
+    private static final String LP_INTEREST_RATE = "1";
+    private static final String PRINCIPAL = "4,500.00";
+    private static final String LOAN_TERM_FREQUENCY = "18";
+    private static final String NUMBER_OF_REPAYMENTS = "9";
+    private static final String REPAYMENT_PERIOD = "2";
+    private static final String DISBURSEMENT_DATE = "30 October 2010";
+    private static final String LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010";
+    private static final String EXPECTED_DISBURSAL_DATE = "28 October 2010";
+    private static final String RATE_OF_INTEREST_PER_PERIOD = "2";
+    private static final String DATE_OF_JOINING = "04 March 2009";
+    private static final String INTEREST_VALUE_AMOUNT = "40.00";
     private LoanTransactionHelper loanTransactionHelper;
 
     @BeforeEach
@@ -75,7 +74,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, DATE_OF_JOINING);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // CREATE LOAN PRODUCT
@@ -101,7 +100,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -114,7 +113,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DIBURSE AGAIN
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -125,13 +124,13 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
         this.loanTransactionHelper.makeRepayment("1 January 2011", repayment_with_interest, loanID);
         this.loanTransactionHelper.makeRepayment("1 March 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 May 2011", this.INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.waiveInterest("1 May 2011", INTEREST_VALUE_AMOUNT, loanID);
         this.loanTransactionHelper.makeRepayment("1 May 2011", repayment_without_interest, loanID);
         this.loanTransactionHelper.makeRepayment("1 July 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 September 2011", this.INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.waiveInterest("1 September 2011", INTEREST_VALUE_AMOUNT, loanID);
         this.loanTransactionHelper.makeRepayment("1 September 2011", repayment_without_interest, loanID);
         this.loanTransactionHelper.makeRepayment("1 November 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 January 2012", this.INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.waiveInterest("1 January 2012", INTEREST_VALUE_AMOUNT, loanID);
         this.loanTransactionHelper.makeRepayment("1 January 2012", repayment_without_interest, loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(7, 1000.0f, loanID);
 
@@ -143,7 +142,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     @Test
     public void checkClientLoan_WRITTEN_OFF() {
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, DATE_OF_JOINING);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // CREATE LOAN PRODUCT
@@ -160,7 +159,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -196,9 +195,9 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
     private Integer createLoanProduct() {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(this.LP_PRINCIPAL).withRepaymentTypeAsMonth()
-                .withRepaymentAfterEvery(this.LP_REPAYMENT_PERIOD).withNumberOfRepayments(this.LP_REPAYMENTS).withRepaymentTypeAsMonth()
-                .withinterestRatePerPeriod(this.LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL).withRepaymentTypeAsMonth()
+                .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
+                .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().build(null);
 
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
@@ -206,13 +205,13 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(this.PRINCIPAL)
-                .withLoanTermFrequency(this.LOAN_TERM_FREQUENCY).withLoanTermFrequencyAsMonths()
-                .withNumberOfRepayments(this.NUMBER_OF_REPAYMENTS).withRepaymentEveryAfter(this.REPAYMENT_PERIOD)
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(this.RATE_OF_INTEREST_PER_PERIOD)
-                .withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate(this.EXPECTED_DISBURSAL_DATE)
-                .withSubmittedOnDate(this.LOAN_APPLICATION_SUBMISSION_DATE).build(clientID.toString(), loanProductID.toString(), null);
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL)
+                .withLoanTermFrequency(LOAN_TERM_FREQUENCY).withLoanTermFrequencyAsMonths().withNumberOfRepayments(NUMBER_OF_REPAYMENTS)
+                .withRepaymentEveryAfter(REPAYMENT_PERIOD).withRepaymentFrequencyTypeAsMonths()
+                .withInterestRatePerPeriod(RATE_OF_INTEREST_PER_PERIOD).withInterestTypeAsFlatBalance()
+                .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
+                .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE).withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
+                .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 }

@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component;
 
 @Path("/scheduler")
 @Component
-@Api(tags = { "Scheduler" })
-@SwaggerDefinition(tags = { @Tag(name = "Scheduler", description = "") })
+
+@Tag(name = "Scheduler", description = "")
 public class SchedulerApiResource {
 
     private final PlatformSecurityContext context;
@@ -70,9 +70,10 @@ public class SchedulerApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Scheduler Status", notes = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n"
+    @Operation(summary = "Retrieve Scheduler Status", description = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n"
             + "scheduler")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = SchedulerApiResourceSwagger.GetSchedulerResponse.class) })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class))) })
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
@@ -85,10 +86,11 @@ public class SchedulerApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Activate Scheduler Jobs | Suspend Scheduler Jobs", notes = "Activates the scheduler job service. | Suspends the scheduler job service.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "POST :  scheduler?command=start\n\n" + "\n" + "POST : scheduler?command=stop") })
+    @Operation(summary = "Activate Scheduler Jobs | Suspend Scheduler Jobs", description = "Activates the scheduler job service. | Suspends the scheduler job service.")
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "POST :  scheduler?command=start\n\n" + "\n"
+            + "POST : scheduler?command=stop") })
     public Response changeSchedulerStatus(
-            @QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
+            @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam) {
         // check the logged in user have permissions to update scheduler status
         final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "UPDATE_SCHEDULER");
         if (hasNotPermission) {

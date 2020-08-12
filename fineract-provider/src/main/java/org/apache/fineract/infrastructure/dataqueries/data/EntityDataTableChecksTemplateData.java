@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
@@ -69,7 +70,8 @@ public class EntityDataTableChecksTemplateData implements Serializable {
         return Objects.equals(entities, that.entities) && Objects.equals(statusClient, that.statusClient)
                 && Objects.equals(statusGroup, that.statusGroup) && Objects.equals(statusSavings, that.statusSavings)
                 && Objects.equals(statusLoans, that.statusLoans) && Objects.equals(datatables, that.datatables)
-                && Objects.equals(loanProductDatas, that.loanProductDatas) && Objects.equals(savingsProductDatas, that.savingsProductDatas);
+                && CollectionUtils.isEqualCollection(loanProductDatas, that.loanProductDatas)
+                && CollectionUtils.isEqualCollection(savingsProductDatas, that.savingsProductDatas);
     }
 
     @Override

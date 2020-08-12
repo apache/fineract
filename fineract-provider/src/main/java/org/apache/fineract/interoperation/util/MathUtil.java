@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.interoperation.util;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import javax.validation.constraints.NotNull;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -308,8 +308,7 @@ public class MathUtil {
     }
 
     /**
-     * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the
-     *         parameter currency
+     * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency
      */
     public static BigDecimal normalizeAmount(BigDecimal amount, @NotNull MonetaryCurrency currency) {
         return amount == null ? null : amount.setScale(currency.getDigitsAfterDecimal(), MoneyHelper.getRoundingMode());

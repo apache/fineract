@@ -44,7 +44,7 @@ public class Response extends AbstractPersistableCustom {
     private Integer sequenceNo;
 
     public Response() {
-        super();
+
     }
 
     public Question getQuestion() {

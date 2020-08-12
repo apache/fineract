@@ -21,8 +21,7 @@ package org.apache.fineract.portfolio.client.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when a client identifier of the particular
- * type is already present
+ * A {@link RuntimeException} thrown when a client identifier of the particular type is already present
  */
 public class DuplicateClientIdentifierException extends AbstractPlatformDomainRuleException {
 

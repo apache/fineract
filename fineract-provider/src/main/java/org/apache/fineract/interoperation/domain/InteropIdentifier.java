@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.interoperation.domain;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -30,7 +31,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
@@ -89,16 +89,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return account;
     }
 
-    private void setAccount(SavingsAccount account) {
-        this.account = account;
-    }
-
     public InteropIdentifierType getType() {
         return type;
-    }
-
-    private void setType(InteropIdentifierType type) {
-        this.type = type;
     }
 
     public String getValue() {
@@ -121,16 +113,8 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return createdBy;
     }
 
-    private void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    private void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     public String geModifiedBy() {

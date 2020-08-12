@@ -65,13 +65,15 @@ public class HookIntegrationTest {
         // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
         final String uniqueId = UUID.randomUUID().toString();
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
-        this.hookHelper.createHook(payloadURL);
+        final Integer hookId = this.hookHelper.createHook(payloadURL);
+        Assertions.assertNotNull(hookId);
         final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
+        Assertions.assertNotNull(createdOfficeID);
         try {
 
             /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
+             * sleep for a three seconds after each failure to increase the likelihood of the previous request for
+             * creating office completing
              **/
 
             for (int i = 0; i < 6; i++) {
@@ -93,6 +95,8 @@ public class HookIntegrationTest {
                 fail("Failed to connect to https://echo-webhook.herokuapp.com platform");
             }
             throw new RuntimeException(e);
+        } finally {
+            this.hookHelper.deleteHook(hookId.longValue());
         }
 
     }

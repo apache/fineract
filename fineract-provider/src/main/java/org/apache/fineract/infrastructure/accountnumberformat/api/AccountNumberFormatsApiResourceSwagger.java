@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -33,7 +32,7 @@ final class AccountNumberFormatsApiResourceSwagger {
         // this class is only for Swagger implementation for Live Documentation
     }
 
-    @ApiModel(value = "GetAccountNumberFormatsResponse")
+    @Schema(description = "GetAccountNumberFormatsResponse")
     public static final class GetAccountNumberFormatsResponse {
 
         private GetAccountNumberFormatsResponse() {
@@ -43,14 +42,14 @@ final class AccountNumberFormatsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetAccountNumberFormatsIdResponse")
+    @Schema(description = "GetAccountNumberFormatsIdResponse")
     public static final class GetAccountNumberFormatsIdResponse {
 
         private GetAccountNumberFormatsIdResponse() {
 
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Long id;
         public EnumOptionData accountType;
 
@@ -58,7 +57,7 @@ final class AccountNumberFormatsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetAccountNumberFormatsResponseTemplate")
+    @Schema(description = "GetAccountNumberFormatsResponseTemplate")
     public static final class GetAccountNumberFormatsResponseTemplate {
 
         private GetAccountNumberFormatsResponseTemplate() {
@@ -70,45 +69,45 @@ final class AccountNumberFormatsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "PostAccountNumberFormatsRequest")
+    @Schema(description = "PostAccountNumberFormatsRequest")
     public static final class PostAccountNumberFormatsRequest {
 
         private PostAccountNumberFormatsRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long accountType;
-        @ApiModelProperty(example = "101")
+        @Schema(example = "101")
         public Long prefixType;
 
     }
 
-    @ApiModel(value = "PostAccountNumberFormatsResponse")
+    @Schema(description = "PostAccountNumberFormatsResponse")
     public static final class PostAccountNumberFormatsResponse {
 
         private PostAccountNumberFormatsResponse() {
 
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
 
     }
 
-    @ApiModel(value = "PutAccountNumberFormatsRequest")
+    @Schema(description = "PutAccountNumberFormatsRequest")
     public static final class PutAccountNumberFormatsRequest {
 
         private PutAccountNumberFormatsRequest() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long prefixType;
 
     }
 
-    @ApiModel(value = "PutAccountNumberFormatsResponse")
+    @Schema(description = "PutAccountNumberFormatsResponse")
     public static final class PutAccountNumberFormatsResponse {
 
         private PutAccountNumberFormatsResponse() {
@@ -121,24 +120,24 @@ final class AccountNumberFormatsApiResourceSwagger {
 
             }
 
-            @ApiModelProperty(example = "OFFICE_NAME")
+            @Schema(example = "OFFICE_NAME")
             public Long prefixType;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Long resourceId;
         public PutAccountNumberFormatschangesSwagger changes;
 
     }
 
-    @ApiModel(value = "DeleteAccountNumberFormatsResponse")
+    @Schema(description = "DeleteAccountNumberFormatsResponse")
     public static final class DeleteAccountNumberFormatsResponse {
 
         private DeleteAccountNumberFormatsResponse() {
 
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Long resourceId;
 
     }

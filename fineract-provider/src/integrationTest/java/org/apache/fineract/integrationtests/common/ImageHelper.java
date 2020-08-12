@@ -33,21 +33,21 @@ public class ImageHelper {
     public static Integer createImageForStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer staffId) {
         LOG.info("---------------------------------CREATING AN IMAGE FOR STAFF---------------------------------------------");
-        String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, URL, generateImageAsText(), "resourceId");
     }
 
     public static Integer updateImageForStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer staffId) {
         LOG.info("---------------------------------UPDATING AN IMAGE FOR STAFF---------------------------------------------");
-        String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, URL, generateImageAsText(), "resourceId");
     }
 
     public static String getStaffImageAsText(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer staffId) {
         LOG.info("---------------------------------RETRIEVING STAFF IMAGE---------------------------------------------");
-        String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
         requestSpec.header(HttpHeaders.ACCEPT, "text/plain");
         return Utils.performGetTextResponse(requestSpec, responseSpec, URL);
     }
@@ -55,7 +55,7 @@ public class ImageHelper {
     public static byte[] getStaffImageAsBinary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer staffId) {
         LOG.info("---------------------------------RETRIEVING STAFF IMAGE---------------------------------------------");
-        String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
         requestSpec.header(HttpHeaders.ACCEPT, "application/octet-stream");
         return Utils.performGetBinaryResponse(requestSpec, responseSpec, URL);
     }
@@ -63,7 +63,7 @@ public class ImageHelper {
     public static Integer deleteStaffImage(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer staffId) {
         LOG.info("---------------------------------RETRIEVING STAFF IMAGE---------------------------------------------");
-        String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = STAFF_IMAGE_URL + staffId + IMAGES_URI + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(requestSpec, responseSpec, URL, "resourceId");
     }
 

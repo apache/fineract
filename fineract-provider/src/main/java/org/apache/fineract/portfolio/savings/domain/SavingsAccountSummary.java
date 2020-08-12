@@ -33,8 +33,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.joda.time.LocalDate;
 
 /**
- * {@link SavingsAccountSummary} encapsulates all the summary details of a
- * {@link SavingsAccount}.
+ * {@link SavingsAccountSummary} encapsulates all the summary details of a {@link SavingsAccount}.
  */
 @Embeddable
 public final class SavingsAccountSummary {
@@ -83,7 +82,7 @@ public final class SavingsAccountSummary {
     @Column(name = "last_interest_calculation_date")
     private Date lastInterestCalculationDate;
 
-    protected SavingsAccountSummary() {
+    SavingsAccountSummary() {
         //
     }
 
