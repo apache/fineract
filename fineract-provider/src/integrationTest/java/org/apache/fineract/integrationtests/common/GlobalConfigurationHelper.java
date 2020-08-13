@@ -88,9 +88,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 27 global configurations.
-        Assertions.assertEquals(28, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(28, actualGlobalConfigurations.size());
+        // There are currently 29 global configurations.
+        Assertions.assertEquals(29, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(29, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -345,6 +345,14 @@ public class GlobalConfigurationHelper {
         enableSubRatesDefault.put("enabled", false);
         enableSubRatesDefault.put("trapDoor", false);
         defaults.add(enableSubRatesDefault);
+
+        HashMap<String, Object> isFirstPaydayAllowedOnHoliday = new HashMap<>();
+        isFirstPaydayAllowedOnHoliday.put("id", 33);
+        isFirstPaydayAllowedOnHoliday.put("name", "loan-reschedule-is-first-payday-allowed-on-holiday");
+        isFirstPaydayAllowedOnHoliday.put("value", 0);
+        isFirstPaydayAllowedOnHoliday.put("enabled", false);
+        isFirstPaydayAllowedOnHoliday.put("trapDoor", false);
+        defaults.add(isFirstPaydayAllowedOnHoliday);
 
         return defaults;
     }

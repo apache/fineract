@@ -140,11 +140,14 @@ public class LoanUtilService {
         final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled = this.configurationDomainService
                 .isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
 
+        boolean isFirstRepaymentDateAllowedOnHoliday = this.configurationDomainService
+                .isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
+
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
                 overdurPenaltyWaitPeriod, floatingRateDTO, calendar, calendarHistoryDataWrapper,
                 isInterestChargedFromDateAsDisbursementDateEnabled, numberOfDays, isSkipRepaymentOnFirstMonth,
-                isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled);
+                isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled, isFirstRepaymentDateAllowedOnHoliday);
 
         return scheduleGeneratorDTO;
     }
