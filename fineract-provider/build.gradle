@@ -45,7 +45,7 @@ buildscript {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE'
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
         classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.2.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.3.RELEASE'
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0'
         classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
