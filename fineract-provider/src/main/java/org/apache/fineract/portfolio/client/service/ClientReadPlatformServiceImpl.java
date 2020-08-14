@@ -92,8 +92,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
-    private final List<String> supportedStatusvalues = new ArrayList<String>(
-            Arrays.asList("pending", "active", "withdrawn", "closed", "rejected", "transfer_on_hold", "transfer_in_progreess"));
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -181,12 +179,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
         if (searchParameters != null && searchParameters.getStatus() != null
-                && !supportedStatusvalues.contains(searchParameters.getStatus())) {
+                && ClientStatus.fromString(searchParameters.getStatus()) == ClientStatus.INVALID) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final String defaultUserMessage = "The Status value '" + searchParameters.getStatus()
-                    + "' is not supported. The supported status values are " + supportedStatusvalues.toString();
+            final String defaultUserMessage = "The Status value '" + searchParameters.getStatus() + "' is not supported.";
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.client.status.value.is.not.supported",
-                    defaultUserMessage, "status", searchParameters.getStatus(), supportedStatusvalues.toString());
+                    defaultUserMessage, "status", searchParameters.getStatus());
             dataValidationErrors.add(error);
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
