@@ -20,7 +20,9 @@ package org.apache.fineract.accounting.accrual.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,8 +61,7 @@ public class AccrualAccountingApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Executes Periodic Accrual Accounting", method = "POST", description = "Mandatory Fields\n" + "\n" + "tillDate\n")
-    @Parameter(required = true, schema = @Schema(implementation = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, description = "Request Body\n"
-            + "\n" + "Field Descriptions: \n" + "tillDate: \n" + "which specifies periodic accruals should happen till the given Date"))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String executePeriodicAccrualAccounting(@Parameter(hidden = true) final String jsonRequestBody) {
 

@@ -22,7 +22,6 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -194,7 +193,7 @@ public class JournalEntriesApiResource {
             + "\n" + "Mandatory Fields\n" + "officeId, transactionDate\n\n" + "\ncredits- glAccountId, amount, comments\n\n "
             + "\ndebits-  glAccountId, amount, comments\n\n " + "\n" + "Optional Fields\n"
             + "paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber")
-    @Parameters({ @Parameter(content = @Content(schema = @Schema(implementation = JournalEntryCommand.class))) })
+    @RequestBody(content = @Content(schema = @Schema(implementation = JournalEntryCommand.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = JournalEntriesApiResourceSwagger.PostJournalEntriesResponse.class))) })
     public String createGLJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
