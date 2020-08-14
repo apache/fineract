@@ -147,6 +147,11 @@ public class CommandProcessingResult implements Serializable {
         this.subResourceId = null;
     }
 
+    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId,
+            final Map<String, Object> changesOnly, long clientId) {
+        this(commandId, officeId, null, clientId, null, null, null, resourceId, null, changesOnly, null, null, null, null, null);
+    }
+
     public Long commandId() {
         return this.commandId;
     }

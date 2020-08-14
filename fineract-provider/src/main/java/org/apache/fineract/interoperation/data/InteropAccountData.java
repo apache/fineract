@@ -70,8 +70,8 @@ public class InteropAccountData extends CommandProcessingResult {
             String productName, String shortProductName, String currency, BigDecimal accountBalance, BigDecimal availableBalance,
             SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus, AccountType accountType, DepositAccountType depositType,
             LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn, LocalDate balanceOn,
-            List<InteropIdentifierData> identifiers) {
-        super(resourceId, officeId, commandId, changesOnly);
+            List<InteropIdentifierData> identifiers, long clientId) {
+        super(resourceId, officeId, commandId, changesOnly, clientId);
         this.accountId = accountId;
         this.savingProductId = productId;
         this.productName = productName;
@@ -93,9 +93,9 @@ public class InteropAccountData extends CommandProcessingResult {
     InteropAccountData(String accountId, String productId, String productName, String shortProductName, String currency,
             BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
             AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn,
-            LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
+            LocalDate balanceOn, List<InteropIdentifierData> identifiers, long clientId) {
         this(null, null, null, null, accountId, productId, productName, shortProductName, currency, accountBalance, availableBalance,
-                status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn, identifiers);
+                status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn, identifiers, clientId);
     }
 
     public static InteropAccountData build(SavingsAccount account) {
@@ -114,28 +114,28 @@ public class InteropAccountData extends CommandProcessingResult {
         return new InteropAccountData(account.getExternalId(), product.getId().toString(), product.getName(), product.getShortName(),
                 account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(), account.getStatus(),
                 subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
-                calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids);
+                calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids,
+                account.getClient().getId());
     }
 
     private static LocalDate calcStatusUpdateOn(@NotNull SavingsAccount account) {
-        LocalDate date = account.getClosedOnDate();
-        if (date != null) {
-            return date;
+        if (account.getClosedOnDate() != null) {
+            return account.getClosedOnDate();
         }
-        if ((date = account.getWithdrawnOnDate()) != null) {
-            return date;
+        if (account.getWithdrawnOnDate() != null) {
+            return account.getWithdrawnOnDate();
         }
-        if ((date = account.getActivationLocalDate()) != null) {
-            return date;
+        if (account.getActivationLocalDate() != null) {
+            return account.getActivationLocalDate();
         }
-        if ((date = account.getRejectedOnDate()) != null) {
-            return date;
+        if (account.getRejectedOnDate() != null) {
+            return account.getRejectedOnDate();
         }
-        if ((date = account.getApprovedOnDate()) != null) {
-            return date;
+        if (account.getApprovedOnDate() != null) {
+            return account.getApprovedOnDate();
         }
-        if ((date = account.getSubmittedOnDate()) != null) {
-            return date;
+        if (account.getSubmittedOnDate() != null) {
+            return account.getSubmittedOnDate();
         }
         return null;
     }

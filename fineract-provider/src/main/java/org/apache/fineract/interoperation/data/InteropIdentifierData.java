@@ -55,6 +55,6 @@ public class InteropIdentifierData {
     }
 
     public static InteropIdentifierData build(InteropIdentifier identifier) {
-        return new InteropIdentifierData(identifier.getType(), identifier.getValue(), identifier.getSubValueOrType());
+        return new InteropIdentifierData(identifier.getType(), identifier.getValue(), identifier.getSubType());
     }
 }

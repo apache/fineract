@@ -20,6 +20,7 @@ package org.apache.fineract.interoperation.domain;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -51,7 +52,7 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     private String value;
 
     @Column(name = "sub_value_or_type", length = 128)
-    private String subValueOrType;
+    private String subType;
 
     @Column(name = "created_by", nullable = false, length = 32)
     private String createdBy;
@@ -69,12 +70,12 @@ public class InteropIdentifier extends AbstractPersistableCustom {
 
     protected InteropIdentifier() {}
 
-    public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value,
-            String subValueOrType, @NotNull String createdBy, @NotNull Date createdOn) {
+    public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value, String subType,
+            @NotNull String createdBy, @NotNull Date createdOn) {
         this.account = account;
         this.type = type;
         this.value = value;
-        this.subValueOrType = subValueOrType;
+        this.subType = subType;
         this.createdBy = createdBy;
         this.createdOn = createdOn;
     }
@@ -100,12 +101,12 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         this.value = value;
     }
 
-    public String getSubValueOrType() {
-        return subValueOrType;
+    public String getSubType() {
+        return subType;
     }
 
-    public void setSubValueOrType(String subValueOrType) {
-        this.subValueOrType = subValueOrType;
+    public void setSubType(String subType) {
+        this.subType = subType;
     }
 
     public String getCreatedBy() {
@@ -152,14 +153,14 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         if (!value.equals(that.value)) {
             return false;
         }
-        return subValueOrType != null ? subValueOrType.equals(that.subValueOrType) : that.subValueOrType == null;
+        return Objects.equals(subType, that.subType);
     }
 
     @Override
     public int hashCode() {
         int result = type.hashCode();
         result = 31 * result + value.hashCode();
-        result = 31 * result + (subValueOrType != null ? subValueOrType.hashCode() : 0);
+        result = 31 * result + (subType != null ? subType.hashCode() : 0);
         return result;
     }
 }

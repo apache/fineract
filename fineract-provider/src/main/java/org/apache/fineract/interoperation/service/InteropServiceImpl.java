@@ -20,7 +20,11 @@ package org.apache.fineract.interoperation.service;
 
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE;
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_ROUTING_CODE;
-import static org.springframework.data.jpa.domain.Specification.where;
+import static org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail.instance;
+import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionType.AMOUNT_HOLD;
+import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionType.DEPOSIT;
+import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionType.WITHDRAWAL;
+import static org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction.releaseAmount;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -29,10 +33,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -59,11 +59,11 @@ import org.apache.fineract.interoperation.serialization.InteropDataValidator;
 import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
-import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -84,7 +84,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,7 +114,7 @@ public class InteropServiceImpl implements InteropService {
             ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
             PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, SavingsHelper savingsHelper,
             SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+            SavingsAccountDomainService savingsAccountService) {
         this.securityContext = securityContext;
         this.dataValidator = interopDataValidator;
         this.savingsAccountRepository = savingsAccountRepository;
@@ -133,8 +132,7 @@ public class InteropServiceImpl implements InteropService {
     @Override
     @Transactional
     public InteropAccountData getAccountDetails(@NotNull String accountId) {
-        SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
-        return InteropAccountData.build(savingsAccount);
+        return InteropAccountData.build(validateAndGetSavingAccount(accountId));
     }
 
     @NotNull
@@ -171,17 +169,22 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @NotNull
-    @Override
     @Transactional
+    @Override
     public InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
+        if (identifier == null) {
+            throw new UnsupportedOperationException(
+                    "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
+        }
+
         return InteropIdentifierAccountResponseData.build(identifier.getAccount().getExternalId());
     }
 
     @NotNull
-    @Override
     @Transactional(propagation = Propagation.MANDATORY)
+    @Override
     public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType, @NotNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
@@ -198,12 +201,16 @@ public class InteropServiceImpl implements InteropService {
         return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
     }
 
-    @Override
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
+    @Override
     public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
+        if (identifier == null) {
+            throw new UnsupportedOperationException(
+                    "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
+        }
 
         String accountId = identifier.getAccount().getExternalId();
 
@@ -226,7 +233,8 @@ public class InteropServiceImpl implements InteropService {
         // always Payer
         InteropTransactionRequestData request = dataValidator.validateAndParseCreateRequest(command);
 
-        validateAndGetSavingAccount(request);
+        // TODO: error handling
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
 
         return InteropTransactionRequestResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
                 request.getExpiration(), request.getExtensionList(), request.getRequestCode());
@@ -243,12 +251,18 @@ public class InteropServiceImpl implements InteropService {
     public InteropQuoteResponseData createQuote(@NotNull JsonCommand command) {
         InteropQuoteRequestData request = dataValidator.validateAndParseCreateQuote(command);
 
-        // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
         SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
 
-        BigDecimal fee = transactionType.isDebit() ? savingsAccount.calculateWithdrawalFee(request.getAmount().getAmount())
-                : BigDecimal.ZERO;
+        final BigDecimal fee;
+        if (transactionType.isDebit()) {
+            fee = savingsAccount.calculateWithdrawalFee(request.getAmount().getAmount());
+            if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount().add(fee))) {
+                throw new UnsupportedOperationException("Not enough balance amount for requested amount plus fees!");
+            }
+        } else {
+            fee = BigDecimal.ZERO;
+        }
 
         return InteropQuoteResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
                 request.getExpiration(), request.getExtensionList(), request.getQuoteCode(),
@@ -264,32 +278,37 @@ public class InteropServiceImpl implements InteropService {
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
     public InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command) {
-        InteropTransferRequestData request = dataValidator.validateAndParsePrepareTransfer(command);
-
-        // TODO: error handling
-        // TODO: REVERSE
-        SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
-
-        BigDecimal total = validateTransfer(request, savingsAccount);
-
+        InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
         String transferCode = request.getTransferCode();
         LocalDateTime transactionDate = DateUtils.getLocalDateTimeOfTenant();
-        if (MathUtil.isGreaterThanZero(total)) {
+
+        // TODO validate request fee/comission and account quote amount
+        // matching, at CREATE it is debited anyway
+
+        SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
+        if (transactionType.isDebit()) {
+            SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
+            BigDecimal total = calculateTotalTransferAmount(request, savingsAccount);
+
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Not enough balance amount for requested amount plus fees!");
             }
-            if (findTransaction(savingsAccount, transferCode, SavingsAccountTransactionType.AMOUNT_HOLD) != null) {
+            if (findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue()) != null) {
                 throw new UnsupportedOperationException("Transfer amount was already put on hold " + transferCode);
             }
 
-            PaymentDetail paymentDetail = PaymentDetail.instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(),
-                    transferCode, null);
-            AppUser appUser = getLoginUser();
-            SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
-                    paymentDetail, transactionDate.toLocalDate(), Money.of(savingsAccount.getCurrency(), total), new Date(), appUser);
+            PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
+                    null);
+            SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
+                    paymentDetail, transactionDate.toLocalDate(), Money.of(savingsAccount.getCurrency(), total), new Date(),
+                    getLoginUser());
+            MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
+            holdTransaction.updateRunningBalance(
+                    Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().subtract(holdTransaction.getAmount())));
+            holdTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate.toLocalDate());
 
             savingsAccount.holdAmount(total);
-            savingsAccount.addTransaction(transaction);
+            savingsAccount.addTransaction(holdTransaction);
 
             savingsAccountRepository.save(savingsAccount);
         }
@@ -302,55 +321,52 @@ public class InteropServiceImpl implements InteropService {
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
     public InteropTransferResponseData commitTransfer(@NotNull JsonCommand command) {
-        InteropTransferRequestData request = dataValidator.validateAndParseCreateTransfer(command);
-        SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
-        boolean debit = transactionType.isDebit();
-
-        // TODO: error handling
-        // TODO: REVERSE
+        InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
+        boolean isDebit = request.getTransactionRole().getTransactionType().isDebit();
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
-
-        validateTransfer(request, savingsAccount);
-
         String transferCode = request.getTransferCode();
-        if (findTransaction(savingsAccount, transferCode,
-                debit ? SavingsAccountTransactionType.WITHDRAWAL : SavingsAccountTransactionType.DEPOSIT) != null) {
-            throw new UnsupportedOperationException("Transfer was already committed " + transferCode);
-        }
 
-        PaymentDetail paymentDetail = PaymentDetail.instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(),
-                transferCode, null);
+        if (findTransaction(savingsAccount, transferCode, (isDebit ? WITHDRAWAL : DEPOSIT).getValue()) != null) {
+            throw new UnsupportedOperationException("Transfer was already committed with code: " + transferCode);
+        }
 
         LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
         LocalDate transactionDate = transactionDateTime.toLocalDate();
-        Date createdDate = new Date();
-
-        SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, transferCode,
-                SavingsAccountTransactionType.AMOUNT_HOLD);
-        if (holdTransaction != null && holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-            AppUser appUser = getLoginUser();
-
-            SavingsAccountTransaction releaseTransaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate,
-                    createdDate, appUser);
-            releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(releaseTransaction);
-            holdTransaction.updateReleaseId(releaseTransaction.getId());
-
-            savingsAccount.releaseAmount(holdTransaction.getAmount());
-            savingsAccount.addTransaction(releaseTransaction);
-
-            savingsAccountRepository.save(savingsAccount);
-        }
-
-        BigDecimal amount = request.getAmount().getAmount();
         DateTimeFormatter fmt = getDateTimeFormatter(command);
-
         SavingsAccountTransaction transaction;
-        if (debit) {
+
+        if (isDebit) {
+            SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue());
+            if (holdTransaction == null) {
+                throw new UnsupportedOperationException("Missing onhold transaction for transfer: " + transferCode);
+            }
+
+            BigDecimal totalTransferAmount = calculateTotalTransferAmount(request, savingsAccount);
+            if (holdTransaction.getAmount().compareTo(totalTransferAmount) != 0) {
+                throw new UnsupportedOperationException("Transfer request amount plus fees does not match with onhold amount!");
+            }
+
+            if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount()), totalTransferAmount)) {
+                throw new UnsupportedOperationException("Not enough balance amount!");
+            }
+
+            if (holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
+                SavingsAccountTransaction releaseTransaction = savingsAccountTransactionRepository
+                        .saveAndFlush(releaseAmount(holdTransaction, transactionDate, new Date(), getLoginUser()));
+                holdTransaction.updateReleaseId(releaseTransaction.getId());
+                savingsAccount.releaseOnHoldAmount(holdTransaction.getAmount());
+                savingsAccount.addTransaction(releaseTransaction);
+
+                savingsAccountRepository.save(savingsAccount);
+            }
+
             SavingsTransactionBooleanValues transactionValues = new SavingsTransactionBooleanValues(false, true, true, false, false);
-            transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, amount, paymentDetail,
+            transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
+                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null),
                     transactionValues);
         } else {
-            transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, amount, paymentDetail, false, true);
+            transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
+                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true);
         }
 
         String note = request.getNote();
@@ -362,7 +378,36 @@ public class InteropServiceImpl implements InteropService {
                 request.getExpiration(), request.getExtensionList(), request.getTransferCode(), transactionDateTime);
     }
 
-    // Util
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public @NotNull InteropTransferResponseData releaseTransfer(@NotNull JsonCommand command) {
+        InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
+
+        LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
+        SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, request.getTransferCode(), AMOUNT_HOLD.getValue());
+
+        if (holdTransaction != null && holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
+            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDateTime.toLocalDate(), new Date(),
+                    getLoginUser());
+            MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
+            releaseTransaction.updateRunningBalance(
+                    Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount())));
+            releaseTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDateTime.toLocalDate());
+            releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(releaseTransaction);
+            holdTransaction.updateReleaseId(releaseTransaction.getId());
+
+            savingsAccount.releaseOnHoldAmount(holdTransaction.getAmount());
+            savingsAccount.addTransaction(releaseTransaction);
+
+            savingsAccountRepository.save(savingsAccount);
+        } else {
+            throw new UnsupportedOperationException("No active onhold transaction exists with transferCode " + request.getTransferCode());
+        }
+
+        return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
+                request.getExpiration(), request.getExtensionList(), request.getTransferCode(), transactionDateTime);
+    }
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
         SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
@@ -377,44 +422,38 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
         savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper);
 
-        ApplicationCurrency currency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
-        if (!savingsAccount.getCurrency().getCode().equals(currency.getCode())) {
-            throw new UnsupportedOperationException();
+        ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
+        if (!savingsAccount.getCurrency().getCode().equals(requestCurrency.getCode())) {
+            throw new UnsupportedOperationException("Account and request has different currencies!");
         }
 
         SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
         if (!savingsAccount.isTransactionAllowed(transactionType, request.getExpirationLocalDate())) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Transaction not allowed on account!");
         }
 
         request.normalizeAmounts(savingsAccount.getCurrency());
-        if (transactionType.isDebit() && MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount())) {
-            throw new UnsupportedOperationException();
-        }
 
         return savingsAccount;
     }
 
-    private BigDecimal validateTransfer(@NotNull InteropTransferRequestData request, @NotNull SavingsAccount savingsAccount) {
-        BigDecimal amount = request.getAmount().getAmount();
-        SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
-
-        BigDecimal total = transactionType.isDebit() ? amount : MathUtil.negate(amount);
-        MoneyData fspFee = request.getFspFee();
-        if (fspFee != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspFee.getCurrency())) {
+    private BigDecimal calculateTotalTransferAmount(@NotNull InteropTransferRequestData request, @NotNull SavingsAccount savingsAccount) {
+        BigDecimal total = request.getAmount().getAmount();
+        MoneyData requestFee = request.getFspFee();
+        if (requestFee != null) {
+            if (!savingsAccount.getCurrency().getCode().equals(requestFee.getCurrency())) {
                 throw new UnsupportedOperationException();
             }
             // TODO: compare with calculated quote fee
-            total = MathUtil.add(total, fspFee.getAmount());
+            total = MathUtil.add(total, requestFee.getAmount());
         }
-        MoneyData fspCommission = request.getFspCommission();
-        if (fspCommission != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspCommission.getCurrency())) {
+        MoneyData requestCommission = request.getFspCommission();
+        if (requestCommission != null) {
+            if (!savingsAccount.getCurrency().getCode().equals(requestCommission.getCurrency())) {
                 throw new UnsupportedOperationException();
             }
             // TODO: compare with calculated quote commission
-            total = MathUtil.subtractToZero(total, fspCommission.getAmount());
+            total = MathUtil.subtractToZero(total, requestCommission.getAmount());
         }
         return total;
     }
@@ -437,50 +476,23 @@ public class InteropServiceImpl implements InteropService {
         for (PaymentType paymentType : paymentTypes) {
             if (!paymentType.isCashPayment()) {
                 return paymentType;
-                // TODO: for now first not cash is retured:
-                // 1. must be added as initial setup,
-                // 2. if more than one non-cashe type added then update this
-                // code
             }
+            // TODO: for now first not cash is retured:
+            // 1. must be added as initial setup,
+            // 2. if more than one non-cashe type added then update this code
         }
         return null;
     }
 
-    SavingsAccountTransaction findTransaction(@NotNull SavingsAccount savingsAccount, @NotNull String transactionCode,
-            SavingsAccountTransactionType transactionType) {
-        String routingCode = getRoutingCode();
-        for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
-            if (transactionType != null && !transactionType.getValue().equals(transaction.getTypeOf())) {
-                continue;
-            }
-
-            PaymentDetail detail = transaction.getPaymentDetail();
-            if (detail != null && routingCode.equals(detail.getRoutingCode()) && transactionCode.equals(detail.getReceiptNumber())) {
-                return transaction;
-            }
-        }
-        return null;
+    private SavingsAccountTransaction findTransaction(SavingsAccount savingsAccount, String transactionCode, Integer transactionTypeValue) {
+        return savingsAccount.getTransactions().stream().filter(t -> transactionTypeValue.equals(t.getTypeOf())).filter(t -> {
+            PaymentDetail detail = t.getPaymentDetail();
+            return detail != null && getRoutingCode().equals(detail.getRoutingCode()) && transactionCode.equals(detail.getReceiptNumber());
+        }).findFirst().orElse(null);
     }
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
-        return identifierRepository.findOne(where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType)))
-                .orElseThrow(() -> new UnsupportedOperationException(
-                        "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType))));
-    }
-
-    public static Specification<InteropIdentifier> idTypeEqual(@NotNull InteropIdentifierType idType) {
-        return (Root<InteropIdentifier> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> cb.and(cb.equal(root.get("type"), idType));
-    }
-
-    public static Specification<InteropIdentifier> idValueEqual(@NotNull String idValue) {
-        return (Root<InteropIdentifier> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> cb.and(cb.equal(root.get("value"), idValue));
-    }
-
-    public static Specification<InteropIdentifier> subIdOrTypeEqual(String subIdOrType) {
-        return (Root<InteropIdentifier> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
-            Path<Object> path = root.get("subValueOrType");
-            return cb.and(subIdOrType == null ? cb.isNull(path) : cb.equal(path, subIdOrType));
-        };
+        return identifierRepository.findOneByTypeAndValueAndSubType(idType, idValue, subIdOrType);
     }
 
     private AppUser getLoginUser() {

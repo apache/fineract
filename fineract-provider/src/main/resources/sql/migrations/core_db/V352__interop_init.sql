@@ -61,6 +61,9 @@ INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_
 VALUES ('interop', 'PREPARE_INTERTRANSFER', 'INTERTRANSFER', 'PREPARE', 0);
 
 INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
+VALUES ('interop', 'RELEASE_INTERTRANSFER', 'INTERTRANSFER', 'RELEASE', 0);
+
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERID', 'INTERID', 'CREATE', 0);
 INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERREQUEST', 'INTERREQUEST', 'CREATE', 0);

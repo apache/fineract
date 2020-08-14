@@ -825,7 +825,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             } else {
                 Money overdraftAmount = Money.zero(this.currency);
                 Money transactionAmount = Money.zero(this.currency);
-                if (transaction.isCredit()) {
+                if (transaction.isCredit() || transaction.isAmountRelease()) {
                     if (runningBalance.isLessThanZero()) {
                         Money diffAmount = transaction.getAmount(this.currency).plus(runningBalance);
                         if (diffAmount.isGreaterThanZero()) {
@@ -835,7 +835,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         }
                     }
                     transactionAmount = transactionAmount.plus(transaction.getAmount(this.currency));
-                } else if (transaction.isDebit()) {
+                } else if (transaction.isDebit() || transaction.isAmountOnHold()) {
                     if (runningBalance.isLessThanZero()) {
                         overdraftAmount = transaction.getAmount(this.currency);
                     }
@@ -1034,15 +1034,17 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_WITHDRAWAL, transactionDTO.getTransactionDate());
 
+        if (applyWithdrawFee) {
+            // auto pay withdrawal fee
+            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
+        }
+
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney,
                 transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
         addTransaction(transaction);
-        if (applyWithdrawFee) {
-            // auto pay withdrawal fee
-            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
-        }
+
         if (this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
                 || this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())) {
             this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
@@ -3264,7 +3266,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.savingsOnHoldAmount = getSavingsHoldAmount().add(amount);
     }
 
-    public void releaseAmount(BigDecimal amount) {
+    public void releaseOnHoldAmount(BigDecimal amount) {
         this.savingsOnHoldAmount = getSavingsHoldAmount().subtract(amount);
     }
 
