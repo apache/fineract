@@ -120,7 +120,7 @@ dependencyManagement {
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
         dependency 'org.mockito:mockito-core:3.5.0'
-        dependency 'org.mockito:mockito-junit-jupiter:3.4.6'
+        dependency 'org.mockito:mockito-junit-jupiter:3.5.0'
         dependency 'io.github.classgraph:classgraph:4.8.87'
         dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.1.1'
