@@ -120,9 +120,9 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
 
-        if (currentAuthentication instanceof OAuth2Authentication) {
-            final OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) currentAuthentication;
-            return new OAuth2Authentication(oAuth2Authentication.getOAuth2Request(), authentication);
+        if (currentAuthentication instanceof OAuth2RestTemplate) {
+            final OAuth2RestTemplate oAuth2Authentication = (OAuth2RestTemplate) currentAuthentication;
+            return new OAuth2RestTemplate(oAuth2Authentication.getOAuth2Request(), authentication);
         }
 
         return authentication;

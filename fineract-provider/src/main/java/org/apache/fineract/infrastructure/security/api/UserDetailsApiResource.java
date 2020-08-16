@@ -61,16 +61,16 @@ import org.springframework.stereotype.Component;
 @Api(tags = { "Fetch authenticated user details" })
 @SwaggerDefinition(tags = { @Tag(name = "Fetch authenticated user details", description = "") })
 
-@EnableResourceServer // FINERACT-1012
+ // FINERACT-1012
 public class UserDetailsApiResource {
 
-    private final ResourceServerTokenServices tokenServices;
+    private final oauth2ResourceServer tokenServices;
     private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
     private final TwoFactorUtils twoFactorUtils;
 
     @Autowired
-    public UserDetailsApiResource(@Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
+    public UserDetailsApiResource(@Qualifier("tokenServices") final oauth2ResourceServer tokenServices,
             final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
             final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext, final TwoFactorUtils twoFactorUtils) {
         this.tokenServices = tokenServices;
