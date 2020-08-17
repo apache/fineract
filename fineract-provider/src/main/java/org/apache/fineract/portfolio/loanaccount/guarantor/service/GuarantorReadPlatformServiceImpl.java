@@ -237,7 +237,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
         private final String sql;
 
-        public GuarantorTransactionMapper() {
+        GuarantorTransactionMapper() {
             StringBuilder sb = new StringBuilder(" gt.id as gtId,");
             sb.append("gt.is_reversed as reversed,");
             sb.append(" oht.id as ohtId, oht.amount as transactionAmount, ");
@@ -301,7 +301,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
         private final String sql;
 
-        public ObligeeMapper() {
+        ObligeeMapper() {
             StringBuilder sb = new StringBuilder(
                     "SELECT cl.firstname, cl.lastname,cl.display_name as displayName, loan.account_no as loanAccountNumber, loan.principal_amount as loanAmount, gfd.amount as guaranteedAmount, ");
             sb.append(

@@ -86,7 +86,7 @@ public class TenantDatabaseUpgradeService {
                 } catch (FlywayException e) {
                     String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connectionProtocol + ", username: "
                             + connection.getSchemaUsername();
-                    throw new FlywayException(betterMessage, e.getCause());
+                    throw new FlywayException(betterMessage, e);
                 }
             }
         }

@@ -35,7 +35,7 @@ public class ScorecardService {
 
     @Autowired
     public ScorecardService(final PlatformSecurityContext securityContext, final ScorecardRepository scorecardRepository) {
-        super();
+
         this.securityContext = securityContext;
         this.scorecardRepository = scorecardRepository;
     }

@@ -20,6 +20,6 @@ package org.apache.fineract.portfolio.self.savings.service;
 
 public interface AppuserSavingsMapperReadService {
 
-    public Boolean isSavingsMappedToUser(Long savingsId, Long appUserId);
+    Boolean isSavingsMappedToUser(Long savingsId, Long appUserId);
 
 }

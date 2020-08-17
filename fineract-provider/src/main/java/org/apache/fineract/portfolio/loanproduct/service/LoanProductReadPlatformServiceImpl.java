@@ -85,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(loanProductId);
+            throw new LoanProductNotFoundException(loanProductId, e);
         }
     }
 
@@ -180,7 +180,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         private final Collection<RateData> rates;
 
-        public LoanProductMapper(final Collection<ChargeData> charges,
+        LoanProductMapper(final Collection<ChargeData> charges,
                 final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
@@ -638,13 +638,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(loanProductId);
+            throw new LoanProductNotFoundException(loanProductId, e);
         }
     }
 
     private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
 
-        public LoanProductFloatingRateMapper() {}
+        LoanProductFloatingRateMapper() {}
 
         public String schema() {
             return "lp.id as id,  lp.name as name," + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "

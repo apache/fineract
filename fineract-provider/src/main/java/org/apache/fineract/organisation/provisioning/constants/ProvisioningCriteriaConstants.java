@@ -20,26 +20,26 @@ package org.apache.fineract.organisation.provisioning.constants;
 
 public interface ProvisioningCriteriaConstants {
 
-    public static final String JSON_LOCALE_PARAM = "locale";
-    public static final String JSON_CRITERIAID_PARAM = "criteriaId";
-    public static final String JSON_CRITERIANAME_PARAM = "criteriaName";
-    public static final String JSON_LOANPRODUCTS_PARAM = "loanProducts";
-    public static final String JSON_LOAN_PRODUCT_ID_PARAM = "id";
-    public static final String JSON_LOAN_PRODUCTNAME_PARAM = "name";
-    public static final String JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM = "includeInBorrowerCycle";
-    public static final String JSON_PROVISIONING_DEFINITIONS_PARAM = "definitions";
-    public static final String JSON_CATEOGRYID_PARAM = "categoryId";
-    public static final String JSON_CATEOGRYNAME_PARAM = "categoryName";
-    public static final String JSON_MINIMUM_AGE_PARAM = "minAge";
-    public static final String JSON_MAXIMUM_AGE_PARAM = "maxAge";
-    public static final String JSON_PROVISIONING_PERCENTAGE_PARAM = "provisioningPercentage";
-    public static final String JSON_LIABILITY_ACCOUNT_PARAM = "liabilityAccount";
-    public static final String JSON_EXPENSE_ACCOUNT_PARAM = "expenseAccount";
-    public static final String DEFINITIONS_PARAM = "definitions";
-    public static final String LOANPRODUCTS_PARAM = "loanProducts";
-    public static final String GLACCOUNTS_PARAM = "glAccounts";
-    public static final String CRITERIA_PARAM = "criteriaName";
-    public static final String CRITERIA_ID_PARAM = "criteriaId";
-    public static final String CRITERIA_NAME_PARAM = "criterianame";
-    public static final String CREATED_BY_PARAM = "createdby";
+    String JSON_LOCALE_PARAM = "locale";
+    String JSON_CRITERIAID_PARAM = "criteriaId";
+    String JSON_CRITERIANAME_PARAM = "criteriaName";
+    String JSON_LOANPRODUCTS_PARAM = "loanProducts";
+    String JSON_LOAN_PRODUCT_ID_PARAM = "id";
+    String JSON_LOAN_PRODUCTNAME_PARAM = "name";
+    String JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM = "includeInBorrowerCycle";
+    String JSON_PROVISIONING_DEFINITIONS_PARAM = "definitions";
+    String JSON_CATEOGRYID_PARAM = "categoryId";
+    String JSON_CATEOGRYNAME_PARAM = "categoryName";
+    String JSON_MINIMUM_AGE_PARAM = "minAge";
+    String JSON_MAXIMUM_AGE_PARAM = "maxAge";
+    String JSON_PROVISIONING_PERCENTAGE_PARAM = "provisioningPercentage";
+    String JSON_LIABILITY_ACCOUNT_PARAM = "liabilityAccount";
+    String JSON_EXPENSE_ACCOUNT_PARAM = "expenseAccount";
+    String DEFINITIONS_PARAM = "definitions";
+    String LOANPRODUCTS_PARAM = "loanProducts";
+    String GLACCOUNTS_PARAM = "glAccounts";
+    String CRITERIA_PARAM = "criteriaName";
+    String CRITERIA_ID_PARAM = "criteriaId";
+    String CRITERIA_NAME_PARAM = "criterianame";
+    String CREATED_BY_PARAM = "createdby";
 }

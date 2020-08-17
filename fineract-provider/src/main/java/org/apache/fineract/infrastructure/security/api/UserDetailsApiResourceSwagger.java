@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.useradministration.data.RoleData;
@@ -33,32 +32,32 @@ final class UserDetailsApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetUserDetailsResponse")
+    @Schema(description = "GetUserDetailsResponse")
     public static final class GetUserDetailsResponse {
 
         private GetUserDetailsResponse() {
 
         }
 
-        @ApiModelProperty(example = "mifos")
+        @Schema(example = "mifos")
         public String username;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long userId;
-        @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
+        @Schema(example = "bWlmb3M6cGFzc3dvcmQ=")
         public String accessToken;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean authenticated;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long staffId;
-        @ApiModelProperty(example = "mifosStaffDisplayName")
+        @Schema(example = "mifosStaffDisplayName")
         public String staffDisplayName;
         public EnumOptionData organisationalRole;
         public Collection<RoleData> roles;
-        @ApiModelProperty(example = "ALL_FUNCTIONS")
+        @Schema(example = "ALL_FUNCTIONS")
         public Collection<String> permissions;
     }
 }

@@ -137,7 +137,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
             }
             return data;
         } catch (final EmptyResultDataAccessException e) {
-            throw new ProductNotFoundException(productId, "share");
+            throw new ProductNotFoundException(productId, "share", e);
         }
     }
 

@@ -122,7 +122,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             sql = sql + " ;";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new ChargeNotFoundException(chargeId);
+            throw new ChargeNotFoundException(chargeId, e);
         }
     }
 

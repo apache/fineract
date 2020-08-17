@@ -252,7 +252,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
             return this.jdbcTemplate.queryForObject(sql, this.accountTransfersMapper, new Object[] { transferId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(transferId);
+            throw new AccountTransferNotFoundException(transferId, e);
         }
     }
 

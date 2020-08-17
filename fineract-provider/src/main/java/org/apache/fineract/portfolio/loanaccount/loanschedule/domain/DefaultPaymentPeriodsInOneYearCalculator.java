@@ -22,8 +22,12 @@ import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsInOneYearCalculator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultPaymentPeriodsInOneYearCalculator.class);
 
     @Override
     public Integer calculate(final PeriodFrequencyType repaymentFrequencyType) {
@@ -45,7 +49,9 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 paymentPeriodsInOneYear = Integer.valueOf(0);
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement repaymentFrequencyType for WHOLE_TERM");
+            break;
         }
         return paymentPeriodsInOneYear;
     }
@@ -92,7 +98,9 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 fraction = Double.valueOf("0");
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            break;
         }
         return fraction;
     }

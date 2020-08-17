@@ -35,9 +35,9 @@ public interface GroupingTypesWritePlatformService {
 
     CommandProcessingResult deleteGroup(Long groupId);
 
-    CommandProcessingResult closeGroup(final Long groupId, final JsonCommand command);
+    CommandProcessingResult closeGroup(Long groupId, JsonCommand command);
 
-    CommandProcessingResult closeCenter(final Long centerId, final JsonCommand command);
+    CommandProcessingResult closeCenter(Long centerId, JsonCommand command);
 
     CommandProcessingResult unassignGroupOrCenterStaff(Long groupId, JsonCommand command);
 
@@ -47,7 +47,7 @@ public interface GroupingTypesWritePlatformService {
 
     CommandProcessingResult disassociateClientsFromGroup(Long groupId, JsonCommand command);
 
-    CommandProcessingResult associateGroupsToCenter(final Long centerId, final JsonCommand command);
+    CommandProcessingResult associateGroupsToCenter(Long centerId, JsonCommand command);
 
-    CommandProcessingResult disassociateGroupsToCenter(final Long centerId, final JsonCommand command);
+    CommandProcessingResult disassociateGroupsToCenter(Long centerId, JsonCommand command);
 }

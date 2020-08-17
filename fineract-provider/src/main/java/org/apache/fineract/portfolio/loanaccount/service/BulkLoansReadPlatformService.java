@@ -22,5 +22,5 @@ import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollection
 
 public interface BulkLoansReadPlatformService {
 
-    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(final Long loanOfficerId);
+    StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(Long loanOfficerId);
 }

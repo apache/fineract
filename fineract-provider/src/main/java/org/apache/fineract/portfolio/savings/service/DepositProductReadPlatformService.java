@@ -24,12 +24,12 @@ import org.apache.fineract.portfolio.savings.data.DepositProductData;
 
 public interface DepositProductReadPlatformService {
 
-    Collection<DepositProductData> retrieveAll(final DepositAccountType depositAccountType);
+    Collection<DepositProductData> retrieveAll(DepositAccountType depositAccountType);
 
-    Collection<DepositProductData> retrieveAllForLookup(final DepositAccountType depositAccountType);
+    Collection<DepositProductData> retrieveAllForLookup(DepositAccountType depositAccountType);
 
-    DepositProductData retrieveOne(final DepositAccountType depositAccountType, Long productId);
+    DepositProductData retrieveOne(DepositAccountType depositAccountType, Long productId);
 
-    DepositProductData retrieveOneWithChartSlabs(final DepositAccountType depositAccountType, Long productId);
+    DepositProductData retrieveOneWithChartSlabs(DepositAccountType depositAccountType, Long productId);
 
 }

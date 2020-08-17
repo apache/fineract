@@ -20,5 +20,5 @@ package org.apache.fineract.portfolio.products.service;
 
 public interface ProductCommandsService {
 
-    public Object handleCommand(final Long productId, final String command, final String jsonBody);
+    public Object handleCommand(Long productId, String command, String jsonBody);
 }

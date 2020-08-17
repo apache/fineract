@@ -24,10 +24,10 @@ import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData
 
 public interface CollectionSheetReadPlatformService {
 
-    JLGCollectionSheetData generateGroupCollectionSheet(final Long groupId, final JsonQuery query);
+    JLGCollectionSheetData generateGroupCollectionSheet(Long groupId, JsonQuery query);
 
-    JLGCollectionSheetData generateCenterCollectionSheet(final Long groupId, final JsonQuery query);
+    JLGCollectionSheetData generateCenterCollectionSheet(Long groupId, JsonQuery query);
 
-    IndividualCollectionSheetData generateIndividualCollectionSheet(final JsonQuery query);
+    IndividualCollectionSheetData generateIndividualCollectionSheet(JsonQuery query);
 
 }

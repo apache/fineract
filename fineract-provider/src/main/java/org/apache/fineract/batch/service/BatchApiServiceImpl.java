@@ -82,7 +82,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      *
      * @param requestList
      * @param uriInfo
-     * @return List<BatchResponse>
+     * @return {@code List<BatchResponse>}
      */
     private List<BatchResponse> handleBatchRequests(final List<BatchRequest> requestList, final UriInfo uriInfo) {
 

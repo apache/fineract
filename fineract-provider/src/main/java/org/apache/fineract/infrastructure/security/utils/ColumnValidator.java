@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class ColumnValidator {
             connection = this.jdbcTemplate.getDataSource().getConnection();
             DatabaseMetaData dbMetaData = connection.getMetaData();
             ResultSet resultSet = null;
-            for (HashMap.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
+            for (Map.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
                 Set<String> columns = entry.getValue();
                 resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null);
                 Set<String> tableColumns = getTableColumns(resultSet);
@@ -68,7 +69,7 @@ public class ColumnValidator {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLInjectionException();
+            throw new SQLInjectionException(e);
         } finally {
             if (connection != null) {
                 DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
@@ -91,6 +92,9 @@ public class ColumnValidator {
 
     public void validateSqlInjection(String schema, String... conditions) {
         for (String condition : conditions) {
+            if (StringUtils.isBlank(condition)) {
+                continue;
+            }
             SQLInjectionValidator.validateSQLInput(condition);
             List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<", "> =", "< =", "! =", "!=", ">=", "<="));
             condition = condition.trim().replace("( ", "(").replace(" )", ")").toLowerCase();

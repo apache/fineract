@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.self.pockets.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 /**
@@ -30,7 +29,7 @@ final class PocketApiResourceSwagger {
 
     private PocketApiResourceSwagger() {}
 
-    @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
+    @Schema(description = "PostLinkDelinkAccountsToFromPocketRequest")
     public static final class PostLinkDelinkAccountsToFromPocketRequest {
 
         private PostLinkDelinkAccountsToFromPocketRequest() {}
@@ -39,25 +38,25 @@ final class PocketApiResourceSwagger {
 
             private GetPocketAccountDetail() {}
 
-            @ApiModelProperty(example = "11")
+            @Schema(example = "11")
             public Integer accountId;
-            @ApiModelProperty(example = "LOAN")
+            @Schema(example = "LOAN")
             public String accountType;
         }
 
         public Set<GetPocketAccountDetail> accountDetail;
     }
 
-    @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
+    @Schema(description = "PostLinkDelinkAccountsToFromPocketResponse")
     public static final class PostLinkDelinkAccountsToFromPocketResponse {
 
         private PostLinkDelinkAccountsToFromPocketResponse() {}
 
-        @ApiModelProperty(example = "6")
+        @Schema(example = "6")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetAccountsLinkedToPocketResponse")
+    @Schema(description = "GetAccountsLinkedToPocketResponse")
     public static final class GetAccountsLinkedToPocketResponse {
 
         private GetAccountsLinkedToPocketResponse() {}
@@ -66,15 +65,15 @@ final class PocketApiResourceSwagger {
 
             private GetPocketLoanAccounts() {}
 
-            @ApiModelProperty(example = "6")
+            @Schema(example = "6")
             public Integer pocketId;
-            @ApiModelProperty(example = "11")
+            @Schema(example = "11")
             public Integer accountId;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountType;
-            @ApiModelProperty(example = "000000011")
+            @Schema(example = "000000011")
             public Integer accountNumber;
-            @ApiModelProperty(example = "10")
+            @Schema(example = "10")
             public Integer id;
         }
 
@@ -82,15 +81,15 @@ final class PocketApiResourceSwagger {
 
             private GetPocketSavingAccounts() {}
 
-            @ApiModelProperty(example = "6")
+            @Schema(example = "6")
             public Integer pocketId;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountId;
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer accountType;
-            @ApiModelProperty(example = "000000002")
+            @Schema(example = "000000002")
             public Integer accountNumber;
-            @ApiModelProperty(example = "11")
+            @Schema(example = "11")
             public Integer id;
         }
 

@@ -70,7 +70,7 @@ public class RateReadServiceImpl implements RateReadService {
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new RateNotFoundException(rateId);
+            throw new RateNotFoundException(rateId, e);
         }
     }
 
@@ -84,7 +84,7 @@ public class RateReadServiceImpl implements RateReadService {
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new RateNotFoundException(name);
+            throw new RateNotFoundException(name, e);
         }
     }
 
@@ -125,7 +125,7 @@ public class RateReadServiceImpl implements RateReadService {
             return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
         }
 
-        public RateMapper() {}
+        RateMapper() {}
 
         @Override
         public RateData mapRow(ResultSet resultSet, int i) throws SQLException {

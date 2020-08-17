@@ -40,7 +40,7 @@ public class JournalEntryDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    private final Set<String> RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+    private static final Set<String> RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(JournalEntryJsonInputParams.OFFICE_ID.getValue()));
 
     @Autowired

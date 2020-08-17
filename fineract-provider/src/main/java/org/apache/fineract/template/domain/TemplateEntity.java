@@ -31,7 +31,7 @@ public enum TemplateEntity {
     private final int id;
     private final String name;
 
-    private TemplateEntity(final int id, final String name) {
+    TemplateEntity(final int id, final String name) {
         this.id = id;
         this.name = name;
     }

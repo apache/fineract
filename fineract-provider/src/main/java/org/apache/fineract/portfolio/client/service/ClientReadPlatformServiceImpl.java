@@ -30,8 +30,10 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -176,6 +178,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     // @Transactional(readOnly=true)
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
+        if (searchParameters != null && searchParameters.getStatus() != null
+                && ClientStatus.fromString(searchParameters.getStatus()) == ClientStatus.INVALID) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final String defaultUserMessage = "The Status value '" + searchParameters.getStatus() + "' is not supported.";
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.client.status.value.is.not.supported",
+                    defaultUserMessage, "status", searchParameters.getStatus());
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
         final String appUserID = String.valueOf(context.authenticatedUser().getId());
@@ -232,6 +244,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String displayName = searchParameters.getName();
         final String firstname = searchParameters.getFirstname();
         final String lastname = searchParameters.getLastname();
+        final String status = searchParameters.getStatus();
 
         String extraCriteria = "";
         if (sqlSearch != null) {
@@ -256,6 +269,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             // if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
             paramList.add("%" + displayName + "%");
             extraCriteria += " and c.display_name like ? ";
+        }
+
+        if (status != null) {
+            ClientStatus clientStatus = ClientStatus.fromString(status);
+            extraCriteria += " and c.status_enum = " + clientStatus.getValue().toString() + " ";
         }
 
         if (firstname != null) {
@@ -302,7 +320,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.setParentGroups(clientData, parentGroups);
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientNotFoundException(clientId);
+            throw new ClientNotFoundException(clientId, e);
         }
     }
 
@@ -356,7 +374,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final String schema;
 
-        public ClientMembersOfGroupMapper() {
+        ClientMembersOfGroupMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
             sqlBuilder.append(
@@ -545,7 +563,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final String schema;
 
-        public ClientMapper() {
+        ClientMapper() {
             final StringBuilder builder = new StringBuilder(400);
 
             builder.append(
@@ -842,7 +860,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String sql = "SELECT cl.id FROM m_client cl WHERE cl.id =? ";
             this.jdbcTemplate.queryForObject(sql, Long.class, clientId);
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientNotFoundException(clientId);
+            throw new ClientNotFoundException(clientId, e);
         }
     }
 

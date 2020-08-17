@@ -123,7 +123,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, resourceId);
         } catch (final EmptyResultDataAccessException e) {
-            throw new EmailNotFoundException(resourceId);
+            throw new EmailNotFoundException(resourceId, e);
         }
     }
 

@@ -33,7 +33,7 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult unassignClientStaff(Long clientId, JsonCommand command);
 
-    CommandProcessingResult closeClient(final Long clientId, final JsonCommand command);
+    CommandProcessingResult closeClient(Long clientId, JsonCommand command);
 
     CommandProcessingResult assignClientStaff(Long clientId, JsonCommand command);
 

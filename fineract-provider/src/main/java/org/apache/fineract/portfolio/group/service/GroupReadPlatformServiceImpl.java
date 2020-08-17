@@ -278,7 +278,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final String sql = "select " + this.allGroupTypesDataMapper.schema() + " where g.id = ? and o.hierarchy like ?";
             return this.jdbcTemplate.queryForObject(sql, this.allGroupTypesDataMapper, new Object[] { groupId, hierarchySearchString });
         } catch (final EmptyResultDataAccessException e) {
-            throw new GroupNotFoundException(groupId);
+            throw new GroupNotFoundException(groupId, e);
         }
     }
 

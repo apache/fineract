@@ -23,5 +23,5 @@ import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionD
 
 public interface PurchasedSharesReadPlatformService {
 
-    public Collection<ShareAccountTransactionData> retrievePurchasedShares(final Long accountId);
+    Collection<ShareAccountTransactionData> retrievePurchasedShares(Long accountId);
 }

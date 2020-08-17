@@ -100,7 +100,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
                     new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsProductNotFoundException(savingProductId);
+            throw new SavingsProductNotFoundException(savingProductId, e);
         }
     }
 
@@ -108,7 +108,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         private final String schemaSql;
 
-        public SavingProductMapper() {
+        SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
             sqlBuilder.append(

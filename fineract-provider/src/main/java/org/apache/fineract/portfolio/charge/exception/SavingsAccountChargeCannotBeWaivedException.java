@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class SavingsAccountChargeCannotBeWaivedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Savings Account Charge cannot be waived **/
-    public static enum SavingsAccountChargeCannotBeWaivedReason {
+    public enum SavingsAccountChargeCannotBeWaivedReason {
 
         ALREADY_PAID, ALREADY_WAIVED, SAVINGS_ACCOUNT_NOT_ACTIVE, SAVINGS_ACCOUNT_CLOSED;
 

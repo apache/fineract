@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.products.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.beans.BeansException;
 
 public class ResourceNotFoundException extends AbstractPlatformResourceNotFoundException {
 
@@ -28,5 +29,9 @@ public class ResourceNotFoundException extends AbstractPlatformResourceNotFoundE
 
     public ResourceNotFoundException() {
         super("", "", "");
+    }
+
+    public ResourceNotFoundException(BeansException e) {
+        super("", "", "", e);
     }
 }

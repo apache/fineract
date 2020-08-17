@@ -22,7 +22,7 @@ RUN apt-get update -qq && apt-get install -y wget
 COPY . fineract
 WORKDIR /fineract
 
-RUN ./gradlew --no-daemon -x rat -x test bootJar
+RUN ./gradlew -PautomatedBuild=true --no-daemon -q -x rat -x test bootJar
 
 WORKDIR /fineract/target
 RUN jar -xf /fineract/build/libs/fineract-provider.jar
@@ -33,7 +33,7 @@ RUN jar -xf /fineract/build/libs/fineract-provider.jar
 # allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
 # The commented out lines in the docker-compose.yml illustrate how to do this.
 WORKDIR /fineract/target/BOOT-INF/lib
-RUN wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.20/mysql-connector-java-8.0.20.jar 
+RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.20/mysql-connector-java-8.0.20.jar
 
 # =========================================
 

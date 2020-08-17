@@ -108,7 +108,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
                     new Object[] { fixedDepositProductId, depositAccountType.getValue() });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new FixedDepositProductNotFoundException(fixedDepositProductId);
+            throw new FixedDepositProductNotFoundException(fixedDepositProductId, e);
         }
     }
 
@@ -133,7 +133,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
         @Override
         public abstract DepositProductData mapRow(ResultSet rs, int rowNum) throws SQLException;
 
-        public DepositProductMapper() {
+        protected DepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
             sqlBuilder.append(
@@ -222,7 +222,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         private final String schemaSql;
 
-        public FixedDepositProductMapper() {
+        FixedDepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.schema());
             sqlBuilder.append(", dptp.pre_closure_penal_applicable as preClosurePenalApplicable, ");
@@ -286,7 +286,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         private final String schemaSql;
 
-        public RecurringDepositProductMapper() {
+        RecurringDepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.schema());
             sqlBuilder.append(", dptp.pre_closure_penal_applicable as preClosurePenalApplicable, ");

@@ -227,7 +227,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
 
@@ -235,7 +235,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         private final String schemaSql;
 
-        public SavingAccountMapper() {
+        SavingAccountMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
             sqlBuilder.append("sa.deposit_type_enum as depositType, ");
@@ -558,7 +558,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         private final String schemaSql;
 
-        public SavingAccountMapperForLookup() {
+        SavingAccountMapperForLookup() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
             sqlBuilder.append("sa.deposit_type_enum as depositType, ");
@@ -738,7 +738,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper,
                     new Object[] { savingsId, depositAccountType.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(savingsId);
+            throw new SavingsAccountNotFoundException(savingsId, e);
         }
     }
 
@@ -773,7 +773,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         private final String schemaSql;
 
-        public SavingsAccountTransactionsMapper() {
+        SavingsAccountTransactionsMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
@@ -887,7 +887,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         private final String schemaSql;
 
-        public SavingsAccountTransactionTemplateMapper() {
+        SavingsAccountTransactionTemplateMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
             sqlBuilder.append(
@@ -931,7 +931,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         private final String schemaSql;
 
-        public SavingAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
+        SavingAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             this.client = client;
             this.group = group;
 
@@ -1203,7 +1203,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return this.jdbcTemplate.queryForObject(buff.toString(),
                     new Object[] { accountId, clientId, depositAccountType.getValue(), currencyCode }, Integer.class) > 0;
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
     /*
@@ -1235,7 +1235,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String sql = "select s.account_no from m_savings_account s where s.id = ?";
             return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
 }

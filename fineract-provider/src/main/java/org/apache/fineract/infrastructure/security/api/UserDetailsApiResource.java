@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -58,10 +58,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("oauth")
 @Scope("singleton")
+// FINERACT-1012
 @Api(tags = { "Fetch authenticated user details" })
 @SwaggerDefinition(tags = { @Tag(name = "Fetch authenticated user details", description = "") })
 
- // FINERACT-1012
 public class UserDetailsApiResource {
 
     private final oauth2ResourceServer tokenServices;
@@ -81,9 +81,11 @@ public class UserDetailsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Fetch authenticated user details\n", notes = "checks the Authentication and returns the set roles and permissions allowed.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class) })
-    public String fetchAuthenticatedUserData(@QueryParam("access_token") @ApiParam(value = "access_token") final String accessToken) {
+    @Operation(summary = "Fetch authenticated user details\n", description = "checks the Authentication and returns the set roles and permissions allowed.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class))) })
+    public String fetchAuthenticatedUserData(
+            @QueryParam("access_token") @Parameter(description = "access_token") final String accessToken) {
 
         final Authentication authentication = this.tokenServices.loadAuthentication(accessToken);
         if (authentication.isAuthenticated()) {

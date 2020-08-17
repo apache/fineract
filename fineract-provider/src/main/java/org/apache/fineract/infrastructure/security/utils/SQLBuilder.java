@@ -76,7 +76,8 @@ public class SQLBuilder {
         }
         String columnName = trimmedCriteria.substring(0, columnOperatorIndex).trim().toLowerCase(Locale.ROOT);
         if (!ATOZ.matcher(columnName).matches()) {
-            throw new IllegalArgumentException("criteria column name must match [a-z]: " + trimmedCriteria);
+            throw new IllegalArgumentException(
+                    "criteria column name must match [a-zA-Z_][a-zA-Z0-9_-]*\\.)?[a-zA-Z_-][a-zA-Z0-9_-]* : " + trimmedCriteria);
         }
         String operator = trimmedCriteria.substring(columnOperatorIndex).trim();
         if (operator.indexOf(' ') > -1) {

@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
  */
 public interface RateWriteService {
 
-    CommandProcessingResult createRate(final JsonCommand command);
+    CommandProcessingResult createRate(JsonCommand command);
 
     CommandProcessingResult updateRate(Long rateId, JsonCommand command);
 

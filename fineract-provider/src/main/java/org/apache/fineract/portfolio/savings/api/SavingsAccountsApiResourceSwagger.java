@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class SavingsAccountsApiResourceSwagger {
 
     private SavingsAccountsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetSavingsAccountsTemplateResponse")
+    @Schema(description = "GetSavingsAccountsTemplateResponse")
     public static final class GetSavingsAccountsTemplateResponse {
 
         private GetSavingsAccountsTemplateResponse() {}
@@ -39,20 +38,20 @@ final class SavingsAccountsApiResourceSwagger {
 
             private GetSavingsProductOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Passbook Savings")
+            @Schema(example = "Passbook Savings")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "small business")
+        @Schema(example = "small business")
         public String clientName;
         public Set<GetSavingsProductOptions> productOptions;
     }
 
-    @ApiModel(value = "GetSavingsAccountsResponse")
+    @Schema(description = "GetSavingsAccountsResponse")
     public static final class GetSavingsAccountsResponse {
 
         private GetSavingsAccountsResponse() {}
@@ -65,23 +64,23 @@ final class SavingsAccountsApiResourceSwagger {
 
                 private GetSavingsStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "savingsAccountStatusType.submitted.and.pending.approval")
+                @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
-                @ApiModelProperty(example = "Submitted and pending approval")
-                public String value;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "Submitted and pending approval")
+                public String description;
+                @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean approved;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean rejected;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean withdrawnByApplicant;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
 
             }
@@ -90,7 +89,7 @@ final class SavingsAccountsApiResourceSwagger {
 
                 private GetSavingsTimeline() {}
 
-                @ApiModelProperty(example = "[2013, 3, 1]")
+                @Schema(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
             }
 
@@ -98,17 +97,17 @@ final class SavingsAccountsApiResourceSwagger {
 
                 private GetSavingsCurrency() {}
 
-                @ApiModelProperty(example = "USD")
+                @Schema(example = "USD")
                 public String code;
-                @ApiModelProperty(example = "US Dollar")
+                @Schema(example = "US Dollar")
                 public String name;
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer decimalPlaces;
-                @ApiModelProperty(example = "$")
+                @Schema(example = "$")
                 public String displaySymbol;
-                @ApiModelProperty(example = "currency.USD")
+                @Schema(example = "currency.USD")
                 public String nameCode;
-                @ApiModelProperty(example = "US Dollar ($)")
+                @Schema(example = "US Dollar ($)")
                 public String displayLabel;
             }
 
@@ -116,48 +115,48 @@ final class SavingsAccountsApiResourceSwagger {
 
                 private GetSavingsInterestCompoundingPeriodType() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
+                @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
                 public String code;
-                @ApiModelProperty(example = "Daily")
-                public String value;
+                @Schema(example = "Daily")
+                public String description;
             }
 
             static final class GetSavingsInterestPostingPeriodType {
 
                 private GetSavingsInterestPostingPeriodType() {}
 
-                @ApiModelProperty(example = "4")
+                @Schema(example = "4")
                 public Integer id;
-                @ApiModelProperty(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
+                @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
                 public String code;
-                @ApiModelProperty(example = "Monthly")
-                public String value;
+                @Schema(example = "Monthly")
+                public String description;
             }
 
             static final class GetSavingsInterestCalculationType {
 
                 private GetSavingsInterestCalculationType() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "savingsInterestCalculationType.dailybalance")
+                @Schema(example = "savingsInterestCalculationType.dailybalance")
                 public String code;
-                @ApiModelProperty(example = "Daily Balance")
-                public String value;
+                @Schema(example = "Daily Balance")
+                public String description;
             }
 
             static final class GetSavingsInterestCalculationDaysInYearType {
 
                 private GetSavingsInterestCalculationDaysInYearType() {}
 
-                @ApiModelProperty(example = "365")
+                @Schema(example = "365")
                 public Integer id;
-                @ApiModelProperty(example = "savingsInterestCalculationDaysInYearType.days365")
+                @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
                 public String code;
-                @ApiModelProperty(example = "365 Days")
-                public String value;
+                @Schema(example = "365 Days")
+                public String description;
             }
 
             static final class GetSavingsSummary {
@@ -165,28 +164,28 @@ final class SavingsAccountsApiResourceSwagger {
                 private GetSavingsSummary() {}
 
                 public GetSavingsCurrency currency;
-                @ApiModelProperty(example = "0")
+                @Schema(example = "0")
                 public Integer accountBalance;
             }
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "000000001")
+            @Schema(example = "000000001")
             public String accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer clientId;
-            @ApiModelProperty(example = "small business")
+            @Schema(example = "small business")
             public String clientName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer savingsProductId;
-            @ApiModelProperty(example = "Passbook Savings")
+            @Schema(example = "Passbook Savings")
             public String savingsProductName;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer fieldOfficerId;
             public GetSavingsStatus status;
             public GetSavingsTimeline timeline;
             public GetSavingsCurrency currency;
-            @ApiModelProperty(example = "5")
+            @Schema(example = "5")
             public Double nominalAnnualInterestRate;
             public GetSavingsInterestCompoundingPeriodType interestCompoundingPeriodType;
             public GetSavingsInterestPostingPeriodType interestPostingPeriodType;
@@ -195,44 +194,44 @@ final class SavingsAccountsApiResourceSwagger {
             public GetSavingsSummary summary;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer totalFilteredRecords;
         public Set<GetSavingsPageItems> pageItems;
     }
 
-    @ApiModel(value = "PostSavingsAccountsRequest")
+    @Schema(description = "PostSavingsAccountsRequest")
     public static final class PostSavingsAccountsRequest {
 
         private PostSavingsAccountsRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer productId;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "01 March 2011")
+        @Schema(example = "01 March 2011")
         public String submittedOnDate;
     }
 
-    @ApiModel(value = "PostSavingsAccountsResponse")
+    @Schema(description = "PostSavingsAccountsResponse")
     public static final class PostSavingsAccountsResponse {
 
         private PostSavingsAccountsResponse() {}
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "GetSavingsAccountsAccountIdResponse")
+    @Schema(description = "GetSavingsAccountsAccountIdResponse")
     public static final class GetSavingsAccountsAccountIdResponse {
 
         private GetSavingsAccountsAccountIdResponse() {}
@@ -242,30 +241,30 @@ final class SavingsAccountsApiResourceSwagger {
             private GetSavingsAccountsSummary() {}
 
             public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer accountBalance;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer availableBalance;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "000000001")
+        @Schema(example = "000000001")
         public String accountNo;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "small business")
+        @Schema(example = "small business")
         public String clientName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsProductId;
-        @ApiModelProperty(example = "Passbook Savings")
+        @Schema(example = "Passbook Savings")
         public String savingsProductName;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer fieldOfficerId;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsStatus status;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsTimeline timeline;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Double nominalAnnualInterestRate;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsInterestCompoundingPeriodType interestCompoundingPeriodType;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsInterestPostingPeriodType interestPostingPeriodType;
@@ -274,18 +273,18 @@ final class SavingsAccountsApiResourceSwagger {
         public GetSavingsAccountsSummary summary;
     }
 
-    @ApiModel(value = "PutSavingsAccountsAccountIdRequest")
+    @Schema(description = "PutSavingsAccountsAccountIdRequest")
     public static final class PutSavingsAccountsAccountIdRequest {
 
         private PutSavingsAccountsAccountIdRequest() {}
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "5.9999999999")
+        @Schema(example = "5.9999999999")
         public Double nominalAnnualInterestRate;
     }
 
-    @ApiModel(value = "PutSavingsAccountsAccountIdResponse")
+    @Schema(description = "PutSavingsAccountsAccountIdResponse")
     public static final class PutSavingsAccountsAccountIdResponse {
 
         private PutSavingsAccountsAccountIdResponse() {}
@@ -294,37 +293,37 @@ final class SavingsAccountsApiResourceSwagger {
 
             private PutSavingsAccountsChanges() {}
 
-            @ApiModelProperty(example = "5.9999999999")
+            @Schema(example = "5.9999999999")
             public Double nominalAnnualInterestRate;
-            @ApiModelProperty(example = "en")
+            @Schema(example = "en")
             public String locale;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer savingsId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutSavingsAccountsChanges changes;
     }
 
-    @ApiModel(value = "PostSavingsAccountsAccountIdRequest")
+    @Schema(description = "PostSavingsAccountsAccountIdRequest")
     public static final class PostSavingsAccountsAccountIdRequest {
 
         private PostSavingsAccountsAccountIdRequest() {}
 
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "05 September 2014")
+        @Schema(example = "05 September 2014")
         public String unassignedDate;
     }
 
-    @ApiModel(value = "PostSavingsAccountsAccountIdResponse")
+    @Schema(description = "PostSavingsAccountsAccountIdResponse")
     public static final class PostSavingsAccountsAccountIdResponse {
 
         private PostSavingsAccountsAccountIdResponse() {}
@@ -334,25 +333,25 @@ final class SavingsAccountsApiResourceSwagger {
             private PostSavingsAccountsAccountIdChanges() {}
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer officeId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer clientId;
-        @ApiModelProperty(example = "8")
+        @Schema(example = "8")
         public Integer resourceId;
         public PostSavingsAccountsAccountIdChanges changes;
     }
 
-    @ApiModel(value = "DeleteSavingsAccountsAccountIdResponse")
+    @Schema(description = "DeleteSavingsAccountsAccountIdResponse")
     public static final class DeleteSavingsAccountsAccountIdResponse {
 
         private DeleteSavingsAccountsAccountIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 }

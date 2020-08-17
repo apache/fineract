@@ -96,7 +96,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
     private Long transferToSavingsAccountId;
 
     protected DepositAccountTermAndPreClosure() {
-        super();
+
     }
 
     public static DepositAccountTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,

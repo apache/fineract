@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.spm.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -51,9 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/surveys/{surveyId}/lookuptables")
 @Component
 @Scope("singleton")
-@Api(tags = { "SPM API - LookUp Table" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.") })
+@Tag(name = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
 public class LookupTableApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -63,7 +62,7 @@ public class LookupTableApiResource {
     @Autowired
     public LookupTableApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
             final LookupTableService lookupTableService) {
-        super();
+
         this.securityContext = securityContext;
         this.spmService = spmService;
         this.lookupTableService = lookupTableService;
@@ -73,9 +72,10 @@ public class LookupTableApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @ApiOperation(value = "List all Lookup Table entries", notes = "List all Lookup Table entries for a survey.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = LookupTableData.class, responseContainer = "list") })
-    public List<LookupTableData> fetchLookupTables(@PathParam("surveyId") @ApiParam(value = "Enter surveyId") final Long surveyId) {
+    @Operation(summary = "List all Lookup Table entries", description = "List all Lookup Table entries for a survey.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LookupTableData.class)))) })
+    public List<LookupTableData> fetchLookupTables(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId) {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findSurvey(surveyId);
@@ -94,10 +94,11 @@ public class LookupTableApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @ApiOperation(value = "Retrieve a Lookup Table entry", notes = "Retrieve a Lookup Table entry for a survey.")
-    @ApiResponses({ @ApiResponse(code = 200, message = "", response = LookupTableData.class) })
-    public LookupTableData findLookupTable(@PathParam("surveyId") @ApiParam(value = "Enter surveyId") final Long surveyId,
-            @PathParam("key") @ApiParam(value = "Enter key") final String key) {
+    @Operation(summary = "Retrieve a Lookup Table entry", description = "Retrieve a Lookup Table entry for a survey.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = LookupTableData.class))) })
+    public LookupTableData findLookupTable(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
+            @PathParam("key") @Parameter(description = "Enter key") final String key) {
         this.securityContext.authenticatedUser();
 
         findSurvey(surveyId);
@@ -115,10 +116,10 @@ public class LookupTableApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @ApiOperation(value = "Create a Lookup Table entry", notes = "Add a new entry to a survey.\n" + "\n" + "Mandatory Fields\n"
+    @Operation(summary = "Create a Lookup Table entry", description = "Add a new entry to a survey.\n" + "\n" + "Mandatory Fields\n"
             + "key, score, validFrom, validTo")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
-    public void createLookupTable(@PathParam("surveyId") @ApiParam(value = "Enter surveyId") final Long surveyId,
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
+    public void createLookupTable(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
             final LookupTableData lookupTableData) {
         this.securityContext.authenticatedUser();
 

@@ -31,12 +31,12 @@ public class QuestionData {
     private Integer sequenceNo;
 
     public QuestionData() {
-        super();
+
     }
 
     public QuestionData(final Long id, final List<ResponseData> responseDatas, final String componentKey, final String key,
             final String text, final String description, final Integer sequenceNo) {
-        super();
+
         this.id = id;
         this.responseDatas = responseDatas;
         this.componentKey = componentKey;

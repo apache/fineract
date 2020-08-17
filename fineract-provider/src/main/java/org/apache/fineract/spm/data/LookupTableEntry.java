@@ -25,11 +25,11 @@ public class LookupTableEntry {
     private Double score;
 
     public LookupTableEntry() {
-        super();
+
     }
 
     public LookupTableEntry(final Integer valueFrom, final Integer valueTo, final Double score) {
-        super();
+
         this.valueFrom = valueFrom;
         this.valueTo = valueTo;
         this.score = score;

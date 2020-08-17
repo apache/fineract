@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 
@@ -32,7 +31,7 @@ final class GlobalConfigurationApiResourceSwagger {
 
     }
 
-    @ApiModel(value = "GetGlobalConfigurationsResponse")
+    @Schema(description = "GetGlobalConfigurationsResponse")
     public static final class GetGlobalConfigurationsResponse {
 
         private GetGlobalConfigurationsResponse() {}
@@ -40,18 +39,18 @@ final class GlobalConfigurationApiResourceSwagger {
         public List<GlobalConfigurationPropertyData> globalConfiguration;
     }
 
-    @ApiModel(value = "PutGlobalConfigurationsRequest")
+    @Schema(description = "PutGlobalConfigurationsRequest")
     public static final class PutGlobalConfigurationsRequest {
 
         private PutGlobalConfigurationsRequest() {}
 
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean enabled;
-        @ApiModelProperty(example = "2")
-        public Long value;
+        @Schema(example = "2")
+        public Long description;
     }
 
-    @ApiModel(value = "PutGlobalConfigurationsResponse")
+    @Schema(description = "PutGlobalConfigurationsResponse")
     public static final class PutGlobalConfigurationsResponse {
 
         private PutGlobalConfigurationsResponse() {}
@@ -60,11 +59,11 @@ final class GlobalConfigurationApiResourceSwagger {
 
             private PutGlobalConfigurationsResponsechangesSwagger() {}
 
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public boolean enabled;
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
         public PutGlobalConfigurationsResponsechangesSwagger changes;
     }

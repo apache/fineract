@@ -80,6 +80,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -265,7 +266,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         .update("insert into c_configuration (name, value, enabled ) values( :dataTableName , '0','0')", paramMap);
             }
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable cause = dve.getCause();
             final Throwable realCause = dve.getMostSpecificCause();
             // even if duplicate is only due to permission duplicate, okay to
@@ -273,21 +274,21 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (realCause.getMessage().contains("Duplicate entry") || cause.getMessage().contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException("error.msg.datatable.registered",
                         "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
-                        dataTableName);
+                        dataTableName, dve);
             }
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         } catch (final PersistenceException dve) {
             final Throwable cause = dve.getCause();
             if (cause.getMessage().contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException("error.msg.datatable.registered",
                         "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
-                        dataTableName);
+                        dataTableName, dve);
             }
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
 
     }
@@ -394,35 +395,35 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
                                 + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, dve);
             } else if (realCause.getMessage().contains("doesn't have a default value")
                     || cause.getMessage().contains("doesn't have a default value")) {
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `"
                                 + dataTableName + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, dve);
             }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         } catch (final PersistenceException e) {
             final Throwable cause = e.getCause();
             if (cause.getMessage().contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
                                 + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, e);
             } else if (cause.getMessage().contains("doesn't have a default value")) {
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `"
                                 + dataTableName + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, e);
             }
 
             logAsErrorUnexpectedDataIntegrityException(e);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", e);
 
         }
     }
@@ -452,24 +453,24 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
                                 + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, dve);
             }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         } catch (final PersistenceException dve) {
             final Throwable cause = dve.getCause();
             if (cause.getMessage().contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException(
                         "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
                                 + "` and application table with identifier `" + appTableId + "`.",
-                        "dataTableName", dataTableName, appTableId);
+                        "dataTableName", dataTableName, appTableId, dve);
             }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
     }
 
@@ -624,7 +625,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
             registerDatatable(datatableName, apptableName);
             registerColumnCodeMapping(codeMappings);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
@@ -1008,7 +1009,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 } catch (final Exception e) {
                     if (e.getMessage().contains("Error on rename")) {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
-                                "One of the column name modification not allowed");
+                                "One of the column name modification not allowed", e);
                     }
                     // handle all other exceptions in here
 
@@ -1018,11 +1019,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     // PlatformServiceUnavailableException
                     if (e.getMessage().toLowerCase().contains("invalid use of null value")) {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
-                                "One of the data table columns contains null values");
+                                "One of the data table columns contains null values", e);
                     }
                 }
             }
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
@@ -1078,7 +1079,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String sql = "DROP TABLE `" + datatableName + "`";
             sqlArray[0] = sql;
             this.jdbcTemplate.batchUpdate(sqlArray);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");

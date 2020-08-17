@@ -81,7 +81,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
             return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId);
+            throw new LoanNotFoundException(loanId, e);
         }
     }
 
@@ -94,7 +94,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         private LocalDate lastDueDate;
         private BigDecimal outstandingLoanPrincipalBalance;
 
-        public LoanScheduleArchiveResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
+        LoanScheduleArchiveResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
                 Collection<DisbursementData> disbursementData) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();

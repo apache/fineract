@@ -224,7 +224,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new GLAccountNotFoundException(glAccountId);
+            throw new GLAccountNotFoundException(glAccountId, e);
         }
     }
 

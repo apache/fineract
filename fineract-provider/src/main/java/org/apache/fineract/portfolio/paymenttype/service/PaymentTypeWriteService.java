@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface PaymentTypeWriteService {
 
-    CommandProcessingResult createPaymentType(final JsonCommand command);
+    CommandProcessingResult createPaymentType(JsonCommand command);
 
-    CommandProcessingResult updatePaymentType(final Long id, final JsonCommand command);
+    CommandProcessingResult updatePaymentType(Long id, JsonCommand command);
 
-    CommandProcessingResult deletePaymentType(final Long id);
+    CommandProcessingResult deletePaymentType(Long id);
 }

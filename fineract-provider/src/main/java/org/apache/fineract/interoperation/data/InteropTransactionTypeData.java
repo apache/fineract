@@ -26,9 +26,10 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SCENARIO
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SUB_SCENARIO;
 
 import com.google.gson.JsonObject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropInitiatorType;
@@ -37,8 +38,8 @@ import org.apache.fineract.interoperation.domain.InteropTransactionScenario;
 
 public class InteropTransactionTypeData {
 
-    public static final String[] PARAMS = { PARAM_SCENARIO, PARAM_SUB_SCENARIO, PARAM_INITIATOR, PARAM_INITIATOR_TYPE, PARAM_REFUND_INFO,
-            PARAM_BALANCE_OF_PAYMENTS };
+    public static final List<String> PARAMS = List.copyOf(Arrays.asList(PARAM_SCENARIO, PARAM_SUB_SCENARIO, PARAM_INITIATOR,
+            PARAM_INITIATOR_TYPE, PARAM_REFUND_INFO, PARAM_BALANCE_OF_PAYMENTS));
 
     @NotNull
     private final InteropTransactionScenario scenario;
@@ -92,7 +93,7 @@ public class InteropTransactionTypeData {
             return null;
         }
 
-        jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
+        jsonHelper.checkForUnsupportedParameters(element, PARAMS);
 
         String scenarioString = jsonHelper.extractStringNamed(PARAM_SCENARIO, element);
         DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_SCENARIO).value(scenarioString).notBlank();

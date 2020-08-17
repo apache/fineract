@@ -51,7 +51,9 @@ public class AccountEnumerations {
             case GLIM:
                 optionData = new EnumOptionData(AccountType.GLIM.getValue().longValue(), AccountType.GLIM.getCode(), "GLIM");
             break;
-            default:
+            case GSIM:
+                optionData = new EnumOptionData(AccountType.GSIM.getValue().longValue(), AccountType.GSIM.getCode(), "GSIM");
+            break;
         }
 
         return optionData;

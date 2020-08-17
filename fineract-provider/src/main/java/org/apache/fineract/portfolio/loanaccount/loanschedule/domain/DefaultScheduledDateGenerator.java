@@ -33,8 +33,12 @@ import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.joda.time.Weeks;
 import org.joda.time.Years;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultScheduledDateGenerator.class);
 
     @Override
     public LocalDate getLastRepaymentDate(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
@@ -58,6 +62,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate dueRepaymentPeriodDate = null;
         if (isFirstRepayment && firstRepaymentPeriodDate != null) {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
+
         } else {
             LocalDate seedDate = null;
             String reccuringString = null;
@@ -225,7 +230,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
+            break;
         }
         return dueRepaymentPeriodDate;
     }
@@ -265,7 +272,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement isDateFallsInSchedule for WHOLE_TERM");
+            break;
         }
         return isScheduledDate;
     }
@@ -300,7 +309,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            break;
         }
 
         return idealDisbursementDate;

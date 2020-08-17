@@ -32,7 +32,7 @@ public class ScorecardData {
     private List<ScorecardValue> scorecardValues;
 
     public ScorecardData() {
-        super();
+
     }
 
     private ScorecardData(final Long id, final Long userId, final String username, final Long surveyId, final String surveyName,

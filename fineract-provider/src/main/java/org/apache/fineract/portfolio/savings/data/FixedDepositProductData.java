@@ -39,17 +39,17 @@ public final class FixedDepositProductData extends DepositProductData {
 
     // additional fields
     private boolean preClosurePenalApplicable;
-    protected BigDecimal preClosurePenalInterest;
-    protected EnumOptionData preClosurePenalInterestOnType;
-    protected Integer minDepositTerm;
-    protected Integer maxDepositTerm;
+    private BigDecimal preClosurePenalInterest;
+    private EnumOptionData preClosurePenalInterestOnType;
+    private Integer minDepositTerm;
+    private Integer maxDepositTerm;
     private EnumOptionData minDepositTermType;
     private EnumOptionData maxDepositTermType;
-    protected Integer inMultiplesOfDepositTerm;
-    protected EnumOptionData inMultiplesOfDepositTermType;
-    protected BigDecimal minDepositAmount;
-    protected BigDecimal depositAmount;
-    protected BigDecimal maxDepositAmount;
+    private Integer inMultiplesOfDepositTerm;
+    private EnumOptionData inMultiplesOfDepositTermType;
+    private BigDecimal minDepositAmount;
+    private BigDecimal depositAmount;
+    private BigDecimal maxDepositAmount;
 
     private Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
     private Collection<EnumOptionData> periodFrequencyTypeOptions;

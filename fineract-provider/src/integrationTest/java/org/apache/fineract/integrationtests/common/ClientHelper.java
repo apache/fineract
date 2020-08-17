@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -622,4 +623,12 @@ public class ClientHelper {
         return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
                 legalFormType, file, locale, dateFormat);
     }
+
+    public List getClientWithStatus(final int limit, final String status) {
+        final String URL = "/fineract-provider/api/v1/clients?paged=true&status=" + status + "&limit=" + Integer.toString(limit) + "&"
+                + Utils.TENANT_IDENTIFIER;
+        LinkedHashMap responseClients = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        return (List) responseClients.get("pageItems");
+    }
+
 }

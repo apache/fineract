@@ -134,7 +134,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         private final String schemaSql;
 
-        public StaffLookupMapper() {
+        StaffLookupMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(100);
             sqlBuilder.append("s.id as id, s.display_name as displayName ");
@@ -199,7 +199,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy });
         } catch (final EmptyResultDataAccessException e) {
-            throw new StaffNotFoundException(staffId);
+            throw new StaffNotFoundException(staffId, e);
         }
     }
 

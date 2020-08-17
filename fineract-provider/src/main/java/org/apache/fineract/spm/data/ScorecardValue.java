@@ -28,7 +28,7 @@ public class ScorecardValue {
     private Date createdOn;
 
     public ScorecardValue() {
-        super();
+
     }
 
     private ScorecardValue(final Long questionId, final Long responseId, final Integer value, final Date createdOn) {

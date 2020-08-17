@@ -27,7 +27,7 @@ public class HookEventSource implements Serializable {
     private final String actionName;
 
     public HookEventSource(final String entityName, final String actionName) {
-        super();
+
         this.entityName = entityName;
         this.actionName = actionName;
     }

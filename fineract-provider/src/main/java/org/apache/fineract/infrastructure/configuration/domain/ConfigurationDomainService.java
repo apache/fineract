@@ -94,4 +94,6 @@ public interface ConfigurationDomainService {
     Integer retrieveOTPLiveTime();
 
     boolean isSubRatesEnabled();
+
+    boolean isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
 }

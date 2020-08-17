@@ -214,7 +214,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm,
                     new Object[] { loanId, hierarchySearchString, hierarchySearchString });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId);
+            throw new LoanNotFoundException(loanId, e);
         }
     }
 
@@ -260,7 +260,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId);
+            throw new LoanNotFoundException(loanId, e);
         }
     }
 
@@ -549,7 +549,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, transactionId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanTransactionNotFoundException(transactionId);
+            throw new LoanTransactionNotFoundException(transactionId, e);
         }
     }
 
@@ -1953,7 +1953,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.sqlSchema;
         }
 
-        public LoanRepaymentWaiverMapper() {
+        LoanRepaymentWaiverMapper() {
             StringBuilder sb = new StringBuilder();
             sb.append("lrs.duedate as dueDate,lrs.interest_waived_derived interestWaived, lrs.installment as installment");
             sb.append(" from m_loan_repayment_schedule lrs ");
@@ -2197,6 +2197,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append(" (select min(ls.duedate) datedue,ls.loan_id from m_loan_repayment_schedule ls  ");
             sqlBuilder.append(" where ls.loan_id = ? and  ls.completed_derived = 0)");
             sqlBuilder.append(" )asq on asq.loan_id = ls.loan_id and asq.datedue = ls.duedate");
+            sqlBuilder.append(" GROUP BY ls.duedate");
+            sqlBuilder.append(",ls.principal_amount,ls.principal_completed_derived,ls.principal_writtenoff_derived");
+            sqlBuilder
+                    .append(",ls.interest_amount,ls.interest_completed_derived,ls.interest_waived_derived,ls.interest_writtenoff_derived");
+            sqlBuilder.append(
+                    ",ls.fee_charges_amount,ls.fee_charges_completed_derived, ls.fee_charges_writtenoff_derived, ls.fee_charges_waived_derived");
+            sqlBuilder.append(
+                    ",ls.penalty_charges_amount, ls.penalty_charges_completed_derived, ls.penalty_charges_writtenoff_derived, ls.penalty_charges_waived_derived");
             return sqlBuilder.toString();
 
         }
@@ -2246,7 +2254,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
             return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(accountId);
+            throw new LoanNotFoundException(accountId, e);
         }
     }
 

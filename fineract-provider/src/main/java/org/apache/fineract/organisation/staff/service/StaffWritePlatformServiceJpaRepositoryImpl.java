@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +75,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                     .withCommandId(command.commandId()) //
                     .withEntityId(staff.getId()).withOfficeId(officeId) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -106,7 +107,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
                     .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {

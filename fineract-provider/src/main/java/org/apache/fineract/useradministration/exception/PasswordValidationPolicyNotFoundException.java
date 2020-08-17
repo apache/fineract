@@ -19,6 +19,7 @@
 package org.apache.fineract.useradministration.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when role resources are not found.
@@ -32,5 +33,9 @@ public class PasswordValidationPolicyNotFoundException extends AbstractPlatformR
 
     public PasswordValidationPolicyNotFoundException() {
         super("error.msg.password.validation.policy.not.found", "An active password validation policy was not found");
+    }
+
+    public PasswordValidationPolicyNotFoundException(EmptyResultDataAccessException e) {
+        super("error.msg.password.validation.policy.not.found", "An active password validation policy was not found", e);
     }
 }

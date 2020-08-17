@@ -95,7 +95,7 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
 
         private final String schemaSql;
 
-        public DepositAccountOnHoldTransactionsMapper() {
+        DepositAccountOnHoldTransactionsMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(" tr.id as transactionId, tr.transaction_type_enum as transactionType, ");

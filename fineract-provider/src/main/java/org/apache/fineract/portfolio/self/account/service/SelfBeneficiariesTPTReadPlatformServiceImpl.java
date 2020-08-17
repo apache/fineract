@@ -66,7 +66,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
 
         private final String schemaSql;
 
-        public BeneficiaryMapper() {
+        BeneficiaryMapper() {
             final StringBuilder sqlBuilder = new StringBuilder("(select b.id as id, ");
             sqlBuilder.append(" b.name as name, ");
             sqlBuilder.append(" o.name as officeName, ");
@@ -124,7 +124,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
 
         private final String schemaSql;
 
-        public AccountTemplateMapper() {
+        AccountTemplateMapper() {
             final StringBuilder sqlBuilder = new StringBuilder("(select o.name as officeName, ");
             sqlBuilder.append(" o.id as officeId, ");
             sqlBuilder.append(" c.display_name as clientName, ");

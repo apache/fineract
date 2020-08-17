@@ -29,7 +29,7 @@ public class ClientChargePaymentDTO {
     private final Long incomeAccountId;
 
     public ClientChargePaymentDTO(Long chargeId, BigDecimal amount, Long clientChargeId, boolean isPenalty, Long incomeAccountId) {
-        super();
+
         this.chargeId = chargeId;
         this.amount = amount;
         this.clientChargeId = clientChargeId;

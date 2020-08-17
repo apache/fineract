@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -66,9 +65,7 @@ import org.springframework.stereotype.Component;
 @Path("/loans/{loanId}/transactions")
 @Component
 @Scope("singleton")
-@Api(tags = { "Loan Transactions" })
-@SwaggerDefinition(tags = {
-        @Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.") })
+@Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
 public class LoanTransactionsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -108,16 +105,16 @@ public class LoanTransactionsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Loan Transaction Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Loan Transaction Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n"
             + "loans/1/transactions/template?command=repayment")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class) })
-    public String retrieveTransactionTemplate(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
-            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo,
-            @QueryParam("dateFormat") @ApiParam(value = "dateFormat") final String dateFormat,
-            @QueryParam("transactionDate") @ApiParam(value = "transactionDate") final DateParam transactionDateParam,
-            @QueryParam("locale") @ApiParam(value = "locale") final String locale) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
+    public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
+            @QueryParam("transactionDate") @Parameter(description = "transactionDate") final DateParam transactionDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -170,12 +167,13 @@ public class LoanTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Transaction Details", httpMethod = "GET", notes = "Retrieves a Transaction Details\n\n"
-            + "Example Request:\n" + "\n" + "loans/5/transactions/3")
+    @Operation(summary = "Retrieve a Transaction Details", description = "Retrieves a Transaction Details\n\n" + "Example Request:\n" + "\n"
+            + "loans/5/transactions/3")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTransactionIdResponse.class) })
-    public String retrieveTransaction(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
-            @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTransactionIdResponse.class))) })
+    public String retrieveTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -193,15 +191,14 @@ public class LoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Make a Repayment | Make a Refund of an Active Loan by Cash | Foreclosure of an Active Loan | Waive Interest | Write-off Loan | Make Recovery Payment | Undo Loan Write-off Transaction", httpMethod = "POST", notes = "Make Recovery Payment:\n\n"
+    @Operation(summary = "Make a Repayment | Make a Refund of an Active Loan by Cash | Foreclosure of an Active Loan | Waive Interest | Write-off Loan | Make Recovery Payment | Undo Loan Write-off Transaction", description = "Make Recovery Payment:\n\n"
             + "This API allows collecting recovery payments for written-off loans")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class) })
-    public String executeLoanTransaction(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
-            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
+    public String executeLoanTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
@@ -246,15 +243,14 @@ public class LoanTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Adjust a Transaction", httpMethod = "POST", notes = "Note: there is no need to specify command={transactionType} parameter.\n\n"
+    @Operation(summary = "Adjust a Transaction", description = "Note: there is no need to specify command={transactionType} parameter.\n\n"
             + "Mandatory Fields: transactionDate, transactionAmount")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsTransactionIdRequest.class) })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsTransactionIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsTransactionIdResponse.class) })
-    public String adjustLoanTransaction(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
-            @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsTransactionIdResponse.class))) })
+    public String adjustLoanTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();

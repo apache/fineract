@@ -52,7 +52,7 @@ public class BatchRequestsIntegrationTest {
     private RequestSpecification requestSpec;
 
     public BatchRequestsIntegrationTest() {
-        super();
+
     }
 
     /**

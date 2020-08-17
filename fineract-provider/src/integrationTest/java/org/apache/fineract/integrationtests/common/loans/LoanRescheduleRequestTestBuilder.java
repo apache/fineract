@@ -33,6 +33,8 @@ public class LoanRescheduleRequestTestBuilder {
     private String rescheduleReasonId = "1";
     private String rescheduleReasonComment = null;
     private String submittedOnDate = "04 September 2014";
+    private String emi = null;
+    private String emiEndDate = null;
 
     public String build(final String loanId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -69,6 +71,14 @@ public class LoanRescheduleRequestTestBuilder {
 
         if (rescheduleReasonComment != null) {
             map.put("rescheduleReasonComment", rescheduleReasonComment);
+        }
+
+        if (emi != null) {
+            map.put("emi", emi);
+        }
+
+        if (emiEndDate != null) {
+            map.put("endDate", emiEndDate);
         }
 
         return new Gson().toJson(map);
@@ -133,6 +143,16 @@ public class LoanRescheduleRequestTestBuilder {
     public LoanRescheduleRequestTestBuilder updateSubmittedOnDate(final String submittedOnDate) {
         this.submittedOnDate = submittedOnDate;
 
+        return this;
+    }
+
+    public LoanRescheduleRequestTestBuilder updateEmiChangeEndDate(final String emiChangeEndDate) {
+        this.emiEndDate = emiChangeEndDate;
+        return this;
+    }
+
+    public LoanRescheduleRequestTestBuilder updateEMI(final String emi) {
+        this.emi = emi;
         return this;
     }
 

@@ -23,5 +23,5 @@ import org.apache.fineract.portfolio.meeting.attendance.data.ClientAttendanceDat
 
 public interface ClientAttendanceReadPlatformService {
 
-    Collection<ClientAttendanceData> retrieveClientAttendanceByMeetingId(final Long meetingId);
+    Collection<ClientAttendanceData> retrieveClientAttendanceByMeetingId(Long meetingId);
 }

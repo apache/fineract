@@ -34,7 +34,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 public final class ScorecardMapper {
 
     private ScorecardMapper() {
-        super();
+
     }
 
     public static List<Scorecard> map(final ScorecardData scorecardData, final Survey survey, final AppUser appUser, final Client client) {

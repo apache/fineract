@@ -75,7 +75,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hookId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new HookNotFoundException(hookId);
+            throw new HookNotFoundException(hookId, e);
         }
 
     }

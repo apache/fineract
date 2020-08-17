@@ -29,5 +29,5 @@ public interface ReportMailingJobRepository extends JpaRepository<ReportMailingJ
      *
      * @return instances of {@link ReportMailingJob}
      */
-    public Collection<ReportMailingJob> findByIsActiveTrueAndIsDeletedFalse();
+    Collection<ReportMailingJob> findByIsActiveTrueAndIsDeletedFalse();
 }

@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +47,9 @@ import org.springframework.stereotype.Component;
 public class AccountNumberFormatDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AccountNumberFormatDataValidator.class);
+
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
 
@@ -56,7 +62,6 @@ public class AccountNumberFormatDataValidator {
     }
 
     public void validateForCreate(final String json) {
-
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -125,7 +130,9 @@ public class AccountNumberFormatDataValidator {
             case GROUP:
                 validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;
-            default:
+            case SHARES:
+                validAccountNumberPrefixes = Collections.emptySet();
+            break;
         }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();
@@ -136,7 +143,6 @@ public class AccountNumberFormatDataValidator {
     }
 
     public void validateForUpdate(final String json, EntityAccountType entityAccountType) {
-
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -166,12 +172,10 @@ public class AccountNumberFormatDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
-            //
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class ValidCommandHandler implements NewCommandSourceHandler {
 
     public ValidCommandHandler() {
-        super();
+
     }
 
     @Override

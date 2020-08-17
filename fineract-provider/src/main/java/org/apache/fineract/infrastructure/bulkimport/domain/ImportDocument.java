@@ -52,7 +52,7 @@ public class ImportDocument extends AbstractPersistableCustom {
     private Boolean completed;
 
     @Column(name = "entity_type")
-    private Integer entity_type;
+    private Integer entityType;
 
     @ManyToOne
     @JoinColumn(name = "createdby_id")
@@ -71,7 +71,7 @@ public class ImportDocument extends AbstractPersistableCustom {
 
     }
 
-    public static ImportDocument instance(final Document document, final LocalDateTime importTime, final Integer entity_type,
+    public static ImportDocument instance(final Document document, final LocalDateTime importTime, final Integer entityType,
             final AppUser createdBy, final Integer totalRecords) {
 
         final Boolean completed = Boolean.FALSE;
@@ -79,18 +79,18 @@ public class ImportDocument extends AbstractPersistableCustom {
         final Integer failureCount = 0;
         final LocalDateTime endTime = LocalDateTime.now();
 
-        return new ImportDocument(document, importTime, endTime, completed, entity_type, createdBy, totalRecords, successCount,
+        return new ImportDocument(document, importTime, endTime, completed, entityType, createdBy, totalRecords, successCount,
                 failureCount);
     }
 
     private ImportDocument(final Document document, final LocalDateTime importTime, final LocalDateTime endTime, Boolean completed,
-            final Integer entity_type, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
+            final Integer entityType, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
             final Integer failureCount) {
         this.document = document;
         this.importTime = importTime.toDate();
         this.endTime = endTime.toDate();
         this.completed = completed;
-        this.entity_type = entity_type;
+        this.entityType = entityType;
         this.createdBy = createdBy;
         this.totalRecords = totalRecords;
         this.successCount = successCount;
@@ -110,7 +110,7 @@ public class ImportDocument extends AbstractPersistableCustom {
     }
 
     public Integer getEntityType() {
-        return this.entity_type;
+        return this.entityType;
     }
 
 }

@@ -283,7 +283,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_INSUFFICIENT_BALANCE_ERROR,
                     accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId());
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
 
         }
     }

@@ -53,7 +53,7 @@ public enum InterestRecalculationCompoundingMethod {
         return type;
     }
 
-    private InterestRecalculationCompoundingMethod(final Integer value, final String code) {
+    InterestRecalculationCompoundingMethod(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

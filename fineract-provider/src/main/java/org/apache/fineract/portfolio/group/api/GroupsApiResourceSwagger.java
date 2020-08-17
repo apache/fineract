@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ final class GroupsApiResourceSwagger {
 
     private GroupsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetGroupsTemplateResponse")
+    @Schema(description = "GetGroupsTemplateResponse")
     public static final class GetGroupsTemplateResponse {
 
         private GetGroupsTemplateResponse() {}
@@ -39,11 +38,11 @@ final class GroupsApiResourceSwagger {
 
             private GetGroupsTemplateOfficeOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String name;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String nameDecorated;
         }
 
@@ -51,9 +50,9 @@ final class GroupsApiResourceSwagger {
 
             private GetGroupsTemplateStaffOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "C, Mike")
+            @Schema(example = "C, Mike")
             public String displayName;
         }
 
@@ -61,13 +60,13 @@ final class GroupsApiResourceSwagger {
 
             private GetGroupsTemplateClientOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Petra Yton")
+            @Schema(example = "Petra Yton")
             public String displayName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer officeId;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String officeName;
         }
 
@@ -84,29 +83,29 @@ final class GroupsApiResourceSwagger {
                     private GetGroupsTemplateColumnValues() {}
                 }
 
-                @ApiModelProperty(example = "group_id")
+                @Schema(example = "group_id")
                 public String columnName;
-                @ApiModelProperty(example = "bigint")
+                @Schema(example = "bigint")
                 public String columnType;
-                @ApiModelProperty(example = "0")
+                @Schema(example = "0")
                 public Integer columnLength;
-                @ApiModelProperty(example = "INTEGER")
+                @Schema(example = "INTEGER")
                 public String columnDisplayType;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean isColumnNullable;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "true")
                 public Boolean isColumnPrimaryKey;
                 public Set<GetGroupsTemplateColumnValues> columnValues;
             }
 
-            @ApiModelProperty(example = "m_group")
+            @Schema(example = "m_group")
             public String applicationTableName;
-            @ApiModelProperty(example = "Group Activation Data")
+            @Schema(example = "Group Activation Data")
             public String registeredTableName;
             public Set<GetGroupsTemplateColumnHeaderData> columnHeaderData;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
         public Set<GetGroupsTemplateOfficeOptions> officeOptions;
         public Set<GetGroupsTemplateStaffOptions> staffOptions;
@@ -114,7 +113,7 @@ final class GroupsApiResourceSwagger {
         public Set<GetGroupsTemplateDatatables> datatables;
     }
 
-    @ApiModel(value = "GetGroupsResponse")
+    @Schema(description = "GetGroupsResponse")
     public static final class GetGroupsResponse {
 
         private GetGroupsResponse() {}
@@ -127,35 +126,35 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "clientStatusType.pending")
+                @Schema(example = "clientStatusType.pending")
                 public String code;
-                @ApiModelProperty(example = "Pending")
-                public String value;
+                @Schema(example = "Pending")
+                public String description;
             }
 
-            @ApiModelProperty(example = "4")
+            @Schema(example = "4")
             public Integer id;
-            @ApiModelProperty(example = "AnotherGroup")
+            @Schema(example = "AnotherGroup")
             public String name;
             public GetGroupsStatus status;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean active;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer officeId;
-            @ApiModelProperty(example = "Head Office")
+            @Schema(example = "Head Office")
             public String officeName;
-            @ApiModelProperty(example = ".4.")
+            @Schema(example = ".4.")
             public String hierarchy;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer totalFilteredRecords;
         public Set<GetGroupsPageItems> pageItems;
     }
 
-    @ApiModel(value = "GetGroupsGroupIdResponse")
+    @Schema(description = "GetGroupsGroupIdResponse")
     public static final class GetGroupsGroupIdResponse {
 
         private GetGroupsGroupIdResponse() {}
@@ -164,80 +163,80 @@ final class GroupsApiResourceSwagger {
 
             private GetGroupsGroupIdTimeline() {}
 
-            @ApiModelProperty(example = "[2013, 11, 14]")
+            @Schema(example = "[2013, 11, 14]")
             public LocalDate activatedOnDate;
-            @ApiModelProperty(example = "mifos")
+            @Schema(example = "mifos")
             public String activatedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String activatedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String activatedByLastname;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "First Group")
+        @Schema(example = "First Group")
         public String name;
-        @ApiModelProperty(example = "000-1A")
+        @Schema(example = "000-1A")
         public String externalId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "Head Office")
+        @Schema(example = "Head Office")
         public String officeName;
-        @ApiModelProperty(example = ".1.")
+        @Schema(example = ".1.")
         public String hierarchy;
         public GetGroupsGroupIdTimeline timeline;
     }
 
-    @ApiModel(value = "PostGroupsRequest")
+    @Schema(description = "PostGroupsRequest")
     public static final class PostGroupsRequest {
 
         private PostGroupsRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "Pending Group")
+        @Schema(example = "Pending Group")
         public String name;
-        @ApiModelProperty(example = "false")
+        @Schema(example = "false")
         public Boolean active;
     }
 
-    @ApiModel(value = "PostGroupsResponse")
+    @Schema(description = "PostGroupsResponse")
     public static final class PostGroupsResponse {
 
         private PostGroupsResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer groupId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "DeleteGroupsGroupIdResponse")
+    @Schema(description = "DeleteGroupsGroupIdResponse")
     public static final class DeleteGroupsGroupIdResponse {
 
         private DeleteGroupsGroupIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer groupId;
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffRequest")
+    @Schema(description = "PostGroupsGroupIdCommandUnassignStaffRequest")
     public static final class PostGroupsGroupIdCommandUnassignStaffRequest {
 
         private PostGroupsGroupIdCommandUnassignStaffRequest() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer staffId;
     }
 
-    @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffResponse")
+    @Schema(description = "PostGroupsGroupIdCommandUnassignStaffResponse")
     public static final class PostGroupsGroupIdCommandUnassignStaffResponse {
 
         private PostGroupsGroupIdCommandUnassignStaffResponse() {}
@@ -247,25 +246,25 @@ final class GroupsApiResourceSwagger {
             private PostGroupsGroupIdCommandUnassignStaffChanges() {}
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer groupId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PostGroupsGroupIdCommandUnassignStaffChanges changes;
     }
 
-    @ApiModel(value = "PutGroupsGroupIdRequest")
+    @Schema(description = "PutGroupsGroupIdRequest")
     public static final class PutGroupsGroupIdRequest {
 
         private PutGroupsGroupIdRequest() {}
 
-        @ApiModelProperty(example = "First Group (changed)")
+        @Schema(example = "First Group (changed)")
         public String name;
     }
 
-    @ApiModel(value = "PutGroupsGroupIdResponse")
+    @Schema(description = "PutGroupsGroupIdResponse")
     public static final class PutGroupsGroupIdResponse {
 
         private PutGroupsGroupIdResponse() {}
@@ -274,20 +273,20 @@ final class GroupsApiResourceSwagger {
 
             private PutGroupsGroupIdChanges() {}
 
-            @ApiModelProperty(example = "First Group (changed)")
+            @Schema(example = "First Group (changed)")
             public String name;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer officeId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer groupId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutGroupsGroupIdChanges changes;
     }
 
-    @ApiModel(value = "GetGroupsGroupIdAccountsResponse")
+    @Schema(description = "GetGroupsGroupIdAccountsResponse")
     public static final class GetGroupsGroupIdAccountsResponse {
 
         private GetGroupsGroupIdAccountsResponse() {}
@@ -300,27 +299,27 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "loanStatusType.submitted.and.pending.approval")
+                @Schema(example = "loanStatusType.submitted.and.pending.approval")
                 public String code;
-                @ApiModelProperty(example = "Submitted and pending approval")
-                public String value;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "Submitted and pending approval")
+                public String description;
+                @Schema(example = "true")
                 public Boolean pendingApproval;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean waitingForDisbursal;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedObligationsMet;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedWrittenOff;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedRescheduled;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean overpaid;
             }
 
@@ -328,21 +327,21 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsLoanType() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.group")
+                @Schema(example = "accountType.group")
                 public String code;
-                @ApiModelProperty(example = "Group")
-                public String value;
+                @Schema(example = "Group")
+                public String description;
             }
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "000000003")
+            @Schema(example = "000000003")
             public Long accountNo;
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer productId;
-            @ApiModelProperty(example = "daily product")
+            @Schema(example = "daily product")
             public String productName;
             public GetGroupsGroupIdAccountsStatus status;
             public GetGroupsGroupIdAccountsLoanType loanType;
@@ -356,23 +355,23 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsSavingStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "savingsAccountStatusType.submitted.and.pending.approval")
+                @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
-                @ApiModelProperty(example = "Submitted and pending approval")
-                public String value;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "Submitted and pending approval")
+                public String description;
+                @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean approved;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean rejected;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean withdrawnByApplicant;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
             }
 
@@ -380,17 +379,17 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsSavingCurrency() {}
 
-                @ApiModelProperty(example = "USD")
+                @Schema(example = "USD")
                 public String code;
-                @ApiModelProperty(example = "US Dollar")
+                @Schema(example = "US Dollar")
                 public String name;
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer decimalPlaces;
-                @ApiModelProperty(example = "$")
+                @Schema(example = "$")
                 public String displaySymbol;
-                @ApiModelProperty(example = "currency.USD")
+                @Schema(example = "currency.USD")
                 public String nameCode;
-                @ApiModelProperty(example = "US Dollar ($)")
+                @Schema(example = "US Dollar ($)")
                 public String displayLabel;
             }
 
@@ -398,21 +397,21 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsSavingAccountType() {}
 
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.group")
+                @Schema(example = "accountType.group")
                 public String code;
-                @ApiModelProperty(example = "Group")
-                public String value;
+                @Schema(example = "Group")
+                public String description;
             }
 
-            @ApiModelProperty(example = "9")
+            @Schema(example = "9")
             public Integer id;
-            @ApiModelProperty(example = "000000009")
+            @Schema(example = "000000009")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "p_sav")
+            @Schema(example = "p_sav")
             public String productName;
             public GetGroupsGroupIdAccountsSavingStatus status;
             public GetGroupsGroupIdAccountsSavingCurrency currency;
@@ -427,27 +426,27 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsMemberLoanStatus() {}
 
-                @ApiModelProperty(example = "200")
+                @Schema(example = "200")
                 public Integer id;
-                @ApiModelProperty(example = "loanStatusType.approved")
+                @Schema(example = "loanStatusType.approved")
                 public String code;
-                @ApiModelProperty(example = "Approved")
-                public String value;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "Approved")
+                public String description;
+                @Schema(example = "false")
                 public Boolean pendingApproval;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "true")
                 public Boolean waitingForDisbursal;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedObligationsMet;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedWrittenOff;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closedRescheduled;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean overpaid;
             }
 
@@ -455,21 +454,21 @@ final class GroupsApiResourceSwagger {
 
                 private GetGroupsGroupIdAccountsMemberLoanType() {}
 
-                @ApiModelProperty(example = "3")
+                @Schema(example = "3")
                 public Integer id;
-                @ApiModelProperty(example = "accountType.jlg")
+                @Schema(example = "accountType.jlg")
                 public String code;
-                @ApiModelProperty(example = "JLG")
-                public String value;
+                @Schema(example = "JLG")
+                public String description;
             }
 
-            @ApiModelProperty(example = "4")
+            @Schema(example = "4")
             public Integer id;
-            @ApiModelProperty(example = "000000004")
+            @Schema(example = "000000004")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "testLoan")
+            @Schema(example = "testLoan")
             public String productName;
             public GetGroupsGroupIdAccountsMemberLoanStatus status;
             public GetGroupsGroupIdAccountsMemberLoanType loanType;
@@ -479,13 +478,13 @@ final class GroupsApiResourceSwagger {
 
             private GetGroupsGroupIdAccountsMemberSavingsAccounts() {}
 
-            @ApiModelProperty(example = "3")
+            @Schema(example = "3")
             public Integer id;
-            @ApiModelProperty(example = "000000003")
+            @Schema(example = "000000003")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "p_sav")
+            @Schema(example = "p_sav")
             public String productName;
             public GetGroupsGroupIdAccountsSavingAccounts.GetGroupsGroupIdAccountsSavingStatus status;
             public GetGroupsGroupIdAccountsSavingAccounts.GetGroupsGroupIdAccountsSavingCurrency currency;
@@ -498,7 +497,7 @@ final class GroupsApiResourceSwagger {
         public Set<GetGroupsGroupIdAccountsMemberSavingsAccounts> memberSavingsAccounts;
     }
 
-    @ApiModel(value = "PostGroupsGroupIdRequest")
+    @Schema(description = "PostGroupsGroupIdRequest")
     public static final class PostGroupsGroupIdRequest {
 
         private PostGroupsGroupIdRequest() {}
@@ -507,21 +506,21 @@ final class GroupsApiResourceSwagger {
 
             private PostGroupsGroupIdClients() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer destinationGroupId;
         public Set<PostGroupsGroupIdClients> clients;
     }
 
-    @ApiModel(value = "PostGroupsGroupIdResponse")
+    @Schema(description = "PostGroupsGroupIdResponse")
     public static final class PostGroupsGroupIdResponse {
 
         private PostGroupsGroupIdResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 }

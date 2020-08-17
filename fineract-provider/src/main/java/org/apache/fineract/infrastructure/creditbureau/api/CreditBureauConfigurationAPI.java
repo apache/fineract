@@ -19,7 +19,6 @@
 
 package org.apache.fineract.infrastructure.creditbureau.api;
 
-import io.swagger.annotations.Api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -57,7 +56,6 @@ import org.springframework.stereotype.Component;
 @Path("/CreditBureauConfiguration")
 @Component
 @Scope("singleton")
-@Api(value = "CreditBureau Configuration")
 public class CreditBureauConfigurationAPI {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(

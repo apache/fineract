@@ -180,7 +180,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountChargeNotFoundException(savingsAccountId);
+            throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
     }
 
@@ -205,7 +205,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
         private final String schemaSql;
 
-        public SavingsAccountChargeDueMapper() {
+        SavingsAccountChargeDueMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("sac.id as id, ");
             sqlBuilder.append("sa.id as accountId, ");

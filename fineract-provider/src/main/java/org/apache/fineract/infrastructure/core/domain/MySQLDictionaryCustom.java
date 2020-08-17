@@ -27,7 +27,7 @@ import org.apache.openjpa.jdbc.sql.MySQLDictionary;
 public class MySQLDictionaryCustom extends MySQLDictionary {
 
     public MySQLDictionaryCustom() {
-        super();
+
         this.supportsSubselect = true;
         this.booleanRepresentation = BooleanRepresentationFactory.BOOLEAN;
         this.supportsGetGeneratedKeys = false;

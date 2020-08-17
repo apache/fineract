@@ -47,7 +47,7 @@ public class DeleteTellerCommandHandler implements NewCommandSourceHandler {
      */
     @Autowired
     public DeleteTellerCommandHandler(final TellerWritePlatformService writePlatformService) {
-        super();
+
         this.writePlatformService = writePlatformService;
     }
 

@@ -176,7 +176,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         } catch (IOException e) {
             LOG.error("Problem occurred in importWorkbook function", e);
             throw new GeneralPlatformDomainRuleException("error.msg.io.exception",
-                    "IO exception occured with " + fileDetail.getFileName() + " " + e.getMessage());
+                    "IO exception occured with " + fileDetail.getFileName() + " " + e.getMessage(), e);
 
         }
     }

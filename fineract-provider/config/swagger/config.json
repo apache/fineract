@@ -1,0 +1,11 @@
+{
+   "groupId": "org.apache.fineract",
+   "artifactId": "client",
+   "artifactVersion": "1.4.0",
+   "invokerPackage": "org.apache.fineract.client",
+   "modelPackage": "org.apache.fineract.client.models",
+   "apiPackage": "org.apache.fineract.client.services",
+   "dateLibrary": "java8",
+   "hideGenerationTimestamp": "true",
+   "library": "retrofit2"
+}

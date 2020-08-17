@@ -75,7 +75,7 @@ public enum SavingsAccountStatusType {
         return enumeration;
     }
 
-    private SavingsAccountStatusType(final Integer value, final String code) {
+    SavingsAccountStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

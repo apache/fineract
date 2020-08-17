@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.accounts.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +30,7 @@ final class AccountsApiResourceSwagger {
 
     private AccountsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetAccountsTypeTemplateResponse")
+    @Schema(description = "GetAccountsTypeTemplateResponse")
     public static final class GetAccountsTypeTemplateResponse {
 
         private GetAccountsTypeTemplateResponse() {}
@@ -40,24 +39,24 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsTypeProductOptions() {}
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "Share Product")
+            @Schema(example = "Share Product")
             public String name;
-            @ApiModelProperty(example = "SP")
+            @Schema(example = "SP")
             public String shortName;
-            @ApiModelProperty(example = "100")
+            @Schema(example = "100")
             public Long totalShares;
         }
 
-        @ApiModelProperty(example = "7")
+        @Schema(example = "7")
         public Integer clientId;
-        @ApiModelProperty(example = "Client Name")
+        @Schema(example = "Client Name")
         public String clientName;
         public Set<GetAccountsTypeProductOptions> productOptions;
     }
 
-    @ApiModel(value = "GetAccountsTypeAccountIdResponse")
+    @Schema(description = "GetAccountsTypeAccountIdResponse")
     public static final class GetAccountsTypeAccountIdResponse {
 
         private GetAccountsTypeAccountIdResponse() {}
@@ -66,21 +65,21 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsStatus() {}
 
-            @ApiModelProperty(example = "300")
+            @Schema(example = "300")
             public Integer id;
-            @ApiModelProperty(example = "shareAccountStatusType.active")
+            @Schema(example = "shareAccountStatusType.active")
             public String code;
-            @ApiModelProperty(example = "Active")
-            public String value;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "Active")
+            public String description;
+            @Schema(example = "false")
             public Boolean submittedAndPendingApproval;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean approved;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean rejected;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean active;
-            @ApiModelProperty(example = "false")
+            @Schema(example = "false")
             public Boolean closed;
         }
 
@@ -88,23 +87,23 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsTimeline() {}
 
-            @ApiModelProperty(example = "[2016, 4, 1]")
+            @Schema(example = "[2016, 4, 1]")
             public LocalDate submittedOnDate;
-            @ApiModelProperty(example = "mifos")
+            @Schema(example = "mifos")
             public String submittedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String submittedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String submittedByLastname;
-            @ApiModelProperty(example = "[2016, 4, 1]")
+            @Schema(example = "[2016, 4, 1]")
             public LocalDate approvedDate;
-            @ApiModelProperty(example = "mifos")
+            @Schema(example = "mifos")
             public String approvedByUsername;
-            @ApiModelProperty(example = "App")
+            @Schema(example = "App")
             public String approvedByFirstname;
-            @ApiModelProperty(example = "Administrator")
+            @Schema(example = "Administrator")
             public String approvedByLastname;
-            @ApiModelProperty(example = "[2016, 4, 1]")
+            @Schema(example = "[2016, 4, 1]")
             public LocalDate activatedDate;
         }
 
@@ -112,19 +111,19 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsCurrency() {}
 
-            @ApiModelProperty(example = "USD")
+            @Schema(example = "USD")
             public String code;
-            @ApiModelProperty(example = "US Dollar")
+            @Schema(example = "US Dollar")
             public String name;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer decimalPlaces;
-            @ApiModelProperty(example = "100")
+            @Schema(example = "100")
             public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
+            @Schema(example = "$")
             public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
+            @Schema(example = "currency.USD")
             public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
+            @Schema(example = "US Dollar ($)")
             public String displayLabel;
         }
 
@@ -132,17 +131,17 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsSummary() {}
 
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer id;
-            @ApiModelProperty(example = "000000002")
+            @Schema(example = "000000002")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer totalApprovedShares;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer totalPendingForApprovalShares;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "Conflux Share Product")
+            @Schema(example = "Conflux Share Product")
             public String productName;
             public GetAccountsStatus status;
             public GetAccountsTimeline timeline;
@@ -157,43 +156,43 @@ final class AccountsApiResourceSwagger {
 
                 private GetAccountsPurchasedSharesStatus() {}
 
-                @ApiModelProperty(example = "300")
+                @Schema(example = "300")
                 public Integer id;
-                @ApiModelProperty(example = "purchasedSharesStatusType.approved")
+                @Schema(example = "purchasedSharesStatusType.approved")
                 public String code;
-                @ApiModelProperty(example = "Approved")
-                public String value;
+                @Schema(example = "Approved")
+                public String description;
             }
 
             static final class GetAccountsPurchasedSharesType {
 
                 private GetAccountsPurchasedSharesType() {}
 
-                @ApiModelProperty(example = "500")
+                @Schema(example = "500")
                 public Integer id;
-                @ApiModelProperty(example = "purchasedSharesType.purchased")
+                @Schema(example = "purchasedSharesType.purchased")
                 public String code;
-                @ApiModelProperty(example = "Purchase")
-                public String value;
+                @Schema(example = "Purchase")
+                public String description;
             }
 
-            @ApiModelProperty(example = "6")
+            @Schema(example = "6")
             public Integer id;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountId;
-            @ApiModelProperty(example = "[2016, 4, 1]")
+            @Schema(example = "[2016, 4, 1]")
             public LocalDate purchasedDate;
-            @ApiModelProperty(example = "10")
+            @Schema(example = "10")
             public Integer numberOfShares;
-            @ApiModelProperty(example = "0.5")
+            @Schema(example = "0.5")
             public Double purchasedPrice;
             public GetAccountsPurchasedSharesStatus status;
             public GetAccountsPurchasedSharesType type;
-            @ApiModelProperty(example = "5.05")
+            @Schema(example = "5.05")
             public Double amount;
-            @ApiModelProperty(example = "0.05")
+            @Schema(example = "0.05")
             public Double chargeAmount;
-            @ApiModelProperty(example = "5.05")
+            @Schema(example = "5.05")
             public Double amountPaid;
         }
 
@@ -201,12 +200,12 @@ final class AccountsApiResourceSwagger {
 
             private GetAccountsLockPeriodTypeEnum() {}
 
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Integer id;
-            @ApiModelProperty(example = "savings.lockin.sharePeriodFrequencyType.days")
+            @Schema(example = "savings.lockin.sharePeriodFrequencyType.days")
             public String code;
-            @ApiModelProperty(example = "Days")
-            public String value;
+            @Schema(example = "Days")
+            public String description;
         }
 
         static final class GetAccountsCharges {
@@ -217,112 +216,112 @@ final class AccountsApiResourceSwagger {
 
                 private GetAccountsChargeTimeType() {}
 
-                @ApiModelProperty(example = "13")
+                @Schema(example = "13")
                 public Integer id;
-                @ApiModelProperty(example = "chargeTimeType.activation")
+                @Schema(example = "chargeTimeType.activation")
                 public String code;
-                @ApiModelProperty(example = "Share Account Activate")
-                public String value;
+                @Schema(example = "Share Account Activate")
+                public String description;
             }
 
             static final class GetAccountsChargeCalculationType {
 
                 private GetAccountsChargeCalculationType() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "chargeCalculationType.flat")
+                @Schema(example = "chargeCalculationType.flat")
                 public String code;
-                @ApiModelProperty(example = "Flat")
-                public String value;
+                @Schema(example = "Flat")
+                public String description;
             }
 
             static final class GetAccountsChargesCurrency {
 
                 private GetAccountsChargesCurrency() {}
 
-                @ApiModelProperty(example = "USD")
+                @Schema(example = "USD")
                 public String code;
-                @ApiModelProperty(example = "US Dollar")
+                @Schema(example = "US Dollar")
                 public String name;
-                @ApiModelProperty(example = "2")
+                @Schema(example = "2")
                 public Integer decimalPlaces;
-                @ApiModelProperty(example = "$")
+                @Schema(example = "$")
                 public String displaySymbol;
-                @ApiModelProperty(example = "currency.USD")
+                @Schema(example = "currency.USD")
                 public String nameCode;
-                @ApiModelProperty(example = "US Dollar ($)")
+                @Schema(example = "US Dollar ($)")
                 public String displayLabel;
             }
 
-            @ApiModelProperty(example = "9")
+            @Schema(example = "9")
             public Integer id;
-            @ApiModelProperty(example = "20")
+            @Schema(example = "20")
             public Integer chargeId;
-            @ApiModelProperty(example = "2")
+            @Schema(example = "2")
             public Integer accountId;
-            @ApiModelProperty(example = "Share Account Activation Flat")
+            @Schema(example = "Share Account Activation Flat")
             public String name;
             public GetAccountsChargeTimeType chargeTimeType;
             public GetAccountsChargeCalculationType chargeCalculationType;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Double percentage;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Double amountPercentageAppliedTo;
             public GetAccountsChargesCurrency currency;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Float amount;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Float amountPaid;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Float amountWaived;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Float amountWrittenOff;
-            @ApiModelProperty(example = "0")
+            @Schema(example = "0")
             public Float amountOutstanding;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Float amountOrPercentage;
-            @ApiModelProperty(example = "true")
+            @Schema(example = "true")
             public Boolean isActive;
         }
 
-        @ApiModelProperty(example = "2")
+        @Schema(example = "2")
         public Integer id;
-        @ApiModelProperty(example = "000000002")
+        @Schema(example = "000000002")
         public Long accountNo;
-        @ApiModelProperty(example = "000000013")
+        @Schema(example = "000000013")
         public Long savingsAccountNumber;
-        @ApiModelProperty(example = "7")
+        @Schema(example = "7")
         public Integer clientId;
-        @ApiModelProperty(example = "Client_FirstName_2KX8C Client_LastName_NWNG")
+        @Schema(example = "Client_FirstName_2KX8C Client_LastName_NWNG")
         public String clientName;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer productId;
-        @ApiModelProperty(example = "Share Product")
+        @Schema(example = "Share Product")
         public String productName;
         public GetAccountsStatus status;
         public GetAccountsTimeline timeline;
         public GetAccountsCurrency currency;
         public GetAccountsSummary summary;
         public Set<GetAccountsPurchasedShares> purchasedShares;
-        @ApiModelProperty(example = "13")
+        @Schema(example = "13")
         public Integer savingsAccountId;
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Integer currentMarketPrice;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer lockinPeriod;
         public GetAccountsLockPeriodTypeEnum lockPeriodTypeEnum;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minimumActivePeriod;
         public GetAccountsLockPeriodTypeEnum minimumActivePeriodTypeEnum;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean allowDividendCalculationForInactiveClients;
         public Set<GetAccountsCharges> charges;
-        @ApiModelProperty(example = "")
+        @Schema(example = "")
         public List<String> dividends;
     }
 
-    @ApiModel(value = "GetAccountsTypeResponse")
+    @Schema(description = "GetAccountsTypeResponse")
     public static final class GetAccountsTypeResponse {
 
         private GetAccountsTypeResponse() {}
@@ -335,21 +334,21 @@ final class AccountsApiResourceSwagger {
 
                 private GetAccountsTypeStatus() {}
 
-                @ApiModelProperty(example = "100")
+                @Schema(example = "100")
                 public Integer id;
-                @ApiModelProperty(example = "shareAccountStatusType.submitted.and.pending.approval")
+                @Schema(example = "shareAccountStatusType.submitted.and.pending.approval")
                 public String code;
-                @ApiModelProperty(example = "Submitted and pending approval")
-                public String value;
-                @ApiModelProperty(example = "true")
+                @Schema(example = "Submitted and pending approval")
+                public String description;
+                @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean approved;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean rejected;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean active;
-                @ApiModelProperty(example = "false")
+                @Schema(example = "false")
                 public Boolean closed;
             }
 
@@ -357,7 +356,7 @@ final class AccountsApiResourceSwagger {
 
                 private GetAccountsTypeTimeline() {}
 
-                @ApiModelProperty(example = "[2013, 3, 1]")
+                @Schema(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
             }
 
@@ -365,13 +364,13 @@ final class AccountsApiResourceSwagger {
 
                 private GetAccountsTypePurchasedShares() {}
 
-                @ApiModelProperty(example = "1")
+                @Schema(example = "1")
                 public Integer id;
-                @ApiModelProperty(example = "01 May 2013")
+                @Schema(example = "01 May 2013")
                 public String purchasedDate;
-                @ApiModelProperty(example = "10")
+                @Schema(example = "10")
                 public Integer numberOfShares;
-                @ApiModelProperty(example = "5")
+                @Schema(example = "5")
                 public Integer purchasedPrice;
             }
 
@@ -382,17 +381,17 @@ final class AccountsApiResourceSwagger {
                 public GetAccountsTypeAccountIdResponse.GetAccountsCharges.GetAccountsChargesCurrency currency;
             }
 
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer id;
-            @ApiModelProperty(example = "000000001")
+            @Schema(example = "000000001")
             public Long accountNo;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer clientId;
-            @ApiModelProperty(example = "Client Name")
+            @Schema(example = "Client Name")
             public String clientName;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer productId;
-            @ApiModelProperty(example = "Share Product Name")
+            @Schema(example = "Share Product Name")
             public String productName;
             public GetAccountsTypeStatus status;
             public GetAccountsTypeTimeline timeline;
@@ -401,12 +400,12 @@ final class AccountsApiResourceSwagger {
             public GetAccountsTypeSummary summary;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer totalFilteredRecords;
         public Set<GetAccountsPageItems> pageItems;
     }
 
-    @ApiModel(value = "PostAccountsTypeRequest")
+    @Schema(description = "PostAccountsTypeRequest")
     public static final class PostAccountsTypeRequest {
 
         private PostAccountsTypeRequest() {}
@@ -415,53 +414,53 @@ final class AccountsApiResourceSwagger {
 
             private PostAccountsCharges() {}
 
-            @ApiModelProperty(example = "20")
+            @Schema(example = "20")
             public Integer chargeId;
-            @ApiModelProperty(example = "1")
+            @Schema(example = "1")
             public Integer amount;
         }
 
-        @ApiModelProperty(example = "7")
+        @Schema(example = "7")
         public Integer clientId;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer productId;
-        @ApiModelProperty(example = "100")
+        @Schema(example = "100")
         public Integer requestedShares;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer externalId;
-        @ApiModelProperty(example = "01 May 2016")
+        @Schema(example = "01 May 2016")
         public String submittedDate;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer minimumActivePeriod;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer minimumActivePeriodFrequencyType;
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer lockinPeriodFrequency;
-        @ApiModelProperty(example = "0")
+        @Schema(example = "0")
         public Integer lockinPeriodFrequencyType;
-        @ApiModelProperty(example = "01 May 2016")
+        @Schema(example = "01 May 2016")
         public String applicationDate;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public Boolean allowDividendCalculationForInactiveClients;
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         public Set<PostAccountsCharges> charges;
-        @ApiModelProperty(example = "13")
+        @Schema(example = "13")
         public Integer savingsAccountId;
     }
 
-    @ApiModel(value = "PostAccountsTypeResponse")
+    @Schema(description = "PostAccountsTypeResponse")
     public static final class PostAccountsTypeResponse {
 
         private PostAccountsTypeResponse() {}
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PostAccountsTypeAccountIdRequest")
+    @Schema(description = "PostAccountsTypeAccountIdRequest")
     public static final class PostAccountsTypeAccountIdRequest {
 
         private PostAccountsTypeAccountIdRequest() {}
@@ -470,38 +469,38 @@ final class AccountsApiResourceSwagger {
 
             private PostAccountsRequestedShares() {}
 
-            @ApiModelProperty(example = "35")
+            @Schema(example = "35")
             public Integer id;
         }
 
         public Set<PostAccountsRequestedShares> requestedShares;
     }
 
-    @ApiModel(value = "PostAccountsTypeAccountIdResponse")
+    @Schema(description = "PostAccountsTypeAccountIdResponse")
     public static final class PostAccountsTypeAccountIdResponse {
 
         private PostAccountsTypeAccountIdResponse() {}
 
-        @ApiModelProperty(example = "5")
+        @Schema(example = "5")
         public Integer resourceId;
     }
 
-    @ApiModel(value = "PutAccountsTypeAccountIdRequest")
+    @Schema(description = "PutAccountsTypeAccountIdRequest")
     public static final class PutAccountsTypeAccountIdRequest {
 
         private PutAccountsTypeAccountIdRequest() {}
 
-        @ApiModelProperty(example = "en")
+        @Schema(example = "en")
         public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
+        @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @ApiModelProperty(example = "01 April 2016")
+        @Schema(example = "01 April 2016")
         public String applicationDate;
-        @ApiModelProperty(example = "20")
+        @Schema(example = "20")
         public Integer requestedShares;
     }
 
-    @ApiModel(value = "PutAccountsTypeAccountIdResponse")
+    @Schema(description = "PutAccountsTypeAccountIdResponse")
     public static final class PutAccountsTypeAccountIdResponse {
 
         private PutAccountsTypeAccountIdResponse() {}
@@ -510,17 +509,17 @@ final class AccountsApiResourceSwagger {
 
             private PutAccountsChanges() {}
 
-            @ApiModelProperty(example = "dd MMMM yyyy")
+            @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
-            @ApiModelProperty(example = "01 April 2016")
+            @Schema(example = "01 April 2016")
             public String applicationDate;
-            @ApiModelProperty(example = "20")
+            @Schema(example = "20")
             public Integer requestedShares;
-            @ApiModelProperty(example = "en")
+            @Schema(example = "en")
             public String locale;
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Integer resourceId;
         public PutAccountsChanges changes;
     }

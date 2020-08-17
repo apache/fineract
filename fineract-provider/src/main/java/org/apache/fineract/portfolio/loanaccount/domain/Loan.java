@@ -142,6 +142,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Entity
@@ -149,6 +151,8 @@ import org.springframework.stereotype.Component;
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
 public class Loan extends AbstractPersistableCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Loan.class);
 
     /** Disable optimistic locking till batch jobs failures can be fixed **/
     @Version
@@ -2851,7 +2855,7 @@ public class Loan extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    private final void reverseExistingTransactions() {
+    private void reverseExistingTransactions() {
         Collection<LoanTransaction> retainTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             transaction.reverse();
@@ -4478,7 +4482,8 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case INVALID:
             break;
-            default:
+            case WHOLE_TERM:
+            break;
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from
                                                    // startDate
@@ -5481,7 +5486,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
-                holidayDetailDTO, allowCompoundingOnEod);
+                holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday());
         return loanApplicationTerms;
     }
 
@@ -5759,7 +5764,7 @@ public class Loan extends AbstractPersistableCustom {
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
-                calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod);
+                calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false);
     }
 
     /**

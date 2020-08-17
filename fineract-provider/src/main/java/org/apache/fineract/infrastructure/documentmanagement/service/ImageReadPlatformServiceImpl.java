@@ -113,7 +113,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
             return result;
         } catch (final EmptyResultDataAccessException e) {
-            throw new ImageNotFoundException("clients", entityId);
+            throw new ImageNotFoundException("clients", entityId, e);
         }
     }
 }

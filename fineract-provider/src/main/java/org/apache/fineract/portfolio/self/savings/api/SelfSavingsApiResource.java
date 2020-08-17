@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.savings.api;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -56,8 +57,8 @@ import org.springframework.stereotype.Component;
 @Path("/self/savingsaccounts")
 @Component
 @Scope("singleton")
-@Api(tags = { "Self Savings Account" })
-@SwaggerDefinition(tags = { @Tag(name = "Self Savings Account", description = "") })
+
+@Tag(name = "Self Savings Account", description = "")
 public class SelfSavingsApiResource {
 
     private final PlatformSecurityContext context;
@@ -87,12 +88,12 @@ public class SelfSavingsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a savings account", httpMethod = "GET", notes = "Retrieves a savings account\n\n"
-            + "Example Requests :\n" + "\n" + "self/savingsaccounts/1\n" + "\n" + "\n" + "self/savingsaccounts/1?associations=transactions")
+    @Operation(summary = "Retrieve a savings account", description = "Retrieves a savings account\n\n" + "Example Requests :\n" + "\n"
+            + "self/savingsaccounts/1\n" + "\n" + "\n" + "self/savingsaccounts/1?associations=transactions")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsResponse.class) })
-    public String retrieveSavings(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
-            @DefaultValue("all") @QueryParam("chargeStatus") @ApiParam(value = "chargeStatus") final String chargeStatus,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsResponse.class))) })
+    public String retrieveSavings(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
             @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateRetrieveSavings(uriInfo);
@@ -107,12 +108,13 @@ public class SelfSavingsApiResource {
     @Path("{accountId}/transactions/{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Savings Account Transaction", httpMethod = "GET", notes = "Retrieves Savings Account Transaction\n\n"
+    @Operation(summary = "Retrieve Savings Account Transaction", description = "Retrieves Savings Account Transaction\n\n"
             + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/transactions/1")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse.class) })
-    public String retrieveSavingsTransaction(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
-            @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse.class))) })
+    public String retrieveSavingsTransaction(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateRetrieveSavingsTransaction(uriInfo);
 
@@ -125,13 +127,13 @@ public class SelfSavingsApiResource {
     @Path("{accountId}/charges")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Savings Charges", httpMethod = "GET", notes = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n"
+    @Operation(summary = "List Savings Charges", description = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n"
             + "self/savingsaccounts/1/charges\n" + "\n" + "self/savingsaccounts/1/charges?chargeStatus=inactive\n" + "\n"
             + "self/savingsaccounts/1/charges?fields=name,amountOrPercentage")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesResponse.class, responseContainer = "List") })
-    public String retrieveAllSavingsAccountCharges(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
-            @DefaultValue("all") @QueryParam("chargeStatus") @ApiParam(value = "chargeStatus") final String chargeStatus,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesResponse.class)))) })
+    public String retrieveAllSavingsAccountCharges(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
             @Context final UriInfo uriInfo) {
 
         validateAppuserSavingsAccountMapping(accountId);
@@ -143,13 +145,12 @@ public class SelfSavingsApiResource {
     @Path("{accountId}/charges/{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Savings account Charge", httpMethod = "GET", notes = "Retrieves a Savings account Charge\n\n"
-            + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/charges/5\n" + "\n" + "\n"
-            + "self/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+    @Operation(summary = "Retrieve a Savings account Charge", description = "Retrieves a Savings account Charge\n\n" + "Example Requests:\n"
+            + "\n" + "self/savingsaccounts/1/charges/5\n" + "\n" + "\n" + "self/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse.class) })
-    public String retrieveSavingsAccountCharge(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
-            @PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId,
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
+    public String retrieveSavingsAccountCharge(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+            @PathParam("savingsAccountChargeId") @Parameter(description = "savingsAccountChargeId") final Long savingsAccountChargeId,
             @Context final UriInfo uriInfo) {
 
         validateAppuserSavingsAccountMapping(accountId);

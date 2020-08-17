@@ -191,7 +191,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         private final String schemaSql;
 
-        public CenterDataMapper() {
+        CenterDataMapper() {
 
             this.schemaSql = SQL_QUERY;
         }
@@ -509,7 +509,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new CenterNotFoundException(centerId);
+            throw new CenterNotFoundException(centerId, e);
         }
     }
 

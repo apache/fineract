@@ -54,12 +54,12 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
     private String displayLabel;
 
     CurrencyDomain() {
-        super();
+
     }
 
     private CurrencyDomain(final String code, final String name, final int decimalPlaces, final String displaySymbol, final String nameCode,
             final String displayLabel) {
-        super();
+
         this.code = code;
         this.name = name;
         this.decimalPlaces = decimalPlaces;

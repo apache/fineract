@@ -264,6 +264,12 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
         final String usernameParamName = "username";
         if (command.isChangeInStringParameterNamed(usernameParamName, this.username)) {
+
+            // TODO Remove this check once we are identifying system user based on user ID
+            if (isSystemUser()) {
+                throw new NoAuthorizationException("User name of current system user may not be modified");
+            }
+
             final String newValue = command.stringValueOfParameterNamed(usernameParamName);
             actualChanges.put(usernameParamName, newValue);
             this.username = newValue;
@@ -343,6 +349,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
+        if (isSystemUser()) {
+            throw new NoAuthorizationException("User configured as the system user cannot be deleted");
+        }
+
         this.deleted = true;
         this.enabled = false;
         this.accountNonExpired = false;
@@ -353,6 +363,15 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public boolean isDeleted() {
         return this.deleted;
+    }
+
+    public boolean isSystemUser() {
+        // TODO Determine system user by ID not by user name
+        if (this.username.equals(AppUserConstants.SYSTEM_USER_NAME)) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

@@ -121,7 +121,7 @@ public final class LoanSummary {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
     }
 
-    protected LoanSummary() {
+    LoanSummary() {
         //
     }
 

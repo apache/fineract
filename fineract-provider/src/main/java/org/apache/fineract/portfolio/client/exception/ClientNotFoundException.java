@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when client resources are not found.
@@ -35,5 +36,9 @@ public class ClientNotFoundException extends AbstractPlatformResourceNotFoundExc
 
     public ClientNotFoundException(String accountNumber) {
         super("error.msg.client.not.found.with.account.number", "Client not found with account number " + accountNumber + ".");
+    }
+
+    public ClientNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.client.id.invalid", "Client with identifier " + id + " does not exist", id, e);
     }
 }

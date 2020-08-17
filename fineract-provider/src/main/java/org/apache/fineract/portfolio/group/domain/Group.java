@@ -148,7 +148,7 @@ public final class Group extends AbstractPersistableCustom {
     private List<GroupLoanIndividualMonitoringAccount> glimLoan;
 
     // JPA default constructor for entity
-    protected Group() {
+    Group() {
         this.name = null;
         this.externalId = null;
         this.clientMembers = new HashSet<>();

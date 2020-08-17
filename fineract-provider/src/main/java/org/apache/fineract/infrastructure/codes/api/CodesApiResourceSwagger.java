@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.infrastructure.codes.api;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Created by sanyam on 29/7/17.
@@ -30,55 +29,55 @@ final class CodesApiResourceSwagger {
         // this class is only for Swagger Live Documentation
     }
 
-    @ApiModel(value = "GetCodesResponse")
+    @Schema(description = "GetCodesResponse")
     public static final class GetCodesResponse {
 
         private GetCodesResponse() {
 
         }
 
-        @ApiModelProperty(example = "1")
+        @Schema(example = "1")
         public Long id;
-        @ApiModelProperty(example = "Education")
+        @Schema(example = "Education")
         public String name;
-        @ApiModelProperty(example = "true")
+        @Schema(example = "true")
         public boolean systemDefined;
     }
 
-    @ApiModel(value = "PostCodesRequest")
+    @Schema(description = "PostCodesRequest")
     public static final class PostCodesRequest {
 
         private PostCodesRequest() {
 
         }
 
-        @ApiModelProperty(example = "MyNewCode")
+        @Schema(example = "MyNewCode")
         public String name;
     }
 
-    @ApiModel(value = "PostCodesResponse")
+    @Schema(description = "PostCodesResponse")
     public static final class PostCodesResponse {
 
         private PostCodesResponse() {
 
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
     }
 
-    @ApiModel(value = "PutCodesRequest")
+    @Schema(description = "PutCodesRequest")
     public static final class PutCodesRequest {
 
         private PutCodesRequest() {
 
         }
 
-        @ApiModelProperty(example = "MyNewCode(changed)")
+        @Schema(example = "MyNewCode(changed)")
         public String name;
     }
 
-    @ApiModel(value = "PutCodesResponse")
+    @Schema(description = "PutCodesResponse")
     public static final class PutCodesResponse {
 
         private PutCodesResponse() {
@@ -89,23 +88,23 @@ final class CodesApiResourceSwagger {
 
             private PutCodesApichangesSwagger() {}
 
-            @ApiModelProperty(example = "MyNewCode(changed)")
+            @Schema(example = "MyNewCode(changed)")
             public String name;
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
         public PutCodesApichangesSwagger changes;
     }
 
-    @ApiModel(value = "DeleteCodesResponse")
+    @Schema(description = "DeleteCodesResponse")
     public static final class DeleteCodesResponse {
 
         private DeleteCodesResponse() {
 
         }
 
-        @ApiModelProperty(example = "4")
+        @Schema(example = "4")
         public Long resourceId;
     }
 }
