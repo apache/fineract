@@ -52,7 +52,6 @@ public class RescheduleLoansApiConstants {
     public static final String approveCommandParamName = "approve";
     public static final String pendingCommandParamName = "pending";
     public static final String rejectCommandParamName = "reject";
-
     public static final String endDateParamName = "endDate";
     public static final String emiParamName = "emi";
 
