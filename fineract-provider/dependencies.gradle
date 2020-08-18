@@ -78,6 +78,23 @@ dependencies {
 
             'javax.cache:cache-api',
 
+            'pentaho-reporting-engine:pentaho-reporting-engine-classic-core',
+            'pentaho-reporting-engine:pentaho-reporting-engine-classic-extensions',
+            'pentaho-reporting-engine:pentaho-reporting-engine-classic-extensions-scripting',
+            'pentaho-reporting-engine:pentaho-reporting-engine-wizard-core',
+            'pentaho-report-designer:pentaho-reporting-engine-wizard-xul',
+
+            'pentaho-library:libbase',
+            'pentaho-library:libdocbundle',
+            'pentaho-library:libfonts',
+            'pentaho-library:libformat',
+            'pentaho-library:libformula',
+            'pentaho-library:libloader',
+            'pentaho-library:librepository',
+            'pentaho-library:libserializer',
+            'pentaho-library:libsparkline',
+            'pentaho-library:libxml',
+
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core'

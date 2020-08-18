@@ -106,8 +106,6 @@ public class ClasspathHellDuplicatesChecker {
                 || resourcePath.equals("META-INF/git.properties") || resourcePath.equals("META-INF/io.netty.versions.properties")
                 || resourcePath.equals("META-INF/jersey-module-version") || resourcePath.startsWith("OSGI-INF/blueprint/")
                 || resourcePath.startsWith("org/opendaylight/blueprint/") || resourcePath.endsWith("reference.conf") // in
-                                                                                                                     // Akka's
-                                                                                                                     // JARs
                 // json-schema-core and json-schema-validator depend on each
                 // other and include these files
                 || resourcePath.equals("draftv4/schema") || resourcePath.equals("draftv3/schema") //
@@ -163,6 +161,20 @@ public class ClasspathHellDuplicatesChecker {
                 // errorprone with Java 11 integration leaks to classpath, which
                 // causes a conflict between
                 // checkerframework/checker-qual and checkerframework/dataflow
-                || resourcePath.startsWith("org/checkerframework/dataflow/qual/");
+                || resourcePath.startsWith("org/checkerframework/dataflow/qual/")
+                // ClasspathHell from adding Pentaho Reports Support
+                // overview.html
+                || resourcePath.endsWith("overview.html") || resourcePath.contains("org.mnode.ical4j/ical4j/3.0.19")
+                || resourcePath.endsWith("overview.html")
+                || resourcePath.contains("pentaho-reporting-engine/pentaho-reporting-engine-classic")
+                || resourcePath.endsWith("overview.html") || resourcePath.contains("pentaho-library/lib")
+                // classic-engine.properties
+                || resourcePath.endsWith("classic-engine.properties")
+                || resourcePath.contains("pentaho-reporting-engine/pentaho-reporting-engine")
+                // loader.properties
+                || resourcePath.endsWith("loader.properties") || resourcePath.contains("pentaho-reporting-engine/pentaho-reporting-engine")
+                || resourcePath.endsWith("loader.properties") || resourcePath.contains("pentaho-library/lib")
+
+        ;
     }
 }

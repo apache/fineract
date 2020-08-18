@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  version: release-1.4.0-558-gc4de1bf-dirty
+  title: Apache Fineract
+  description: |-
+    Apache Fineract is a secure, multi-tenanted microfinance platform
+
+    The goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform<br>The [reference app](https://cui.fineract.dev) (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation
+
+    - The API is organized around [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)
+    - Find out more about Apache Fineract [here](/fineract-provider/api-docs/apiLive.htm#top)
+    - You can [Try The API From Your Browser](/fineract-provider/api-docs/apiLive.htm#interact)
+    - The Generic Options are available [here](/fineract-provider/api-docs/apiLive.htm#genopts)
+    - Find out more about [Updating Dates and Numbers](/fineract-provider/api-docs/apiLive.htm#dates_and_numbers)
+    - For the Authentication and the Basic of HTTP and HTTPS refer [here](/fineract-provider/api-docs/apiLive.htm#authentication_overview)
+    - Check about ERROR codes [here](/fineract-provider/api-docs/apiLive.htm#errors)
+
+    Please refer to the [old documentation](/fineract-provider/api-docs/apiLive.htm) for any documentation queries
+  contact:
+    email: dev@fineract.apache.org
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+- url: https://demo.fineract.dev/fineract-provider/api/v1
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    tenantid:        
+      type: apiKey
+      in: header       
+      name: fineract-platform-tenantid 
+security:
+  - basicAuth: []
+    tenantid: []
