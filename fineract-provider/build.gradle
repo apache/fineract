@@ -195,6 +195,20 @@ openjpa {
 
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task prepareInputYaml(dependsOn: 'generateGitProperties') {
+    doLast {
+        copy {
+            from file('config/swagger/fineract-input.yaml.template')
+            into file('config/swagger')
+            rename { String filename -> return 'fineract-input.yaml' }
+            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+        }
+    }
+}
+
+
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
@@ -204,6 +218,8 @@ resolve {
     outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
     openApiFile = file("config/swagger/fineract-input.yaml")
 }
+
+resolve.dependsOn prepareInputYaml
 
 // Configuration for JaCoCo code coverage task
 // https://www.eclemma.org/jacoco/
@@ -290,6 +306,7 @@ rat {
         '**/*.github/**',
         '**/MANIFEST.MF',
         '**/*.json',
+        '**/*.json.template',
         '**/*.txt',
         '**/*.log',
         '**/fineractdev-eclipse-preferences.epf',
@@ -846,14 +863,27 @@ gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
+    extProperty = 'gitProps'
 }
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
 
-//This is for swagger code generation
+// This is for swagger code generation
+// https://github.com/int128/gradle-swagger-generator-plugin
 dependencies {
     swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.18'
+}
+
+task prepareConfigJson(dependsOn: 'generateGitProperties') {
+    doLast {
+        copy {
+            from file('config/swagger/config.json.template')
+            into file('config/swagger')
+            rename { String filename -> return 'config.json' }
+            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+        }
+    }
 }
 
 swaggerSources {
@@ -865,3 +895,5 @@ swaggerSources {
         }
     }
 }
+
+generateSwaggerCodeFineract.dependsOn prepareConfigJson
