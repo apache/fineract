@@ -1,7 +1,7 @@
 {
    "groupId": "org.apache.fineract",
    "artifactId": "client",
-   "artifactVersion": "1.4.0",
+   "artifactVersion": "@VERSION@",
    "invokerPackage": "org.apache.fineract.client",
    "modelPackage": "org.apache.fineract.client.models",
    "apiPackage": "org.apache.fineract.client.services",
