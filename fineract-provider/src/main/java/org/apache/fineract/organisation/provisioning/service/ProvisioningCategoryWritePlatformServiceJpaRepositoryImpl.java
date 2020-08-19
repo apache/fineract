@@ -63,7 +63,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
         try {
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             final ProvisioningCategory provisioningCategory = ProvisioningCategory.fromJson(command);
-            this.provisioningCategoryRepository.save(provisioningCategory);
+            this.provisioningCategoryRepository.saveAndFlush(provisioningCategory);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCategory.getId())
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -98,7 +98,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
                     .orElseThrow(() -> new ProvisioningCategoryNotFoundException(categoryId));
             final Map<String, Object> changes = provisioningCategoryForUpdate.update(command);
             if (!changes.isEmpty()) {
-                this.provisioningCategoryRepository.save(provisioningCategoryForUpdate);
+                this.provisioningCategoryRepository.saveAndFlush(provisioningCategoryForUpdate);
             }
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(categoryId).with(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

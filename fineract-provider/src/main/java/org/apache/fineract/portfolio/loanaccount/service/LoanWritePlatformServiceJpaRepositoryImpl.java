@@ -612,10 +612,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.saveAndFlush(installment);
+                    this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+            this.loanRepositoryWrapper.save(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

@@ -33,7 +33,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @Table(name = "m_loan_transaction_repayment_schedule_mapping")
 public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
 
@@ -92,6 +92,10 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
 
     public LoanRepaymentScheduleInstallment getLoanRepaymentScheduleInstallment() {
         return this.installment;
+    }
+
+    public void setLoanRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
     }
 
     public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {

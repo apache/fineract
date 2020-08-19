@@ -120,20 +120,17 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             if (isSavingsToSavingsAccountTransfer(fromAccountType, toAccountType)) {
                 final AccountTransferDetails standingInstruction = this.standingInstructionAssembler
                         .assembleSavingsToSavingsTransfer(command);
-                this.accountTransferDetailRepository.save(standingInstruction);
+                this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
             } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
                 final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleSavingsToLoanTransfer(command);
-                this.accountTransferDetailRepository.save(standingInstruction);
+                this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
             } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
-
                 final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleLoanToSavingsTransfer(command);
-                this.accountTransferDetailRepository.save(standingInstruction);
+                this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
-
             }
-            this.accountTransferDetailRepository.flush();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(command, throwable, dve);

@@ -144,7 +144,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
     }
 
-    @Transactional
+    // @Transactional
     @Override
     public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
@@ -230,8 +230,20 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         return newRepaymentTransaction;
     }
 
-    private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
+    @Transactional
+    private void saveLoanTransactionWithDataIntegrityViolationChecks(final LoanTransaction newRepaymentTransaction) {
         try {
+            // final Set<LoanTransactionToRepaymentScheduleMapping> transactionMappings = newRepaymentTransaction
+            // .getLoanTransactionToRepaymentScheduleMappings();
+            // for (final LoanTransactionToRepaymentScheduleMapping transactionMapping : transactionMappings) {
+            // final LoanRepaymentScheduleInstallment installment =
+            // transactionMapping.getLoanRepaymentScheduleInstallment();
+            // if (installment.getId() == null) {
+            // transactionMapping.setLoanRepaymentScheduleInstallment(null);
+            // this.repaymentScheduleInstallmentRepository.saveAndFlush(installment);
+            // transactionMapping.setLoanRepaymentScheduleInstallment(installment);
+            // }
+            // }
             this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
@@ -248,15 +260,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
     }
 
+    @Transactional
     private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.save(installment);
+                    this.repaymentScheduleInstallmentRepository.saveAndFlush(installment);
                 }
             }
-            this.loanRepositoryWrapper.save(loan);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -272,15 +285,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
+    @Transactional
     public void saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.saveAndFlush(installment);
+                    this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+            this.loanRepositoryWrapper.save(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

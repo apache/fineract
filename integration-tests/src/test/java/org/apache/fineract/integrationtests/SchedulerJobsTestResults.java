@@ -68,7 +68,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unchecked" })
 
-public class SchedulerJobsTestResults { // NOK
+public class SchedulerJobsTestResults {
 
     private static final String FROM_ACCOUNT_TYPE_LOAN = "1";
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
@@ -265,7 +265,7 @@ public class SchedulerJobsTestResults { // NOK
 
     }
 
-    @Test // NOK
+    @Test
     public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -581,7 +581,7 @@ public class SchedulerJobsTestResults { // NOK
 
     }
 
-    @Test // NOK
+    @Test
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);

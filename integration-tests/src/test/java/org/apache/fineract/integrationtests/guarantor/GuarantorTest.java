@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GuarantorTest { // NOK - OK
+public class GuarantorTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuarantorTest.class);
     private ResponseSpecification responseSpec;

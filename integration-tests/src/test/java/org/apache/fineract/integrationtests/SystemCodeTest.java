@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class SystemCodeTest { // NOK
+public class SystemCodeTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification generalResponseSpec;
