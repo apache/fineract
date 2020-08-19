@@ -128,6 +128,34 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         interestForThisInstallment = interestForThisInstallment.plus(result.interest());
         cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
 
+        Money interestTobeApproppriated = loanApplicationTerms.getInterestTobeApproppriated() == null
+                ? Money.zero(interestForThisInstallment.getCurrency())
+                : loanApplicationTerms.getInterestTobeApproppriated();
+
+        if (loanApplicationTerms.getFixedEmiAmount() != null
+                && loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled() && interestForThisInstallment
+                        .isGreaterThan(Money.of(interestForThisInstallment.getCurrency(), loanApplicationTerms.getFixedEmiAmount()))) {
+            LocalDate actualPeriodEndDate = this.scheduledDateGenerator.generateNextRepaymentDate(interestStartDate, loanApplicationTerms,
+                    false);
+            PrincipalInterest tempInterest = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+                    interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
+                    balanceForInterestCalculation, interestStartDate, actualPeriodEndDate);
+
+            Money fixedEmi = Money.of(interestForThisInstallment.getCurrency(), loanApplicationTerms.getFixedEmiAmount());
+
+            if (tempInterest.interest().isGreaterThan(fixedEmi)) {
+                loanApplicationTerms
+                        .setInterestTobeApproppriated(interestTobeApproppriated.plus(interestForThisInstallment.minus(fixedEmi)));
+                interestForThisInstallment = fixedEmi;
+            } else {
+                loanApplicationTerms.setInterestTobeApproppriated(
+                        interestTobeApproppriated.plus(interestForThisInstallment.minus(tempInterest.interest())));
+                interestForThisInstallment = tempInterest.interest();
+            }
+        }
+
+        cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
+
         Money interestForPeriod = interestForThisInstallment;
         if (interestForPeriod.isGreaterThanZero()) {
             interestForPeriod = interestForPeriod.minus(cumulatingInterestPaymentDueToGrace);

@@ -154,7 +154,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     @Override
     public void addInterestAmount(Money interestDue) {
         this.interestDue = this.interestDue.plus(interestDue);
-        this.totalDue = this.totalDue.plus(principalDue);
+        this.totalDue = this.totalDue.plus(interestDue);
     }
 
     @Override

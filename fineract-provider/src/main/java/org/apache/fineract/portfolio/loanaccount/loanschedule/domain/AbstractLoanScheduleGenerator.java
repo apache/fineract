@@ -60,7 +60,7 @@ import org.joda.time.LocalDate;
 
 public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGenerator {
 
-    private final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+    protected final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
 
     @Override
@@ -282,7 +282,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // will check for EMI amount greater than interest calculated
             if (loanApplicationTerms.getFixedEmiAmount() != null
-                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0) {
+                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0
+                    && !loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled()) {
                 String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
                         loanApplicationTerms.getFixedEmiAmount());
@@ -367,6 +368,23 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             scheduleParams.addTotalRepaymentExpected(scheduleParams.getTotalOutstandingInterestPaymentDueToGrace());
             scheduleParams.addTotalCumulativeInterest(scheduleParams.getTotalOutstandingInterestPaymentDueToGrace());
             scheduleParams.setTotalOutstandingInterestPaymentDueToGrace(Money.zero(currency));
+        }
+
+        if (loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled()
+                && loanApplicationTerms.getInterestTobeApproppriated() != null
+                && loanApplicationTerms.getInterestTobeApproppriated().isGreaterThanZero()) {
+            Money interestFraction = loanApplicationTerms.getInterestTobeApproppriated().dividedBy(periods.size(), mc.getRoundingMode());
+            BigDecimal roundFraction = interestFraction.getAmount().remainder(BigDecimal.ONE);
+            interestFraction = interestFraction.minus(roundFraction);
+            roundFraction = roundFraction.multiply(new BigDecimal(periods.size()));
+            for (LoanScheduleModelPeriod installment : (List<LoanScheduleModelPeriod>) periods) {
+                installment.addInterestAmount(interestFraction);
+            }
+            LoanScheduleModelPeriod installment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
+            installment.addInterestAmount(Money.of(currency, roundFraction));
+            scheduleParams.addTotalRepaymentExpected(loanApplicationTerms.getInterestTobeApproppriated());
+            scheduleParams.addTotalCumulativeInterest(loanApplicationTerms.getInterestTobeApproppriated());
+            loanApplicationTerms.setInterestTobeApproppriated(Money.zero(currency));
         }
 
         // determine fees and penalties for charges which depends on total
