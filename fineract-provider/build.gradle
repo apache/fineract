@@ -369,8 +369,8 @@ configurations {
         exclude module: 'bctsp-jdk14'
         exclude module: 'c3p0'
         exclude module: 'stax-api'
-        exclude module: 'jaxb-api'
-        exclude module: 'jaxb-impl'
+        //exclude module: 'jaxb-api' (Not sure what to do with this when running in Oauth2 it fails)
+        //exclude module: 'jaxb-impl' (Maybe we make a seperate module ?)
         exclude module: 'jboss-logging'
         exclude module: 'itext-rtf'
         exclude module: 'classworlds'
