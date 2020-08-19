@@ -32,6 +32,7 @@
         <properties>
             <property name="eclipselink.weaving" value="static" />
             <!-- <property name="eclipselink.id-validation" value="Null" /> -->
+            <!-- <property name="eclipselink.logging.file" value="C:\myout\"/> -->
             <property name="eclipselink.weaving.eager" value="true" />
             <property name="eclipselink.logging.level" value="FINE" />
             <property name="eclipselink.allow-zero-id" value="true" />
