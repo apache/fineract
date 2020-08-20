@@ -28,9 +28,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,11 +91,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -313,7 +314,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = emailCampaign.getNextTriggerDate();
-        emailCampaign.setLastTriggerDate(nextTriggerDate.toDate());
+        emailCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(ZoneId.systemDefault()).toInstant()));
         // calculate new trigger date and insert into next trigger date
 
         /**
@@ -335,12 +336,11 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     emailCampaign.getNextTriggerDate().toLocalDate(), DateUtils.getLocalDateOfTenant());
         }
         final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
-        final String dateString = nextRuntime.toString() + " " + getTime.getHourOfDay() + ":" + getTime.getMinuteOfHour() + ":"
-                + getTime.getSecondOfMinute();
-        final DateTimeFormatter simpleDateFormat = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        final String dateString = nextRuntime.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":" + getTime.getSecond();
+        final DateTimeFormatter simpleDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         final LocalDateTime newTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-        emailCampaign.setNextTriggerDate(newTriggerDateWithTime.toDate());
+        emailCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
         this.emailCampaignRepository.saveAndFlush(emailCampaign);
     }
 
@@ -355,7 +355,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
         emailCampaign.activate(currentUser, fmt, activationDate);
@@ -382,12 +382,13 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 // to get time of tenant
                 final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
 
-                final String dateString = nextTriggerDate.toString() + " " + getTime.getHourOfDay() + ":" + getTime.getMinuteOfHour() + ":"
-                        + getTime.getSecondOfMinute();
-                final DateTimeFormatter simpleDateFormat = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+                final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
+                        + getTime.getSecond();
+                final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                        .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
                 final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-                emailCampaign.setNextTriggerDate(nextTriggerDateWithTime.toDate());
+                emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
                 this.emailCampaignRepository.saveAndFlush(emailCampaign);
             }
         }
@@ -413,7 +414,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closureDate = command.localDateValueOfParameterNamed("closureDate");
 
         emailCampaign.close(currentUser, fmt, closureDate);
@@ -513,7 +514,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate reactivationDate = command.localDateValueOfParameterNamed("activationDate");
         emailCampaign.reactivate(currentUser, fmt, reactivationDate);
         if (emailCampaign.isSchedule()) {
@@ -532,12 +533,13 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             // to get time of tenant
             final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
 
-            final String dateString = nextTriggerDate.toString() + " " + getTime.getHourOfDay() + ":" + getTime.getMinuteOfHour() + ":"
-                    + getTime.getSecondOfMinute();
-            final DateTimeFormatter simpleDateFormat = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+            final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
+                    + getTime.getSecond();
+            final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                    .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-            emailCampaign.setNextTriggerDate(nextTriggerDateWithTime.toDate());
+            emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
             this.emailCampaignRepository.saveAndFlush(emailCampaign);
         }
 
@@ -555,13 +557,13 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     private LocalDateTime tenantDateTime() {
-        LocalDateTime today = new LocalDateTime();
+        LocalDateTime today = LocalDateTime.now(ZoneId.systemDefault());
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         if (tenant != null) {
-            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+            final ZoneId zone = ZoneId.of(tenant.getTimezoneId());
             if (zone != null) {
-                today = new LocalDateTime(zone);
+                today = LocalDateTime.now(zone);
             }
         }
         return today;

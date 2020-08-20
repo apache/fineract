@@ -19,8 +19,8 @@
 package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
 
 public final class DepositAccountOnHoldTransactionData {
 

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.commands.domain;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.DateTime;
 
 @Entity
 @Table(name = "m_portfolio_command_source")
@@ -102,7 +103,7 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, DateTime.now());
+                command.json(), maker, ZonedDateTime.now(ZoneId.systemDefault()));
     }
 
     protected CommandSource() {
@@ -110,7 +111,7 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final DateTime madeOnDateTime) {
+            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final ZonedDateTime madeOnDateTime) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
@@ -118,7 +119,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.subresourceId = subresourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
-        this.madeOnDate = madeOnDateTime.toDate();
+        this.madeOnDate = Date.from(madeOnDateTime.toInstant());
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
@@ -138,15 +139,15 @@ public class CommandSource extends AbstractPersistableCustom {
         this.organisationCreditBureauId = organisationCreditBureauId;
     }
 
-    public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
+    public void markAsChecked(final AppUser checker, final ZonedDateTime checkedOnDate) {
         this.checker = checker;
-        this.checkedOnDate = checkedOnDate.toDate();
+        this.checkedOnDate = Date.from(checkedOnDate.toInstant());
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
-    public void markAsRejected(final AppUser checker, final DateTime checkedOnDate) {
+    public void markAsRejected(final AppUser checker, final ZonedDateTime checkedOnDate) {
         this.checker = checker;
-        this.checkedOnDate = checkedOnDate.toDate();
+        this.checkedOnDate = Date.from(checkedOnDate.toInstant());
         this.processingResult = CommandProcessingResultType.REJECTED.getValue();
     }
 

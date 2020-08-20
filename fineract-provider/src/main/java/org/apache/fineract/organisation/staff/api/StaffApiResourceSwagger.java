@@ -19,7 +19,7 @@
 package org.apache.fineract.organisation.staff.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Created by sanyam on 19/8/17.

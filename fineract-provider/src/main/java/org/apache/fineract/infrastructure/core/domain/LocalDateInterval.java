@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 
 public class LocalDateInterval {
 
@@ -50,7 +50,7 @@ public class LocalDateInterval {
     }
 
     private Integer daysBetween() {
-        return Days.daysBetween(this.startDate, this.endDate).getDays();
+        return Math.toIntExact(ChronoUnit.DAYS.between(this.startDate, this.endDate));
     }
 
     public boolean containsPortionOf(final LocalDateInterval interval) {

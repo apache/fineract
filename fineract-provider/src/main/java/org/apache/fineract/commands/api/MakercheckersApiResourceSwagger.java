@@ -19,11 +19,11 @@
 package org.apache.fineract.commands.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
 import org.apache.fineract.useradministration.data.AppUserData;
-import org.joda.time.DateTime;
 
 /**
  * Created by sanyam on 27/7/17.
@@ -47,9 +47,9 @@ final class MakercheckersApiResourceSwagger {
         public Long resourceId;
         public Long subresourceId;
         public String maker;
-        public DateTime madeOnDate;
+        public ZonedDateTime madeOnDate;
         public String checker;
-        public DateTime checkedOnDate;
+        public ZonedDateTime checkedOnDate;
         public String processingResult;
         public String commandAsJson;
         public String officeName;

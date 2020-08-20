@@ -21,6 +21,10 @@ package org.apache.fineract.portfolio.group.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,10 +69,6 @@ import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeEnumerations;
 import org.apache.fineract.portfolio.group.exception.CenterNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -87,7 +87,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ColumnValidator columnValidator;
 
     // data mappers
@@ -437,8 +437,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         // final boolean clientPendingApprovalAllowed =
         // this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
 
-        return CenterData.template(officeIdDefaulted, accountNo, new LocalDate(), officeOptions, staffOptions, groupMembersOptions,
-                totalCollected, totalOverdue, totaldue, installmentDue);
+        return CenterData.template(officeIdDefaulted, accountNo, LocalDate.now(ZoneId.systemDefault()), officeOptions, staffOptions,
+                groupMembersOptions, totalCollected, totalOverdue, totaldue, installmentDue);
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
@@ -514,9 +514,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
         validateForGenerateCollectionSheet(staffId);
-        LocalDate localDate = new LocalDate(meetingDate);
+        LocalDate localDate = LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault());
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
-        String passeddate = formatter.print(localDate);
+        String passeddate = formatter.format(localDate);
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray = null;
         if (staffId != null) {
@@ -538,8 +538,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
         }
         for (CenterData centerData : centerDataArray) {
-            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate),
-                    isSkipRepaymentOnFirstMonthEnabled, numberOfDays)) {
+            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(
+                    LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault()), isSkipRepaymentOnFirstMonthEnabled,
+                    numberOfDays)) {
                 if (staffCenterDataArray.size() <= 0) {
                     Collection<CenterData> meetingFallCenter = new ArrayList<>();
                     meetingFallCenter.add(centerData);

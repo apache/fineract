@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,7 +51,7 @@ public final class DeviceRegistration extends AbstractPersistableCustom {
     private DeviceRegistration(final Client client, final String registrationId) {
         this.client = client;
         this.registrationId = registrationId;
-        this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant().toDate();
+        this.updatedOnDate = Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault()).toInstant());
     }
 
     public static DeviceRegistration instance(final Client client, final String registrationId) {

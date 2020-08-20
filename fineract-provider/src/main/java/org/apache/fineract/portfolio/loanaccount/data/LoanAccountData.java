@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -51,7 +52,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableA
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.rate.data.RateData;
-import org.joda.time.LocalDate;
 import org.springframework.util.CollectionUtils;
 
 /**

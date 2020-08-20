@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +54,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_charge")
@@ -192,7 +193,8 @@ public class LoanCharge extends AbstractPersistableCustom {
         if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && loan.isMultiDisburmentLoan()) {
             amountPercentageAppliedTo = BigDecimal.ZERO;
             for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
-                if (!loanDisbursementDetails.expectedDisbursementDate().after(dueDate.toDate())) {
+                if (!loanDisbursementDetails.expectedDisbursementDate()
+                        .after(Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
                     amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
                 }
             }
@@ -239,7 +241,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                         chargeDefinition.getName());
             }
 
-            this.dueDate = dueDate.toDate();
+            this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.dueDate = null;
         }
@@ -382,7 +384,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     public void update(final BigDecimal amount, final LocalDate dueDate, final BigDecimal loanPrincipal, Integer numberOfRepayments,
             BigDecimal loanCharge) {
         if (dueDate != null) {
-            this.dueDate = dueDate.toDate();
+            this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (amount != null) {
@@ -470,7 +472,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(dueDateParamName);
-            this.dueDate = newValue.toDate();
+            this.dueDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String amountParamName = "amount";
@@ -578,7 +580,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     public LocalDate getDueLocalDate() {
         LocalDate dueDate = null;
         if (this.dueDate != null) {
-            dueDate = new LocalDate(this.dueDate);
+            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
         }
         return dueDate;
     }

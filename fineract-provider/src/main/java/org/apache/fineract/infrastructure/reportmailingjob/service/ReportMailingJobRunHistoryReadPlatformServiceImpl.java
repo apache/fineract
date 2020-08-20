@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.reportmailingjob.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -29,7 +30,6 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobRunHistoryData;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -97,8 +97,8 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         public ReportMailingJobRunHistoryData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
             final Long reportMailingJobId = JdbcSupport.getLong(rs, "reportMailingJobId");
-            final DateTime startDateTime = JdbcSupport.getDateTime(rs, "startDateTime");
-            final DateTime endDateTime = JdbcSupport.getDateTime(rs, "endDateTime");
+            final ZonedDateTime startDateTime = JdbcSupport.getDateTime(rs, "startDateTime");
+            final ZonedDateTime endDateTime = JdbcSupport.getDateTime(rs, "endDateTime");
             final String status = rs.getString("status");
             final String errorMessage = rs.getString("errorMessage");
             final String errorLog = rs.getString("errorLog");

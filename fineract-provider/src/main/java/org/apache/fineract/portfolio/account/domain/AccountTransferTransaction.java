@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.account.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -33,7 +35,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_account_transfer_transaction")
@@ -110,7 +111,7 @@ public class AccountTransferTransaction extends AbstractPersistableCustom {
         this.fromSavingsTransaction = withdrawal;
         this.toSavingsTransaction = deposit;
         this.toLoanTransaction = loanRepaymentTransaction;
-        this.date = transactionDate.toDate();
+        this.date = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.currency = transactionAmount.getCurrency();
         this.amount = transactionAmount.getAmountDefaultedToNullIfZero();
         this.description = description;

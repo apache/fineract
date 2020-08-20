@@ -19,12 +19,12 @@
 package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
 
 public class FloatingRateData implements Comparable<FloatingRateData>, Serializable {
 

@@ -20,6 +20,9 @@ package org.apache.fineract.portfolio.address.domain;
 
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
@@ -34,9 +37,6 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "m_address")
@@ -122,12 +122,12 @@ public class Address extends AbstractPersistableCustom {
         // this.updatedOn = updatedOn;
 
         if (createdOn != null) {
-            this.createdOn = createdOn.toDate();
+            this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         }
 
         if (updatedOn != null) {
-            this.updatedOn = updatedOn.toDate();
+            this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
     }
@@ -229,7 +229,7 @@ public class Address extends AbstractPersistableCustom {
         }
         if (jsonObject.has("createdOn")) {
             String createdOn = jsonObject.get("createdOn").getAsString();
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             createdOnDate = LocalDate.parse(createdOn, formatter);
 
         }
@@ -238,7 +238,7 @@ public class Address extends AbstractPersistableCustom {
         }
         if (jsonObject.has("updatedOn")) {
             String updatedOn = jsonObject.get("updatedOn").getAsString();
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             updatedOnDate = LocalDate.parse(updatedOn, formatter);
         }
 
@@ -363,7 +363,7 @@ public class Address extends AbstractPersistableCustom {
     }
 
     public void setCreatedOn(LocalDate createdOn) {
-        this.createdOn = createdOn.toDate();
+        this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public String getUpdatedBy() {
@@ -379,7 +379,7 @@ public class Address extends AbstractPersistableCustom {
     }
 
     public void setUpdatedOn(LocalDate updatedOn) {
-        this.updatedOn = updatedOn.toDate();
+        this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
 }

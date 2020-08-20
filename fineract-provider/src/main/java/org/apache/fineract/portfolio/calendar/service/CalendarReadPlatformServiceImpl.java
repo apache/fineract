@@ -20,8 +20,12 @@ package org.apache.fineract.portfolio.calendar.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -33,8 +37,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -432,7 +434,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " where c.calendar_id = ? and date(?) between c.start_date and c.end_date limit 1";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, compareDate.toDate() });
+            return this.jdbcTemplate.queryForObject(sql, rm,
+                    new Object[] { calendarId, Date.from(compareDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) });
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

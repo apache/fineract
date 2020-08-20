@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +35,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_term_variations")
@@ -119,10 +120,10 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LoanTermVariationsData toData() {
-        LocalDate termStartDate = new LocalDate(this.termApplicableFrom);
+        LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
         LocalDate dateValue = null;
         if (this.dateValue != null) {
-            dateValue = new LocalDate(this.dateValue);
+            dateValue = LocalDate.ofInstant(this.dateValue.toInstant(), ZoneId.systemDefault());
         }
         EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
         return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
@@ -133,7 +134,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchTermApplicaDate() {
-        return new LocalDate(this.termApplicableFrom);
+        return LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
     }
 
     public BigDecimal getTermValue() {
@@ -145,7 +146,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchDateValue() {
-        return this.dateValue == null ? null : new LocalDate(this.dateValue);
+        return this.dateValue == null ? null : LocalDate.ofInstant(this.dateValue.toInstant(), ZoneId.systemDefault());
     }
 
     public void setTermApplicableFrom(Date termApplicableFrom) {

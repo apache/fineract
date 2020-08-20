@@ -30,7 +30,10 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -90,10 +93,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSum
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -224,8 +223,7 @@ public class InteropServiceImpl implements InteropService {
                 return true;
             }
 
-            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().toDateTimeAtStartOfDay().toDate().toInstant()
-                    .atZone(zoneId).toLocalDateTime();
+            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
             return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0) && (transactionsFrom == null
                     || transactionsFrom.compareTo(transactionDate.withHour(23).withMinute(59).withSecond(59)) <= 0);
         };
@@ -581,7 +579,7 @@ public class InteropServiceImpl implements InteropService {
             dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
         }
 
-        return DateTimeFormat.forPattern(dateFormat).withLocale(locale);
+        return DateTimeFormatter.ofPattern(dateFormat).withLocale(locale);
     }
 
     PaymentType findPaymentType() {

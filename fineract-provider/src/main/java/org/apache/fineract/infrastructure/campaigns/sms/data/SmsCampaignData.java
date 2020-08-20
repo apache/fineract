@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.data;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
 public final class SmsCampaignData {
@@ -35,10 +35,10 @@ public final class SmsCampaignData {
     private final EnumOptionData campaignStatus;
     private final EnumOptionData triggerType;
     private final String campaignMessage;
-    private final DateTime nextTriggerDate;
+    private final ZonedDateTime nextTriggerDate;
     private final LocalDate lastTriggerDate;
     private final SmsCampaignTimeLine smsCampaignTimeLine;
-    private final DateTime recurrenceStartDate;
+    private final ZonedDateTime recurrenceStartDate;
     private final String recurrence;
     private final Long providerId;
     private final boolean isNotification;
@@ -61,8 +61,8 @@ public final class SmsCampaignData {
 
     private SmsCampaignData(final Long id, final String campaignName, final EnumOptionData campaignType, final EnumOptionData triggerType,
             final Long runReportId, final String reportName, final String paramValue, final EnumOptionData campaignStatus,
-            final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
-            final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
+            final String message, final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate,
+            final SmsCampaignTimeLine smsCampaignTimeLine, final ZonedDateTime recurrenceStartDate, final String recurrence,
             final Long providerId, final Collection<SmsBusinessRulesData> businessRulesOptions,
             final Collection<SmsProviderData> smsProviderOptions, final Collection<EnumOptionData> campaignTypeOptions,
             final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
@@ -104,8 +104,8 @@ public final class SmsCampaignData {
 
     public static SmsCampaignData instance(final Long id, final String campaignName, final EnumOptionData campaignType,
             final EnumOptionData triggerType, final Long runReportId, final String reportName, final String paramValue,
-            final EnumOptionData campaignStatus, final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
-            final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
+            final EnumOptionData campaignStatus, final String message, final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate,
+            final SmsCampaignTimeLine smsCampaignTimeLine, final ZonedDateTime recurrenceStartDate, final String recurrence,
             final Long providerId, final boolean isNotification) {
         final Collection<SmsBusinessRulesData> businessRulesOptions = null;
         final Collection<SmsProviderData> smsProviderOptions = null;
@@ -134,10 +134,10 @@ public final class SmsCampaignData {
         final String paramValue = null;
         final EnumOptionData campaignStatus = null;
         final String message = null;
-        final DateTime nextTriggerDate = null;
+        final ZonedDateTime nextTriggerDate = null;
         final LocalDate lastTriggerDate = null;
         final SmsCampaignTimeLine smsCampaignTimeLine = null;
-        final DateTime recurrenceStartDate = null;
+        final ZonedDateTime recurrenceStartDate = null;
         final String recurrence = null;
         final EnumOptionData triggerType = null;
         final String reportName = null;
@@ -177,7 +177,7 @@ public final class SmsCampaignData {
         return this.campaignMessage;
     }
 
-    public DateTime getNextTriggerDate() {
+    public ZonedDateTime getNextTriggerDate() {
         return this.nextTriggerDate;
     }
 
@@ -189,7 +189,7 @@ public final class SmsCampaignData {
         return this.recurrence;
     }
 
-    public DateTime getRecurrenceStartDate() {
+    public ZonedDateTime getRecurrenceStartDate() {
         return this.recurrenceStartDate;
     }
 

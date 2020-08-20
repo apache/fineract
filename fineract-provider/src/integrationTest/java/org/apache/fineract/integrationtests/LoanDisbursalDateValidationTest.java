@@ -61,7 +61,7 @@ public class LoanDisbursalDateValidationTest {
     public void loanApplicationValidateDisbursalDate() {
 
         final String proposedAmount = "5000";
-        final String approveDate = "1 March 2014";
+        final String approveDate = "01 March 2014";
         final String disbursalDate = "02 March 2014";
 
         // CREATE CLIENT
@@ -102,7 +102,7 @@ public class LoanDisbursalDateValidationTest {
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("1 March 2014")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("01 March 2014")
                 .withSubmittedOnDate("26 February 2014").build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplication);
     }

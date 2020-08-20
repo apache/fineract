@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.floatingrates.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,8 +33,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "m_floating_rates_periods")
@@ -136,7 +137,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchFromDate() {
-        return new LocalDate(this.fromDate);
+        return LocalDate.ofInstant(this.fromDate.toInstant(), ZoneId.systemDefault());
     }
 
     public FloatingRatePeriodData toData(final FloatingRateDTO floatingRateDTO) {
@@ -146,9 +147,9 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
             interest = interest.add(floatingRateDTO.fetchBaseRate(fetchFromDate()));
         }
 
-        final LocalDate fromDate = new LocalDateTime(getFromDate()).toLocalDate();
-        final LocalDate createdOn = new LocalDateTime(getCreatedOn()).toLocalDate();
-        final LocalDate modidiedOn = new LocalDateTime(getModifiedOn()).toLocalDate();
+        final LocalDate fromDate = ZonedDateTime.ofInstant(getFromDate().toInstant(), ZoneId.systemDefault()).toLocalDate();
+        final LocalDate createdOn = ZonedDateTime.ofInstant(getCreatedOn().toInstant(), ZoneId.systemDefault()).toLocalDate();
+        final LocalDate modidiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), ZoneId.systemDefault()).toLocalDate();
 
         return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(),
                 getCreatedBy().getUsername(), createdOn, getModifiedBy().getUsername(), modidiedOn);

@@ -29,6 +29,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -54,8 +57,6 @@ import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProd
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.joda.time.DateTime;
-import org.joda.time.Months;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -1565,12 +1566,12 @@ public class FixedDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        DateTime startDate = new DateTime(activationDate.getTime());
+        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), ZoneId.systemDefault());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        DateTime endDate = new DateTime(prematureClosureDate.getTime());
+        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), ZoneId.systemDefault());
 
-        Integer depositedPeriod = Months.monthsBetween(startDate, endDate).getMonths();
+        Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(startDate.toLocalDate(), endDate.toLocalDate()));
 
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
@@ -1679,12 +1680,12 @@ public class FixedDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        DateTime startDate = new DateTime(activationDate.getTime());
+        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), ZoneId.systemDefault());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        DateTime endDate = new DateTime(prematureClosureDate.getTime());
+        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), ZoneId.systemDefault());
 
-        Integer depositedPeriod = Months.monthsBetween(startDate, endDate).getMonths();
+        Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(startDate.toLocalDate(), endDate.toLocalDate()));
 
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;

@@ -31,9 +31,12 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +57,6 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -755,7 +757,7 @@ public class ClientLoanIntegrationTest {
         final Integer loanProductID = createLoanProduct(true, NONE);
 
         List<HashMap> tranches = new ArrayList<>();
-        tranches.add(createTrancheDetail("1 March 2014", "25000"));
+        tranches.add(createTrancheDetail("01 March 2014", "25000"));
         tranches.add(createTrancheDetail("23 April 2014", "20000"));
 
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, null, null, "45,000.00", tranches);
@@ -765,12 +767,12 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("1 March 2014", loanID);
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2014", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE first Tranche
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("1 March 2014", loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("01 March 2014", loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -798,7 +800,7 @@ public class ClientLoanIntegrationTest {
                 MINIMUM_OPENING_BALANCE);
 
         List<HashMap> tranches = new ArrayList<>();
-        tranches.add(createTrancheDetail("1 March 2014", "25000"));
+        tranches.add(createTrancheDetail("01 March 2014", "25000"));
         tranches.add(createTrancheDetail("23 April 2014", "20000"));
 
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, null, savingsId.toString(), "45,000.00",
@@ -809,7 +811,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("1 March 2014", loanID);
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 March 2014", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
@@ -818,7 +820,7 @@ public class ClientLoanIntegrationTest {
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         // DISBURSE first Tranche
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanToSavings("1 March 2014", loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanToSavings("01 March 2014", loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -949,8 +951,8 @@ public class ClientLoanIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("2 June 2014") //
-                .withSubmittedOnDate("2 June 2014") //
+                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("02 June 2014") //
+                .withSubmittedOnDate("02 June 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
@@ -989,9 +991,9 @@ public class ClientLoanIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("1 March 2014") //
+                .withExpectedDisbursementDate("01 March 2014") //
                 .withTranches(tranches) //
-                .withSubmittedOnDate("1 March 2014") //
+                .withSubmittedOnDate("01 March 2014") //
 
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
@@ -3089,7 +3091,7 @@ public class ClientLoanIntegrationTest {
             final HashMap repayment = loanSchedule.get(i);
 
             final ArrayList<Integer> dueDateAsArray = (ArrayList<Integer>) repayment.get("dueDate");
-            final LocalDate transactionDate = new LocalDate(dueDateAsArray.get(0), dueDateAsArray.get(1), dueDateAsArray.get(2));
+            final LocalDate transactionDate = LocalDate.of(dueDateAsArray.get(0), dueDateAsArray.get(1), dueDateAsArray.get(2));
 
             final Float interestPortion = BigDecimal.valueOf(Double.valueOf(repayment.get("interestDue").toString()))
                     .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("interestWaived").toString())))
@@ -4487,7 +4489,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4656,7 +4658,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4847,7 +4849,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar.setTime(Utils.getLocalDateOfTenant().toDate());
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         final String FROM_LOAN_ACCOUNT_TYPE = "1";
@@ -5056,8 +5058,8 @@ public class ClientLoanIntegrationTest {
                 .withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("2") //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("1 March 2014") //
-                .withSubmittedOnDate("1 March 2014") //
+                .withExpectedDisbursementDate("01 March 2014") //
+                .withSubmittedOnDate("01 March 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
@@ -5080,8 +5082,8 @@ public class ClientLoanIntegrationTest {
                 .withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("2") //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("1 March 2014") //
-                .withSubmittedOnDate("1 March 2014") //
+                .withExpectedDisbursementDate("01 March 2014") //
+                .withSubmittedOnDate("01 March 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
 
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);

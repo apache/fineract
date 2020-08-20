@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.transfer.service;
 import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +65,6 @@ import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransfe
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalOrOnHoldException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TransferNotSupportedReason;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -475,7 +476,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             case PROPOSAL:
                 client.setStatus(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
                 client.updateTransferToOffice(destinationOffice);
-                client.updateProposedTransferDate(transferDate.toDate());
+                client.updateProposedTransferDate(Date.from(transferDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
             break;
             case REJECTION:
                 client.setStatus(ClientStatus.TRANSFER_ON_HOLD.getValue());
@@ -489,10 +490,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
-        Date proposedTransferDate = transferDate != null ? transferDate.toDate() : null;
+        Date proposedTransferDate = transferDate != null ? Date.from(transferDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
         this.clientTransferDetailsRepositoryWrapper.save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
                 destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
-                DateUtils.getLocalDateTimeOfTenant().toDate(), this.context.authenticatedUser().getId()));
+                Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault()).toInstant()),
+                this.context.authenticatedUser().getId()));
     }
 
     private List<Client> assembleListOfClients(final JsonCommand command) {

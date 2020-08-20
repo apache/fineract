@@ -19,6 +19,10 @@
 package org.apache.fineract.organisation.teller.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -31,8 +35,6 @@ import org.apache.fineract.organisation.teller.exception.CashierDateRangeOutOfTe
 import org.apache.fineract.organisation.teller.exception.CashierInsufficientAmountException;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +80,8 @@ public class CashierTransactionDataValidator {
 
     public void validateCashierAllowedDateAndTime(final Cashier cashier, final Teller teller) {
         Long staffId = cashier.getStaff().getId();
-        final LocalDate fromDate = new LocalDate(cashier.getStartDate());
-        final LocalDate endDate = new LocalDate(cashier.getEndDate());
+        final LocalDate fromDate = LocalDate.ofInstant(cashier.getStartDate().toInstant(), ZoneId.systemDefault());
+        final LocalDate endDate = LocalDate.ofInstant(cashier.getEndDate().toInstant(), ZoneId.systemDefault());
         final LocalDate tellerFromDate = teller.getStartLocalDate();
         final LocalDate tellerEndDate = teller.getEndLocalDate();
         /**
@@ -113,7 +115,8 @@ public class CashierTransactionDataValidator {
         if (user.getStaff() != null) {
             String sql = "select c.id from m_cashiers c where c.staff_id = " + user.getStaff().getId() + " AND "
                     + " (case when c.full_day then '" + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date " + " else ('"
-                    + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date and " + " TIME('" + localDateTime.toDateTime()
+                    + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date and " + " TIME('"
+                    + ZonedDateTime.of(localDateTime, ZoneId.systemDefault())
                     + "') BETWEEN TIME(c.start_time) AND TIME(c.end_time)  ) end)";
             try {
                 Long cashierId = this.jdbcTemplate.queryForObject(sql, Long.class);

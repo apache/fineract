@@ -21,6 +21,11 @@ package org.apache.fineract.scheduledjobs.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -46,11 +51,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPla
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +64,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatterWithTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -334,7 +334,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final Collection<Map<String, Object>> scheduleDetails = this.depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
         String insertSql = "INSERT INTO `m_mandatory_savings_schedule` (`savings_account_id`, `duedate`, `installment`, `deposit_amount`, `completed_derived`, `created_date`, `lastmodified_date`) VALUES ";
         StringBuilder sb = new StringBuilder();
-        String currentDate = formatterWithTime.print(DateUtils.getLocalDateTimeOfTenant());
+        String currentDate = formatterWithTime.format(DateUtils.getLocalDateTimeOfTenant());
         int iterations = 0;
         for (Map<String, Object> details : scheduleDetails) {
             Long count = (Long) details.get("futureInstallemts");
@@ -345,7 +345,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
             Date date = (Date) details.get("dueDate");
-            LocalDate lastDepositDate = new LocalDate(date);
+            LocalDate lastDepositDate = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
             Integer installmentNumber = (Integer) details.get("installment");
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
@@ -358,7 +358,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 sb.append("(");
                 sb.append(savingsId);
                 sb.append(",'");
-                sb.append(formatter.print(lastDepositDate));
+                sb.append(formatter.format(lastDepositDate));
                 sb.append("',");
                 sb.append(installmentNumber);
                 sb.append(",");
@@ -431,8 +431,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
 
         for (Date tbGap : tbGaps) {
-            LocalDate convDate = new DateTime(tbGap).toLocalDate();
-            int days = Days.daysBetween(convDate, DateUtils.getLocalDateOfTenant()).getDays();
+            LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), ZoneId.systemDefault()).toLocalDate();
+            int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getLocalDateOfTenant()));
             if (days < 1) {
                 continue;
             }

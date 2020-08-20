@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.address.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,7 +38,6 @@ import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,8 +90,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
         final Address add = Address.fromJson(command, stateIdobj, countryIdObj);
-        add.setCreatedOn(LocalDate.now());
-        add.setUpdatedOn(LocalDate.now());
+        add.setCreatedOn(LocalDate.now(ZoneId.systemDefault()));
+        add.setUpdatedOn(LocalDate.now(ZoneId.systemDefault()));
         this.addressRepository.save(add);
         final Long addressid = add.getId();
         final Address addobj = this.addressRepository.getOne(addressid);
@@ -137,8 +138,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
                 final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
-                add.setCreatedOn(LocalDate.now());
-                add.setUpdatedOn(LocalDate.now());
+                add.setCreatedOn(LocalDate.now(ZoneId.systemDefault()));
+                add.setUpdatedOn(LocalDate.now(ZoneId.systemDefault()));
                 this.addressRepository.save(add);
                 final Long addressid = add.getId();
                 final Address addobj = this.addressRepository.getOne(addressid);
@@ -267,7 +268,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         }
 
         if (is_address_update) {
-            addobj.setUpdatedOn(LocalDate.now());
+            addobj.setUpdatedOn(LocalDate.now(ZoneId.systemDefault()));
             this.addressRepository.save(addobj);
 
         }

@@ -27,6 +27,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import javax.ws.rs.Consumes;
@@ -55,8 +57,6 @@ import org.apache.fineract.organisation.teller.data.TellerJournalData;
 import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.util.DateRange;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -164,10 +164,10 @@ public class TellerApiResource {
     public String getCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @QueryParam("fromdate") @Parameter(description = "fromdate") final String fromDateStr,
             @QueryParam("todate") @Parameter(description = "todate") final String toDateStr) {
-        final DateTimeFormatter dateFormatter = ISODateTimeFormat.basicDate();
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.BASIC_ISO_DATE;
 
-        final Date fromDate = fromDateStr != null ? dateFormatter.parseDateTime(fromDateStr).toDate() : new Date();
-        final Date toDate = toDateStr != null ? dateFormatter.parseDateTime(toDateStr).toDate() : new Date();
+        final Date fromDate = fromDateStr != null ? Date.from(ZonedDateTime.parse(fromDateStr, dateFormatter).toInstant()) : new Date();
+        final Date toDate = toDateStr != null ? Date.from(ZonedDateTime.parse(toDateStr, dateFormatter).toInstant()) : new Date();
 
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final Collection<CashierData> cashiers = this.readPlatformService.getCashiersForTeller(tellerId, fromDate, toDate);

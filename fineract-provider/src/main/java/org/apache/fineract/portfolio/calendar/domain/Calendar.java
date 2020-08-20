@@ -20,6 +20,10 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import static org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_RESOURCE_NAME;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -47,8 +51,6 @@ import org.apache.fineract.portfolio.calendar.exception.CalendarDateException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "m_calendar")
@@ -125,13 +127,13 @@ public class Calendar extends AbstractAuditableCustom {
         this.location = StringUtils.defaultIfEmpty(location, null);
 
         if (null != startDate) {
-            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.startDate = null;
         }
 
         if (null != endDate) {
-            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
+            this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.endDate = null;
         }
@@ -188,7 +190,7 @@ public class Calendar extends AbstractAuditableCustom {
                 .integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.SECOND_REMINDER.getValue());
         final LocalDateTime time = command.localTimeValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
         if (time != null) {
-            meetingtime = time.toDate();
+            meetingtime = Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
         }
         final String recurrence = Calendar.constructRecurrence(command, null);
 
@@ -215,7 +217,7 @@ public class Calendar extends AbstractAuditableCustom {
         } else {
 
             actualChanges.put(CalendarSupportedParameters.START_DATE.getValue(), newMeetingStartDate.toString());
-            this.startDate = newMeetingStartDate.toDate();
+            this.startDate = Date.from(newMeetingStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
             /*
              * If meeting start date is changed then there is possibilities of recurring day may change, so derive the
@@ -232,7 +234,7 @@ public class Calendar extends AbstractAuditableCustom {
              */
 
             if (calendarFrequencyType.isWeekly()) {
-                repeatsOnDay = newMeetingStartDate.getDayOfWeek();
+                repeatsOnDay = newMeetingStartDate.get(ChronoField.DAY_OF_WEEK);
             } else if (calendarFrequencyType.isMonthly()) {
                 repeatsOnDay = newMeetingStartDate.getDayOfMonth();
             }
@@ -291,7 +293,7 @@ public class Calendar extends AbstractAuditableCustom {
                 actualChanges.put(startDateParamName, valueAsInput);
                 actualChanges.put("dateFormat", dateFormatAsInput);
                 actualChanges.put("locale", localeAsInput);
-                this.startDate = newValue.toDate();
+                this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -303,7 +305,7 @@ public class Calendar extends AbstractAuditableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = newValue.toDate();
+            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String durationParamName = CalendarSupportedParameters.DURATION.getValue();
@@ -408,7 +410,7 @@ public class Calendar extends AbstractAuditableCustom {
             actualChanges.put(CalendarSupportedParameters.MEETING_TIME.getValue(), newValue);
             LocalDateTime timeInLocalDateTimeFormat = command.localTimeValueOfParameterNamed(time);
             if (timeInLocalDateTimeFormat != null) {
-                this.meetingtime = timeInLocalDateTimeFormat.toDate();
+                this.meetingtime = Date.from(timeInLocalDateTimeFormat.atZone(ZoneId.systemDefault()).toInstant());
             }
 
         }
@@ -424,7 +426,7 @@ public class Calendar extends AbstractAuditableCustom {
         if (calendarStartDate != null && this.startDate != null) {
             if (!calendarStartDate.equals(this.getStartDateLocalDate())) {
                 actualChanges.put("startDate", calendarStartDate);
-                this.startDate = calendarStartDate.toDate();
+                this.startDate = Date.from(calendarStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -491,7 +493,7 @@ public class Calendar extends AbstractAuditableCustom {
     public LocalDate getStartDateLocalDate() {
         LocalDate startDateLocalDate = null;
         if (this.startDate != null) {
-            startDateLocalDate = LocalDate.fromDateFields(this.startDate);
+            startDateLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startDateLocalDate;
     }
@@ -499,7 +501,7 @@ public class Calendar extends AbstractAuditableCustom {
     public LocalDate getEndDateLocalDate() {
         LocalDate endDateLocalDate = null;
         if (this.endDate != null) {
-            endDateLocalDate = LocalDate.fromDateFields(this.endDate);
+            endDateLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
         }
         return endDateLocalDate;
     }
@@ -659,11 +661,11 @@ public class Calendar extends AbstractAuditableCustom {
 
         final CalendarFrequencyType frequencyType = CalendarUtils.getFrequency(this.recurrence);
         final Integer interval = Integer.valueOf(CalendarUtils.getInterval(this.recurrence));
-        final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, startDate.getDayOfWeek(), null);
+        final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, startDate.get(ChronoField.DAY_OF_WEEK), null);
 
         this.recurrence = newRecurrence;
-        this.startDate = startDate.toDate();
-        this.endDate = endDate.toDate();
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public Set<CalendarHistory> getCalendarHistory() {

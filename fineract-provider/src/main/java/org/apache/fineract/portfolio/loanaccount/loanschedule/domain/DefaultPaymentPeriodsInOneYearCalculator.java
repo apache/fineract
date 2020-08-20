@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +69,8 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             periodFraction = Double.valueOf("1.0");
         } else if (interestChargedFromLocalDate != null && repaymentPeriod.contains(interestChargedFromLocalDate)) {
 
-            final int numberOfDaysInterestCalculationGraceInPeriod = Days
-                    .daysBetween(repaymentPeriodStartDate, interestChargedFromLocalDate).getDays();
+            final int numberOfDaysInterestCalculationGraceInPeriod = Math
+                    .toIntExact(ChronoUnit.DAYS.between(repaymentPeriodStartDate, interestChargedFromLocalDate));
             periodFraction = calculateRepaymentPeriodFraction(repaymentPeriodFrequencyType, repaidEvery,
                     numberOfDaysInterestCalculationGraceInPeriod);
         }

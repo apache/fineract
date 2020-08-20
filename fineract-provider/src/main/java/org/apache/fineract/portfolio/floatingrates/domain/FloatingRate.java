@@ -22,6 +22,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -46,7 +48,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
@@ -110,8 +111,9 @@ public class FloatingRate extends AbstractPersistableCustom {
         final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(currentUser, command);
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
-        return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods, currentUser, currentUser, currentDate.toDate(),
-                currentDate.toDate());
+        return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods, currentUser, currentUser,
+                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     private static List<FloatingRatePeriod> getRatePeriods(final AppUser currentUser, final JsonCommand command) {
@@ -123,7 +125,8 @@ public class FloatingRate extends AbstractPersistableCustom {
         for (final JsonElement ratePeriod : arrayOfParameterNamed) {
             final JsonObject ratePeriodObject = ratePeriod.getAsJsonObject();
             final JsonParserHelper helper = new JsonParserHelper();
-            final Date fromDate = helper.extractLocalDateNamed("fromDate", ratePeriod, new HashSet<String>()).toDate();
+            final Date fromDate = Date.from(helper.extractLocalDateNamed("fromDate", ratePeriod, new HashSet<String>())
+                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
             final BigDecimal interestRate = ratePeriodObject.get("interestRate").getAsBigDecimal();
             final boolean isDifferentialToBaseLendingRate = helper.parameterExists("isDifferentialToBaseLendingRate", ratePeriod)
                     ? ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean()
@@ -204,11 +207,11 @@ public class FloatingRate extends AbstractPersistableCustom {
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         if (this.floatingRatePeriods != null) {
             for (FloatingRatePeriod ratePeriod : this.floatingRatePeriods) {
-                LocalDate fromDate = LocalDate.fromDateFields(ratePeriod.getFromDate());
+                LocalDate fromDate = LocalDate.ofInstant(ratePeriod.getFromDate().toInstant(), ZoneId.systemDefault());
                 if (fromDate.isAfter(today)) {
                     ratePeriod.setActive(false);
                     ratePeriod.setModifiedBy(appUser);
-                    ratePeriod.setModifiedOn(today.toDate());
+                    ratePeriod.setModifiedOn(Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 }
             }
         }

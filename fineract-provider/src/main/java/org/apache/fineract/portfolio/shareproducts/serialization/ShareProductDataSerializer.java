@@ -24,8 +24,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,8 +57,6 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceD
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductMarketPrice;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -187,8 +189,8 @@ public class ShareProductDataSerializer {
 
         AppUser createdBy = platformSecurityContext.authenticatedUser();
         AppUser modifiedBy = createdBy;
-        DateTime createdDate = DateUtils.getLocalDateTimeOfTenant().toDateTime();
-        DateTime modifiedOn = createdDate;
+        ZonedDateTime createdDate = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+        ZonedDateTime modifiedOn = createdDate;
         ShareProduct product = new ShareProduct(productName, shortName, description, externalId, currency, totalNumberOfShares,
                 sharesIssued, unitPrice, shareCapitalValue, minimumClientShares, nominalClientShares, maximumClientShares, marketPriceSet,
                 charges, allowdividendsForInactiveClients, lockinPeriod, lockPeriodType, minimumActivePeriod, minimumActivePeriodType,
@@ -220,7 +222,8 @@ public class ShareProductDataSerializer {
                         arrayElement);
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
-                ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id, localDate.toDate(), shareValue);
+                ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id,
+                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
                 set.add(obj);
             }
         }
@@ -237,7 +240,8 @@ public class ShareProductDataSerializer {
                         arrayElement);
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
-                ShareProductMarketPrice obj = new ShareProductMarketPrice(localDate.toDate(), shareValue);
+                ShareProductMarketPrice obj = new ShareProductMarketPrice(
+                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
                 set.add(obj);
             }
         }

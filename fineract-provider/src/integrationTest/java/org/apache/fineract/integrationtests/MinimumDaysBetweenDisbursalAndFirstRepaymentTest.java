@@ -58,7 +58,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
-    private final String groupActivationDate = "1 August 2014";
+    private final String groupActivationDate = "01 August 2014";
 
     @BeforeEach
     public void setup() {
@@ -80,7 +80,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         // create all required entities
         this.createRequiredEntities();
 
-        final String disbursalDate = "4 September 2014";
+        final String disbursalDate = "04 September 2014";
         final String firstRepaymentDate = "11 September 2014";
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
@@ -130,8 +130,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         // server
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
 
-        final String disbursalDate = "4 September 2014";
-        final String firstRepaymentDate = "5 September 2014";
+        final String disbursalDate = "04 September 2014";
+        final String firstRepaymentDate = "05 September 2014";
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
                 .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsWeeks().withNumberOfRepayments(numberOfRepayments)

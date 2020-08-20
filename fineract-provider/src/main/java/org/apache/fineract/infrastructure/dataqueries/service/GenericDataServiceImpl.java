@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
@@ -28,8 +31,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,15 +162,14 @@ public class GenericDataServiceImpl implements GenericDataService {
                         writer.append(currVal);
                     } else {
                         if (currColType.equals("DATE")) {
-                            final LocalDate localDate = new LocalDate(currVal);
+                            final LocalDate localDate = LocalDate.parse(currVal);
                             writer.append(
-                                    "[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth() + "]");
+                                    "[" + localDate.getYear() + ", " + localDate.getMonthValue() + ", " + localDate.getDayOfMonth() + "]");
                         } else if (currColType.equals("DATETIME")) {
-                            final LocalDateTime localDateTime = new LocalDateTime(currVal);
-                            writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthOfYear() + ", "
-                                    + localDateTime.getDayOfMonth() + " " + localDateTime.getHourOfDay() + ", "
-                                    + localDateTime.getMinuteOfHour() + ", " + localDateTime.getSecondOfMinute() + ", "
-                                    + localDateTime.getMillisOfSecond() + "]");
+                            final LocalDateTime localDateTime = LocalDateTime.parse(currVal);
+                            writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthValue() + ", "
+                                    + localDateTime.getDayOfMonth() + " " + localDateTime.getHour() + ", " + localDateTime.getMinute()
+                                    + ", " + localDateTime.getSecond() + ", " + localDateTime.get(ChronoField.MILLI_OF_SECOND) + "]");
                         } else {
                             writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
                         }

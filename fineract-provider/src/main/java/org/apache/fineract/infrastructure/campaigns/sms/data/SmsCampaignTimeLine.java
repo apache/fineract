@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class SmsCampaignTimeLine {

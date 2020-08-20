@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.sms.domain;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +38,6 @@ import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "sms_messages_outbound")
@@ -120,7 +121,7 @@ public class SmsMessage extends AbstractPersistableCustom {
         this.mobileNo = mobileNo;
         this.message = message;
         this.smsCampaign = smsCampaign;
-        this.submittedOnDate = LocalDate.now().toDate();
+        this.submittedOnDate = Date.from(LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.isNotification = isNotification;
     }
 

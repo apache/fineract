@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.spm.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -30,8 +35,6 @@ import org.apache.fineract.spm.domain.SurveyRepository;
 import org.apache.fineract.spm.domain.SurveyValidator;
 import org.apache.fineract.spm.exception.SurveyNotFoundException;
 import org.apache.openjpa.persistence.EntityExistsException;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -82,9 +85,9 @@ public class SpmService {
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         // set valid to for 100 years
         Calendar cal = Calendar.getInstance();
-        cal.setTime(validFrom.toDate());
+        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(validFrom.toDate());
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         survey.setValidTo(cal.getTime());
         try {
             this.surveyRepository.saveAndFlush(survey);
@@ -120,8 +123,8 @@ public class SpmService {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findById(id);
-        final DateTime dateTime = getStartOfToday().minusMillis(1);
-        survey.setValidTo(dateTime.toDate());
+        final ZonedDateTime dateTime = getStartOfToday().minus(1, ChronoUnit.MILLIS);
+        survey.setValidTo(Date.from(dateTime.toInstant()));
 
         this.surveyRepository.save(survey);
     }
@@ -132,16 +135,16 @@ public class SpmService {
         final Survey survey = findById(id);
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         Calendar cal = Calendar.getInstance();
-        cal.setTime(validFrom.toDate());
+        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(validFrom.toDate());
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         survey.setValidTo(cal.getTime());
 
         this.surveyRepository.save(survey);
     }
 
-    public static DateTime getStartOfToday() {
-        return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
+    public static ZonedDateTime getStartOfToday() {
+        return ZonedDateTime.now(ZoneId.systemDefault()).withHour(0).withMinute(0).withSecond(0).with(ChronoField.MILLI_OF_SECOND, 0);
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {

@@ -45,7 +45,6 @@ dependencies {
             'com.sun.jersey.contribs:jersey-spring',
             'com.sun.jersey.contribs:jersey-multipart',
 
-            'joda-time:joda-time',
             'com.google.guava:guava',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',

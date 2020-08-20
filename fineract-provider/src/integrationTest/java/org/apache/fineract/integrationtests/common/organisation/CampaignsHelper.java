@@ -25,11 +25,13 @@ import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.report.ReportData;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -86,7 +88,7 @@ public class CampaignsHelper {
         LOG.info("------------------------------PERFORM ACTION ON CAMPAIGN DETAILS------------------------------------\n");
         final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
-        String actionDate = Utils.getLocalDateOfTenant().toString(DATE_FORMAT);
+        String actionDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
         return Utils.performServerPost(requestSpec, responseSpec, SMS_CAMPAIGNS_ACTION_URL, getJSONForCampaignAction(command, actionDate),
                 "resourceId");
     }
@@ -107,7 +109,7 @@ public class CampaignsHelper {
         map.put("providerId", 1);
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
-            map.put("recurrenceStartDate", LocalDateTime.now().toString(DATE_TIME_FORMAT));
+            map.put("recurrenceStartDate", LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
             map.put("frequency", 1);
             map.put("interval", "1");
         }
@@ -134,7 +136,7 @@ public class CampaignsHelper {
         map.put("providerId", 1);
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
-            map.put("recurrenceStartDate", LocalDateTime.now().toString(DATE_TIME_FORMAT));
+            map.put("recurrenceStartDate", LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
         }
         map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
         map.put("campaignType", 1);

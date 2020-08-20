@@ -23,6 +23,8 @@ import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.clientId
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -49,7 +51,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.meeting.attendance.domain.ClientAttendance;
 import org.apache.fineract.portfolio.meeting.exception.MeetingDateException;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_meeting", uniqueConstraints = {
@@ -106,7 +107,7 @@ public class Meeting extends AbstractPersistableCustom {
             actualChanges.put(meetingDateParamName, valueAsInput);
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
-            this.meetingDate = newValue.toDate();
+            this.meetingDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
             if (!isValidMeetingDate(this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
                 throw new NotValidRecurringDateException("meeting", "Not a valid meeting date", this.meetingDate);
@@ -167,7 +168,7 @@ public class Meeting extends AbstractPersistableCustom {
     public LocalDate getMeetingDateLocalDate() {
         LocalDate meetingDateLocalDate = null;
         if (this.meetingDate != null) {
-            meetingDateLocalDate = LocalDate.fromDateFields(this.meetingDate);
+            meetingDateLocalDate = LocalDate.ofInstant(this.meetingDate.toInstant(), ZoneId.systemDefault());
         }
         return meetingDateLocalDate;
     }
@@ -185,7 +186,7 @@ public class Meeting extends AbstractPersistableCustom {
         final Calendar calendar = calendarInstance.getCalendar();
         LocalDate meetingDateLocalDate = null;
         if (meetingDate != null) {
-            meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
+            meetingDateLocalDate = LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault());
         }
 
         if (meetingDateLocalDate == null

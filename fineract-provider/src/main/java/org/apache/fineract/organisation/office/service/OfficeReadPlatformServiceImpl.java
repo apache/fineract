@@ -21,6 +21,8 @@ package org.apache.fineract.organisation.office.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -34,7 +36,6 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.data.OfficeTransactionData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -209,7 +210,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         this.context.authenticatedUser();
 
-        return OfficeData.template(null, new LocalDate());
+        return OfficeData.template(null, LocalDate.now(ZoneId.systemDefault()));
     }
 
     @Override
@@ -257,7 +258,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final Collection<OfficeData> parentLookups = retrieveAllOfficesForDropdown();
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
-        return OfficeTransactionData.template(new LocalDate(), parentLookups, currencyOptions);
+        return OfficeTransactionData.template(LocalDate.now(ZoneId.systemDefault()), parentLookups, currencyOptions);
     }
 
     public PlatformSecurityContext getContext() {

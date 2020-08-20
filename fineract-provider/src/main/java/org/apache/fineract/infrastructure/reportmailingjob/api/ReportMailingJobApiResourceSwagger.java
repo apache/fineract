@@ -19,11 +19,11 @@
 package org.apache.fineract.infrastructure.reportmailingjob.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobTimelineData;
-import org.joda.time.DateTime;
 
 /**
  * Created by sanyam on 13/8/17.
@@ -61,7 +61,7 @@ final class ReportMailingJobApiResourceSwagger {
         @Schema(example = "Client Numbers Report")
         public String description;
         @Schema(example = "1469627093000")
-        public DateTime startDateTime;
+        public ZonedDateTime startDateTime;
         @Schema(example = "")
         public String recurrence;
         public ReportMailingJobTimelineData timeline;
@@ -78,7 +78,7 @@ final class ReportMailingJobApiResourceSwagger {
         @Schema(example = "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}")
         public String stretchyReportParamMap;
         @Schema(example = "1469627093000")
-        public DateTime nextRunDateTime;
+        public ZonedDateTime nextRunDateTime;
         @Schema(example = "0")
         public Integer numberOfRuns;
         @Schema(example = "true")
@@ -103,7 +103,7 @@ final class ReportMailingJobApiResourceSwagger {
         @Schema(example = "Client Numbers Report")
         public String description;
         @Schema(example = "1469627093000")
-        public DateTime startDateTime;
+        public ZonedDateTime startDateTime;
         @Schema(example = "120")
         public Long stretchyReportId;
         @Schema(example = "info@musonisystem.com")
@@ -144,7 +144,7 @@ final class ReportMailingJobApiResourceSwagger {
         @Schema(example = "dd-MM-yyyy HH:mm:ss")
         public String dateFormat;
         @Schema(example = "10-08-2016 23:30:00")
-        public DateTime startDateTime;
+        public ZonedDateTime startDateTime;
     }
 
     @Schema(description = "PutReportMailingJobsResponse")
@@ -159,7 +159,7 @@ final class ReportMailingJobApiResourceSwagger {
             private PutReportMailingJobsResponseChanges() {}
 
             @Schema(example = "10-08-2016 23:30:00")
-            public DateTime startDateTime;
+            public ZonedDateTime startDateTime;
         }
 
         @Schema(example = "1")

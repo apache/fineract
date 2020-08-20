@@ -33,14 +33,14 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -231,10 +231,10 @@ public final class Utils {
     }
 
     public static LocalDate getLocalDateOfTenant() {
-        LocalDate today = new LocalDate();
-        final DateTimeZone zone = DateTimeZone.forID(TENANT_TIME_ZONE);
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        final ZoneId zone = ZoneId.of(TENANT_TIME_ZONE);
         if (zone != null) {
-            today = new LocalDate(zone);
+            today = LocalDate.now(zone);
         }
         return today;
     }

@@ -22,6 +22,8 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,9 +43,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -127,7 +126,7 @@ public final class EmailDataValidator {
         if (StringUtils.isNotEmpty(dateFormat)) {
 
             try {
-                final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(jsonCommand.extractLocale());
+                final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat).withLocale(jsonCommand.extractLocale());
 
                 // try to parse the date time string
                 LocalDateTime.parse(startDateTime, dateTimeFormatter);
@@ -224,7 +223,7 @@ public final class EmailDataValidator {
             if (StringUtils.isNotEmpty(dateFormat)) {
 
                 try {
-                    final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat)
+                    final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat)
                             .withLocale(jsonCommand.extractLocale());
 
                     // try to parse the date time string

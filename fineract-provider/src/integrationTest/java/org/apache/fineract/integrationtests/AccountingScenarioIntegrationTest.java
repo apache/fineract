@@ -30,6 +30,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -58,8 +61,6 @@ import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDep
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ public class AccountingScenarioIntegrationTest {
     private static final String LP_REPAYMENT_PERIOD = "2";
     private static final String LP_INTEREST_RATE = "1";
     private static final String EXPECTED_DISBURSAL_DATE = "04 March 2011";
-    private static final String LOAN_APPLICATION_SUBMISSION_DATE = "3 March 2011";
+    private static final String LOAN_APPLICATION_SUBMISSION_DATE = "03 March 2011";
     private static final String TRANSACTION_DATE = "01 March 2013";
     private static final String LOAN_TERM_FREQUENCY = "10";
     private static final String INDIVIDUAL_LOAN = "individual";
@@ -786,18 +787,18 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now();
+        LocalDate fromDateLocal = LocalDate.now(ZoneId.systemDefault());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
-        fromDateLocal = fromDateLocal.withMonthOfYear((int) fromDateList.get(1));
+        fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now();
+        LocalDate dueDateLocal = LocalDate.now(ZoneId.systemDefault());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
-        dueDateLocal = dueDateLocal.withMonthOfYear((int) dueDateList.get(1));
+        dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
 
-        int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
+        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDateLocal, dueDateLocal));
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
@@ -890,18 +891,18 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now();
+        LocalDate fromDateLocal = LocalDate.now(ZoneId.systemDefault());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
-        fromDateLocal = fromDateLocal.withMonthOfYear((int) fromDateList.get(1));
+        fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now();
+        LocalDate dueDateLocal = LocalDate.now(ZoneId.systemDefault());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
-        dueDateLocal = dueDateLocal.withMonthOfYear((int) dueDateList.get(1));
+        dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
 
-        int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
+        int totalDaysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDateLocal, dueDateLocal));
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
@@ -1041,7 +1042,7 @@ public class AccountingScenarioIntegrationTest {
 
     private LocalDate getDateAsLocalDate(String dateAsString) throws ParseException {
         DateFormat df = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        LocalDate date = new LocalDate(df.parse(dateAsString));
+        LocalDate date = LocalDate.ofInstant(df.parse(dateAsString).toInstant(), ZoneId.systemDefault());
 
         return date;
     }

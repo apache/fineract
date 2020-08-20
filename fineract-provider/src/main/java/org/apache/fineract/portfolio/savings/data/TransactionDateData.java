@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Immutable data object representing date

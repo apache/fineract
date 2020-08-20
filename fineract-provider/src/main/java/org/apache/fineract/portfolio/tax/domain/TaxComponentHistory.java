@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,7 +28,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_component_history")
@@ -49,8 +50,8 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
 
     private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
         this.percentage = percentage;
-        this.startDate = startDate.toDate();
-        this.endDate = endDate.toDate();
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,
@@ -61,7 +62,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     public LocalDate startDate() {
         LocalDate startDate = null;
         if (this.startDate != null) {
-            startDate = new LocalDate(this.startDate);
+            startDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startDate;
     }
@@ -69,7 +70,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     public LocalDate endDate() {
         LocalDate endDate = null;
         if (this.endDate != null) {
-            endDate = new LocalDate(this.endDate);
+            endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
         }
         return endDate;
     }

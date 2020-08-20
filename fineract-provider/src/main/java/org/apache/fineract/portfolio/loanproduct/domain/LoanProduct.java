@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -62,7 +64,6 @@ import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.rate.domain.Rate;
-import org.joda.time.LocalDate;
 
 /**
  * Loan products allow for categorisation of an organisations loans into something meaningful to them.
@@ -641,11 +642,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.useBorrowerCycle = useBorrowerCycle;
 
         if (startDate != null) {
-            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (closeDate != null) {
-            this.closeDate = closeDate.toDateTimeAtStartOfDay().toDate();
+            this.closeDate = Date.from(closeDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         this.externalId = externalId;
@@ -877,7 +878,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
             if (newValue != null) {
-                this.startDate = newValue.toDate();
+                this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.startDate = null;
             }
@@ -892,7 +893,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(closeDateParamName);
             if (newValue != null) {
-                this.closeDate = newValue.toDate();
+                this.closeDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.closeDate = null;
             }
@@ -1183,7 +1184,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     public LocalDate getStartDate() {
         LocalDate startLocalDate = null;
         if (this.startDate != null) {
-            startLocalDate = LocalDate.fromDateFields(this.startDate);
+            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startLocalDate;
     }
@@ -1191,7 +1192,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     public LocalDate getCloseDate() {
         LocalDate closeLocalDate = null;
         if (this.closeDate != null) {
-            closeLocalDate = LocalDate.fromDateFields(this.closeDate);
+            closeLocalDate = LocalDate.ofInstant(this.closeDate.toInstant(), ZoneId.systemDefault());
         }
         return closeLocalDate;
     }

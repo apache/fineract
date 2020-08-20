@@ -23,6 +23,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,8 +38,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -229,7 +230,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
-            LocalDateTime currentDate = LocalDateTime.now();
+            LocalDateTime currentDate = LocalDateTime.now(ZoneId.systemDefault());
 
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
             baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).validateDateBefore(currentDate.toLocalDate());

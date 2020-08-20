@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateMapper;
 import org.apache.fineract.template.service.TemplateMergeService;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -74,7 +74,7 @@ public class TemplateMergeServiceTest {
 
     @Test
     public void compileLoanSummary() throws IOException {
-        LocalDate july2nd = new LocalDate(2012, 7, 2);
+        LocalDate july2nd = LocalDate.of(2012, 7, 2);
         MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
         List<LoanRepaymentScheduleInstallment> installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
 

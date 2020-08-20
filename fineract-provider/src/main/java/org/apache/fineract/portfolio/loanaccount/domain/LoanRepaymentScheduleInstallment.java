@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,7 +38,6 @@ import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
@@ -148,8 +149,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
-        this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
-        this.dueDate = dueDate.toDateTimeAtStartOfDay().toDate();
+        this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.principal = defaultToNullIfZero(principal);
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);
@@ -166,8 +167,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
-        this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
-        this.dueDate = dueDate.toDateTimeAtStartOfDay().toDate();
+        this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.principal = defaultToNullIfZero(principal);
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);
@@ -204,14 +205,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public LocalDate getFromDate() {
         LocalDate fromLocalDate = null;
         if (this.fromDate != null) {
-            fromLocalDate = new LocalDate(this.fromDate);
+            fromLocalDate = LocalDate.ofInstant(this.fromDate.toInstant(), ZoneId.systemDefault());
         }
 
         return fromLocalDate;
     }
 
     public LocalDate getDueDate() {
-        return new LocalDate(this.dueDate);
+        return LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
     }
 
     public Money getPrincipal(final MonetaryCurrency currency) {
@@ -587,7 +588,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public void updateDerivedFields(final MonetaryCurrency currency, final LocalDate actualDisbursementDate) {
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
-            this.obligationsMetOnDate = actualDisbursementDate.toDate();
+            this.obligationsMetOnDate = Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -615,7 +616,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMetOnDate = transactionDate.toDate();
+            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.obligationsMetOnDate = null;
         }
@@ -623,13 +624,13 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public void updateDueDate(final LocalDate newDueDate) {
         if (newDueDate != null) {
-            this.dueDate = newDueDate.toDate();
+            this.dueDate = Date.from(newDueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
     public void updateFromDate(final LocalDate newFromDate) {
         if (newFromDate != null) {
-            this.fromDate = newFromDate.toDate();
+            this.fromDate = Date.from(newFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -664,7 +665,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public void updateObligationMetOnDate(final LocalDate obligationsMetOnDate) {
-        this.obligationsMetOnDate = (obligationsMetOnDate != null) ? obligationsMetOnDate.toDate() : null;
+        this.obligationsMetOnDate = (obligationsMetOnDate != null)
+                ? Date.from(obligationsMetOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                : null;
     }
 
     public void updateInterestWrittenOff(final BigDecimal interestWrittenOff) {
@@ -696,7 +699,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         LocalDate obligationsMetOnDate = null;
 
         if (this.obligationsMetOnDate != null) {
-            obligationsMetOnDate = new LocalDate(this.obligationsMetOnDate);
+            obligationsMetOnDate = LocalDate.ofInstant(this.obligationsMetOnDate.toInstant(), ZoneId.systemDefault());
         }
 
         return obligationsMetOnDate;

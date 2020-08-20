@@ -19,12 +19,12 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
 public final class ClientTransactionData {

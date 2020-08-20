@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.calendar.command;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 public class CalendarCommand {
 

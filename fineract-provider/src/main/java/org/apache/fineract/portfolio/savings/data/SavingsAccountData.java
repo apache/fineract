@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -33,7 +34,6 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing a savings account.

@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.note.data;
 
+import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.DateTime;
 
 /**
  * Immutable data object represent note or case information about a client, loan or loan transaction.
@@ -49,17 +49,17 @@ public class NoteData {
     @SuppressWarnings("unused")
     private final String createdByUsername;
     @SuppressWarnings("unused")
-    private final DateTime createdOn;
+    private final ZonedDateTime createdOn;
     @SuppressWarnings("unused")
     private final Long updatedById;
     @SuppressWarnings("unused")
     private final String updatedByUsername;
     @SuppressWarnings("unused")
-    private final DateTime updatedOn;
+    private final ZonedDateTime updatedOn;
 
     public NoteData(final Long id, final Long clientId, final Long groupId, final Long loanId, final Long transactionId,
             final Long depositAccountId, final Long savingAccountId, final EnumOptionData noteType, final String note,
-            final DateTime createdDate, final Long createdById, final String createdByUsername, final DateTime lastModifiedDate,
+            final ZonedDateTime createdDate, final Long createdById, final String createdByUsername, final ZonedDateTime lastModifiedDate,
             final Long lastModifiedById, final String updatedByUsername) {
         this.id = id;
         this.clientId = clientId;

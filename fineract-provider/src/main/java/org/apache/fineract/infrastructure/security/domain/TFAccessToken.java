@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.security.domain;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,8 +34,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.data.AccessTokenData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "twofactor_access_token", uniqueConstraints = {
@@ -60,10 +61,10 @@ public class TFAccessToken extends AbstractPersistableCustom {
     public TFAccessToken() {}
 
     public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
-        DateTime validFrom = DateUtils.getLocalDateTimeOfTenant().toDateTime();
-        DateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
+        ZonedDateTime validFrom = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+        ZonedDateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
 
-        return new TFAccessToken(token, user, validFrom.toDate(), validTo.toDate(), true);
+        return new TFAccessToken(token, user, Date.from(validFrom.toInstant()), Date.from(validTo.toInstant()), true);
     }
 
     public TFAccessToken(String token, AppUser user, Date validFrom, Date validTo, boolean enabled) {
@@ -79,7 +80,8 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public AccessTokenData toTokenData() {
-        return new AccessTokenData(this.token, getValidFromDate().toDateTime(), getValidToDate().toDateTime());
+        return new AccessTokenData(this.token, getValidFromDate().atZone(ZoneId.systemDefault()),
+                getValidToDate().atZone(ZoneId.systemDefault()));
     }
 
     public String getToken() {
@@ -95,11 +97,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getValidFromDate() {
-        return new LocalDateTime(validFrom);
+        return ZonedDateTime.ofInstant(validFrom.toInstant(), ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public LocalDateTime getValidToDate() {
-        return new LocalDateTime(validTo);
+        return ZonedDateTime.ofInstant(validTo.toInstant(), ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public void setToken(String token) {

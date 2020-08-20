@@ -19,8 +19,8 @@
 package org.apache.fineract.portfolio.search.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
 
 /**
  * Created by Kang Breder on 13/06/19.

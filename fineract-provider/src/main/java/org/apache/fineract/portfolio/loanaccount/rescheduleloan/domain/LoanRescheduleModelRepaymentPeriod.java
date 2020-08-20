@@ -19,9 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
-import org.joda.time.LocalDate;
 
 public final class LoanRescheduleModelRepaymentPeriod implements LoanRescheduleModalPeriod {
 

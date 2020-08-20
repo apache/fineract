@@ -21,10 +21,10 @@ package org.apache.fineract.interoperation.data;
 import jakarta.validation.constraints.NotNull;
 import java.beans.Transient;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.interoperation.domain.InteropActionState;
-import org.joda.time.LocalDateTime;
 
 public final class InteropTransferResponseData extends InteropResponseData {
 

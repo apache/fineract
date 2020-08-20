@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.organisation.holiday.domain;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.organisation.holiday.exception.HolidayNotFoundException;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +71,8 @@ public class HolidayRepositoryWrapper {
     }
 
     public boolean isHoliday(Long officeId, LocalDate transactionDate) {
-        final List<Holiday> holidays = findByOfficeIdAndGreaterThanDate(officeId, transactionDate.toDate());
+        final List<Holiday> holidays = findByOfficeIdAndGreaterThanDate(officeId,
+                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         return HolidayUtil.isHoliday(transactionDate, holidays);
     }
 }

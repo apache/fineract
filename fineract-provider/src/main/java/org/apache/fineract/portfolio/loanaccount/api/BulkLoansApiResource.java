@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,7 +48,6 @@ import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollection
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -107,7 +108,7 @@ public class BulkLoansApiResource {
         }
 
         final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.templateForBulk(officeId, loanOfficerId,
-                new LocalDate(), offices, loanOfficers, staffAccountSummaryCollectionData);
+                LocalDate.now(ZoneId.systemDefault()), offices, loanOfficers, staffAccountSummaryCollectionData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, loanReassignmentData, this.responseDataParameters);
