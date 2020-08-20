@@ -31,6 +31,7 @@ dependencies {
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
+            'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-cache',
@@ -38,7 +39,6 @@ dependencies {
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
             'org.springframework.security.oauth:spring-security-oauth2',
-
             'com.sun.jersey:jersey-servlet',
             'com.sun.jersey:jersey-server',
             'com.sun.jersey:jersey-json',
