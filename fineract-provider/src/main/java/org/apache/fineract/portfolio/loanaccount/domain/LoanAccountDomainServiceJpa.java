@@ -30,7 +30,9 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -101,6 +103,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
@@ -114,7 +117,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
             final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService,
-            final StandingInstructionRepository standingInstructionRepository) {
+            final StandingInstructionRepository standingInstructionRepository,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -132,6 +136,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.businessEventNotifierService = businessEventNotifierService;
         this.loanUtilService = loanUtilService;
         this.standingInstructionRepository = standingInstructionRepository;
+        this.configurationReadPlatformService = configurationReadPlatformService;
     }
 
     @Transactional
@@ -150,6 +155,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
             final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
             Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+        final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Loan-Overpayment");
+        final Boolean isLoanOverpaymentEnabled = configuration.isEnabled();
+
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_MAKE_REPAYMENT,
@@ -168,6 +180,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
+
+        // customization configure ability to overpay loan
+        final Money outstandingBalance = Money.of(loan.getCurrency(), loan.getSummary().getTotalOutstanding());
+        if (outstandingBalance.minus(repaymentAmount).isLessThanZero() && !isLoanOverpaymentEnabled) {
+            baseDataValidator.reset().failWithCode("Repayment exceeding outstanding balance");
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
         LoanTransaction newRepaymentTransaction = null;
         final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
         if (isRecoveryRepayment) {
