@@ -19,11 +19,11 @@
 package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
-import org.joda.time.LocalDate;
 
 /**
  * {@code TellerData} represents an immutable data object for teller data.

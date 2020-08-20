@@ -95,7 +95,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------RE-APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("1 October 2010", loanID);
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 October 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
@@ -106,7 +106,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // PERFORM REPAYMENTS AND CHECK LOAN STATUS
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("1 January 2011", 540.0f, loanID);
+        this.loanTransactionHelper.makeRepayment("01 January 2011", 540.0f, loanID);
 
         // UNDO DISBURSE LOAN
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
@@ -122,20 +122,20 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         final float repayment_without_interest = 500.0f;
 
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("1 January 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("1 March 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 May 2011", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("1 May 2011", repayment_without_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("1 July 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 September 2011", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("1 September 2011", repayment_without_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("1 November 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("1 January 2012", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("1 January 2012", repayment_without_interest, loanID);
+        this.loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
+        this.loanTransactionHelper.makeRepayment("01 March 2011", repayment_with_interest, loanID);
+        this.loanTransactionHelper.waiveInterest("01 May 2011", INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.makeRepayment("01 May 2011", repayment_without_interest, loanID);
+        this.loanTransactionHelper.makeRepayment("01 July 2011", repayment_with_interest, loanID);
+        this.loanTransactionHelper.waiveInterest("01 September 2011", INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.makeRepayment("01 September 2011", repayment_without_interest, loanID);
+        this.loanTransactionHelper.makeRepayment("01 November 2011", repayment_with_interest, loanID);
+        this.loanTransactionHelper.waiveInterest("01 January 2012", INTEREST_VALUE_AMOUNT, loanID);
+        this.loanTransactionHelper.makeRepayment("01 January 2012", repayment_without_interest, loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(7, 1000.0f, loanID);
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
-        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 March 2012", loanID));
+        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("01 March 2012", loanID));
 
     }
 
@@ -167,7 +167,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         final float repayment_with_interest = 680.0f;
 
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("1 January 2011", repayment_with_interest, loanID);
+        this.loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
 
         HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assertions.assertTrue(Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0,
@@ -179,7 +179,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 "Checking for total paid ");
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
-        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 January 2011", loanID));
+        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("01 January 2011", loanID));
         toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assertions.assertTrue(
                 Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,

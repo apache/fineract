@@ -19,6 +19,8 @@
 package org.apache.fineract.accounting.provisioning.service;
 
 import com.google.gson.JsonObject;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,7 +60,6 @@ import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteri
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,13 +151,13 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
 
     private Date parseDate(JsonCommand command) {
         LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed("date", command.parsedJson());
-        return localDate.toDate();
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     @Override
     @CronTarget(jobName = JobName.GENERATE_LOANLOSS_PROVISIONING)
     public void generateLoanLossProvisioningAmount() {
-        Date currentDate = DateUtils.getLocalDateOfTenant().toDate();
+        Date currentDate = Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
         boolean addJournalEntries = true;
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService

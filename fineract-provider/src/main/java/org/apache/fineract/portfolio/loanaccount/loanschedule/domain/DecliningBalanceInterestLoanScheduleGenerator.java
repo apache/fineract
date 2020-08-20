@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +29,6 @@ import java.util.TreeMap;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 
 /**
  * <p>
@@ -90,7 +90,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
 
                 if (!principal.getKey().isAfter(periodEndDate)) {
-                    int interestForDays = Days.daysBetween(interestStartDate, principal.getKey()).getDays();
+                    int interestForDays = Math.toIntExact(ChronoUnit.DAYS.between(interestStartDate, principal.getKey()));
                     if (interestForDays > 0) {
                         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,

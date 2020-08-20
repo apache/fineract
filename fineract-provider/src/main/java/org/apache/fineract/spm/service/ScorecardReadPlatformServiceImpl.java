@@ -20,14 +20,16 @@ package org.apache.fineract.spm.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.ScorecardData;
 import org.apache.fineract.spm.data.ScorecardValue;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -93,7 +95,8 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
             final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
             final Integer value = rs.getInt("value");
 
-            return ScorecardValue.instance(questionId, responseId, value, createdOn.toDate());
+            return ScorecardValue.instance(questionId, responseId, value,
+                    Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
     }
 

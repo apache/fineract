@@ -19,11 +19,11 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormatter;
 
 public interface SavingsAccountDomainService {
 

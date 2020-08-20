@@ -24,8 +24,11 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAcc
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.statusParamName;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +62,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultSche
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,7 +199,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             boolean isDueForTransfer = false;
             AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
             StandingInstructionType instructionType = data.instructionType();
-            LocalDate transactionDate = new LocalDate();
+            LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
                 PeriodFrequencyType frequencyType = data.recurrenceFrequency();
@@ -208,7 +210,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                         startDate = startDate.plusMonths(1);
                     }
                 } else if (frequencyType.isYearly()) {
-                    startDate = startDate.withDayOfMonth(data.recurrenceOnDay()).withMonthOfYear(data.recurrenceOnMonth());
+                    startDate = startDate.withDayOfMonth(data.recurrenceOnDay()).withMonth(data.recurrenceOnMonth());
                     if (startDate.isBefore(data.validFrom())) {
                         startDate = startDate.plusYears(1);
                     }
@@ -226,7 +228,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = new LocalDate().equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = LocalDate.now(ZoneId.systemDefault()).equals(standingInstructionDuesData.dueDate());
                 }
             }
 
@@ -243,7 +245,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    this.jdbcTemplate.update(updateQuery, transactionDate.toDate(), data.getId());
+                    this.jdbcTemplate.update(updateQuery, Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                            data.getId());
                 }
 
             }

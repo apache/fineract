@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -32,7 +33,6 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
-import org.joda.time.LocalDate;
 
 public interface LoanWritePlatformService {
 

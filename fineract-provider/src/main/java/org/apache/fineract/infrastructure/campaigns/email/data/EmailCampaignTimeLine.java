@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 public class EmailCampaignTimeLine {
 

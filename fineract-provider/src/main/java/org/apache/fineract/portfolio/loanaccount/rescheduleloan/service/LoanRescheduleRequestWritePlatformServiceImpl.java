@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -79,9 +82,6 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRe
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -226,7 +226,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 if (localDate != null) {
                     // update the value of the "submittedOnDate" variable
-                    submittedOnDate = localDate.toDate();
+                    submittedOnDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -251,7 +251,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     rescheduleFromInstallment = installment.getInstallmentNumber();
 
                     // update the value of the "rescheduleFromDate" variable
-                    rescheduleFromDate = localDate.toDate();
+                    rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -262,7 +262,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 if (localDate != null) {
                     // update the value of the "adjustedDueDate"variable
-                    adjustedDueDate = localDate.toDate();
+                    adjustedDueDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -308,14 +308,16 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         if (rescheduleFromDate != null && endDate != null && emi != null) {
             LoanTermVariations parent = null;
-            LocalDate rescheduleFromLocDate = new LocalDate(rescheduleFromDate);
-            LocalDate endDateLocDate = new LocalDate(endDate);
+            LocalDate rescheduleFromLocDate = LocalDate.ofInstant(rescheduleFromDate.toInstant(), ZoneId.systemDefault());
+            LocalDate endDateLocDate = LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
             final Integer termType = LoanTermVariationType.EMI_AMOUNT.getValue();
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getDueDate().isEqual(rescheduleFromLocDate) || installment.getDueDate().isEqual(endDateLocDate)
                         || (installment.getDueDate().isAfter(rescheduleFromLocDate) && installment.getDueDate().isBefore(endDateLocDate))) {
-                    createLoanTermVariations(termType, loan, installment.getDueDate().toDate(), installment.getDueDate().toDate(),
+                    createLoanTermVariations(termType, loan,
+                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                             loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
                 }
                 if (installment.getDueDate().isAfter(endDateLocDate)) {
@@ -393,12 +395,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(jsonCommand.dateFormat())
                     .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
-            changes.put("approvedOnDate", approvedOnDate.toString(dateTimeFormatter));
+            changes.put("approvedOnDate", approvedOnDate.format(dateTimeFormatter));
             changes.put("approvedByUserId", appUser.getId());
 
             Loan loan = loanRescheduleRequest.getLoan();
@@ -427,7 +429,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             && activeLoanTermVariation.fetchDateValue().equals(dueDateVariationInCurrentRequest.fetchTermApplicaDate())) {
                         activeLoanTermVariation.markAsInactive();
                         rescheduleFromDate = activeLoanTermVariation.fetchTermApplicaDate();
-                        dueDateVariationInCurrentRequest.setTermApplicableFrom(rescheduleFromDate.toDate());
+                        dueDateVariationInCurrentRequest
+                                .setTermApplicableFrom(Date.from(rescheduleFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
                         while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
                             currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
@@ -437,8 +440,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             changeMap.put(currentScheduleDate, modifiedScheduleDate);
                         }
                         if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            activeLoanTermVariation
-                                    .setTermApplicableFrom(changeMap.get(activeLoanTermVariation.fetchTermApplicaDate()).toDate());
+                            activeLoanTermVariation.setTermApplicableFrom(Date.from(changeMap
+                                    .get(activeLoanTermVariation.fetchTermApplicaDate()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
                         }
                     }
                 }
@@ -486,7 +489,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
 
             loan.updateRescheduledByUser(appUser);
-            loan.updateRescheduledOnDate(new LocalDate());
+            loan.updateRescheduledOnDate(LocalDate.now(ZoneId.systemDefault()));
 
             // update the status of the request
             loanRescheduleRequest.approve(appUser, approvedOnDate);
@@ -571,12 +574,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(jsonCommand.dateFormat())
                     .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
-            changes.put("rejectedOnDate", rejectedOnDate.toString(dateTimeFormatter));
+            changes.put("rejectedOnDate", rejectedOnDate.format(dateTimeFormatter));
             changes.put("rejectedByUserId", appUser.getId());
 
             if (!changes.isEmpty()) {

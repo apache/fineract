@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.notification.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 public class TopicSubscriberData {
 
@@ -38,7 +39,7 @@ public class TopicSubscriberData {
         this.id = id;
         this.topicId = topicId;
         this.userId = userId;
-        this.subscriptionDate = new LocalDate();
+        this.subscriptionDate = LocalDate.now(ZoneId.systemDefault());
     }
 
     public Long getId() {

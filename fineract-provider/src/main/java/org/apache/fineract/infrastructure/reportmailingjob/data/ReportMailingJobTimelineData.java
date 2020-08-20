@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Immutable data object represent the timeline events of a report mailing job (creation)

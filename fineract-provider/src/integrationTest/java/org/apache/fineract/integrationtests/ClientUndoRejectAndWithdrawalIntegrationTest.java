@@ -27,6 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         ClientStatusChecker.verifyClientPending(status);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Date todaysDate = Utils.getLocalDateOfTenant().toDate();
+        Date todaysDate = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
         final String undoRejectDate = dateFormat.format(todaysDate);
 
         ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoRejectedclient(clientId,
@@ -155,7 +156,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         status = this.clientHelper.rejectClient(clientId);
         ClientStatusChecker.verifyClientRejected(status);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Date tomorrowsDate = Utils.getLocalDateOfTenant().plusDays(1).toDate();
+        Date tomorrowsDate = Date.from(Utils.getLocalDateOfTenant().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         final String undoRejectDate = dateFormat.format(tomorrowsDate);
         ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoRejectDate);
@@ -231,7 +232,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Date todaysDate = Utils.getLocalDateOfTenant().toDate();
+        Date todaysDate = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
         final String undoWithdrawDate = dateFormat.format(todaysDate);
 
         ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
@@ -263,7 +264,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         status = this.clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(status);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        Date tomorrowsDate = Utils.getLocalDateOfTenant().plusDays(1).toDate();
+        Date tomorrowsDate = Date.from(Utils.getLocalDateOfTenant().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         final String undoWithdrawDate = dateFormat.format(tomorrowsDate);
         ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoWithdrawDate);

@@ -459,8 +459,8 @@ public class EntityDatatableChecksIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("2 June 2014") //
-                .withSubmittedOnDate("2 June 2014") //
+                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("02 June 2014") //
+                .withSubmittedOnDate("02 June 2014") //
                 .withDatatables(getTestDatatableAsJson(registeredTableName)) //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
@@ -480,8 +480,8 @@ public class EntityDatatableChecksIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("2 June 2014") //
-                .withSubmittedOnDate("2 June 2014") //
+                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("02 June 2014") //
+                .withSubmittedOnDate("02 June 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.validationErrorHelper.getLoanError(loanApplicationJSON, responseAttribute);
     }

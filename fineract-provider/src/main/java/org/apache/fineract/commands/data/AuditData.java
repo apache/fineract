@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.commands.data;
 
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Immutable data object representing client data.
@@ -37,11 +37,11 @@ public final class AuditData {
     @SuppressWarnings("unused")
     private final String maker;
     @SuppressWarnings("unused")
-    private final DateTime madeOnDate;
+    private final ZonedDateTime madeOnDate;
     @SuppressWarnings("unused")
     private final String checker;
     @SuppressWarnings("unused")
-    private final DateTime checkedOnDate;
+    private final ZonedDateTime checkedOnDate;
     @SuppressWarnings("unused")
     private final String processingResult;
     private String commandAsJson;
@@ -65,7 +65,7 @@ public final class AuditData {
     private final String url;
 
     public AuditData(final Long id, final String actionName, final String entityName, final Long resourceId, final Long subresourceId,
-            final String maker, final DateTime madeOnDate, final String checker, final DateTime checkedOnDate,
+            final String maker, final ZonedDateTime madeOnDate, final String checker, final ZonedDateTime checkedOnDate,
             final String processingResult, final String commandAsJson, final String officeName, final String groupLevelName,
             final String groupName, final String clientName, final String loanAccountNo, final String savingsAccountNo, final Long clientId,
             final Long loanId, final String url) {

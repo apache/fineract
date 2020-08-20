@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -63,7 +64,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformS
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,9 +157,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
             final String maker = rs.getString("maker");
-            final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
+            final ZonedDateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
             final String checker = rs.getString("checker");
-            final DateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
+            final ZonedDateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
             final String processingResult = rs.getString("processingResult");
             final String resourceGetUrl = rs.getString("resourceGetUrl");
             String commandAsJson;

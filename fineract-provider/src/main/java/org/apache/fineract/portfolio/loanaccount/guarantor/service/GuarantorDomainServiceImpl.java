@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,8 +60,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -222,7 +223,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         final boolean isRegularTransaction = true;
         final boolean isExceptionForBalanceCheck = true;
-        LocalDate transactionDate = LocalDate.now();
+        LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
         PortfolioAccountType fromAccountType = PortfolioAccountType.SAVINGS;
         PortfolioAccountType toAccountType = PortfolioAccountType.LOAN;
         final Long toAccountId = loan.getId();

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +44,6 @@ import org.apache.fineract.portfolio.savings.data.DepositAccountInterestIncentiv
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChartData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChartSlabData;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountInterestRateChartNotFoundException;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;

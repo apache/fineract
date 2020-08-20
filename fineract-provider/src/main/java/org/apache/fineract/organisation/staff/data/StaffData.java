@@ -19,9 +19,9 @@
 package org.apache.fineract.organisation.staff.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing staff data.

@@ -382,8 +382,8 @@ public class LoanDisbursementDetailsIntegrationTest {
         String id = null;
         addTranches.add(this.loanTransactionHelper.createTrancheDetail(disbursementDetails.get(0).get("id").toString(), date,
                 disbursementDetails.get(0).get("principal").toString()));
-        addTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "3 March 2014", "2000"));
-        addTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "4 March 2014", "500"));
+        addTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "03 March 2014", "2000"));
+        addTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "04 March 2014", "500"));
 
         /* Add disbursement detail */
         this.loanTransactionHelper.addAndDeleteDisbursementDetail(this.loanID, this.approvalAmount, this.expectedDisbursementDate,

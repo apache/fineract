@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +59,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -189,7 +190,8 @@ public class LoanUtilService {
     private HolidayDetailDTO constructHolidayDTO(final Loan loan) {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                loan.getDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+                Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
@@ -321,7 +323,7 @@ public class LoanUtilService {
                         LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
                                 jsonObject, dateFormat, locale);
                         if (date != null) {
-                            expectedDisbursementDate = date.toDate();
+                            expectedDisbursementDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
                         }
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)

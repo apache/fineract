@@ -19,8 +19,8 @@
 package org.apache.fineract.organisation.office.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.Collection;
-import org.joda.time.LocalDate;
 
 /**
  * Created by sanyam on 14/8/17.

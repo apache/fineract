@@ -19,6 +19,8 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +36,6 @@ import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_cashier_transactions")
@@ -102,7 +103,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
         this.cashier = cashier;
         this.txnType = txnType;
         if (txnDate != null) {
-            this.txnDate = txnDate.toDate();
+            this.txnDate = Date.from(txnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         this.txnAmount = txnAmount;
         this.entityType = entityType;
@@ -134,7 +135,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(txnDateParamName);
-            this.txnDate = newValue.toDate();
+            this.txnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String txnAmountParamName = "txnAmount";
@@ -234,7 +235,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
     public LocalDate getTxnLocalDate() {
         LocalDate txnLocalDate = null;
         if (this.txnDate != null) {
-            txnLocalDate = LocalDate.fromDateFields(this.txnDate);
+            txnLocalDate = LocalDate.ofInstant(this.txnDate.toInstant(), ZoneId.systemDefault());
         }
         return txnLocalDate;
     }

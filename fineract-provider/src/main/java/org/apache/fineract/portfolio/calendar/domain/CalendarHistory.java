@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.calendar.domain;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,7 +29,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_calendar_history")
@@ -103,7 +104,7 @@ public class CalendarHistory extends AbstractPersistableCustom {
     public LocalDate getStartDateLocalDate() {
         LocalDate startDateLocalDate = null;
         if (this.startDate != null) {
-            startDateLocalDate = LocalDate.fromDateFields(this.startDate);
+            startDateLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startDateLocalDate;
     }
@@ -111,7 +112,7 @@ public class CalendarHistory extends AbstractPersistableCustom {
     public LocalDate getEndDateLocalDate() {
         LocalDate endDateLocalDate = null;
         if (this.endDate != null) {
-            endDateLocalDate = LocalDate.fromDateFields(this.endDate);
+            endDateLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
         }
         return endDateLocalDate;
     }

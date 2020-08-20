@@ -25,6 +25,9 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccou
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -63,9 +66,6 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @DiscriminatorValue("200")
@@ -352,7 +352,7 @@ public class FixedDepositAccount extends SavingsAccount {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
         if (closedDate.isBefore(getActivationLocalDate())) {
@@ -414,13 +414,13 @@ public class FixedDepositAccount extends SavingsAccount {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = closedDate.toDate();
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
@@ -446,7 +446,7 @@ public class FixedDepositAccount extends SavingsAccount {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
         if (closedDate.isBefore(getActivationLocalDate())) {
@@ -502,13 +502,13 @@ public class FixedDepositAccount extends SavingsAccount {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = closedDate.toDate();
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
         // this.summary.updateSummary(this.currency,
         // this.savingsAccountTransactionSummaryWrapper, this.transactions);

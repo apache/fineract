@@ -20,10 +20,10 @@ package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.joda.time.LocalDate;
 
 public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData>, Serializable {
 

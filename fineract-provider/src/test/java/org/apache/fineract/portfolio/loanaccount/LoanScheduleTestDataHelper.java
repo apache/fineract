@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.joda.time.LocalDate;
 
 /**
  * Helper class for creating loan schedule data suitable for testing.

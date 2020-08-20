@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.group.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing groups.

@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -30,7 +32,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_disbursement_detail")
@@ -97,7 +98,7 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     public LocalDate expectedDisbursementDateAsLocalDate() {
         LocalDate expectedDisburseDate = null;
         if (this.expectedDisbursementDate != null) {
-            expectedDisburseDate = new LocalDate(this.expectedDisbursementDate);
+            expectedDisburseDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
         return expectedDisburseDate;
     }
@@ -126,7 +127,7 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         LocalDate expectedDisburseDate = expectedDisbursementDateAsLocalDate();
         LocalDate actualDisburseDate = null;
         if (this.actualDisbursementDate != null) {
-            actualDisburseDate = new LocalDate(this.actualDisbursementDate);
+            actualDisburseDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
         BigDecimal waivedChargeAmount = null;
         return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, null, null, waivedChargeAmount);

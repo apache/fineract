@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
-import org.joda.time.LocalDate;
 
 public final class TaxUtils {
 

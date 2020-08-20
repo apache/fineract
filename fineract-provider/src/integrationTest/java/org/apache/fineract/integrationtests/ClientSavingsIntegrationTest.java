@@ -30,6 +30,9 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -48,9 +51,6 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -649,8 +649,8 @@ public class ClientSavingsIntegrationTest {
         HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
         assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
         List nextDueDates = (List) paidCharge.get("dueDate");
-        LocalDate nextDueDate = new LocalDate((Integer) nextDueDates.get(0), (Integer) nextDueDates.get(1), (Integer) nextDueDates.get(2));
-        LocalDate expectedNextDueDate = new LocalDate((Integer) dates.get(0), (Integer) dates.get(1), (Integer) dates.get(2))
+        LocalDate nextDueDate = LocalDate.of((Integer) nextDueDates.get(0), (Integer) nextDueDates.get(1), (Integer) nextDueDates.get(2));
+        LocalDate expectedNextDueDate = LocalDate.of((Integer) dates.get(0), (Integer) dates.get(1), (Integer) dates.get(2))
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
     }
@@ -1787,10 +1787,10 @@ public class ClientSavingsIntegrationTest {
 
         savingsList.add(savingsId);
 
-        final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
-        LocalDate transactionDate = new LocalDate();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
         for (int i = 0; i < 4; i++) {
-            String transactionDateValue = formatter.print(transactionDate);
+            String transactionDateValue = formatter.format(transactionDate);
             Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
                     transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
             transactionDate = transactionDate.minusDays(30);
@@ -1821,7 +1821,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        String transactionDateValue = formatter.print(new LocalDate());
+        String transactionDateValue = formatter.format(LocalDate.now(ZoneId.systemDefault()));
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
@@ -1840,7 +1840,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        transactionDateValue = formatter.print(new LocalDate());
+        transactionDateValue = formatter.format(LocalDate.now(ZoneId.systemDefault()));
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
@@ -2030,7 +2030,7 @@ public class ClientSavingsIntegrationTest {
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
-        Date today = Utils.getLocalDateOfTenant().toDate();
+        Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
         String todayDate = today.toString();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
         todayDate = dt1.format(today).toString();

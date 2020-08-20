@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,8 +75,6 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -319,7 +320,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         } else {
             final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
             final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                    transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
+                    Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
             final WorkingDays workingDays = this.workingDaysRepository.findOne();
             final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
             final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
@@ -398,8 +399,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final LoanTransaction newRefundTransaction = LoanTransaction.refund(loan.getOffice(), refundAmount, paymentDetail, transactionDate,
                 txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate(),
-                HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
@@ -506,7 +507,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
                 accruedTill = DateUtils.getLocalDateOfTenant();
             }
-            if (!isOrganisationDateEnabled || new LocalDate(organisationStartDate).isBefore(installment.getDueDate())) {
+            if (!isOrganisationDateEnabled
+                    || LocalDate.ofInstant(organisationStartDate.toInstant(), ZoneId.systemDefault()).isBefore(installment.getDueDate())) {
                 generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate,
                         repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
                         installment);
@@ -590,8 +592,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final LoanTransaction newRefundTransaction = LoanTransaction.refundForActiveLoan(loan.getOffice(), refundAmount, paymentDetail,
                 transactionDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate(),
-                HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
@@ -679,7 +681,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             payment = LoanTransaction.repayment(loan.getOffice(), payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable),
                     paymentDetail, foreClosureDate, externalId, currentDateTime, appUser);
             createdDate = createdDate.plusSeconds(1);
-            payment.updateCreatedDate(createdDate.toDate());
+            payment.updateCreatedDate(Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant()));
             payment.updateLoan(loan);
             newTransactions.add(payment);
         }

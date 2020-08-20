@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.commands.service;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
@@ -36,7 +38,6 @@ import org.apache.fineract.infrastructure.hooks.event.HookEvent;
 import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -86,7 +87,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         CommandSource commandSourceResult = null;
         if (command.commandId() != null) {
             commandSourceResult = this.commandSourceRepository.findById(command.commandId()).orElse(null);
-            commandSourceResult.markAsChecked(maker, DateTime.now());
+            commandSourceResult.markAsChecked(maker, ZonedDateTime.now(ZoneId.systemDefault()));
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }

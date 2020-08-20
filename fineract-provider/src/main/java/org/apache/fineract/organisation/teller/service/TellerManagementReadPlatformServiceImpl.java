@@ -21,6 +21,8 @@ package org.apache.fineract.organisation.teller.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -50,7 +52,6 @@ import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -597,8 +598,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String startTime = rs.getString("start_time");
             final String endTime = rs.getString("end_time");
 
-            return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description, startDate.toDate(),
-                    endDate.toDate(), fullDay, startTime, endTime);
+            return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description,
+                    Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                    Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), fullDay, startTime, endTime);
         }
     }
 
@@ -748,11 +750,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             Date txnDate = null;
             if (txnLocalDate != null) {
-                txnDate = txnLocalDate.toDate();
+                txnDate = Date.from(txnLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
             Date createdDate = null;
             if (createdLocalDate != null) {
-                createdDate = createdLocalDate.toDate();
+                createdDate = Date.from(createdLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
 
             final Long officeId = rs.getLong("office_id");

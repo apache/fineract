@@ -104,10 +104,8 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
             for (OfficeData office : offices) {
                 Row row = sheet.createRow(++rowIndex);
                 writeString(officeNameCol, row, office.name().trim().replaceAll("[ )(]", "_"));
-                writeDate(
-                        activationDateCol, row, "" + office.getOpeningDate().getDayOfMonth() + "/"
-                                + office.getOpeningDate().getMonthOfYear() + "/" + office.getOpeningDate().getYear(),
-                        dateCellStyle, dateFormat);
+                writeDate(activationDateCol, row, "" + office.getOpeningDate().getDayOfMonth() + "/"
+                        + office.getOpeningDate().getMonthValue() + "/" + office.getOpeningDate().getYear(), dateCellStyle, dateFormat);
 
             }
         }

@@ -58,7 +58,7 @@ public class LoanRescheduleRequestTest {
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
-    private final String dateString = "4 September 2014";
+    private final String dateString = "04 September 2014";
 
     @BeforeEach
     public void initialize() {

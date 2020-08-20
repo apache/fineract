@@ -24,6 +24,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurri
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -93,7 +95,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -361,7 +362,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
             final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
 
-            final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
+            final Integer repeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
             final String title = "recurring_savings_" + account.getId();
 
             final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
@@ -509,7 +510,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
                 final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
                 final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
-                final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
+                final Integer repeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
 
                 CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());

@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -48,7 +50,6 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
@@ -125,7 +126,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
         this.office = office;
         this.paymentDetail = paymentDetail;
         this.typeOf = typeOf;
-        this.dateOf = transactionLocalDate.toDate();
+        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.amount = amount.getAmount();
         this.reversed = reversed;
         this.externalId = externalId;
@@ -227,7 +228,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     }
 
     public LocalDate getTransactionDate() {
-        return new LocalDate(this.dateOf);
+        return LocalDate.ofInstant(this.dateOf.toInstant(), ZoneId.systemDefault());
     }
 
 }

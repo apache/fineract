@@ -20,7 +20,10 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -43,7 +46,6 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -107,7 +109,8 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 if (loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().getTermType().isDueDateVariation()
                         && rescheduleFromDate != null) {
                     adjustedApplicableDate = loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().fetchDateValue();
-                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().setTermApplicableFrom(rescheduleFromDate.toDate());
+                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations()
+                            .setTermApplicableFrom(Date.from(rescheduleFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 }
                 loanTermVariationsData.add(loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().toData());
             }

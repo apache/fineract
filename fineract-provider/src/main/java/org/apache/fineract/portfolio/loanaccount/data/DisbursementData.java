@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Immutable data object representing disbursement information.

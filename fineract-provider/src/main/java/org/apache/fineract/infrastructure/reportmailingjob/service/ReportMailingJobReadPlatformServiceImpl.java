@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.reportmailingjob.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,8 +38,6 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobTimelineData;
 import org.apache.fineract.infrastructure.reportmailingjob.exception.ReportMailingJobNotFoundException;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -146,7 +146,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final String description = rs.getString("description");
-            final DateTime startDateTime = JdbcSupport.getDateTime(rs, "startDateTime");
+            final ZonedDateTime startDateTime = JdbcSupport.getDateTime(rs, "startDateTime");
             final String recurrence = rs.getString("recurrence");
             final LocalDate createdOnDate = JdbcSupport.getLocalDate(rs, "createdOnDate");
             final LocalDate updatedOnDate = JdbcSupport.getLocalDate(rs, "updatedOnDate");
@@ -164,8 +164,8 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             }
 
             final String stretchyReportParamMap = rs.getString("stretchyReportParamMap");
-            final DateTime previousRunDateTime = JdbcSupport.getDateTime(rs, "previousRunDateTime");
-            final DateTime nextRunDateTime = JdbcSupport.getDateTime(rs, "nextRunDateTime");
+            final ZonedDateTime previousRunDateTime = JdbcSupport.getDateTime(rs, "previousRunDateTime");
+            final ZonedDateTime nextRunDateTime = JdbcSupport.getDateTime(rs, "nextRunDateTime");
             final String previousRunStatus = rs.getString("previousRunStatus");
             final String previousRunErrorLog = rs.getString("previousRunErrorLog");
             final String previousRunErrorMessage = rs.getString("previousRunErrorMessage");

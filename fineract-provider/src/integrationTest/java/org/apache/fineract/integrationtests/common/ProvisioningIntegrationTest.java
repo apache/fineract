@@ -27,6 +27,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -235,7 +236,8 @@ public class ProvisioningIntegrationTest {
                 DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
                 Date date1 = formatter.parse(date);
                 DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-                String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
+                String formattedString = simple
+                        .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 Date currentDate = simple.parse(formattedString);
                 if (date1.getTime() == currentDate.getTime()) {
                     provisioningetryAlreadyCreated = true;

@@ -20,12 +20,12 @@ package org.apache.fineract.adhocquery.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,15 +81,15 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
             final String tableName = rs.getString("tableName");
             final String tableFields = rs.getString("tableField");
             final Boolean isActive = rs.getBoolean("isActive");
-            final DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+            final ZonedDateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
             final Long createdById = JdbcSupport.getLong(rs, "createdById");
             final Long updatedById = JdbcSupport.getLong(rs, "updatedById");
-            final DateTime updatedOn = JdbcSupport.getDateTime(rs, "updatedOn");
+            final ZonedDateTime updatedOn = JdbcSupport.getDateTime(rs, "updatedOn");
             final String createdByUsername = rs.getString("createdBy");
             final String email = rs.getString("email");
             final Long reportRunFrequency = JdbcSupport.getLong(rs, "report_run_frequency_code");
             final Long reportRunEvery = JdbcSupport.getLong(rs, "report_run_every");
-            final DateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
+            final ZonedDateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
 
             return new AdHocData(id, name, query, tableName, tableFields, isActive, createdDate, createdById, updatedById, updatedOn,
                     createdByUsername, email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);

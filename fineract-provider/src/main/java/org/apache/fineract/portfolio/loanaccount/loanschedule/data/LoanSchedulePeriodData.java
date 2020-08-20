@@ -19,8 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
@@ -144,7 +145,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = null;
         this.complete = null;
         if (fromDate != null) {
-            this.daysInPeriod = Days.daysBetween(this.fromDate, this.dueDate).getDays();
+            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
         } else {
             this.daysInPeriod = null;
         }
@@ -192,7 +193,7 @@ public final class LoanSchedulePeriodData {
         this.totalOutstandingForPeriod = this.feeChargesOutstanding;
         this.totalActualCostOfLoanForPeriod = this.feeChargesDue;
         this.totalInstallmentAmountForPeriod = null;
-        if (dueDate.isBefore(new LocalDate())) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -212,7 +213,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = null;
         this.complete = null;
         if (fromDate != null) {
-            this.daysInPeriod = Days.daysBetween(this.fromDate, this.dueDate).getDays();
+            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
         } else {
             this.daysInPeriod = null;
         }
@@ -254,7 +255,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = interestDueOnPrincipalOutstanding.add(feeChargesDueForPeriod);
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(new LocalDate())) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -283,7 +284,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = obligationsMetOnDate;
         this.complete = complete;
         if (fromDate != null) {
-            this.daysInPeriod = Days.daysBetween(this.fromDate, this.dueDate).getDays();
+            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
         } else {
             this.daysInPeriod = null;
         }
@@ -325,7 +326,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = totalActualCostOfLoanForPeriod;
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(new LocalDate())) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;

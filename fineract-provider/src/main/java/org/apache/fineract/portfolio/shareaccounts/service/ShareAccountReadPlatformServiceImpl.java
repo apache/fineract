@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.shareaccounts.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -59,9 +62,6 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.apache.fineract.portfolio.shareproducts.service.ShareProductDropdownReadPlatformService;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -80,7 +80,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService;
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PaginationHelper<AccountData> shareAccountDataPaginationHelper = new PaginationHelper<>();
 
     @Autowired
@@ -225,7 +225,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             sb.append(" and (sa.status_enum = ? or (sa.status_enum = ? ");
             sb.append(" and sa.closed_date >  ?)) ");
             params.add(ShareAccountStatusType.CLOSED.getValue());
-            params.add(formatter.print(startDate));
+            params.add(formatter.format(startDate));
         } else {
             sb.append(" and sa.status_enum = ? ");
         }
@@ -456,7 +456,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         public ShareAccountTransactionData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final Long id = rs.getLong("purchasedId");
             final Long accountId = rs.getLong("accountId");
-            final LocalDate transactionDate = new LocalDate(rs.getDate("transactionDate"));
+            final LocalDate transactionDate = rs.getDate("transactionDate").toLocalDate();
             final Long numberOfShares = JdbcSupport.getLong(rs, "purchasedShares");
             final BigDecimal purchasedPrice = rs.getBigDecimal("unitPrice");
             final Integer status = rs.getInt("purchaseStatus");
@@ -491,7 +491,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         @Override
         public ShareAccountDividendData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
-            final Date postedDate = JdbcSupport.getLocalDate(rs, "created_date").toDate();
+            final Date postedDate = Date
+                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(ZoneId.systemDefault()).toInstant());
             final BigDecimal postedAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final Long savingTransactionId = rs.getLong("savings_transaction_id");
             final Integer status = rs.getInt("status");

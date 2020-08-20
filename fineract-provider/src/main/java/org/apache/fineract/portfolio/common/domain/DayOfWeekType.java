@@ -18,14 +18,15 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
-import org.joda.time.DateTimeConstants;
+import java.time.DayOfWeek;
 
 public enum DayOfWeekType {
 
-    MONDAY(DateTimeConstants.MONDAY, "weekDayType.monday"), TUESDAY(DateTimeConstants.TUESDAY, "weekDayType.tuesday"), WEDNESDAY(
-            DateTimeConstants.WEDNESDAY, "weekDayType.wednesday"), THURSDAY(DateTimeConstants.THURSDAY, "weekDayType.thursday"), FRIDAY(
-                    DateTimeConstants.FRIDAY, "weekDayType.friday"), SATURDAY(DateTimeConstants.SATURDAY, "weekDayType.saturday"), SUNDAY(
-                            DateTimeConstants.SUNDAY, "weekDayType.sunday"), INVALID(0, "weekDayType.invalid");
+    MONDAY(DayOfWeek.MONDAY.getValue(), "weekDayType.monday"), TUESDAY(DayOfWeek.TUESDAY.getValue(), "weekDayType.tuesday"), WEDNESDAY(
+            DayOfWeek.WEDNESDAY.getValue(),
+            "weekDayType.wednesday"), THURSDAY(DayOfWeek.THURSDAY.getValue(), "weekDayType.thursday"), FRIDAY(DayOfWeek.FRIDAY.getValue(),
+                    "weekDayType.friday"), SATURDAY(DayOfWeek.SATURDAY.getValue(), "weekDayType.saturday"), SUNDAY(
+                            DayOfWeek.SUNDAY.getValue(), "weekDayType.sunday"), INVALID(0, "weekDayType.invalid");
 
     private final Integer value;
     private final String code;

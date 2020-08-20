@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
-import org.joda.time.LocalDate;
 
 public interface ShareAccountReadPlatformService extends AccountReadPlatformService {
 

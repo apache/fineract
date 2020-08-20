@@ -19,11 +19,12 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.joda.time.LocalDate;
 
 public class LoanScheduleAccrualData {
 
@@ -88,7 +89,7 @@ public class LoanScheduleAccrualData {
     }
 
     public Date getDueDate() {
-        return this.dueDate.toDate();
+        return Date.from(this.dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public LocalDate getDueDateAsLocaldate() {

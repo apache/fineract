@@ -62,9 +62,9 @@ public class LoanApplicationUndoLastTrancheTest {
 
         final String proposedAmount = "5000";
         final String approvalAmount = "2000";
-        final String approveDate = "1 March 2014";
-        final String expectedDisbursementDate = "1 March 2014";
-        final String disbursalDate = "1 March 2014";
+        final String approveDate = "01 March 2014";
+        final String expectedDisbursementDate = "01 March 2014";
+        final String disbursalDate = "01 March 2014";
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
@@ -79,12 +79,12 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
+        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("01 March 2014", "1000"));
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "4000"));
 
         // APPROVE TRANCHES
         List<HashMap> approveTranches = new ArrayList<>();
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
+        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("01 March 2014", "1000"));
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "1000"));
 
         // APPLY FOR LOAN WITH TRANCHES
@@ -141,10 +141,10 @@ public class LoanApplicationUndoLastTrancheTest {
                 //
                 .withNumberOfRepayments("5").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("2") //
-                .withExpectedDisbursementDate("1 March 2014") //
+                .withExpectedDisbursementDate("01 March 2014") //
                 .withTranches(tranches) //
                 .withInterestTypeAsDecliningBalance() //
-                .withSubmittedOnDate("1 March 2014") //
+                .withSubmittedOnDate("01 March 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
 
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);

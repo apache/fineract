@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.survey.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Created by Cieyou on 3/18/14.

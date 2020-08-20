@@ -27,6 +27,9 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -53,8 +56,6 @@ import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDep
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.joda.time.DateTime;
-import org.joda.time.Months;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -1917,12 +1918,12 @@ public class RecurringDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        DateTime start = new DateTime(activationDate.getTime());
+        ZonedDateTime start = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), ZoneId.systemDefault());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        DateTime end = new DateTime(prematureClosureDate.getTime());
+        ZonedDateTime end = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), ZoneId.systemDefault());
 
-        Integer depositedPeriod = Months.monthsBetween(start, end).getMonths();
+        Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(start.toLocalDate(), end.toLocalDate()));
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, expectedFirstDepositOnDate);
@@ -2058,12 +2059,12 @@ public class RecurringDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        DateTime start = new DateTime(activationDate.getTime());
+        ZonedDateTime start = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), ZoneId.systemDefault());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        DateTime end = new DateTime(prematureClosureDate.getTime());
+        ZonedDateTime end = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), ZoneId.systemDefault());
 
-        Integer depositedPeriod = Months.monthsBetween(start, end).getMonths();
+        Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(start.toLocalDate(), end.toLocalDate()));
 
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 DEPOSIT_AMOUNT, expectedFirstDepositOnDate);

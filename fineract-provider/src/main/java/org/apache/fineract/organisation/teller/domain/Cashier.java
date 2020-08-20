@@ -19,6 +19,8 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import com.google.common.base.Splitter;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,7 +39,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.joda.time.LocalDate;
 
 /**
  * Provides the base model for a cashier. Represents a row in the &quot;m_cashiers&quot; database table, with each
@@ -113,8 +114,8 @@ public class Cashier extends AbstractPersistableCustom {
         this.teller = teller;
         this.staff = staff;
         this.description = description;
-        this.startDate = startDate.toDate();
-        this.endDate = endDate.toDate();
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.isFullDay = isFullDay;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -142,7 +143,7 @@ public class Cashier extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = newValue.toDate();
+            this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String endDateParamName = "endDate";
@@ -153,7 +154,7 @@ public class Cashier extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = newValue.toDate();
+            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
@@ -346,7 +347,7 @@ public class Cashier extends AbstractPersistableCustom {
     public LocalDate getStartLocalDate() {
         LocalDate startLocalDate = null;
         if (this.startDate != null) {
-            startLocalDate = LocalDate.fromDateFields(this.startDate);
+            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startLocalDate;
     }
@@ -381,7 +382,7 @@ public class Cashier extends AbstractPersistableCustom {
     public LocalDate getEndLocalDate() {
         LocalDate endLocalDate = null;
         if (this.endDate != null) {
-            endLocalDate = LocalDate.fromDateFields(this.endDate);
+            endLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
         }
         return endLocalDate;
     }

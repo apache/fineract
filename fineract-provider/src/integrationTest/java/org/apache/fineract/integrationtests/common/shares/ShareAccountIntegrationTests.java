@@ -26,6 +26,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -200,7 +201,9 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
+                Assertions.assertEquals(
+                        simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                        simple.format(date));
             }
         }
 
@@ -249,7 +252,8 @@ public class ShareAccountIntegrationTests {
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date rejectedDate = cal.getTime();
-        Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(rejectedDate));
+        Assertions.assertEquals(simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                simple.format(rejectedDate));
 
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assertions.assertNotNull(transactions);
@@ -272,7 +276,7 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Date transactionDate = Utils.getLocalDateOfTenant().toDate();
+                Date transactionDate = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 Assertions.assertEquals(simple.format(transactionDate), simple.format(date));
             }
         }
@@ -358,7 +362,9 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
+                Assertions.assertEquals(
+                        simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                        simple.format(date));
             }
         }
 

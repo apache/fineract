@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.charge.domain;
 
 import java.math.BigDecimal;
+import java.time.MonthDay;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +50,6 @@ import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSu
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
-import org.joda.time.MonthDay;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
@@ -157,7 +158,7 @@ public class Charge extends AbstractPersistableCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
         if (isMonthlyFee() || isAnnualFee()) {
-            this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
+            this.feeOnMonth = feeOnMonthDay.getMonthValue();
             this.feeOnDay = feeOnMonthDay.getDayOfMonth();
         }
         this.feeInterval = feeInterval;
@@ -416,7 +417,7 @@ public class Charge extends AbstractPersistableCustom {
                 this.feeOnDay = dayOfMonthValue;
             }
 
-            final Integer monthOfYear = monthDay.getMonthOfYear();
+            final Integer monthOfYear = monthDay.getMonthValue();
             if (!this.feeOnMonth.equals(monthOfYear)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
                 actualChanges.put("locale", localeAsInput);
@@ -557,7 +558,7 @@ public class Charge extends AbstractPersistableCustom {
     public MonthDay getFeeOnMonthDay() {
         MonthDay feeOnMonthDay = null;
         if (this.feeOnDay != null && this.feeOnMonth != null) {
-            feeOnMonthDay = new MonthDay(this.feeOnMonth, this.feeOnDay);
+            feeOnMonthDay = MonthDay.now(ZoneId.systemDefault()).withMonth(this.feeOnMonth).withDayOfMonth(this.feeOnDay);
         }
         return feeOnMonthDay;
     }

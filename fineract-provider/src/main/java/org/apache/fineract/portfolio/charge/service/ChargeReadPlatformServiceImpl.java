@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.charge.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.MonthDay;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +44,6 @@ import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
-import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -342,7 +343,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
             final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
             if (feeOnDay != null && feeOnMonth != null) {
-                feeOnMonthDay = new MonthDay(feeOnMonth, feeOnDay);
+                feeOnMonthDay = MonthDay.now(ZoneId.systemDefault()).withDayOfMonth(feeOnDay).withMonth(feeOnMonth);
             }
             final BigDecimal minCap = rs.getBigDecimal("minCap");
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");

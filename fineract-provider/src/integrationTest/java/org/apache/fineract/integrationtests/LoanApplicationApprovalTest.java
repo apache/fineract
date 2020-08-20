@@ -126,7 +126,7 @@ public class LoanApplicationApprovalTest {
     public void loanApplicationApprovalAndValidationForMultiDisburseLoans() {
 
         List<HashMap> createTranches = new ArrayList<>();
-        createTranches.add(createTrancheDetail("1 March 2014", "1000"));
+        createTranches.add(createTrancheDetail("01 March 2014", "1000"));
         createTranches.add(createTrancheDetail("23 March 2014", "4000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
@@ -146,11 +146,11 @@ public class LoanApplicationApprovalTest {
     private void trancheLoansApprovedAmountLesserThanProposedAmount(Integer clientID, Integer loanProductID, List<HashMap> createTranches) {
         final String proposedAmount = "5000";
         final String approvalAmount = "2000";
-        final String approveDate = "1 March 2014";
-        final String expectedDisbursementDate = "1 March 2014";
+        final String approveDate = "01 March 2014";
+        final String expectedDisbursementDate = "01 March 2014";
 
         List<HashMap> approveTranches = new ArrayList<>();
-        approveTranches.add(createTrancheDetail("1 March 2014", "1000"));
+        approveTranches.add(createTrancheDetail("01 March 2014", "1000"));
         approveTranches.add(createTrancheDetail("23 March 2014", "1000"));
 
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
@@ -175,26 +175,26 @@ public class LoanApplicationApprovalTest {
         final String approvalAmount3 = "400";
         final String approvalAmount4 = "200";
 
-        final String approveDate = "1 March 2014";
-        final String expectedDisbursementDate = "1 March 2014";
+        final String approveDate = "01 March 2014";
+        final String expectedDisbursementDate = "01 March 2014";
 
         List<HashMap> approveTranche1 = new ArrayList<>();
-        approveTranche1.add(createTrancheDetail("1 March 2014", "5000"));
+        approveTranche1.add(createTrancheDetail("01 March 2014", "5000"));
         approveTranche1.add(createTrancheDetail("23 March 2014", "5000"));
 
         List<HashMap> approveTranche2 = new ArrayList<>();
-        approveTranche2.add(createTrancheDetail("1 March 2014", "1000"));
+        approveTranche2.add(createTrancheDetail("01 March 2014", "1000"));
         approveTranche2.add(createTrancheDetail("23 March 2014", "1000"));
         approveTranche2.add(createTrancheDetail("23 March 2014", "1000"));
 
         List<HashMap> approveTranche3 = new ArrayList<>();
-        approveTranche3.add(createTrancheDetail("1 March 2014", "100"));
+        approveTranche3.add(createTrancheDetail("01 March 2014", "100"));
         approveTranche3.add(createTrancheDetail("23 March 2014", "100"));
         approveTranche3.add(createTrancheDetail("24 March 2014", "100"));
         approveTranche3.add(createTrancheDetail("25 March 2014", "100"));
 
         List<HashMap> approveTranche4 = new ArrayList<>();
-        approveTranche4.add(createTrancheDetail("1 March 2014", "100"));
+        approveTranche4.add(createTrancheDetail("01 March 2014", "100"));
         approveTranche4.add(createTrancheDetail("23 March 2014", "100"));
         approveTranche4.add(createTrancheDetail("24 March 2014", "100"));
 
@@ -263,10 +263,10 @@ public class LoanApplicationApprovalTest {
                 //
                 .withNumberOfRepayments("5").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("2") //
-                .withExpectedDisbursementDate("1 March 2014") //
+                .withExpectedDisbursementDate("01 March 2014") //
                 .withTranches(tranches) //
                 .withInterestTypeAsDecliningBalance() //
-                .withSubmittedOnDate("1 March 2014") //
+                .withSubmittedOnDate("01 March 2014") //
                 .build(clientID.toString(), loanProductID.toString(), null);
 
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);

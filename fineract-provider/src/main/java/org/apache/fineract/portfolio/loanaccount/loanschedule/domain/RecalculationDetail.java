@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.joda.time.LocalDate;
 
 public class RecalculationDetail {
 

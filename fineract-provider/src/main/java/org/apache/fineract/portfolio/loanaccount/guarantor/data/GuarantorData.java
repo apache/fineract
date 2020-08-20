@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -28,7 +29,6 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
-import org.joda.time.LocalDate;
 
 public class GuarantorData {
 

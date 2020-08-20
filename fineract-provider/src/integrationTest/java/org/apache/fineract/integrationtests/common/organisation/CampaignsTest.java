@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -206,7 +207,8 @@ public class CampaignsTest {
         // activating campaign with failure
         ArrayList<HashMap<String, Object>> campaignDateValidationData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
                 .performActionsOnCampaignWithFailure(campaignId, ACTIVATE_COMMAND,
-                        Utils.getLocalDateOfTenant().plusDays(1).toString(DATE_FORMAT), CommonConstants.RESPONSE_ERROR);
+                        Utils.getLocalDateOfTenant().plusDays(1).format(DateTimeFormatter.ofPattern(DATE_FORMAT)),
+                        CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.campaign.activationDate.in.the.future",
                 campaignDateValidationData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -218,7 +220,7 @@ public class CampaignsTest {
         // activating campaign with failure
         ArrayList<HashMap<String, Object>> campaignErrorData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
                 .performActionsOnCampaignWithFailure(activatedCampaignId, ACTIVATE_COMMAND,
-                        Utils.getLocalDateOfTenant().toString(DATE_FORMAT), CommonConstants.RESPONSE_ERROR);
+                        Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(DATE_FORMAT)), CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.campaign.already.active", campaignErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         // closing campaign again for deletion

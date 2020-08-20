@@ -27,6 +27,8 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
@@ -36,11 +38,6 @@ import javax.persistence.Embeddable;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.Months;
-import org.joda.time.Weeks;
-import org.joda.time.Years;
 
 @Embeddable
 public class InterestRateChartSlabFields {
@@ -341,16 +338,16 @@ public class InterestRateChartSlabFields {
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodType());
         switch (periodFrequencyType) {
             case DAYS:
-                actualDepositPeriod = Days.daysBetween(periodStartDate, periodEndDate).getDays();
+                actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
             break;
             case WEEKS:
-                actualDepositPeriod = Weeks.weeksBetween(periodStartDate, periodEndDate).getWeeks();
+                actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
             break;
             case MONTHS:
-                actualDepositPeriod = Months.monthsBetween(periodStartDate, periodEndDate).getMonths();
+                actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
             break;
             case YEARS:
-                actualDepositPeriod = Years.yearsBetween(periodStartDate, periodEndDate).getYears();
+                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
             break;
             case INVALID:
                 actualDepositPeriod = 0;// default value

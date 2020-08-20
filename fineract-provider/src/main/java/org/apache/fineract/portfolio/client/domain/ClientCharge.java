@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,7 +39,6 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_charge")
@@ -114,7 +115,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         this.charge = charge;
         this.penaltyCharge = charge.isPenalty();
         this.chargeTime = charge.getChargeTimeType();
-        this.dueDate = (dueDate == null) ? null : dueDate.toDate();
+        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.chargeCalculation = charge.getChargeCalculation();
 
         BigDecimal chargeAmount = charge.getAmount();
@@ -220,7 +221,7 @@ public class ClientCharge extends AbstractPersistableCustom {
     public LocalDate getDueLocalDate() {
         LocalDate dueDate = null;
         if (this.dueDate != null) {
-            dueDate = new LocalDate(this.dueDate);
+            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
         }
         return dueDate;
     }

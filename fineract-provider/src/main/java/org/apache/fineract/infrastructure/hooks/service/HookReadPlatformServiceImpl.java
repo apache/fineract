@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.hooks.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -34,7 +35,6 @@ import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookRepository;
 import org.apache.fineract.infrastructure.hooks.exception.HookNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;

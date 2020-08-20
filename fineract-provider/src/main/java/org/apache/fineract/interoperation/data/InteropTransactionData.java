@@ -20,6 +20,7 @@ package org.apache.fineract.interoperation.data;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -28,7 +29,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargePaidBy;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
-import org.joda.time.LocalDate;
 
 public class InteropTransactionData extends CommandProcessingResult {
 

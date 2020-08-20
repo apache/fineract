@@ -212,7 +212,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
             }
             writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
                     "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
-                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthOfYear() + "/"
+                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
                             + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
                     dateCellStyle, dateFormat);
         }

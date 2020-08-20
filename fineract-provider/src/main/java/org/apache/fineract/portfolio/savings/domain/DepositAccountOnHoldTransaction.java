@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,7 +36,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction;
 import org.apache.fineract.portfolio.savings.DepositAccountOnHoldTransactionType;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_deposit_account_on_hold_transaction")
@@ -71,7 +72,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
         this.savingsAccount = savingsAccount;
         this.amount = amount;
         this.transactionType = transactionType.getValue();
-        this.transactionDate = transactionDate.toDate();
+        this.transactionDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.createdDate = new Date();
         this.reversed = reversed;
     }
@@ -114,7 +115,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
     public LocalDate getTransactionDate() {
         LocalDate transactionDate = null;
         if (this.transactionDate != null) {
-            transactionDate = LocalDate.fromDateFields(this.transactionDate);
+            transactionDate = LocalDate.ofInstant(this.transactionDate.toInstant(), ZoneId.systemDefault());
         }
         return transactionDate;
     }

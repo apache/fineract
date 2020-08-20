@@ -25,6 +25,9 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccou
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,9 +72,6 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @DiscriminatorValue("300")
@@ -388,7 +388,8 @@ public class RecurringDepositAccount extends SavingsAccount {
                         dueDate = latestTransactionDate;
                     }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null, dueDate,
-                            installment.getDepositAmountOutstanding(getCurrency()), installment.dueDate().toDate(), null);
+                            installment.getDepositAmountOutstanding(getCurrency()),
+                            Date.from(installment.dueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()), null);
                     allTransactions.add(transaction);
                 }
             }
@@ -448,7 +449,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
         if (closedDate.isBefore(getActivationLocalDate())) {
@@ -519,13 +520,13 @@ public class RecurringDepositAccount extends SavingsAccount {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = closedDate.toDate();
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
@@ -565,7 +566,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
         if (closedDate.isBefore(getActivationLocalDate())) {
@@ -618,13 +619,13 @@ public class RecurringDepositAccount extends SavingsAccount {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = closedDate.toDate();
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
@@ -811,8 +812,8 @@ public class RecurringDepositAccount extends SavingsAccount {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                     .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(this.accountTermAndPreClosure.getExpectedFirstDepositOnDate());
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.format(this.accountTermAndPreClosure.getExpectedFirstDepositOnDate());
             baseDataValidator.reset().parameter(DepositsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.expected.first.deposit.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -839,7 +840,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             final String defaultUserMessage = "Transaction is not allowed. Account is matured.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg.recurring.deposit.account.transaction.account.is.matured", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -851,7 +852,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             final String defaultUserMessage = "Transaction is not allowed. Transaction date is on or after account maturity date.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg.recurring.deposit.account.transaction.date.is.after.account.maturity.date", defaultUserMessage,
-                    "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -863,7 +864,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             final String defaultUserMessage = "Transaction is not allowed. Transaction date is on or after account activation and deposit start date.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg.recurring.deposit.account.transaction.date.is.before.account.activation.or.deposit.date", defaultUserMessage,
-                    "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -1156,11 +1157,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedBy = null;
         this.lockedInUntilDate = null;
 
-        this.activatedOnDate = now.toDate();
+        this.activatedOnDate = Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void setClosedOnDate(final LocalDate closedOnDate) {
-        this.closedOnDate = closedOnDate.toDate();
+        this.closedOnDate = Date.from(closedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     @Override
@@ -1182,7 +1183,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final BigDecimal depositAmount = this.recurringDetail.mandatoryRecommendedDepositAmount();
         while (maturityDate.isAfter(installmentDate)) {
             final RecurringDepositScheduleInstallment installment = RecurringDepositScheduleInstallment.installment(this, installmentNumber,
-                    installmentDate.toDate(), depositAmount);
+                    Date.from(installmentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), depositAmount);
             addDepositScheduleInstallment(installment);
             installmentDate = DepositAccountUtils.calculateNextDepositDate(installmentDate, frequency, recurringEvery);
             installmentNumber += 1;

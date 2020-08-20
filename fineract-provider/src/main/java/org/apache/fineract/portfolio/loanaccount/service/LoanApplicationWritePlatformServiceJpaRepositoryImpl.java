@@ -22,6 +22,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -137,7 +139,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -723,7 +724,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 calendarFrequencyType = CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
                 calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
                 if (updatedRepeatsOnDay == null) {
-                    updatedRepeatsOnDay = calendarStartDate.getDayOfWeek();
+                    updatedRepeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
                 }
             break;
             case WEEKLY:

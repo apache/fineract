@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.calendar.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -31,8 +33,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 /**
  * Immutable data object representing a Calendar.

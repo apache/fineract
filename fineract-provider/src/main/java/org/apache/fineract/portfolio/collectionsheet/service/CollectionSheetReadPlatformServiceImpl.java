@@ -28,8 +28,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +71,6 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -317,7 +319,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final Long calendarId = query.longValueOfParameterNamed(calendarIdParamName);
         final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String transactionDateStr = df.format(transactionDate.toDate());
+        final String transactionDateStr = df.format(Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
         // check if transaction against calendar effective from date
@@ -453,7 +455,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String dueDateStr = df.format(transactionDate.toDate());
+        final String dueDateStr = df.format(Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
@@ -666,7 +668,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String transactionDateStr = df.format(transactionDate.toDate());
+        final String transactionDateStr = df.format(Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();

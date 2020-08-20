@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.tax.domain;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +33,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_group_mappings")
@@ -55,10 +56,10 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
 
         this.taxComponent = taxComponent;
         if (startDate != null) {
-            this.startDate = startDate.toDate();
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         if (endDate != null) {
-            this.endDate = endDate.toDate();
+            this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -104,7 +105,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     public LocalDate startDate() {
         LocalDate startDate = null;
         if (this.startDate != null) {
-            startDate = new LocalDate(this.startDate);
+            startDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
         }
         return startDate;
     }
@@ -112,7 +113,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     public LocalDate endDate() {
         LocalDate endDate = null;
         if (this.endDate != null) {
-            endDate = new LocalDate(this.endDate);
+            endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
         }
         return endDate;
     }

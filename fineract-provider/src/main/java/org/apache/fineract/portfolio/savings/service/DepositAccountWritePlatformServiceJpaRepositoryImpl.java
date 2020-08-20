@@ -26,6 +26,8 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfD
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -111,9 +113,6 @@ import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanc
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,7 +218,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         Money activationChargeAmount = getActivationCharge(account);
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
-            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
             Money amountForDeposit = account.activateWithBalance().plus(activationChargeAmount);
             if (amountForDeposit.isGreaterThanZero()) {
                 final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
@@ -326,7 +325,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
-            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
             Money amountForDeposit = account.activateWithBalance();
             if (amountForDeposit.isGreaterThanZero()) {
                 final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
@@ -452,7 +451,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         checkClientOrGroupActive(account);
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -490,7 +489,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
@@ -732,7 +731,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(SavingsApiConstants.transactionDateParamName);
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(SavingsApiConstants.transactionAmountParamName);
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -1088,8 +1087,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final Locale locale = command.extractLocale();
         final String format = command.dateFormat();
-        final DateTimeFormatter fmt = StringUtils.isNotBlank(format) ? DateTimeFormat.forPattern(format).withLocale(locale)
-                : DateTimeFormat.forPattern("dd MM yyyy");
+        final DateTimeFormatter fmt = StringUtils.isNotBlank(format) ? DateTimeFormatter.ofPattern(format).withLocale(locale)
+                : DateTimeFormatter.ofPattern("dd MM yyyy");
 
         final Long chargeDefinitionId = command.longValueOfParameterNamed(chargeIdParamName);
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
@@ -1100,7 +1099,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             // transaction date should not be on a holiday or non working day
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1109,7 +1108,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1154,12 +1153,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (savingsAccountCharge.getDueLocalDate() != null) {
             final Locale locale = command.extractLocale();
-            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
             // transaction date should not be on a holiday or non working day
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1168,7 +1167,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().format(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
                 if (!dataValidationErrors.isEmpty()) {
                     throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1276,7 +1275,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         this.savingsAccountChargeDataValidator.validatePayCharge(command.json());
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final BigDecimal amountPaid = command.bigDecimalValueOfParameterNamed(amountParamName);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
 
@@ -1290,7 +1289,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         // transaction date should not be on a holiday or non working day
         if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                 && this.holidayRepository.isHoliday(savingsAccountCharge.savingsAccount().officeId(), transactionDate)) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.format(fmt))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.on.holiday");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1299,7 +1298,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                 && !this.workingDaysRepository.isWorkingDay(transactionDate)) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.format(fmt))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.a.nonworking.day");
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1326,7 +1325,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
                 .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
 
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy");
 
         while (transactionDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
             payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
@@ -1395,7 +1394,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             // handle maturity instructions
 
             if (fdAccount.isMatured() && (fdAccount.isReinvestOnClosure() || fdAccount.isTransferToSavingsOnClosure())) {
-                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 Map<String, Object> changes = new HashMap<>();
                 AppUser user = context.authenticatedUser();
                 Long toSavingsId = fdAccount.getTransferToSavingsAccountId();
