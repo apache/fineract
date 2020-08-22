@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.client.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -80,7 +81,8 @@ public class ClientFamilyMembersApiResources {
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getFamilyMember(@Context final UriInfo uriInfo, @PathParam("familyMemberId") final Long familyMemberId) {
+    public String getFamilyMember(@Context final UriInfo uriInfo, @PathParam("familyMemberId") final Long familyMemberId,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -124,7 +126,8 @@ public class ClientFamilyMembersApiResources {
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId, final String apiRequestBodyAsJson) {
+    public String updateClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId, final String apiRequestBodyAsJson,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFamilyMembers(familyMemberId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -150,7 +153,8 @@ public class ClientFamilyMembersApiResources {
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId, final String apiRequestBodyAsJson) {
+    public String deleteClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId, final String apiRequestBodyAsJson,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFamilyMembers(familyMemberId).withJson(apiRequestBodyAsJson)
                 .build();

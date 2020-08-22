@@ -91,7 +91,7 @@ public class DatatablesApiResource {
             + "\n" + "ARGUMENTS\n" + "\n" + "apptable  - optional" + "\n" + "The Apache Fineract core application table.\n" + "\n"
             + "Example Requests:\n" + "\n" + "datatables?apptable=m_client\n" + "\n" + "\n" + "datatables")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesResponse.class)))) })
     public String getDatatables(@QueryParam("apptable") @Parameter(description = "apptable") final String apptable,
             @Context final UriInfo uriInfo) {
 
@@ -123,7 +123,7 @@ public class DatatablesApiResource {
             + "Length of the text field. Mandatory if type String is used, otherwise an error is returned.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesResponse.class))) })
     public String createDatatable(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createDBDatatable(apiRequestBodyAsJson).build();
@@ -139,7 +139,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Update Data Table", description = "Modifies fields of a data table. If the apptableName parameter is passed, data table is deregistered and registered with the new application table.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
     public String updateDatatable(@PathParam("datatableName") @Parameter(description = "datatableName") final String datatableName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -155,7 +155,7 @@ public class DatatablesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Data Table", description = "Deletes a data table and deregisters it from the Apache Fineract Core application table.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesResponse.class))) })
     public String deleteDatatable(@PathParam("datatableName") @Parameter(description = "datatableName") final String datatableName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -172,7 +172,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Register Data Table", description = "Registers a data table with the Apache Fineract Core application table. This allows the data table to be maintained through the API. In case the datatable is a PPI (survey table), a parameter category should be pass along with the request. The API currently support one category (200)")
     @RequestBody(content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesRegisterDatatableAppTable.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
     public String registerDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptable") @Parameter(description = "apptable") final String apptable,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -191,7 +191,7 @@ public class DatatablesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Deregister Data Table", description = "Deregisters a data table. It will no longer be available through the API.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
     public String deregisterDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable) {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
@@ -207,7 +207,7 @@ public class DatatablesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Data Table Details", description = "Lists a registered data table details and the Apache Fineract Core application table they are registered to.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesResponse.class))) })
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @Context final UriInfo uriInfo) {
 
@@ -229,7 +229,7 @@ public class DatatablesApiResource {
             + "datatables/extra_family_details/1?order=`Date of Birth` desc\n" + "\n" + "\n"
             + "datatables/extra_client_details/1?genericResultSet=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesAppTableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.GetDataTablesAppTableIdResponse.class))) })
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @QueryParam("order") @Parameter(description = "order") final String order, @Context final UriInfo uriInfo) {
@@ -285,7 +285,7 @@ public class DatatablesApiResource {
             + "Note that the default datatable UI functionality converts any field name containing spaces to underscores when using the API. This means the field name \"Business Description\" is considered the same as \"Business_Description\". So you shouldn't have both \"versions\" in any data table.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesAppTableIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesAppTableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PostDataTablesAppTableIdResponse.class))) })
     public String createDatatableEntry(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -307,7 +307,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Update Entry in Data Table (One to One)", description = "Updates the row (if it exists) of the data table.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdResponse.class))) })
     public String updateDatatableEntryOnetoOne(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -329,7 +329,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Update Entry in Data Table (One to Many)", description = "Updates the row (if it exists) of the data table.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class))) })
     public String updateDatatableEntryOneToMany(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @PathParam("datatableId") @Parameter(description = "datatableId") final Long datatableId,
@@ -352,7 +352,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Delete Entry(s) in Data Table", description = "Deletes the entry (if it exists) for data tables that are one-to-one with the application table. \n"
             + "Deletes the entries (if they exist) for data tables that are one-to-many with the application table.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdResponse.class))) })
     public String deleteDatatableEntries(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId) {
 
@@ -372,7 +372,7 @@ public class DatatablesApiResource {
     @Operation(summary = "Delete Entry in Datatable (One to Many)", description = "Deletes the entry (if it exists) for data tables that are one to many with the application table.\n"
             + "\n")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdDatatableIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdDatatableIdResponse.class))) })
     public String deleteDatatableEntries(
             @PathParam("datatable") @Parameter(description = "datatable", example = "{}") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,

@@ -99,7 +99,7 @@ public class GLClosuresApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Accounting closures", description = "Example Requests:\n" + "\n" + "glclosures")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class, description = "")))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class)))) })
     public String retrieveAllClosures(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(name = "officeId") final Long officeId) {
 
@@ -117,7 +117,7 @@ public class GLClosuresApiResource {
     @Operation(summary = "Retrieve an Accounting Closure", description = "Example Requests:\n" + "\n" + "glclosures/1\n" + "\n" + "\n"
             + "/glclosures/1?fields=officeName,closingDate")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class))) })
     public String retreiveClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
             @Context final UriInfo uriInfo) {
 
@@ -140,7 +140,7 @@ public class GLClosuresApiResource {
     @Operation(summary = "Create an Accounting Closure", description = "Mandatory Fields\n" + "officeId,closingDate")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresRequest.class, description = "Request Body")))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresResponse.class))) })
     public String createGLClosure(@Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLClosure().withJson(jsonRequestBody).build();
@@ -157,7 +157,7 @@ public class GLClosuresApiResource {
     @Operation(summary = "Update an Accounting closure", description = "Once an accounting closure is created, only the comments associated with it may be edited")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class, required = true)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class))) })
     public String updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
             @Parameter(hidden = true) final String jsonRequestBody) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLClosure(glClosureId).withJson(jsonRequestBody).build();
@@ -173,7 +173,7 @@ public class GLClosuresApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete an accounting closure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.DeleteGlClosuresResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.DeleteGlClosuresResponse.class))) })
     public String deleteGLClosure(@PathParam("glClosureId") @Parameter(description = "glclosureId") final Long glClosureId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGLClosure(glClosureId).build();

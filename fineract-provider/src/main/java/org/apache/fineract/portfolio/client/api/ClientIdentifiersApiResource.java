@@ -124,7 +124,8 @@ public class ClientIdentifiersApiResource {
             + "\n" + " Field Defaults\n" + " Allowed description Lists\n" + "\n\nExample Request:\n" + "clients/1/identifiers/template")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersTemplateResponse.class))) })
-    public String newClientIdentifierDetails(@Context final UriInfo uriInfo) {
+    public String newClientIdentifierDetails(@Context final UriInfo uriInfo,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 

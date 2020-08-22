@@ -92,7 +92,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Codes", description = "Returns the list of codes.\n" + "\n" + "Example Requests:\n" + "\n" + "codes")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))) })
     public String retrieveCodes(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -109,7 +109,7 @@ public class CodesApiResource {
     @Operation(summary = "Create a Code", description = "Creates a code. Codes created through api are always 'user defined' and so system defined is marked as false.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PostCodesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PostCodesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PostCodesResponse.class))) })
     public String createCode(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCode().withJson(apiRequestBodyAsJson).build();
@@ -126,7 +126,7 @@ public class CodesApiResource {
     @Operation(summary = "Retrieve a Code", description = "Returns the details of a Code.\n" + "\n" + "Example Requests:\n" + "\n"
             + "codes/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class))) })
     public String retrieveCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId, @Context final UriInfo uriInfo) {
 
         final CodeData code = this.readPlatformService.retrieveCode(codeId);
@@ -142,7 +142,7 @@ public class CodesApiResource {
     @Operation(summary = "Update a Code", description = "Updates the details of a code if it is not system defined.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PutCodesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PutCodesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PutCodesResponse.class))) })
     public String updateCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -159,7 +159,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Code", description = "Deletes a code if it is not system defined.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.DeleteCodesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.DeleteCodesResponse.class))) })
     public String deleteCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCode(codeId).build();

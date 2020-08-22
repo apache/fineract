@@ -72,7 +72,7 @@ public class SpmApiResource {
     @Transactional
     @Operation(summary = "List all Surveys", description = "")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SurveyData.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SurveyData.class)))) })
     public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
         this.securityContext.authenticatedUser();
         final List<SurveyData> result = new ArrayList<>();
@@ -97,7 +97,7 @@ public class SpmApiResource {
     @Transactional
     @Operation(summary = "Retrieve a Survey", description = "")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SurveyData.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SurveyData.class))) })
     public SurveyData findSurvey(@PathParam("id") @Parameter(description = "Enter id") final Long id) {
         this.securityContext.authenticatedUser();
         final Survey survey = this.spmService.findById(id);

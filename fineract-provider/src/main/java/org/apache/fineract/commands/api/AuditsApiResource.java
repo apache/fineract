@@ -94,7 +94,7 @@ public class AuditsApiResource {
             + "audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n" + "audits?officeId=1\n" + "\n"
             + "audits?officeId=1&includeJson=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)))) })
     public String retrieveAuditEntries(@Context final UriInfo uriInfo,
             @QueryParam("actionName") @Parameter(description = "actionName") final String actionName,
             @QueryParam("entityName") @Parameter(description = "entityName") final String entityName,
@@ -143,7 +143,7 @@ public class AuditsApiResource {
     @Operation(summary = "Retrieve an Audit Entry", description = "Example Requests:\n" + "\n" + "audits/20\n"
             + "audits/20?fields=madeOnDate,maker,processingResult")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class))) })
     public String retrieveAuditEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId,
             @Context final UriInfo uriInfo) {
 
@@ -162,7 +162,7 @@ public class AuditsApiResource {
     @Operation(summary = "Audit Search Template", description = "This is a convenience resource. It can be useful when building an Audit Search UI. \"appUsers\" are data scoped to the office/branch the requestor is associated with.\n"
             + "\n" + "Example Requests:\n" + "\n" + "audits/searchtemplate\n" + "audits/searchtemplate?fields=actionNames")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
