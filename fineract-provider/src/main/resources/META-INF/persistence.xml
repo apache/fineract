@@ -31,19 +31,23 @@
         <shared-cache-mode>NONE</shared-cache-mode>
         <properties>
             <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving.eager" value="false" />
+            <property name="eclipselink.weaving.internal" value="false" />
+            <!-- <property name="eclipselink.weaving.changetracking" value="false"/> -->
+
             <!-- <property name="eclipselink.logging.file" value="C:\myout\"/> -->
             <!-- Performance Profiling https://www.eclipse.org/eclipselink/documentation/2.5/solutions/performance002.htm#CHDIAFJI -->
             <!-- <property name="eclipselink.profiler" value="PerformanceProfiler"/> -->
-            <property name="eclipselink.weaving.eager" value="true" />
             <property name="eclipselink.logging.level" value="FINE" />
             <property name="eclipselink.allow-zero-id" value="true" />
+
             <property name="eclipselink.target-database" value="MySQL" />
             <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
             <property name="eclipselink.cache.shared.default" value="false" />
             <property name="eclipselink.jdbc.batch-writing.size" value="1000" />
             <property name="eclipselink.persistence-context.flush-mode" value="auto" />
             <property name="eclipselink.ddl-generation.index-foreign-keys" value="true" />
-
+like
             <!-- Schema Generation
             <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>

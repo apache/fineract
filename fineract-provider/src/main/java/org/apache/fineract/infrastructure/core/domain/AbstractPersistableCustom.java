@@ -23,6 +23,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
@@ -45,6 +47,9 @@ public abstract class AbstractPersistableCustom implements Persistable<Long>, Se
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Transient
+    private boolean isNew = true;
+
     @Override
     public Long getId() {
         return id;
@@ -55,8 +60,13 @@ public abstract class AbstractPersistableCustom implements Persistable<Long>, Se
     }
 
     @Override
-    @Transient // DATAJPA-622
     public boolean isNew() {
-        return null == this.id;
+        return isNew;
+    }
+
+    @PrePersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
     }
 }

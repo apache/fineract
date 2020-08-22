@@ -21,25 +21,10 @@ description = 'Fineract Provider'
 apply plugin: 'rebel'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'openjpa'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
-
-// Configuration for the OpenJPA enhance task
-// https://github.com/radcortez/openjpa-gradle-plugin
-System.setProperty("openjpa.Log", "commons")
-
-openjpa {
-    includes = [
-        '**/AbstractPersistableCustom.class',
-        '**/domain/*.class'
-    ]
-    enhance {
-        enforcePropertyRestrictions true
-    }
-}
 
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin

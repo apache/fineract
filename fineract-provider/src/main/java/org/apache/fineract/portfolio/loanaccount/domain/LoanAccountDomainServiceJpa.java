@@ -233,18 +233,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     private void saveLoanTransactionWithDataIntegrityViolationChecks(final LoanTransaction newRepaymentTransaction) {
         try {
-            // final Set<LoanTransactionToRepaymentScheduleMapping> transactionMappings = newRepaymentTransaction
-            // .getLoanTransactionToRepaymentScheduleMappings();
-            // for (final LoanTransactionToRepaymentScheduleMapping transactionMapping : transactionMappings) {
-            // final LoanRepaymentScheduleInstallment installment =
-            // transactionMapping.getLoanRepaymentScheduleInstallment();
-            // if (installment.getId() == null) {
-            // transactionMapping.setLoanRepaymentScheduleInstallment(null);
-            // this.repaymentScheduleInstallmentRepository.saveAndFlush(installment);
-            // transactionMapping.setLoanRepaymentScheduleInstallment(installment);
-            // }
-            // }
-            this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
+            this.loanTransactionRepository.save(newRepaymentTransaction);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

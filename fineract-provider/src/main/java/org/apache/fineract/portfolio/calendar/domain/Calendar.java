@@ -33,7 +33,6 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -97,8 +96,7 @@ public class Calendar extends AbstractAuditableCustom {
     @Temporal(TemporalType.TIME)
     private Date meetingtime;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "calendar_id")
+    @OneToMany(mappedBy = "calendar", fetch = FetchType.EAGER)
     private Set<CalendarHistory> calendarHistory = new HashSet<>();
 
     protected Calendar() {

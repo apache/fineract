@@ -144,9 +144,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
-                                            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-                                            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
-                                            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
+            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = Date.from(fromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
@@ -162,9 +162,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
-                                            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-                                            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
-                                            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
+            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = Date.from(fromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
@@ -570,7 +570,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
-                                    final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
+            final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
         this.feeChargesCharged = defaultToNullIfZero(feeChargesDue.getAmount());
         this.feeChargesWaived = defaultToNullIfZero(feeChargesWaived.getAmount());
         this.feeChargesWrittenOff = defaultToNullIfZero(feeChargesWrittenOff.getAmount());
@@ -593,7 +593,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     private void trackAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
-                                                             final Money amountPaidInRepaymentPeriod) {
+            final Money amountPaidInRepaymentPeriod) {
         if (isInAdvance(transactionDate)) {
             this.totalPaidInAdvance = asMoney(this.totalPaidInAdvance, currency).plus(amountPaidInRepaymentPeriod).getAmount();
         } else if (isLatePayment(transactionDate)) {
@@ -790,7 +790,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     private void reduceAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
-                                                              final Money amountDeductedInRepaymentPeriod) {
+            final Money amountDeductedInRepaymentPeriod) {
 
         if (isInAdvance(transactionDate)) {
             Money mTotalPaidInAdvance = Money.of(currency, this.totalPaidInAdvance);

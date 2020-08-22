@@ -32,7 +32,7 @@
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
         depends-on="tenantDatabaseUpgradeService">
         <property name="dataSource" ref="routingDataSource" />
-        <property name="persistenceUnitName" value="jpa-pu" />
+        <property name="persistenceUnitName" value="EclipseLink-PU" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
                 <property name="showSql" value="false" />

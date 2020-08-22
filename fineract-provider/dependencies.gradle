@@ -80,7 +80,8 @@ dependencies {
             'org.webjars:webjars-locator-core',
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.1.0',
-            'com.squareup.retrofit2:converter-gson'
+            'com.squareup.retrofit2:converter-gson',
+            'org.gaul:modernizer-maven-annotations',
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
@@ -88,9 +89,8 @@ dependencies {
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
-    implementation ('org.apache.openjpa:openjpa') {
-        exclude group: 'org.eclipse.persistence'
-        exclude group: 'org.apache.geronimo.specs'
+    implementation ("org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.7") {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
