@@ -115,7 +115,7 @@ public class StaffApiResource {
             + "and for status=ALL, it Returns both ACTIVE and INACTIVE Staff.\n" + "\n" + "Example Requests:\n" + "\n"
             + "staff?status=active")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class)))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class)))),
             @ApiResponse(responseCode = "200", description = "GET https://DomainName/api/v1/staff?status={ACTIVE|INACTIVE|ALL}", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class))) })
     public String retrieveStaff(@Context final UriInfo uriInfo,
             @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
@@ -144,7 +144,7 @@ public class StaffApiResource {
             + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PostStaffRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PostStaffResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PostStaffResponse.class))) })
     public String createStaff(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff().withJson(apiRequestBodyAsJson).build();
@@ -161,7 +161,7 @@ public class StaffApiResource {
     @Operation(summary = "Retrieve a Staff Member", description = "Returns the details of a Staff Member.\n" + "\n" + "Example Requests:\n"
             + "\n" + "staff/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class))) })
     public String retreiveStaff(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Context final UriInfo uriInfo) {
 
@@ -184,7 +184,7 @@ public class StaffApiResource {
     @Operation(summary = "Update a Staff Member", description = "Updates the details of a staff member.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PutStaffRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PutStaffResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PutStaffResponse.class))) })
     public String updateStaff(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 

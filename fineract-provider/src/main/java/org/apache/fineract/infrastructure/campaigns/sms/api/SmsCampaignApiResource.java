@@ -101,7 +101,7 @@ public class SmsCampaignApiResource {
     @Path("template")
     @Operation(summary = "Retrieve a SMS Campaign", description = "Example Requests:\n" + "\n" + "smscampaigns/1\n" + "\n" + "\n"
             + "smscampaigns/1?template=true\n" + "\n" + "\n" + "smscampaigns/template")
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
     public String template(@Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         final SmsCampaignData smsCampaignData = this.smsCampaignReadPlatformService.retrieveTemplate(CampaignType.SMS.name());
@@ -116,7 +116,7 @@ public class SmsCampaignApiResource {
             + "campaignName, campaignType, triggerType, providerId, runReportId, message\n" + "\n"
             + "Mandatory Fields for Cash based on selected report id\n" + "paramValue in json format")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CommandWrapper.class)))
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String createCampaign(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSmsCampaign().withJson(apiRequestBodyAsJson).build();
@@ -128,7 +128,7 @@ public class SmsCampaignApiResource {
     @Path("{resourceId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a SMS Campaign", description = "Example Requests:\n" + "\n" + "smscampaigns/1\n")
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
     public String retrieveCampaign(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         SmsCampaignData smsCampaignData = this.smsCampaignReadPlatformService.retrieveOne(resourceId);
@@ -140,7 +140,7 @@ public class SmsCampaignApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List SMS Campaigns", description = "Example Requests:\n" + "\n" + "smscampaigns")
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SmsCampaignData.class)))
     public String retrieveAllEmails(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
@@ -157,7 +157,7 @@ public class SmsCampaignApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Campaign")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CommandWrapper.class)))
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String updateCampaign(@PathParam("campaignId") final Long campaignId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSmsCampaign(campaignId).withJson(apiRequestBodyAsJson)
@@ -171,7 +171,7 @@ public class SmsCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "SMS Campaign", description = "Activates | Deactivates | Reactivates")
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String handleCommands(@PathParam("campaignId") final Long campaignId, @QueryParam("command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
@@ -209,7 +209,7 @@ public class SmsCampaignApiResource {
     @DELETE
     @Path("{campaignId}")
     @Operation(summary = "Delete a SMS Campaign", description = "Note: Only closed SMS Campaigns can be deleted")
-    @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     public String delete(@PathParam("campaignId") final Long campaignId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSmsCampaign(campaignId).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

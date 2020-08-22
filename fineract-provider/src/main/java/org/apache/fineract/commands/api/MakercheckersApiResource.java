@@ -93,7 +93,7 @@ public class MakercheckersApiResource {
             + "\n" + "makercheckers?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n"
             + "makercheckers?officeId=1\n" + "\n" + "makercheckers?officeId=1&includeJson=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)))) })
     public String retrieveCommands(@Context final UriInfo uriInfo,
             @QueryParam("actionName") @Parameter(description = "actionName") final String actionName,
             @QueryParam("entityName") @Parameter(description = "entityName") final String entityName,
@@ -125,7 +125,7 @@ public class MakercheckersApiResource {
     @Operation(summary = "Maker Checker Search Template", description = "This is a convenience resource. It can be useful when building a Checker Inbox UI. \"appUsers\" are data scoped to the office/branch the requestor is associated with. \"actionNames\" and \"entityNames\" returned are those that the requestor has Checker approval permissions for.\n"
             + "\n" + "Example Requests:\n" + "\n" + "makercheckers/searchtemplate\n" + "makercheckers/searchtemplate?fields=entityNames")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class))) })
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -143,7 +143,7 @@ public class MakercheckersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Approve Maker Checker Entry | Reject Maker Checker Entry")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.PostMakerCheckersResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.PostMakerCheckersResponse.class))) })
     public String approveMakerCheckerEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
@@ -169,7 +169,7 @@ public class MakercheckersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Maker Checker Entry")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.PostMakerCheckersResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.PostMakerCheckersResponse.class))) })
     public String deleteMakerCheckerEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId) {
 
         final Long id = this.writePlatformService.deleteEntry(auditId);

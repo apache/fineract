@@ -125,7 +125,7 @@ public class GLAccountsApiResource {
                     + "glaccounts/template?type=1\n" + "\n" + "type is optional and integer value from 1 to 5.\n" + "\n" + "1.Assets \n"
                     + "2.Liabilities \n" + "3.Equity \n" + "4.Income \n" + "5.Expenses")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsTemplateResponse.class))) })
     public String retrieveNewAccountDetails(@Context final UriInfo uriInfo,
             @QueryParam("type") @Parameter(description = "type") final Integer type) {
 
@@ -146,7 +146,7 @@ public class GLAccountsApiResource {
             + "Example Requests:\n" + "\n" + "glaccounts\n" + "\n" + "\n"
             + "glaccounts?type=1&manualEntriesAllowed=true&usage=1&disabled=false\n" + "\n" + "glaccounts?fetchRunningBalance=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class)))) })
     public String retrieveAllAccounts(@Context final UriInfo uriInfo,
             @QueryParam("type") @Parameter(description = "type") final Integer type,
             @QueryParam("searchParam") @Parameter(description = "searchParam") final String searchParam,
@@ -172,7 +172,7 @@ public class GLAccountsApiResource {
             + "\n" + "glaccounts/1\n" + "\n" + "\n" + "glaccounts/1?template=true\n" + "\n" + "\n" + "glaccounts/1?fields=name,glCode\n"
             + "\n" + "\n" + "glaccounts/1?fetchRunningBalance=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class))) })
     public String retreiveAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId,
             @Context final UriInfo uriInfo,
             @QueryParam("fetchRunningBalance") @Parameter(description = "fetchRunningBalance") final boolean runningBalance) {
@@ -197,7 +197,7 @@ public class GLAccountsApiResource {
                     + "Mandatory Fields: \n" + "name, glCode, type, usage and manualEntriesAllowed")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class))) })
     public String createGLAccount(@Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLAccount().withJson(jsonRequestBody).build();
@@ -216,7 +216,7 @@ public class GLAccountsApiResource {
                     + "\n")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class))) })
     public String updateGLAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId,
             @Parameter(hidden = true) final String jsonRequestBody) {
 
@@ -234,7 +234,7 @@ public class GLAccountsApiResource {
     @Operation(tags = {
             "General Ledger Account" }, summary = "Delete an accounting closure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class))) })
     public String deleteGLAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGLAccount(glAccountId).build();
