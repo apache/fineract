@@ -87,7 +87,7 @@ public class ExternalServicesConfigurationApiResource {
     @Operation(summary = "Retrieve External Services Configuration", description = "Returns a external Service configurations based on the Service Name.\n"
             + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = ExternalServicesPropertiesData.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalServicesPropertiesData.class))) })
     public String retrieveOne(@PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_RESOURCE_NAME);
@@ -105,7 +105,7 @@ public class ExternalServicesConfigurationApiResource {
     @Operation(summary = "Update External Service", description = "Updates the external Service Configuration for a Service Name.\n" + "\n"
             + "Example: \n" + "\n" + "externalservice/S3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class)))
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String updateExternalServiceProperties(
             @PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {

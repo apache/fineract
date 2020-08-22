@@ -96,7 +96,7 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Code Values", description = "Returns the list of Code Values for a given Code\n" + "\n"
-            + "Example Requests:\n" + "\n" + "codes/1/codevalues")
+            + "Example Requests:\n" + "\n" + "codes/1/codevalues", parameters = @Parameter(name = "codeId", description = "co"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "A List of code values for a given code", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class)))) })
     public String retrieveAllCodeValues(@Context final UriInfo uriInfo,
@@ -117,9 +117,10 @@ public class CodeValuesApiResource {
     @Operation(summary = "Retrieve a Code description", description = "Returns the details of a Code Value\n" + "\n" + "Example Requests:\n"
             + "\n" + "codes/1/codevalues/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class))) })
     public String retrieveCodeValue(@Context final UriInfo uriInfo,
-            @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId) {
+            @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId,
+            @PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -135,7 +136,7 @@ public class CodeValuesApiResource {
     @Operation(summary = "Create a Code description", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class))) })
     public String createCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -154,7 +155,7 @@ public class CodeValuesApiResource {
     @Operation(summary = "Update a Code description", description = "Updates the details of a code description.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class))) })
     public String updateCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -173,7 +174,7 @@ public class CodeValuesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Code description", description = "Deletes a code description")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class))) })
     public String deleteCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId) {
 

@@ -94,7 +94,7 @@ public class SchedulerJobApiResource {
     @Operation(summary = "Retrieve Scheduler Jobs", description = "Returns the list of jobs.\n" + "\n" + "Example Requests:\n" + "\n"
             + "jobs")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final List<JobDetailData> jobDetailDatas = this.schedulerJobRunnerReadService.findAllJobDeatils();
@@ -106,7 +106,7 @@ public class SchedulerJobApiResource {
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Operation(summary = "Retrieve a Job", description = "Returns the details of a Job.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs/5")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class))) })
     public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
@@ -119,7 +119,7 @@ public class SchedulerJobApiResource {
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}/" + SchedulerJobApiConstants.JOB_RUN_HISTORY)
     @Operation(summary = "Retrieve Job Run History", description = "Example Requests:\n" + "\n" + "jobs/5/runhistory?offset=0&limit=200")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsJobIDJobRunHistoryResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsJobIDJobRunHistoryResponse.class))) })
     public String retrieveHistory(@Context final UriInfo uriInfo,
             @PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -161,7 +161,7 @@ public class SchedulerJobApiResource {
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Operation(summary = "Update a Job", description = "Updates the details of a job.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)))
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "") })
+    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String updateJobDetail(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @Parameter(hidden = true) final String jsonRequestBody) {
 

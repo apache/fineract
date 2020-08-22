@@ -132,7 +132,8 @@ public class ClientChargesApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
@@ -151,7 +152,7 @@ public class ClientChargesApiResource {
     @Operation(summary = "Retrieve a Client Charge", description = "Example Requests:\n" + "clients/1/charges/1\n" + "\n" + "\n"
             + "clients/1/charges/1?fields=name,id")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.GetClientsChargesPageItems.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.GetClientsChargesPageItems.class))) })
     public String retrieveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
 
@@ -183,7 +184,7 @@ public class ClientChargesApiResource {
             + "Mandatory Fields : \n" + "chargeId and dueDate  \n" + "Optional Fields : \n" + "amount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesResponse.class))) })
     public String applyClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 

@@ -98,7 +98,8 @@ public class CollateralsApiResource {
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "loans/1/collaterals/template")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.GetLoansLoanIdCollateralsTemplateResponse.class))) })
-    public String newCollateralTemplate(@Context final UriInfo uriInfo) {
+    public String newCollateralTemplate(@Context final UriInfo uriInfo,
+            @PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);

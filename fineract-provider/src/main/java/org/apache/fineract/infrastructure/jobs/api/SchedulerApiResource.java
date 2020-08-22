@@ -73,7 +73,7 @@ public class SchedulerApiResource {
     @Operation(summary = "Retrieve Scheduler Status", description = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n"
             + "scheduler")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class))) })
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();

@@ -74,7 +74,7 @@ public class LookupTableApiResource {
     @Transactional
     @Operation(summary = "List all Lookup Table entries", description = "List all Lookup Table entries for a survey.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LookupTableData.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LookupTableData.class)))) })
     public List<LookupTableData> fetchLookupTables(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId) {
         this.securityContext.authenticatedUser();
 
@@ -96,7 +96,7 @@ public class LookupTableApiResource {
     @Transactional
     @Operation(summary = "Retrieve a Lookup Table entry", description = "Retrieve a Lookup Table entry for a survey.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = LookupTableData.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LookupTableData.class))) })
     public LookupTableData findLookupTable(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
             @PathParam("key") @Parameter(description = "Enter key") final String key) {
         this.securityContext.authenticatedUser();

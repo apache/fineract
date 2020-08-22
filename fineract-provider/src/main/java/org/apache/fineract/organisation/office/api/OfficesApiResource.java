@@ -108,7 +108,7 @@ public class OfficesApiResource {
     @Operation(summary = "List Offices", description = "Example Requests:\n" + "\n" + "offices\n" + "\n" + "\n"
             + "offices?fields=id,name,openingDate")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class)))) })
     public String retrieveOffices(@Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("includeAllOffices") @Parameter(description = "includeAllOffices") final boolean onlyManualEntries,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
@@ -131,7 +131,7 @@ public class OfficesApiResource {
     @Operation(summary = "Retrieve Office Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "offices/template")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesTemplateResponse.class))) })
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -151,7 +151,7 @@ public class OfficesApiResource {
     @Operation(summary = "Create an Office", description = "Mandatory Fields\n" + "name, openingDate, parentId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesResponse.class))) })
     public String createOffice(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -171,7 +171,7 @@ public class OfficesApiResource {
     @Operation(summary = "Retrieve an Office", description = "Example Requests:\n" + "\n" + "offices/1\n" + "\n" + "\n"
             + "offices/1?template=true\n" + "\n" + "\n" + "offices/1?fields=id,name,parentName")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class))) })
     public String retreiveOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Context final UriInfo uriInfo) {
 
@@ -195,7 +195,7 @@ public class OfficesApiResource {
     @Operation(summary = "Update Office", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.class))) })
     public String updateOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 

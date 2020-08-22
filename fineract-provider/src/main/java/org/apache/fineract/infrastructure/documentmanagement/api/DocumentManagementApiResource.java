@@ -99,7 +99,7 @@ public class DocumentManagementApiResource {
     @Operation(summary = "List documents", description = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n"
             + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
     public String retreiveAllDocuments(@Context final UriInfo uriInfo,
             @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
@@ -199,7 +199,7 @@ public class DocumentManagementApiResource {
     @Operation(summary = "Retrieve a Document", description = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n"
             + "loans/1/documents/1\n" + "\n" + "\n" + "client_identifiers/1/documents/1?fields=name,description")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class))) })
     public String getDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
@@ -239,7 +239,7 @@ public class DocumentManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Remove a Document", description = "")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class))) })
     public String deleteDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {

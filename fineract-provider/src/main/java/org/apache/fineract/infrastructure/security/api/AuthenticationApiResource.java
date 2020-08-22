@@ -88,7 +88,7 @@ public class AuthenticationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Verify authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class))),
             @ApiResponse(responseCode = "400", description = "Unauthenticated. Please login") })
     public String authenticate(final String apiRequestBodyAsJson) {
         // TODO FINERACT-819: sort out Jersey so JSON conversion does not have

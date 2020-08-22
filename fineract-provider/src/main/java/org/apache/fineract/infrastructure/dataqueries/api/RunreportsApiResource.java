@@ -105,7 +105,7 @@ public class RunreportsApiResource {
             + "\n" + "\n"
             + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.GetReportNameResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RunreportsApiResourceSwagger.GetReportNameResponse.class))) })
     public Response runReport(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("isSelfServiceUserReport") @Parameter(description = "isSelfServiceUserReport") final boolean isSelfServiceUserReport) {
