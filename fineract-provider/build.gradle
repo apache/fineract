@@ -323,6 +323,7 @@ rat {
         '**/.gitignore',
         '**/.gitkeep',
         '**/*.iml',
+        '**/config/swagger/templates/**',
         // Notice files
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
