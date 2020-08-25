@@ -109,7 +109,7 @@ public class SelfClientsApiResource {
         final String externalId = null;
         final String hierarchy = null;
         final Boolean orphansOnly = null;
-        return this.clientApiResource.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status,
+        return this.clientApiResource.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, null,
                 hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, true);
     }
 

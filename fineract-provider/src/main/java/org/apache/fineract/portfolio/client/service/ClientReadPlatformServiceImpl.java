@@ -291,6 +291,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             extraCriteria += " and o.hierarchy like ? ";
         }
 
+        if (StringUtils.isNotBlank(searchParameters.getMobileNo())) {
+            paramList.add(searchParameters.getMobileNo());
+            extraCriteria += " and c.mobile_no =  ? ";
+        }
+
         if (searchParameters.isOrphansOnly()) {
             extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
         }
