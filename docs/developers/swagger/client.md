@@ -43,4 +43,4 @@ If you need to add templates for a specific library, you need to follow the same
 
 ## Validate OpenAPI Spec File
 
-The `resolve` task in [build.gradle](https://github.com/apache/fineract/blob/217e34ba9e4cf04ad7b82fc3a0f8f8e5f8de8042/fineract-provider/build.gradle#L212) file will generate the OpenAPI Spec File for the project. To make sure Swagger Codegen generates a correct library, it is important for the OpenAPI Spec file to be valid. Use [Swagger OpenAPI Validator](https://validator.swagger.io/) to validate the spec file.
+The `resolve` task in [build.gradle](https://github.com/apache/fineract/blob/develop/fineract-provider/build.gradle#L212) file will generate the OpenAPI Spec File for the project. To make sure Swagger Codegen generates a correct library, it is important for the OpenAPI Spec file to be valid. Use [Swagger OpenAPI Validator](https://validator.swagger.io/) to validate the spec file.
