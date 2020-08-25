@@ -85,7 +85,8 @@ public class SQLBuilder {
                     "criteria cannot contain more than 1 space (between column name and operator): " + trimmedCriteria);
         }
         if (!operator.equals("=") && !operator.equals("<") && !operator.equals(">") && !operator.equals("<=") && !operator.equals(">=")
-                && !operator.equals("<>") && !operator.equals("LIKE") && !operator.equals("like")) {
+                && !operator.equals("<>") && !operator.equals("LIKE") && !operator.equals("like")
+                && !operator.toLowerCase().equals("not in")) {
             // add support for SQL's BETWEEN and IN, if/when ever needed.. (it's
             // a little more than just adding above, as it can have multiple
             // arguments)
@@ -118,6 +119,18 @@ public class SQLBuilder {
     public String getSQLTemplate() {
         if (sb.length() > 0) {
             return " WHERE  " + sb.toString();
+        }
+        return "";
+    }
+
+    /**
+     * Returns the added criterias, created from the {@link #addCriteria(String, Object)}, with '?' placeholders.
+     *
+     * @return added criterias
+     */
+    public String getCriteria() {
+        if (sb.length() > 0) {
+            return sb.toString();
         }
         return "";
     }

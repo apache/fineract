@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -196,25 +197,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         // this.context.validateAccessRights(searchParameters.getHierarchy());
         // underHierarchySearchString = searchParameters.getHierarchy() + "%";
         // }
-        List<Object> paramList = new ArrayList<>(Arrays.asList(underHierarchySearchString, underHierarchySearchString));
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
-        sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
+        final SQLBuilder extraCriteria = buildSqlStringFromClientCriteria(this.clientMapper.schema(), searchParameters);
+        sqlBuilder.append(" where (o.hierarchy like " + underHierarchySearchString + " or transferToOffice.hierarchy like "
+                + underHierarchySearchString + " ) ");
 
         if (searchParameters != null) {
             if (searchParameters.isSelfUser()) {
-                sqlBuilder.append(
-                        " and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
-                paramList.add(appUserID);
+                extraCriteria.addNonNullCriteria(
+                        " c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ",
+                        appUserID + ")");
             }
-
-            final String extraCriteria = buildSqlStringFromClientCriteria(this.clientMapper.schema(), searchParameters, paramList);
-
-            if (StringUtils.isNotBlank(extraCriteria)) {
-                sqlBuilder.append(" and (").append(extraCriteria).append(")");
-            }
-
+            sqlBuilder.append(" and ").append(extraCriteria.getCriteria());
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
@@ -232,13 +228,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             }
         }
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(),
                 this.clientMapper);
     }
 
-    private String buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters, List<Object> paramList) {
+    private SQLBuilder buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters) {
 
-        String sqlSearch = searchParameters.getSqlSearch();
         final Long officeId = searchParameters.getOfficeId();
         final String externalId = searchParameters.getExternalId();
         final String displayName = searchParameters.getName();
@@ -246,58 +241,27 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String lastname = searchParameters.getLastname();
         final String status = searchParameters.getStatus();
 
-        String extraCriteria = "";
-        if (sqlSearch != null) {
-            sqlSearch = sqlSearch.replaceAll(" display_name ", " c.display_name ");
-            sqlSearch = sqlSearch.replaceAll("display_name ", "c.display_name ");
-            extraCriteria = " and (" + sqlSearch + ")";
-            this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
-        }
+        SQLBuilder extraCriteria = new SQLBuilder();
 
-        if (officeId != null) {
-            extraCriteria += " and c.office_id = ? ";
-            paramList.add(officeId);
-        }
-
-        if (externalId != null) {
-            paramList.add(externalId);
-            extraCriteria += " and c.external_id like ? ";
-        }
-
-        if (displayName != null) {
-            // extraCriteria += " and concat(ifnull(c.firstname, ''),
-            // if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
-            paramList.add("%" + displayName + "%");
-            extraCriteria += " and c.display_name like ? ";
-        }
+        extraCriteria.addNonNullCriteria(" c.office_id = ", officeId);
+        extraCriteria.addNonNullCriteria(" c.external_id like ", externalId);
+        extraCriteria.addNonNullCriteria("  c.display_name like ", "%" + displayName + "%");
 
         if (status != null) {
             ClientStatus clientStatus = ClientStatus.fromString(status);
-            extraCriteria += " and c.status_enum = " + clientStatus.getValue().toString() + " ";
+            extraCriteria.addNonNullCriteria("  c.status_enum =  ", clientStatus.getValue().toString());
         }
-
-        if (firstname != null) {
-            paramList.add(firstname);
-            extraCriteria += " and c.firstname like ? ";
-        }
-
-        if (lastname != null) {
-            paramList.add(lastname);
-            extraCriteria += " and c.lastname like ? ";
-        }
+        extraCriteria.addNonNullCriteria("  c.firstname like  ", firstname);
+        extraCriteria.addNonNullCriteria("  c.lastname like  ", lastname);
 
         if (searchParameters.isScopedByOfficeHierarchy()) {
-            paramList.add(searchParameters.getHierarchy() + "%");
-            extraCriteria += " and o.hierarchy like ? ";
+            extraCriteria.addNonNullCriteria("  o.hierarchy like ", searchParameters.getHierarchy() + "%");
         }
 
         if (searchParameters.isOrphansOnly()) {
-            extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
+            extraCriteria.addNonNullCriteria("c.id NOT IN", "(select client_id from m_group_client)");
         }
 
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
         return extraCriteria;
     }
 

@@ -104,13 +104,12 @@ public class SelfClientsApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        final String sqlSearch = null;
         final Long officeId = null;
         final String externalId = null;
         final String hierarchy = null;
         final Boolean orphansOnly = null;
-        return this.clientApiResource.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status,
-                hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, true);
+        return this.clientApiResource.retrieveAll(uriInfo, officeId, externalId, displayName, firstname, lastname, status, hierarchy,
+                offset, limit, orderBy, sortOrder, orphansOnly, true);
     }
 
     @GET
