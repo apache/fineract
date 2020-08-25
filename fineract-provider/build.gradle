@@ -81,6 +81,8 @@ apply plugin: "net.ltgt.errorprone"
 apply plugin: "com.diffplug.spotless"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 apply plugin: "org.hidetake.swagger.generator"
+apply plugin: 'distribution'
+apply plugin: 'signing'
 
 dependencyManagement {
     imports {
@@ -820,6 +822,41 @@ bootWar {
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Tar){
+    compression = Compression.GZIP
+}
+
+def distributionsCopySpec = copySpec {
+    into("apache-fineract-$releaseVersion-binary") {
+        from "${buildDir}/${libsDirName}"
+        from('../licenses/binary/') {
+            into "licenses/binary/"
+        }
+        from '../LICENSE_RELEASE'
+        from '../NOTICE_RELEASE'
+        rename ('LICENSE_RELEASE', 'LICENSE')
+        rename ('NOTICE_RELEASE', 'NOTICE')
+
+        from '../DISCLAIMER'
+        from '../README.md'
+    }
+}
+
+task fineractRelease(type: Tar, dependsOn: [
+    'bootJar',
+    'bootWar',
+    'generateSwaggerCodeFineract'
+]) {
+    archiveFileName = "apache-fineract-$releaseVersion-binary.tar.gz"
+    with distributionsCopySpec
+    doLast {
+        signing {
+            useGpgCmd()
+            sign file("${buildDir}/distributions/apache-fineract-$releaseVersion-binary.tar.gz")
+        }
+    }
 }
 
 // Configuration for spotbugs plugin
