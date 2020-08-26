@@ -48,7 +48,7 @@ public enum RecalculationFrequencyType {
         return type;
     }
 
-    private RecalculationFrequencyType(final Integer value, final String code) {
+    RecalculationFrequencyType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

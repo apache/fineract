@@ -44,7 +44,7 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
 
         private final String schema;
 
-        public TopicMapper() {
+        TopicMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("t.id as id, t.title as title, t.enabled as enabled, ");
             sqlBuilder.append("t.entity_id as entityId, t.entity_type as entityType, ");

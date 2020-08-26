@@ -52,7 +52,7 @@ public enum GuarantorFundStatusType {
         return enumeration;
     }
 
-    private GuarantorFundStatusType(final Integer value, final String code) {
+    GuarantorFundStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

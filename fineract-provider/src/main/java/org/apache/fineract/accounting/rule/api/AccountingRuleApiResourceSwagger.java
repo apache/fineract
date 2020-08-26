@@ -118,7 +118,7 @@ final class AccountingRuleApiResourceSwagger {
 
         public static class PutAccountingRulesResponsechangesSwagger {
 
-            public PutAccountingRulesResponsechangesSwagger() {}
+            PutAccountingRulesResponsechangesSwagger() {}
 
             @Schema(example = "Employee Salary posting rule")
             public String name;

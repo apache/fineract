@@ -29,7 +29,7 @@ public final class CalendarConstants {
 
     public static final String CALENDAR_RESOURCE_NAME = "calendar";
 
-    public static enum CalendarSupportedParameters {
+    public enum CalendarSupportedParameters {
 
         CALENDAR_ID("id"), ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), TITLE("title"), DESCRIPTION("description"), LOCATION(
                 "location"), START_DATE("startDate"), END_DATE("endDate"), CREATED_DATE("createdDate"), DURATION("duration"), TYPE_ID(
@@ -45,7 +45,7 @@ public final class CalendarConstants {
 
         private final String value;
 
-        private CalendarSupportedParameters(final String value) {
+        CalendarSupportedParameters(final String value) {
             this.value = value;
         }
 

@@ -26,7 +26,7 @@ public enum RescheduleType {
     private final Integer value;
     private final String code;
 
-    private RescheduleType(Integer value, String code) {
+    RescheduleType(Integer value, String code) {
         this.value = value;
         this.code = code;
     }

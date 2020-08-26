@@ -419,7 +419,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
         private final String schema;
 
-        public OriginalScheduleExtractor(final String loanIdsAsString) {
+        OriginalScheduleExtractor(final String loanIdsAsString) {
             final StringBuilder scheduleDetail = new StringBuilder();
             scheduleDetail.append("select ml.id as loanId, mr.duedate as dueDate, mr.principal_amount as principalAmount, ");
             scheduleDetail.append(

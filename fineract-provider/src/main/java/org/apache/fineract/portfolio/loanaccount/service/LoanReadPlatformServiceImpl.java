@@ -1026,7 +1026,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         private boolean excludePastUndisbursed;
         private BigDecimal totalPaidFeeCharges;
 
-        public LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
+        LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
                 Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();

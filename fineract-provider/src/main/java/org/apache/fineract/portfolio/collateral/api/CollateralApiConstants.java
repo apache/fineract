@@ -39,7 +39,7 @@ public final class CollateralApiConstants {
 
         private final String value;
 
-        private CollateralJSONinputParams(final String value) {
+        CollateralJSONinputParams(final String value) {
             this.value = value;
         }
 

@@ -89,7 +89,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
 
         private final String sql;
 
-        public FinancialActivityAccountMapper() {
+        FinancialActivityAccountMapper() {
             StringBuilder sb = new StringBuilder(300);
             sb.append(
                     " faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");

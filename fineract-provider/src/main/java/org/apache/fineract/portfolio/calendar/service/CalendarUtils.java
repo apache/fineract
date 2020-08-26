@@ -393,7 +393,7 @@ public final class CalendarUtils {
         private final String code;
         private final Integer value;
 
-        private DayNameEnum(final Integer value, final String code) {
+        DayNameEnum(final Integer value, final String code) {
             this.value = value;
             this.code = code;
         }
@@ -416,14 +416,14 @@ public final class CalendarUtils {
         }
     }
 
-    public static enum NthDayNameEnum {
+    public enum NthDayNameEnum {
 
         ONE(1, "First"), TWO(2, "Second"), THREE(3, "Third"), FOUR(4, "Fourth"), FIVE(5, "Fifth"), LAST(-1, "Last"), INVALID(0, "Invalid");
 
         private final String code;
         private final Integer value;
 
-        private NthDayNameEnum(final Integer value, final String code) {
+        NthDayNameEnum(final Integer value, final String code) {
             this.value = value;
             this.code = code;
         }

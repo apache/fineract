@@ -45,7 +45,7 @@ public enum AccountAssociationType {
         return enumeration;
     }
 
-    private AccountAssociationType(final Integer value, final String code) {
+    AccountAssociationType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -34,7 +34,7 @@ public final class ProvisioningHelper {
 
     }
 
-    public static final Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
+    public static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
             Account expense) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("loanProducts", addLoanProducts(loanProducts));
@@ -48,7 +48,7 @@ public final class ProvisioningHelper {
         return map;
     }
 
-    public static final String createProvisioningEntryJson() {
+    public static String createProvisioningEntryJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.FALSE);
         map.put("locale", "en");
@@ -59,7 +59,7 @@ public final class ProvisioningHelper {
         return provisioningEntryCreateJson;
     }
 
-    public static final String createProvisioningEntryJsonWithJournalsEnabled() {
+    public static String createProvisioningEntryJsonWithJournalsEnabled() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.TRUE);
         map.put("locale", "en");

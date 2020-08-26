@@ -34,14 +34,14 @@ public final class AccountingConstants {
     /***
      * Accounting placeholders for cash based accounting for loan products
      ***/
-    public static enum CashAccountsForLoan {
+    public enum CashAccountsForLoan {
 
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
                 6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
 
         private final Integer value;
 
-        private CashAccountsForLoan(final Integer value) {
+        CashAccountsForLoan(final Integer value) {
             this.value = value;
         }
 
@@ -70,7 +70,7 @@ public final class AccountingConstants {
     /***
      * Accounting placeholders for accrual based accounting for loan products
      ***/
-    public static enum AccrualAccountsForLoan {
+    public enum AccrualAccountsForLoan {
 
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
                 6), INTEREST_RECEIVABLE(
@@ -78,7 +78,7 @@ public final class AccountingConstants {
 
         private final Integer value;
 
-        private AccrualAccountsForLoan(final Integer value) {
+        AccrualAccountsForLoan(final Integer value) {
             this.value = value;
         }
 
@@ -108,7 +108,7 @@ public final class AccountingConstants {
     /***
      * Enum of all accounting related input parameter names used while creating/updating a loan product
      ***/
-    public static enum LoanProductAccountingParams {
+    public enum LoanProductAccountingParams {
 
         FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS(
                 "interestOnLoanAccountId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), INCOME_FROM_PENALTIES(
@@ -126,7 +126,7 @@ public final class AccountingConstants {
 
         private final String value;
 
-        private LoanProductAccountingParams(final String value) {
+        LoanProductAccountingParams(final String value) {
             this.value = value;
         }
 
@@ -140,7 +140,7 @@ public final class AccountingConstants {
         }
     }
 
-    public static enum LoanProductAccountingDataParams {
+    public enum LoanProductAccountingDataParams {
 
         FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS(
                 "interestOnLoanAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
@@ -153,7 +153,7 @@ public final class AccountingConstants {
 
         private final String value;
 
-        private LoanProductAccountingDataParams(final String value) {
+        LoanProductAccountingDataParams(final String value) {
             this.value = value;
         }
 
@@ -170,14 +170,14 @@ public final class AccountingConstants {
     /***
      * Accounting placeholders for cash based accounting for savings products
      ***/
-    public static enum CashAccountsForSavings {
+    public enum CashAccountsForSavings {
 
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
                 10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
 
         private final Integer value;
 
-        private CashAccountsForSavings(final Integer value) {
+        CashAccountsForSavings(final Integer value) {
             this.value = value;
         }
 
@@ -206,7 +206,7 @@ public final class AccountingConstants {
     /***
      * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
-    public static enum SavingProductAccountingParams {
+    public enum SavingProductAccountingParams {
 
         SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
                 "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
@@ -224,7 +224,7 @@ public final class AccountingConstants {
 
         private final String value;
 
-        private SavingProductAccountingParams(final String value) {
+        SavingProductAccountingParams(final String value) {
             this.value = value;
         }
 
@@ -238,7 +238,7 @@ public final class AccountingConstants {
         }
     }
 
-    public static enum SavingProductAccountingDataParams {
+    public enum SavingProductAccountingDataParams {
 
         SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES(
                 "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS(
@@ -251,7 +251,7 @@ public final class AccountingConstants {
 
         private final String value;
 
-        private SavingProductAccountingDataParams(final String value) {
+        SavingProductAccountingDataParams(final String value) {
             this.value = value;
         }
 
@@ -265,7 +265,7 @@ public final class AccountingConstants {
         }
     }
 
-    public static enum FinancialActivity {
+    public enum FinancialActivity {
 
         ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer",
                 GLAccountType.LIABILITY), CASH_AT_MAINVAULT(101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102,
@@ -286,7 +286,7 @@ public final class AccountingConstants {
             }
         }
 
-        private FinancialActivity(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
+        FinancialActivity(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
             this.value = value;
             this.code = code;
             this.mappedGLAccountType = mappedGLAccountType;
@@ -343,13 +343,13 @@ public final class AccountingConstants {
     /***
      * Accounting placeholders for cash based accounting for Share products
      ***/
-    public static enum CashAccountsForShares {
+    public enum CashAccountsForShares {
 
         SHARES_REFERENCE(1), SHARES_SUSPENSE(2), INCOME_FROM_FEES(3), SHARES_EQUITY(4);
 
         private final Integer value;
 
-        private CashAccountsForShares(final Integer value) {
+        CashAccountsForShares(final Integer value) {
             this.value = value;
         }
 
@@ -378,14 +378,14 @@ public final class AccountingConstants {
     /***
      * Enum of all accounting related input parameter names used while creating/updating a savings product
      ***/
-    public static enum SharesProductAccountingParams {
+    public enum SharesProductAccountingParams {
 
         SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), SHARES_EQUITY(
                 "shareEquityId");
 
         private final String value;
 
-        private SharesProductAccountingParams(final String value) {
+        SharesProductAccountingParams(final String value) {
             this.value = value;
         }
 

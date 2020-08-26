@@ -971,7 +971,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public SavingsAccountTransactionsMapper() {
+        SavingsAccountTransactionsMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
@@ -1383,7 +1383,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public DepositAccountForMaturityMapper() {
+        DepositAccountForMaturityMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("da.id as id, ");
             sqlBuilder.append("da.account_no as accountNumber, ");
@@ -1477,7 +1477,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         private final String schemaSql;
 
-        public AccountTransferMapper() {
+        AccountTransferMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(
                     "sa.id as fromAcc ,aa.linked_savings_account_id as toAcc,st.amount as amount, st.transaction_date as transactionDate ")

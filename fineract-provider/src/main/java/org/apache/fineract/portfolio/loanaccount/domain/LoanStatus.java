@@ -80,7 +80,7 @@ public enum LoanStatus {
         return enumeration;
     }
 
-    private LoanStatus(final Integer value, final String code) {
+    LoanStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

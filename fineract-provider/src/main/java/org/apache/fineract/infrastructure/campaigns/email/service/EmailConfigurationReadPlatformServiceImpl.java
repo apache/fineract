@@ -48,7 +48,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
 
         final String schema;
 
-        public EmailConfigurationRowMapper() {
+        EmailConfigurationRowMapper() {
             final StringBuilder sql = new StringBuilder(300);
             sql.append("cnf.id as id, ");
             sql.append("cnf.name as name, ");

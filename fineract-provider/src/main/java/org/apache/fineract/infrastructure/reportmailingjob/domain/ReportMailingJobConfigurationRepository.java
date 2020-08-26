@@ -27,5 +27,5 @@ public interface ReportMailingJobConfigurationRepository
     /**
      * find ReportMailingJobConfiguration by name
      **/
-    ReportMailingJobConfiguration findByName(final String name);
+    ReportMailingJobConfiguration findByName(String name);
 }

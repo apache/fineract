@@ -31,7 +31,7 @@ public enum AdHocJsonInputParams {
 
     private final String value;
 
-    private AdHocJsonInputParams(final String value) {
+    AdHocJsonInputParams(final String value) {
         this.value = value;
     }
 

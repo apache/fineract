@@ -62,7 +62,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
                 .append(" ts.deadlock_max_retry_interval as maxIntervalBetweenRetries ")//
                 .append(" from tenants t left join tenant_server_connections ts ");
 
-        public TenantMapper(boolean isReport) {
+        TenantMapper(boolean isReport) {
             this.isReport = isReport;
         }
 

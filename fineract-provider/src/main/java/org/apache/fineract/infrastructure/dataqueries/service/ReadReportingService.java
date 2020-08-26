@@ -43,7 +43,7 @@ public interface ReadReportingService {
 
     Collection<ReportParameterData> getAllowedParameters();
 
-    ReportData retrieveReport(final Long id);
+    ReportData retrieveReport(Long id);
 
     Collection<String> getAllowedReportTypes();
 

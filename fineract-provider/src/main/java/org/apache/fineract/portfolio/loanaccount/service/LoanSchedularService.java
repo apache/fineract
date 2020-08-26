@@ -27,5 +27,5 @@ public interface LoanSchedularService {
 
     void recalculateInterest() throws JobExecutionException;
 
-    void recalculateInterest(@SuppressWarnings("unused") final Map<String, String> jobParameters);
+    void recalculateInterest(@SuppressWarnings("unused") Map<String, String> jobParameters);
 }

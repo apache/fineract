@@ -20,22 +20,22 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public interface SchedulerServiceConstants {
 
-    public static final String JOB_KEY_SEPERATOR = " _ ";
-    public static final String TRIGGER_TYPE_CRON = "cron";
-    public static final String TRIGGER_TYPE_APPLICATION = "application";
-    public static final String TRIGGER_TYPE_REFERENCE = "TRIGGER_TYPE_REFERENCE";
-    public static final String SCHEDULER_EXCEPTION = "SchedulerException";
-    public static final String JOB_EXECUTION_EXCEPTION = "JobExecutionException";
-    public static final String JOB_METHOD_INVOCATION_FAILED_EXCEPTION = "JobMethodInvocationFailedException";
-    public static final String STATUS_SUCCESS = "success";
-    public static final String STATUS_FAILED = "failed";
-    public static final String DEFAULT_LISTENER_NAME = "Global Listner";
-    public static final int STACK_TRACE_LEVEL = 7;
-    public static final String TENANT_IDENTIFIER = "tenantIdentifier";
-    public static final String SCHEDULER = "Scheduler";
-    public static final String SCHEDULER_GROUP = "group";
-    public static final int DEFAULT_THREAD_COUNT = 7;
-    public static final int GROUP_THREAD_COUNT = 1;
-    public static final String SCHEDULER_NAME = "schedulerName";
+    String JOB_KEY_SEPERATOR = " _ ";
+    String TRIGGER_TYPE_CRON = "cron";
+    String TRIGGER_TYPE_APPLICATION = "application";
+    String TRIGGER_TYPE_REFERENCE = "TRIGGER_TYPE_REFERENCE";
+    String SCHEDULER_EXCEPTION = "SchedulerException";
+    String JOB_EXECUTION_EXCEPTION = "JobExecutionException";
+    String JOB_METHOD_INVOCATION_FAILED_EXCEPTION = "JobMethodInvocationFailedException";
+    String STATUS_SUCCESS = "success";
+    String STATUS_FAILED = "failed";
+    String DEFAULT_LISTENER_NAME = "Global Listner";
+    int STACK_TRACE_LEVEL = 7;
+    String TENANT_IDENTIFIER = "tenantIdentifier";
+    String SCHEDULER = "Scheduler";
+    String SCHEDULER_GROUP = "group";
+    int DEFAULT_THREAD_COUNT = 7;
+    int GROUP_THREAD_COUNT = 1;
+    String SCHEDULER_NAME = "schedulerName";
 
 }

@@ -2681,7 +2681,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         private final LocalDate scheduledDueDate;
         private final ArrayList<LoanTermVariationsData> variationsData;
 
-        public LoanTermVariationParams(final boolean skipPeriod, final boolean recalculateAmounts, final LocalDate scheduledDueDate,
+        LoanTermVariationParams(final boolean skipPeriod, final boolean recalculateAmounts, final LocalDate scheduledDueDate,
                 final ArrayList<LoanTermVariationsData> variationsData) {
             this.skipPeriod = skipPeriod;
             this.recalculateAmounts = recalculateAmounts;

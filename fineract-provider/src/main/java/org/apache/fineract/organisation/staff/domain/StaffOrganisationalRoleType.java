@@ -29,7 +29,7 @@ public enum StaffOrganisationalRoleType {
     private final Integer value;
     private final String code;
 
-    private StaffOrganisationalRoleType(final Integer value, final String code) {
+    StaffOrganisationalRoleType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

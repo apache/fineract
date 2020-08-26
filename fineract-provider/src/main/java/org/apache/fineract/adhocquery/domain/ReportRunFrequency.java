@@ -33,7 +33,7 @@ public enum ReportRunFrequency {
     private final long value;
     private final String code;
 
-    private ReportRunFrequency(final long value, final String code) {
+    ReportRunFrequency(final long value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -58,7 +58,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
         final String schema;
 
-        public EmailMapper() {
+        EmailMapper() {
             final StringBuilder sql = new StringBuilder(300);
             sql.append(" emo.id as id, ");
             sql.append("emo.group_id as groupId, ");
