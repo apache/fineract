@@ -218,7 +218,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final String hierarchy = searchCriteria.getHierarchy();
         if (hierarchy != null) {
-            extraCriteria.addNonNullCriteria("o.hierarchy like ? ", hierarchy + "%");
+            extraCriteria.addNonNullCriteria("o.hierarchy like ", hierarchy + "%");
         }
         extraCriteria.addNonNullCriteria("g.staff_id =", searchCriteria.getStaffId());
 
