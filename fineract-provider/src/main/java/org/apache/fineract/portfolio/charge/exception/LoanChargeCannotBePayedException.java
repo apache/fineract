@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class LoanChargeCannotBePayedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LoanChargeCannotBePayedReason {
+    public enum LoanChargeCannotBePayedReason {
 
         ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, CHARGE_NOT_ACCOUNT_TRANSFER, CHARGE_NOT_PAYABLE;
 

@@ -29,7 +29,7 @@ public enum EntityAccountType {
     private final Integer value;
     private final String code;
 
-    private EntityAccountType(final Integer value, final String code) {
+    EntityAccountType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -802,7 +802,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private final String sql;
 
-        public IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
+        IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
 
             final StringBuilder sb = new StringBuilder(400);
             sb.append(

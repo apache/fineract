@@ -27,8 +27,8 @@ public interface HolidayWritePlatformService {
 
     CommandProcessingResult updateHoliday(JsonCommand command);
 
-    CommandProcessingResult activateHoliday(final Long holidayId);
+    CommandProcessingResult activateHoliday(Long holidayId);
 
-    CommandProcessingResult deleteHoliday(final Long holidayId);
+    CommandProcessingResult deleteHoliday(Long holidayId);
 
 }

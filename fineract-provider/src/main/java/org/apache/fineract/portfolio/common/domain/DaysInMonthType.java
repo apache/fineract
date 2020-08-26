@@ -38,7 +38,7 @@ public enum DaysInMonthType {
     private final Integer value;
     private final String code;
 
-    private DaysInMonthType(final Integer value, final String code) {
+    DaysInMonthType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

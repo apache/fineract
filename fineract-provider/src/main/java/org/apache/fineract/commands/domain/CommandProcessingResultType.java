@@ -28,7 +28,7 @@ public enum CommandProcessingResultType {
     private final Integer value;
     private final String code;
 
-    private CommandProcessingResultType(final Integer value, final String code) {
+    CommandProcessingResultType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

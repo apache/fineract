@@ -318,7 +318,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
         final String schemaSql;
 
-        public SavingsAccountSummaryDataMapper() {
+        SavingsAccountSummaryDataMapper() {
             final StringBuilder accountsSummary = new StringBuilder();
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.account_type_enum as accountType, ");

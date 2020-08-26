@@ -204,7 +204,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         private final String schemaSql;
 
-        public CenterCalendarDataMapper() {
+        CenterCalendarDataMapper() {
 
             schemaSql = "select ce.id as id, g.account_no as accountNo,"
                     + "ce.display_name as name, g.office_id as officeId, g.staff_id as staffId, s.display_name as staffName,"
@@ -278,7 +278,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         private final String schemaSql;
 
-        public GroupDataMapper() {
+        GroupDataMapper() {
 
             this.schemaSql = SQL_QUERY;
         }

@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
  */
 public interface ReadLikelihoodService {
 
-    public List<LikelihoodData> retrieveAll(final String ppiName);
+    List<LikelihoodData> retrieveAll(String ppiName);
 
-    public LikelihoodData retrieve(final Long likelihoodId);
+    LikelihoodData retrieve(Long likelihoodId);
 }

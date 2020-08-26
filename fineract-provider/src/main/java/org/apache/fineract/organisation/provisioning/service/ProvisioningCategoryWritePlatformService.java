@@ -25,7 +25,7 @@ public interface ProvisioningCategoryWritePlatformService {
 
     CommandProcessingResult createProvisioningCateogry(JsonCommand command);
 
-    CommandProcessingResult updateProvisioningCategory(final Long categoryId, JsonCommand command);
+    CommandProcessingResult updateProvisioningCategory(Long categoryId, JsonCommand command);
 
     CommandProcessingResult deleteProvisioningCateogry(JsonCommand command);
 }

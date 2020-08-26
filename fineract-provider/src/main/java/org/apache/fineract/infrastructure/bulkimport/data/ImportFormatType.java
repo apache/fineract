@@ -27,7 +27,7 @@ public enum ImportFormatType {
 
     private final String format;
 
-    private ImportFormatType(String format) {
+    ImportFormatType(String format) {
         this.format = format;
     }
 

@@ -253,7 +253,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
-        public final String schema() {
+        public String schema() {
             return "g.id as id, g.account_no as accountNo, g.display_name as displayName from m_group g where g.level_id = 2 ";
         }
 

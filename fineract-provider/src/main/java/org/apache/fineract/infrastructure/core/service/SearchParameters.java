@@ -176,7 +176,7 @@ public final class SearchParameters {
                 loanId, savingsId, orphansOnly, isSelfUser);
     }
 
-    public static final SearchParameters forProvisioningEntries(final Long provisioningEntryId, final Long officeId, final Long productId,
+    public static SearchParameters forProvisioningEntries(final Long provisioningEntryId, final Long officeId, final Long productId,
             final Long categoryId, final Integer offset, final Integer limit) {
         return new SearchParameters(provisioningEntryId, officeId, productId, categoryId, offset, limit);
     }

@@ -39,11 +39,11 @@ public interface JournalEntryWritePlatformService {
 
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
 
-    public String revertProvisioningJournalEntries(final Date reversalTransactionDate, final Long entityId, final Integer entityType);
+    String revertProvisioningJournalEntries(Date reversalTransactionDate, Long entityId, Integer entityType);
 
-    public String createProvisioningJournalEntries(ProvisioningEntry entry);
+    String createProvisioningJournalEntries(ProvisioningEntry entry);
 
     void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
 
-    void revertShareAccountJournalEntries(final ArrayList<Long> transactionId, final Date transactionDate);
+    void revertShareAccountJournalEntries(ArrayList<Long> transactionId, Date transactionDate);
 }

@@ -55,7 +55,7 @@ public enum LoanTransactionType {
     private final Integer value;
     private final String code;
 
-    private LoanTransactionType(final Integer value, final String code) {
+    LoanTransactionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

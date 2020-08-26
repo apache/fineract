@@ -42,7 +42,7 @@ public interface ClientReadPlatformService {
 
     Collection<ClientData> retrieveActiveClientMembersOfGroup(Long groupId);
 
-    Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId);
+    Collection<ClientData> retrieveActiveClientMembersOfCenter(Long centerId);
 
     ClientData retrieveAllNarrations(String clientNarrations);
 

@@ -61,7 +61,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
         private final String schema;
 
-        public AccountNumberFormatMapper() {
+        AccountNumberFormatMapper() {
             final StringBuilder builder = new StringBuilder(400);
 
             builder.append(" anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum");

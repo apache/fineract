@@ -92,7 +92,7 @@ public enum ClientStatus {
         return clientStatus;
     }
 
-    private ClientStatus(final Integer value, final String code) {
+    ClientStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

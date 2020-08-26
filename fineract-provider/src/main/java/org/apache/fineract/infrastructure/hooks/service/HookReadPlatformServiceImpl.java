@@ -119,7 +119,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
         private final JdbcTemplate jdbcTemplate;
 
-        public HookMapper(final JdbcTemplate jdbcTemplate) {
+        HookMapper(final JdbcTemplate jdbcTemplate) {
             this.jdbcTemplate = jdbcTemplate;
         }
 
@@ -199,7 +199,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
         private final JdbcTemplate jdbcTemplate;
 
-        public TemplateMapper(final JdbcTemplate jdbcTemplate) {
+        TemplateMapper(final JdbcTemplate jdbcTemplate) {
             this.jdbcTemplate = jdbcTemplate;
         }
 

@@ -58,7 +58,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
         private final String entityDisplayName;
 
-        public ImageMapper(final String entityDisplayName) {
+        ImageMapper(final String entityDisplayName) {
             this.entityDisplayName = entityDisplayName;
         }
 

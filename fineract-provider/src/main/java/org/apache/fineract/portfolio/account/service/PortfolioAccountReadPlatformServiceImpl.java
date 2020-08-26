@@ -169,7 +169,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
         private final String schemaSql;
 
-        public PortfolioSavingsAccountMapper() {
+        PortfolioSavingsAccountMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
@@ -231,7 +231,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
         private final String schemaSql;
 
-        public PortfolioLoanAccountMapper() {
+        PortfolioLoanAccountMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("la.id as id, la.account_no as accountNo, la.external_id as externalId, ");
@@ -295,7 +295,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
         private final String schemaSql;
 
-        public PortfolioLoanAccountRefundByTransferMapper() {
+        PortfolioLoanAccountRefundByTransferMapper() {
 
             final StringBuilder amountQueryString = new StringBuilder(400);
             amountQueryString.append("(select (SUM(ifnull(mr.principal_completed_derived, 0)) +");

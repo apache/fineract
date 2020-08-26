@@ -64,7 +64,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         private final GLAccountReadPlatformService glAccountReadPlatformService;
         private final boolean isAssociationParametersExists;
 
-        public AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate, final GLAccountReadPlatformService glAccountReadPlatformService,
+        AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate, final GLAccountReadPlatformService glAccountReadPlatformService,
                 final boolean isAssociationParametersExists) {
             this.jdbcTemplate = jdbcTemplate;
             this.glAccountReadPlatformService = glAccountReadPlatformService;

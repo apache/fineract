@@ -29,7 +29,7 @@ public interface HookReadPlatformService {
 
     HookData retrieveHook(Long hookId);
 
-    List<Hook> retrieveHooksByEvent(final String entityName, final String actionName);
+    List<Hook> retrieveHooksByEvent(String entityName, String actionName);
 
     HookData retrieveNewHookDetails(String templateName);
 }

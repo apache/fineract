@@ -69,7 +69,7 @@ public class BusinessEventNotificationConstants {
 
         private final String value;
 
-        private BusinessEvents(final String value) {
+        BusinessEvents(final String value) {
             this.value = value;
         }
 

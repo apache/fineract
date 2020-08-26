@@ -40,5 +40,5 @@ public interface CommandStrategy {
      * @param uriInfo
      * @return BatchResponse
      */
-    public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo);
+    BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo);
 }

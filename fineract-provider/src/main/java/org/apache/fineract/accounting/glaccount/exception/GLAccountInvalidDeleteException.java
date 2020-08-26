@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleException {
 
     /*** Enum of reasons for invalid delete **/
-    public static enum GlAccountInvalidDeleteReason {
+    public enum GlAccountInvalidDeleteReason {
 
         TRANSANCTIONS_LOGGED, HAS_CHILDREN;
 

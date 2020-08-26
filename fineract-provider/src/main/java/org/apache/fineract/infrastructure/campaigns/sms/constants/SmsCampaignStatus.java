@@ -28,7 +28,7 @@ public enum SmsCampaignStatus {
     private final Integer value;
     private final String code;
 
-    private SmsCampaignStatus(Integer value, String code) {
+    SmsCampaignStatus(Integer value, String code) {
         this.value = value;
         this.code = code;
     }

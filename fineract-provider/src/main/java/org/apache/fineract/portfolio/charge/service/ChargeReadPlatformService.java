@@ -53,7 +53,7 @@ public interface ChargeReadPlatformService {
      *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes);
+    Collection<ChargeData> retrieveLoanAccountApplicableCharges(Long loanId, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all charges applicable for a given loan product (filter based on Currency of Selected Loan Product)
@@ -62,7 +62,7 @@ public interface ChargeReadPlatformService {
      *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes);
+    Collection<ChargeData> retrieveLoanProductApplicableCharges(Long loanProductId, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all Penalties applicable for loans
@@ -120,5 +120,5 @@ public interface ChargeReadPlatformService {
      */
     Collection<ChargeData> retrieveSharesApplicableCharges();
 
-    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId);
+    Collection<ChargeData> retrieveShareProductCharges(Long shareProductId);
 }

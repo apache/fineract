@@ -25,11 +25,11 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public interface SmsCampaignReadPlatformService {
 
-    public SmsCampaignData retrieveOne(final Long campaignId);
+    SmsCampaignData retrieveOne(Long campaignId);
 
-    public Page<SmsCampaignData> retrieveAll(final SearchParameters searchParameters);
+    Page<SmsCampaignData> retrieveAll(SearchParameters searchParameters);
 
-    public SmsCampaignData retrieveTemplate(final String reportType);
+    SmsCampaignData retrieveTemplate(String reportType);
 
     Collection<SmsCampaignData> retrieveAllScheduleActiveCampaign();
 

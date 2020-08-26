@@ -68,7 +68,7 @@ public enum GlobalEntityType {
         }
     }
 
-    private GlobalEntityType(final Integer value, final String code) {
+    GlobalEntityType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

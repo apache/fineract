@@ -33,7 +33,7 @@ public enum AccountingRuleJsonInputParams {
 
     private final String value;
 
-    private AccountingRuleJsonInputParams(final String value) {
+    AccountingRuleJsonInputParams(final String value) {
         this.value = value;
     }
 

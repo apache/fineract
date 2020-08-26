@@ -27,7 +27,7 @@ public enum CampaignType {
     private final Integer value;
     private final String code;
 
-    private CampaignType(Integer value, String code) {
+    CampaignType(Integer value, String code) {
         this.value = value;
         this.code = code;
     }
