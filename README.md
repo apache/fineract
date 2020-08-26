@@ -353,6 +353,41 @@ Releasing
 
 [How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release ZIP available on http://fineract.apache.org.
 
+Before you use Gradle to create a release you need to make sure that your GPG is properly setup and that you have set the following properties in your ~/gradle/gradle.properties:
+```
+signing.gnupg.keyName=7890ABCD
+signing.gnupg.passphrase=secret
+```
+
+IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties and double check that you are not accidentally committing them to Git.
+
+NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName". 
+
+Execute the following task to create a distribution with an ASCII armored signature (.asc) and a SHA512 checksum file (.sha512):
+```
+./gradlew -Pfineract.release clean build 
+```
+
+Above task will create the following files in folder build/distributions:
+
+- distribution file: apache-fineract-1.4.0-binary.tar.gz
+- ASCII armored signatures: apache-fineract-1.4.0-binary.tar.gz.asc
+- SHA512 checksum: apache-fineract-1.4.0-binary.tar.gz.sha512
+
+Verify the validity of the release distribution with:
+```
+gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
+```
+
+The output should look somewhat like this:
+```
+gpg: assuming signed data in 'build/distributions/apache-fineract-1.4.0-binary.tgz'
+gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
+gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
+gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
+```
+
+NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 
 More Information
 ============

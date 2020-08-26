@@ -824,41 +824,51 @@ bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar){
-    compression = Compression.GZIP
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
 }
 
-def distributionsCopySpec = copySpec {
-    into("apache-fineract-$releaseVersion-binary") {
-        from "${buildDir}/${libsDirName}"
-        from("${buildDir}/swagger-code-fineract/build/${libsDirName}/client-*.jar") {
-            into "fineract-client-$releaseVersion\\.jar"
-        }
-        from('../licenses/binary/') {
-            into "licenses/binary/"
-        }
-        from '../LICENSE_RELEASE'
-        from '../NOTICE_RELEASE'
-        rename ('LICENSE_RELEASE', 'LICENSE')
-        rename ('NOTICE_RELEASE', 'NOTICE')
+tasks.withType(Tar){
+    compression Compression.GZIP
+    extension 'tar.gz'
+}
 
-        from '../DISCLAIMER'
-        from '../README.md'
+distributions {
+    main {
+        baseName "apache-fineract-$releaseVersion-binary"
+        contents {
+            from sourcesJar
+            from bootJar
+            from bootWar
+            // TODO: fix client code generation
+            // from buildSwaggerCodeFineract
+            from('../licenses/binary/') {
+                into "licenses/binary/"
+            }
+            from '../LICENSE_RELEASE'
+            from '../NOTICE_RELEASE'
+            rename ('LICENSE_RELEASE', 'LICENSE')
+            rename ('NOTICE_RELEASE', 'NOTICE')
+
+            from '../DISCLAIMER'
+            from '../README.md'
+        }
     }
 }
 
-task release(type: Tar, dependsOn: [
-    'bootJar',
-    'bootWar',
-    // TODO: fix client code generation
-    // 'buildSwaggerCodeFineract'
-]) {
-    archiveFileName = "apache-fineract-$releaseVersion-binary.tar.gz"
-    with distributionsCopySpec
-    doLast {
-        signing {
-            useGpgCmd()
-            sign file("${buildDir}/distributions/apache-fineract-$releaseVersion-binary.tar.gz")
+tasks.distZip.enabled false
+
+// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
+if( project.hasProperty("fineract.release") ) {
+    signing {
+        useGpgCmd()
+        sign distTar
+    }
+
+    tasks.withType(Tar) { task ->
+        task.doLast {
+            ant.checksum file: it.archivePath, algorithm: 'SHA-512'
         }
     }
 }
@@ -942,15 +952,11 @@ generateSwaggerCodeFineract.dependsOn prepareConfigJson
 // TODO: at the moment the generated client code and the Gradle version it uses needs Java 8 to compile and run; make sure the generator uses Gradle 6.x
 // TODO: fix version information for client jar
 // TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
-/*
-task buildSwaggerCodeFineract(type:Exec, dependsOn: [
-    'build',
-    'generateSwaggerCodeFineract'
-]) {
-    workingDir '../build/swagger-code-fineract'
-
-    executable 'sh'
-
-    args '-c', 'chmod +x gradlew && ./gradlew clean build'
-}
-*/
+//task buildSwaggerCodeFineract(type:Exec, dependsOn: [
+//    'build',
+//    'generateSwaggerCodeFineract'
+//]) {
+//    workingDir '../build/swagger-code-fineract'
+//    executable 'sh'
+//    args '-c', 'chmod +x gradlew && ./gradlew clean build'
+//}
