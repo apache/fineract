@@ -831,6 +831,9 @@ tasks.withType(Tar){
 def distributionsCopySpec = copySpec {
     into("apache-fineract-$releaseVersion-binary") {
         from "${buildDir}/${libsDirName}"
+        from("${buildDir}/swagger-code-fineract/build/${libsDirName}/client-*.jar") {
+            into "fineract-client-$releaseVersion\\.jar"
+        }
         from('../licenses/binary/') {
             into "licenses/binary/"
         }
@@ -844,10 +847,11 @@ def distributionsCopySpec = copySpec {
     }
 }
 
-task fineractRelease(type: Tar, dependsOn: [
+task release(type: Tar, dependsOn: [
     'bootJar',
     'bootWar',
-    'generateSwaggerCodeFineract'
+    // TODO: fix client code generation
+    // 'buildSwaggerCodeFineract'
 ]) {
     archiveFileName = "apache-fineract-$releaseVersion-binary.tar.gz"
     with distributionsCopySpec
@@ -934,3 +938,19 @@ swaggerSources {
 }
 
 generateSwaggerCodeFineract.dependsOn prepareConfigJson
+
+// TODO: at the moment the generated client code and the Gradle version it uses needs Java 8 to compile and run; make sure the generator uses Gradle 6.x
+// TODO: fix version information for client jar
+// TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
+/*
+task buildSwaggerCodeFineract(type:Exec, dependsOn: [
+    'build',
+    'generateSwaggerCodeFineract'
+]) {
+    workingDir '../build/swagger-code-fineract'
+
+    executable 'sh'
+
+    args '-c', 'chmod +x gradlew && ./gradlew clean build'
+}
+*/
