@@ -109,7 +109,7 @@ dependencyManagement {
         dependency 'org.flywaydb:flyway-core:6.5.5'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.832'
-        dependency 'org.ehcache:ehcache:3.8.1'
+        dependency 'org.ehcache:ehcache:3.9.0'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
@@ -121,8 +121,8 @@ dependencyManagement {
         dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
-        dependency 'org.mockito:mockito-core:3.5.6'
-        dependency 'org.mockito:mockito-junit-jupiter:3.5.6'
+        dependency 'org.mockito:mockito-core:3.5.7'
+        dependency 'org.mockito:mockito-junit-jupiter:3.5.7'
         dependency 'io.github.classgraph:classgraph:4.8.88'
         dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.1.2'
@@ -325,6 +325,7 @@ rat {
         '**/.gitignore',
         '**/.gitkeep',
         '**/*.iml',
+        '**/config/swagger/templates/**',
         // Notice files
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
@@ -923,7 +924,7 @@ generateGitProperties.outputs.upToDateWhen { false }
 // This is for swagger code generation
 // https://github.com/int128/gradle-swagger-generator-plugin
 dependencies {
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.18'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
 }
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
@@ -943,6 +944,7 @@ swaggerSources {
         code {
             language = 'java'
             configFile = file('config/swagger/config.json')
+            templateDir = file('config/swagger/templates')
         }
     }
 }
