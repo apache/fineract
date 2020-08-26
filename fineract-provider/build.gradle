@@ -833,6 +833,7 @@ task sourcesJar(type: Jar) {
 tasks.withType(Tar){
     compression Compression.GZIP
     extension 'tar.gz'
+    dependsOn 'buildSwaggerCodeFineract'
 }
 
 distributions {
@@ -842,8 +843,10 @@ distributions {
             from sourcesJar
             from bootJar
             from bootWar
-            // TODO: fix client code generation
-            // from buildSwaggerCodeFineract
+            from('../build/swagger-code-fineract/build/libs/') {
+                include '**/*.jar'
+                rename 'client-(.+)\\.jar', 'fineract-client.jar'
+            }
             from('../licenses/binary/') {
                 into "licenses/binary/"
             }
@@ -951,14 +954,13 @@ swaggerSources {
 
 generateSwaggerCodeFineract.dependsOn prepareConfigJson
 
-// TODO: at the moment the generated client code and the Gradle version it uses needs Java 8 to compile and run; make sure the generator uses Gradle 6.x
 // TODO: fix version information for client jar
 // TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
-//task buildSwaggerCodeFineract(type:Exec, dependsOn: [
-//    'build',
-//    'generateSwaggerCodeFineract'
-//]) {
-//    workingDir '../build/swagger-code-fineract'
-//    executable 'sh'
-//    args '-c', 'chmod +x gradlew && ./gradlew clean build'
-//}
+task buildSwaggerCodeFineract(type:Exec, dependsOn: [
+    'resolve',
+    'generateSwaggerCodeFineract'
+]) {
+    workingDir '../build/swagger-code-fineract'
+    executable 'sh'
+    args '-c', 'chmod +x gradlew && ./gradlew clean build'
+}
