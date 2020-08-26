@@ -348,7 +348,7 @@ This project's committers typically prefer to bring your Pull Requests in throug
 
 We expect most proposed PRs to typically consist of a single commit.  Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so will rewrite your commit message as they see fit.
 
-Neither of these two are hard absolute rules, but mere conventions.  Multiple commits in singl PR make sense in certain cases (e.g. branch backports).
+Neither of these two are hard absolute rules, but mere conventions.  Multiple commits in single PR make sense in certain cases (e.g. branch backports).
 
 
 Dependency Upgrades
