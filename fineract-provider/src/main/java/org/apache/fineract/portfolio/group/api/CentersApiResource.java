@@ -183,7 +183,6 @@ public class CentersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
