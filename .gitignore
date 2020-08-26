@@ -12,6 +12,7 @@ build
 *.iws
 *.DS_Store
 .idea
+.vscode
 catalina.base_IS_UNDEFINED/
 keystore.jks
 bin/

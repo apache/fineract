@@ -323,6 +323,7 @@ rat {
         '**/.gitignore',
         '**/.gitkeep',
         '**/*.iml',
+        '**/config/swagger/templates/**',
         // Notice files
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
@@ -872,7 +873,7 @@ generateGitProperties.outputs.upToDateWhen { false }
 // This is for swagger code generation
 // https://github.com/int128/gradle-swagger-generator-plugin
 dependencies {
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.18'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
 }
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
@@ -892,6 +893,7 @@ swaggerSources {
         code {
             language = 'java'
             configFile = file('config/swagger/config.json')
+            templateDir = file('config/swagger/templates')
         }
     }
 }
