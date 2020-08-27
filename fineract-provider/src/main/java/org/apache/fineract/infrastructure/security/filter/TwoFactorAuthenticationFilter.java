@@ -78,7 +78,7 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         }
 
         // Process two-factor only when user is authenticated
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
             if (user == null) {
