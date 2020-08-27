@@ -872,7 +872,7 @@ if( project.hasProperty("fineract.release") ) {
 
     tasks.withType(Tar) { task ->
         task.doLast {
-            ant.checksum file: task.archivePath, algorithm: 'SHA-512'
+            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
         }
     }
     tasks.withType(Sign) { task ->
