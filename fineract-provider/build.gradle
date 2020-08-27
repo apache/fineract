@@ -81,6 +81,8 @@ apply plugin: "net.ltgt.errorprone"
 apply plugin: "com.diffplug.spotless"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 apply plugin: "org.hidetake.swagger.generator"
+apply plugin: 'distribution'
+apply plugin: 'signing'
 
 dependencyManagement {
     imports {
@@ -823,6 +825,77 @@ bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+tasks.withType(Tar){
+    compression Compression.GZIP
+    extension 'tar.gz'
+    dependsOn 'buildSwaggerCodeFineract'
+}
+
+distributions {
+    main {
+        baseName "apache-fineract-$releaseVersion-binary"
+        contents {
+            from sourcesJar
+            from bootJar
+            from bootWar
+            from('../build/swagger-code-fineract/build/libs/') {
+                include '**/*.jar'
+                rename 'client-(.+)\\.jar', 'fineract-client.jar'
+            }
+            from('../licenses/binary/') {
+                into "licenses/binary/"
+            }
+            from '../LICENSE_RELEASE'
+            from '../NOTICE_RELEASE'
+            rename ('LICENSE_RELEASE', 'LICENSE')
+            rename ('NOTICE_RELEASE', 'NOTICE')
+
+            from '../DISCLAIMER'
+            from '../README.md'
+        }
+    }
+}
+
+tasks.distZip.enabled false
+
+// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
+if( project.hasProperty("fineract.release") ) {
+    signing {
+        useGpgCmd()
+        sign distTar
+    }
+
+    tasks.withType(Tar) { task ->
+        task.doLast {
+            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
+        }
+    }
+    tasks.withType(Sign) { task ->
+        task.doLast {
+            new ByteArrayOutputStream().withStream { os ->
+                def result = exec {
+                    workingDir '../build/distributions'
+                    executable 'sh'
+                    args '-c', "gpg --verify apache-fineract-$releaseVersion-binary.tar.gz.asc"
+                    standardOutput = os
+                }
+
+                if(result.exitValue==0) {
+                    println '+++++++ GPG signature correct!'
+                } else {
+                    println '------- GPG signature incorrect!'
+                    throw new RuntimeException('GPG signature incorrect!')
+                }
+            }
+        }
+    }
+}
+
 // Configuration for spotbugs plugin
 // https://github.com/spotbugs/spotbugs-gradle-plugin
 
@@ -899,3 +972,14 @@ swaggerSources {
 }
 
 generateSwaggerCodeFineract.dependsOn prepareConfigJson
+
+// TODO: fix version information for client jar
+// TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
+task buildSwaggerCodeFineract(type:Exec, dependsOn: [
+    'resolve',
+    'generateSwaggerCodeFineract'
+]) {
+    workingDir '../build/swagger-code-fineract'
+    executable 'sh'
+    args '-c', 'chmod +x gradlew && ./gradlew clean build'
+}
