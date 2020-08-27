@@ -872,7 +872,26 @@ if( project.hasProperty("fineract.release") ) {
 
     tasks.withType(Tar) { task ->
         task.doLast {
-            ant.checksum file: it.archivePath, algorithm: 'SHA-512'
+            ant.checksum file: task.archivePath, algorithm: 'SHA-512'
+        }
+    }
+    tasks.withType(Sign) { task ->
+        task.doLast {
+            new ByteArrayOutputStream().withStream { os ->
+                def result = exec {
+                    workingDir '../build/distributions'
+                    executable 'sh'
+                    args '-c', "gpg --verify apache-fineract-$releaseVersion-binary.tar.gz.asc"
+                    standardOutput = os
+                }
+
+                if(result.exitValue==0) {
+                    println '+++++++ GPG signature correct!'
+                } else {
+                    println '------- GPG signature incorrect!'
+                    throw new RuntimeException('GPG signature incorrect!')
+                }
+            }
         }
     }
 }

@@ -351,9 +351,11 @@ Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more t
 Releasing
 ---------
 
-[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release ZIP available on http://fineract.apache.org.
+[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
 
-Before you use Gradle to create a release you need to make sure that your GPG is properly setup and that you have set the following properties in your ~/gradle/gradle.properties:
+Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
+
+1. Provide the parameters via ~/gradle/gradle.properties in your home folder:
 ```
 signing.gnupg.keyName=7890ABCD
 signing.gnupg.passphrase=secret
@@ -361,20 +363,27 @@ signing.gnupg.passphrase=secret
 
 IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties and double check that you are not accidentally committing them to Git.
 
-NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName". 
-
-Execute the following task to create a distribution with an ASCII armored signature (.asc) and a SHA512 checksum file (.sha512):
+The release command would look then look like this:
 ```
 ./gradlew -Pfineract.release clean build 
 ```
 
-Above task will create the following files in folder build/distributions:
+2. Another way to provide these parameters are via project parameters on the command line. A release command would then look like this:
+```
+./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build 
+```
+
+NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName". 
+
+Above tasks will create the following files in folder build/distributions:
 
 - distribution file: apache-fineract-1.4.0-binary.tar.gz
 - ASCII armored signatures: apache-fineract-1.4.0-binary.tar.gz.asc
 - SHA512 checksum: apache-fineract-1.4.0-binary.tar.gz.sha512
 
-Verify the validity of the release distribution with:
+The signature is automatically verified by the build script. It will throw an exception if the verification fails.
+
+Additionally, you can verify the validity of the release distribution with:
 ```
 gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
 ```
