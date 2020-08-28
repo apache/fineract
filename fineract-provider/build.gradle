@@ -825,22 +825,16 @@ bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-task sourcesJar(type: Jar) {
-    classifier 'sources'
-    from sourceSets.main.allSource
-}
-
-tasks.withType(Tar){
+tasks.withType(Tar) {
     compression Compression.GZIP
     extension 'tar.gz'
     dependsOn 'buildSwaggerCodeFineract'
 }
 
 distributions {
-    main {
+    binary {
         baseName "apache-fineract-$releaseVersion-binary"
         contents {
-            from sourcesJar
             from bootJar
             from bootWar
             from('../build/swagger-code-fineract/build/libs/') {
@@ -859,17 +853,26 @@ distributions {
             from '../README.md'
         }
     }
+    src {
+        baseName "apache-fineract-$releaseVersion-src"
+        contents {
+            from "../"
+            exclude 'build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
+            rename ('LICENSE_SOURCE', 'LICENSE')
+            rename ('NOTICE_SOURCE', 'NOTICE')
+        }
+    }
 }
 
-tasks.distZip.enabled false
+tasks.binaryDistZip.enabled false
+tasks.srcDistZip.enabled false
 
 // create signatures and checksums only if project parameter "fineract.release" is provided on the command line
 if( project.hasProperty("fineract.release") ) {
     signing {
         useGpgCmd()
-        sign distTar
+        sign (binaryDistTar, srcDistTar)
     }
-
     tasks.withType(Tar) { task ->
         task.doLast {
             ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
@@ -877,19 +880,20 @@ if( project.hasProperty("fineract.release") ) {
     }
     tasks.withType(Sign) { task ->
         task.doLast {
-            new ByteArrayOutputStream().withStream { os ->
-                def result = exec {
-                    workingDir '../build/distributions'
-                    executable 'sh'
-                    args '-c', "gpg --verify apache-fineract-$releaseVersion-binary.tar.gz.asc"
-                    standardOutput = os
-                }
-
-                if(result.exitValue==0) {
-                    println '+++++++ GPG signature correct!'
-                } else {
-                    println '------- GPG signature incorrect!'
-                    throw new RuntimeException('GPG signature incorrect!')
+            task.getFilesToSign().each { f ->
+                new ByteArrayOutputStream().withStream { os ->
+                    def result = exec {
+                        workingDir '../build/distributions'
+                        executable 'sh'
+                        args '-c', "gpg --verify ${f}.asc"
+                        standardOutput = os
+                    }
+                    if(result.exitValue==0) {
+                        println '+++ GPG signature correct!'
+                    } else {
+                        println '--- GPG signature incorrect!'
+                        throw new RuntimeException('--- GPG signature incorrect!')
+                    }
                 }
             }
         }
