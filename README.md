@@ -377,13 +377,16 @@ NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789
 
 Above tasks will create the following files in folder build/distributions:
 
-- distribution file: apache-fineract-1.4.0-binary.tar.gz
-- ASCII armored signatures: apache-fineract-1.4.0-binary.tar.gz.asc
-- SHA512 checksum: apache-fineract-1.4.0-binary.tar.gz.sha512
+- binary distribution file: apache-fineract-1.4.0-binary.tar.gz
+- ASCII armored signature for binary distribution: apache-fineract-1.4.0-binary.tar.gz.asc
+- SHA512 checksum for binary distribution: apache-fineract-1.4.0-binary.tar.gz.sha512
+- source distribution file: apache-fineract-1.4.0-src.tar.gz
+- ASCII armored signature for source distribution: apache-fineract-1.4.0-src.tar.gz.asc
+- SHA512 checksum for source distribution: apache-fineract-1.4.0-src.tar.gz.sha512
 
-The signature is automatically verified by the build script. It will throw an exception if the verification fails.
+The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
 
-Additionally, you can verify the validity of the release distribution with:
+Additionally, you can verify the validity of the release distribution files e. g. with:
 ```
 gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
 ```
@@ -396,6 +399,8 @@ gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
 ```
 
+
+NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 
 
