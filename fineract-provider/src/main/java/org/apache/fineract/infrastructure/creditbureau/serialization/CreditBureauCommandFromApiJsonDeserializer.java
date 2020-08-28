@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreditBureauCommandFromApiJsonDeserializer {
 
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "is_active", "creditBureauId"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "isActive", "creditBureauId"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -66,10 +66,10 @@ public class CreditBureauCommandFromApiJsonDeserializer {
         final String alias = this.fromApiJsonHelper.extractStringNamed("alias", element);
         baseDataValidator.reset().parameter("alias").value(alias).notNull().notBlank().notExceedingLengthOf(100);
 
-        final String is_activeParameter = "is_active";
+        final String is_activeParameter = "isActive";
         if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
-            final boolean is_active = this.fromApiJsonHelper.extractBooleanNamed("is_active", element);
-            baseDataValidator.reset().parameter("is_active").value(is_active).notNull().notBlank().trueOrFalseRequired(is_active);
+            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -94,10 +94,10 @@ public class CreditBureauCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("creditBureauId").value(creditBureauId).notNull().notBlank().longGreaterThanZero();
         }
 
-        final String is_activeParameter = "is_active";
+        final String is_activeParameter = "isActive";
         if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
-            final boolean is_active = this.fromApiJsonHelper.extractBooleanNamed("is_active", element);
-            baseDataValidator.reset().parameter("is_active").value(is_active).notNull().notBlank().trueOrFalseRequired(is_active);
+            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

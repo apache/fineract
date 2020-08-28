@@ -46,7 +46,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         public String schema() {
             return "ocb.id as orgCbId,ocb.alias as orgCbAlias,cb.name as creditbureauName,cb.product as creditbureauProduct,cb.country as creditbureauCountry,"
                     + "concat(cb.product,' - ',cb.name,' - ',cb.country) as CreditBureauSummary,"
-                    + "ocb.creditbureau_id as cbid,ocb.is_active as is_active"
+                    + "ocb.creditbureau_id as cbid,ocb.isActive  as isActive"
                     + " from m_organisation_creditbureau ocb,m_creditbureau cb where ocb.creditbureau_id=cb.id";
 
         }
@@ -60,10 +60,10 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
             final String creditbureauCountry = rs.getString("creditbureauCountry");
             final String CreditBureauSummary = rs.getString("CreditBureauSummary");
             final long cbid = rs.getLong("cbid");
-            final boolean is_active = rs.getBoolean("is_active");
+            final boolean isActive = rs.getBoolean("isActive");
 
             return OrganisationCreditBureauData.instance(orgCbId, orgCbAlias, cbid, creditbureauName, creditbureauProduct,
-                    creditbureauCountry, CreditBureauSummary, is_active);
+                    creditbureauCountry, CreditBureauSummary, isActive);
 
         }
     }
