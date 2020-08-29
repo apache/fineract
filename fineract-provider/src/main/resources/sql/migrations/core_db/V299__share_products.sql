@@ -22,7 +22,7 @@ CREATE TABLE `m_share_product` (
 `name` VARCHAR(200) NOT NULL,
 `short_name` VARCHAR(4) NOT NULL,
 `external_id` VARCHAR(100) NULL DEFAULT NULL,
-`description` VARCHAR(500) NOT NULL,
+`description` VARCHAR(500) NULL DEFAULT NULL,
 `start_date` DATETIME NULL DEFAULT NULL,
 `end_date` DATETIME NULL DEFAULT NULL,
 `currency_code` VARCHAR(3) NOT NULL,
