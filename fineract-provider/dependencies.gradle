@@ -80,7 +80,8 @@ dependencies {
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
-            'org.webjars:webjars-locator-core'
+            'org.webjars:webjars-locator-core',
+            'org.gaul:modernizer-maven-annotations'
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'

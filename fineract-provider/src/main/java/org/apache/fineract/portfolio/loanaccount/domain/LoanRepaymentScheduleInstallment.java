@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.beans.Transient;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
@@ -27,21 +29,33 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.TableAbstractAuditable;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.joda.time.LocalDate;
 
+@org.gaul.modernizer_maven_annotations.SuppressModernizer
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom
-        implements Comparable<LoanRepaymentScheduleInstallment> {
+public class LoanRepaymentScheduleInstallment extends TableAbstractAuditable
+        implements Comparable<LoanRepaymentScheduleInstallment>, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "installmentTable")
+    @TableGenerator(name = "installmentTable", table = "installment_id_gen", pkColumnName = "id", valueColumnName = "installment_id_value", pkColumnValue = "id")
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id")
@@ -170,6 +184,21 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    protected void setId(final Long id) {
+        this.id = id;
+    }
+
+    @Override
+    @Transient // DATAJPA-622
+    public boolean isNew() {
+        return null == this.id;
     }
 
     public Loan getLoan() {
