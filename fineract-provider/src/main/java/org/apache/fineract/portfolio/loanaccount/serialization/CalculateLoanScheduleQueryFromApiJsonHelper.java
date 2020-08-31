@@ -110,9 +110,10 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         // FIXME - KW - this constraint doesnt really need to be here. should be
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
-        validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentEveryType);
-
+        if (loanTermFrequency.equals(repaymentEveryType)) {
+            validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
+                    repaymentEvery, repaymentEveryType);
+        }
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
                 element);

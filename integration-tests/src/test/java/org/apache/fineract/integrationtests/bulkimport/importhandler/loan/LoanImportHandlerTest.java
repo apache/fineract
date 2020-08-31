@@ -44,6 +44,7 @@ import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.funds.FundsHelper;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -63,6 +64,7 @@ public class LoanImportHandlerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandlerTest.class);
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_CHARGE_URL = "/fineract-provider/api/v1/charges?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private ResponseSpecification responseSpec;
@@ -105,6 +107,14 @@ public class LoanImportHandlerTest {
         Integer outcome_client_creation = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
+
+        final String disbursementChargeJsonString = ChargesHelper.getLoanDisbursementJSON();
+
+        final Integer disbursementChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, disbursementChargeJsonString);
+
+        final JsonPath disbursementChargeJSON = JsonPath.from(disbursementChargeJsonString);
+
+        Assertions.assertNotNull(disbursementChargeId, "Could not create charge");
 
         // in order to populate helper sheets
         Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
@@ -184,6 +194,10 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.TOTAL_AMOUNT_REPAID_COL).setCellValue(6000);
         firstLoanRow.createCell(LoanConstants.LAST_REPAYMENT_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(paymentTypeName);
+        firstLoanRow.createCell(LoanConstants.CHARGE_NAME_1).setCellValue(disbursementChargeJSON.getString("name"));
+        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_1).setCellValue(disbursementChargeJSON.getFloat("amount"));
+        firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_TYPE_1)
+                .setCellValue(disbursementChargeJSON.getString("chargeCalculationType.value"));
 
         String currentdirectory = new File("").getAbsolutePath();
         File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator

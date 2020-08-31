@@ -986,6 +986,8 @@ public class ShareAccountDataSerializer {
                 break;
                 case WHOLE_TERM: // Never comes in to this state.
                 break;
+                case SEMI_MONTH:
+                break;
             }
         }
         return lockinDate;
