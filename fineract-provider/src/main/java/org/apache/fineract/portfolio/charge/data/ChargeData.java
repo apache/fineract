@@ -321,6 +321,18 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
         return name;
     }
 
+    public EnumOptionData getChargeCalculationType() {
+        return chargeCalculationType;
+    }
+
+    public EnumOptionData getChargeTimeType() {
+        return chargeTimeType;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
     public CurrencyData getCurrency() {
         return currency;
     }

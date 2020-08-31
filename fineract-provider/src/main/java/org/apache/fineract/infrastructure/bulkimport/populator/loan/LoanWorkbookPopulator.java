@@ -22,12 +22,14 @@ import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
+import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ExtrasSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.GroupSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.LoanProductSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.OfficeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.PersonnelSheetPopulator;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -46,22 +48,25 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private final OfficeSheetPopulator officeSheetPopulator;
-    private final ClientSheetPopulator clientSheetPopulator;
-    private final GroupSheetPopulator groupSheetPopulator;
-    private final PersonnelSheetPopulator personnelSheetPopulator;
-    private final LoanProductSheetPopulator productSheetPopulator;
-    private final ExtrasSheetPopulator extrasSheetPopulator;
+    private OfficeSheetPopulator officeSheetPopulator;
+    private ClientSheetPopulator clientSheetPopulator;
+    private GroupSheetPopulator groupSheetPopulator;
+    private PersonnelSheetPopulator personnelSheetPopulator;
+    private LoanProductSheetPopulator productSheetPopulator;
+    private ChargeSheetPopulator chargeSheetPopulator;
+    private ExtrasSheetPopulator extrasSheetPopulator;
 
     public LoanWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            LoanProductSheetPopulator productSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+            LoanProductSheetPopulator productSheetPopulator, ChargeSheetPopulator chargeSheetPopulator,
+            ExtrasSheetPopulator extrasSheetPopulator) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.groupSheetPopulator = groupSheetPopulator;
         this.personnelSheetPopulator = personnelSheetPopulator;
         this.productSheetPopulator = productSheetPopulator;
         this.extrasSheetPopulator = extrasSheetPopulator;
+        this.chargeSheetPopulator = chargeSheetPopulator;
     }
 
     @Override
@@ -72,6 +77,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         groupSheetPopulator.populate(workbook, dateFormat);
         personnelSheetPopulator.populate(workbook, dateFormat);
         productSheetPopulator.populate(workbook, dateFormat);
+        chargeSheetPopulator.populate(workbook, dateFormat);
         extrasSheetPopulator.populate(workbook, dateFormat);
         setLayout(loanSheet);
         setRules(loanSheet, dateFormat);
@@ -138,6 +144,16 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
                 LoanConstants.LAST_REPAYMENT_DATE_COL, LoanConstants.LAST_REPAYMENT_DATE_COL);
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) worksheet);
 
+        CellRangeAddressList chargeOneNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                LoanConstants.CHARGE_NAME_1, LoanConstants.CHARGE_NAME_1);
+        CellRangeAddressList chargeOneAmountTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                LoanConstants.CHARGE_AMOUNT_TYPE_1, LoanConstants.CHARGE_AMOUNT_TYPE_1);
+
+        CellRangeAddressList chargeTwoNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                LoanConstants.CHARGE_NAME_2, LoanConstants.CHARGE_NAME_2);
+        CellRangeAddressList chargeTwoAmountTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                LoanConstants.CHARGE_AMOUNT_TYPE_2, LoanConstants.CHARGE_AMOUNT_TYPE_2);
+
         setNames(worksheet);
 
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
@@ -168,9 +184,11 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
                 DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE(\"MIN_REPAYMENT_\",$E1))",
                 "=INDIRECT(CONCATENATE(\"MAX_REPAYMENT_\",$E1))");
         DataValidationConstraint frequencyConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { "Days", "Weeks", "Months", "Semi Month" });
+        DataValidationConstraint loanTermFrequencyConstraint = validationHelper
                 .createExplicitListConstraint(new String[] { "Days", "Weeks", "Months" });
         DataValidationConstraint loanTermConstraint = validationHelper
-                .createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$M1*$N1", null);
+                .createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$M1/$N1", "=$M1*$N1");
         DataValidationConstraint interestFrequencyConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"INTEREST_FREQUENCY_\",$E1))");
         DataValidationConstraint interestConstraint = validationHelper.createDecimalConstraint(
@@ -196,6 +214,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint lastRepaymentDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$I1", "=TODAY()", dateFormat);
 
+        DataValidationConstraint chargeOneNameConstraint = validationHelper.createFormulaListConstraint("Charges");
+        DataValidationConstraint chargeOneAmountTypeConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { "Flat", "% Amount" });
+
+        DataValidationConstraint chargeTwoNameConstraint = validationHelper.createFormulaListConstraint("Charges");
+        DataValidationConstraint chargeTwoAmountTypeConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { "Flat", "% Amount" });
+
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation loanTypeValidation = validationHelper.createValidation(loanTypeConstraint, loanTypeRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
@@ -203,7 +229,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation loanOfficerValidation = validationHelper.createValidation(loanOfficerNameConstraint, loanOfficerRange);
         DataValidation fundNameValidation = validationHelper.createValidation(fundNameConstraint, fundNameRange);
         DataValidation repaidFrequencyValidation = validationHelper.createValidation(frequencyConstraint, repaidFrequencyRange);
-        DataValidation loanTermFrequencyValidation = validationHelper.createValidation(frequencyConstraint, loanTermFrequencyRange);
+        DataValidation loanTermFrequencyValidation = validationHelper.createValidation(loanTermFrequencyConstraint, loanTermFrequencyRange);
         DataValidation amortizationValidation = validationHelper.createValidation(amortizationConstraint, amortizationRange);
         DataValidation interestMethodValidation = validationHelper.createValidation(interestMethodConstraint, interestMethodRange);
         DataValidation interestCalculationPeriodValidation = validationHelper.createValidation(interestCalculationPeriodConstraint,
@@ -227,6 +253,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation graceOnInterestChargedValidation = validationHelper.createValidation(graceOnInterestChargedConstraint,
                 graceOnInterestChargedRange);
         DataValidation interestFrequencyValidation = validationHelper.createValidation(interestFrequencyConstraint, interestFrequencyRange);
+
+        DataValidation chargeOneNameValidation = validationHelper.createValidation(chargeOneNameConstraint, chargeOneNameRange);
+        DataValidation chargeOneAmountTypeValidation = validationHelper.createValidation(chargeOneAmountTypeConstraint,
+                chargeOneAmountTypeRange);
+
+        DataValidation chargeTwoNameValidation = validationHelper.createValidation(chargeTwoNameConstraint, chargeTwoNameRange);
+        DataValidation chargeTwoAmountTypeValidation = validationHelper.createValidation(chargeTwoAmountTypeConstraint,
+                chargeTwoAmountTypeRange);
 
         interestFrequencyValidation.setSuppressDropDownArrow(true);
 
@@ -257,6 +291,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.addValidationData(graceOnInterestChargedValidation);
         worksheet.addValidationData(lastRepaymentDateValidation);
         worksheet.addValidationData(repaymentTypeValidation);
+
+        worksheet.addValidationData(chargeOneNameValidation);
+        // worksheet.addValidationData(chargeOneAmountValidation);
+        worksheet.addValidationData(chargeOneAmountTypeValidation);
+
+        worksheet.addValidationData(chargeTwoNameValidation);
+        // worksheet.addValidationData(chargeTwoAmountValidation);
+        worksheet.addValidationData(chargeTwoAmountTypeValidation);
 
     }
 
@@ -299,11 +341,13 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.setColumnWidth(LoanConstants.LOOKUP_CLIENT_EXTERNAL_ID, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.LOOKUP_ACTIVATION_DATE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.EXTERNAL_ID_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        worksheet.setColumnWidth(LoanConstants.CHARGE_ID_1, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(LoanConstants.CHARGE_NAME_1, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.CHARGE_AMOUNT_1, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(LoanConstants.CHARGE_AMOUNT_TYPE_1, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.CHARGE_DUE_DATE_1, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        worksheet.setColumnWidth(LoanConstants.CHARGE_ID_2, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(LoanConstants.CHARGE_NAME_2, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.CHARGE_AMOUNT_2, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(LoanConstants.CHARGE_AMOUNT_TYPE_2, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.CHARGE_DUE_DATE_2, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.GROUP_ID, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(LoanConstants.LINK_ACCOUNT_ID, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
@@ -341,11 +385,13 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(LoanConstants.LOOKUP_CLIENT_EXTERNAL_ID, rowHeader, "Lookup Client ExternalID");
         writeString(LoanConstants.LOOKUP_ACTIVATION_DATE_COL, rowHeader, "Client Activation Date");
         writeString(LoanConstants.EXTERNAL_ID_COL, rowHeader, "External Id");
-        writeString(LoanConstants.CHARGE_ID_1, rowHeader, "Charge Id");
+        writeString(LoanConstants.CHARGE_NAME_1, rowHeader, "Charge Name*");
         writeString(LoanConstants.CHARGE_AMOUNT_1, rowHeader, "Charged Amount");
+        writeString(LoanConstants.CHARGE_AMOUNT_TYPE_1, rowHeader, "Charged Amount Type");
         writeString(LoanConstants.CHARGE_DUE_DATE_1, rowHeader, "Charged On Date");
-        writeString(LoanConstants.CHARGE_ID_2, rowHeader, "Charge Id");
+        writeString(LoanConstants.CHARGE_NAME_2, rowHeader, "Charge Name*");
         writeString(LoanConstants.CHARGE_AMOUNT_2, rowHeader, "Charged Amount");
+        writeString(LoanConstants.CHARGE_AMOUNT_TYPE_2, rowHeader, "Charged Amount Type");
         writeString(LoanConstants.CHARGE_DUE_DATE_2, rowHeader, "Charged On Date");
         writeString(LoanConstants.GROUP_ID, rowHeader, "GROUP ID");
         writeString(LoanConstants.LINK_ACCOUNT_ID, rowHeader, "Linked Account No.");
@@ -385,8 +431,11 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             writeFormula(LoanConstants.NO_OF_REPAYMENTS_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"NO_REPAYMENT_\",$E" + (rowNo + 1)
                     + "))),\"\",INDIRECT(CONCATENATE(\"NO_REPAYMENT_\",$E" + (rowNo + 1) + ")))");
             writeFormula(LoanConstants.LOAN_TERM_COL, row,
-                    "IF(ISERROR($M" + (rowNo + 1) + "*$N" + (rowNo + 1) + "),\"\",$M" + (rowNo + 1) + "*$N" + (rowNo + 1) + ")");
-            writeFormula(LoanConstants.LOAN_TERM_FREQUENCY_COL, row, "$O" + (rowNo + 1));
+                    "IF(($O" + (rowNo + 1) + "=\"Semi Month\"), " + "(IF(ISERROR($M" + (rowNo + 1) + "/$N" + (rowNo + 1) + "),\"\",$M"
+                            + (rowNo + 1) + "/$N" + (rowNo + 1) + ")), " + "(IF(ISERROR($M" + (rowNo + 1) + "*$N" + (rowNo + 1)
+                            + "),\"\",$M" + (rowNo + 1) + "*$N" + (rowNo + 1) + "))" + ")");
+            writeFormula(LoanConstants.LOAN_TERM_FREQUENCY_COL, row,
+                    "IF(($O" + (rowNo + 1) + "=\"Semi Month\"), \"Months\", $O" + (rowNo + 1) + ")");
             writeFormula(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL, row,
                     "IF(ISERROR(INDIRECT(CONCATENATE(\"INTEREST_FREQUENCY_\",$E" + (rowNo + 1)
                             + "))),\"\",INDIRECT(CONCATENATE(\"INTEREST_FREQUENCY_\",$E" + (rowNo + 1) + ")))");
@@ -408,13 +457,13 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
                     + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"GRACE_INTEREST_PAYMENT_\",$E" + (rowNo + 1) + ")))");
             writeFormula(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"GRACE_INTEREST_CHARGED_\",$E"
                     + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"GRACE_INTEREST_CHARGED_\",$E" + (rowNo + 1) + ")))");
-
         }
     }
 
     private void setNames(Sheet worksheet) {
         Workbook loanWorkbook = worksheet.getWorkbook();
         List<String> officeNames = officeSheetPopulator.getOfficeNames();
+        List<ChargeData> charges = chargeSheetPopulator.getCharges();
         List<LoanProductData> products = productSheetPopulator.getProducts();
 
         // Office Names
@@ -459,6 +508,31 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         fundGroup.setNameName("Funds");
         fundGroup.setRefersToFormula(
                 TemplatePopulateImportConstants.EXTRAS_SHEET_NAME + "!$B$2:$B$" + (extrasSheetPopulator.getFundsSize() + 1));
+
+        // Charge Name
+        Name chargeGroup = loanWorkbook.createName();
+        chargeGroup.setNameName("Charges");
+        chargeGroup.setRefersToFormula(
+                TemplatePopulateImportConstants.CHARGE_SHEET_NAME + "!$B$2:$B$" + (chargeSheetPopulator.getChargesSize() + 1));
+
+        // Default Charge Name, Charge Amount, Charge Amount Type, Charge Due Date
+        for (Integer i = 0; i < charges.size(); i++) {
+            Name chargeColName = loanWorkbook.createName();
+            Name chargeAmount = loanWorkbook.createName();
+            Name chargeAmountType = loanWorkbook.createName();
+
+            String chargeName = charges.get(i).getName().trim().replaceAll("[ )(]", "_");
+
+            chargeColName.setNameName("CHARGE_NAME_" + chargeName);
+            chargeColName.setRefersToFormula(TemplatePopulateImportConstants.CHARGE_SHEET_NAME + "!$B$" + (i + 2));
+
+            chargeAmount.setNameName("CHARGE_AMOUNT_" + chargeName);
+            chargeAmount.setRefersToFormula(TemplatePopulateImportConstants.CHARGE_SHEET_NAME + "!$C$" + (i + 2));
+
+            chargeAmountType.setNameName("CHARGE_AMOUNT_TYPE_" + chargeName);
+            chargeAmountType.setRefersToFormula(TemplatePopulateImportConstants.CHARGE_SHEET_NAME + "!$D$" + (i + 2));
+
+        }
 
         // Payment Type Name
         Name paymentTypeGroup = loanWorkbook.createName();

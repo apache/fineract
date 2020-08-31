@@ -4500,6 +4500,9 @@ public class Loan extends AbstractPersistableCustom {
             case YEARS:
                 dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
             break;
+            case SEMI_MONTH:
+                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            break;
             case INVALID:
             break;
             case WHOLE_TERM:
@@ -5499,7 +5502,8 @@ public class Loan extends AbstractPersistableCustom {
         if (interestChargedFromDate == null && scheduleGeneratorDTO.isInterestChargedFromDateAsDisbursementDateEnabled()) {
             interestChargedFromDate = getDisbursementDate();
         }
-
+        final LocalDate firstSemi = loanProduct.getFirstSemiDate();
+        final LocalDate secondSemi = loanProduct.getSecondSemiDate();
         final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(scheduleGeneratorDTO.getApplicationCurrency(),
                 loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(),
                 getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
@@ -5510,7 +5514,7 @@ public class Loan extends AbstractPersistableCustom {
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
-                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI());
+                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), firstSemi, secondSemi);
         return loanApplicationTerms;
     }
 
@@ -5783,7 +5787,8 @@ public class Loan extends AbstractPersistableCustom {
 
         List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
         annualNominalInterestRate = constructFloatingInterestRates(annualNominalInterestRate, floatingRateDTO, loanTermVariations);
-
+        final LocalDate firstSemiDate = loanProduct.getFirstSemiDate();
+        final LocalDate secondSemiDate = loanProduct.getSecondSemiDate();
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDayType,
                 dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
                 inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData,
@@ -5792,7 +5797,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false);
+                false, firstSemiDate, secondSemiDate);
     }
 
     /**

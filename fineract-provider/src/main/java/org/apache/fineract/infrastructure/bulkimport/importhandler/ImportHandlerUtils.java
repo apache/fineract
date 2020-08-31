@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -304,6 +305,7 @@ public final class ImportHandlerUtils {
                             if (sheetName.equals(TemplatePopulateImportConstants.OFFICE_SHEET_NAME)
                                     || sheetName.equals(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME)
                                     || sheetName.equals(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME)
+                                    || sheetName.equals(TemplatePopulateImportConstants.CHARGE_SHEET_NAME)
                                     || sheetName.equals(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME)
                                     || sheetName.equals(TemplatePopulateImportConstants.ROLES_SHEET_NAME)) {
                                 if (row.getCell(cell.getColumnIndex() - 1).getCellType() == CellType.NUMERIC) {
@@ -340,6 +342,47 @@ public final class ImportHandlerUtils {
             }
         }
         return 0L;
+    }
+
+    public static EnumOptionData getChargeTimeTypeEmun(Sheet sheet, String name) {
+        String sheetName = sheet.getSheetName();
+        String chargeTimeType = "";
+        EnumOptionData chargeTimeTypeEnum = null;
+        sheetName.equals(TemplatePopulateImportConstants.CHARGE_SHEET_NAME);
+        {
+            for (Row row : sheet) {
+                for (Cell cell : row) {
+                    if (name != null) {
+                        if (cell.getCellType() == CellType.STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
+                            chargeTimeType = row.getCell(cell.getColumnIndex() + 3).getStringCellValue().toString();
+
+                        }
+                    }
+                }
+            }
+        }
+        if (!chargeTimeType.equals("")) {
+            String chargeTimeTypeId = "";
+            if (chargeTimeType.equalsIgnoreCase("Disbursement")) {
+                chargeTimeTypeId = "1";
+            }
+            chargeTimeTypeEnum = new EnumOptionData(null, null, chargeTimeTypeId);
+        }
+        return chargeTimeTypeEnum;
+    }
+
+    public static EnumOptionData getChargeAmountTypeEnum(final String chargeAmountType) {
+        EnumOptionData chargeAmountTypeEnum = null;
+        if (chargeAmountType != null) {
+            String chargeAmountTypeId = "";
+            if (chargeAmountType.equalsIgnoreCase("Flat")) {
+                chargeAmountTypeId = "1";
+            } else if (chargeAmountType.equalsIgnoreCase("% Amount")) {
+                chargeAmountTypeId = "2";
+            }
+            chargeAmountTypeEnum = new EnumOptionData(null, null, chargeAmountTypeId);
+        }
+        return chargeAmountTypeEnum;
     }
 
     public static String getCodeByName(Sheet sheet, String name) {

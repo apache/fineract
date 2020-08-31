@@ -52,6 +52,8 @@ public final class DepositAccountUtils {
             case YEARS:
                 nextDepositDate = lastDepositDate.plusYears(recurringEvery);
             break;
+            case SEMI_MONTH:
+            break;
             case INVALID:
             break;
             case WHOLE_TERM:

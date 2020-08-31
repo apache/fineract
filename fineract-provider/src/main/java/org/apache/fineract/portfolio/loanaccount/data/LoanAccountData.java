@@ -1014,7 +1014,7 @@ public final class LoanAccountData {
         final Collection<CalendarData> calendarOptions = null;
         final Collection<StaffData> loanOfficerOptions = null;
 
-        final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
+        EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
 
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (final ChargeData charge : product.charges()) {
@@ -1059,8 +1059,12 @@ public final class LoanAccountData {
         if (numberOfRepayments == null) {
             numberOfRepayments = product.getNumberOfRepayments();
         }
-
-        final Integer termFrequency = numberOfRepayments * product.getRepaymentEvery();
+        Integer termFrequency = numberOfRepayments * product.getRepaymentEvery();
+        // this case handles the semi-month
+        if (product.hasSemiMonthEnabled()) {
+            termFrequency = numberOfRepayments;
+            numberOfRepayments = numberOfRepayments * product.getRepaymentEvery();
+        }
         final BigDecimal fixedEmi = null;
         Map<Long, LoanBorrowerCycleData> memberVariations = null;
         final Boolean inArrears = null;

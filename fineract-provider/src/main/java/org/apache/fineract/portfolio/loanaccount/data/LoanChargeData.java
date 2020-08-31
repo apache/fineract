@@ -308,6 +308,37 @@ public class LoanChargeData {
         this.amountUnrecognized = chargeData.amountUnrecognized;
     }
 
+    public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amount, final EnumOptionData chargeCalculationType,
+            final EnumOptionData chargeTimeType) {
+        this.id = null;
+        this.chargeId = id;
+        this.name = null;
+        this.currency = null;
+        this.amount = amount;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.chargeTimeType = chargeTimeType;
+        this.dueDate = dueAsOfDate;
+        this.chargeCalculationType = chargeCalculationType;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.penalty = false;
+        this.chargePaymentMode = null;
+        this.paid = false;
+        this.waived = false;
+        this.amountOrPercentage = null;
+        this.chargeOptions = null;
+        this.chargePayable = false;
+        this.loanId = null;
+        this.minCap = null;
+        this.maxCap = null;
+        this.installmentChargeData = null;
+        this.amountAccrued = null;
+        this.amountUnrecognized = null;
+    }
+
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOrPercentage) {
         this.id = id;
         this.chargeId = null;

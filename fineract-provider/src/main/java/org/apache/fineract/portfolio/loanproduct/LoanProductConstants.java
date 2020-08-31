@@ -135,4 +135,9 @@ public interface LoanProductConstants {
 
     String RATES_PARAM_NAME = "rates";
 
+    // Semi Month Details
+
+    String SEMI_MONTH_START_DATE = "semiMonthFirstDate";
+    String SEMI_MONTH_SECOND_DATE = "semiMonthSecondDate";
+
 }

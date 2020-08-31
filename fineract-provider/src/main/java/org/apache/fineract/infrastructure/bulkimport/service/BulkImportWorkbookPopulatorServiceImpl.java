@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformSer
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.populator.CenterSheetPopulator;
+import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ExtrasSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.FixedDepositProductSheetPopulator;
@@ -278,6 +279,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     @SuppressWarnings("unchecked")
+    private List<ChargeData> fetchCharges() {
+        return (List) this.chargeReadPlatformService.retrieveAllCharges();
+    }
+
+    @SuppressWarnings("unchecked")
     private List<StaffData> fetchStaff(final Long staffId) {
         List<StaffData> staff = null;
         if (staffId == null) {
@@ -376,13 +382,15 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<StaffData> staff = fetchStaff(staffId);
         List<ClientData> clients = fetchClients(officeId);
         List<GroupGeneralData> groups = fetchGroups(officeId);
+        List<ChargeData> charges = fetchCharges();
         List<LoanProductData> loanproducts = fetchLoanProducts();
         List<FundData> funds = fetchFunds();
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
         return new LoanWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
                 new GroupSheetPopulator(groups, offices), new PersonnelSheetPopulator(staff, offices),
-                new LoanProductSheetPopulator(loanproducts), new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+                new LoanProductSheetPopulator(loanproducts), new ChargeSheetPopulator(charges),
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
     }
 
     private List<CurrencyData> fetchCurrencies() {

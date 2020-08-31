@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -59,15 +60,66 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate dueRepaymentPeriodDate = null;
         if (isFirstRepayment && firstRepaymentPeriodDate != null) {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
-
+        } else if (isFirstRepayment && firstRepaymentPeriodDate == null) {
+            if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+                dueRepaymentPeriodDate = LocalDate.of(lastRepaymentDate.getYear(), lastRepaymentDate.getMonthValue(),
+                        loanApplicationTerms.getFirstDateForSemi().getDayOfMonth());
+            }
         } else {
             LocalDate seedDate = null;
             String reccuringString = null;
+            boolean isLeapYear = this.isLeapYear(lastRepaymentDate.getYear());
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
-            dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
-            dueRepaymentPeriodDate = CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
-                    loanApplicationTerms.getRepaymentPeriodFrequencyType());
+            if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly() && !isFirstRepayment) {
+                int difference = 0;
+                if (lastRepaymentDate.getDayOfMonth() == loanApplicationTerms.getFirstDateForSemi().getDayOfMonth()) {
+                    difference = loanApplicationTerms.getSecondDateForSemi().getDayOfMonth() - lastRepaymentDate.getDayOfMonth();
+                } else if (lastRepaymentDate.getDayOfMonth() == loanApplicationTerms.getSecondDateForSemi().getDayOfMonth()) {
+                    difference = lastRepaymentDate.getDayOfMonth() - loanApplicationTerms.getFirstDateForSemi().getDayOfMonth();
+                } else if (lastRepaymentDate.getDayOfMonth() < loanApplicationTerms.getSecondDateForSemi().getDayOfMonth()) {
+                    if (lastRepaymentDate.getMonthValue() == 2) {
+                        difference = lastRepaymentDate.getDayOfMonth() - loanApplicationTerms.getFirstDateForSemi().getDayOfMonth();
+                        difference = difference + 2;
+                        if (isLeapYear) {
+                            difference = difference - 1;
+                        }
+                    }
+                }
+                dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                        Math.abs(difference), lastRepaymentDate);
+                if (dueRepaymentPeriodDate.getDayOfMonth() < loanApplicationTerms.getFirstDateForSemi().getDayOfMonth()) {
+                    if (lastRepaymentDate.getMonthValue() == 2
+                            && dueRepaymentPeriodDate.getDayOfMonth() < loanApplicationTerms.getSecondDateForSemi().getDayOfMonth()) {
+                        if (isLeapYear) {
+                            dueRepaymentPeriodDate = dueRepaymentPeriodDate.minusDays(1);
+                        } else {
+                            dueRepaymentPeriodDate = dueRepaymentPeriodDate.minusDays(2);
+                        }
+                    } else {
+                        dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusDays(1);
+                    }
+                } else if (dueRepaymentPeriodDate.getDayOfMonth() > loanApplicationTerms.getFirstDateForSemi().getDayOfMonth()
+                        && dueRepaymentPeriodDate.getDayOfMonth() < loanApplicationTerms.getSecondDateForSemi().getDayOfMonth()) {
+                    //
+                    int some = dueRepaymentPeriodDate.getDayOfMonth();
+                    int other = loanApplicationTerms.getFirstDateForSemi().getDayOfMonth();
+                    // diff
+                    int then = some - other;
+                    //
+                    if (then == 1) {
+                        dueRepaymentPeriodDate = dueRepaymentPeriodDate.minusDays(1);
+                    } else {
+                        dueRepaymentPeriodDate = dueRepaymentPeriodDate.minusDays(2);
+                    }
+                }
+
+            } else {
+                dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                        loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
+                dueRepaymentPeriodDate = CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+                        loanApplicationTerms.getRepaymentPeriodFrequencyType());
+            }
+
             if (currentCalendar != null) {
                 // If we have currentCalendar object, this means there is a
                 // calendar associated with
@@ -97,6 +149,18 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
 
         return dueRepaymentPeriodDate;
+    }
+
+    public boolean isLeapYear(int year) {
+        if (year % 4 == 0) {
+            if (year % 100 == 0) {
+                return year % 400 == 0;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -230,6 +294,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case WHOLE_TERM:
                 LOG.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
             break;
+            case SEMI_MONTH:
+                dueRepaymentPeriodDate = startDate.plus(Period.ofDays(repaidEvery));
+            break;
         }
         return dueRepaymentPeriodDate;
     }
@@ -258,6 +325,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                     LocalDate modifiedDate = startDate.plusMonths(monthDiff);
                     isScheduledDate = modifiedDate.isEqual(date);
                 }
+            break;
+            case SEMI_MONTH:
             break;
             case YEARS:
                 int yearDiff = Math.toIntExact(ChronoUnit.YEARS.between(startDate, date));
@@ -308,6 +377,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            break;
+            case SEMI_MONTH:
             break;
         }
 
