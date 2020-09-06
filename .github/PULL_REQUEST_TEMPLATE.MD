@@ -11,7 +11,7 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] Write the commit message as per https://github.com/apache/fineract/#pull-requests
 
-- [ ] Acknowledge that we will not review PRs that are not passing the build _("green")_ - it is your responsability to get a proposed PR to pass the build, not primarily the project's maintainers.
+- [ ] Acknowledge that we will not review PRs that are not passing the build _("green")_ - it is your responsibility to get a proposed PR to pass the build, not primarily the project's maintainers.
 
 - [ ] Create/update unit or integration tests for verifying the changes made.
 
