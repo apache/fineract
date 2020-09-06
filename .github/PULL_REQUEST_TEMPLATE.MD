@@ -15,7 +15,7 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] Create/update unit or integration tests for verifying the changes made.
 
-- [ ] Follow coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions have been followed.
+- [ ] Follow coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions.
 
 - [ ] Add required Swagger annotation and updated API documentation at fineract-provider/src/main/resources/static/api-docs/apiLive.htm with details of any API changes
 
