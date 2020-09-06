@@ -19,6 +19,6 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] Add required Swagger annotation and update API documentation at fineract-provider/src/main/resources/static/api-docs/apiLive.htm with details of any API changes
 
-- [ ] Submission is not a "code dump".  (Large changes can be made "in repository" via a branch.  Ask on the developer mailling list for guidance, if required.)
+- [ ] Submission is not a "code dump".  (Large changes can be made "in repository" via a branch.  Ask on the developer mailing list for guidance, if required.)
 
 FYI our guidelines for code reviews are at https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide.
