@@ -1,19 +1,24 @@
 ## Description
-Describe the changes made and why they were made. Ignore if these details are present on the associated Jira ticket
+
+Describe the changes made and why they were made.
+
+Ignore if these details are present on the associated [Apache Fineract JIRA ticket](https://github.com/apache/fineract/pull/1284).
+
 
 ## Checklist
+
 Please make sure these boxes are checked before submitting your pull request - thanks!
 
-- [ ] Commit message starts with the issue number from https://issues.apache.org/jira/projects/FINERACT/. Ex: FINERACT-646 Pockets API.
+- [ ] Write the commit message as per https://github.com/apache/fineract/#pull-requests
 
-- [ ] Coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions have been followed.
+- [ ] Acknowledge that we will not review PRs that are not passing the build _("green")_ - it is your responsibility to get a proposed PR to pass the build, not primarily the project's maintainers.
 
-- [ ] API documentation at fineract-provider/src/main/resources/static/api-docs/apiLive.htm has been updated with details of any API changes.
+- [ ] Create/update unit or integration tests for verifying the changes made.
 
-- [ ] Integration tests have been created/updated for verifying the changes made.
+- [ ] Follow coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions.
 
-- [ ] All Integrations tests are passing with the new commits.
+- [ ] Add required Swagger annotation and update API documentation at fineract-provider/src/main/resources/static/api-docs/apiLive.htm with details of any API changes
 
-- [ ] Submission is not a "code dump".  (Large changes can be made "in repository" via a branch.  Ask on the list.)
+- [ ] Submission is not a "code dump".  (Large changes can be made "in repository" via a branch.  Ask on the developer mailing list for guidance, if required.)
 
-Our guidelines for code reviews is at https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide
+FYI our guidelines for code reviews are at https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide.
