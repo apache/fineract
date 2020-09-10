@@ -4402,22 +4402,28 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 				</div>
 				<div class="method-example">
 <code>
-// A Javascript/Jquery example of how to login to Apache Fineract and use its api.
-// Typically, the javascript application would
+// A Javascript/JQuery example of how to login to Apache Fineract and use its API.
+// Typically, the JavaScript application would:
 // 1) Display a login page to retrieve the username and password.
 // 2) Send the username, password, client_id , grant_type and client_secret to a function
-//    such as getOauthToken below which sets the HTTP bearer Auth key.
+//    such as getOauthToken() below which POSTs these as x-www-form-urlencoded (but NOT in the URL, see FINERACT-629)
+//    and stores the token in a global variable.
 // 3) The HTTP bearer Auth key is used in all subsequent requests
-// (see the function executeAjaxRequest below).
+// (see the function executeAjaxRequest() below).
 
 function getOauthToken(username, password) {
 
 	var jqxhr = $.ajax({
-		url : "/fineract-provider/api/oauth/token?username=" + credentials.username + "&password=" + credentials.password +"&client_id=community-app&grant_type=password&client_secret=123,
+		url : "/fineract-provider/api/oauth/token",
 		type : 'POST',
-		contentType : "application/json; charset=utf-8",
 		dataType : 'json',
-		data : "{}",
+		data : {
+		    username: credentials.username,
+		    password: credentials.password,
+		    client_id: "community-app",
+		    grant_type: "password",
+		    client_secret: "123"
+		},
 		cache : false,
 		success : function(data, textStatus, jqXHR) {
 			authKey = data.access_token;
