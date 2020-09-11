@@ -161,7 +161,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
         SQLBuilder extraCriteria = new SQLBuilder();
         extraCriteria.addCriteria(" office_id = ", officeId);
-        extraCriteria.addCriteria(" is_loan_officer= = ", 1);
+        extraCriteria.addCriteria(" is_loan_officer = ", 1);
         return retrieveAllStaff(extraCriteria);
     }
 
