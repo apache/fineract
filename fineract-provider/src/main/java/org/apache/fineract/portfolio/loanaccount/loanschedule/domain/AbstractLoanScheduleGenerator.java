@@ -337,6 +337,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanRepaymentScheduleTransactionProcessor, loanApplicationTerms.getTotalInterestDue(), lastRestDate, scheduledDueDate,
                     periodStartDateApplicableForInterest, applicableTransactions, currentPeriodParams,
                     lastTotalOutstandingInterestPaymentDueToGrace, installment, loanCharges);
+
+            if (loanApplicationTerms.getCurrentPeriodFixedEmiAmount() != null) {
+                installment.setEMIFixedSpecificToInstallmentTrue();
+            }
+
             periods.add(installment);
 
             // Updates principal paid map with efective date for reducing
@@ -373,15 +378,30 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         if (loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled()
                 && loanApplicationTerms.getInterestTobeApproppriated() != null
                 && loanApplicationTerms.getInterestTobeApproppriated().isGreaterThanZero()) {
-            Money interestFraction = loanApplicationTerms.getInterestTobeApproppriated().dividedBy(periods.size(), mc.getRoundingMode());
+            int emisTobeChanged = 1;
+            for (LoanScheduleModelPeriod installment : (List<LoanScheduleModelPeriod>) periods) {
+                if (!installment.isEMIFixedSpecificToInstallment()) {
+                    emisTobeChanged++;
+                }
+            }
+            if (emisTobeChanged > 1) {
+                emisTobeChanged--;
+            }
+            Money interestTobeApproppriated = loanApplicationTerms.getInterestTobeApproppriated();
+            Money interestFraction = interestTobeApproppriated.dividedBy(emisTobeChanged, mc.getRoundingMode());
             BigDecimal roundFraction = interestFraction.getAmount().remainder(BigDecimal.ONE);
             interestFraction = interestFraction.minus(roundFraction);
-            roundFraction = roundFraction.multiply(new BigDecimal(periods.size()));
             for (LoanScheduleModelPeriod installment : (List<LoanScheduleModelPeriod>) periods) {
-                installment.addInterestAmount(interestFraction);
+                if (!installment.isEMIFixedSpecificToInstallment()) {
+                    installment.addInterestAmount(interestFraction);
+                    interestTobeApproppriated = interestTobeApproppriated.minus(interestFraction);
+                }
             }
-            LoanScheduleModelPeriod installment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
-            installment.addInterestAmount(Money.of(currency, roundFraction));
+            LoanScheduleModelPeriod lastInstallment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
+
+            if (interestTobeApproppriated.isGreaterThanZero()) {
+                lastInstallment.addInterestAmount(interestTobeApproppriated);
+            }
             scheduleParams.addTotalRepaymentExpected(loanApplicationTerms.getInterestTobeApproppriated());
             scheduleParams.addTotalCumulativeInterest(loanApplicationTerms.getInterestTobeApproppriated());
             loanApplicationTerms.setInterestTobeApproppriated(Money.zero(currency));
@@ -1079,6 +1099,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     if (loanTermVariationsData.isSpecificToInstallment()) {
                         loanApplicationTerms.setCurrentPeriodFixedEmiAmount(loanTermVariationsData.getDecimalValue());
                         recalculateAmounts = true;
+
                     } else {
                         loanApplicationTerms.setFixedEmiAmount(loanTermVariationsData.getDecimalValue());
                     }
