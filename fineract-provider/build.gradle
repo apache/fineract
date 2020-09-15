@@ -671,7 +671,7 @@ configurations
 }
 
 dependencies {
-    tomcat "org.apache.tomcat:tomcat:9.0.37@zip"
+    tomcat "org.apache.tomcat:tomcat:9.0.38@zip"
 }
 
 cargo {
