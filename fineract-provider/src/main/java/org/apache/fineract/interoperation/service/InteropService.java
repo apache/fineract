@@ -78,4 +78,7 @@ public interface InteropService {
 
     @NotNull
     InteropKycResponseData getKyc(@NotNull String accountId);
+
+    @NotNull
+    String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson);
 }

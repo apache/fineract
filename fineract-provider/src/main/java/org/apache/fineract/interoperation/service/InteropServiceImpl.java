@@ -36,7 +36,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -66,6 +71,9 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -110,6 +118,7 @@ public class InteropServiceImpl implements InteropService {
     private final NoteRepository noteRepository;
     private final PaymentTypeRepository paymentTypeRepository;
     private final InteropIdentifierRepository identifierRepository;
+    private final LoanRepository loanRepository;
 
     private final SavingsHelper savingsHelper;
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
@@ -118,13 +127,19 @@ public class InteropServiceImpl implements InteropService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
+
     @Autowired
     public InteropServiceImpl(PlatformSecurityContext securityContext, InteropDataValidator interopDataValidator,
             SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
-            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, SavingsHelper savingsHelper,
-            SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, final RoutingDataSource dataSource) {
+            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, LoanRepository loanRepository,
+            SavingsHelper savingsHelper, SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            SavingsAccountDomainService savingsAccountService, final RoutingDataSource dataSource,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer) {
         this.securityContext = securityContext;
         this.dataValidator = interopDataValidator;
         this.savingsAccountRepository = savingsAccountRepository;
@@ -133,10 +148,13 @@ public class InteropServiceImpl implements InteropService {
         this.noteRepository = noteRepository;
         this.paymentTypeRepository = paymentTypeRepository;
         this.identifierRepository = identifierRepository;
+        this.loanRepository = loanRepository;
         this.savingsHelper = savingsHelper;
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountService = savingsAccountService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
     }
 
     private static final class KycMapper implements RowMapper<InteropKycData> {
@@ -481,12 +499,35 @@ public class InteropServiceImpl implements InteropService {
         }
     }
 
+    @Override
+    public @NotNull String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson) {
+        Loan loan = validateAndGetLoan(accountId);
+        Long loanId = loan.getId();
+
+        LocalDateTime disbursedOnDate = DateUtils.getLocalDateTimeOfTenant();
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
         SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
         if (savingsAccount == null) {
             throw new SavingsAccountNotFoundException(accountId);
         }
         return savingsAccount;
+    }
+
+    private Loan validateAndGetLoan(String accountId) {
+        Loan loan = loanRepository.findNonClosedLoanByAccountNumber(accountId);
+        if (loan == null) {
+            throw new UnsupportedOperationException("Loan not found for the given account No: " + accountId);
+        }
+        return loan;
     }
 
     private SavingsAccount validateAndGetSavingAccount(@NotNull InteropRequestData request) {
@@ -508,6 +549,19 @@ public class InteropServiceImpl implements InteropService {
 
         return savingsAccount;
     }
+
+    // private Loan validateAndGetLoan(@NotNull InteropRequestData request) {
+    // Loan loan = validateAndGetLoan(request.getAccountId());
+    //
+    // ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
+    // if (!loan.getCurrency().getCode().equals(requestCurrency.getCode())) {
+    // throw new UnsupportedOperationException("Account and request has different currencies!");
+    // }
+    //
+    // request.normalizeAmounts(loan.getCurrency());
+    //
+    // return loan;
+    // }
 
     private BigDecimal calculateTotalTransferAmount(@NotNull InteropTransferRequestData request, @NotNull SavingsAccount savingsAccount) {
         BigDecimal total = request.getAmount().getAmount();
