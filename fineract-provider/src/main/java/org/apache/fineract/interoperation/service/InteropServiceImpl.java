@@ -28,6 +28,8 @@ import static org.apache.fineract.portfolio.savings.domain.SavingsAccountTransac
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -36,12 +38,15 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.interoperation.data.InteropAccountData;
 import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
 import org.apache.fineract.interoperation.data.InteropIdentifierRequestData;
 import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
+import org.apache.fineract.interoperation.data.InteropKycData;
+import org.apache.fineract.interoperation.data.InteropKycResponseData;
 import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
 import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
 import org.apache.fineract.interoperation.data.InteropRequestData;
@@ -84,6 +89,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,13 +116,15 @@ public class InteropServiceImpl implements InteropService {
 
     private final SavingsAccountDomainService savingsAccountService;
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
     public InteropServiceImpl(PlatformSecurityContext securityContext, InteropDataValidator interopDataValidator,
             SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
             PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, SavingsHelper savingsHelper,
             SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService) {
+            SavingsAccountDomainService savingsAccountService, final RoutingDataSource dataSource) {
         this.securityContext = securityContext;
         this.dataValidator = interopDataValidator;
         this.savingsAccountRepository = savingsAccountRepository;
@@ -126,6 +136,50 @@ public class InteropServiceImpl implements InteropService {
         this.savingsHelper = savingsHelper;
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountService = savingsAccountService;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    private static final class KycMapper implements RowMapper<InteropKycData> {
+
+        public String schema() {
+            return " country.code_value as nationality, c.`date_of_birth` as dateOfBirth, c.`mobile_no` as contactPhone, gender.code_value as gender, c.`email_address` as email, "
+                    + "kyc.code_value as idType, ci.`document_key` as idNo, ci.`description` as description, "
+                    + "country.code_value as country, a.`address_line_1`, a.`address_line_2`, "
+                    + "a.`city`, state.code_value as stateProvince, a.`postal_code` as postalCode, c.`firstname` as firstName, c.`middlename` as middleName,"
+                    + "c.`lastname` as lastName, c.`display_name` as displayName" + " from " + "m_client c "
+                    + "left join m_client_address ca on c.id=ca.client_id " + "left join m_address a on a.id = ca.address_id "
+                    + "inner join m_code_value gender on gender.id=c.`gender_cv_id` "
+                    + "left join m_code_value country on country.id=a.`country_id` "
+                    + "left join m_code_value state on state.id = a.`state_province_id` "
+                    + "left join m_client_identifier ci on c.id=ci.`client_id` "
+                    + "left join m_code_value kyc on kyc.id = ci.`document_type_id` ";
+        }
+
+        @Override
+        public InteropKycData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final String nationality = rs.getString("nationality");
+            final String dateOfBirth = rs.getString("dateOfBirth");
+            final String contactPhone = rs.getString("contactPhone");
+            final String gender = rs.getString("gender");
+            final String email = rs.getString("email");
+            final String idType = rs.getString("idType");
+            final String idNo = rs.getString("idNo");
+            final String description = rs.getString("description");
+            final String country = rs.getString("country");
+            final String address_line_1 = rs.getString("address_line_1");
+            final String address_line_2 = rs.getString("address_line_2");
+            final String city = rs.getString("city");
+            final String stateProvince = rs.getString("stateProvince");
+            final String postalCode = rs.getString("postalCode");
+            final String firstName = rs.getString("firstName");
+            final String middleName = rs.getString("middleName");
+            final String lastName = rs.getString("lastName");
+            final String displayName = rs.getString("displayName");
+
+            return InteropKycData.instance(nationality, dateOfBirth, contactPhone, gender, email, idType, idNo, description, country,
+                    address_line_1, address_line_2, city, stateProvince, postalCode, firstName, middleName, lastName, displayName);
+        }
     }
 
     @NotNull
@@ -407,6 +461,24 @@ public class InteropServiceImpl implements InteropService {
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
                 request.getExpiration(), request.getExtensionList(), request.getTransferCode(), transactionDateTime);
+    }
+
+    @Override
+    public @NotNull InteropKycResponseData getKyc(@NotNull @NotNull String accountId) {
+
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
+        Long client_id = savingsAccount.getClient().getId();
+
+        try {
+            final InteropServiceImpl.KycMapper rm = new InteropServiceImpl.KycMapper();
+            final String sql = "select " + rm.schema() + " where c.id = ?";
+
+            final InteropKycData accountKyc = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { client_id });
+
+            return InteropKycResponseData.build(accountKyc);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new UnsupportedOperationException("Error in retrieving KYC information: " + e.toString());
+        }
     }
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
