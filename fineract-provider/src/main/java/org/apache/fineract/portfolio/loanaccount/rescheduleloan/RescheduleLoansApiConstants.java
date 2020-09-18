@@ -23,7 +23,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RescheduleLoansApiConstants {
+public final class RescheduleLoansApiConstants {
+
+    private RescheduleLoansApiConstants() {
+
+    }
 
     public static final String ENTITY_NAME = "RESCHEDULELOAN";
 
@@ -52,6 +56,8 @@ public class RescheduleLoansApiConstants {
     public static final String approveCommandParamName = "approve";
     public static final String pendingCommandParamName = "pending";
     public static final String rejectCommandParamName = "reject";
+    public static final String endDateParamName = "endDate";
+    public static final String emiParamName = "emi";
 
     // reject action request parameters
     public static final String rejectedOnDateParam = "rejectedOnDate";

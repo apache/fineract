@@ -28,7 +28,7 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     private final String value;
     private final Integer id;
 
-    private ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
+    ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;
         this.code = code;
         this.id = id;

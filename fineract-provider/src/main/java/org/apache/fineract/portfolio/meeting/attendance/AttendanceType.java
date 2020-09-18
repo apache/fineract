@@ -35,7 +35,7 @@ public enum AttendanceType {
     private final Integer value;
     private final String code;
 
-    private AttendanceType(final Integer value, final String code) {
+    AttendanceType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

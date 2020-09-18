@@ -50,7 +50,7 @@ public enum TellerStatus {
         return status;
     }
 
-    private TellerStatus(final Integer value, final String code) {
+    TellerStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

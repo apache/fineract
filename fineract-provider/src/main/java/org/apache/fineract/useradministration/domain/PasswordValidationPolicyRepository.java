@@ -26,6 +26,6 @@ public interface PasswordValidationPolicyRepository
         extends JpaRepository<PasswordValidationPolicy, Long>, JpaSpecificationExecutor<PasswordValidationPolicy> {
 
     @Query("select PVP from PasswordValidationPolicy PVP WHERE PVP.active = true")
-    public PasswordValidationPolicy findActivePasswordValidationPolicy();
+    PasswordValidationPolicy findActivePasswordValidationPolicy();
 
 }

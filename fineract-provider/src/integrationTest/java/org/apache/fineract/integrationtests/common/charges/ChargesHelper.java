@@ -30,7 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ChargesHelper {
+public final class ChargesHelper {
+
+    private ChargesHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ChargesHelper.class);
     private static final String CHARGES_URL = "/fineract-provider/api/v1/charges";

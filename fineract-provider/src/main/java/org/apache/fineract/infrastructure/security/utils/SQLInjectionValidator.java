@@ -23,7 +23,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
-public class SQLInjectionValidator {
+public final class SQLInjectionValidator {
+
+    private SQLInjectionValidator() {
+
+    }
 
     private static final String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
 
@@ -33,7 +37,7 @@ public class SQLInjectionValidator {
 
     private static final String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
-    public static final void validateSQLInput(final String sqlSearch) {
+    public static void validateSQLInput(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
@@ -121,7 +125,7 @@ public class SQLInjectionValidator {
         }
     }
 
-    public static final void validateAdhocQuery(final String sqlSearch) {
+    public static void validateAdhocQuery(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }

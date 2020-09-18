@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.meeting;
 
-public class MeetingApiConstants {
+public final class MeetingApiConstants {
+
+    private MeetingApiConstants() {
+
+    }
 
     public static final String MEETING_RESOURCE_NAME = "meeting";
 

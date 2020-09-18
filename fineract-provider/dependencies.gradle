@@ -20,7 +20,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-    spotbugs 'com.github.spotbugs:spotbugs:4.0.6'
+    spotbugs 'com.github.spotbugs:spotbugs:4.1.2'
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -129,6 +129,7 @@ dependencies {
     testImplementation('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
+        exclude group: 'javax.validation'
     }
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'

@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class WorkingDaysApiConstants {
+public final class WorkingDaysApiConstants {
+
+    private WorkingDaysApiConstants() {
+
+    }
 
     public static final String WORKING_DAYS_RESOURCE_NAME = "workingdays";
 
@@ -38,8 +42,8 @@ public class WorkingDaysApiConstants {
     public static final String extendTermForDailyRepayments = "extendTermForDailyRepayments";
     public static final String extendTermForRepaymentsOnHolidays = "extendTermForRepaymentsOnHolidays";
 
-    protected static final Set<String> WORKING_DAYS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, recurrence,
+    static final Set<String> WORKING_DAYS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, recurrence,
             repayment_rescheduling_enum, extendTermForDailyRepayments, extendTermForRepaymentsOnHolidays));
 
-    protected static final Set<String> WORKING_DAYS_TEMPLATE_PARAMETERS = new HashSet<>(Arrays.asList(rescheduleRepaymentTemplate));
+    static final Set<String> WORKING_DAYS_TEMPLATE_PARAMETERS = new HashSet<>(Arrays.asList(rescheduleRepaymentTemplate));
 }

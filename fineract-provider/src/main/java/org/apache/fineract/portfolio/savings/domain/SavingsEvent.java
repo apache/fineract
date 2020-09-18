@@ -40,7 +40,7 @@ public enum SavingsEvent {
 
     private final String value;
 
-    private SavingsEvent(final String value) {
+    SavingsEvent(final String value) {
         this.value = value;
     }
 

@@ -28,7 +28,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaxGroupHelper {
+public final class TaxGroupHelper {
+
+    private TaxGroupHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;

@@ -300,7 +300,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         private final String schemaSql;
 
-        public LoanChargeAccrualMapper() {
+        LoanChargeAccrualMapper() {
             StringBuilder sb = new StringBuilder(50);
             sb.append("lc.id as id, lc.charge_id as chargeId, ");
             sb.append("lc.amount as amountDue, ");
@@ -360,7 +360,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         private final String schemaSql;
         private final Map<Long, LoanChargeData> chargeDataMap;
 
-        public LoanChargeUnRecognizedIncomeMapper(final Collection<LoanChargeData> datas) {
+        LoanChargeUnRecognizedIncomeMapper(final Collection<LoanChargeData> datas) {
             this.chargeDataMap = new HashMap<>();
             for (LoanChargeData chargeData : datas) {
                 this.chargeDataMap.put(chargeData.getId(), chargeData);
@@ -417,7 +417,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         private final String schemaSql;
 
-        public LoanInstallmentChargeAccrualMapper() {
+        LoanInstallmentChargeAccrualMapper() {
             StringBuilder sb = new StringBuilder(50);
             sb.append(" lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, ");
             sb.append("lic.amount_outstanding_derived as amountOutstanding,");
@@ -469,7 +469,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         private final String schemaSql;
         private final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas;
 
-        public LoanInstallmentChargeUnRecognizedIncomeMapper(final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas) {
+        LoanInstallmentChargeUnRecognizedIncomeMapper(final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas) {
             this.installmentChargeDatas = installmentChargeDatas;
             StringBuilder sb = new StringBuilder(50);
             sb.append(" cpb.installment_number as installmentNumber, ");
@@ -520,7 +520,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         private final String schemaSql;
 
-        public LoanChargesPaidByMapper() {
+        LoanChargesPaidByMapper() {
             StringBuilder sb = new StringBuilder(100);
             sb.append("lcp.id as id, lcp.loan_charge_id as chargeId, ");
             sb.append("lcp.amount as amount, ");

@@ -42,20 +42,21 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE'
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
         classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.1.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.4.RELEASE'
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0'
         classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.4"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.0"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.1.0"
-        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.3"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.5.1"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.4"
+        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2"
     }
 }
 
@@ -79,6 +80,9 @@ apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: "net.ltgt.errorprone"
 apply plugin: "com.diffplug.spotless"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
+apply plugin: "org.hidetake.swagger.generator"
+apply plugin: 'distribution'
+apply plugin: 'signing'
 
 dependencyManagement {
     imports {
@@ -98,33 +102,33 @@ dependencyManagement {
         dependency 'com.google.guava:guava:29.0-jre'
         dependency 'com.google.code.gson:gson:2.8.6'
         dependency 'org.apache.commons:commons-email:1.5'
-        dependency 'commons-io:commons-io:2.7'
+        dependency 'commons-io:commons-io:2.8.0'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
         dependency 'com.github.librepdf:openpdf:1.3.20'
         dependency 'org.mnode.ical4j:ical4j:3.0.19'
-        dependency 'org.flywaydb:flyway-core:6.5.1'
+        dependency 'org.flywaydb:flyway-core:6.5.6'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.816'
-        dependency 'org.ehcache:ehcache:3.8.1'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.852'
+        dependency 'org.ehcache:ehcache:3.9.0'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:4.5.12'
-        dependency 'io.swagger.core.v3:swagger-annotations:2.1.3'
+        dependency 'io.swagger.core.v3:swagger-annotations:2.1.4'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
         dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-        dependency 'jakarta.validation:jakarta.validation-api:2.0.2'
+        dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
-        dependency 'org.mockito:mockito-core:3.4.3'
-        dependency 'org.mockito:mockito-junit-jupiter:3.4.4'
-        dependency 'io.github.classgraph:classgraph:4.8.87'
+        dependency 'org.mockito:mockito-core:3.5.10'
+        dependency 'org.mockito:mockito-junit-jupiter:3.5.10'
+        dependency 'io.github.classgraph:classgraph:4.8.90'
         dependency 'org.awaitility:awaitility:4.0.3'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.0.6'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.1.2'
         dependency 'javax.cache:cache-api:1.1.1'
-        dependency 'org.mock-server:mockserver-junit-jupiter:5.10.0'
-        dependency 'org.webjars.npm:swagger-ui-dist:3.30.0'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.11.0'
+        dependency 'org.webjars.npm:swagger-ui-dist:3.33.0'
         dependency 'org.webjars:webjars-locator-core:0.46'
 
         dependency ('org.dom4j:dom4j:2.1.3') {
@@ -193,6 +197,20 @@ openjpa {
 
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task prepareInputYaml(dependsOn: 'generateGitProperties') {
+    doLast {
+        copy {
+            from file('config/swagger/fineract-input.yaml.template')
+            into file('config/swagger')
+            rename { String filename -> return 'fineract-input.yaml' }
+            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+        }
+    }
+}
+
+
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
@@ -202,6 +220,8 @@ resolve {
     outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
     openApiFile = file("config/swagger/fineract-input.yaml")
 }
+
+resolve.dependsOn prepareInputYaml
 
 // Configuration for JaCoCo code coverage task
 // https://www.eclemma.org/jacoco/
@@ -288,6 +308,7 @@ rat {
         '**/*.github/**',
         '**/MANIFEST.MF',
         '**/*.json',
+        '**/*.json.template',
         '**/*.txt',
         '**/*.log',
         '**/fineractdev-eclipse-preferences.epf',
@@ -304,6 +325,7 @@ rat {
         '**/.gitignore',
         '**/.gitkeep',
         '**/*.iml',
+        '**/config/swagger/templates/**',
         // Notice files
         '**/NOTICE_RELEASE',
         '**/NOTICE_SOURCE',
@@ -649,7 +671,7 @@ configurations
 }
 
 dependencies {
-    tomcat "org.apache.tomcat:tomcat:9.0.37@zip"
+    tomcat "org.apache.tomcat:tomcat:9.0.38@zip"
 }
 
 cargo {
@@ -744,7 +766,7 @@ test {
 // Configuration for the Checkstyle plugin
 // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
 dependencies {
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.34'
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.36.1'
     checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
@@ -803,6 +825,81 @@ bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.withType(Tar) {
+    compression Compression.GZIP
+    extension 'tar.gz'
+    dependsOn 'buildSwaggerCodeFineract'
+}
+
+distributions {
+    binary {
+        baseName "apache-fineract-$releaseVersion-binary"
+        contents {
+            from bootJar
+            from bootWar
+            from('../build/swagger-code-fineract/build/libs/') {
+                include '**/*.jar'
+                rename 'client-(.+)\\.jar', 'fineract-client.jar'
+            }
+            from('../licenses/binary/') {
+                into "licenses/binary/"
+            }
+            from '../LICENSE_RELEASE'
+            from '../NOTICE_RELEASE'
+            rename ('LICENSE_RELEASE', 'LICENSE')
+            rename ('NOTICE_RELEASE', 'NOTICE')
+
+            from '../DISCLAIMER'
+            from '../README.md'
+        }
+    }
+    src {
+        baseName "apache-fineract-$releaseVersion-src"
+        contents {
+            from "../"
+            exclude 'build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
+            rename ('LICENSE_SOURCE', 'LICENSE')
+            rename ('NOTICE_SOURCE', 'NOTICE')
+        }
+    }
+}
+
+tasks.binaryDistZip.enabled false
+tasks.srcDistZip.enabled false
+
+// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
+if( project.hasProperty("fineract.release") ) {
+    signing {
+        useGpgCmd()
+        sign (binaryDistTar, srcDistTar)
+    }
+    tasks.withType(Tar) { task ->
+        task.doLast {
+            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
+        }
+    }
+    tasks.withType(Sign) { task ->
+        task.doLast {
+            task.getFilesToSign().each { f ->
+                new ByteArrayOutputStream().withStream { os ->
+                    def result = exec {
+                        workingDir '../build/distributions'
+                        executable 'sh'
+                        args '-c', "gpg --verify ${f}.asc"
+                        standardOutput = os
+                    }
+                    if(result.exitValue==0) {
+                        println '+++ GPG signature correct!'
+                    } else {
+                        println '--- GPG signature incorrect!'
+                        throw new RuntimeException('--- GPG signature incorrect!')
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Configuration for spotbugs plugin
 // https://github.com/spotbugs/spotbugs-gradle-plugin
 
@@ -844,7 +941,49 @@ gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
+    extProperty = 'gitProps'
 }
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
+
+// This is for swagger code generation
+// https://github.com/int128/gradle-swagger-generator-plugin
+dependencies {
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
+}
+
+task prepareConfigJson(dependsOn: 'generateGitProperties') {
+    doLast {
+        copy {
+            from file('config/swagger/config.json.template')
+            into file('config/swagger')
+            rename { String filename -> return 'config.json' }
+            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+        }
+    }
+}
+
+swaggerSources {
+    fineract {
+        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.yaml')
+        code {
+            language = 'java'
+            configFile = file('config/swagger/config.json')
+            templateDir = file('config/swagger/templates')
+        }
+    }
+}
+
+generateSwaggerCodeFineract.dependsOn prepareConfigJson
+
+// TODO: fix version information for client jar
+// TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
+task buildSwaggerCodeFineract(type:Exec, dependsOn: [
+    'resolve',
+    'generateSwaggerCodeFineract'
+]) {
+    workingDir '../build/swagger-code-fineract'
+    executable 'sh'
+    args '-c', 'chmod +x gradlew && ./gradlew clean build'
+}

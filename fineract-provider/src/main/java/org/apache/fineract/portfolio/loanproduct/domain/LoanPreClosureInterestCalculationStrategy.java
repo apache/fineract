@@ -58,7 +58,7 @@ public enum LoanPreClosureInterestCalculationStrategy {
         return type;
     }
 
-    private LoanPreClosureInterestCalculationStrategy(final Integer value, final String code) {
+    LoanPreClosureInterestCalculationStrategy(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

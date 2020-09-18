@@ -28,7 +28,7 @@ public enum GLAccountUsage {
     private final Integer value;
     private final String code;
 
-    private GLAccountUsage(final Integer value, final String code) {
+    GLAccountUsage(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

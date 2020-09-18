@@ -23,7 +23,11 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.meeting.attendance.AttendanceType;
 
-public class AttendanceEnumerations {
+public final class AttendanceEnumerations {
+
+    private AttendanceEnumerations() {
+
+    }
 
     public static EnumOptionData attendanceType(final int attendanceType) {
         return attendanceType(AttendanceType.fromInt(attendanceType));

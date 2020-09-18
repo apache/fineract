@@ -56,7 +56,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class RateApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "percentage", "productApply", "active"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "percentage", "productApply", "active"));
     private final String resourceNameForPermissions = "RATE";
     private final PlatformSecurityContext context;
     private final RateReadService readPlatformService;
@@ -87,7 +87,7 @@ public class RateApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, rate, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, rate, this.responseDataParameters);
     }
 
     @POST
@@ -113,7 +113,7 @@ public class RateApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, rates, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, rates, this.responseDataParameters);
     }
 
     @PUT

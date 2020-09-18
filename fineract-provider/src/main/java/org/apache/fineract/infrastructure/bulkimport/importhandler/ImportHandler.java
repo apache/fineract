@@ -23,5 +23,5 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public interface ImportHandler {
 
-    public Count process(Workbook workbook, String locale, String dateFormat);
+    Count process(Workbook workbook, String locale, String dateFormat);
 }

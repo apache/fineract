@@ -122,7 +122,7 @@ public class AccountingRuleApiResource {
     @Operation(summary = "Retrieve Accounting Rule Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "accountingrules/template")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.GetAccountRulesTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.GetAccountRulesTemplateResponse.class))) })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
@@ -140,7 +140,7 @@ public class AccountingRuleApiResource {
     @Operation(summary = "Retrieve Accounting Rules", description = "Returns the list of defined accounting rules.\n" + "\n"
             + "Example Requests:\n" + "\n" + "accountingrules")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.GetAccountRulesResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.GetAccountRulesResponse.class)))) })
     public String retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -172,7 +172,7 @@ public class AccountingRuleApiResource {
     @Operation(summary = "Retrieve a Accounting rule", description = "Returns the details of a defined Accounting rule.\n" + "\n"
             + "Example Requests:\n" + "\n" + "accountingrules/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AccountingRuleData.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleData.class))) })
     public String retreiveAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Context final UriInfo uriInfo) {
@@ -196,7 +196,7 @@ public class AccountingRuleApiResource {
             + "description")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PostAccountingRulesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PostAccountingRulesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PostAccountingRulesResponse.class))) })
     public String createAccountingRule(@Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createAccountingRule().withJson(jsonRequestBody).build();
@@ -213,7 +213,7 @@ public class AccountingRuleApiResource {
     @Operation(summary = "Update a Accounting Rule", description = "Updates the details of a Accounting rule.")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PutAccountingRulesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PutAccountingRulesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.PutAccountingRulesResponse.class))) })
     public String updateAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Parameter(hidden = true) final String jsonRequestBody) {
@@ -231,7 +231,7 @@ public class AccountingRuleApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Accounting Rule", description = "Deletes a Accounting rule.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.DeleteAccountingRulesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountingRuleApiResourceSwagger.DeleteAccountingRulesResponse.class))) })
     public String deleteAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId) {
 

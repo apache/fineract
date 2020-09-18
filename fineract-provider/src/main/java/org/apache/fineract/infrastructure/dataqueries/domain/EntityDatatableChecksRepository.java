@@ -27,23 +27,23 @@ import org.springframework.data.repository.query.Param;
 public interface EntityDatatableChecksRepository
         extends JpaRepository<EntityDatatableChecks, Long>, JpaSpecificationExecutor<EntityDatatableChecks> {
 
-    public List<EntityDatatableChecks> findByEntityAndStatus(String entityName, Long status);
+    List<EntityDatatableChecks> findByEntityAndStatus(String entityName, Long status);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status and t.entity=:entity and t.productId = :productId ")
-    public List<EntityDatatableChecks> findByEntityStatusAndProduct(@Param("entity") String entity, @Param("status") Long status,
+    List<EntityDatatableChecks> findByEntityStatusAndProduct(@Param("entity") String entity, @Param("status") Long status,
             @Param("productId") Long productId);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status and t.entity=:entity and t.productId IS NULL ")
-    public List<EntityDatatableChecks> findByEntityStatusAndNoProduct(@Param("entity") String entity, @Param("status") Long status);
+    List<EntityDatatableChecks> findByEntityStatusAndNoProduct(@Param("entity") String entity, @Param("status") Long status);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status "
             + "and t.entity=:entity and t.datatableName = :datatableName AND t.productId = :productId")
-    public List<EntityDatatableChecks> findByEntityStatusAndDatatableIdAndProductId(@Param("entity") String entityName,
+    List<EntityDatatableChecks> findByEntityStatusAndDatatableIdAndProductId(@Param("entity") String entityName,
             @Param("status") Long status, @Param("datatableName") String datatableName, @Param("productId") Long productId);
 
     @Query("select t from  EntityDatatableChecks t WHERE t.status =:status and t.entity=:entity "
             + " and t.datatableName = :datatableName AND t.productId IS NULL")
-    public List<EntityDatatableChecks> findByEntityStatusAndDatatableIdAndNoProduct(@Param("entity") String entityName,
+    List<EntityDatatableChecks> findByEntityStatusAndDatatableIdAndNoProduct(@Param("entity") String entityName,
             @Param("status") Long status, @Param("datatableName") String datatableName);
 
 }

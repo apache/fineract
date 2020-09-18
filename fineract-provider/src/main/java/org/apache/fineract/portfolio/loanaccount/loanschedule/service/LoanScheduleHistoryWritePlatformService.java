@@ -26,8 +26,8 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 
 public interface LoanScheduleHistoryWritePlatformService {
 
-    List<LoanRepaymentScheduleHistory> createLoanScheduleArchive(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final Loan loan, final LoanRescheduleRequest loanRescheduleRequest);
+    List<LoanRepaymentScheduleHistory> createLoanScheduleArchive(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            Loan loan, LoanRescheduleRequest loanRescheduleRequest);
 
     void createAndSaveLoanScheduleArchive(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Loan loan,
             LoanRescheduleRequest loanRescheduleRequest);

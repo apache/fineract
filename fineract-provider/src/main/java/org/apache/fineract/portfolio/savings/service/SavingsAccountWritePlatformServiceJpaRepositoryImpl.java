@@ -1617,7 +1617,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .validateReleaseAmountAndAssembleForm(holdTransaction, submittedBy);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
-        account.releaseAmount(transaction.getAmount());
+        account.releaseOnHoldAmount(transaction.getAmount());
 
         this.savingsAccountTransactionRepository.save(transaction);
         holdTransaction.updateReleaseId(transaction.getId());

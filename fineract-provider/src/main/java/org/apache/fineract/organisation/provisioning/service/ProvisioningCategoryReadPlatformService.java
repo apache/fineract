@@ -23,5 +23,5 @@ import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryDa
 
 public interface ProvisioningCategoryReadPlatformService {
 
-    public Collection<ProvisioningCategoryData> retrieveAllProvisionCategories();
+    Collection<ProvisioningCategoryData> retrieveAllProvisionCategories();
 }

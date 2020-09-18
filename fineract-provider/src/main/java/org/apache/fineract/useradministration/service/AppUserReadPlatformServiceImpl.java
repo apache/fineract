@@ -160,8 +160,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         private final RoleReadPlatformService roleReadPlatformService;
         private final StaffReadPlatformService staffReadPlatformService;
 
-        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService,
-                final StaffReadPlatformService staffReadPlatformService) {
+        AppUserMapper(final RoleReadPlatformService roleReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
             this.roleReadPlatformService = roleReadPlatformService;
             this.staffReadPlatformService = staffReadPlatformService;
         }

@@ -27,5 +27,5 @@ import org.springframework.data.repository.query.Param;
 public interface TrialBalanceRepository extends JpaRepository<TrialBalance, Long>, JpaSpecificationExecutor<TrialBalance> {
 
     @Query(value = "select * from m_trial_balance where office_id=:officeId and account_id=:accountId and closing_balance is null order by created_date, entry_date", nativeQuery = true)
-    List<TrialBalance> findNewByOfficeAndAccount(@Param("officeId") final Long officeId, @Param("accountId") final Long accountId);
+    List<TrialBalance> findNewByOfficeAndAccount(@Param("officeId") Long officeId, @Param("accountId") Long accountId);
 }

@@ -39,7 +39,11 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditio
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 
-public class LoanEnumerations {
+public final class LoanEnumerations {
+
+    private LoanEnumerations() {
+
+    }
 
     public static final String LOAN_TERM_FREQUENCY_TYPE = "loanTermFrequencyType";
     public static final String TERM_FREQUENCY_TYPE = "termFrequencyType";

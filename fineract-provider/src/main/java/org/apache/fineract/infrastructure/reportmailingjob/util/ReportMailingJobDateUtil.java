@@ -23,7 +23,11 @@ import java.util.Calendar;
 import java.util.Date;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobStretchyReportParamDateOption;
 
-public class ReportMailingJobDateUtil {
+public final class ReportMailingJobDateUtil {
+
+    private ReportMailingJobDateUtil() {
+
+    }
 
     public static final String MYSQL_DATE_FORMAT = "yyyy-MM-dd";
 

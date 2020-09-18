@@ -26,6 +26,7 @@ import org.joda.time.DateTime;
 /**
  * Created by sanyam on 13/8/17.
  */
+@SuppressWarnings({ "MemberName" })
 final class SurveyApiResourceSwagger {
 
     private SurveyApiResourceSwagger() {

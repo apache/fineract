@@ -55,7 +55,7 @@ public class CommandHandlerProvider implements ApplicationContextAware {
     private HashMap<String, String> registeredHandlers;
 
     CommandHandlerProvider() {
-        super();
+
     }
 
     /**

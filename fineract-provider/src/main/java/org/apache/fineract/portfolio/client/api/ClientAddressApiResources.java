@@ -62,7 +62,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Clients Address", description = "Address module is an optional module and can be configured into the system by using GlobalConfiguration setting: enable-address. In order to activate Address module, we need to enable the configuration, enable-address by setting its value to true.")
 public class ClientAddressApiResources {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("addressId", "street", "addressLine1", "addressLine2",
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("addressId", "street", "addressLine1", "addressLine2",
             "addressLine3", "townVillage", "city", "countyDistrict", "stateProvinceId", "countryId", "postalCode", "latitude", "longitude",
             "createdBy", "createdOn", "updatedBy", "updatedOn", "clientAddressId", "client_id", "address_id", "address_type_id", "isActive",
             "fieldConfigurationId", "entity", "table", "field", "is_enabled", "is_mandatory", "validation_regex"));
@@ -94,7 +94,7 @@ public class ClientAddressApiResources {
         final AddressData template = this.readPlatformService.retrieveTemplate();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, template, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, template, this.responseDataParameters);
 
     }
 
@@ -144,7 +144,7 @@ public class ClientAddressApiResources {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, address, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, address, this.responseDataParameters);
 
     }
 

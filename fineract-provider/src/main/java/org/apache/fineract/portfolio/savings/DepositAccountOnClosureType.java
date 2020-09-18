@@ -38,7 +38,7 @@ public enum DepositAccountOnClosureType {
     private final Integer value;
     private final String code;
 
-    private DepositAccountOnClosureType(final Integer value, final String code) {
+    DepositAccountOnClosureType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

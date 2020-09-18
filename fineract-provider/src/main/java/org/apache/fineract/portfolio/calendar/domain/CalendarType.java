@@ -29,7 +29,7 @@ public enum CalendarType {
     private final Integer value;
     private final String code;
 
-    private CalendarType(final Integer value, final String code) {
+    CalendarType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

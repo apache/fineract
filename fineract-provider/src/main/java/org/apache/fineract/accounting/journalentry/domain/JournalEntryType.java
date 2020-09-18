@@ -28,7 +28,7 @@ public enum JournalEntryType {
     private final Integer value;
     private final String code;
 
-    private JournalEntryType(final Integer value, final String code) {
+    JournalEntryType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

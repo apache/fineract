@@ -20,7 +20,11 @@ package org.apache.fineract.organisation.staff.domain;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class StaffEnumerations {
+public final class StaffEnumerations {
+
+    private StaffEnumerations() {
+
+    }
 
     public static EnumOptionData organisationalRole(final Integer id) {
         return organisationalRole(StaffOrganisationalRoleType.fromInt(id));

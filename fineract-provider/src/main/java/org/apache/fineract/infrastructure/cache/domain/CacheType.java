@@ -47,7 +47,7 @@ public enum CacheType {
         return type;
     }
 
-    private CacheType(final Integer value, final String code) {
+    CacheType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

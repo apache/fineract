@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 class MultiExceptionTest {
 
-    Logger LOG = LoggerFactory.getLogger(MultiExceptionTest.class);
+    private static Logger LOG = LoggerFactory.getLogger(MultiExceptionTest.class);
 
     @Test()
     void testEmpty() throws MultiException {

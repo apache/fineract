@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class TransactionConstants {
+public final class TransactionConstants {
+
+    private TransactionConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;
     public static final int CLIENT_NAME_COL = 1;

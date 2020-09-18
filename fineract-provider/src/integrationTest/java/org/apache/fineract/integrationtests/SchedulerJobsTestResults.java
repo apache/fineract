@@ -74,13 +74,13 @@ public class SchedulerJobsTestResults {
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
     private static final String TO_ACCOUNT_TYPE_LOAN = "1";
     private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
-    private final String DATE_OF_JOINING = "01 January 2011";
+    private static final String DATE_OF_JOINING = "01 January 2011";
 
-    private final String TRANSACTION_DATE = "01 March 2013";
+    private static final String TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String MINIMUM_OPENING_BALANCE = "1000";
 
-    Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
+    static Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -399,7 +399,7 @@ public class SchedulerJobsTestResults {
         final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
                 liabilityAccount);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
         final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
@@ -412,11 +412,10 @@ public class SchedulerJobsTestResults {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE,
-                liablilityAccountInitialEntry);
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
 
         String JobName = "Update Accounting Running Balances";
 

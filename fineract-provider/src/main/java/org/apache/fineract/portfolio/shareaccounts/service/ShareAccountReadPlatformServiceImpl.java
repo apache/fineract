@@ -251,7 +251,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         private final String schema;
 
-        public ShareAccountMapper(final Collection<ShareAccountChargeData> charges,
+        ShareAccountMapper(final Collection<ShareAccountChargeData> charges,
                 final Collection<ShareAccountTransactionData> purchasedShares) {
             this.charges = charges;
             this.purchasedShares = purchasedShares;
@@ -379,7 +379,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         private final String schema;
         final PurchasedSharesDataRowMapper purchasedSharesDataRowMapper = new PurchasedSharesDataRowMapper();
 
-        public ShareAccountMapperForDividents() {
+        ShareAccountMapperForDividents() {
             StringBuilder sb = new StringBuilder();
 
             sb.append("sa.id as id, sa.status_enum as statusEnum, ");
@@ -443,7 +443,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         private final String schema;
 
-        public PurchasedSharesDataRowMapper() {
+        PurchasedSharesDataRowMapper() {
             StringBuilder buff = new StringBuilder().append(
                     "saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice, ")
                     .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount, ")

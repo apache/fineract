@@ -362,7 +362,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         private final String schemaSql;
 
-        public StandingInstructionMapper() {
+        StandingInstructionMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("atsi.id as id,atsi.name as name, atsi.priority as priority,");
             sqlBuilder.append("atsi.status as status, atsi.instruction_type as instructionType,");
@@ -517,7 +517,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         private final String schemaSql;
 
-        public StandingInstructionLoanDuesMapper() {
+        StandingInstructionLoanDuesMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("max(ls.duedate) as dueDate,sum(ls.principal_amount) as principalAmount,");

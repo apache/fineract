@@ -31,7 +31,7 @@ public enum GroupTypes {
     private final String code;
     private final String value;
 
-    private GroupTypes(final Long id, final String code, final String value) {
+    GroupTypes(final Long id, final String code, final String value) {
         this.id = id;
         this.code = code;
         this.value = value;

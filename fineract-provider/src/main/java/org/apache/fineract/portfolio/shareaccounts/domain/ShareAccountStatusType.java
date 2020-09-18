@@ -56,7 +56,7 @@ public enum ShareAccountStatusType {
         return enumeration;
     }
 
-    private ShareAccountStatusType(final Integer value, final String code) {
+    ShareAccountStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

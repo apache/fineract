@@ -33,7 +33,7 @@ public enum PeriodFrequencyType {
     private final Integer value;
     private final String code;
 
-    private PeriodFrequencyType(final Integer value, final String code) {
+    PeriodFrequencyType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

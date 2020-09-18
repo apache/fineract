@@ -38,7 +38,7 @@ public enum SavingsInterestCalculationDaysInYearType {
     private final Integer value;
     private final String code;
 
-    private SavingsInterestCalculationDaysInYearType(final Integer value, final String code) {
+    SavingsInterestCalculationDaysInYearType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.note.service;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 
-public class NoteEnumerations {
+public final class NoteEnumerations {
+
+    private NoteEnumerations() {
+
+    }
 
     public static EnumOptionData noteType(final Integer id) {
         return noteType(NoteType.fromInt(id));

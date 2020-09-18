@@ -28,7 +28,7 @@ public enum GuarantorType {
     private final Integer value;
     private final String code;
 
-    private GuarantorType(final Integer value, final String code) {
+    GuarantorType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

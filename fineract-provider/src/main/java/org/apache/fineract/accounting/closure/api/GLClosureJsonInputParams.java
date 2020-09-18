@@ -30,7 +30,7 @@ public enum GLClosureJsonInputParams {
 
     private final String value;
 
-    private GLClosureJsonInputParams(final String value) {
+    GLClosureJsonInputParams(final String value) {
         this.value = value;
     }
 

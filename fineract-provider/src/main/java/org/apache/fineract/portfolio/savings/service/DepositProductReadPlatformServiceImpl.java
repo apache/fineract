@@ -222,7 +222,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         private final String schemaSql;
 
-        public FixedDepositProductMapper() {
+        FixedDepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.schema());
             sqlBuilder.append(", dptp.pre_closure_penal_applicable as preClosurePenalApplicable, ");
@@ -286,7 +286,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         private final String schemaSql;
 
-        public RecurringDepositProductMapper() {
+        RecurringDepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(super.schema());
             sqlBuilder.append(", dptp.pre_closure_penal_applicable as preClosurePenalApplicable, ");

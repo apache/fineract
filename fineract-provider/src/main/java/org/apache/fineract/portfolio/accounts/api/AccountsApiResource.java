@@ -237,7 +237,8 @@ public class AccountsApiResource {
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
     public Response getSharedAccountsTemplate(@QueryParam("officeId") final Long officeId,
-            @QueryParam("dateFormat") final String dateFormat) {
+            @QueryParam("dateFormat") final String dateFormat,
+            @PathParam("type") @Parameter(description = "type") final String accountType) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.SHARE_ACCOUNTS.toString(), officeId, null, dateFormat);
     }
 
@@ -246,7 +247,8 @@ public class AccountsApiResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String postSharedAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
-            @FormDataParam("dateFormat") final String dateFormat) {
+            @FormDataParam("dateFormat") final String dateFormat,
+            @PathParam("type") @Parameter(description = "type") final String accountType) {
         final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.SHARE_ACCOUNTS.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);

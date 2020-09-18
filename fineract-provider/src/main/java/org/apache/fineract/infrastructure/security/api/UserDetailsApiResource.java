@@ -82,7 +82,7 @@ public class UserDetailsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Fetch authenticated user details\n", description = "checks the Authentication and returns the set roles and permissions allowed.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class))) })
     public String fetchAuthenticatedUserData(
             @QueryParam("access_token") @Parameter(description = "access_token") final String accessToken) {
 

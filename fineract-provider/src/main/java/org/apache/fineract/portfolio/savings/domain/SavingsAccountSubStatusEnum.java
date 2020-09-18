@@ -60,7 +60,7 @@ public enum SavingsAccountSubStatusEnum {
         return enumeration;
     }
 
-    private SavingsAccountSubStatusEnum(final Integer value, final String code) {
+    SavingsAccountSubStatusEnum(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

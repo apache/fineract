@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Created by Kang Breder on 05/08/19.
  */
-
+@SuppressWarnings({ "MemberName" })
 final class SelfShareAccountsApiResourceSwagger {
 
     private SelfShareAccountsApiResourceSwagger() {

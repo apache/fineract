@@ -43,6 +43,8 @@ public class ScheduleGeneratorDTO {
     final Integer numberOfdays;
     final boolean isSkipRepaymentOnFirstDayofMonth;
     final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled;
+    final boolean isFirstRepaymentDateAllowedOnHoliday;
+    final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
@@ -50,7 +52,8 @@ public class ScheduleGeneratorDTO {
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
             final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
             final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays,
-            final boolean isSkipRepaymentOnFirstDayofMonth, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
+            final boolean isSkipRepaymentOnFirstDayofMonth, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled,
+            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
@@ -67,6 +70,8 @@ public class ScheduleGeneratorDTO {
         this.numberOfdays = numberOfdays;
         this.isSkipRepaymentOnFirstDayofMonth = isSkipRepaymentOnFirstDayofMonth;
         this.isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled = isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled;
+        this.isFirstRepaymentDateAllowedOnHoliday = isFirstRepaymentDateAllowedOnHoliday;
+        this.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI = isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
     }
 
     public LoanScheduleGeneratorFactory getLoanScheduleFactory() {
@@ -141,4 +146,11 @@ public class ScheduleGeneratorDTO {
         return this.isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled;
     }
 
+    public boolean isFirstRepaymentDateAllowedOnHoliday() {
+        return isFirstRepaymentDateAllowedOnHoliday;
+    }
+
+    public boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI() {
+        return isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+    }
 }

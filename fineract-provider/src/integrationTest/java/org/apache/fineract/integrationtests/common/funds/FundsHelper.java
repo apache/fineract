@@ -47,11 +47,11 @@ public class FundsHelper {
     private Long resourceId;
 
     FundsHelper() {
-        super();
+
     }
 
     private FundsHelper(final String name, final String externalId) {
-        super();
+
         this.name = name;
         this.externalId = externalId;
     }

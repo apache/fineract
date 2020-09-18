@@ -31,11 +31,11 @@ public interface BusinessEventListner {
     /**
      * Implement this method for notifications before executing Business Event
      */
-    public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity);
+    void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity);
 
     /**
      * Implement this method for notifications after executing Business Event
      */
-    public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity);
+    void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity);
 
 }

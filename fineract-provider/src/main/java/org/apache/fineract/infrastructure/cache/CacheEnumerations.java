@@ -21,7 +21,11 @@ package org.apache.fineract.infrastructure.cache;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class CacheEnumerations {
+public final class CacheEnumerations {
+
+    private CacheEnumerations() {
+
+    }
 
     public static EnumOptionData cacheType(final int id) {
         return cacheType(CacheType.fromInt(id));

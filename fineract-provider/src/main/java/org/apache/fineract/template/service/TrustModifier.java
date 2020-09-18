@@ -33,7 +33,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 @SuppressWarnings("unused")
-public class TrustModifier {
+public final class TrustModifier {
+
+    private TrustModifier() {
+
+    }
 
     private static final TrustingHostnameVerifier TRUSTING_HOSTNAME_VERIFIER = new TrustingHostnameVerifier();
     private static SSLSocketFactory factory;

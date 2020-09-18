@@ -40,7 +40,7 @@ public class AllocateCashToCashierCommandHandler implements NewCommandSourceHand
      */
     @Autowired
     public AllocateCashToCashierCommandHandler(final TellerWritePlatformService writePlatformService) {
-        super();
+
         this.writePlatformService = writePlatformService;
     }
 

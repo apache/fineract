@@ -23,7 +23,11 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class ShareProductTransactionHelper {
+public final class ShareProductTransactionHelper {
+
+    private ShareProductTransactionHelper() {
+
+    }
 
     private static final String SHARE_PRODUCT_URL = "/fineract-provider/api/v1/products/share";
     private static final String CREATE_SHARE_PRODUCT_URL = SHARE_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;

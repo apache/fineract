@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class TemplatePopulateImportConstants {
+public final class TemplatePopulateImportConstants {
+
+    private TemplatePopulateImportConstants() {
+
+    }
 
     // columns sizes
     public static final int SMALL_COL_SIZE = 4000;

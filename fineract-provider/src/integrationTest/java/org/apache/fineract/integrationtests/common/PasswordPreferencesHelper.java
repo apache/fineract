@@ -23,7 +23,11 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 
-public class PasswordPreferencesHelper {
+public final class PasswordPreferencesHelper {
+
+    private PasswordPreferencesHelper() {
+
+    }
 
     private static final String PASSWORD_PREFERENCES_URL = "/fineract-provider/api/v1/passwordpreferences";
 

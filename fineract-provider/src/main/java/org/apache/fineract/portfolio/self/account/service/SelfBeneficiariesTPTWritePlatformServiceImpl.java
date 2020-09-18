@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBeneficiariesTPTWritePlatformService {
 
-    private final Logger LOG;
+    private static final Logger LOG = LoggerFactory.getLogger(SelfBeneficiariesTPTWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final SelfBeneficiariesTPTRepository repository;
     private final SelfBeneficiariesTPTDataValidator validator;
@@ -68,7 +68,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
         this.validator = validator;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.savingRepositoryWrapper = savingRepositoryWrapper;
-        this.LOG = LoggerFactory.getLogger(SelfBeneficiariesTPTWritePlatformServiceImpl.class);
+
     }
 
     @Transactional
@@ -178,7 +178,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements SelfBenefic
                     "Beneficiary with name `" + name + "` already exists", NAME_PARAM_NAME, name);
         }
 
-        this.LOG.error("Error occured.", dae);
+        LOG.error("Error occured.", dae);
         throw new PlatformDataIntegrityException("error.msg.beneficiary.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.security.constants;
 
-public class TwoFactorConstants {
+public final class TwoFactorConstants {
+
+    private TwoFactorConstants() {
+
+    }
 
     public static final String ACCESSTOKEN_RESOURCE_NAME = "TWOFACTOR_ACCESSTOKEN";
 

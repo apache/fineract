@@ -35,7 +35,7 @@ public enum StatusEnum {
         return code;
     }
 
-    private StatusEnum(String name, Integer code) {
+    StatusEnum(String name, Integer code) {
 
         this.name = name;
         this.code = code;

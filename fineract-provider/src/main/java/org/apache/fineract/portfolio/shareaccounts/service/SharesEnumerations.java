@@ -26,7 +26,11 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType
 import org.apache.fineract.portfolio.shareproducts.SharePeriodFrequencyType;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendStatusType;
 
-public class SharesEnumerations {
+public final class SharesEnumerations {
+
+    private SharesEnumerations() {
+
+    }
 
     public static ShareAccountStatusEnumData status(final Integer statusEnum) {
         return status(ShareAccountStatusType.fromInt(statusEnum));

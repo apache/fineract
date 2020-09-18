@@ -1,4 +1,4 @@
-Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
+Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds)  
 ============
 
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
@@ -249,9 +249,11 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").
+The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/api-docs/apiLive.htm), and the [apiLive.htm can be viewed on Fineract.dev](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
 
-If you have your own Fineract instance running, you can find the same documentation under '(your host:port)/fineract-provider/api-docs/apiLive.htm' under your. The Swagger documentation (work in progress) can be accessed under '(your host:port)/fineract-provider/swagger-ui/index.html'
+The Swagger documentation (work in progress; see [FINERACT-733](https://issues.apache.org/jira/browse/FINERACT-733)) can be accessed under [/fineract-provider/swagger-ui/index.html](https://localhost:8443/fineract-provider/swagger-ui/index.html) and [live Swagger UI here on Fineract.dev](https://demo.fineract.dev/fineract-provider/swagger-ui/index.html).
+
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/).  For more instructions on how to generate the client code, check [docs/developers/swagger/client.md](docs/developers/swagger/client.md).
 
 
 API clients (Web UIs, Mobile, etc.)
@@ -286,6 +288,11 @@ Video Demonstration
 
 Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
 
+Swagger-UI Documentation 
+============
+
+We use Swagger-UI to generate and maintain our API documentation, you can see the demo video [here](https://www.youtube.com/watch?v=FlVd-0YAo6c) or a live version 
+[here](https://demo.fineract.dev/fineract-provider/swagger-ui/index.html). If you interested to know more about Swagger-UI you can check their [website](https://swagger.io/).
 
 Governance and Policies
 =======================
@@ -316,6 +323,8 @@ Logging Guidelines
 Pull Requests
 -------------
 
+We request that your commit message include a FINERACT JIRA issue, recommended to be put in parenthesis add the end of the first line.  Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. _Add enforced HideUtilityClassConstructor checkstyle (FINERACT-821)_ or _Fix inability to reschedule when interest accrued larger than EMI (FINERACT-1109)_ etc.).
+
 If your PR is failing to pass our CI build due to a test failure, then:
 
 1. Understand if the failure is due to your PR or an unrelated unstable test.
@@ -336,6 +345,17 @@ them in different commits. This helps review to review your code faster.
 
 We have an automated Bot which marks pull requests as "stale" after a while, and ultimately automatically closes them.
 
+
+Merge Strategy
+--------------
+
+This project's committers typically prefer to bring your Pull Requests in through _Rebase and Merge_ instead of _Create a Merge Commit_. (If you are unfamiliar with GitHub's UI re. this, note the somewhat hidden little triangle drop-down at the bottom of PR, visible only to committers, not contributors.)  This avoids the "merge commits" which we consider to be somewhat "polluting" the projects commits log history view.  We understand this doesn't give an easy automatic reference to the original PR (which GitHub automatically adds to the Merge Commit message it generates), but we consider this an only very minor inconvenience; it's typically relatively easy to find the original PR even just from the commit message, and JIRA.
+
+We expect most proposed PRs to typically consist of a single commit.  Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so will rewrite your commit message as they see fit.
+
+Neither of these two are hard absolute rules, but mere conventions.  Multiple commits in single PR make sense in certain cases (e.g. branch backports).
+
+
 Dependency Upgrades
 -------------------
 
@@ -349,8 +369,55 @@ Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more t
 Releasing
 ---------
 
-[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release ZIP available on http://fineract.apache.org.
+[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
 
+Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
+
+1. Provide the parameters via ~/gradle/gradle.properties in your home folder:
+```
+signing.gnupg.keyName=7890ABCD
+signing.gnupg.passphrase=secret
+```
+
+IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties and double check that you are not accidentally committing them to Git.
+
+The release command would look then look like this:
+```
+./gradlew -Pfineract.release clean build 
+```
+
+2. Another way to provide these parameters are via project parameters on the command line. A release command would then look like this:
+```
+./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build 
+```
+
+NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName". 
+
+Above tasks will create the following files in folder build/distributions:
+
+- binary distribution file: apache-fineract-1.4.0-binary.tar.gz
+- ASCII armored signature for binary distribution: apache-fineract-1.4.0-binary.tar.gz.asc
+- SHA512 checksum for binary distribution: apache-fineract-1.4.0-binary.tar.gz.sha512
+- source distribution file: apache-fineract-1.4.0-src.tar.gz
+- ASCII armored signature for source distribution: apache-fineract-1.4.0-src.tar.gz.asc
+- SHA512 checksum for source distribution: apache-fineract-1.4.0-src.tar.gz.sha512
+
+The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
+
+Additionally, you can verify the validity of the release distribution files e. g. with:
+```
+gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
+```
+
+The output should look somewhat like this:
+```
+gpg: assuming signed data in 'build/distributions/apache-fineract-1.4.0-binary.tgz'
+gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
+gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
+gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
+```
+
+NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 
 More Information
 ============

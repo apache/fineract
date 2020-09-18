@@ -24,7 +24,11 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImageHelper {
+public final class ImageHelper {
+
+    private ImageHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageHelper.class);
     private static final String STAFF_IMAGE_URL = "/fineract-provider/api/v1/staff/";

@@ -52,7 +52,7 @@ public enum LoanRescheduleStrategyMethod {
         return type;
     }
 
-    private LoanRescheduleStrategyMethod(final Integer value, final String code) {
+    LoanRescheduleStrategyMethod(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

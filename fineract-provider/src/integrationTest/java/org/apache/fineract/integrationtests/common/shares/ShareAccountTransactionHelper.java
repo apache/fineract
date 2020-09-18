@@ -23,7 +23,11 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class ShareAccountTransactionHelper {
+public final class ShareAccountTransactionHelper {
+
+    private ShareAccountTransactionHelper() {
+
+    }
 
     private static final String SHARE_ACCOUNT_URL = "/fineract-provider/api/v1/accounts/share";
     private static final String CREATE_SHARE_ACCOUNT_URL = SHARE_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER;

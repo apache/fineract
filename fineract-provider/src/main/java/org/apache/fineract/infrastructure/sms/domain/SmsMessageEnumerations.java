@@ -20,7 +20,11 @@ package org.apache.fineract.infrastructure.sms.domain;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class SmsMessageEnumerations {
+public final class SmsMessageEnumerations {
+
+    private SmsMessageEnumerations() {
+
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(SmsMessageStatusType.fromInt(statusId));

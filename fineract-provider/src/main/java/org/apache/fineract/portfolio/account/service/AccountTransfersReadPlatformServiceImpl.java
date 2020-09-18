@@ -270,7 +270,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         private final String schemaSql;
 
-        public AccountTransfersMapper() {
+        AccountTransfersMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("att.id as id, att.is_reversed as isReversed,");
             sqlBuilder.append("att.transaction_date as transferDate, att.amount as transferAmount,");

@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,14 +65,14 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
-    private final GLAccountRepositoryWrapper gLAccountRepository;
+    private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper gLAccountRepository,
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
             final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -80,7 +81,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.gLAccountRepository = gLAccountRepository;
+        this.glAccountRepository = glAccountRepository;
         this.taxGroupRepository = taxGroupRepository;
     }
 
@@ -97,7 +98,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             GLAccount glAccount = null;
             if (glAccountId != null) {
-                glAccount = this.gLAccountRepository.findOneWithNotFoundDetection(glAccountId);
+                glAccount = this.glAccountRepository.findOneWithNotFoundDetection(glAccountId);
             }
 
             final Long taxGroupId = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
@@ -116,7 +117,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, charge.getId());
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -170,7 +171,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
                 GLAccount newIncomeAccount = null;
                 if (newValue != null) {
-                    newIncomeAccount = this.gLAccountRepository.findOneWithNotFoundDetection(newValue);
+                    newIncomeAccount = this.glAccountRepository.findOneWithNotFoundDetection(newValue);
                 }
                 chargeForUpdate.setAccount(newIncomeAccount);
             }
@@ -189,7 +190,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(chargeId).with(changes).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {

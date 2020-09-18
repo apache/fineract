@@ -50,7 +50,7 @@ public enum JobName {
 
     private final String name;
 
-    private JobName(final String name) {
+    JobName(final String name) {
         this.name = name;
     }
 

@@ -24,7 +24,6 @@ import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactio
 
 public interface DepositAccountOnHoldTransactionReadPlatformService {
 
-    public Page<DepositAccountOnHoldTransactionData> retriveAll(final Long savingsId, final Long guarantorFundingId,
-            final SearchParameters searchParameters);
+    Page<DepositAccountOnHoldTransactionData> retriveAll(Long savingsId, Long guarantorFundingId, SearchParameters searchParameters);
 
 }

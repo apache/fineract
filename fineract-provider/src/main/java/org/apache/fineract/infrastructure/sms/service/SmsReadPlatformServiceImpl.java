@@ -62,7 +62,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
         final String schema;
 
-        public SmsMapper() {
+        SmsMapper() {
             final StringBuilder sql = new StringBuilder(300);
             sql.append("smo.id as id, ");
             sql.append("smo.group_id as groupId, ");

@@ -28,7 +28,11 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class AccountNumberFormatEnumerations {
+public final class AccountNumberFormatEnumerations {
+
+    private AccountNumberFormatEnumerations() {
+
+    }
 
     public static final Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.CLIENT_TYPE)));

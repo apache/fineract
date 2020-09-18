@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
@@ -55,6 +55,6 @@ public class InteropIdentifierData {
     }
 
     public static InteropIdentifierData build(InteropIdentifier identifier) {
-        return new InteropIdentifierData(identifier.getType(), identifier.getValue(), identifier.getSubValueOrType());
+        return new InteropIdentifierData(identifier.getType(), identifier.getValue(), identifier.getSubType());
     }
 }

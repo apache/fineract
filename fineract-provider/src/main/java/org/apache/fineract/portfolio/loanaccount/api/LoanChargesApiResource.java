@@ -71,7 +71,7 @@ import org.springframework.stereotype.Component;
         + "Loan Charges are instances of Charges and represent either fees and penalties for loan products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Loan) are described here")
 public class LoanChargesApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("id", "chargeId", "name", "penalty", "chargeTimeType", "dueAsOfDate", "chargeCalculationType", "percentage",
                     "amountPercentageAppliedTo", "currency", "amountWaived", "amountWrittenOff", "amountOutstanding", "amountOrPercentage",
                     "amount", "amountPaid", "chargeOptions", "installmentChargeData"));
@@ -117,7 +117,7 @@ public class LoanChargesApiResource {
         final Collection<LoanChargeData> loanCharges = this.loanChargeReadPlatformService.retrieveLoanCharges(loanId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanCharges, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanCharges, this.responseDataParameters);
     }
 
     @GET
@@ -138,7 +138,7 @@ public class LoanChargesApiResource {
         final LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanChargeTemplate, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanChargeTemplate, this.responseDataParameters);
     }
 
     @GET
@@ -162,7 +162,7 @@ public class LoanChargesApiResource {
         final LoanChargeData loanChargeData = new LoanChargeData(loanCharge, installmentChargeData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanChargeData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanChargeData, this.responseDataParameters);
     }
 
     @POST

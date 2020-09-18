@@ -31,7 +31,7 @@ public enum CalendarWeekDaysType {
     private final Integer value;
     private final String code;
 
-    private CalendarWeekDaysType(final Integer value, final String code) {
+    CalendarWeekDaysType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

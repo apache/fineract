@@ -20,7 +20,11 @@ package org.apache.fineract.portfolio.group.domain;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class GroupingTypeEnumerations {
+public final class GroupingTypeEnumerations {
+
+    private GroupingTypeEnumerations() {
+
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(GroupingTypeStatus.fromInt(statusId));

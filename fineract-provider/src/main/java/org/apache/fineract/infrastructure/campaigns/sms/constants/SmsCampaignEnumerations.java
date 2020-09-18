@@ -25,7 +25,11 @@ import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
-public class SmsCampaignEnumerations {
+public final class SmsCampaignEnumerations {
+
+    private SmsCampaignEnumerations() {
+
+    }
 
     public static EnumOptionData smscampaignTriggerType(final SmsCampaignTriggerType type) {
         EnumOptionData optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),

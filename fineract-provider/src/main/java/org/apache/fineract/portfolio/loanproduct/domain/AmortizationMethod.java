@@ -27,7 +27,7 @@ public enum AmortizationMethod {
     private final Integer value;
     private final String code;
 
-    private AmortizationMethod(final Integer value, final String code) {
+    AmortizationMethod(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

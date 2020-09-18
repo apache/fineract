@@ -64,7 +64,7 @@ import org.springframework.stereotype.Component;
         + "At present we support defining charges for use with Client accounts and both loan and saving products.")
 public class ChargesApiResource {
 
-    private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
+    private final Set<String> chargesDataParameters = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
             "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "chargeAppliesToOptions",
             "chargeTimeTypeOptions", "currencyOptions", "loanChargeCalculationTypeOptions", "loanChargeTimeTypeOptions",
             "savingsChargeCalculationTypeOptions", "savingsChargeTimeTypeOptions", "incomeAccount", "clientChargeCalculationTypeOptions",
@@ -103,7 +103,7 @@ public class ChargesApiResource {
         final Collection<ChargeData> charges = this.readPlatformService.retrieveAllCharges();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charges, this.CHARGES_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, charges, this.chargesDataParameters);
     }
 
     @GET
@@ -127,7 +127,7 @@ public class ChargesApiResource {
             charge = ChargeData.withTemplate(charge, templateData);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, charge, this.chargesDataParameters);
     }
 
     @GET
@@ -145,7 +145,7 @@ public class ChargesApiResource {
         final ChargeData charge = this.readPlatformService.retrieveNewChargeDetails();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, charge, this.chargesDataParameters);
     }
 
     @POST

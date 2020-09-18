@@ -28,7 +28,7 @@ public enum CalendarRemindBy {
     private final Integer value;
     private final String code;
 
-    private CalendarRemindBy(final Integer value, final String code) {
+    CalendarRemindBy(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

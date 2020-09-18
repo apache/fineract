@@ -36,7 +36,7 @@ public enum DepositAccountType {
     private final String code;
     private static final String SPACE = " ";
 
-    private DepositAccountType(final Integer value, final String code) {
+    DepositAccountType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

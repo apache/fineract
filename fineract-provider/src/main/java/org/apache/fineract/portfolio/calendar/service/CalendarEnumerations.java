@@ -29,7 +29,11 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 
-public class CalendarEnumerations {
+public final class CalendarEnumerations {
+
+    private CalendarEnumerations() {
+
+    }
 
     public static EnumOptionData calendarEntityType(final int id) {
         return calendarEntityType(CalendarEntityType.fromInt(id));

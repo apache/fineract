@@ -30,7 +30,11 @@ import org.slf4j.LoggerFactory;
  *
  * @see http://hawkee.com/snippet/9731/
  */
-public class IPv4Helper {
+public final class IPv4Helper {
+
+    private IPv4Helper() {
+
+    }
 
     /**
      * Returns the long format of the provided IP address.

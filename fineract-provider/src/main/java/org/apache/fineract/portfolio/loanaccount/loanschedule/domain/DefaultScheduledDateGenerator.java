@@ -62,6 +62,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate dueRepaymentPeriodDate = null;
         if (isFirstRepayment && firstRepaymentPeriodDate != null) {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
+
         } else {
             LocalDate seedDate = null;
             String reccuringString = null;

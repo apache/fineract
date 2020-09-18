@@ -81,9 +81,9 @@ import org.springframework.stereotype.Component;
         + "UGDs can be assigned to an entity like client or loan and be of a type like Document or SMS. The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab). The Template Engine back-end runner does not actually need this metadata.")
 public class TemplatesApiResource {
 
-    private final Set<String> RESPONSE_TEMPLATES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
-    private final Set<String> RESPONSE_TEMPLATE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entities", "types", "template"));
-    private final String RESOURCE_NAME_FOR_PERMISSION = "template";
+    private final Set<String> responseTemplatesDataParameters = new HashSet<>(Arrays.asList("id"));
+    private final Set<String> responseTemplateDataParameters = new HashSet<>(Arrays.asList("id", "entities", "types", "template"));
+    private final String resourceNameForPermission = "template";
 
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<Template> toApiJsonSerializer;
@@ -115,12 +115,12 @@ public class TemplatesApiResource {
             + "[Entity: Id]\n\n\n\n" + "\n\n" + "client: 0, loan: 1" + "\n\n" + "[Type: Id]\n\n\n\n"
             + "Document: 0, E-Mail (not yet): 1,  SMS: 2")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesResponse.class))) })
     public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") @Parameter(description = "typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") @Parameter(description = "entityId") final int entityId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         // FIXME - we dont use the ORM when doing fetches - we write SQL and
         // fetch through JDBC returning data to be serialized to JSON
@@ -133,7 +133,7 @@ public class TemplatesApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, templates, this.RESPONSE_TEMPLATES_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, templates, this.responseTemplatesDataParameters);
     }
 
     @GET
@@ -142,15 +142,15 @@ public class TemplatesApiResource {
             + "\n" + "ARGUMENTS\n" + "name String entity String type String text String optional mappers Mapper optional\n"
             + "Example Request:\n" + "\n" + "templates/template")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class))) })
     public String template(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         final TemplateData templateData = TemplateData.template();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.templateDataApiJsonSerializer.serialize(settings, templateData, this.RESPONSE_TEMPLATES_DATA_PARAMETERS);
+        return this.templateDataApiJsonSerializer.serialize(settings, templateData, this.responseTemplatesDataParameters);
     }
 
     @POST
@@ -158,7 +158,7 @@ public class TemplatesApiResource {
             + "Example Requests:\n" + "\n" + "templates/1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesResponse.class))) })
     public String createTemplate(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
 
@@ -171,28 +171,28 @@ public class TemplatesApiResource {
     @Path("{templateId}")
     @Operation(summary = "Retrieve a UGD", description = "Example Requests:\n" + "\n" + "templates/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class))) })
     public String retrieveOne(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         final Template template = this.templateService.findOneById(templateId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, template, this.RESPONSE_TEMPLATES_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, template, this.responseTemplatesDataParameters);
     }
 
     @GET
     @Path("{templateId}/template")
     public String getTemplateByTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         final TemplateData template = TemplateData.template(this.templateService.findOneById(templateId));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.templateDataApiJsonSerializer.serialize(settings, template, this.RESPONSE_TEMPLATE_DATA_PARAMETERS);
+        return this.templateDataApiJsonSerializer.serialize(settings, template, this.responseTemplateDataParameters);
     }
 
     @PUT
@@ -200,7 +200,7 @@ public class TemplatesApiResource {
     @Operation(summary = "Update a UGD", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class))) })
     public String saveTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -215,7 +215,7 @@ public class TemplatesApiResource {
     @Path("{templateId}")
     @Operation(summary = "Delete a UGD", description = "")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class))) })
     public String deleteTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteTemplate(templateId).build();

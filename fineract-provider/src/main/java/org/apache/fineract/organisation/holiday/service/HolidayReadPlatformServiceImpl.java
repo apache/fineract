@@ -56,7 +56,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
         private final String schema;
 
-        public HolidayMapper() {
+        HolidayMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("h.id as id, h.name as name, h.description as description, h.from_date as fromDate, h.to_date as toDate, ");
             sqlBuilder.append(

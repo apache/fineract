@@ -108,7 +108,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         private final String schemaSql;
 
-        public SavingProductMapper() {
+        SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
             sqlBuilder.append(

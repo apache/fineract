@@ -60,6 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -140,8 +142,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, null, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, null, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -187,8 +190,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withEntityId(clientCharge.getId()) //
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()).build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
 
@@ -226,8 +230,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -249,8 +254,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -440,9 +446,8 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     }
 
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final Long clientId, final Long clientChargeId,
-            final DataIntegrityViolationException dve) {
+            final Throwable realCause, final NonTransientDataAccessException dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("FK_m_client_charge_paid_by_m_client_charge")) {
 
             throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",

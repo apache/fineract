@@ -24,7 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TwoFactorConfigurationConstants {
+public final class TwoFactorConfigurationConstants {
+
+    private TwoFactorConfigurationConstants() {
+
+    }
 
     public static final String RESOURCE_NAME = "TWOFACTOR_CONFIGURATION";
 

@@ -54,7 +54,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CalendarUtils {
+public final class CalendarUtils {
+
+    private CalendarUtils() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(CalendarUtils.class);
 
@@ -74,7 +78,7 @@ public class CalendarUtils {
 
     public static LocalDate adjustDate(final LocalDate date, final LocalDate seedDate, final PeriodFrequencyType frequencyType) {
         LocalDate adjustedVal = date;
-        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28) {
+        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28 && date.getDayOfMonth() > 28) {
             switch (date.getMonthOfYear()) {
                 case 2:
                     if (date.year().isLeap()) {
@@ -382,14 +386,14 @@ public class CalendarUtils {
         return (recurDate == null || recurDate.isEmpty()) ? false : recurDate.contains(date);
     }
 
-    public static enum DayNameEnum {
+    public enum DayNameEnum {
 
         MO(1, "Monday"), TU(2, "Tuesday"), WE(3, "Wednesday"), TH(4, "Thursday"), FR(5, "Friday"), SA(6, "Saturday"), SU(7, "Sunday");
 
         private final String code;
         private final Integer value;
 
-        private DayNameEnum(final Integer value, final String code) {
+        DayNameEnum(final Integer value, final String code) {
             this.value = value;
             this.code = code;
         }
@@ -412,14 +416,14 @@ public class CalendarUtils {
         }
     }
 
-    public static enum NthDayNameEnum {
+    public enum NthDayNameEnum {
 
         ONE(1, "First"), TWO(2, "Second"), THREE(3, "Third"), FOUR(4, "Fourth"), FIVE(5, "Fifth"), LAST(-1, "Last"), INVALID(0, "Invalid");
 
         private final String code;
         private final Integer value;
 
-        private NthDayNameEnum(final Integer value, final String code) {
+        NthDayNameEnum(final Integer value, final String code) {
             this.value = value;
             this.code = code;
         }

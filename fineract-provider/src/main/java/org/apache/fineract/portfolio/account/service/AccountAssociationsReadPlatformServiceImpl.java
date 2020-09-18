@@ -137,7 +137,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
 
         private final String schemaSql;
 
-        public AccountAssociationsMapper() {
+        AccountAssociationsMapper() {
             final StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("aa.id as id,");
             // sqlBuilder.append("savingsAccount.id as savingsAccountId,

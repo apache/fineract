@@ -97,7 +97,8 @@ public class ShareDividendApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveDividendDetails(@PathParam("dividendId") final Long dividendId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder, @QueryParam("accountNo") final String accountNo) {
+            @QueryParam("sortOrder") final String sortOrder, @QueryParam("accountNo") final String accountNo,
+            @PathParam("productId") final Long productId) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         final SearchParameters searchParameters = SearchParameters.forPaginationAndAccountNumberSearch(offset, limit, orderBy, sortOrder,

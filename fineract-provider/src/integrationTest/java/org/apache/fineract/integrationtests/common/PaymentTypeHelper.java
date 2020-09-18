@@ -27,7 +27,11 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class PaymentTypeHelper {
+public final class PaymentTypeHelper {
+
+    private PaymentTypeHelper() {
+
+    }
 
     private static final String CREATE_PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes?" + Utils.TENANT_IDENTIFIER;
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";

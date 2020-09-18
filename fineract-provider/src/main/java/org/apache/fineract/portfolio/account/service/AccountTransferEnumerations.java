@@ -26,7 +26,11 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 
-public class AccountTransferEnumerations {
+public final class AccountTransferEnumerations {
+
+    private AccountTransferEnumerations() {
+
+    }
 
     public static EnumOptionData accountType(final Integer type) {
         return accountType(PortfolioAccountType.fromInt(type));

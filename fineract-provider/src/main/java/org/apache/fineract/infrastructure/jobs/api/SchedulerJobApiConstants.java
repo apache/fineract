@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SchedulerJobApiConstants {
+public final class SchedulerJobApiConstants {
+
+    private SchedulerJobApiConstants() {
+
+    }
 
     public static final String JOB_RESOURCE_NAME = "schedulerjob";
     public static final String SCHEDULER_RESOURCE_NAME = "SCHEDULER";
@@ -53,13 +57,12 @@ public class SchedulerJobApiConstants {
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
 
-    protected static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(jobIdentifierParamName, displayNameParamName, nextRunTimeParamName, initializingErrorParamName,
                     cronExpressionParamName, jobActiveStatusParamName, currentlyRunningParamName, lastRunHistoryObjParamName));
 
-    protected static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(versionParamName, jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName,
-                    triggerTypeParamName, jobRunErrorLogParamName));
+    static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(versionParamName, jobRunStartTimeParamName,
+            jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName, triggerTypeParamName, jobRunErrorLogParamName));
 
-    protected static final Set<String> SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(schedulerStatusParamName));
+    static final Set<String> SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(schedulerStatusParamName));
 }

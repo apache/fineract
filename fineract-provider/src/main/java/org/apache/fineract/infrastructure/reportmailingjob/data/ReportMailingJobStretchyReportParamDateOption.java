@@ -39,7 +39,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
      * @param code
      * @param value
      */
-    private ReportMailingJobStretchyReportParamDateOption(final Integer id, final String code, final String value) {
+    ReportMailingJobStretchyReportParamDateOption(final Integer id, final String code, final String value) {
         this.value = value;
         this.code = code;
         this.id = id;

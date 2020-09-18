@@ -29,7 +29,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class CodeHelper {
+public final class CodeHelper {
+
+    private CodeHelper() {
+
+    }
 
     public static final String CODE_ID_ATTRIBUTE_NAME = "id";
     public static final String RESPONSE_ID_ATTRIBUTE_NAME = "resourceId";

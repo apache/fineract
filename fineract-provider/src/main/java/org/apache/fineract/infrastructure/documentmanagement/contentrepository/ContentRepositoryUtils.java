@@ -29,17 +29,21 @@ import org.apache.fineract.infrastructure.core.exception.ImageUploadException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 
-public class ContentRepositoryUtils {
+public final class ContentRepositoryUtils {
+
+    private ContentRepositoryUtils() {
+
+    }
 
     private static final Random random = new Random();
 
-    public static enum ImageMIMEtype {
+    public enum ImageMIMEtype {
 
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
 
         private final String value;
 
-        private ImageMIMEtype(final String value) {
+        ImageMIMEtype(final String value) {
             this.value = value;
         }
 
@@ -63,13 +67,13 @@ public class ContentRepositoryUtils {
         }
     }
 
-    public static enum ImageFileExtension {
+    public enum ImageFileExtension {
 
         GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
 
         private final String value;
 
-        private ImageFileExtension(final String value) {
+        ImageFileExtension(final String value) {
             this.value = value;
         }
 
@@ -95,14 +99,14 @@ public class ContentRepositoryUtils {
         }
     }
 
-    public static enum ImageDataURIsuffix {
+    public enum ImageDataURIsuffix {
 
         GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), PNG(
                 "data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
 
         private final String value;
 
-        private ImageDataURIsuffix(final String value) {
+        ImageDataURIsuffix(final String value) {
             this.value = value;
         }
 

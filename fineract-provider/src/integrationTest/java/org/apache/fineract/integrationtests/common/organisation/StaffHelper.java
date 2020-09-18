@@ -29,7 +29,11 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaffHelper {
+public final class StaffHelper {
+
+    private StaffHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(StaffHelper.class);
     private static final String TRANSFER_STAFF_URL = "/fineract-provider/api/v1/groups";

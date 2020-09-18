@@ -67,7 +67,7 @@ public class CalendarsApiResource {
     /**
      * The set of parameters that are supported in response for {@link Calendar}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title", "description",
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title", "description",
             "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval", "repeatsOnDay",
             "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate", "createdByUserId",
             "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates", "nextTenRecurringDates",
@@ -117,7 +117,7 @@ public class CalendarsApiResource {
         if (settings.isTemplate()) {
             calendarData = handleTemplate(calendarData);
         }
-        return this.toApiJsonSerializer.serialize(settings, calendarData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarData, this.responseDataParameters);
     }
 
     /**
@@ -155,14 +155,15 @@ public class CalendarsApiResource {
         calendarsData = this.readPlatformService.updateWithRecurringDates(calendarsData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, calendarsData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarsData, this.responseDataParameters);
     }
 
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveNewCalendarDetails(@Context final UriInfo uriInfo) {
+    public String retrieveNewCalendarDetails(@Context final UriInfo uriInfo, @PathParam("entityType") final String entityType,
+            @PathParam("entityId") final Long entityId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -170,7 +171,7 @@ public class CalendarsApiResource {
         calendarData = handleTemplate(calendarData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, calendarData, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, calendarData, this.responseDataParameters);
     }
 
     @POST

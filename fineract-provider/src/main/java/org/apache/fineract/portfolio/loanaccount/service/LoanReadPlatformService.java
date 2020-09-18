@@ -88,8 +88,7 @@ public interface LoanReadPlatformService {
      * The 'overdue-charge' is only ever applied once to an installment and as a result overdue installments with this
      * charge already applied are not returned.
      */
-    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod,
-            final Boolean backdatePenalties);
+    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(Long penaltyWaitPeriod, Boolean backdatePenalties);
 
     Integer retriveLoanCounter(Long groupId, Integer loanType, Long productId);
 
@@ -131,7 +130,7 @@ public interface LoanReadPlatformService {
 
     Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions();
 
-    LoanTransactionData retrieveLoanForeclosureTemplate(final Long loanId, final LocalDate transactionDate);
+    LoanTransactionData retrieveLoanForeclosureTemplate(Long loanId, LocalDate transactionDate);
 
     LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
 

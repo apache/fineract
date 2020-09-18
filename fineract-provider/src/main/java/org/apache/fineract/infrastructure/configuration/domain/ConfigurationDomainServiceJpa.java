@@ -253,6 +253,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isFirstRepaymentDateAfterRescheduleAllowedOnHoliday() {
+        return getGlobalConfigurationPropertyData("loan-reschedule-is-first-payday-allowed-on-holiday").isEnabled();
+    }
+
+    @Override
+    public boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI() {
+        return getGlobalConfigurationPropertyData("is-interest-to-be-appropriated-equally-when-greater-than-emi").isEnabled();
+    }
+
+    @Override
     public Long retreivePeroidInNumberOfDaysForSkipMeetingDate() {
         final String propertyName = "skip-repayment-on-first-day-of-month";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);

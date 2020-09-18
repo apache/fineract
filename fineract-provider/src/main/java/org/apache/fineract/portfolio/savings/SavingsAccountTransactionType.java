@@ -45,7 +45,7 @@ public enum SavingsAccountTransactionType {
     private final Integer value;
     private final String code;
 
-    private SavingsAccountTransactionType(final Integer value, final String code) {
+    SavingsAccountTransactionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

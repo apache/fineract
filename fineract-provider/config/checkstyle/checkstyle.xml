@@ -29,6 +29,7 @@
     <!--
         You can learn more about individual checkstyles at: https://checkstyle.sourceforge.io/
         Checks related to LineLength and Indentation are only handled by Spotless
+        Checks included in MissingSwitchDefault are handled by ErrorProne
     -->
 
     <module name="FileTabCharacter">
@@ -161,6 +162,7 @@
              <message key="ws.notPreceded"
              value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
         </module>
+        <module name="HideUtilityClassConstructor"/>
           <module name="OneTopLevelClass"/>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
@@ -183,6 +185,12 @@
              <message key="ws.notPreceded"
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+             value="Member name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+        <module name="RedundantModifier"/>
         <module name="ParenPad" />
         <module name="ModifierOrder"/>
                 <module name="LocalVariableName">
@@ -192,6 +200,8 @@
             <message key="name.invalidPattern"
              value="Local variable name ''{0}'' must match pattern ''{1}''."/>
         </module>
+        <module name="AvoidNoArgumentSuperConstructorCall"/>
+        <module name="AvoidDoubleBraceInitialization"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -201,7 +211,6 @@
             <property name="setterCanReturnItsClass" value="true" />
         </module>
 
-        <module name="HideUtilityClassConstructor"/>
 
         < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
         <module name="IllegalCatch"/>
@@ -222,17 +231,13 @@
 
 
 
-        <module name="MissingSwitchDefault"/>
 
 
 
-        <module name="RedundantModifier"/>
 
-        <module name="MemberName">
-            <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
-            <message key="name.invalidPattern"
-             value="Member name ''{0}'' must match pattern ''{1}''."/>
-        </module>
+
+
+
 
 
 

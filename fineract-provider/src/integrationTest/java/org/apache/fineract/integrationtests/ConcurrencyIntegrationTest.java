@@ -49,7 +49,7 @@ public class ConcurrencyIntegrationTest {
 
     private static final String NO_ACCOUNTING = "1";
 
-    final int MYTHREADS = 30;
+    static final int MYTHREADS = 30;
 
     @BeforeEach
     public void setup() {

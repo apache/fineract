@@ -26,29 +26,28 @@ import org.joda.time.LocalDate;
 
 public interface CalendarReadPlatformService {
 
-    CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
+    CalendarData retrieveCalendar(Long calendarId, Long entityId, Integer entityTypeId);
 
-    Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<Integer> calendarTypeOptions);
+    Collection<CalendarData> retrieveCalendarsByEntity(Long entityId, Integer entityTypeId, List<Integer> calendarTypeOptions);
 
-    Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId,
-            List<Integer> calendarTypeOptions);
+    Collection<CalendarData> retrieveParentCalendarsByEntity(Long entityId, Integer entityTypeId, List<Integer> calendarTypeOptions);
 
     Collection<CalendarData> retrieveAllCalendars();
 
     CalendarData retrieveNewCalendarDetails();
 
-    Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory, final LocalDate tillDate);
+    Collection<LocalDate> generateRecurringDates(CalendarData calendarData, boolean withHistory, LocalDate tillDate);
 
-    Collection<LocalDate> generateNextTenRecurringDates(final CalendarData calendarData);
+    Collection<LocalDate> generateNextTenRecurringDates(CalendarData calendarData);
 
-    Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData);
+    Collection<CalendarData> updateWithRecurringDates(Collection<CalendarData> calendarsData);
 
-    CalendarData retrieveLoanCalendar(final Long loanId);
+    CalendarData retrieveLoanCalendar(Long loanId);
 
-    CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
+    CalendarData retrieveCollctionCalendarByEntity(Long entityId, Integer entityTypeId);
 
     LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
 
-    Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, Long entityTypeId);
+    Boolean isCalendarAssociatedWithEntity(Long entityId, Long calendarId, Long entityTypeId);
 
 }

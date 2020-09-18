@@ -39,7 +39,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.joda.time.LocalDate;
 
-public class ImportHandlerUtils {
+public final class ImportHandlerUtils {
+
+    private ImportHandlerUtils() {
+
+    }
 
     public static Integer getNumberOfRows(Sheet sheet, int primaryColumn) {
         Integer noOfEntries = 0;

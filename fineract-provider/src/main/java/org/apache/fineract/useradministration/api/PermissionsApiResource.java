@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
         + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
 public class PermissionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
     private final String resourceNameForPermissions = "PERMISSION";
 
@@ -93,7 +93,7 @@ public class PermissionsApiResource {
             + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n" + "\n"
             + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n" + "permissions?fields=grouping,code")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionsApiResourceSwagger.GetPermissionsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionsApiResourceSwagger.GetPermissionsResponse.class)))) })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -107,7 +107,7 @@ public class PermissionsApiResource {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.toApiJsonSerializer.serialize(settings, permissions, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, permissions, this.responseDataParameters);
     }
 
     @PUT
@@ -116,7 +116,7 @@ public class PermissionsApiResource {
     @Operation(summary = "Enable/Disable Permissions for Maker Checker", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })
     public String updatePermissionsDetails(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //

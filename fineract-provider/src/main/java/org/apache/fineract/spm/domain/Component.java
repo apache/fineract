@@ -47,7 +47,7 @@ public class Component extends AbstractPersistableCustom {
     private Integer sequenceNo;
 
     public Component() {
-        super();
+
     }
 
     public Survey getSurvey() {

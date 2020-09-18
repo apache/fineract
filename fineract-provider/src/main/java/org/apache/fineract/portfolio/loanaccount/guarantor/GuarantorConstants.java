@@ -21,7 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.guarantor;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GuarantorConstants {
+public final class GuarantorConstants {
+
+    private GuarantorConstants() {
+
+    }
 
     public static final String GUARANTOR_RELATIONSHIP_CODE_NAME = "GuarantorRelationship";
 

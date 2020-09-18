@@ -26,7 +26,7 @@ public enum ShareAccountDividendStatusType {
     private final Integer value;
     private final String code;
 
-    private ShareAccountDividendStatusType(final Integer value, final String code) {
+    ShareAccountDividendStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

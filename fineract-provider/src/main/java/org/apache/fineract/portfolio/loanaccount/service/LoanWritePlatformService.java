@@ -78,9 +78,9 @@ public interface LoanWritePlatformService {
 
     LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
 
-    LoanTransaction withdrawLoanTransfer(final Loan loan, LocalDate transferDate);
+    LoanTransaction withdrawLoanTransfer(Loan loan, LocalDate transferDate);
 
-    void rejectLoanTransfer(final Loan loan);
+    void rejectLoanTransfer(Loan loan);
 
     LoanTransaction acceptLoanTransfer(Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
@@ -106,7 +106,7 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
+    CommandProcessingResult forecloseLoan(Long loanId, JsonCommand command);
 
     CommandProcessingResult disburseGLIMLoan(Long loanId, JsonCommand command);
 

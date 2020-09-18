@@ -27,7 +27,11 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SurveyHelper {
+public final class SurveyHelper {
+
+    private SurveyHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(SurveyHelper.class);
     private static final String FULFIL_SURVEY_URL = "/fineract-provider/api/v1/survey/ppi_kenya_2009/clientId?" + Utils.TENANT_IDENTIFIER;

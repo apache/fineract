@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountEntityServiceForLoanImpl implements AccountEntityService {
 
-    private final String KEY = EntityAccountType.LOAN.name();
+    private final String key = EntityAccountType.LOAN.name();
 
     private final PlatformSecurityContext context;
     private final AppuserLoansMapperReadService appuserLoansMapperReadService;
@@ -48,7 +48,7 @@ public class AccountEntityServiceForLoanImpl implements AccountEntityService {
 
     @Override
     public String getKey() {
-        return KEY;
+        return key;
     }
 
     @Override

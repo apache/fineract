@@ -30,7 +30,7 @@ public enum SavingsWithdrawalFeesType {
     private final Integer value;
     private final String code;
 
-    private SavingsWithdrawalFeesType(final Integer value, final String code) {
+    SavingsWithdrawalFeesType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 1.4.0
+  version: @VERSION@
   title: Apache Fineract
   description: |-
     Apache Fineract is a secure, multi-tenanted microfinance platform
@@ -22,7 +22,7 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
-- url: /fineract-provider/api/v1
+- url: https://demo.fineract.dev/fineract-provider/api/v1
 components:
   securitySchemes:
     basicAuth:

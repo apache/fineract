@@ -20,7 +20,11 @@ package org.apache.fineract.infrastructure.accountnumberformat.service;
 
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatData;
 
-public class AccountNumberFormatConstants {
+public final class AccountNumberFormatConstants {
+
+    private AccountNumberFormatConstants() {
+
+    }
 
     // resource name for validation
     public static final String ENTITY_NAME = "accountNumberFormat";

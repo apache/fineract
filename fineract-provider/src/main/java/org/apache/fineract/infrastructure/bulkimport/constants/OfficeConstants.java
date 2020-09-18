@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class OfficeConstants {
+public final class OfficeConstants {
+
+    private OfficeConstants() {
+
+    }
 
     // Column indices
     public static final int OFFICE_NAME_COL = 0;

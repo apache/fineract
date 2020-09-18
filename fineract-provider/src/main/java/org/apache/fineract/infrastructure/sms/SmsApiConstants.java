@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.sms;
 
-public class SmsApiConstants {
+public final class SmsApiConstants {
+
+    private SmsApiConstants() {
+
+    }
 
     public static final String RESOURCE_NAME = "sms";
 

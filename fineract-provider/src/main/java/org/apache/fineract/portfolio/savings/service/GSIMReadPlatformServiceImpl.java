@@ -245,7 +245,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
         final String schemaSql;
 
-        public SavingsAccountSummaryDataMapper() {
+        SavingsAccountSummaryDataMapper() {
             final StringBuilder accountsSummary = new StringBuilder();
             accountsSummary.append(
                     "sa.id as id, CONCAT('(',clnt.id,') ',clnt.display_name) as displayName,sa.account_no as accountNo, sa.external_id as externalId, sa.gsim_id as gsimId,gsim.account_number as parentAccountNo,sa.status_enum as statusEnum, ");

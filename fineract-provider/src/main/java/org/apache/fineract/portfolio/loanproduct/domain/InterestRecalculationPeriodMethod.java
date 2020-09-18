@@ -57,7 +57,7 @@ public enum InterestRecalculationPeriodMethod {
         return type;
     }
 
-    private InterestRecalculationPeriodMethod(final Integer value, final String code) {
+    InterestRecalculationPeriodMethod(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -28,7 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
-public class SavingsStatusChecker {
+public final class SavingsStatusChecker {
+
+    private SavingsStatusChecker() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsStatusChecker.class);
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";

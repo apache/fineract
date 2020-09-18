@@ -86,6 +86,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -210,6 +212,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Boolean recalculateInterest = jsonCommand
                     .booleanObjectValueOfParameterNamed(RescheduleLoansApiConstants.recalculateInterestParamName);
 
+            final Date endDate = jsonCommand.dateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
+            final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
+
             // initialize set the value to null
             Date submittedOnDate = null;
 
@@ -275,7 +280,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // create term variations for flat and declining balance loans
             createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
                     adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment,
-                    decimalValue, dueDate);
+                    decimalValue, dueDate, endDate, emi);
 
             // create a new entry in the m_loan_reschedule_request table
             this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
@@ -286,7 +291,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withGroupId(loan.getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -299,7 +304,25 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Integer extraTerms, final BigDecimal interestRate, Date rescheduleFromDate, Date adjustedDueDate,
             final LoanRescheduleRequest loanRescheduleRequest,
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
-            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate) {
+            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate, Date endDate, BigDecimal emi) {
+
+        if (rescheduleFromDate != null && endDate != null && emi != null) {
+            LoanTermVariations parent = null;
+            LocalDate rescheduleFromLocDate = new LocalDate(rescheduleFromDate);
+            LocalDate endDateLocDate = new LocalDate(endDate);
+            final Integer termType = LoanTermVariationType.EMI_AMOUNT.getValue();
+            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+            for (LoanRepaymentScheduleInstallment installment : installments) {
+                if (installment.getDueDate().isEqual(rescheduleFromLocDate) || installment.getDueDate().isEqual(endDateLocDate)
+                        || (installment.getDueDate().isAfter(rescheduleFromLocDate) && installment.getDueDate().isBefore(endDateLocDate))) {
+                    createLoanTermVariations(termType, loan, installment.getDueDate().toDate(), installment.getDueDate().toDate(),
+                            loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
+                }
+                if (installment.getDueDate().isAfter(endDateLocDate)) {
+                    break;
+                }
+            }
+        }
 
         if (rescheduleFromDate != null && adjustedDueDate != null) {
             LoanTermVariations parent = null;
@@ -489,7 +512,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withOfficeId(loan.getOfficeId()).withGroupId(loan.getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -507,7 +530,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
             }
             this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final DataIntegrityViolationException e) {
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -571,7 +594,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     .withGroupId(loanRescheduleRequest.getLoan().getGroupId()).build();
         }
 
-        catch (final DataIntegrityViolationException dve) {
+        catch (final JpaSystemException | DataIntegrityViolationException dve) {
             // handle the data integrity violation
             handleDataIntegrityViolation(dve);
 
@@ -587,7 +610,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      *            data integrity violation exception
      *
      **/
-    private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityViolation(final NonTransientDataAccessException dve) {
 
         LOG.error("Error occured.", dve);
 

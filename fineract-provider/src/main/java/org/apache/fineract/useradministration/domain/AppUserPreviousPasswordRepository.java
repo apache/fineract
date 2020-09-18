@@ -26,5 +26,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface AppUserPreviousPasswordRepository
         extends JpaRepository<AppUserPreviousPassword, Long>, JpaSpecificationExecutor<AppUserPreviousPassword> {
 
-    public List<AppUserPreviousPassword> findByUserId(Long userId, Pageable pageable);
+    List<AppUserPreviousPassword> findByUserId(Long userId, Pageable pageable);
 }

@@ -478,7 +478,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
         final boolean isDeposit;
 
-        public SavingsAccountTransactionListener(final boolean isDeposit) {
+        SavingsAccountTransactionListener(final boolean isDeposit) {
             this.isDeposit = isDeposit;
         }
 

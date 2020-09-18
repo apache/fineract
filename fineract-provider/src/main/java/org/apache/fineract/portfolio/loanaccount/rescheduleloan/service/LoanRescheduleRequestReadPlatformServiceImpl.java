@@ -64,7 +64,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
         private final String schema;
 
-        public LoanRescheduleRequestRowMapper() {
+        LoanRescheduleRequestRowMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
             sqlBuilder.append("lr.id as id, lr.loan_id as loanId, lr.status_enum as statusEnum, ");

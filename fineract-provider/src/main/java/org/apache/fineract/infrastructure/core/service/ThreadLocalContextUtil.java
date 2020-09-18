@@ -24,7 +24,11 @@ import org.springframework.util.Assert;
 /**
  *
  */
-public class ThreadLocalContextUtil {
+public final class ThreadLocalContextUtil {
+
+    private ThreadLocalContextUtil() {
+
+    }
 
     public static final String CONTEXT_TENANTS = "tenants";
 

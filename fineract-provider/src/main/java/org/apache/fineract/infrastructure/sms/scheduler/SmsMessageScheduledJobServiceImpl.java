@@ -152,7 +152,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         private final FineractPlatformTenant tenant;
         private final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas;
 
-        public SmsTask(final FineractPlatformTenant tenant, final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
+        SmsTask(final FineractPlatformTenant tenant, final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
             this.tenant = tenant;
             this.apiQueueResourceDatas = apiQueueResourceDatas;
         }

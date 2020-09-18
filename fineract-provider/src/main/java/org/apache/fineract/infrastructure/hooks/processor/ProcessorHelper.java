@@ -38,7 +38,11 @@ import retrofit.client.OkClient;
 import retrofit.client.Response;
 
 @SuppressWarnings("unused")
-public class ProcessorHelper {
+public final class ProcessorHelper {
+
+    private ProcessorHelper() {
+
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ProcessorHelper.class);
 

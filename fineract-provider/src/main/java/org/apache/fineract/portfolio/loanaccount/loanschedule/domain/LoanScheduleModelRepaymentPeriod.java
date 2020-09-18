@@ -42,6 +42,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private Money totalDue;
     private final boolean recalculatedInterestComponent;
     private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
+    private boolean isEMIFixedSpecificToInstallment = false;
 
     public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
             final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
@@ -154,11 +155,21 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     @Override
     public void addInterestAmount(Money interestDue) {
         this.interestDue = this.interestDue.plus(interestDue);
-        this.totalDue = this.totalDue.plus(principalDue);
+        this.totalDue = this.totalDue.plus(interestDue);
     }
 
     @Override
     public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
         return this.loanCompoundingDetails;
+    }
+
+    @Override
+    public boolean isEMIFixedSpecificToInstallment() {
+        return this.isEMIFixedSpecificToInstallment;
+    }
+
+    @Override
+    public void setEMIFixedSpecificToInstallmentTrue() {
+        this.isEMIFixedSpecificToInstallment = true;
     }
 }

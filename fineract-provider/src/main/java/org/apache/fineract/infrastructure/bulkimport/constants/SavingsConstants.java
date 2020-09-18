@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.constants;
 
-public class SavingsConstants {
+public final class SavingsConstants {
+
+    private SavingsConstants() {
+
+    }
 
     public static final int OFFICE_NAME_COL = 0;
     public static final int SAVINGS_TYPE_COL = 1;

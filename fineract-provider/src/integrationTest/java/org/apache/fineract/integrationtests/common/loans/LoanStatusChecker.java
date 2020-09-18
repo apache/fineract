@@ -28,7 +28,11 @@ import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
-public class LoanStatusChecker {
+public final class LoanStatusChecker {
+
+    private LoanStatusChecker() {
+
+    }
 
     public static void verifyLoanIsApproved(final HashMap loanStatusHashMap) {
         assertFalse(getStatus(loanStatusHashMap, "pendingApproval"));

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-public class FinanicalFunctions {
+public final class FinanicalFunctions {
+
+    private FinanicalFunctions() {
+
+    }
 
     /**
      * PMT calculates a fixed monthly payment to be paid by borrower every 'period' to ensure loan is paid off in full

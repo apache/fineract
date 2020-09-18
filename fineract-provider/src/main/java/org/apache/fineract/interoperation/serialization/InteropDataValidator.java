@@ -20,8 +20,8 @@ package org.apache.fineract.interoperation.serialization;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -44,6 +44,16 @@ public class InteropDataValidator {
     @Autowired
     public InteropDataValidator(final FromJsonHelper fromJsonHelper) {
         this.jsonHelper = fromJsonHelper;
+    }
+
+    public InteropTransferRequestData validateAndParseTransferRequest(JsonCommand command) {
+        final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("interoperation.transfer");
+        JsonObject element = extractJsonObject(command);
+
+        InteropTransferRequestData result = InteropTransferRequestData.validateAndParse(dataValidator, element, jsonHelper);
+        throwExceptionIfValidationWarningsExist(dataValidator);
+
+        return result;
     }
 
     public InteropIdentifierRequestData validateAndParseCreateIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,

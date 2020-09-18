@@ -83,7 +83,7 @@ public class SearchApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrive Adhoc Search query template", description = "Mandatory Fields\n" + "\n" + "search?query=000000001\n")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))) })
     public String retrieveAdHocSearchQueryTemplate(@Context final UriInfo uriInfo) {
 
         final AdHocSearchQueryData templateData = this.searchReadPlatformService.retrieveAdHocQueryTemplate();
@@ -98,7 +98,7 @@ public class SearchApiResource {
     @Operation(summary = "Search Resources", description = "Example Requests:\n" + "\n" + "search?query=000000001\n" + "\n" + "\n"
             + "search?query=Petra&resource=clients,groups\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups&exactMatch=true")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))) })
     public String searchData(@Context final UriInfo uriInfo, @QueryParam("query") @Parameter(description = "query") final String query,
             @QueryParam("resource") @Parameter(description = "resource") final String resource,
             @DefaultValue("false") @QueryParam("exactMatch") @Parameter(description = "exactMatch") Boolean exactMatch) {
@@ -124,7 +124,7 @@ public class SearchApiResource {
             + "minOutstandingAmount and maxOutstandingAmount OR outstandingAmount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchResponse.class))) })
     public String advancedSearch(@Context final UriInfo uriInfo, final String json) {
 
         final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);

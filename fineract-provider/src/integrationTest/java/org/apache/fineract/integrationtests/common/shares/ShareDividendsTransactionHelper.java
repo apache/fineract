@@ -23,7 +23,11 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class ShareDividendsTransactionHelper {
+public final class ShareDividendsTransactionHelper {
+
+    private ShareDividendsTransactionHelper() {
+
+    }
 
     private static final String SHARE_PRODUCT_URL = "/fineract-provider/api/v1/shareproduct";
     private static final String DIVIDEND = "dividend";

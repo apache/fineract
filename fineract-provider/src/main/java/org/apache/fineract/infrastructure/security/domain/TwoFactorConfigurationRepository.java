@@ -27,7 +27,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface TwoFactorConfigurationRepository
         extends JpaRepository<TwoFactorConfiguration, Long>, JpaSpecificationExecutor<TwoFactorConfiguration> {
 
-    TwoFactorConfiguration findByName(final String name);
+    TwoFactorConfiguration findByName(String name);
 
     @Override
     List<TwoFactorConfiguration> findAll();

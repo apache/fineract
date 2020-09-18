@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -77,12 +79,11 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .withCommandId(command.commandId()) //
                     .withEntityId(financialActivityAccount.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
-                    dataIntegrityViolationException);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleFinancialActivityAccountDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
+            final Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -128,9 +129,8 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .withEntityId(financialActivityAccountId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
-                    dataIntegrityViolationException);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleFinancialActivityAccountDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {
             Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
@@ -151,7 +151,19 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     }
 
     private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final Exception dve) {
+            final NonTransientDataAccessException dve) {
+        if (realCause.getMessage().contains("financial_activity_type")) {
+            final Integer financialActivityId = command
+                    .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
+            throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
+        }
+
+        LOG.error("Error occured.", dve);
+        throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
+    }
+
+    private void handleFinancialActivityAccountDataIntegrityIssues(JsonCommand command, Throwable realCause, PersistenceException dve) {
         if (realCause.getMessage().contains("financial_activity_type")) {
             final Integer financialActivityId = command
                     .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());

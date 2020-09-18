@@ -39,7 +39,7 @@ public enum LoanSubStatus {
         return enumeration;
     }
 
-    private LoanSubStatus(final Integer value, final String code) {
+    LoanSubStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.spm.util;
 
-public class SurveyApiConstants {
+public final class SurveyApiConstants {
+
+    private SurveyApiConstants() {
+
+    }
 
     public static final String SURVEY_RESOURCE_NAME = "survey";
     public static final String keyParamName = "key";

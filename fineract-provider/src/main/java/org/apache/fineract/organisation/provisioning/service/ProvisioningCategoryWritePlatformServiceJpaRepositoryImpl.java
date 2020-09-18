@@ -35,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -64,7 +66,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             this.provisioningCategoryRepository.save(provisioningCategory);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCategory.getId())
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -99,7 +101,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
                 this.provisioningCategoryRepository.save(provisioningCategoryForUpdate);
             }
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(categoryId).with(changes).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
@@ -118,7 +120,20 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final NonTransientDataAccessException dve) {
+
+        if (realCause.getMessage().contains("category_name")) {
+            final String name = command.stringValueOfParameterNamed("category_name");
+            throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.categoryname",
+                    "Provisioning Cateory with name `" + name + "` already exists", "category name", name);
+        }
+        LOG.error("Error occured.", dve);
+        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final PersistenceException dve) {
 
         if (realCause.getMessage().contains("category_name")) {
             final String name = command.stringValueOfParameterNamed("category_name");
