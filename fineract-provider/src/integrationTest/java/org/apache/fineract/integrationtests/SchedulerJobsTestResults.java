@@ -422,9 +422,9 @@ public class SchedulerJobsTestResults {
         this.schedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
 
-        final Integer INT_BALANCE = Integer.valueOf(MINIMUM_OPENING_BALANCE);
+        final Integer intBalance = Integer.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Assertions.assertEquals(INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"),
+        Assertions.assertEquals(intBalance, runningBalanceAfter.get("organizationRunningBalance"),
                 "Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job");
 
     }
@@ -475,11 +475,11 @@ public class SchedulerJobsTestResults {
         final String currentDate = dateFormat.format(todayDate.getTime());
 
         todayDate.add(Calendar.MONTH, -1);
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todayDate.getTime());
+        final String loanDisbursementDate = dateFormat.format(todayDate.getTime());
 
         todayDate = Calendar.getInstance();
         todayDate.add(Calendar.DATE, -5);
-        final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todayDate.getTime());
+        final String loanFirstRepaymentDate = dateFormat.format(todayDate.getTime());
 
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
@@ -496,14 +496,14 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         ArrayList<HashMap> loanScheduleBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
 
         Float totalDueForCurrentPeriod = (Float) loanScheduleBefore.get(1).get("totalDueForPeriod");
 
-        this.loanTransactionHelper.makeRepayment(LOAN_FIRST_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
+        this.loanTransactionHelper.makeRepayment(loanFirstRepaymentDate, totalDueForCurrentPeriod, loanID);
 
         HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
@@ -537,11 +537,11 @@ public class SchedulerJobsTestResults {
         final String currentDate = dateFormat.format(todaysDate.getTime());
 
         todaysDate.add(Calendar.MONTH, -1);
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String loanDisbursementDate = dateFormat.format(todaysDate.getTime());
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DATE, -5);
-        final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String loanFirstRepaymentDate = dateFormat.format(todaysDate.getTime());
 
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
@@ -566,7 +566,7 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         HashMap loanSummaryBefore = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
@@ -594,7 +594,7 @@ public class SchedulerJobsTestResults {
         todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        final String monthDayValue = monthDayFormat.format(todaysDate.getTime());
 
         todaysDate.add(Calendar.YEAR, 1);
         final String VALID_TO = dateFormat.format(todaysDate.getTime());
@@ -640,7 +640,7 @@ public class SchedulerJobsTestResults {
 
         Integer standingInstructionId = this.standingInstructionsHelper.createStandingInstruction(clientID.toString(),
                 fromSavingsId.toString(), toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO,
-                MONTH_DAY);
+                monthDayValue);
         Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
@@ -839,9 +839,9 @@ public class SchedulerJobsTestResults {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -2);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String submittedOnDate = dateFormat.format(todaysDate.getTime());
+        final String approvedOnDate = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         final String WHOLE_TERM = "1";
 
@@ -870,17 +870,17 @@ public class SchedulerJobsTestResults {
         Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, savingsId.toString(), true, fixedDepositAccountHelper);
+                VALID_TO, submittedOnDate, WHOLE_TERM, savingsId.toString(), true, fixedDepositAccountHelper);
         Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(requestSpec,
                 responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, approvedOnDate);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
+        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, activationDate);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
         balance = Float.valueOf(MINIMUM_OPENING_BALANCE);

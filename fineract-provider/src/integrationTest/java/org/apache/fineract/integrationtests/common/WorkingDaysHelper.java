@@ -36,16 +36,16 @@ public final class WorkingDaysHelper {
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        final String updateWorkingDaysURL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
+        return Utils.performServerPut(requestSpec, responseSpec, updateWorkingDaysURL, updateWorkingDaysAsJson(), "");
     }
 
     public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        final String updateWorkingDaysURL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
+        return Utils.performServerPut(requestSpec, responseSpec, updateWorkingDaysURL, updateWorkingDayWithWrongRecur(),
                 jsonAttributeToGetback);
     }
 

@@ -410,8 +410,8 @@ public final class BatchHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String externalId) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
-        final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
+        final String clientURL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
+        final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, clientURL, "totalFilteredRecords");
         Assertions.assertEquals((long) 0, (long) responseRecords, "No records found with given externalId");
     }
 }

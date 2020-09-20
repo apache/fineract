@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Group Savings Integration Test for checking Savings Application.
  */
-@SuppressWarnings({ "rawtypes", "unused" })
+@SuppressWarnings({ "rawtypes", "unused", "AbbreviationAsWordInName" })
 public class GroupSavingsIntegrationTest {
 
     public static final String DEPOSIT_AMOUNT = "2000";
@@ -160,10 +160,10 @@ public class GroupSavingsIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        final String closedOnDate = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
-                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, closedOnDate);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -367,10 +367,10 @@ public class GroupSavingsIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        final String closedOnDate = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
-                .closeGsimSavingsAccountAndGetBackRequiredField(gsimID, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+                .closeGsimSavingsAccountAndGetBackRequiredField(gsimID, withdrawBalance, CommonConstants.RESPONSE_ERROR, closedOnDate);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 

@@ -244,8 +244,8 @@ public class RecurringDepositProductHelper {
     public static HashMap retrieveRecurringDepositProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String productId) {
         LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
-        final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL, "");
+        final String getRdProductByIdURL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, getRdProductByIdURL, "");
         return response;
     }
 

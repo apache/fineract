@@ -55,7 +55,7 @@ public class EmbeddedTomcatWithSSLConfiguration {
             File keystore = getFile(getKeystore());
             connector.setScheme("https");
             connector.setSecure(true);
-            connector.setPort(getHTTPSPort());
+            connector.setPort(getHttpsPort());
             protocol.setSSLEnabled(true);
             protocol.setKeystoreFile(keystore.getAbsolutePath());
             protocol.setKeystorePass(getKeystorePass());
@@ -65,7 +65,7 @@ public class EmbeddedTomcatWithSSLConfiguration {
         }
     }
 
-    protected int getHTTPSPort() {
+    protected int getHttpsPort() {
         // TODO This shouldn't be hard-coded here, but configurable
         return 8443;
     }

@@ -232,7 +232,7 @@ public class GuarantorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testGuarantor_UNDO_DISBURSAL() {
+    public void testGuarantorUndoDisbursal() {
 
         Float self1_hold_funds = Float.valueOf((float) 0);
         Float external1_hold_funds = Float.valueOf((float) 0);
@@ -426,7 +426,7 @@ public class GuarantorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testGuarantor_RECOVER_GUARANTEES() {
+    public void testGurantorRecoverGurantees() {
 
         Float self1_hold_funds = Float.valueOf((float) 0);
         Float external1_hold_funds = Float.valueOf((float) 0);
@@ -480,10 +480,10 @@ public class GuarantorTest {
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
-        final String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
         Float totalDueForCurrentPeriod = (Float) loanSchedule.get(1).get("totalDueForPeriod");
         external1_hold_funds -= Float.valueOf((float) 993.104);
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, totalDueForCurrentPeriod, loanID);
         verifySavingsOnHoldBalance(selfSavigsId, self1_hold_funds);
         verifySavingsOnHoldBalance(externalSavigsId_1, external1_hold_funds);
 
@@ -495,7 +495,7 @@ public class GuarantorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testGuarantor_RECOVER_GUARANTEES_WITH_MORE_GUARANTEE() {
+    public void testGurantorRecoverGuranteesWithMoreGurantee() {
 
         Float self1_hold_funds = Float.valueOf((float) 0);
         Float external1_hold_funds = Float.valueOf((float) 0);
@@ -554,10 +554,10 @@ public class GuarantorTest {
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
-        final String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
         Float totalDueForCurrentPeriod = (Float) loanSchedule.get(1).get("totalDueForPeriod");
         external1_hold_funds -= Float.valueOf((float) 3227.588);
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, totalDueForCurrentPeriod, loanID);
         verifySavingsOnHoldBalance(selfSavigsId, self1_hold_funds);
         verifySavingsOnHoldBalance(externalSavigsId_1, external1_hold_funds);
 
@@ -624,16 +624,16 @@ public class GuarantorTest {
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
-        final String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
         Float totalDueForCurrentPeriod = (Float) loanSchedule.get(1).get("totalDueForPeriod");
         external1_hold_funds -= Float.valueOf((float) 993.104);
-        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, totalDueForCurrentPeriod, loanID);
         verifySavingsOnHoldBalance(selfSavigsId, self1_hold_funds);
         verifySavingsOnHoldBalance(externalSavigsId_1, external1_hold_funds);
 
         todaysDate = Calendar.getInstance();
-        final String LOAN_WRITEOFF_DATE = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.writeOffLoan(LOAN_WRITEOFF_DATE, loanID);
+        final String loanWriteoffDate = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.writeOffLoan(loanWriteoffDate, loanID);
         verifySavingsBalanceAndOnHoldBalance(selfSavigsId, Float.valueOf((float) 0), SELF1_BALANCE);
         verifySavingsBalanceAndOnHoldBalance(externalSavigsId_1, Float.valueOf((float) 0), EXTERNAL1_BALANCE);
 

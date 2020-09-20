@@ -132,9 +132,9 @@ public class MakercheckersApiResource {
 
         final AuditSearchData auditSearchData = this.readPlatformService.retrieveSearchTemplate("makerchecker");
 
-        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(Arrays.asList("appUsers", "actionNames", "entityNames"));
+        final Set<String> responseDataParemetersSearchTemplate = new HashSet<>(Arrays.asList("appUsers", "actionNames", "entityNames"));
 
-        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, responseDataParemetersSearchTemplate);
     }
 
     @POST

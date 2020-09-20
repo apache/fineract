@@ -37,33 +37,33 @@ public final class CenterHelper {
     private static final String CENTERS_URL = "/fineract-provider/api/v1/centers";
 
     public static final String CREATED_DATE = "29 December 2014";
-    private static final String CREATE_CENTER_URL = "/fineract-provider/api/v1/centers?" + Utils.TENANT_IDENTIFIER;
+    private static final String createCenterURL = "/fineract-provider/api/v1/centers?" + Utils.TENANT_IDENTIFIER;
 
     private CenterHelper() {
 
     }
 
     public static CenterDomain retrieveByID(int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
+        final String getCenterByIDurl = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING CENTER AT {}-------------------------", id);
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
+        Object get = Utils.performServerGet(requestSpec, responseSpec, getCenterByIDurl, "");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
     }
 
     public static ArrayList<CenterDomain> paginatedListCenters(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String GET_CENTER = CENTERS_URL + "?paged=true&limit=-1&" + Utils.TENANT_IDENTIFIER;
+        final String getCenterURL = CENTERS_URL + "?paged=true&limit=-1&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING CENTERS-------------------------");
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "pageItems");
+        Object get = Utils.performServerGet(requestSpec, responseSpec, getCenterURL, "pageItems");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
     }
 
     public static ArrayList<CenterDomain> listCenters(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_CENTER = CENTERS_URL + "?limit=-1&" + Utils.TENANT_IDENTIFIER;
+        final String getCenterURL = CENTERS_URL + "?limit=-1&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING CENTERS-------------------------");
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "");
+        Object get = Utils.performServerGet(requestSpec, responseSpec, getCenterURL, "");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
     }
@@ -86,7 +86,7 @@ public final class CenterHelper {
     public static int createCenter(final String name, final int officeId, final String externalId, final int staffId,
             final int[] groupMembers, final String activationDate, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String CREATE_CENTER_URL = CENTERS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        final String createCenterURL = CENTERS_URL + "?" + Utils.TENANT_IDENTIFIER;
         HashMap hm = new HashMap();
         hm.put("name", name);
         hm.put("officeId", officeId);
@@ -109,25 +109,25 @@ public final class CenterHelper {
         }
 
         LOG.info("------------------------CREATING CENTER-------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, new Gson().toJson(hm), "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, createCenterURL, new Gson().toJson(hm), "resourceId");
     }
 
     public static HashMap<String, String> updateCenter(final int id, HashMap request, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String UPDATE_CENTER_URL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
+        final String updateCenterURL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE CENTER AT {}---------------------------------------------", id);
-        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_CENTER_URL, new Gson().toJson(request),
+        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, updateCenterURL, new Gson().toJson(request),
                 "changes");
         return hash;
     }
 
     public static int[] associateGroups(final int id, final int[] groupMembers, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String ASSOCIATE_GROUP_CENTER_URL = CENTERS_URL + "/" + id + "?command=associateGroups&" + Utils.TENANT_IDENTIFIER;
+        final String associateGroupCenterURL = CENTERS_URL + "/" + id + "?command=associateGroups&" + Utils.TENANT_IDENTIFIER;
         HashMap groupMemberHashMap = new HashMap();
         groupMemberHashMap.put("groupMembers", groupMembers);
         LOG.info("---------------------------------ASSOCIATING GROUPS AT {}--------------------------------------------", id);
-        HashMap hash = Utils.performServerPost(requestSpec, responseSpec, ASSOCIATE_GROUP_CENTER_URL, new Gson().toJson(groupMemberHashMap),
+        HashMap hash = Utils.performServerPost(requestSpec, responseSpec, associateGroupCenterURL, new Gson().toJson(groupMemberHashMap),
                 "changes");
         LOG.info("{}", hash.toString());
         ArrayList<String> arr = (ArrayList<String>) hash.get("groupMembers");
@@ -139,9 +139,9 @@ public final class CenterHelper {
     }
 
     public static void deleteCenter(final int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String DELETE_CENTER_URL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
+        final String deleteCenterURL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------DELETING CENTER AT {}--------------------------------------------", id);
-        Utils.performServerDelete(requestSpec, responseSpec, DELETE_CENTER_URL, "");
+        Utils.performServerDelete(requestSpec, responseSpec, deleteCenterURL, "");
     }
 
     public static Integer createCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -153,44 +153,43 @@ public final class CenterHelper {
     public static Integer createCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, getTestCenterAsJSON(true, activationDate), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, createCenterURL, getTestCenterAsJSON(true, activationDate), "groupId");
     }
 
     public static Integer createCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, getTestCenterAsJSON(true, CenterHelper.CREATED_DATE),
+        return Utils.performServerPost(requestSpec, responseSpec, createCenterURL, getTestCenterAsJSON(true, CenterHelper.CREATED_DATE),
                 "groupId");
     }
 
     public static int createCenterWithStaffId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer staffId) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL,
+        return Utils.performServerPost(requestSpec, responseSpec, createCenterURL,
                 getTestCenterWithStaffAsJSON(true, CenterHelper.CREATED_DATE, staffId), "groupId");
     }
 
     public static void verifyCenterCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCenterID) {
         LOG.info("------------------------------CHECK CENTER DETAILS------------------------------------\n");
-        final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responseCenterID = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "id");
+        final String centerURL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responseCenterID = Utils.performServerGet(requestSpec, responseSpec, centerURL, "id");
         assertEquals(generatedCenterID, responseCenterID, "ERROR IN CREATING THE CENTER");
     }
 
     public static void verifyCenterActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCenterID, final boolean generatedCenterStatus) {
         LOG.info("------------------------------CHECK CENTER STATUS------------------------------------\n");
-        final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
-        final Boolean responseCenterStatus = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "active");
+        final String centerURL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
+        final Boolean responseCenterStatus = Utils.performServerGet(requestSpec, responseSpec, centerURL, "active");
         assertEquals(generatedCenterStatus, responseCenterStatus, "ERROR IN ACTIVATING THE CENTER");
     }
 
     public static Integer activateCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String centerId) {
-        final String CENTER_ASSOCIATE_URL = "/fineract-provider/api/v1/centers/" + centerId + "?command=activate&"
-                + Utils.TENANT_IDENTIFIER;
+        final String centerAssociateURL = "/fineract-provider/api/v1/centers/" + centerId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------ACTIVATE A CENTER---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CENTER_ASSOCIATE_URL, activateCenterAsJSON(""), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, centerAssociateURL, activateCenterAsJSON(""), "groupId");
     }
 
     public static String getTestCenterWithStaffAsJSON(final boolean active, final String activationDate, final Integer staffId) {
@@ -265,18 +264,18 @@ public final class CenterHelper {
 
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
             final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+        final String groupAssignStaffURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------Assign Staff---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssignStaffURL, assignStaffAsJSON(staffId), "changes");
     }
 
     public static Object unassignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+        final String groupAssignStaffURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=unassignStaff";
         LOG.info("---------------------------------Unassign Staff---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, unassignStaffAsJSON(staffId), "changes");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssignStaffURL, unassignStaffAsJSON(staffId), "changes");
     }
 
 }

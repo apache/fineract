@@ -161,8 +161,8 @@ public class LoanTransactionHelper {
     }
 
     public ArrayList getLoanCharges(final Integer loanId) {
-        final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+        final String getLoanChargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, getLoanChargesURL, "");
     }
 
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
@@ -303,46 +303,46 @@ public class LoanTransactionHelper {
 
     public Integer addChargesForLoan(final Integer loanId, final String request) {
         LOG.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
-        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
+        final String addChargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, addChargesURL, request, "");
         return (Integer) response.get("resourceId");
     }
 
     public Object addChargesForAllreadyDisursedLoan(final Integer loanId, final String request,
             final ResponseSpecification responseSpecification) {
-        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpecification, ADD_CHARGES_URL, request, "");
+        final String addChargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, responseSpecification, addChargesURL, request, "");
     }
 
     public Integer updateChargesForLoan(final Integer loanId, final Integer loanchargeId, final String request) {
         LOG.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
-        final String UPDATE_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
+        final String updateChargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, UPDATE_CHARGES_URL, request, "");
+        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, updateChargesURL, request, "");
         return (Integer) response.get("resourceId");
     }
 
     public Integer deleteChargesForLoan(final Integer loanId, final Integer loanchargeId) {
         LOG.info("--------------------------------- DELETE CHARGES FOR LOAN --------------------------------");
-        final String DELETE_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
+        final String deleteChargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerDelete(requestSpec, responseSpec, DELETE_CHARGES_URL, "");
+        final HashMap response = Utils.performServerDelete(requestSpec, responseSpec, deleteChargesURL, "");
         return (Integer) response.get("resourceId");
     }
 
     public Integer waiveChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         LOG.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=waive&"
+        final String chargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=waive&"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, chargesURL, json, "");
         return (Integer) response.get("resourceId");
     }
 
     public Integer payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         LOG.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
+        final String chargesURL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, chargesURL, json, "");
         return (Integer) response.get("resourceId");
     }
 

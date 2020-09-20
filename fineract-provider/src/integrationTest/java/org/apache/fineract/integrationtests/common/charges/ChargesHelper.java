@@ -37,8 +37,8 @@ public final class ChargesHelper {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ChargesHelper.class);
-    private static final String CHARGES_URL = "/fineract-provider/api/v1/charges";
-    private static final String CREATE_CHARGES_URL = CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER;
+    private static final String chargesURL = "/fineract-provider/api/v1/charges";
+    private static final String CREATE_CHARGES_URL = chargesURL + "?" + Utils.TENANT_IDENTIFIER;
 
     private static final Integer CHARGE_APPLIES_TO_LOAN = 1;
     private static final Integer CHARGE_APPLIES_TO_SAVINGS = 2;
@@ -365,29 +365,29 @@ public final class ChargesHelper {
     }
 
     public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
+        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, chargesURL + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
     public static HashMap getChargeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer chargeId) {
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
+        return Utils.performServerGet(requestSpec, responseSpec, chargesURL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
     public static HashMap getChargeChanges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer chargeId) {
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerGet(requestSpec, responseSpec, chargesURL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_CHANGES);
     }
 
     public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer chargeId, final String request) {
-        return Utils.performServerPut(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
+        return Utils.performServerPut(requestSpec, responseSpec, chargesURL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
                 CommonConstants.RESPONSE_CHANGES);
     }
 
     public static Integer deleteCharge(final ResponseSpecification responseSpec, final RequestSpecification requestSpec,
             final Integer chargeId) {
-        return Utils.performServerDelete(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerDelete(requestSpec, responseSpec, chargesURL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
@@ -487,7 +487,7 @@ public final class ChargesHelper {
     }
 
     public static String applyCharge(RequestSpecification requestSpec, ResponseSpecification responseSpec, String chargeId, String json) {
-        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,
+        return Utils.performServerPost(requestSpec, responseSpec, chargesURL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,
                 "status");
 
     }

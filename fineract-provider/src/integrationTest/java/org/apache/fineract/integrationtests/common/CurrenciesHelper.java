@@ -39,9 +39,9 @@ public final class CurrenciesHelper {
 
     public static ArrayList<CurrencyDomain> getAllCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String GET_ALL_CURRENCIES_URL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
+        final String getAllCurrenciesURL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING ALL CURRENCIES -------------------------");
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_CURRENCIES_URL, "");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, getAllCurrenciesURL, "");
         ArrayList<HashMap> selectedCurrencyOptions = (ArrayList<HashMap>) response.get("selectedCurrencyOptions");
         ArrayList<HashMap> currencyOptions = (ArrayList<HashMap>) response.get("currencyOptions");
         currencyOptions.addAll(selectedCurrencyOptions);
@@ -51,9 +51,9 @@ public final class CurrenciesHelper {
 
     public static ArrayList<CurrencyDomain> getSelectedCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String GET_ALL_SELECTED_CURRENCIES_URL = CURRENCIES_URL + "?fields=selectedCurrencyOptions" + "&" + Utils.TENANT_IDENTIFIER;
+        final String getAllSelectedCurrenciesURL = CURRENCIES_URL + "?fields=selectedCurrencyOptions" + "&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING ALL SELECTED CURRENCIES -------------------------");
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_SELECTED_CURRENCIES_URL, "");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, getAllSelectedCurrenciesURL, "");
         final String jsonData = new Gson().toJson(response.get("selectedCurrencyOptions"));
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CurrencyDomain>>() {}.getType());
     }
@@ -71,9 +71,9 @@ public final class CurrenciesHelper {
 
     public static ArrayList<String> updateSelectedCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final ArrayList<String> currencies) {
-        final String CURRENCIES_UPDATE_URL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
+        final String currenciesUpdateURL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE SELECTED CURRENCIES LIST---------------------------------------------");
-        HashMap hash = Utils.performServerPut(requestSpec, responseSpec, CURRENCIES_UPDATE_URL, currenciesToJSON(currencies), "changes");
+        HashMap hash = Utils.performServerPut(requestSpec, responseSpec, currenciesUpdateURL, currenciesToJSON(currencies), "changes");
         return (ArrayList<String>) hash.get("currencies");
     }
 

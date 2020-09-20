@@ -70,7 +70,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      * is set as 7. system should allow to create this loan and allow to disburse
      */
     @Test
-    public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_GREATER_THAN_MIN_DAY_CRITERIA() {
+    public void createLoanEntryWithDayBetweenDisbDateAndRepayStartDateGreaterThanMidCriteria() {
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -116,7 +116,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      */
     @SuppressWarnings("unchecked")
     @Test
-    public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_LESS_THAN_MIN_DAY_CRITERIA() {
+    public void createLoanEntityWithDayBetweenDisbDateAndRepayStartDateLessThanMinDayCriteria() {
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());

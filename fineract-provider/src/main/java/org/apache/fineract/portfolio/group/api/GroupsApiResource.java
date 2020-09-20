@@ -555,11 +555,11 @@ public class GroupsApiResource {
 
         final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
 
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts",
-                "groupLoanIndividualMonitoringAccounts", "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
+        final Set<String> groupAccountsDataParameters = new HashSet<>(Arrays.asList("loanAccounts", "groupLoanIndividualMonitoringAccounts",
+                "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
+        return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, groupAccountsDataParameters);
     }
 
     @GET
@@ -596,11 +596,11 @@ public class GroupsApiResource {
                     parentLoanAccountNo);
         }
 
-        final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
+        final Set<String> glimAccountsDataParameters = new HashSet<>(
                 Arrays.asList("groupId", "accountNumber", "childGLIMAccounts", "memberLoanAccounts", "parentPrincipalAmount"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.glimContainerToApiJsonSerializer.serialize(settings, glimContainer, GLIM_ACCOUNTS_DATA_PARAMETERS);
+        return this.glimContainerToApiJsonSerializer.serialize(settings, glimContainer, glimAccountsDataParameters);
 
     }
 
@@ -624,11 +624,11 @@ public class GroupsApiResource {
 
         }
 
-        final Set<String> GSIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
+        final Set<String> gsimAccountsDataParameters = new HashSet<>(
                 Arrays.asList("gsimId", "groupId", "accountNumber", "childGSIMAccounts", "parentBalance", "savingsStatus"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, GSIM_ACCOUNTS_DATA_PARAMETERS);
+        return this.gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, gsimAccountsDataParameters);
 
     }
 

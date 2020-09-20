@@ -79,55 +79,55 @@ public class GroupHelper {
 
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
+        final String groupAssociateURL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Associate Client To A GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssociateURL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
+        final String groupAssociateURL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssociateURL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
+        final String groupAssociateURL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Activate A GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssociateURL, activateGroupAsJSON(""), "groupId");
     }
 
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
+        final String groupAssociateURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE GROUP---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
+        return Utils.performServerPut(requestSpec, responseSpec, groupAssociateURL, updateGroupAsJSON(name), "groupId");
     }
 
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
+        final String groupAssociateURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
-        return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
+        return Utils.performServerDelete(requestSpec, responseSpec, groupAssociateURL, "groupId");
     }
 
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
             final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+        final String groupAssignStaffURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssignStaffURL, assignStaffAsJSON(staffId), "changes");
     }
 
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String groupId, final String staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
+        final String groupAssignStaffURL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,
+        return Utils.performServerPost(requestSpec, responseSpec, groupAssignStaffURL,
                 assignStaffAndInheritStaffForClientAccountsAsJSON(staffId), "changes");
     }
 

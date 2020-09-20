@@ -71,9 +71,9 @@ public final class SurveyHelper {
     public static void verifySurveyCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String SURVEY_URL = "/fineract-provider/api/v1/Survey/ppi_kenya_2009/clientid/entryId" + generatedClientID + "?"
+        final String surveyURL = "/fineract-provider/api/v1/Survey/ppi_kenya_2009/clientid/entryId" + generatedClientID + "?"
                 + Utils.TENANT_IDENTIFIER;
-        final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, SURVEY_URL, "id");
+        final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, surveyURL, "id");
         assertEquals(generatedClientID, responseClientID, "ERROR IN CREATING THE CLIENT");
     }
 

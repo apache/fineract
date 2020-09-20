@@ -156,9 +156,9 @@ public class RecurringDepositAccountHelper {
 
     public static HashMap getRecurringDepositAccountById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer accountID) {
-        final String GET_RECURRING_DEPOSIT_BY_ID_URL = RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
+        final String getRecurringDepositByIdURL = RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING RECURRING DEPOSIT ACCOUNT BY ID -------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_RECURRING_DEPOSIT_BY_ID_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, getRecurringDepositByIdURL, "");
     }
 
     public HashMap getRecurringDepositSummary(final Integer accountID) {
@@ -221,10 +221,10 @@ public class RecurringDepositAccountHelper {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.add(Calendar.DATE, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String EXPECTED_FIRST_DEPOSIT_ON_ON_DATE = SUBMITTED_ON_DATE;
+        final String submittedOnDateValue = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = submittedOnDateValue;
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
-                .withSubmittedOnDate(SUBMITTED_ON_DATE).withExpectedFirstDepositOnDate(EXPECTED_FIRST_DEPOSIT_ON_ON_DATE)
+                .withSubmittedOnDate(submittedOnDateValue).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
                 .build(clientID, productID, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec,

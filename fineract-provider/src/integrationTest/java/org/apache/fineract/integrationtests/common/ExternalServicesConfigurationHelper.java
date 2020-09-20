@@ -36,22 +36,22 @@ public class ExternalServicesConfigurationHelper {
 
     public static ArrayList<HashMap> getExternalServicesConfigurationByServiceName(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String serviceName) {
-        final String GET_EXTERNAL_SERVICES_CONFIG_BY_SERVICE_NAME_URL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
+        final String getExternalServicesConfigByServiceNameURL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
                 + Utils.TENANT_IDENTIFIER;
         // system.out.println("------------------------ RETRIEVING GLOBAL
         // CONFIGURATION
         // BY ID -------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_EXTERNAL_SERVICES_CONFIG_BY_SERVICE_NAME_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, getExternalServicesConfigByServiceNameURL, "");
     }
 
     public static HashMap updateValueForExternaServicesConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String serviceName, final String name, final String value) {
-        final String EXTERNAL_SERVICES_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
+        final String externalServicesConfigUpdateURL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
                 + Utils.TENANT_IDENTIFIER;
         // system.out.println("---------------------------------UPDATE VALUE FOR
         // GLOBAL
         // CONFIG---------------------------------------------");
-        HashMap map = Utils.performServerPut(requestSpec, responseSpec, EXTERNAL_SERVICES_CONFIG_UPDATE_URL,
+        HashMap map = Utils.performServerPut(requestSpec, responseSpec, externalServicesConfigUpdateURL,
                 updateExternalServicesConfigUpdateValueAsJSON(name, value), "");
 
         return (HashMap) map.get("changes");

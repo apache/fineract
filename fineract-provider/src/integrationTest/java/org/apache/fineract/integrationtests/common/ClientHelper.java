@@ -168,11 +168,11 @@ public class ClientHelper {
 
     public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String staffId) {
-        final String CLIENT_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
+        final String clientAssignStaffURL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
 
         LOG.info("---------------------------------CREATING A CLIENT---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CLIENT_ASSIGN_STAFF_URL, assignStaffToClientAsJson(staffId), "changes");
+        return Utils.performServerPost(requestSpec, responseSpec, clientAssignStaffURL, assignStaffToClientAsJson(staffId), "changes");
     }
 
     public static Integer getClientsStaffId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -300,16 +300,16 @@ public class ClientHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/fineract-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
+        final String clientURL = "/fineract-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, clientURL, "id");
         assertEquals(generatedClientID, responseClientID, "ERROR IN CREATING THE CLIENT");
     }
 
     public static Object getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String clientId,
             final String jsonReturn) {
-        final String GET_CLIENT_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
+        final String getClientURL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------GET A CLIENT---------------------------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
+        return Utils.performServerGet(requestSpec, responseSpec, getClientURL, jsonReturn);
 
     }
 
@@ -549,37 +549,37 @@ public class ClientHelper {
     public static Integer addChargesForClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final String request) {
         LOG.info("--------------------------------- ADD CHARGES FOR Client --------------------------------");
-        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
-        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
+        final String addChargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, addChargesURL, request, "");
         return (Integer) response.get("resourceId");
     }
 
     public static String payChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         LOG.info("--------------------------------- PAY CHARGES FOR CLIENT --------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
+        final String chargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, chargesURL, json, "");
         return response.get("transactionId") != null ? response.get("transactionId").toString() : null;
     }
 
     public static String waiveChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         LOG.info("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=waive&"
+        final String chargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=waive&"
                 + Utils.TENANT_IDENTIFIER;
 
-        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, chargesURL, json, "");
         return response.get("transactionId").toString();
     }
 
     public static Integer revertClientChargeTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, String clientChargeId) {
         LOG.info("---------------------------------UNDO TRANSACTION---------------------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + clientChargeId + "?command=undo&"
+        final String chargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + clientChargeId + "?command=undo&"
                 + Utils.TENANT_IDENTIFIER;
 
-        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, "", "");
+        final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, chargesURL, "", "");
         return (Integer) response.get("resourceId");
 
     }
@@ -587,17 +587,17 @@ public class ClientHelper {
     public static Object getClientCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String clientChargeId) {
         LOG.info("---------------------------------GET CLIENT CHARGE---------------------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
+        final String chargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "amountOutstanding");
+        return Utils.performServerGet(requestSpec, responseSpec, chargesURL, "amountOutstanding");
     }
 
     public static Boolean getClientTransactions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String transactionId) {
         LOG.info("---------------------------------GET CLIENT CHARGE TRANSACTIONS---------------------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
+        final String chargesURL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "reversed");
+        return Utils.performServerGet(requestSpec, responseSpec, chargesURL, "reversed");
     }
 
     public Workbook getClientEntityWorkbook(GlobalEntityType clientsEntity, String dateFormat) throws IOException {

@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings({ "AbbreviationAsWordInName" })
 public final class ExternalServicesConstants {
 
     private ExternalServicesConstants() {

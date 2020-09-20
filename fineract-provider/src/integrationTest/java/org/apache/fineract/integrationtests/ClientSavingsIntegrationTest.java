@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({ "rawtypes", "AbbreviationAsWordInName" })
 public class ClientSavingsIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
@@ -201,10 +201,10 @@ public class ClientSavingsIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        final String closedOnDateValue = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
-                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, closedOnDateValue);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -281,7 +281,7 @@ public class ClientSavingsIntegrationTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testSavingsAccount_DELETE_APPLICATION() {
+    public void testSavingsAccountDeleteApplication() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
@@ -707,7 +707,7 @@ public class ClientSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
         final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
         todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
         final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
@@ -718,7 +718,7 @@ public class ClientSavingsIntegrationTest {
          * @param activationDate
          *            this value is every time first day of previous month
          */
-        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, activationDate);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         /***
@@ -736,7 +736,7 @@ public class ClientSavingsIntegrationTest {
          * there prior to this transaction)
          */
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
-                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                activationDate, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
@@ -785,10 +785,10 @@ public class ClientSavingsIntegrationTest {
         assertEquals(interestPosted, actualInterestPosted, "Verifying interest posted");
 
         todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        final String closedOnDateValue = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
-                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+                .closeSavingsAccountAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, closedOnDateValue);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
@@ -839,7 +839,7 @@ public class ClientSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
 
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
 
         /***
          * Activate the application and verify account status
@@ -847,7 +847,7 @@ public class ClientSavingsIntegrationTest {
          * @param activationDate
          *            this value is every time first day of previous month
          */
-        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, activationDate);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         /***
          * Verify the account summary
@@ -1090,7 +1090,7 @@ public class ClientSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
 
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
 
         /***
          * Activate the application and verify account status
@@ -1098,7 +1098,7 @@ public class ClientSavingsIntegrationTest {
          * @param activationDate
          *            this value is every time first day of previous month
          */
-        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, activationDate);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         /***
          * Verify the account summary
@@ -1124,7 +1124,7 @@ public class ClientSavingsIntegrationTest {
          * there prior to this transaction)
          */
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
-                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                activationDate, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
@@ -1352,7 +1352,7 @@ public class ClientSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
         final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
         todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
         final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
@@ -1368,7 +1368,7 @@ public class ClientSavingsIntegrationTest {
          * @param activationDate
          *            this value is every time first day of previous month
          */
-        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, activationDate);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         /***
@@ -1386,7 +1386,7 @@ public class ClientSavingsIntegrationTest {
          * there prior to this transaction)
          */
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
-                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                activationDate, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
@@ -1447,7 +1447,7 @@ public class ClientSavingsIntegrationTest {
         LOG.info("------Post Interest As On After doing a post interest Successfully worked--------");
 
         todaysDate = Calendar.getInstance();
-        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        final String closedOnDateValue = dateFormat.format(todaysDate.getTime());
 
         Calendar interestPostingDate = Calendar.getInstance();
         Calendar todysDate = Calendar.getInstance();
@@ -1460,12 +1460,12 @@ public class ClientSavingsIntegrationTest {
         if (TODYS_POSTING_DATE.equalsIgnoreCase(INTEREST_POSTING_DATE)) {
             final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, responseSpec);
             validationErrorHelper.closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance,
-                    CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+                    CommonConstants.RESPONSE_ERROR, closedOnDateValue);
         } else {
             final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
             ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
                     .closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR,
-                            CLOSEDON_DATE);
+                            closedOnDateValue);
             assertEquals("error.msg.postInterest.notDone", savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         }
 
@@ -1520,7 +1520,7 @@ public class ClientSavingsIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.set(Calendar.DAY_OF_MONTH, 1);
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String activationDate = dateFormat.format(todaysDate.getTime());
         final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
         todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
         final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
@@ -1541,7 +1541,7 @@ public class ClientSavingsIntegrationTest {
          * @param activationDate
          *            this value is every time first day of previous month
          */
-        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        savingsStatusHashMap = activateSavingsAccount(savingsId, activationDate);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         /***
@@ -1559,7 +1559,7 @@ public class ClientSavingsIntegrationTest {
          * there prior to this transaction)
          */
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
-                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+                activationDate, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");

@@ -66,17 +66,17 @@ public final class PaymentTypeHelper {
             final Integer generatedPaymentTypeID) {
         // system.out.println("------------------------------CHECK PAYMENT
         // DETAILS------------------------------------\n");
-        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "id");
+        final String getPaymentTypeURL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, getPaymentTypeURL, "id");
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
     public static PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec,
             final Integer paymentTypeId) {
-        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
+        final String getPaymentTypeURL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
         // system.out.println("---------------------------------GET PAYMENT
         // TYPE---------------------------------------------");
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "");
+        Object get = Utils.performServerGet(requestSpec, responseSpec, getPaymentTypeURL, "");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
 
@@ -84,22 +84,22 @@ public final class PaymentTypeHelper {
 
     public static HashMap<String, String> updatePaymentType(final int id, HashMap request, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String UPDATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
+        final String updatePaymentTypeURL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
         // system.out.println("---------------------------------UPDATE PAYMENT
         // TYPE " +
         // id + "---------------------------------------------");
-        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_PAYMENTTYPE_URL, new Gson().toJson(request),
+        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, updatePaymentTypeURL, new Gson().toJson(request),
                 "changes");
         return hash;
     }
 
     public static Integer deletePaymentType(final int id, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String DELETE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
+        final String deletePaymentTypeURL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
         // system.out.println("---------------------------------DELETING PAYMENT
         // TYPE "
         // + id + "--------------------------------------------");
-        return Utils.performServerDelete(requestSpec, responseSpec, DELETE_PAYMENTTYPE_URL, "resourceId");
+        return Utils.performServerDelete(requestSpec, responseSpec, deletePaymentTypeURL, "resourceId");
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {

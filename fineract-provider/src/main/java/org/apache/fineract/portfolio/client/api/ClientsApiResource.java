@@ -414,11 +414,10 @@ public class ClientsApiResource {
 
         final AccountSummaryCollectionData clientAccount = this.accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
 
-        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-                Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
+        final Set<String> clientAccountDataParameters = new HashSet<>(Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
+        return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, clientAccountDataParameters);
     }
 
     @GET

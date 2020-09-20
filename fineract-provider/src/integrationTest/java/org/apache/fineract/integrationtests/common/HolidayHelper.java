@@ -77,15 +77,15 @@ public class HolidayHelper {
 
     public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String holidayID) {
-        final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
+        final String activateHolidayURL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, activateHolidayURL, getActivateHolidayDataAsJSON(), "resourceId");
     }
 
     public static HashMap getHolidayById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String holidayID) {
-        final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
+        final String getHolidayByIdURL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_HOLIDAY_BY_ID_URL, "");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, getHolidayByIdURL, "");
         return response;
     }
 

@@ -316,10 +316,10 @@ public class AccountNumberPreferencesTest {
         if (isAccountPreferenceSetUp) {
             String centerPrefixName = (String) this.accountNumberPreferencesHelper
                     .getAccountNumberPreference(this.centerAccountNumberPreferenceId, "prefixType.value");
-            final String CENTER_URL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
+            final String centerURL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
 
             if (centerPrefixName.equals(this.officeName)) {
-                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");
+                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, centerURL, "officeName");
                 this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
             }
         } else {

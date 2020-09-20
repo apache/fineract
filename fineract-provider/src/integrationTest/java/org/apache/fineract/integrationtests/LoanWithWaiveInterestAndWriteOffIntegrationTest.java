@@ -140,7 +140,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     }
 
     @Test
-    public void checkClientLoan_WRITTEN_OFF() {
+    public void checkClientLoanWrittenOff() {
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, DATE_OF_JOINING);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);

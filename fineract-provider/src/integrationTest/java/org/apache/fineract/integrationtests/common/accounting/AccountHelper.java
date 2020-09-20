@@ -67,15 +67,15 @@ public class AccountHelper {
     }
 
     public ArrayList getAccountingWithRunningBalances() {
-        final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts?fetchRunningBalance=true";
-        final ArrayList<HashMap> accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec,
-                GET_RUNNING_BALANCE_URL, "");
+        final String getRunningBalanceURL = "/fineract-provider/api/v1/glaccounts?fetchRunningBalance=true";
+        final ArrayList<HashMap> accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, getRunningBalanceURL,
+                "");
         return accountRunningBalance;
     }
 
     public HashMap getAccountingWithRunningBalanceById(final String accountId) {
-        final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts/" + accountId + "?fetchRunningBalance=true";
-        final HashMap accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");
+        final String getRunningBalanceURL = "/fineract-provider/api/v1/glaccounts/" + accountId + "?fetchRunningBalance=true";
+        final HashMap accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, getRunningBalanceURL, "");
         return accountRunningBalance;
     }
 

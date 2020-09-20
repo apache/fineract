@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.configuration.domain;
 import java.util.Date;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
+@SuppressWarnings({ "AbbreviationAsWordInName" })
 public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);

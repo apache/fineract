@@ -46,11 +46,11 @@ public final class CalendarHelper {
 
         LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
-        final String CALENDAR_RESOURCE_URL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
+        final String calendarResourceURL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
 
-        LOG.info("{}", CALENDAR_RESOURCE_URL);
+        LOG.info("{}", calendarResourceURL);
 
-        return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
+        return Utils.performServerPost(requestSpec, responseSpec, calendarResourceURL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
@@ -60,11 +60,11 @@ public final class CalendarHelper {
 
         LOG.info("---------------------------------UPDATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
-        final String CALENDAR_RESOURCE_URL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "/" + calendarID;
+        final String calendarResourceURL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "/" + calendarID;
 
-        LOG.info("{}", CALENDAR_RESOURCE_URL);
+        LOG.info("{}", calendarResourceURL);
         // TODO: check that resource id indeed exists in calendar update put.
-        return Utils.performServerPut(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
+        return Utils.performServerPut(requestSpec, responseSpec, calendarResourceURL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
@@ -88,8 +88,8 @@ public final class CalendarHelper {
     public static void verifyCalendarCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupId, final Integer generatedCalendarId) {
         LOG.info("------------------------------CHECK CALENDAR DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/fineract-provider/api/v1/groups/" + generatedGroupId + "?associations=all&" + Utils.TENANT_IDENTIFIER;
-        final String responseCalendarDetailsinJSON = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL,
+        final String clientURL = "/fineract-provider/api/v1/groups/" + generatedGroupId + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+        final String responseCalendarDetailsinJSON = Utils.performServerGet(requestSpec, responseSpec, clientURL,
                 "collectionMeetingCalendar");
         final Integer responseCalendarId = JsonPath.from(responseCalendarDetailsinJSON).get("id");
         assertEquals(generatedCalendarId, responseCalendarId, "ERROR IN CREATING THE CALENDAR");
@@ -100,11 +100,11 @@ public final class CalendarHelper {
 
         LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
-        final String CALENDAR_RESOURCE_URL = BASE_URL + CENTER_ENTITY + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
+        final String calendarResourceURL = BASE_URL + CENTER_ENTITY + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
 
-        LOG.info("{}", CALENDAR_RESOURCE_URL);
+        LOG.info("{}", calendarResourceURL);
 
-        return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
+        return Utils.performServerPost(requestSpec, responseSpec, calendarResourceURL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
@@ -113,12 +113,12 @@ public final class CalendarHelper {
 
         LOG.info("---------------------------------UPADATING A MEETING CALENDAR FOR THE CENTER------------------------------");
 
-        final String CALENDAR_RESOURCE_URL = BASE_URL + CENTER_ENTITY + centerId + ENITY_NAME + "/" + calendarID + "?"
+        final String calendarResourceURL = BASE_URL + CENTER_ENTITY + centerId + ENITY_NAME + "/" + calendarID + "?"
                 + Utils.TENANT_IDENTIFIER;
 
-        LOG.info("{}", CALENDAR_RESOURCE_URL);
+        LOG.info("{}", calendarResourceURL);
 
-        return Utils.performServerPut(requestSpec, responseSpec, CALENDAR_RESOURCE_URL, getTestCalendarMeetingAsJSON(oldDate, startDate),
+        return Utils.performServerPut(requestSpec, responseSpec, calendarResourceURL, getTestCalendarMeetingAsJSON(oldDate, startDate),
                 "resourceId");
 
     }

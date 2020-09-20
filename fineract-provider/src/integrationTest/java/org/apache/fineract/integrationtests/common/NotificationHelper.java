@@ -38,8 +38,8 @@ public class NotificationHelper {
 
     public static Object getNotifications(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String jsonReturn) {
-        final String GET_NOTIFICATIONS_URL = NOTIFICATION_API_URL;
+        final String getNotificationURL = NOTIFICATION_API_URL;
         LOG.info("-----------------------------GET NOTIFICATIONS-----------------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_NOTIFICATIONS_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, getNotificationURL, "");
     }
 }

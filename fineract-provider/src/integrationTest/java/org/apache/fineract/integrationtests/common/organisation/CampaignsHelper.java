@@ -53,50 +53,50 @@ public class CampaignsHelper {
 
     public Integer createCampaign(String reportName, Integer triggerType) {
         LOG.info("---------------------------------CREATING A CAMPAIGN---------------------------------------------");
-        final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_SMS_CAMPAIGNS_URL, getCreateCampaignJSON(reportName, triggerType),
+        final String createSmsCampaignsURL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, createSmsCampaignsURL, getCreateCampaignJSON(reportName, triggerType),
                 "resourceId");
     }
 
     public void verifyCampaignCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId) {
         LOG.info("------------------------------CHECK CAMPAIGN DETAILS------------------------------------\n");
-        final String RETRIEVE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responseCampaignId = Utils.performServerGet(requestSpec, responseSpec, RETRIEVE_SMS_CAMPAIGNS_URL, "id");
+        final String retriveSMScampaignsURL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responseCampaignId = Utils.performServerGet(requestSpec, responseSpec, retriveSMScampaignsURL, "id");
         assertEquals(generatedCampaignId, responseCampaignId, "ERROR IN CREATING THE CAMPAIGN");
     }
 
     public Integer updateCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId, String reportName, Integer triggerType) {
         LOG.info("------------------------------UPDATE CAMPAIGN DETAILS------------------------------------\n");
-        final String UPDATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_SMS_CAMPAIGNS_URL, getUpdateCampaignJSON(reportName, triggerType),
+        final String updateSMSCampaignsURL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPut(requestSpec, responseSpec, updateSMSCampaignsURL, getUpdateCampaignJSON(reportName, triggerType),
                 "resourceId");
     }
 
     public Integer deleteCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId) {
         LOG.info("------------------------------DELETE CAMPAIGN DETAILS------------------------------------\n");
-        final String DELETE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(requestSpec, responseSpec, DELETE_SMS_CAMPAIGNS_URL, "resourceId");
+        final String deleteSMScampaignURL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerDelete(requestSpec, responseSpec, deleteSMScampaignURL, "resourceId");
     }
 
     public Integer performActionsOnCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId, String command) {
         LOG.info("------------------------------PERFORM ACTION ON CAMPAIGN DETAILS------------------------------------\n");
-        final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
+        final String smsCampaignsActionURL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
         String actionDate = Utils.getLocalDateOfTenant().toString(DATE_FORMAT);
-        return Utils.performServerPost(requestSpec, responseSpec, SMS_CAMPAIGNS_ACTION_URL, getJSONForCampaignAction(command, actionDate),
+        return Utils.performServerPost(requestSpec, responseSpec, smsCampaignsActionURL, getJSONForCampaignAction(command, actionDate),
                 "resourceId");
     }
 
     public Object performActionsOnCampaignWithFailure(final Integer generatedCampaignId, String command, String actionDate,
             String responseJsonAttribute) {
         LOG.info("--------------------------PERFORM ACTION ON CAMPAIGN DETAILS WITH FAILURE-------------------------------\n");
-        final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
+        final String smsCampaignsActionURL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SMS_CAMPAIGNS_ACTION_URL,
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, smsCampaignsActionURL,
                 getJSONForCampaignAction(command, actionDate), responseJsonAttribute);
     }
 

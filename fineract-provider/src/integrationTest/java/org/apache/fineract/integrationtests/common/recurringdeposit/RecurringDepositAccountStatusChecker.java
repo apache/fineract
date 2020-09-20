@@ -84,9 +84,9 @@ public final class RecurringDepositAccountStatusChecker {
 
     public static HashMap getStatusOfRecurringDepositAccount(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String recurringDepositAccountID) {
-        final String GET_STATUS_OF_RECURRING_DEPOSIT_ACCOUNT_URL = RECURRING_DEPOSIT_ACCOUNT_URL + "/" + recurringDepositAccountID + "?"
+        final String getStatusOfRecurringDepositAccountURL = RECURRING_DEPOSIT_ACCOUNT_URL + "/" + recurringDepositAccountID + "?"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, GET_STATUS_OF_RECURRING_DEPOSIT_ACCOUNT_URL, "status");
+        return Utils.performServerGet(requestSpec, responseSpec, getStatusOfRecurringDepositAccountURL, "status");
     }
 
     public static void verifyRecurringDepositAccountIsPrematureClosed(HashMap recurringDepositStatusHashMap) {

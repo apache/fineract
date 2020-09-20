@@ -108,20 +108,20 @@ public class StandingInstructionsHelper {
     public HashMap getStandingInstructionById(final String standingInstructionId) {
 
         LOG.info("----------------------------- RETRIEVING STANDING INSTRUCTION BY ID---------------------------");
-        final String GET_STANDING_INSTRUCTION_BY_ID_URL = STANDING_INSTRUCTIONS_URL + "/" + standingInstructionId + "?"
+        final String getStandingInstructionsByIdURL = STANDING_INSTRUCTIONS_URL + "/" + standingInstructionId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
+        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, getStandingInstructionsByIdURL, "");
         return response;
     }
 
     public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
             Integer transferType) {
-        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
+        final String standingInstructionsHistoryURL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
                 + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
                 + transferType;
-        LOG.info("STANDING_INSTRUCTIONS_HISTORY_URL= {}", STANDING_INSTRUCTIONS_HISTORY_URL);
+        LOG.info("standingInstructionsHistoryURL= {}", standingInstructionsHistoryURL);
         final List<HashMap> response = (List<HashMap>) Utils.performServerGet(this.requestSpec, this.responseSpec,
-                STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
+                standingInstructionsHistoryURL, "pageItems");
         return response;
     }
 }

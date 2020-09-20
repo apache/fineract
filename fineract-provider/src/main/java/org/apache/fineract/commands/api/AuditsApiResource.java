@@ -171,10 +171,10 @@ public class AuditsApiResource {
 
         final AuditSearchData auditSearchData = this.auditReadPlatformService.retrieveSearchTemplate("audit");
 
-        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(
+        final Set<String> responseDataParemetersSearchTemplate = new HashSet<>(
                 Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
 
-        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, responseDataParemetersSearchTemplate);
     }
 
     private SQLBuilder getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
