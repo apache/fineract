@@ -60,8 +60,8 @@ public class InteropKycResponseData extends CommandProcessingResult {
 
     public static InteropKycResponseData build(InteropKycData accountKyc) {
 
-        PostalAddress postalAddress = new PostalAddress(accountKyc.getAddress_line_1(), accountKyc.getAddress_line_2(),
-                accountKyc.getCity(), accountKyc.getStateProvince(), accountKyc.getPostalCode(), accountKyc.getCountry());
+        PostalAddress postalAddress = new PostalAddress(accountKyc.getAddressLine1(), accountKyc.getAddressLine2(), accountKyc.getCity(),
+                accountKyc.getStateProvince(), accountKyc.getPostalCode(), accountKyc.getCountry());
         IdDocument idDocument = new IdDocument(accountKyc.getIdType(), accountKyc.getIdNo(), accountKyc.getCountry(),
                 accountKyc.getDescription());
         SubjectName subjectName = new SubjectName(accountKyc.getFirstName(), accountKyc.getMiddleName(), accountKyc.getLastName(),

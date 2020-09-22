@@ -31,8 +31,8 @@ public class InteropKycData implements Serializable {
     private String idNo;
     private String description;
     private String country;
-    private String address_line_1;
-    private String address_line_2;
+    private String addressLine1;
+    private String addressLine2;
     private String city;
     private String stateProvince;
     private String postalCode;
@@ -42,8 +42,8 @@ public class InteropKycData implements Serializable {
     private String displayName;
 
     public InteropKycData(String nationality, String dateOfBirth, String contactPhone, String gender, String email, String idType,
-            String idNo, String description, String country, String address_line_1, String address_line_2, String city,
-            String stateProvince, String postalCode, String firstName, String middleName, String lastName, String displayName) {
+            String idNo, String description, String country, String addressLine1, String addressLine2, String city, String stateProvince,
+            String postalCode, String firstName, String middleName, String lastName, String displayName) {
         this.nationality = nationality;
         this.dateOfBirth = dateOfBirth;
         this.contactPhone = contactPhone;
@@ -53,8 +53,8 @@ public class InteropKycData implements Serializable {
         this.idNo = idNo;
         this.description = description;
         this.country = country;
-        this.address_line_1 = address_line_1;
-        this.address_line_2 = address_line_2;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
         this.city = city;
         this.stateProvince = stateProvince;
         this.postalCode = postalCode;
@@ -107,12 +107,12 @@ public class InteropKycData implements Serializable {
         return country;
     }
 
-    public String getAddress_line_1() {
-        return address_line_1;
+    public String getAddressLine1() {
+        return addressLine1;
     }
 
-    public String getAddress_line_2() {
-        return address_line_2;
+    public String getAddressLine2() {
+        return addressLine2;
     }
 
     public String getCity() {

@@ -185,8 +185,8 @@ public class InteropServiceImpl implements InteropService {
             final String idNo = rs.getString("idNo");
             final String description = rs.getString("description");
             final String country = rs.getString("country");
-            final String address_line_1 = rs.getString("address_line_1");
-            final String address_line_2 = rs.getString("address_line_2");
+            final String addressLine1 = rs.getString("address_line_1");
+            final String addressLine2 = rs.getString("address_line_2");
             final String city = rs.getString("city");
             final String stateProvince = rs.getString("stateProvince");
             final String postalCode = rs.getString("postalCode");
@@ -196,7 +196,7 @@ public class InteropServiceImpl implements InteropService {
             final String displayName = rs.getString("displayName");
 
             return InteropKycData.instance(nationality, dateOfBirth, contactPhone, gender, email, idType, idNo, description, country,
-                    address_line_1, address_line_2, city, stateProvince, postalCode, firstName, middleName, lastName, displayName);
+                    addressLine1, addressLine2, city, stateProvince, postalCode, firstName, middleName, lastName, displayName);
         }
     }
 
@@ -495,7 +495,7 @@ public class InteropServiceImpl implements InteropService {
 
             return InteropKycResponseData.build(accountKyc);
         } catch (final EmptyResultDataAccessException e) {
-            throw new UnsupportedOperationException("Error in retrieving KYC information: " + e.toString());
+            throw new UnsupportedOperationException("Error in retrieving KYC information: " + e);
         }
     }
 
@@ -549,19 +549,6 @@ public class InteropServiceImpl implements InteropService {
 
         return savingsAccount;
     }
-
-    // private Loan validateAndGetLoan(@NotNull InteropRequestData request) {
-    // Loan loan = validateAndGetLoan(request.getAccountId());
-    //
-    // ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
-    // if (!loan.getCurrency().getCode().equals(requestCurrency.getCode())) {
-    // throw new UnsupportedOperationException("Account and request has different currencies!");
-    // }
-    //
-    // request.normalizeAmounts(loan.getCurrency());
-    //
-    // return loan;
-    // }
 
     private BigDecimal calculateTotalTransferAmount(@NotNull InteropTransferRequestData request, @NotNull SavingsAccount savingsAccount) {
         BigDecimal total = request.getAmount().getAmount();
