@@ -82,6 +82,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "accrual_interest_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal interestAccrued;
 
+    @Column(name = "reschedule_interest_portion", scale = 6, precision = 19, nullable = true)
+    private BigDecimal rescheduleInterestPortion;
+
     @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal feeChargesCharged;
 
@@ -137,6 +140,24 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.fromDate = null;
         this.dueDate = null;
         this.obligationsMet = false;
+    }
+
+    public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
+            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
+        this.loan = loan;
+        this.installmentNumber = installmentNumber;
+        this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
+        this.dueDate = dueDate.toDateTimeAtStartOfDay().toDate();
+        this.principal = defaultToNullIfZero(principal);
+        this.interestCharged = defaultToNullIfZero(interest);
+        this.feeChargesCharged = defaultToNullIfZero(feeCharges);
+        this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
+        this.obligationsMet = false;
+        this.recalculatedInterestComponent = recalculatedInterestComponent;
+        this.loanCompoundingDetails = compoundingDetails;
+        this.rescheduleInterestPortion = rescheduleInterestPortion;
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
@@ -807,4 +828,13 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return getPenaltyChargesPaid(currency).plus(getFeeChargesPaid(currency)).plus(getInterestPaid(currency))
                 .plus(getPrincipalCompleted(currency));
     }
+
+    public BigDecimal getRescheduleInterestPortion() {
+        return rescheduleInterestPortion;
+    }
+
+    public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
+        this.rescheduleInterestPortion = rescheduleInterestPortion;
+    }
+
 }

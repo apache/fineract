@@ -58,4 +58,8 @@ public interface LoanScheduleModelPeriod {
     void setEMIFixedSpecificToInstallmentTrue();
 
     boolean isEMIFixedSpecificToInstallment();
+
+    BigDecimal rescheduleInterestPortion();
+
+    void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion);
 }

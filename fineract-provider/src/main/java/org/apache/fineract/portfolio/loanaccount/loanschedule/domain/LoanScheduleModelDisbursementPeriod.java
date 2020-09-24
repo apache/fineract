@@ -138,4 +138,14 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     public boolean isEMIFixedSpecificToInstallment() {
         return isEMIFixedSpecificToInstallment;
     }
+
+    @Override
+    public BigDecimal rescheduleInterestPortion() {
+        return null;
+    }
+
+    @Override
+    public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
+        return;
+    }
 }
