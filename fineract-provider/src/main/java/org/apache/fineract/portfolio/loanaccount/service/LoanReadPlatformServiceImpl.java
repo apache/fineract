@@ -36,8 +36,10 @@ import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -288,6 +290,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Page<LoanAccountData> retrieveAll(final SearchParameters searchParameters) {
+        if (searchParameters != null && searchParameters.getStatusValues() != null && searchParameters.getStatusValues().size() != 0) {
+            final List<String> statusValues = searchParameters.getStatusValues();
+            for (int i = 0; i < statusValues.size(); i++) {
+                if (LoanStatus.fromString(statusValues.get(i)) == LoanStatus.INVALID) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final String defaultUserMessage = "The Status value '" + statusValues.get(i) + "' is not supported.";
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.status.value.is.not.supported",
+                            defaultUserMessage, "status", statusValues.get(i));
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+            }
+        }
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -312,7 +327,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         extraCriterias.add(hierarchySearchString);
 
         if (searchParameters != null) {
-
+            final List<String> statusValues = searchParameters.getStatusValues();
             String sqlQueryCriteria = searchParameters.getSqlSearch();
             if (StringUtils.isNotBlank(sqlQueryCriteria)) {
                 SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
@@ -336,6 +351,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 sqlBuilder.append(" and l.account_no = ?");
                 extraCriterias.add(searchParameters.getAccountNo());
                 arrayPos = arrayPos + 1;
+            }
+
+            if (statusValues != null && statusValues.size() != 0) {
+                StringBuilder loanTypeCodes = new StringBuilder();
+                for (int i = 0; i < statusValues.size() - 1; i++) {
+                    loanTypeCodes.append(LoanStatus.fromString(statusValues.get(i)).getValue().toString() + ",");
+                }
+                loanTypeCodes.append(LoanStatus.fromString(statusValues.get(statusValues.size() - 1)).getValue().toString());
+                sqlBuilder.append(" and l.loan_status_id in (" + loanTypeCodes.toString() + ")");
             }
 
             if (searchParameters.isOrderByRequested()) {

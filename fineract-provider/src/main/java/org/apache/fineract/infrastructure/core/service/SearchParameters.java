@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 public final class SearchParameters {
@@ -30,6 +32,7 @@ public final class SearchParameters {
     private final String firstname;
     private final String lastname;
     private final String status;
+    private final String statusValues;
     private final Integer offset;
     private final Integer limit;
     private final String orderBy;
@@ -99,7 +102,7 @@ public final class SearchParameters {
     }
 
     public static SearchParameters forLoans(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder, final String accountNo) {
+            final String orderBy, final String sortOrder, final String accountNo, final String statusValues) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
         final Long staffId = null;
@@ -109,7 +112,7 @@ public final class SearchParameters {
         final boolean isSelfUser = false;
 
         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
-                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
+                staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser, statusValues);
     }
 
     public static SearchParameters forJournalEntries(final Long officeId, final Integer offset, final Integer limit, final String orderBy,
@@ -269,6 +272,37 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
+        this.statusValues = null;
+
+    }
+
+    private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
+            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
+            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, String statusValues) {
+        this.sqlSearch = sqlSearch;
+        this.officeId = officeId;
+        this.externalId = externalId;
+        this.name = name;
+        this.hierarchy = hierarchy;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.offset = offset;
+        this.limit = limit;
+        this.orderBy = orderBy;
+        this.sortOrder = sortOrder;
+        this.staffId = staffId;
+        this.accountNo = accountNo;
+        this.loanId = loanId;
+        this.savingsId = savingsId;
+        this.orphansOnly = orphansOnly;
+        this.currencyCode = null;
+        this.provisioningEntryId = null;
+        this.productId = null;
+        this.categoryId = null;
+        this.isSelfUser = isSelfUser;
+        this.status = null;
+        this.statusValues = statusValues;
 
     }
 
@@ -298,6 +332,7 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = status;
+        this.statusValues = null;
 
     }
 
@@ -327,6 +362,7 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = isSelfUser;
         this.status = null;
+        this.statusValues = null;
     }
 
     private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
@@ -353,6 +389,7 @@ public final class SearchParameters {
         this.categoryId = categoryId;
         this.isSelfUser = false;
         this.status = null;
+        this.statusValues = null;
 
     }
 
@@ -382,6 +419,7 @@ public final class SearchParameters {
         this.categoryId = null;
         this.isSelfUser = false;
         this.status = null;
+        this.statusValues = null;
 
     }
 
@@ -542,6 +580,13 @@ public final class SearchParameters {
 
     public boolean isSelfUser() {
         return this.isSelfUser;
+    }
+
+    public List<String> getStatusValues() {
+        if (this.statusValues == null) {
+            return null;
+        }
+        return Arrays.asList(this.statusValues.split(","));
     }
 
     /**

@@ -754,12 +754,13 @@ public class LoansApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
-            @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo) {
+            @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
+            @QueryParam("status") @Parameter(description = "Multiple status values are also accepted, example: status=active,approved will return loans with either of the status value.") final String status) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
-                accountNo);
+                accountNo, status);
 
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
 

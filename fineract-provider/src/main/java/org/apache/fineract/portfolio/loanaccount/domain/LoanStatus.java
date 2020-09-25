@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Enum representation of loan status states.
  */
@@ -78,6 +80,42 @@ public enum LoanStatus {
             break;
         }
         return enumeration;
+    }
+
+    public static LoanStatus fromString(final String statusString) {
+
+        LoanStatus enumeration = LoanStatus.INVALID;
+
+        if (StringUtils.isEmpty(statusString)) {
+            return enumeration;
+        }
+
+        if (statusString.equalsIgnoreCase(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.toString())) {
+            enumeration = LoanStatus.SUBMITTED_AND_PENDING_APPROVAL;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.ACTIVE.toString())) {
+            enumeration = LoanStatus.ACTIVE;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.APPROVED.toString())) {
+            enumeration = LoanStatus.APPROVED;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.WITHDRAWN_BY_CLIENT.toString())) {
+            enumeration = LoanStatus.WITHDRAWN_BY_CLIENT;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.OVERPAID.toString())) {
+            enumeration = LoanStatus.OVERPAID;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.TRANSFER_ON_HOLD.toString())) {
+            enumeration = LoanStatus.TRANSFER_ON_HOLD;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.REJECTED.toString())) {
+            enumeration = LoanStatus.REJECTED;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.toString())) {
+            enumeration = LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.CLOSED_OBLIGATIONS_MET.toString())) {
+            enumeration = LoanStatus.CLOSED_OBLIGATIONS_MET;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.CLOSED_WRITTEN_OFF.toString())) {
+            enumeration = LoanStatus.CLOSED_WRITTEN_OFF;
+        } else if (statusString.equalsIgnoreCase(LoanStatus.TRANSFER_IN_PROGRESS.toString())) {
+            enumeration = LoanStatus.TRANSFER_IN_PROGRESS;
+        }
+
+        return enumeration;
+
     }
 
     LoanStatus(final Integer value, final String code) {
