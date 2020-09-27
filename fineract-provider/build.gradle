@@ -766,7 +766,7 @@ test {
 // Configuration for the Checkstyle plugin
 // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
 dependencies {
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.36.1'
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.36.2'
     checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
