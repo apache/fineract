@@ -101,6 +101,14 @@ public class InteropTest {
     }
 
     @Test
+    public void testValidateAction() {
+        interopHelper.setResponseSpec(responseClientErrorSpec);
+        interopHelper.postTransferMissingAction(UUID.randomUUID().toString(), InteropTransactionRole.PAYER);
+        interopHelper.postTransfer(UUID.randomUUID().toString(), null, InteropTransactionRole.PAYER);
+        interopHelper.setResponseSpec(responseSpec);
+    }
+
+    @Test
     public void testInteroperation() {
         createClient();
         createSavingsProduct();
