@@ -49,6 +49,12 @@ Instructions to build the JAR file
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
 3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
 
+The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
+
+    export fineract_tenants_pwd=verysecret
+    ...
+    java -jar fineract-provider.jar
+
 
 Instructions to build a WAR file
 ============
@@ -57,6 +63,8 @@ Instructions to build a WAR file
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
+
+Note that with the 1.4 release the tenants database pool configuration changed from Tomcat DBCP in XML to an embedded Hikari, configured by environment variables, see above.
 
 
 Instructions to execute Integration Tests
