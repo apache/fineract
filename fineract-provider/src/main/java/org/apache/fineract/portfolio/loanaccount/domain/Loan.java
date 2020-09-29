@@ -3026,6 +3026,12 @@ public class Loan extends AbstractPersistableCustom {
             statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
         }
 
+        if (loanTransaction.isRecoveryRepayment()
+                && loanTransaction.getAmount(loanCurrency()).getAmount().compareTo(getSummary().getTotalWrittenOff()) > 0) {
+            final String errorMessage = "The transaction amount cannot greater than the remaining written off amount.";
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.greater.than.total.written.off", errorMessage);
+        }
+
         this.loanStatus = statusEnum.getValue();
 
         loanTransaction.updateLoan(this);
