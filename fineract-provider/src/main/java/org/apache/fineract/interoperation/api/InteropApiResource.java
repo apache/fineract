@@ -58,6 +58,7 @@ import org.apache.fineract.interoperation.data.InteropAccountData;
 import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
 import org.apache.fineract.interoperation.data.InteropIdentifierRequestData;
 import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
+import org.apache.fineract.interoperation.data.InteropKycResponseData;
 import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
 import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
 import org.apache.fineract.interoperation.data.InteropTransactionRequestData;
@@ -389,4 +390,29 @@ public class InteropApiResource {
 
         return jsonSerializer.serialize(settings, result);
     }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("accounts/{accountId}/kyc")
+    @Operation(summary = "Query KYC by Account Id", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropKycResponseData.class))) })
+    public String getClientKyc(@PathParam("accountId") @Parameter(description = "accountId") String accountId, @Context UriInfo uriInfo) {
+        InteropKycResponseData result = interopService.getKyc(accountId);
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return jsonSerializer.serialize(settings, result);
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("transactions/{accountId}/disburse")
+    @Operation(summary = "Disburse Loan by Account Id", description = "")
+    public String disburseLoan(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context UriInfo uriInfo) {
+        return interopService.disburseLoan(accountId, apiRequestBodyAsJson);
+    }
+
 }
