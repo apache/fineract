@@ -61,7 +61,6 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
-            'org.drizzle.jdbc:drizzle-jdbc',
             'org.flywaydb:flyway-core',
 
             'com.github.librepdf:openpdf',
@@ -105,6 +104,8 @@ dependencies {
     runtimeOnly('org.ehcache:ehcache') {
         exclude group: 'com.sun.activation'
     }
+
+    provided 'org.mariadb.jdbc:mariadb-java-client'
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(

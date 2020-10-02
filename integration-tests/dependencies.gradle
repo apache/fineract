@@ -28,6 +28,7 @@ dependencies {
             'com.google.truth:truth',
             'com.google.truth.extensions:truth-java8-extension',
             'org.awaitility:awaitility',
+            'org.mariadb.jdbc:mariadb-java-client',
             // 'com.google.code.gson:gson',
             )
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {

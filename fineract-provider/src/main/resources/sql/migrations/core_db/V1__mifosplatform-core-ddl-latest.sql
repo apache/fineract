@@ -285,7 +285,7 @@ CREATE TABLE `m_appuser` (
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
   CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) COLLATE='utf8mb4_general_ci' ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `m_appuser_role` (
   `appuser_id` BIGINT NOT NULL,
@@ -295,7 +295,7 @@ CREATE TABLE `m_appuser_role` (
   KEY `FK7662CE5915CEC7AB` (`role_id`),
   CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) COLLATE='utf8mb4_general_ci' ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- ================ end of user admin tables ===============
 

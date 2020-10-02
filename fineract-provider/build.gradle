@@ -202,23 +202,24 @@ import groovy.sql.Sql
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
+project.ext.driver='org.mariadb.jdbc.Driver'
 
 configurations {
-    driver
+    connector
 }
 dependencies {
-    driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
+    connector "org.mariadb.jdbc:mariadb-java-client:2.7.2"
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
-configurations.driver.each {File file ->
+configurations.connector.each {File file ->
     loader.addURL(file.toURL())
 }
 
 task createDB {
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, driver )
         sql.execute( 'create database '+"`$dbName`" )
     }
 }
@@ -226,13 +227,13 @@ task createDB {
 task dropDB {
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, driver )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }
 task setBlankPassword {
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, driver )
         sql.execute('USE `fineract_tenants`')
         sql.execute('UPDATE fineract_tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
     }

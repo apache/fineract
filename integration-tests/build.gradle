@@ -19,6 +19,7 @@
 description = 'Fineract Integration Tests'
 
 apply plugin: 'com.bmuschko.cargo'
+apply plugin: 'de.undercouch.download'
 
 // Configuration for the Gradle Cargo plugin
 // https://github.com/bmuschko/gradle-cargo-plugin
@@ -28,6 +29,14 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
+// Configuration for undercouch gradle download plugin
+// https://github.com/michel-kraemer/gradle-download-task
+task downloadJdbcConnector(type: Download) {
+    src "https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/${jdbcConnectorVersion}/mariadb-java-client-${jdbcConnectorVersion}.jar"
+    dest "$buildDir/libs/mariadb-java-client.jar"
+    overwrite false
+}
+
 cargo {
     containerId "tomcat9x"
 
@@ -36,8 +45,11 @@ cargo {
         file = file("$rootDir/fineract-provider/build/libs/fineract-provider.war")
         context = 'fineract-provider'
     }
-
     local {
+        file {
+            file = file("$buildDir/libs/mariadb-java-client.jar")
+            toDir = 'lib'
+        }
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")
@@ -58,6 +70,7 @@ cargo {
 
 cargoRunLocal.dependsOn ':fineract-provider:war'
 cargoStartLocal.dependsOn ':fineract-provider:war'
+cargoStartLocal.dependsOn 'downloadJdbcConnector'
 cargoStartLocal.mustRunAfter 'testClasses'
 
 test {
