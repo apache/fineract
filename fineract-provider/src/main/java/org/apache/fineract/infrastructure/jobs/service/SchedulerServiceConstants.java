@@ -29,7 +29,7 @@ public interface SchedulerServiceConstants {
     String JOB_METHOD_INVOCATION_FAILED_EXCEPTION = "JobMethodInvocationFailedException";
     String STATUS_SUCCESS = "success";
     String STATUS_FAILED = "failed";
-    String DEFAULT_LISTENER_NAME = "Global Listner";
+    String DEFAULT_LISTENER_NAME = "Global Listener";
     int STACK_TRACE_LEVEL = 7;
     String TENANT_IDENTIFIER = "tenantIdentifier";
     String SCHEDULER = "Scheduler";

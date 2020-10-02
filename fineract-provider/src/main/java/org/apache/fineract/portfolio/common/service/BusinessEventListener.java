@@ -26,7 +26,7 @@ import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.B
  * completion of loan approval event need to block guarantor funds
  *
  */
-public interface BusinessEventListner {
+public interface BusinessEventListener {
 
     /**
      * Implement this method for notifications before executing Business Event

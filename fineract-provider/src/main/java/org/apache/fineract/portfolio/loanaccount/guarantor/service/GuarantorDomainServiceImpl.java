@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListner;
+import org.apache.fineract.portfolio.common.service.BusinessEventListener;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -92,18 +92,18 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     }
 
     @PostConstruct
-    public void addListners() {
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new ValidateOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_DISBURSAL,
+    public void addListeners() {
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new ValidateOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_DISBURSAL,
                 new ReverseAllFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_ADJUST_TRANSACTION,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADJUST_TRANSACTION,
                 new AdjustFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT,
                 new ReleaseFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF,
                 new ReverseFundsOnBusinessEvent());
     }
 
@@ -524,7 +524,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ValidateOnBusinessEvent implements BusinessEventListner {
+    private class ValidateOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -539,7 +539,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class HoldFundsOnBusinessEvent implements BusinessEventListner {
+    private class HoldFundsOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -554,7 +554,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseFundsOnBusinessEvent implements BusinessEventListner {
+    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -573,7 +573,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReverseFundsOnBusinessEvent implements BusinessEventListner {
+    private class ReverseFundsOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -590,7 +590,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class AdjustFundsOnBusinessEvent implements BusinessEventListner {
+    private class AdjustFundsOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -612,7 +612,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReverseAllFundsOnBusinessEvent implements BusinessEventListner {
+    private class ReverseAllFundsOnBusinessEvent implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -629,7 +629,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class UndoAllFundTransactions implements BusinessEventListner {
+    private class UndoAllFundTransactions implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
@@ -644,7 +644,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseAllFunds implements BusinessEventListner {
+    private class ReleaseAllFunds implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
