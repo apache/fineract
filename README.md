@@ -381,6 +381,12 @@ Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more t
 Releasing
 ---------
 
+PRE-RELEASE NOTICE: Please before starting any release process, ensure that the you have replaced mysql connector package from mariadb connector/j back to drizzle driver. Files requiring changes are:
+* docker-compose.yml
+* fineract-provider/build.gradle
+* fineract-provider/src/main/resources/META-INF/spring/jdbc.properties
+* kubernetes/fineract-server-deployment.yml
+
 [How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
 
 Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:

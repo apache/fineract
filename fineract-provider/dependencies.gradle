@@ -63,7 +63,6 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
-            'org.drizzle.jdbc:drizzle-jdbc',
             'org.flywaydb:flyway-core',
 
             'com.github.librepdf:openpdf',
