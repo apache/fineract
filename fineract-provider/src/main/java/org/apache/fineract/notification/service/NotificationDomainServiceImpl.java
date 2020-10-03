@@ -38,7 +38,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListner;
+import org.apache.fineract.portfolio.common.service.BusinessEventListener;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -81,32 +81,33 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_CREATE, new ClientCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_APPROVE, new SavingsAccountApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CENTERS_CREATE, new CenterCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.GROUPS_CREATE, new GroupCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_DEPOSIT, new SavingsAccountDepositListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_PRODUCT_DIVIDENDS_CREATE,
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.CLIENTS_CREATE, new ClientCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_APPROVE, new SavingsAccountApprovedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.CENTERS_CREATE, new CenterCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.GROUPS_CREATE, new GroupCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_DEPOSIT, new SavingsAccountDepositListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_PRODUCT_DIVIDENDS_CREATE,
                 new ShareProductDividendCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
                 new FixedDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
                 new RecurringDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_POST_INTEREST, new SavingsPostInterestListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CREATE, new LoanCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new LoanApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CLOSE, new LoanClosedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CLOSE_AS_RESCHEDULE,
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_POST_INTEREST, new SavingsPostInterestListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_CREATE, new LoanCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new LoanApprovedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_CLOSE, new LoanClosedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_CLOSE_AS_RESCHEDULE,
                 new LoanCloseAsRescheduledListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT, new LoanMakeRepaymentListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_PRODUCT_CREATE, new LoanProductCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_CREATE, new SavingsAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_CLOSE, new SavingsAccountClosedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_ACCOUNT_CREATE, new ShareAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_ACCOUNT_APPROVE, new ShareAccountApprovedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT, new LoanMakeRepaymentListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_PRODUCT_CREATE, new LoanProductCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_CREATE, new SavingsAccountCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_CLOSE, new SavingsAccountClosedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_ACCOUNT_CREATE, new ShareAccountCreatedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_ACCOUNT_APPROVE,
+                new ShareAccountApprovedListener());
     }
 
-    private abstract static class NotificationBusinessEventAdapter implements BusinessEventListner {
+    private abstract static class NotificationBusinessEventAdapter implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {}
