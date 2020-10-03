@@ -102,7 +102,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.CLIENTS_REJECT, new ClientRejectedListener());
         this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_ACTIVATE,
                 new SavingsAccountActivatedListener());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_REJECT, new SavingsAccountRejectedListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_REJECT,
+                new SavingsAccountRejectedListener());
         this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_DEPOSIT,
                 new SavingsAccountTransactionListener(true));
         this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_WITHDRAWAL,

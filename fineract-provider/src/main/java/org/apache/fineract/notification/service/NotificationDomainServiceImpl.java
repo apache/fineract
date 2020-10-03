@@ -103,7 +103,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_CREATE, new SavingsAccountCreatedListener());
         businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_CLOSE, new SavingsAccountClosedListener());
         businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_ACCOUNT_CREATE, new ShareAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_ACCOUNT_APPROVE, new ShareAccountApprovedListener());
+        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SHARE_ACCOUNT_APPROVE,
+                new ShareAccountApprovedListener());
     }
 
     private abstract static class NotificationBusinessEventAdapter implements BusinessEventListener {

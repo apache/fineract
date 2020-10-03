@@ -91,7 +91,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     private void addBusinessEventListeners(BusinessEvents businessEvent, BusinessEventListener businessEventListener,
-                                           final Map<BusinessEvents, List<BusinessEventListener>> businessEventListenerMap) {
+            final Map<BusinessEvents, List<BusinessEventListener>> businessEventListenerMap) {
         List<BusinessEventListener> businessEventListeners = businessEventListenerMap.get(businessEvent);
         if (businessEventListeners == null) {
             businessEventListeners = new ArrayList<>();
