@@ -471,7 +471,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     errorLog.append("Response object entity is not equal to ByteArrayOutputStream ---------- ");
                 }
             } else {
-                errorLog.append("ReportingProcessService object is null ---------- ");
+                errorLog.append(ReportingProcessServiceProvider.SERVICE_MISSING + reportType);
             }
         } catch (Exception e) {
             errorLog.append("The ReportMailingJobWritePlatformServiceImpl.generateReportOutputStream method threw an Exception: " + e

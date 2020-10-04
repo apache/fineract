@@ -32,5 +32,5 @@ public @interface ReportService {
     /**
      * @return the type of the report
      */
-    String type();
+    String[] type();
 }

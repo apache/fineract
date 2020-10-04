@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
+import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -71,17 +72,19 @@ public class ReportsApiResource {
     private final ReadReportingService readReportingService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     @Autowired
     public ReportsApiResource(final PlatformSecurityContext context, final ReadReportingService readReportingService,
             final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, ReportingProcessServiceProvider reportingProcessServiceProvider) {
         this.context = context;
         this.readReportingService = readReportingService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
     }
 
     @GET
@@ -117,7 +120,8 @@ public class ReportsApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (settings.isTemplate()) {
-            result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
+            result.appendedTemplate(this.readReportingService.getAllowedParameters(),
+                    this.reportingProcessServiceProvider.findAllReportingTypes());
         }
         return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
     }
@@ -135,7 +139,8 @@ public class ReportsApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final ReportData result = new ReportData();
-        result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
+        result.appendedTemplate(this.readReportingService.getAllowedParameters(),
+                this.reportingProcessServiceProvider.findAllReportingTypes());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
