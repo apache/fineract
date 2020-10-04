@@ -45,7 +45,7 @@ public class ReportsTest extends IntegrationTest {
     @Test
     void runExpectedPaymentsPentahoReportWithoutPlugin() {
         assertThat(fineract().reportsRun.runReportGetFile("Expected Payments By Date - Formatted", Map.of("R_endDate", "2013-04-30",
-                "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"), false)).hasHttpStatus(404);
+                "R_loanOfficerId", "-1", "R_officeId", "1", "R_startDate", "2013-04-16", "output-type", "PDF"), false)).hasHttpStatus(503);
     }
 
     @Test
