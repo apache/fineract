@@ -962,7 +962,7 @@ generateGitProperties.outputs.upToDateWhen { false }
 // This is for swagger code generation
 // https://github.com/int128/gradle-swagger-generator-plugin
 dependencies {
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.22'
 }
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
