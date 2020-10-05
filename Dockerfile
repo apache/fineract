@@ -25,7 +25,7 @@ WORKDIR /fineract
 RUN ./gradlew -PautomatedBuild=true --no-daemon -q -x rat -x test bootJar
 
 WORKDIR /fineract/target
-RUN jar -xf /fineract/build/libs/fineract-provider.jar
+RUN jar -xf /fineract/build/libs/fineract-provider*.jar
 
 # https://issues.apache.org/jira/browse/LEGAL-462
 # https://issues.apache.org/jira/browse/FINERACT-762
