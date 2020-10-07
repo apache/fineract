@@ -90,6 +90,7 @@ CREATE TABLE `tenants` (
   `lastmodified_date` datetime DEFAULT NULL,
   `schema_server` varchar(100) NOT NULL DEFAULT 'localhost',
   `schema_server_port` varchar(10) NOT NULL DEFAULT '3306',
+  `schema_connection_parameters` text DEFAULT NULL,
   `schema_username` varchar(100) NOT NULL DEFAULT 'root',
   `schema_password` varchar(100) NOT NULL DEFAULT 'mysql',
   `auto_update` tinyint NOT NULL DEFAULT '1',
@@ -116,8 +117,8 @@ CREATE TABLE `tenants` (
 
 LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
-INSERT INTO `tenants` VALUES 
-(1,'default','default','fineract_default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1,5,30000,1,60,1,50,1,40,20,10,60,34000,60000);
+INSERT INTO `tenants` VALUES
+(1,'default','default','fineract_default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306',NULL,'root','mysql',1,5,30000,1,60,1,50,1,40,20,10,60,34000,60000);
 /*!40000 ALTER TABLE `tenants` ENABLE KEYS */;
 UNLOCK TABLES;
 

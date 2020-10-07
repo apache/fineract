@@ -51,7 +51,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
         private final StringBuilder sqlBuilder = new StringBuilder("t.id, ts.id as connectionId , ")//
                 .append(" t.timezone_id as timezoneId , t.name,t.identifier, ts.schema_name as schemaName, ts.schema_server as schemaServer,")//
-                .append(" ts.schema_server_port as schemaServerPort, ts.auto_update as autoUpdate,")//
+                .append(" ts.schema_server_port as schemaServerPort, ts.schema_connection_parameters as schemaConnectionParameters, ts.auto_update as autoUpdate,")//
                 .append(" ts.schema_username as schemaUsername, ts.schema_password as schemaPassword , ts.pool_initial_size as initialSize,")//
                 .append(" ts.pool_validation_interval as validationInterval, ts.pool_remove_abandoned as removeAbandoned, ts.pool_remove_abandoned_timeout as removeAbandonedTimeout,")//
                 .append(" ts.pool_log_abandoned as logAbandoned, ts.pool_abandon_when_percentage_full as abandonedWhenPercentageFull, ts.pool_test_on_borrow as testOnBorrow,")//
@@ -84,6 +84,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             final String schemaName = rs.getString("schemaName");
             final String schemaServer = rs.getString("schemaServer");
             final String schemaServerPort = rs.getString("schemaServerPort");
+            final String schemaConnectionParameters = rs.getString("schemaConnectionParameters");
             final String schemaUsername = rs.getString("schemaUsername");
             final String schemaPassword = rs.getString("schemaPassword");
             final boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
@@ -106,10 +107,11 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             maxRetriesOnDeadlock = bindValueInMinMaxRange(maxRetriesOnDeadlock, 0, 15);
             maxIntervalBetweenRetries = bindValueInMinMaxRange(maxIntervalBetweenRetries, 1, 15);
 
-            return new FineractPlatformTenantConnection(connectionId, schemaName, schemaServer, schemaServerPort, schemaUsername,
-                    schemaPassword, autoUpdateEnabled, initialSize, validationInterval, removeAbandoned, removeAbandonedTimeout,
-                    logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout, timeBetweenEvictionRunsMillis,
-                    minEvictableIdleTimeMillis, maxRetriesOnDeadlock, maxIntervalBetweenRetries, testOnBorrow);
+            return new FineractPlatformTenantConnection(connectionId, schemaName, schemaServer, schemaServerPort,
+                    schemaConnectionParameters, schemaUsername, schemaPassword, autoUpdateEnabled, initialSize, validationInterval,
+                    removeAbandoned, removeAbandonedTimeout, logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle,
+                    suspectTimeout, timeBetweenEvictionRunsMillis, minEvictableIdleTimeMillis, maxRetriesOnDeadlock,
+                    maxIntervalBetweenRetries, testOnBorrow);
 
         }
 

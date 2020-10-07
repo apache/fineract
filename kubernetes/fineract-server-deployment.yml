@@ -92,6 +92,8 @@ spec:
             secretKeyRef:
               name: fineract-tenants-db-secret
               key: password
+        - name: FINERACT_DEFAULT_TENANTDB_CONN_PARAMS
+          value: ''
         ports:
         - containerPort: 8443
           name: fineract-server

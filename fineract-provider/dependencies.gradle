@@ -80,7 +80,9 @@ dependencies {
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
-            'org.webjars:webjars-locator-core'
+            'org.webjars:webjars-locator-core',
+
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.1.0'
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
