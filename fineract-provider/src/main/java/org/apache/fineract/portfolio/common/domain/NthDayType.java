@@ -26,7 +26,7 @@ public enum NthDayType {
     private final Integer value;
     private final String code;
 
-    private NthDayType(Integer value, String code) {
+    NthDayType(Integer value, String code) {
         this.value = value;
         this.code = code;
     }

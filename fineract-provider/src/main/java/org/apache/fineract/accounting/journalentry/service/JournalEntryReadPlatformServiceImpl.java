@@ -95,7 +95,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         private final JournalEntryAssociationParametersData associationParametersData;
 
-        public GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData) {
+        GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData) {
             if (associationParametersData == null) {
                 this.associationParametersData = new JournalEntryAssociationParametersData();
             } else {

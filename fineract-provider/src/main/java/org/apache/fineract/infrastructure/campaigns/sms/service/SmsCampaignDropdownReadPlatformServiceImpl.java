@@ -43,6 +43,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -72,17 +73,24 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     @Override
     public Collection<SmsProviderData> retrieveSmsProviders() {
         Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
-        String hostName = "";
         Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
         URI uri = (URI) hostConfig.get("uri");
-        hostName = uri.getHost();
         HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
-        ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
-                new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
-        if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
+
+        ResponseEntity<Collection<SmsProviderData>> responseOne = null;
+
+        try {
+            responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
+                    new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
+        } catch (ResourceAccessException ex) {
+            LOG.debug("Mobile service provider {} not available", uri, ex);
+        }
+
+        if (responseOne == null || !responseOne.getStatusCode().equals(HttpStatus.OK)) {
             throw new PlatformDataIntegrityException("error.msg.mobile.service.provider.not.available",
                     "Mobile service provider not available.");
         }
+
         smsProviderOptions = responseOne.getBody();
         return smsProviderOptions;
     }

@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListner;
+import org.apache.fineract.portfolio.common.service.BusinessEventListener;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -54,7 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, BusinessEventListner {
+public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, BusinessEventListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -70,17 +70,17 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
     @PostConstruct
     public void registerForNotification() {
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_REFUND, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_ADJUST_TRANSACTION, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_WAIVE_INTEREST, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_ADD_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_WAIVE_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CHARGE_PAYMENT, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPLY_OVERDUE_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_DISBURSAL, new DisbursementEventListner());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_FORECLOSURE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_REFUND, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADJUST_TRANSACTION, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WAIVE_INTEREST, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADD_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WAIVE_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_CHARGE_PAYMENT, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPLY_OVERDUE_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_DISBURSAL, new DisbursementEventListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_FORECLOSURE, this);
     }
 
     @Transactional
@@ -419,7 +419,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
         private final String schema;
 
-        public OriginalScheduleExtractor(final String loanIdsAsString) {
+        OriginalScheduleExtractor(final String loanIdsAsString) {
             final StringBuilder scheduleDetail = new StringBuilder();
             scheduleDetail.append("select ml.id as loanId, mr.duedate as dueDate, mr.principal_amount as principalAmount, ");
             scheduleDetail.append(
@@ -503,7 +503,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         }
     }
 
-    private class DisbursementEventListner implements BusinessEventListner {
+    private class DisbursementEventListener implements BusinessEventListener {
 
         @SuppressWarnings("unused")
         @Override

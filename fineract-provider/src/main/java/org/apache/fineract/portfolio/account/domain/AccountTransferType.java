@@ -52,7 +52,7 @@ public enum AccountTransferType {
         return enumeration;
     }
 
-    private AccountTransferType(final Integer value, final String code) {
+    AccountTransferType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

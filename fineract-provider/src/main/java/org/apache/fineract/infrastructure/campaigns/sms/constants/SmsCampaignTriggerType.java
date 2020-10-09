@@ -28,7 +28,7 @@ public enum SmsCampaignTriggerType {
     private final Integer value;
     private final String code;
 
-    private SmsCampaignTriggerType(Integer value, String code) {
+    SmsCampaignTriggerType(Integer value, String code) {
         this.value = value;
         this.code = code;
     }

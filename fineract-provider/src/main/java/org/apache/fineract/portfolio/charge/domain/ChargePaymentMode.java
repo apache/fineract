@@ -26,7 +26,7 @@ public enum ChargePaymentMode {
     private final Integer value;
     private final String code;
 
-    private ChargePaymentMode(final Integer value, final String code) {
+    ChargePaymentMode(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

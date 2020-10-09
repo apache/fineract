@@ -30,7 +30,7 @@ public enum LegalForm {
     private final Integer value;
     private final String code;
 
-    private LegalForm(final Integer value, final String code) {
+    LegalForm(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

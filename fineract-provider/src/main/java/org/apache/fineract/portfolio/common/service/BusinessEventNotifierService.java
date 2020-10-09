@@ -41,11 +41,11 @@ public interface BusinessEventNotifierService {
     /**
      * Method is to register a class as listener for pre-processing of any Business event
      */
-    void addBusinessEventPreListners(BusinessEvents businessEvent, BusinessEventListner businessEventListner);
+    void addBusinessEventPreListeners(BusinessEvents businessEvent, BusinessEventListener businessEventListener);
 
     /**
      * Method is to register a class as listener for post-processing of any Business event
      */
-    void addBusinessEventPostListners(BusinessEvents businessEvent, BusinessEventListner businessEventListner);
+    void addBusinessEventPostListeners(BusinessEvents businessEvent, BusinessEventListener businessEventListener);
 
 }

@@ -322,6 +322,16 @@ public class InteropHelper {
         return response;
     }
 
+    public String postTransferMissingAction(String transferCode, InteropTransactionRole role) {
+        String url = buildUrl(TRANSFERS_URL);
+        String request = buildTransferJson(transferCode, role);
+        LOG.debug("Calling Interoperable POST Transfer: {}, body: {}", url, request);
+
+        String response = Utils.performServerPost(requestSpec, responseSpec, url, request, null);
+        LOG.debug("Response Interoperable POST Transfer: {}", response);
+        return response;
+    }
+
     private String buildTransferJson(String transferCode, InteropTransactionRole role) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(InteropUtil.PARAM_TRANSACTION_CODE, transactionCode);

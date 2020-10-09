@@ -52,7 +52,7 @@ public enum SmsMessageStatusType {
         return enumeration;
     }
 
-    private SmsMessageStatusType(final Integer value, final String code) {
+    SmsMessageStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

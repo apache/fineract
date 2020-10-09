@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerStopListener implements JobListener {
 
-    private static final String name = "Singlr Trigger Global Listner";
+    private static final String name = "Singlr Trigger Global Listener";
 
     // MIFOSX-1184: This class cannot use constructor injection, because one of
     // its dependencies (SchedulerStopListener) has a circular dependency to

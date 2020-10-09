@@ -183,7 +183,6 @@ public class CentersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersResponse.class))) })
     public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -209,8 +208,8 @@ public class CentersApiResource {
         }
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
         final Boolean isOrphansOnly = false;
-        final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, staffId, externalId, name, hierarchy,
-                offset, limit, orderBy, sortOrder, isOrphansOnly);
+        final SearchParameters searchParameters = SearchParameters.forGroups(officeId, staffId, externalId, name, hierarchy, offset, limit,
+                orderBy, sortOrder, isOrphansOnly);
         if (parameters.isPaged()) {
             final Page<CenterData> centers = this.centerReadPlatformService.retrievePagedAll(searchParameters, parameters);
             return this.toApiJsonSerializer.serialize(settings, centers, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);

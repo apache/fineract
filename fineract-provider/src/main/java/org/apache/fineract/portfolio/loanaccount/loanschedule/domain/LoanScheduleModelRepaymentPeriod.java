@@ -42,6 +42,8 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private Money totalDue;
     private final boolean recalculatedInterestComponent;
     private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
+    private boolean isEMIFixedSpecificToInstallment = false;
+    BigDecimal rescheduleInterestPortion;
 
     public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
             final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
@@ -160,5 +162,25 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     @Override
     public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
         return this.loanCompoundingDetails;
+    }
+
+    @Override
+    public boolean isEMIFixedSpecificToInstallment() {
+        return this.isEMIFixedSpecificToInstallment;
+    }
+
+    @Override
+    public void setEMIFixedSpecificToInstallmentTrue() {
+        this.isEMIFixedSpecificToInstallment = true;
+    }
+
+    @Override
+    public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
+        this.rescheduleInterestPortion = rescheduleInterestPortion;
+    }
+
+    @Override
+    public BigDecimal rescheduleInterestPortion() {
+        return this.rescheduleInterestPortion;
     }
 }

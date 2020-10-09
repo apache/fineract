@@ -20,18 +20,18 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public interface JobRegisterService {
 
-    public void executeJob(Long jobId);
+    void executeJob(Long jobId);
 
-    public void rescheduleJob(Long jobId);
+    void rescheduleJob(Long jobId);
 
-    public void pauseScheduler();
+    void pauseScheduler();
 
-    public void startScheduler();
+    void startScheduler();
 
-    public boolean isSchedulerRunning();
+    boolean isSchedulerRunning();
 
-    public void stopScheduler(String name);
+    void stopScheduler(String name);
 
-    public void stopAllSchedulers();
+    void stopAllSchedulers();
 
 }

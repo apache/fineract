@@ -26,10 +26,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -39,7 +37,7 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -148,14 +146,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
-        sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
-        final String extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), paramList, searchParameters);
-        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sqlBuilder.append(" and (").append(extraCriteria).append(")");
-        }
 
+        final SQLBuilder extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), searchParameters);
+        extraCriteria.addCriteria(" o.hierarchy like ", hierarchySearchString);
+        sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
@@ -170,7 +164,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(),
                 this.allGroupTypesDataMapper);
     }
 
@@ -183,15 +177,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
-        sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
-        if (searchParameters != null) {
-            final String extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), paramList, searchParameters);
+        final SQLBuilder extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), searchParameters);
+        extraCriteria.addCriteria("o.hierarchy like ", hierarchySearchString);
 
-            if (StringUtils.isNotBlank(extraCriteria)) {
-                sqlBuilder.append(" and (").append(extraCriteria).append(")");
-            }
-        }
+        sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
+
         if (parameters != null) {
             if (parameters.isOrderByRequested()) {
                 sqlBuilder.append(parameters.orderBySql());
@@ -203,68 +193,39 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }
         }
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, paramList.toArray());
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments());
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getGroupExtraCriteria(String schemaSql, List<Object> paramList, final SearchParameters searchCriteria) {
+    private SQLBuilder getGroupExtraCriteria(String schemaSql, final SearchParameters searchCriteria) {
 
-        StringBuilder extraCriteria = new StringBuilder(200);
-        extraCriteria.append(" and g.level_Id = ").append(GroupTypes.GROUP.getId());
-        String sqlSearch = searchCriteria.getSqlSearch();
-        if (sqlSearch != null) {
-            SQLInjectionValidator.validateSQLInput(sqlSearch);
-            sqlSearch = sqlSearch.replace(" display_name ", " g.display_name ");
-            sqlSearch = sqlSearch.replace("display_name ", "g.display_name ");
-            extraCriteria.append(" and ( ").append(sqlSearch).append(") ");
-            this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
+        SQLBuilder extraCriteria = new SQLBuilder();
+        if (searchCriteria == null) {
+            return extraCriteria;
         }
+        extraCriteria.addCriteria("g.level_Id = ", GroupTypes.GROUP.getId());
 
-        final Long officeId = searchCriteria.getOfficeId();
-        if (officeId != null) {
-            paramList.add(officeId);
-            extraCriteria.append(" and g.office_id = ? ");
-        }
+        extraCriteria.addNonNullCriteria(" g.office_id = ", searchCriteria.getOfficeId());
 
-        final String externalId = searchCriteria.getExternalId();
-        if (externalId != null) {
-            paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
-            extraCriteria.append(" and g.external_id = ? ");
-        }
+        extraCriteria.addNonNullCriteria(" g.external_id =", searchCriteria.getExternalId());
 
         final String name = searchCriteria.getName();
         if (name != null) {
-            paramList.add("%" + name + "%");
-            extraCriteria.append(" and g.display_name like ? ");
+            extraCriteria.addNonNullCriteria("g.display_name like", "%" + name + "%");
         }
 
         final String hierarchy = searchCriteria.getHierarchy();
         if (hierarchy != null) {
-            paramList.add(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
-            extraCriteria.append(" and o.hierarchy like ? ");
+            extraCriteria.addNonNullCriteria("o.hierarchy like ", hierarchy + "%");
         }
-
-        if (searchCriteria.isStaffIdPassed()) {
-            paramList.add(searchCriteria.getStaffId());
-            extraCriteria.append(" and g.staff_id = ? ");
-        }
-
-        if (StringUtils.isNotBlank(extraCriteria.toString())) {
-            extraCriteria.delete(0, 4);
-        }
-
-        final Long staffId = searchCriteria.getStaffId();
-        if (staffId != null) {
-            paramList.add(staffId);
-            extraCriteria.append(" and g.staff_id = ? ");
-        }
+        extraCriteria.addNonNullCriteria("g.staff_id =", searchCriteria.getStaffId());
 
         if (searchCriteria.isOrphansOnly()) {
-            extraCriteria.append(" and g.parent_id IS NULL");
+            extraCriteria.addNonNullCriteria("g.parent_id IS", "NULL");
         }
-        return extraCriteria.toString();
+        return extraCriteria;
     }
 
     @Override
@@ -292,7 +253,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
-        public final String schema() {
+        public String schema() {
             return "g.id as id, g.account_no as accountNo, g.display_name as displayName from m_group g where g.level_id = 2 ";
         }
 

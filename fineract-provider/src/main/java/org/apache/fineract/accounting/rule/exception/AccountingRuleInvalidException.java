@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class AccountingRuleInvalidException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons for invalid Accounting Closure **/
-    public static enum GlClosureInvalidReason {
+    public enum GlClosureInvalidReason {
 
         FUTURE_DATE, ACCOUNTING_CLOSED;
 

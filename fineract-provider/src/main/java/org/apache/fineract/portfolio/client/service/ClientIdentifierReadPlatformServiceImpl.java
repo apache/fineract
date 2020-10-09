@@ -88,7 +88,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
 
     private static final class ClientIdentityMapper implements RowMapper<ClientIdentifierData> {
 
-        public ClientIdentityMapper() {}
+        ClientIdentityMapper() {}
 
         public String schema() {
             return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.status as status, ci.document_key as documentKey,"

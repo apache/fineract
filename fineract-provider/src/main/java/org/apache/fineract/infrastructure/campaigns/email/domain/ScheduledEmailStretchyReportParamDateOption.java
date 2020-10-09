@@ -35,7 +35,7 @@ public enum ScheduledEmailStretchyReportParamDateOption {
      * @param code
      * @param value
      */
-    private ScheduledEmailStretchyReportParamDateOption(final Integer id, final String code, final String value) {
+    ScheduledEmailStretchyReportParamDateOption(final Integer id, final String code, final String value) {
         this.value = value;
         this.code = code;
         this.id = id;

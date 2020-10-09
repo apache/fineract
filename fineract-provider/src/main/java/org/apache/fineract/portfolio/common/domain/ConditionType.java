@@ -46,7 +46,7 @@ public enum ConditionType {
         return type;
     }
 
-    private ConditionType(final Integer value, final String code) {
+    ConditionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

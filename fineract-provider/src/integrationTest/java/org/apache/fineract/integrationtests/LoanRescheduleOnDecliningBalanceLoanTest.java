@@ -71,8 +71,6 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
-        // create all required entities
-        this.createRequiredEntities();
     }
 
     @AfterEach
@@ -86,6 +84,16 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     private void createRequiredEntities() {
         this.createClientEntity();
         this.createLoanProductEntity();
+        this.createLoanEntity();
+        this.enableConfig();
+    }
+
+    /**
+     * Creates the client, loan product, and loan entities
+     **/
+    private void createRequiredEntitiesWithRecalculationEnabled() {
+        this.createClientEntity();
+        this.createLoanProductWithInterestRecalculation();
         this.createLoanEntity();
         this.enableConfig();
     }
@@ -108,6 +116,38 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
                 .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
                 .withInterestRateFrequencyTypeAsYear().withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
+                .build(null);
+
+        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
+    }
+
+    private void createLoanProductWithInterestRecalculation() {
+        LOG.info(
+                "---------------------------------CREATING LOAN PRODUCT WITH RECALULATION ENABLED ------------------------------------------");
+
+        final String interestRecalculationCompoundingMethod = LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE;
+        final String rescheduleStrategyMethod = LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS;
+        final String recalculationRestFrequencyType = LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY;
+        final String recalculationRestFrequencyInterval = "0";
+        final String preCloseInterestCalculationStrategy = LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE;
+        final String recalculationCompoundingFrequencyType = null;
+        final String recalculationCompoundingFrequencyInterval = null;
+        final Integer recalculationCompoundingFrequencyOnDayType = null;
+        final Integer recalculationCompoundingFrequencyDayOfWeekType = null;
+        final Integer recalculationRestFrequencyOnDayType = null;
+        final Integer recalculationRestFrequencyDayOfWeekType = null;
+
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
+                .withInterestRateFrequencyTypeAsYear().withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
+                .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod,
+                        preCloseInterestCalculationStrategy)
+                .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval,
+                        recalculationRestFrequencyOnDayType, recalculationRestFrequencyDayOfWeekType)
+                .withInterestRecalculationCompoundingFrequencyDetails(recalculationCompoundingFrequencyType,
+                        recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyOnDayType,
+                        recalculationCompoundingFrequencyDayOfWeekType)
                 .build(null);
 
         this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
@@ -173,6 +213,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
     @Test
     public void testCreateLoanRescheduleRequestWithInterestAppropriation() {
+        // create all required entities
+        this.createRequiredEntities();
         this.createAndApproveLoanRescheduleRequestForInterestAppropriation();
 
     }
@@ -210,11 +252,159 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
-        assertEquals(12186, totalDueForPeriod.intValue(), "TOTAL EXPECTED LAST REPAYMENT is NOK");
-        assertEquals(123682, totalExpectedRepayment.intValue(), "TOTAL EXPECTED LAST REPAYMENT is NOK");
+        assertEquals(12186, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(123682, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
     }
 
+    @Test
+    public void testCreateLoanRescheduleRequestWithRecalculationEnabled() {
+        // create all required entities
+        this.createRequiredEntitiesWithRecalculationEnabled();
+        this.createAndApproveLoanRescheduleRequestWithRecalculationEnabled();
+    }
+
+    /**
+     * create new loan reschedule request with recalculation enabled in Loan product
+     **/
+
+    private void createAndApproveLoanRescheduleRequestWithRecalculationEnabled() {
+        LOG.info(
+                "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
+                .updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+
+        LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
+
+        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
+        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "repaymentSchedule");
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+
+        HashMap period = (HashMap) periods.get(5);
+        Float totalDueForPeriod = (Float) period.get("totalDueForPeriod");
+
+        final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
+        final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
+
+        assertEquals(12326, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(131512, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+    }
+
+    @Test
+    public void testCreateLoanRescheduleRequestForInterestAppropriationAndFixedEMI() {
+        // create all required entities
+        this.createRequiredEntities();
+        this.createAndApproveLoanRescheduleRequestForInterestAppropriationAndFixedEMI();
+    }
+
+    /**
+     * create new loan reschedule request with combination of date change, interest appropriation and fixed emi
+     **/
+    private void createAndApproveLoanRescheduleRequestForInterestAppropriationAndFixedEMI() {
+        LOG.info(
+                "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 July 2015").updateEMI("5000")
+                .updateEmiChangeEndDate("4 September 2015").updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+
+        LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
+
+        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
+        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "repaymentSchedule");
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+
+        HashMap period = (HashMap) periods.get(5);
+        Float totalFixedDueForPeriod = (Float) period.get("totalDueForPeriod");
+
+        HashMap period2 = (HashMap) periods.get(8);
+        Float totalDueForPeriod = (Float) period2.get("totalDueForPeriod");
+
+        final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
+        final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
+
+        assertEquals(5000, totalFixedDueForPeriod.intValue(), "EXPECTED FIXED REPAYMENT is NOK");
+
+        assertEquals(15316, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(120806, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+    }
+
+    @Test
+    public void testCreateLoanRescheduleRequestWithMultpleInterestAppropriation() {
+        // create all required entities
+        this.createRequiredEntities();
+        this.createAndApproveLoanRescheduleRequestForInterestAppropriation();
+
+        this.createAndApproveLoanRescheduleRequestForSecondInterestAppropriation();
+
+    }
+
+    /**
+     * create new loan reschedule request
+     **/
+    private void createAndApproveLoanRescheduleRequestForSecondInterestAppropriation() {
+        LOG.info(
+                "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("04 December 2015").updateAdjustedDueDate("04 June 2016")
+                .updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+
+        LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
+
+        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
+        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "repaymentSchedule");
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+
+        HashMap period = (HashMap) periods.get(7);
+        Float totalDueForPeriod = (Float) period.get("totalDueForPeriod");
+
+        final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
+        final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
+
+        assertEquals(12187, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT in Second Reschedule is NOK");
+        assertEquals(130750, totalExpectedRepayment.intValue(), "TOTAL EXPECTED in Second Reschedule REPAYMENT is NOK");
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+    }
 }

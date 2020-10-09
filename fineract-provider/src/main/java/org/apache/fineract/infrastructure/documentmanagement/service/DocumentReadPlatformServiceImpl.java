@@ -103,7 +103,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         private final boolean hideLocation;
         private final boolean hideStorageType;
 
-        public DocumentMapper(final boolean hideLocation, final boolean hideStorageType) {
+        DocumentMapper(final boolean hideLocation, final boolean hideStorageType) {
             this.hideLocation = hideLocation;
             this.hideStorageType = hideStorageType;
         }

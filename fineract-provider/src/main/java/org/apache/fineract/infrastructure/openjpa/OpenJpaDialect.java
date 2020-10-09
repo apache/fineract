@@ -103,7 +103,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
         private int savepointCounter = 0;
 
-        public OpenJpaTransactionData(OpenJPAEntityManager entityManager) {
+        OpenJpaTransactionData(OpenJPAEntityManager entityManager) {
             this.entityManager = entityManager;
         }
 
@@ -141,7 +141,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
         private final OpenJPAEntityManager entityManager;
 
-        public OpenJpaConnectionHandle(OpenJPAEntityManager entityManager) {
+        OpenJpaConnectionHandle(OpenJPAEntityManager entityManager) {
             this.entityManager = entityManager;
         }
 

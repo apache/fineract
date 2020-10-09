@@ -30,7 +30,7 @@ public enum FinancialActivityAccountsJsonInputParams {
 
     private final String value;
 
-    private FinancialActivityAccountsJsonInputParams(final String value) {
+    FinancialActivityAccountsJsonInputParams(final String value) {
         this.value = value;
     }
 
