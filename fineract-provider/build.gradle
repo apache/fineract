@@ -208,16 +208,18 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareInputYaml(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
         if(project.ext.properties.containsKey("gitProps"))
-            version = project.ext.gitProps['git.commit.id.describe']
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
         else
-            version = "unknown"
+            versionForSwagger = "unknown"
 
         copy {
             from file('config/swagger/fineract-input.yaml.template')
             into file('config/swagger')
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: version])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }
@@ -967,16 +969,18 @@ dependencies {
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
         if(project.ext.properties.containsKey("gitProps"))
-            version = project.ext.gitProps['git.commit.id.describe']
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
         else
-            version = "unknown"
+            versionForSwagger = "unknown"
 
         copy {
             from file('config/swagger/config.json.template')
             into file('config/swagger')
             rename { String filename -> return 'config.json' }
-            filter(ReplaceTokens, tokens: [VERSION: version])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }
