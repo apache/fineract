@@ -25,7 +25,6 @@ buildDir = new File(rootProject.projectDir, "../build")
 
 repositories {
     jcenter()
-    mavenCentral()
 }
 
 project.ext.jerseyVersion = '1.19.4'
@@ -37,7 +36,6 @@ buildscript {
     }
     repositories {
         jcenter()
-        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -86,7 +84,7 @@ apply plugin: 'signing'
 
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework:spring-framework-bom:5.2.6.RELEASE'
+        mavenBom 'org.springframework:spring-framework-bom:5.2.9.RELEASE'
     }
 
     dependencies {
@@ -105,7 +103,7 @@ dependencyManagement {
         dependency 'commons-io:commons-io:2.8.0'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
         dependency 'com.github.librepdf:openpdf:1.3.22'
-        dependency 'org.mnode.ical4j:ical4j:3.0.19'
+        dependency 'org.mnode.ical4j:ical4j:3.0.20'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.874'
         dependency 'org.ehcache:ehcache:3.9.0'
@@ -127,7 +125,7 @@ dependencyManagement {
         dependency 'com.github.spotbugs:spotbugs-annotations:4.1.3'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.11.1'
-        dependency 'org.webjars.npm:swagger-ui-dist:3.35.0'
+        dependency 'org.webjars.npm:swagger-ui-dist:3.35.1'
         dependency 'org.webjars:webjars-locator-core:0.46'
 
         dependency ('org.flywaydb:flyway-core:7.0.0') {
@@ -208,16 +206,18 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareInputYaml(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
         if(project.ext.properties.containsKey("gitProps"))
-            version = project.ext.gitProps['git.commit.id.describe']
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
         else
-            version = "unknown"
+            versionForSwagger = "unknown"
 
         copy {
             from file('config/swagger/fineract-input.yaml.template')
             into file('config/swagger')
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: version])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }
@@ -683,7 +683,7 @@ configurations
 }
 
 dependencies {
-    tomcat "org.apache.tomcat:tomcat:9.0.38@zip"
+    tomcat "org.apache.tomcat:tomcat:9.0.39@zip"
 }
 
 cargo {
@@ -967,16 +967,18 @@ dependencies {
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
         if(project.ext.properties.containsKey("gitProps"))
-            version = project.ext.gitProps['git.commit.id.describe']
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
         else
-            version = "unknown"
+            versionForSwagger = "unknown"
 
         copy {
             from file('config/swagger/config.json.template')
             into file('config/swagger')
             rename { String filename -> return 'config.json' }
-            filter(ReplaceTokens, tokens: [VERSION: version])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }

@@ -613,27 +613,27 @@ CREATE TABLE `m_loan_arrears_aging` (
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `m_guarantor` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`loan_id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `loan_id` BIGINT NOT NULL,
         `client_reln_cv_id` INT DEFAULT NULL,
-	`type_enum` SMALLINT NOT NULL,
-	`entity_id` BIGINT NULL DEFAULT NULL,
-	`firstname` VARCHAR(50) NULL DEFAULT NULL,
-	`lastname` VARCHAR(50) NULL DEFAULT NULL,
-	`dob` DATE NULL DEFAULT NULL,
-	`address_line_1` VARCHAR(500) NULL DEFAULT NULL,
-	`address_line_2` VARCHAR(500) NULL DEFAULT NULL,
-	`city` VARCHAR(50) NULL DEFAULT NULL,
-	`state` VARCHAR(50) NULL DEFAULT NULL,
-	`country` VARCHAR(50) NULL DEFAULT NULL,
-	`zip` VARCHAR(20) NULL DEFAULT NULL,
-	`house_phone_number` VARCHAR(20) NULL DEFAULT NULL,
-	`mobile_number` VARCHAR(20) NULL DEFAULT NULL,
-	`comment` VARCHAR(500) NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
+    `type_enum` SMALLINT NOT NULL,
+    `entity_id` BIGINT NULL DEFAULT NULL,
+    `firstname` VARCHAR(50) NULL DEFAULT NULL,
+    `lastname` VARCHAR(50) NULL DEFAULT NULL,
+    `dob` DATE NULL DEFAULT NULL,
+    `address_line_1` VARCHAR(500) NULL DEFAULT NULL,
+    `address_line_2` VARCHAR(500) NULL DEFAULT NULL,
+    `city` VARCHAR(50) NULL DEFAULT NULL,
+    `state` VARCHAR(50) NULL DEFAULT NULL,
+    `country` VARCHAR(50) NULL DEFAULT NULL,
+    `zip` VARCHAR(20) NULL DEFAULT NULL,
+    `house_phone_number` VARCHAR(20) NULL DEFAULT NULL,
+    `mobile_number` VARCHAR(20) NULL DEFAULT NULL,
+    `comment` VARCHAR(500) NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `FK_m_guarantor_m_loan` (`loan_id`),
         CONSTRAINT `FK_m_guarantor_m_code_value` FOREIGN KEY (`client_reln_cv_id`) REFERENCES `m_code_value` (`id`)
-	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+    CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `m_loan_charge` (

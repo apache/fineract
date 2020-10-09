@@ -10,5 +10,13 @@
     "description": "Limit the aws sdk to monthly updates because otherwise it PRs every day",
     "packageNames": ["com.amazonaws:aws-java-sdk-s3"],
     "schedule": ["monthly"]
-  }]
+  }],
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.gradle(\\.kts)?$"],
+      "matchStrings": ["[\\s\\n{](mavenBom)\\s*['\"](?<depName>[a-zA-Z][-_a-zA-Z0-9.]*?:[a-zA-Z][-_a-zA-Z0-9.]*?):(?<currentValue>[a-zA-Z0-9][-.a-zA-Z0-9]*?)['\"]"],
+      "datasourceTemplate": "maven",
+      "versioningTemplate": "gradle"
+    }
+  ]
 }

@@ -16,6 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name = 'fineract-provider'
-// include ':fineract-provider'
-rootProject.projectDir = new File(settingsDir, "./fineract-provider")
+apply plugin: "com.diffplug.spotless"
+
+// Configuration for the spotless plugin
+// https://github.com/diffplug/spotless/tree/main/plugin-gradle
+spotless {
+    format 'misc', {
+        target '**/*.md', '**/*.properties', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
+        targetExclude '**/build/**', '**/bin/**', '**/.settings/**','**/.idea/**'
+        indentWithSpaces(4)
+        endWithNewline()
+        trimTrailingWhitespace()
+    }
+
+    groovyGradle {
+        target '*.gradle', '**/*.gradle'
+        greclipse()
+        indentWithSpaces(4)
+        endWithNewline()
+        trimTrailingWhitespace()
+    }
+
+    lineEndings 'UNIX'
+}

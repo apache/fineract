@@ -16,6 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name = 'fineract-provider'
-// include ':fineract-provider'
-rootProject.projectDir = new File(settingsDir, "./fineract-provider")
+// TODO: this is work in progress, please follow FINERACT-1171
+buildscript {
+    apply from: "$rootDir/gradle/repositories.gradle"
+
+    dependencies {
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.6.1'
+    }
+}
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.10.RELEASE"
+}
+
+description = '''\
+Run as:
+gradle clean bootRun'''
+
+ext['groovy.version'] = '3.0.6'
+
+allprojects  {
+    group = 'org.apache.fineract'
+    version = '0.0.0'
+
+    apply from: "$rootDir/gradle/repositories.gradle"
+
+    apply from: "$rootDir/gradle/spotless.common.gradle"
+}
