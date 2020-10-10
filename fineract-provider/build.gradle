@@ -84,7 +84,7 @@ apply plugin: 'signing'
 
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework:spring-framework-bom:5.2.6.RELEASE'
+        mavenBom 'org.springframework:spring-framework-bom:5.2.9.RELEASE'
     }
 
     dependencies {
