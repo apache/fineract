@@ -29,7 +29,7 @@ public enum PortfolioProductType {
     private final Integer value;
     private final String code;
 
-    private PortfolioProductType(final Integer value, final String code) {
+    PortfolioProductType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

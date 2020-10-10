@@ -43,7 +43,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListner;
+import org.apache.fineract.portfolio.common.service.BusinessEventListener;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
@@ -94,18 +94,19 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     }
 
     @PostConstruct
-    public void addListners() {
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new SendSmsOnLoanApproved());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_REJECTED, new SendSmsOnLoanRejected());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT, new SendSmsOnLoanRepayment());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_ACTIVATE, new ClientActivatedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_REJECT, new ClientRejectedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_ACTIVATE,
+    public void addListeners() {
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new SendSmsOnLoanApproved());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_REJECTED, new SendSmsOnLoanRejected());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT, new SendSmsOnLoanRepayment());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.CLIENTS_ACTIVATE, new ClientActivatedListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.CLIENTS_REJECT, new ClientRejectedListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_ACTIVATE,
                 new SavingsAccountActivatedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_REJECT, new SavingsAccountRejectedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_DEPOSIT,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_REJECT,
+                new SavingsAccountRejectedListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_DEPOSIT,
                 new SavingsAccountTransactionListener(true));
-        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_WITHDRAWAL,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.SAVINGS_WITHDRAWAL,
                 new SavingsAccountTransactionListener(false));
     }
 
@@ -384,7 +385,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         return smsParams;
     }
 
-    private abstract static class SmsBusinessEventAdapter implements BusinessEventListner {
+    private abstract static class SmsBusinessEventAdapter implements BusinessEventListener {
 
         @Override
         public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {
@@ -478,7 +479,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
         final boolean isDeposit;
 
-        public SavingsAccountTransactionListener(final boolean isDeposit) {
+        SavingsAccountTransactionListener(final boolean isDeposit) {
             this.isDeposit = isDeposit;
         }
 

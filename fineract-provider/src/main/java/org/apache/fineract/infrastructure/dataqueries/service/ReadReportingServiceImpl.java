@@ -68,7 +68,7 @@ import org.springframework.stereotype.Service;
 public class ReadReportingServiceImpl implements ReadReportingService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
-    private static final String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
+    private static final String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9\\s](\\([a-zA-Z]*\\))?$";
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;

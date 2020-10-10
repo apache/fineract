@@ -118,7 +118,6 @@ public class StaffApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class)))),
             @ApiResponse(responseCode = "200", description = "GET https://DomainName/api/v1/staff?status={ACTIVE|INACTIVE|ALL}", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.GetStaffResponse.class))) })
     public String retrieveStaff(@Context final UriInfo uriInfo,
-            @QueryParam("sqlSearch") @Parameter(description = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") @Parameter(description = "staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") @Parameter(description = "loanOfficersOnly") final boolean loanOfficersOnly,
@@ -130,7 +129,7 @@ public class StaffApiResource {
         if (staffInOfficeHierarchy) {
             staff = this.readPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly);
         } else {
-            staff = this.readPlatformService.retrieveAllStaff(sqlSearch, officeId, loanOfficersOnly, status);
+            staff = this.readPlatformService.retrieveAllStaff(officeId, loanOfficersOnly, status);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

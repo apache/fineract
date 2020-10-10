@@ -26,14 +26,14 @@ public class CodeConstants {
     /***
      * Enum of all parameters passed in while creating/updating a code and code value
      ***/
-    public static enum CodevalueJSONinputParams {
+    public enum CodevalueJSONinputParams {
 
         CODEVALUE_ID("id"), NAME("name"), POSITION("position"), DESCRIPTION("description"), IS_ACTIVE("isActive"), IS_MANDATORY(
                 "isMandatory");
 
         private final String value;
 
-        private CodevalueJSONinputParams(final String value) {
+        CodevalueJSONinputParams(final String value) {
             this.value = value;
         }
 

@@ -24,7 +24,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 
 public interface GenericDataService {
 
-    GenericResultsetData fillGenericResultSet(final String sql);
+    GenericResultsetData fillGenericResultSet(String sql);
 
     String generateJsonFromGenericResultsetData(GenericResultsetData grs);
 

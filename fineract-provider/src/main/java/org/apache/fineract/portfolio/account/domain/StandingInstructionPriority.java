@@ -52,7 +52,7 @@ public enum StandingInstructionPriority {
         return enumeration;
     }
 
-    private StandingInstructionPriority(final Integer value, final String code) {
+    StandingInstructionPriority(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -37,7 +37,7 @@ public final class SQLInjectionValidator {
 
     private static final String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
-    public static final void validateSQLInput(final String sqlSearch) {
+    public static void validateSQLInput(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }
@@ -125,7 +125,7 @@ public final class SQLInjectionValidator {
         }
     }
 
-    public static final void validateAdhocQuery(final String sqlSearch) {
+    public static void validateAdhocQuery(final String sqlSearch) {
         if (StringUtils.isBlank(sqlSearch)) {
             return;
         }

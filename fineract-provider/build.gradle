@@ -25,7 +25,6 @@ buildDir = new File(rootProject.projectDir, "../build")
 
 repositories {
     jcenter()
-    mavenCentral()
 }
 
 project.ext.jerseyVersion = '1.19.4'
@@ -37,7 +36,6 @@ buildscript {
     }
     repositories {
         jcenter()
-        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -45,17 +43,17 @@ buildscript {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE'
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
         classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.3.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.4.RELEASE'
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0'
         classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.0"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.1.2"
-        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.4"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.6.1"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.5"
         classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2"
     }
 }
@@ -102,34 +100,41 @@ dependencyManagement {
         dependency 'com.google.guava:guava:29.0-jre'
         dependency 'com.google.code.gson:gson:2.8.6'
         dependency 'org.apache.commons:commons-email:1.5'
-        dependency 'commons-io:commons-io:2.7'
+        dependency 'commons-io:commons-io:2.8.0'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-        dependency 'com.github.librepdf:openpdf:1.3.20'
-        dependency 'org.mnode.ical4j:ical4j:3.0.19'
-        dependency 'org.flywaydb:flyway-core:6.5.5'
+        dependency 'com.github.librepdf:openpdf:1.3.22'
+        dependency 'org.mnode.ical4j:ical4j:3.0.20'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.832'
-        dependency 'org.ehcache:ehcache:3.8.1'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.874'
+        dependency 'org.ehcache:ehcache:3.9.0'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
-        dependency 'org.apache.httpcomponents:httpclient:4.5.12'
-        dependency 'io.swagger.core.v3:swagger-annotations:2.1.4'
+        dependency 'org.apache.httpcomponents:httpclient:4.5.13'
+        dependency 'io.swagger.core.v3:swagger-annotations:2.1.5'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
         dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
         dependency 'org.apache.activemq:activemq-broker:5.16.0'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
-        dependency 'org.mockito:mockito-core:3.5.2'
-        dependency 'org.mockito:mockito-junit-jupiter:3.5.2'
-        dependency 'io.github.classgraph:classgraph:4.8.87'
+        dependency 'org.mockito:mockito-core:3.5.13'
+        dependency 'org.mockito:mockito-junit-jupiter:3.5.13'
+        dependency 'io.github.classgraph:classgraph:4.8.90'
         dependency 'org.awaitility:awaitility:4.0.3'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.1.2'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.1.3'
         dependency 'javax.cache:cache-api:1.1.1'
-        dependency 'org.mock-server:mockserver-junit-jupiter:5.11.0'
-        dependency 'org.webjars.npm:swagger-ui-dist:3.32.4'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.11.1'
+        dependency 'org.webjars.npm:swagger-ui-dist:3.35.1'
         dependency 'org.webjars:webjars-locator-core:0.46'
+
+        dependency ('org.flywaydb:flyway-core:7.0.0') {
+            // https://issues.apache.org/jira/browse/FINERACT-1172
+            // https://github.com/apache/fineract/pull/1355
+            // https://github.com/flyway/flyway/issues/2957
+            // exclude conflicting non-<optional> dependencies from https://github.com/flyway/flyway/blob/master/flyway-core/pom.xml
+            exclude 'software.amazon.awssdk:s3'
+        }
 
         dependency ('org.dom4j:dom4j:2.1.3') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
@@ -201,11 +206,18 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareInputYaml(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
+        if(project.ext.properties.containsKey("gitProps"))
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
+        else
+            versionForSwagger = "unknown"
+
         copy {
             from file('config/swagger/fineract-input.yaml.template')
             into file('config/swagger')
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }
@@ -671,7 +683,7 @@ configurations
 }
 
 dependencies {
-    tomcat "org.apache.tomcat:tomcat:9.0.37@zip"
+    tomcat "org.apache.tomcat:tomcat:9.0.39@zip"
 }
 
 cargo {
@@ -766,7 +778,7 @@ test {
 // Configuration for the Checkstyle plugin
 // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
 dependencies {
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.35'
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.36.2'
     checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
@@ -950,16 +962,23 @@ generateGitProperties.outputs.upToDateWhen { false }
 // This is for swagger code generation
 // https://github.com/int128/gradle-swagger-generator-plugin
 dependencies {
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.21'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.22'
 }
 
 task prepareConfigJson(dependsOn: 'generateGitProperties') {
     doLast {
+        def versionForSwagger
+
+        if(project.ext.properties.containsKey("gitProps"))
+            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
+        else
+            versionForSwagger = "unknown"
+
         copy {
             from file('config/swagger/config.json.template')
             into file('config/swagger')
             rename { String filename -> return 'config.json' }
-            filter(ReplaceTokens, tokens: [VERSION: project.ext.gitProps['git.commit.id.describe']])
+            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
         }
     }
 }

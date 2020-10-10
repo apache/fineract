@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -45,7 +47,10 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -53,6 +58,7 @@ import org.apache.fineract.interoperation.data.InteropAccountData;
 import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
 import org.apache.fineract.interoperation.data.InteropIdentifierRequestData;
 import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
+import org.apache.fineract.interoperation.data.InteropKycResponseData;
 import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
 import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
 import org.apache.fineract.interoperation.data.InteropTransactionRequestData;
@@ -365,6 +371,17 @@ public class InteropApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransferResponseData.class))) })
     public String performTransfer(@QueryParam("action") @Parameter(description = "action") String action,
             @Parameter(hidden = true) String quotesJson, @Context UriInfo uriInfo) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("InteropApi");
+
+        baseDataValidator.reset().parameter("action").value(action).notNull().isOneOfEnumValues(InteropTransferActionType.class);
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+
         CommandWrapper commandRequest = new InteropWrapperBuilder().performTransfer(InteropTransferActionType.valueOf(action))
                 .withJson(quotesJson).build();
 
@@ -373,4 +390,29 @@ public class InteropApiResource {
 
         return jsonSerializer.serialize(settings, result);
     }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("accounts/{accountId}/kyc")
+    @Operation(summary = "Query KYC by Account Id", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropKycResponseData.class))) })
+    public String getClientKyc(@PathParam("accountId") @Parameter(description = "accountId") String accountId, @Context UriInfo uriInfo) {
+        InteropKycResponseData result = interopService.getKyc(accountId);
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return jsonSerializer.serialize(settings, result);
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("transactions/{accountId}/disburse")
+    @Operation(summary = "Disburse Loan by Account Id", description = "")
+    public String disburseLoan(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context UriInfo uriInfo) {
+        return interopService.disburseLoan(accountId, apiRequestBodyAsJson);
+    }
+
 }

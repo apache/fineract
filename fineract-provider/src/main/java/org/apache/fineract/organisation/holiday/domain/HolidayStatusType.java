@@ -47,7 +47,7 @@ public enum HolidayStatusType {
         return enumeration;
     }
 
-    private HolidayStatusType(final Integer value, final String code) {
+    HolidayStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

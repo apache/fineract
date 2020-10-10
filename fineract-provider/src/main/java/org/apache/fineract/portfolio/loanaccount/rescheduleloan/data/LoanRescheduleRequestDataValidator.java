@@ -202,11 +202,6 @@ public class LoanRescheduleRequestDataValidator {
                     "Loan rescheduling is not supported for multidisbursement loans");
         }
 
-        if (loan.isInterestRecalculationEnabledForProduct()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
-                    "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
-        }
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);

@@ -34,7 +34,7 @@ public enum JournalEntryJsonInputParams {
 
     private final String value;
 
-    private JournalEntryJsonInputParams(final String value) {
+    JournalEntryJsonInputParams(final String value) {
         this.value = value;
     }
 

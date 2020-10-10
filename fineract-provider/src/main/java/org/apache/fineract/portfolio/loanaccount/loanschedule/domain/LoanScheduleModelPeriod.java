@@ -54,4 +54,12 @@ public interface LoanScheduleModelPeriod {
     void addInterestAmount(Money interestDue);
 
     Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
+
+    void setEMIFixedSpecificToInstallmentTrue();
+
+    boolean isEMIFixedSpecificToInstallment();
+
+    BigDecimal rescheduleInterestPortion();
+
+    void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion);
 }

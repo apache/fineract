@@ -25,7 +25,7 @@ public interface ProvisioningCriteriaWritePlatformService {
 
     CommandProcessingResult createProvisioningCriteria(JsonCommand command);
 
-    CommandProcessingResult updateProvisioningCriteria(final Long categoryId, JsonCommand command);
+    CommandProcessingResult updateProvisioningCriteria(Long categoryId, JsonCommand command);
 
     CommandProcessingResult deleteProvisioningCriteria(Long entryId);
 }

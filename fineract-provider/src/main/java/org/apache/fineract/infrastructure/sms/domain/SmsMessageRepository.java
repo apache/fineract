@@ -25,5 +25,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface SmsMessageRepository extends JpaRepository<SmsMessage, Long>, JpaSpecificationExecutor<SmsMessage> {
 
-    Page<SmsMessage> findByStatusType(final Integer status, Pageable pageable);
+    Page<SmsMessage> findByStatusType(Integer status, Pageable pageable);
 }

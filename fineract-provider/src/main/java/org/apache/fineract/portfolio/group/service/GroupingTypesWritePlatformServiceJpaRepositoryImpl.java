@@ -591,7 +591,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 throw new GroupMustBePendingToBeDeletedException(groupId);
             }
 
-            final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
+            final List<Note> relatedNotes = this.noteRepository.findByGroup(groupForDelete);
             this.noteRepository.deleteInBatch(relatedNotes);
 
             this.groupRepository.delete(groupForDelete);

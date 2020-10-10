@@ -754,7 +754,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final String schema;
 
-        public ClientLookupMapper() {
+        ClientLookupMapper() {
             final StringBuilder builder = new StringBuilder(200);
 
             builder.append("c.id as id, c.display_name as displayName, ");

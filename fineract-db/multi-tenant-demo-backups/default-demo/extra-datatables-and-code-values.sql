@@ -44,8 +44,8 @@ join m_code_value mv on mv.code_id = mc.id
 where mc.`code_name` = "YesNo";
 
 INSERT INTO `m_code`
-(`code_name`, `is_system_defined`) 
-VALUES 
+(`code_name`, `is_system_defined`)
+VALUES
 ('Education',1);
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
@@ -141,7 +141,7 @@ from x_registered_table r;
 
 -- ==== Chart of Accounts =====
 truncate `acc_gl_account`;
-INSERT INTO `acc_gl_account` VALUES 
+INSERT INTO `acc_gl_account` VALUES
 (1,'Petty Cash Balances',NULL,'11100',0,1,2,1,NULL),
 (2,'Cash in Valut 1',NULL,'11101',0,1,1,1,NULL),
 (3,'Bank Balances',NULL,'11200',0,1,2,1,NULL),

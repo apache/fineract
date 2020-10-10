@@ -181,7 +181,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         private final String sql;
         private final GuarantorTransactionMapper guarantorTransactionMapper;
 
-        public GuarantorFundingMapper(final GuarantorTransactionMapper guarantorTransactionMapper) {
+        GuarantorFundingMapper(final GuarantorTransactionMapper guarantorTransactionMapper) {
             this.guarantorTransactionMapper = guarantorTransactionMapper;
             StringBuilder sb = new StringBuilder(" gfd.id as gfdId,");
             sb.append(" gfd.amount as amount, gfd.amount_released_derived as amountReleased, ");

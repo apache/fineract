@@ -24,21 +24,20 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface FineractEntityAccessWriteService {
 
-    CommandProcessingResult createEntityAccess(final JsonCommand command);
+    CommandProcessingResult createEntityAccess(JsonCommand command);
 
-    CommandProcessingResult createEntityToEntityMapping(final Long relId, final JsonCommand command);
+    CommandProcessingResult createEntityToEntityMapping(Long relId, JsonCommand command);
 
-    CommandProcessingResult updateEntityToEntityMapping(final Long mapId, final JsonCommand command);
+    CommandProcessingResult updateEntityToEntityMapping(Long mapId, JsonCommand command);
 
-    CommandProcessingResult deleteEntityToEntityMapping(final Long mapId);
+    CommandProcessingResult deleteEntityToEntityMapping(Long mapId);
 
-    void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
-            final Long secondEntityId);
+    void addNewEntityAccess(String entityType, Long entityId, CodeValue accessType, String secondEntityType, Long secondEntityId);
 
     /*
-     * CommandProcessingResult updateEntityAccess ( final Long entityAccessId, final JsonCommand command);
+     * CommandProcessingResult updateEntityAccess ( Long entityAccessId, JsonCommand command);
      *
-     * CommandProcessingResult removeEntityAccess ( final String entityType, final Long entityId, final Long accessType,
-     * final String secondEntityType, final Long secondEntityId);
+     * CommandProcessingResult removeEntityAccess ( String entityType, Long entityId, Long accessType, String
+     * secondEntityType, Long secondEntityId);
      */
 }

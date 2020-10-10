@@ -26,12 +26,11 @@ public interface EntityDatatableChecksWritePlatformService {
 
     CommandProcessingResult createCheck(JsonCommand command);
 
-    CommandProcessingResult deleteCheck(final Long entityDatatableCheckId);
+    CommandProcessingResult deleteCheck(Long entityDatatableCheckId);
 
-    void runTheCheck(final Long entityId, final String entityName, final Long statusCode, String foreignKeyColumn);
+    void runTheCheck(Long entityId, String entityName, Long statusCode, String foreignKeyColumn);
 
-    void runTheCheckForProduct(final Long entityId, final String entityName, final Long statusCode, String foreignKeyColumn,
-            long productLoanId);
+    void runTheCheckForProduct(Long entityId, String entityName, Long statusCode, String foreignKeyColumn, long productLoanId);
 
     boolean saveDatatables(Long status, String entity, Long entityId, Long productId, JsonArray data);
 

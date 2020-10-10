@@ -31,7 +31,7 @@ public enum GLAccountJsonInputParams {
 
     private final String value;
 
-    private GLAccountJsonInputParams(final String value) {
+    GLAccountJsonInputParams(final String value) {
         this.value = value;
     }
 

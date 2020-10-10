@@ -1,4 +1,4 @@
-Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
+Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds)
 ============
 
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
@@ -49,14 +49,22 @@ Instructions to build the JAR file
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
 3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
 
+The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
+
+    export fineract_tenants_pwd=verysecret
+    ...
+    java -jar fineract-provider.jar
+
 
 Instructions to build a WAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean bootWar` to build a traditional WAR file which will be created at `build/libs` directory.  
+2. Run `./gradlew clean bootWar` to build a traditional WAR file which will be created at `build/libs` directory.
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
+
+Note that with the 1.4 release the tenants database pool configuration changed from Tomcat DBCP in XML to an embedded Hikari, configured by environment variables, see above.
 
 
 Instructions to execute Integration Tests
@@ -72,19 +80,19 @@ Run the following commands, very similarly to how [.travis.yml](.travis.yml) doe
 Instructions to run and debug in Eclipse IDE
 ============
 
-It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities. 
+It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
 To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
 
 1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
 2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
 3. Do a clean build of the project in Eclipse (Project->Clean...)
-3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected. 
+3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
 
 If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
 
 You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
 
-Finally, modifying source code in Eclipse automatically triggers hot code replace to a running instance, allowing you to immediately test your changes 
+Finally, modifying source code in Eclipse automatically triggers hot code replace to a running instance, allowing you to immediately test your changes
 
 
 Instructions to run using Docker and docker-compose
@@ -198,7 +206,7 @@ Instructions to run Apache RAT (Release Audit Tool)
 Checkstyle and Spotless
 ============
 
-This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations: 
+This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
 
     `./gradlew spotlessApply`
 
@@ -208,8 +216,8 @@ You can also check for Spotless violations (only; but normally don't have to, be
 
     `./gradlew spotlessCheck`
 
-We recommend that you configure your favourite Java IDE to match those conventions. For Eclipse, you can go to 
-Window > Java > Code Style and import our [config/fineractdev-formatter.xml](config/fineractdev-formatter.xml) under formatter section and [config/fineractdev-cleanup.xml](config/fineractdev-cleanup.xml) under Clean up section. The same fineractdev-formatter.xml configuration file (that can be used in Eclipse IDE) is also used by Spotless to both check for violations and autoformat code on the CLI. 
+We recommend that you configure your favourite Java IDE to match those conventions. For Eclipse, you can go to
+Window > Java > Code Style and import our [config/fineractdev-formatter.xml](config/fineractdev-formatter.xml) under formatter section and [config/fineractdev-cleanup.xml](config/fineractdev-cleanup.xml) under Clean up section. The same fineractdev-formatter.xml configuration file (that can be used in Eclipse IDE) is also used by Spotless to both check for violations and autoformat code on the CLI.
 You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
 
 
@@ -270,6 +278,8 @@ Online Demos
 
 * [fineract.dev](https://www.fineract.dev) always runs the latest version of this code
 * [demo.mifos.io](https://demo.mifos.io) A demo account is provided for users to experience the functionality of the Community App.  Users can use "mifos" for USERNAME and "password" for PASSWORD (without quotation marks).
+* [Swagger-UI Demo video](https://www.youtube.com/watch?v=FlVd-0YAo6c) This is a demo video for Swagger-UI documentation, more information [here](https://github.com/apache/fineract#swagger-ui-documentation).
+
 
 
 Developers
@@ -288,6 +298,11 @@ Video Demonstration
 
 Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
 
+Swagger-UI Documentation
+============
+
+We use Swagger-UI to generate and maintain our API documentation, you can see the demo video [here](https://www.youtube.com/watch?v=FlVd-0YAo6c) or a live version
+[here](https://demo.fineract.dev/fineract-provider/swagger-ui/index.html). If you interested to know more about Swagger-UI you can check their [website](https://swagger.io/).
 
 Governance and Policies
 =======================
@@ -318,6 +333,8 @@ Logging Guidelines
 Pull Requests
 -------------
 
+We request that your commit message include a FINERACT JIRA issue, recommended to be put in parenthesis add the end of the first line.  Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. _Add enforced HideUtilityClassConstructor checkstyle (FINERACT-821)_ or _Fix inability to reschedule when interest accrued larger than EMI (FINERACT-1109)_ etc.).
+
 If your PR is failing to pass our CI build due to a test failure, then:
 
 1. Understand if the failure is due to your PR or an unrelated unstable test.
@@ -337,6 +354,17 @@ and it involves refactoring, try to differentiate "new Feature code" with "Refac
 them in different commits. This helps review to review your code faster.
 
 We have an automated Bot which marks pull requests as "stale" after a while, and ultimately automatically closes them.
+
+
+Merge Strategy
+--------------
+
+This project's committers typically prefer to bring your Pull Requests in through _Rebase and Merge_ instead of _Create a Merge Commit_. (If you are unfamiliar with GitHub's UI re. this, note the somewhat hidden little triangle drop-down at the bottom of PR, visible only to committers, not contributors.)  This avoids the "merge commits" which we consider to be somewhat "polluting" the projects commits log history view.  We understand this doesn't give an easy automatic reference to the original PR (which GitHub automatically adds to the Merge Commit message it generates), but we consider this an only very minor inconvenience; it's typically relatively easy to find the original PR even just from the commit message, and JIRA.
+
+We expect most proposed PRs to typically consist of a single commit.  Committers may use _Squash and merge_ to combine your commits at merge time, and if they do so will rewrite your commit message as they see fit.
+
+Neither of these two are hard absolute rules, but mere conventions.  Multiple commits in single PR make sense in certain cases (e.g. branch backports).
+
 
 Dependency Upgrades
 -------------------
@@ -365,15 +393,15 @@ IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties a
 
 The release command would look then look like this:
 ```
-./gradlew -Pfineract.release clean build 
+./gradlew -Pfineract.release clean build
 ```
 
 2. Another way to provide these parameters are via project parameters on the command line. A release command would then look like this:
 ```
-./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build 
+./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build
 ```
 
-NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName". 
+NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName".
 
 Above tasks will create the following files in folder build/distributions:
 
@@ -399,10 +427,7 @@ gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
 ```
 
-
 NOTE: All commands shown above are assuming that the current working directory is the project root folder.
-NOTE: All commands shown above are assuming that the current working directory is the project root folder.
-
 
 More Information
 ============

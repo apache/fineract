@@ -49,7 +49,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
 
         private final String schema;
 
-        public WorkingDaysMapper() {
+        WorkingDaysMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(100);
             sqlBuilder.append("w.id as id,w.recurrence as recurrence,w.repayment_rescheduling_enum as status_enum,");
             sqlBuilder.append("w.extend_term_daily_repayments as extendTermForDailyRepayments,");

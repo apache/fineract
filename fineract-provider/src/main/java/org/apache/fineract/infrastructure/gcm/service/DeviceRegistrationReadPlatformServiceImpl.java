@@ -50,7 +50,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
 
         private final String schema;
 
-        public DeviceRegistrationDataMapper() {
+        DeviceRegistrationDataMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append(" cdr.id as id, cdr.registration_id as registrationId, cdr.updatedon_date as updatedOnDate, ");
             sqlBuilder.append(" c.id as clientId, c.display_name as clientName ");

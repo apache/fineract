@@ -24,12 +24,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
@@ -159,7 +159,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
-        return retrieveAllStaff(" office_id = ? and is_loan_officer=1 and o.hierarchy like ?", officeId);
+        SQLBuilder extraCriteria = new SQLBuilder();
+        extraCriteria.addCriteria(" office_id = ", officeId);
+        extraCriteria.addCriteria(" is_loan_officer = ", 1);
+        return retrieveAllStaff(extraCriteria);
     }
 
     @Override
@@ -204,67 +207,52 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly,
-            final String status) {
-        final String extraCriteria = getStaffCriteria(sqlSearch, officeId, loanOfficersOnly, status);
-        return retrieveAllStaff(extraCriteria, officeId);
+    public Collection<StaffData> retrieveAllStaff(final Long officeId, final boolean loanOfficersOnly, final String status) {
+        final SQLBuilder extraCriteria = getStaffCriteria(officeId, loanOfficersOnly, status);
+        return retrieveAllStaff(extraCriteria);
     }
 
-    private Collection<StaffData> retrieveAllStaff(final String extraCriteria, Long officeId) {
+    private Collection<StaffData> retrieveAllStaff(final SQLBuilder extraCriteria) {
 
         final StaffMapper rm = new StaffMapper();
         String sql = "select " + rm.schema();
+
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy() + "%";
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " where " + extraCriteria;
-        }
-        sql = sql + " order by s.lastname";
-        if (officeId == null) {
-            return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchy });
-        }
-        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, hierarchy });
+        // adding the Authorization criteria so that a user cannot see an
+        // employee who does not belong to his office or a sub office for his
+        // office.
+        extraCriteria.addCriteria(" o.hierarchy like ", hierarchy);
+
+        sql += " " + extraCriteria.getSQLTemplate();
+        sql = sql + " order by s.lastname ";
+
+        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
     }
 
-    private String getStaffCriteria(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly, final String status) {
+    private SQLBuilder getStaffCriteria(final Long officeId, final boolean loanOfficersOnly, final String status) {
 
-        final StringBuilder extraCriteria = new StringBuilder(200);
+        final SQLBuilder extraCriteria = new SQLBuilder();
 
-        if (sqlSearch != null) {
-            extraCriteria.append(" and (").append(sqlSearch).append(")");
-            final StaffMapper rm = new StaffMapper();
-            this.columnValidator.validateSqlInjection(rm.schema(), sqlSearch);
-        }
-        if (officeId != null) {
-            extraCriteria.append(" and s.office_id = ? ");
-        }
+        extraCriteria.addNonNullCriteria(" s.office_id = ", officeId);
+
         if (loanOfficersOnly) {
-            extraCriteria.append(" and s.is_loan_officer is true ");
+            extraCriteria.addCriteria(" s.is_loan_officer is ", " true ");
         }
         // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
         // (Both active and Inactive) employees
         if (status != null) {
             if (status.equalsIgnoreCase("active")) {
-                extraCriteria.append(" and s.is_active = 1 ");
+                extraCriteria.addCriteria(" s.is_active =", 1);
             } else if (status.equalsIgnoreCase("inActive")) {
-                extraCriteria.append(" and s.is_active = 0 ");
+                extraCriteria.addCriteria(" s.is_active =", 0);
             } else {
                 if (!status.equalsIgnoreCase("all")) {
                     throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
                 }
             }
         }
-        // adding the Authorization criteria so that a user cannot see an
-        // employee who does not belong to his office or a sub office for his
-        // office.
 
-        extraCriteria.append(" and o.hierarchy like ? ");
-
-        if (StringUtils.isNotBlank(extraCriteria.toString())) {
-            extraCriteria.delete(0, 4);
-        }
-
-        // remove begin four letter including a space from the string.
-        return extraCriteria.toString();
+        return extraCriteria;
     }
 
     @Override

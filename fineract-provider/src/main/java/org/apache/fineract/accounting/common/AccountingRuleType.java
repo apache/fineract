@@ -43,7 +43,7 @@ public enum AccountingRuleType {
         return type;
     }
 
-    private AccountingRuleType(final Integer value, final String code) {
+    AccountingRuleType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

@@ -221,7 +221,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         private final String schema;
 
-        public GetOneEntityMapper() {
+        GetOneEntityMapper() {
 
             StringBuilder str = new StringBuilder("select eem.rel_id as relId, ");
             str.append("eem.from_id as fromId,eem.to_Id as toId,eem.start_date as startDate,eem.end_date as endDate ");
@@ -252,7 +252,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         private final String schema;
 
-        public EntityToEntityMapper() {
+        EntityToEntityMapper() {
 
             StringBuilder str = new StringBuilder("select eem.id as mapId, ");
             str.append("eem.rel_id as relId, ");

@@ -35,6 +35,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     private final LocalDate disbursementDate;
     private final Money principalDisbursed;
     private final BigDecimal chargesDueAtTimeOfDisbursement;
+    private boolean isEMIFixedSpecificToInstallment = false;
 
     public static LoanScheduleModelDisbursementPeriod disbursement(final LoanApplicationTerms loanApplicationTerms,
             final BigDecimal chargesDueAtTimeOfDisbursement) {
@@ -126,5 +127,25 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     @Override
     public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
         return null;
+    }
+
+    @Override
+    public void setEMIFixedSpecificToInstallmentTrue() {
+        this.isEMIFixedSpecificToInstallment = true;
+    }
+
+    @Override
+    public boolean isEMIFixedSpecificToInstallment() {
+        return isEMIFixedSpecificToInstallment;
+    }
+
+    @Override
+    public BigDecimal rescheduleInterestPortion() {
+        return null;
+    }
+
+    @Override
+    public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
+        return;
     }
 }

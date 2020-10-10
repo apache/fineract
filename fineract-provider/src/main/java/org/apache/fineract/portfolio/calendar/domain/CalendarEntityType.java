@@ -35,7 +35,7 @@ public enum CalendarEntityType {
     private final Integer value;
     private final String code;
 
-    private CalendarEntityType(final Integer value, final String code) {
+    CalendarEntityType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

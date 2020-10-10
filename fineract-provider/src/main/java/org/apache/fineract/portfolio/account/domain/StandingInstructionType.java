@@ -44,7 +44,7 @@ public enum StandingInstructionType {
         return enumeration;
     }
 
-    private StandingInstructionType(final Integer value, final String code) {
+    StandingInstructionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

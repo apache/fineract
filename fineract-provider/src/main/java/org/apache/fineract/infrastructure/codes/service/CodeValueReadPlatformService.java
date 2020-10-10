@@ -40,9 +40,9 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
  */
 public interface CodeValueReadPlatformService {
 
-    Collection<CodeValueData> retrieveCodeValuesByCode(final String code);
+    Collection<CodeValueData> retrieveCodeValuesByCode(String code);
 
-    Collection<CodeValueData> retrieveAllCodeValues(final Long codeId);
+    Collection<CodeValueData> retrieveAllCodeValues(Long codeId);
 
-    CodeValueData retrieveCodeValue(final Long codeValueId);
+    CodeValueData retrieveCodeValue(Long codeValueId);
 }

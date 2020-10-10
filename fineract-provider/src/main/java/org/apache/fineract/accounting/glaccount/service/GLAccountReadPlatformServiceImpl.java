@@ -56,7 +56,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         private final JournalEntryAssociationParametersData associationParametersData;
 
-        public GLAccountMapper(final JournalEntryAssociationParametersData associationParametersData) {
+        GLAccountMapper(final JournalEntryAssociationParametersData associationParametersData) {
             if (associationParametersData == null) {
                 this.associationParametersData = new JournalEntryAssociationParametersData();
             } else {

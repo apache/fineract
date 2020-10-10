@@ -28,28 +28,28 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 
 public interface ContentRepository {
 
-    public StorageType type = null;
+    StorageType type = null;
 
     // TODO:Vishwas Need to move these settings to the Database
-    public static final Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
+    Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
 
     // TODO:Vishwas Need to move these settings to the Database
-    public static final Integer MAX_IMAGE_UPLOAD_SIZE_IN_MB = 1;
+    Integer MAX_IMAGE_UPLOAD_SIZE_IN_MB = 1;
 
-    public abstract String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand);
+    String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand);
 
-    public abstract void deleteFile(String fileName, String documentPath);
+    void deleteFile(String fileName, String documentPath);
 
-    public abstract FileData fetchFile(DocumentData documentData);
+    FileData fetchFile(DocumentData documentData);
 
-    public abstract String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize);
+    String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize);
 
-    public abstract String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName);
+    String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName);
 
-    public abstract void deleteImage(final Long resourceId, final String location);
+    void deleteImage(Long resourceId, String location);
 
-    public abstract ImageData fetchImage(ImageData imageData);
+    ImageData fetchImage(ImageData imageData);
 
-    public abstract StorageType getStorageType();
+    StorageType getStorageType();
 
 }

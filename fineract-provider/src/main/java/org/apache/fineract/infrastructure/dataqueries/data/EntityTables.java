@@ -51,7 +51,7 @@ public enum EntityTables {
 
     private final String foreignKeyColumnNameOnDatatable;
 
-    private EntityTables(String name, ImmutableList<Integer> codes, String foreignKeyColumnNameOnDatatable) {
+    EntityTables(String name, ImmutableList<Integer> codes, String foreignKeyColumnNameOnDatatable) {
         this.name = name;
         this.codes = codes;
         this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;

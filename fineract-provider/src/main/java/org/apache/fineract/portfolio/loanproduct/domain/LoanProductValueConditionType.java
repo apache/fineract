@@ -28,7 +28,7 @@ public enum LoanProductValueConditionType {
     private final Integer value;
     private final String code;
 
-    private LoanProductValueConditionType(final Integer value, final String code) {
+    LoanProductValueConditionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
