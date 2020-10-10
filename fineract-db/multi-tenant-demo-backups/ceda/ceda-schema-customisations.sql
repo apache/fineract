@@ -264,7 +264,7 @@ from x_registered_table r;
 
 -- ==== Chart of Accounts =====
 truncate `acc_gl_account`;
-INSERT INTO `acc_gl_account` VALUES 
+INSERT INTO `acc_gl_account` VALUES
 (1,'Petty Cash Balances',NULL,'11100',0,1,2,1,NULL),
 (2,'Cash in Valut 1',NULL,'11101',0,1,1,1,NULL),
 (3,'Bank Balances',NULL,'11200',0,1,2,1,NULL),
