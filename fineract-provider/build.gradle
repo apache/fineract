@@ -25,7 +25,6 @@ buildDir = new File(rootProject.projectDir, "../build")
 
 repositories {
     jcenter()
-    mavenCentral()
 }
 
 project.ext.jerseyVersion = '1.19.4'
@@ -37,7 +36,6 @@ buildscript {
     }
     repositories {
         jcenter()
-        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
