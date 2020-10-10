@@ -70,7 +70,7 @@
          Either JSSE or OpenSSL style configuration may be used regardless of
          the SSLImplementation selected. JSSE style configuration is used below.
     -->
-	<Connector protocol="org.apache.coyote.http11.Http11NioProtocol"
+    <Connector protocol="org.apache.coyote.http11.Http11NioProtocol"
     port="8443" maxThreads="200" scheme="https"
     secure="true" SSLEnabled="true"
     keystoreFile="/opt/bitnami/tomcat/tomcat.keystore"
@@ -83,7 +83,7 @@
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
                maxThreads="150" SSLEnabled="true">
         <SSLHostConfig>
-	    <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
+        <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
                          type="RSA" />
         </SSLHostConfig>
     </Connector>

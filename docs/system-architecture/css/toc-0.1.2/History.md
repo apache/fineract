@@ -1,19 +1,19 @@
 
-0.1.2 / 2013-04-08 
+0.1.2 / 2013-04-08
 ==================
 
   * optimized scroll function.  fixes #15
   * migrated to grunt for building
   * fixed tabs on docs/index
 
-0.1.1 / 2012-10-05 
+0.1.1 / 2012-10-05
 ==================
 
   * updated example
   * code cleanup, fixed onHighlight, removed console.log
   * Add headerText and itemClass options
 
-0.1.0 / 2012-07-05 
+0.1.0 / 2012-07-05
 ==================
 
   * added smoosh to Makefile
@@ -24,7 +24,7 @@
   * adds another option to customize the header link text
   * updated site
 
-0.0.3 / 2012-04-06 
+0.0.3 / 2012-04-06
 ==================
 
   * fixed smooth scrolling in firefox
@@ -37,7 +37,7 @@
   * updated site
   * 0.0.2 - updated docs
 
-0.0.1 / 2012-02-25 
+0.0.1 / 2012-02-25
 ==================
 
   * updated docs/site
