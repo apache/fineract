@@ -408,7 +408,6 @@ configurations {
         exclude module: 'classworlds'
     }
     runtime
-    all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 
 tasks.withType(JavaCompile) {
