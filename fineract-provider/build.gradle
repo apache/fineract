@@ -18,7 +18,6 @@
  */
 description = 'Fineract Provider'
 
-group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "build")
 
 buildscript {
