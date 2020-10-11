@@ -20,7 +20,6 @@
 buildscript {
     repositories {
         jcenter()
-        gradlePluginPortal()
     }
 }
 
@@ -38,7 +37,7 @@ ext['groovy.version'] = '3.0.6'
 
 allprojects  {
     group = 'org.apache.fineract'
-    version = '0.0.0'
+    version = "$releaseVersion"
 
     repositories {
         jcenter()
