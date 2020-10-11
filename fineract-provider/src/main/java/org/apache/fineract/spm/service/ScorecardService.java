@@ -22,8 +22,8 @@ import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.spm.domain.Scorecard;
+import org.apache.fineract.spm.domain.ScorecardRepository;
 import org.apache.fineract.spm.domain.Survey;
-import org.apache.fineract.spm.repository.ScorecardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

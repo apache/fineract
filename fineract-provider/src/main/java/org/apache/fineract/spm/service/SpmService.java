@@ -26,9 +26,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.domain.Survey;
+import org.apache.fineract.spm.domain.SurveyRepository;
 import org.apache.fineract.spm.domain.SurveyValidator;
 import org.apache.fineract.spm.exception.SurveyNotFoundException;
-import org.apache.fineract.spm.repository.SurveyRepository;
 import org.apache.openjpa.persistence.EntityExistsException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;

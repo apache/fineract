@@ -21,8 +21,8 @@ package org.apache.fineract.spm.service;
 import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.domain.LookupTable;
+import org.apache.fineract.spm.domain.LookupTableRepository;
 import org.apache.fineract.spm.domain.Survey;
-import org.apache.fineract.spm.repository.LookupTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

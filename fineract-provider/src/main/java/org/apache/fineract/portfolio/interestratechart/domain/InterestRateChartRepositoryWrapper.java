@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.interestratechart.data;
+package org.apache.fineract.portfolio.interestratechart.domain;
 
-import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.exception.InterestRateChartNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
