@@ -823,6 +823,12 @@ task setBlankPassword {
     }
 }
 
+bootRun {
+    jvmArgs = [
+        "-Dspring.output.ansi.enabled=ALWAYS"
+    ]
+}
+
 springBoot {
     mainClassName = 'org.apache.fineract.ServerApplication'
 }
