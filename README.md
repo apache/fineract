@@ -186,15 +186,15 @@ We have [some open issues in JIRA with Kubernetes related enhancement ideas](htt
 
 Instructions to download Gradle wrapper
 ============
-The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
+The file gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
 but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
 In that case, you need to download it using the commands below:
 
-    wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+    wget --no-check-certificate -P gradle/wrapper https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar
 
 (or)
 
-    curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+    curl --insecure -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > gradle/wrapper/gradle-wrapper.jar
 
 
 Instructions to run Apache RAT (Release Audit Tool)
