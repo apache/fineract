@@ -16,17 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.spm.repository;
+package org.apache.fineract.portfolio.interestratechart.domain;
 
-import java.util.List;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.spm.domain.Scorecard;
-import org.apache.fineract.spm.domain.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ScorecardRepository extends JpaRepository<Scorecard, Long> {
+public interface InterestRateChartRepository extends JpaRepository<InterestRateChart, Long>, JpaSpecificationExecutor<InterestRateChart> {
 
-    List<Scorecard> findBySurvey(Survey survey);
-
-    List<Scorecard> findBySurveyAndClient(Survey survey, Client client);
 }
