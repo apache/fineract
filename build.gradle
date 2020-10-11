@@ -16,5 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name="fineract"
-include ':fineract-provider'
+buildscript {
+    repositories {
+        jcenter()
+    }
+}

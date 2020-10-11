@@ -21,7 +21,7 @@ Run as:
 gradle clean bootRun'''
 
 group = 'org.apache.fineract'
-buildDir = new File(rootProject.projectDir, "../build")
+buildDir = new File(rootProject.projectDir, "build")
 
 repositories {
     jcenter()
@@ -176,7 +176,7 @@ targetCompatibility = JavaVersion.VERSION_11
 // set the classes directory to point to Eclipse's default build directory
 if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
 {
-    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "bin/main")
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
 }
 
 eclipse
@@ -272,7 +272,7 @@ spotless {
     java {
         importOrder() //sort imports alphabetically
         removeUnusedImports()
-        eclipse().configFile '../config/fineractdev-formatter.xml'
+        eclipse().configFile "$rootDir/config/fineractdev-formatter.xml"
         endWithNewline()
         trimTrailingWhitespace()
 
@@ -622,22 +622,22 @@ compileJava {
 }
 
 war {
-    from('../licenses/binary/') {
+    from("$rootDir/licenses/binary/") {
         // notice the parens
         into "WEB-INF/licenses/binary/" // no leading slash
     }
-    from('../LICENSE_RELEASE') {
+    from("$rootDir/LICENSE_RELEASE") {
         // notice the parens
         into "WEB-INF/" // no leading slash
     }
-    from('../NOTICE_RELEASE') {
+    from("$rootDir/NOTICE_RELEASE") {
         // notice the parens
         into "WEB-INF/" // no leading slash
     }
     rename ('LICENSE_RELEASE', 'LICENSE')
     rename ('NOTICE_RELEASE', 'NOTICE')
 
-    from('../DISCLAIMER') {
+    from("$rootDir/DISCLAIMER") {
         // notice the parens
         into "WEB-INF/" // no leading slash
     }
@@ -647,7 +647,7 @@ war {
 // Configuration for Gradle license plug-in
 // https://github.com/hierynomus/license-gradle-plugin
 license {
-    header rootProject.file('../APACHE_LICENSETEXT.md')
+    header rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
     excludes([
         "**/git.properties",
         "**/*.html",
@@ -661,7 +661,7 @@ license {
 }
 
 task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
-    source = fileTree(dir: '../', includes: [
+    source = fileTree(dir: "$rootDir/", includes: [
         '**/*.bat',
         '**/*.sh',
         '**/*.sql'
@@ -849,27 +849,27 @@ distributions {
         contents {
             from bootJar
             from bootWar
-            from('../build/swagger-code-fineract/build/libs/') {
+            from("$rootDir/build/swagger-code-fineract/build/libs/") {
                 include '**/*.jar'
                 rename 'client-(.+)\\.jar', 'fineract-client.jar'
             }
-            from('../licenses/binary/') {
+            from("$rootDir/licenses/binary/") {
                 into "licenses/binary/"
             }
-            from '../LICENSE_RELEASE'
-            from '../NOTICE_RELEASE'
+            from "$rootDir/LICENSE_RELEASE"
+            from "$rootDir/NOTICE_RELEASE"
             rename ('LICENSE_RELEASE', 'LICENSE')
             rename ('NOTICE_RELEASE', 'NOTICE')
 
-            from '../DISCLAIMER'
-            from '../README.md'
+            from "$rootDir/DISCLAIMER"
+            from "$rootDir/README.md"
         }
     }
     src {
         baseName "apache-fineract-$releaseVersion-src"
         contents {
-            from "../"
-            exclude 'build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
+            from "$rootDir/"
+            exclude '**/build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
@@ -895,7 +895,7 @@ if( project.hasProperty("fineract.release") ) {
             task.getFilesToSign().each { f ->
                 new ByteArrayOutputStream().withStream { os ->
                     def result = exec {
-                        workingDir '../build/distributions'
+                        workingDir "$rootDir/build/distributions"
                         executable 'sh'
                         args '-c', "gpg --verify ${f}.asc"
                         standardOutput = os
@@ -985,7 +985,7 @@ task prepareConfigJson(dependsOn: 'generateGitProperties') {
 
 swaggerSources {
     fineract {
-        inputFile = file('../build/classes/java/main/static/swagger-ui/fineract.yaml')
+        inputFile = file("$rootDir/build/classes/java/main/static/swagger-ui/fineract.yaml")
         code {
             language = 'java'
             configFile = file('config/swagger/config.json')
@@ -1002,7 +1002,7 @@ task buildSwaggerCodeFineract(type:Exec, dependsOn: [
     'resolve',
     'generateSwaggerCodeFineract'
 ]) {
-    workingDir '../build/swagger-code-fineract'
+    workingDir "$rootDir/build/swagger-code-fineract"
     executable 'sh'
     args '-c', 'chmod +x gradlew && ./gradlew clean build'
 }
