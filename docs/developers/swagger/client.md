@@ -29,10 +29,10 @@ Swagger Codegen provides several options to customize the generated code. [Here]
 - Open the [config.json.template](https://github.com/apache/fineract/blob/develop/fineract-provider/config/swagger/config.json.template) file
 - Customize options
 - Build the project again as mentioned in **Generate API Client Code** section
-  
+
 ## Customize using Mustache Templates
 
-Swagger Codegen uses Mustache Templates for generating the client library. For additional customizations you can add/edit custom templates inside the `fineract-provider/config/swagger/templates` folder. 
+Swagger Codegen uses Mustache Templates for generating the client library. For additional customizations you can add/edit custom templates inside the `fineract-provider/config/swagger/templates` folder.
 
 Make sure you are following the supported templates. Otherwise, the generated code will not build correctly.
 

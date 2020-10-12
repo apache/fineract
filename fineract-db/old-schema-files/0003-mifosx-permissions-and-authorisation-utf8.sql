@@ -33,7 +33,7 @@ If you had other roles set up with specific permissions you will have to set up 
 -- truncate `x_registered_table`;
 
 INSERT INTO `m_permission`
-(`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES 
+(`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES
 ('special','ALL_FUNCTIONS',NULL,NULL,0),
 ('special','ALL_FUNCTIONS_READ',NULL,NULL,0),
 ('special', 'CHECKER_SUPER_USER', NULL, NULL, '0'),
@@ -296,19 +296,19 @@ INSERT INTO `m_permission`
 ('transaction_savings', 'CALCULATEINTEREST_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'CALCULATEINTEREST', '0');
 
 -- == accounting related permissions
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES 
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 ('accounting', 'CREATE_GLACCOUNT', 'GLACCOUNT', 'CREATE', 1),
 ('accounting', 'UPDATE_GLACCOUNT', 'GLACCOUNT', 'UPDATE', 1),
 ('accounting', 'DELETE_GLACCOUNT', 'GLACCOUNT', 'DELETE', 1),
 ('accounting', 'CREATE_GLCLOSURE', 'GLCLOSURE', 'CREATE', 1),
 ('accounting', 'UPDATE_GLCLOSURE', 'GLCLOSURE', 'UPDATE', 1),
-('accounting', 'DELETE_GLCLOSURE', 'GLCLOSURE', 'DELETE', 1), 
+('accounting', 'DELETE_GLCLOSURE', 'GLCLOSURE', 'DELETE', 1),
 ('accounting', 'CREATE_JOURNALENTRY', 'JOURNALENTRY', 'CREATE', 1),
 ('accounting', 'REVERSE_JOURNALENTRY', 'JOURNALENTRY', 'REVERSE', 1);
 
 
-INSERT INTO `m_role` (`id`, `name`, `description`) 
-VALUES 
+INSERT INTO `m_role` (`id`, `name`, `description`)
+VALUES
 (1,'Super user','This role provides all application permissions.');
 
 /* role 1 is super user, give it ALL_FUNCTIONS */
@@ -317,9 +317,9 @@ select 1, id
 from m_permission
 where code = 'ALL_FUNCTIONS';
 
-INSERT INTO `m_appuser` (`id`, `office_id`, `username`, `firstname`, `lastname`, `password`, `email`, 
-`firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`) 
-VALUES 
+INSERT INTO `m_appuser` (`id`, `office_id`, `username`, `firstname`, `lastname`, `password`, `email`,
+`firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`)
+VALUES
 (1,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','');
 
 

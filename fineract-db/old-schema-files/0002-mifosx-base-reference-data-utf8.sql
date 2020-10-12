@@ -29,11 +29,11 @@ VALUES
 
 INSERT INTO `c_configuration`
 (`name`, `enabled`)
-VALUES 
+VALUES
 ('maker-checker', 0);
 
-INSERT INTO `r_enum_value` 
-VALUES 
+INSERT INTO `r_enum_value`
+VALUES
 ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),
 ('amortization_method_enum',1,'Equal installments','Equal installments'),
 ('interest_calculated_in_period_enum',0,'Daily','Daily'),
@@ -67,42 +67,42 @@ VALUES
 ('term_period_frequency_enum',2,'Months','Months'),
 ('term_period_frequency_enum',3,'Years','Years');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '1', 'Disbursement', 'Disbursement');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '2', 'Repayment', 'Repayment');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '3', 'Contra', 'Contra');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '4', 'Waive Interest', 'Waive Interest');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '5', 'Repayment At Disbursement', 'Repayment At Disbursement');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '6', 'Write-Off', 'Write-Off');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '7', 'Marked for Rescheduling', 'Marked for Rescheduling');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '8', 'Recovery Repayment', 'Recovery Repayment');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '9', 'Waive Charges', 'Waive Charges');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '10', 'Apply Charges', 'Apply Charges');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`)
 VALUES ('transaction_type_enum', '11', 'Apply Interest', 'Apply Interest');
 
 INSERT INTO `m_currency`
 (`id`,`code`,`decimal_places`,`display_symbol`,`name`, `internationalized_name_code`)
-VALUES 
+VALUES
 (1,'AED',2,NULL,'UAE Dirham','currency.AED'),
 (2,'AFN',2,NULL,'Afghanistan Afghani','currency.AFN'),
 (3,'ALL',2,NULL,'Albanian Lek','currency.ALL'),
@@ -268,24 +268,24 @@ VALUES
 (163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
 -- ======== end of currencies ==
 
-INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`) 
+INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`)
 VALUES (21,'USD',2,'US Dollar','$','currency.USD');
 
-INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`) 
-VALUES 
+INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`)
+VALUES
 (1,NULL,'.','1','Head Office','2009-01-01');
 
-INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) 
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`)
 VALUES (1, NULL, 1, 'Center', 1, 0);
-INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) 
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`)
 VALUES (2, 1, 0, 'Group', 0, 1);
 
 
 
 -- create single code and code value for client identifiers
 INSERT INTO `m_code`
-(`code_name`, `is_system_defined`) 
-VALUES 
+(`code_name`, `is_system_defined`)
+VALUES
 ('Customer Identifier',1),
 ('LoanCollateral',1),
 ('LoanPurpose',1),
@@ -314,27 +314,27 @@ from m_code mc
 where mc.`code_name` = "Customer Identifier";
 
 -- Adding a few Default Guarantor Relationships
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Spouse",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
+insert into m_code_value (code_id,code_value,order_position)
+    select id,"Spouse",0
+    from m_code
+    where m_code.code_name="GuarantorRelationship";
 
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Parent",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
+insert into m_code_value (code_id,code_value,order_position)
+    select id,"Parent",0
+    from m_code
+    where m_code.code_name="GuarantorRelationship";
 
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Sibling",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
+insert into m_code_value (code_id,code_value,order_position)
+    select id,"Sibling",0
+    from m_code
+    where m_code.code_name="GuarantorRelationship";
 
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Business Associate",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
+insert into m_code_value (code_id,code_value,order_position)
+    select id,"Business Associate",0
+    from m_code
+    where m_code.code_name="GuarantorRelationship";
 
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Other",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
+insert into m_code_value (code_id,code_value,order_position)
+    select id,"Other",0
+    from m_code
+    where m_code.code_name="GuarantorRelationship";

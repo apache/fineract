@@ -16,23 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.spm.repository;
+package org.apache.fineract.spm.domain;
 
-import java.util.Date;
 import java.util.List;
-import org.apache.fineract.spm.domain.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface SurveyRepository extends JpaRepository<Survey, Long> {
+public interface LookupTableRepository extends JpaRepository<LookupTable, Long> {
 
-    @Query("select s from Survey s where :pointInTime between s.validFrom and s.validTo")
-    List<Survey> fetchActiveSurveys(@Param("pointInTime") Date pointInTime);
+    List<LookupTable> findBySurvey(Survey survey);
 
-    @Query("select s from Survey s ")
-    List<Survey> fetchAllSurveys();
-
-    @Query("select s from Survey s where s.key = :key and :pointInTime between s.validFrom and s.validTo")
-    Survey findByKey(@Param("key") String key, @Param("pointInTime") Date pointInTime);
+    List<LookupTable> findByKey(String spmKey);
 }

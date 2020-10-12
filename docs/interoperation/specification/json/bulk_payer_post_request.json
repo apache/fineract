@@ -57,4 +57,3 @@
   "note": "From Mats", // optional, String(1..128)
   "expiration": "2017-11-15T22:17:28.985-01:00" // optional, ISO 8601
 }
-

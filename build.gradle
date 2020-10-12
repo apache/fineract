@@ -16,16 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.spm.repository;
-
-import java.util.List;
-import org.apache.fineract.spm.domain.LookupTable;
-import org.apache.fineract.spm.domain.Survey;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface LookupTableRepository extends JpaRepository<LookupTable, Long> {
-
-    List<LookupTable> findBySurvey(Survey survey);
-
-    List<LookupTable> findByKey(String spmKey);
+buildscript {
+    repositories {
+        jcenter()
+    }
 }
