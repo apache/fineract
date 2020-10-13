@@ -31,11 +31,9 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.ContentMa
 
 public final class ContentRepositoryUtils {
 
-    private ContentRepositoryUtils() {
-
-    }
-
     private static final Random random = new Random();
+
+    private ContentRepositoryUtils() {}
 
     public enum ImageMIMEtype {
 
@@ -177,27 +175,16 @@ public final class ContentRepositoryUtils {
     }
 
     /**
-     * Generate a random String
-     *
-     * @return
+     * Generate a random String.
      */
     public static String generateRandomString() {
         final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
-        final int length = generateRandomNumber();
+        // length is a random number between 5 to 16
+        final int length = random.nextInt(11) + 5;
         final char[] text = new char[length];
         for (int i = 0; i < length; i++) {
             text[i] = characters.charAt(random.nextInt(characters.length()));
         }
         return new String(text);
-    }
-
-    /**
-     * Generate a random number between 5 to 16
-     *
-     * @return
-     */
-    public static int generateRandomNumber() {
-        final Random randomGenerator = new Random();
-        return randomGenerator.nextInt(11) + 5;
     }
 }
