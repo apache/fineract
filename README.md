@@ -83,12 +83,9 @@ Instructions to run and debug in Eclipse IDE
 It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
 To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
 
-1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
-2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
-3. Do a clean build of the project in Eclipse (Project->Clean...)
+1. Import the fineract-provider project into your Eclipse workspace (File->Import->Gradle->Existing Gradle Project into Workspace, choose root directory fineract/fineract-provider)
+2. Do a clean build of the project in Eclipse (Project->Clean...)
 3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
-
-If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
 
 You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
 
@@ -203,7 +200,7 @@ Instructions to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
-Instructions to enable ActiveMQ 
+Instructions to enable ActiveMQ
 ============
 Messaging configuration is disabled by default. If you want to enable it and register some message listeners, application needs to be started with the proper Spring profile, ie `-Dspring.profiles.active=activeMqEnabled` (or one of the other Spring ways to configure it).
 

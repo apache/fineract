@@ -16,55 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = '''\
-Run as:
-gradle clean bootRun'''
+description = 'Fineract Provider'
 
-group = 'org.apache.fineract'
-buildDir = new File(rootProject.projectDir, "build")
-
-repositories {
-    jcenter()
-}
-
-project.ext.jerseyVersion = '1.19.4'
-ext["groovy.version"] = '3.0.3'
-
-buildscript {
-    ext {
-        jacocoVersion = '0.8.5'
-    }
-    repositories {
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-
-    dependencies {
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE'
-        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
-        classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.4.RELEASE'
-        classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0'
-        classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
-        classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'org.nosphere.apache:creadur-rat-gradle:0.7.0'
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
-        classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.6.1"
-        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.5"
-        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2"
-    }
-}
-
-apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'com.bmuschko.cargo'
 apply plugin: 'project-report'
@@ -76,7 +34,6 @@ apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 apply plugin: 'jacoco'
 apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: "net.ltgt.errorprone"
-apply plugin: "com.diffplug.spotless"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 apply plugin: "org.hidetake.swagger.generator"
 apply plugin: 'distribution'
@@ -179,13 +136,6 @@ if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
     sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
 }
 
-eclipse
-{
-    project {
-        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
-    }
-}
-
 // Configuration for the OpenJPA enhance task
 // https://github.com/radcortez/openjpa-gradle-plugin
 System.setProperty("openjpa.Log", "commons")
@@ -250,69 +200,11 @@ jacocoTestReport {
     }
 }
 
-// Configuration for the spotless plugin
-// https://github.com/diffplug/spotless/tree/main/plugin-gradle
-spotless {
-    format 'misc', {
-        target '**/*.md', '**/*.properties', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-        targetExclude '**/build/**', '**/bin/**', '**/.settings/**','**/.idea/**'
-        indentWithSpaces(4)
-        endWithNewline()
-        trimTrailingWhitespace()
-    }
-
-    groovyGradle {
-        target '*.gradle', '**/*.gradle'
-        greclipse()
-        indentWithSpaces(4)
-        endWithNewline()
-        trimTrailingWhitespace()
-    }
-
-    java {
-        importOrder() //sort imports alphabetically
-        removeUnusedImports()
-        eclipse().configFile "$rootDir/config/fineractdev-formatter.xml"
-        endWithNewline()
-        trimTrailingWhitespace()
-
-        // Enforce style modifier order
-        custom 'Modifier ordering', {
-            def modifierRanking = [
-                public      : 1,
-                protected   : 2,
-                private     : 3,
-                abstract    : 4,
-                default     : 5,
-                static      : 6,
-                final       : 7,
-                transient   : 8,
-                volatile    : 9,
-                synchronized: 10,
-                native      : 11,
-                strictfp    : 12]
-            // Find any instance of multiple modifiers. Lead with a non-word character to avoid
-            // accidental matching against for instance, "an alternative default value"
-            it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
-                // Do not replace the leading non-word character.  Identify the modifiers
-                it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
-                    // Sort the modifiers according to the ranking above
-                    it.split().sort({ modifierRanking[it] }).join(' ') + ' '
-                }
-                )
-            }
-            )
-        }
-    }
-
-    lineEndings 'UNIX'
-}
-
 // Configuration for Apache Release Audit Tool task
 // https://github.com/eskatos/creadur-rat-gradle
 rat {
     verbose = false
-    reportDir = new File(buildDir,'reports/rat')
+    reportDir = file("$buildDir/reports/rat")
     excludes = [
         '**/*.launch',
         '**/licenses/**',
@@ -612,12 +504,6 @@ modernizer {
 compileJava {
     dependsOn rat
     finalizedBy resolve
-
-    if (project.hasProperty("automatedBuild")) {
-        dependsOn(spotlessCheck)
-    } else {
-        dependsOn(spotlessApply)
-    }
 }
 
 war {
@@ -687,6 +573,12 @@ dependencies {
 
 cargo {
     containerId "tomcat9x"
+
+    // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
+    deployable {
+        file = file("${buildDir}/libs/fineract-provider.war")
+        context = 'fineract-provider'
+    }
 
     local {
         installer {
@@ -854,7 +746,7 @@ distributions {
         contents {
             from bootJar
             from bootWar
-            from("$rootDir/build/swagger-code-fineract/build/libs/") {
+            from("$buildDir/swagger-code-fineract/build/libs/") {
                 include '**/*.jar'
                 rename 'client-(.+)\\.jar', 'fineract-client.jar'
             }
@@ -900,7 +792,7 @@ if( project.hasProperty("fineract.release") ) {
             task.getFilesToSign().each { f ->
                 new ByteArrayOutputStream().withStream { os ->
                     def result = exec {
-                        workingDir "$rootDir/build/distributions"
+                        workingDir "$buildDir/distributions"
                         executable 'sh'
                         args '-c', "gpg --verify ${f}.asc"
                         standardOutput = os
@@ -990,7 +882,7 @@ task prepareConfigJson(dependsOn: 'generateGitProperties') {
 
 swaggerSources {
     fineract {
-        inputFile = file("$rootDir/build/classes/java/main/static/swagger-ui/fineract.yaml")
+        inputFile = file("$buildDir/classes/java/main/static/swagger-ui/fineract.yaml")
         code {
             language = 'java'
             configFile = file('config/swagger/config.json')
@@ -999,15 +891,15 @@ swaggerSources {
     }
 }
 
-generateSwaggerCodeFineract.dependsOn prepareConfigJson
+// had to put resolve dependency here to make this work in multi-module
+generateSwaggerCodeFineract.dependsOn prepareConfigJson, resolve
 
 // TODO: fix version information for client jar
 // TODO: refactor to multi-module project and make client a separate module; cleaner than running exec
 task buildSwaggerCodeFineract(type:Exec, dependsOn: [
-    'resolve',
     'generateSwaggerCodeFineract'
 ]) {
-    workingDir "$rootDir/build/swagger-code-fineract"
+    workingDir "$buildDir/swagger-code-fineract"
     executable 'sh'
     args '-c', 'chmod +x gradlew && ./gradlew clean build'
 }
