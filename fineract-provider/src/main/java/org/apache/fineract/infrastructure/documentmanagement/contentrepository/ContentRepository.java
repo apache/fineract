@@ -28,8 +28,6 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 
 public interface ContentRepository {
 
-    StorageType type = null;
-
     // TODO:Vishwas Need to move these settings to the Database
     Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
 
