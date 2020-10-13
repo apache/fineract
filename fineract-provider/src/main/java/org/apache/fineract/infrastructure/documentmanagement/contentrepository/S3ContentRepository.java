@@ -24,7 +24,6 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -67,17 +66,13 @@ public class S3ContentRepository implements ContentRepository {
                 documentCommand.getParentEntityId());
         final String uploadDocFullPath = uploadDocFolder + File.separator + fileName;
 
-        uploadDocument(fileName, toUpload, uploadDocFullPath);
+        putObject(fileName, toUpload, uploadDocFullPath);
         return uploadDocFullPath;
     }
 
     @Override
     public void deleteFile(final String documentName, final String documentPath) {
-        try {
-            deleteObjectFromS3(documentPath);
-        } catch (final AmazonClientException ace) {
-            throw new ContentManagementException(documentName, ace.getMessage(), ace);
-        }
+        deleteObject(documentPath);
     }
 
     @Override
@@ -86,7 +81,7 @@ public class S3ContentRepository implements ContentRepository {
         final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName;
 
-        uploadDocument(imageName, toUploadInputStream, fileLocation);
+        putObject(imageName, toUploadInputStream, fileLocation);
         return fileLocation;
     }
 
@@ -97,65 +92,31 @@ public class S3ContentRepository implements ContentRepository {
         final InputStream toUploadInputStream = new ByteArrayInputStream(
                 Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
 
-        uploadDocument(imageName, toUploadInputStream, fileLocation);
+        putObject(imageName, toUploadInputStream, fileLocation);
         return fileLocation;
     }
 
     @Override
     public void deleteImage(final Long resourceId, final String location) {
-        try {
-            deleteObjectFromS3(location);
-        } catch (final AmazonServiceException ase) {
-            deleteObjectAmazonServiceExceptionMessage(ase);
-            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
-        } catch (final AmazonClientException ace) {
-            deleteObjectAmazonClientExceptionMessage(ace);
-            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
-        }
+        deleteObject(location);
+    }
+
+    @Override
+    public FileData fetchFile(final DocumentData documentData) throws DocumentNotFoundException {
+        final S3Object s3object = getObject(documentData.fileLocation());
+        return new FileData(s3object.getObjectContent(), documentData.fileName(), documentData.contentType());
+    }
+
+    @Override
+    public ImageData fetchImage(final ImageData imageData) {
+        final S3Object s3object = getObject(imageData.location());
+        imageData.updateContent(s3object.getObjectContent());
+        return imageData;
     }
 
     @Override
     public StorageType getStorageType() {
         return StorageType.S3;
-    }
-
-    @Override
-    public FileData fetchFile(final DocumentData documentData) throws DocumentNotFoundException {
-        FileData fileData = null;
-        final String fileName = documentData.fileName();
-        try {
-            LOG.info("Downloading an object");
-            final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, documentData.fileLocation()));
-            fileData = new FileData(s3object.getObjectContent(), fileName, documentData.contentType());
-        } catch (final AmazonClientException ace) {
-            LOG.error("Error occured.", ace);
-            throw new DocumentNotFoundException(documentData.getParentEntityType(), documentData.getParentEntityId(), documentData.getId(),
-                    ace);
-        }
-        return fileData;
-    }
-
-    @Override
-    public ImageData fetchImage(final ImageData imageData) {
-        try {
-            final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
-            imageData.updateContent(s3object.getObjectContent());
-        } catch (AmazonS3Exception e) {
-            LOG.error("Error occured.", e);
-        }
-        return imageData;
-    }
-
-    private void deleteObjectAmazonClientExceptionMessage(final AmazonClientException ace) {
-        final String message = "Caught an AmazonClientException." + "Error Message: " + ace.getMessage();
-        LOG.error("{}", message);
-    }
-
-    private void deleteObjectAmazonServiceExceptionMessage(final AmazonServiceException ase) {
-        final String message = "Caught an AmazonServiceException." + "Error Message:    " + ase.getMessage() + "HTTP Status Code: "
-                + ase.getStatusCode() + "AWS Error Code:   " + ase.getErrorCode() + "Error Type:       " + ase.getErrorType()
-                + "Request ID:       " + ase.getRequestId();
-        LOG.error("{}", message);
     }
 
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
@@ -167,18 +128,36 @@ public class S3ContentRepository implements ContentRepository {
         return "images" + File.separator + "clients" + File.separator + resourceId;
     }
 
-    private void deleteObjectFromS3(final String location) {
-        this.s3Client.deleteObject(new DeleteObjectRequest(this.s3BucketName, location));
+    private void deleteObject(final String location) {
+        try {
+            this.s3Client.deleteObject(new DeleteObjectRequest(this.s3BucketName, location));
+        } catch (final AmazonServiceException ase) {
+            throw new ContentManagementException(location, "message=" + ase.getMessage() + ", Error Type=" + ase.getErrorType(), ase);
+        } catch (final AmazonClientException ace) {
+            throw new ContentManagementException(location, ace.getMessage(), ace);
+        }
     }
 
-    private void uploadDocument(final String filename, final InputStream inputStream, final String s3UploadLocation)
+    private void putObject(final String filename, final InputStream inputStream, final String s3UploadLocation)
             throws ContentManagementException {
         try {
-            LOG.info("Uploading a new object to S3 from a file to {}", s3UploadLocation);
+            LOG.info("Uploading a new object to S3 {}", s3UploadLocation);
             this.s3Client.putObject(new PutObjectRequest(this.s3BucketName, s3UploadLocation, inputStream, new ObjectMetadata()));
+        } catch (AmazonServiceException ase) {
+            throw new ContentManagementException(filename, ase.getMessage(), ase);
         } catch (final AmazonClientException ace) {
-            final String message = ace.getMessage();
-            throw new ContentManagementException(filename, message, ace);
+            throw new ContentManagementException(filename, ace.getMessage(), ace);
+        }
+    }
+
+    private S3Object getObject(String key) {
+        try {
+            LOG.info("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
+            return this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, key));
+        } catch (AmazonServiceException ase) {
+            throw new ContentManagementException(key, ase.getMessage(), ase);
+        } catch (final AmazonClientException ace) {
+            throw new ContentManagementException(key, ace.getMessage(), ace);
         }
     }
 }
