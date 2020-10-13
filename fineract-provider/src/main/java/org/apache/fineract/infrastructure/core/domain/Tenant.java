@@ -25,17 +25,19 @@ public class Tenant {
     private final String schemaName;
     private final String schemaServer;
     private final String schemaServerPort;
+    private final String schemaConnectionParameters;
     private final String schemaUsername;
     private final String schemaPassword;
     private final String timezoneId;
 
     public Tenant(final Long id, final String name, final String schemaName, final String schemaServer, final String schemaServerPort,
-            final String schemaUsername, final String schemaPassword, final String timezoneId) {
+            final String schemaConnectionParameters, final String schemaUsername, final String schemaPassword, final String timezoneId) {
         this.id = id;
         this.name = name;
         this.schemaName = schemaName;
         this.schemaServer = schemaServer;
         this.schemaServerPort = schemaServerPort;
+        this.schemaConnectionParameters = schemaConnectionParameters;
         this.schemaUsername = schemaUsername;
         this.schemaPassword = schemaPassword;
         this.timezoneId = timezoneId;
@@ -60,6 +62,10 @@ public class Tenant {
 
     public String getSchemaServerPort() {
         return this.schemaServerPort;
+    }
+
+    public String getSchemaConnectionParameters() {
+        return this.schemaConnectionParameters;
     }
 
     public String getSchemaUsername() {

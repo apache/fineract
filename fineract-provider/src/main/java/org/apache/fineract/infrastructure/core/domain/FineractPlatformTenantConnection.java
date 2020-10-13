@@ -26,6 +26,7 @@ public class FineractPlatformTenantConnection {
     private final Long connectionId;
     private final String schemaServer;
     private final String schemaServerPort;
+    private final String schemaConnectionParameters;
     private final String schemaUsername;
     private final String schemaPassword;
     private final String schemaName;
@@ -47,16 +48,18 @@ public class FineractPlatformTenantConnection {
     private final boolean testOnBorrow;
 
     public FineractPlatformTenantConnection(final Long connectionId, final String schemaName, String schemaServer,
-            final String schemaServerPort, final String schemaUsername, final String schemaPassword, final boolean autoUpdateEnabled,
-            final int initialSize, final long validationInterval, final boolean removeAbandoned, final int removeAbandonedTimeout,
-            final boolean logAbandoned, final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle,
-            final int suspectTimeout, final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis,
-            final int maxRetriesOnDeadlock, final int maxIntervalBetweenRetries, final boolean tesOnBorrow) {
+            final String schemaServerPort, final String schemaConnectionParameters, final String schemaUsername,
+            final String schemaPassword, final boolean autoUpdateEnabled, final int initialSize, final long validationInterval,
+            final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
+            final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
+            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final int maxRetriesOnDeadlock,
+            final int maxIntervalBetweenRetries, final boolean tesOnBorrow) {
 
         this.connectionId = connectionId;
         this.schemaName = schemaName;
         this.schemaServer = schemaServer;
         this.schemaServerPort = schemaServerPort;
+        this.schemaConnectionParameters = schemaConnectionParameters;
         this.schemaUsername = schemaUsername;
         this.schemaPassword = schemaPassword;
         this.autoUpdateEnabled = autoUpdateEnabled;
@@ -83,6 +86,10 @@ public class FineractPlatformTenantConnection {
 
     public String getSchemaServerPort() {
         return this.schemaServerPort;
+    }
+
+    public String getSchemaConnectionParameters() {
+        return this.schemaConnectionParameters;
     }
 
     public String getSchemaUsername() {
@@ -167,6 +174,11 @@ public class FineractPlatformTenantConnection {
 
     @Override
     public String toString() {
-        return this.schemaName + ":" + this.schemaServer + ":" + this.schemaServerPort;
+        StringBuilder sb = new StringBuilder(this.schemaName).append(":").append(this.schemaServer).append(":")
+                .append(this.schemaServerPort);
+        if (this.schemaConnectionParameters != null && !this.schemaConnectionParameters.isEmpty()) {
+            sb.append('?').append(this.schemaConnectionParameters);
+        }
+        return sb.toString();
     }
 }
