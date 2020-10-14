@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.service;
 
+import static org.apache.fineract.infrastructure.report.util.ParameterUtil.toSingleValueMap;
+
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,7 +36,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.api.ReportingProcessService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -48,7 +52,6 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
-import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailData;
@@ -447,7 +450,18 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     .findReportingProcessService(reportType);
 
             if (reportingProcessService != null) {
-                final Response processReport = reportingProcessService.processRequest(reportName, reportParams);
+                final Map<String, String> params = toSingleValueMap(reportParams);
+                final StreamingOutput stream = os -> reportingProcessService.process(reportName, params, os);
+                final ReportingProcessService.ReportType reportTypeEnum = ReportingProcessService.ReportType
+                        .valueOf(params.get(ReportingProcessService.PARAM_OUTPUT_TYPE));
+                Response.ResponseBuilder responseBuilder = Response.ok(stream).type(reportTypeEnum.getContentType());
+                if (ReportingProcessService.ReportType.XLS.equals(reportTypeEnum)
+                        || ReportingProcessService.ReportType.XLSX.equals(reportTypeEnum)
+                        || ReportingProcessService.ReportType.CSV.equals(reportTypeEnum)) {
+                    responseBuilder.header("Content-Disposition",
+                            "attachment;filename=" + reportName.replaceAll(" ", "") + reportTypeEnum.name().toLowerCase());
+                }
+                final Response processReport = responseBuilder.build();
                 final Object reponseObject = (processReport != null) ? processReport.getEntity() : null;
 
                 if (reponseObject != null && reponseObject.getClass().equals(ByteArrayOutputStream.class)) {

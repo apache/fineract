@@ -17,6 +17,7 @@
  * under the License.
  */
 rootProject.name='fineract'
+include ':fineract-api'
 include ':fineract-provider'
 include ':integration-tests'
 include ':fineract-client'

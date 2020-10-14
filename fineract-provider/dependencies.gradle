@@ -26,6 +26,8 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(
+            project(':fineract-api'),
+
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
             'org.springframework.boot:spring-boot-starter-web',

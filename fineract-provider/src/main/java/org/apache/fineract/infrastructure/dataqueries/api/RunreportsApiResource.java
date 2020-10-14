@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
+import static org.apache.fineract.infrastructure.report.util.ParameterUtil.toSingleValueMap;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,6 +45,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import org.apache.fineract.api.ReportingProcessService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -50,7 +53,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
-import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
@@ -125,7 +127,18 @@ public class RunreportsApiResource {
             String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
             ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
             if (reportingProcessService != null) {
-                return reportingProcessService.processRequest(reportName, queryParams);
+                final Map<String, String> params = toSingleValueMap(queryParams);
+                final StreamingOutput stream = os -> reportingProcessService.process(reportName, params, os);
+                final ReportingProcessService.ReportType reportTypeEnum = ReportingProcessService.ReportType
+                        .valueOf(params.get(ReportingProcessService.PARAM_OUTPUT_TYPE));
+                Response.ResponseBuilder responseBuilder = Response.ok(stream).type(reportTypeEnum.getContentType());
+                if (ReportingProcessService.ReportType.XLS.equals(reportTypeEnum)
+                        || ReportingProcessService.ReportType.XLSX.equals(reportTypeEnum)
+                        || ReportingProcessService.ReportType.CSV.equals(reportTypeEnum)) {
+                    responseBuilder.header("Content-Disposition",
+                            "attachment;filename=" + reportName.replaceAll(" ", "") + reportTypeEnum.name().toLowerCase());
+                }
+                return responseBuilder.build();
             }
         } else {
             parameterTypeValue = "parameter";
