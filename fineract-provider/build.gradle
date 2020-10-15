@@ -207,7 +207,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
+    driver 'mysql:mysql-connector-java'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader

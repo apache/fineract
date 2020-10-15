@@ -17,6 +17,7 @@
 #
 FROM openjdk:11 AS builder
 
+# COPY ./build/libs/fineract-provider.jar fineract/build/libs/
 RUN apt-get update -qq && apt-get install -y wget
 
 COPY . fineract
@@ -27,20 +28,24 @@ RUN ./gradlew -PautomatedBuild=true -Psecurity=oauth --no-daemon -q -x rat -x te
 WORKDIR /fineract/target
 RUN jar -xf /fineract/fineract-provider/build/libs/fineract-provider*.jar
 
-# https://issues.apache.org/jira/browse/LEGAL-462
-# https://issues.apache.org/jira/browse/FINERACT-762
-# We include an alternative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
-# allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
-# The commented out lines in the docker-compose.yml illustrate how to do this.
-WORKDIR /fineract/target/BOOT-INF/lib
-RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.20/mysql-connector-java-8.0.20.jar
-
-# =========================================
-
 FROM gcr.io/distroless/java:11 as fineract
 
 COPY --from=builder /fineract/target/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/target/META-INF /app/META-INF
 COPY --from=builder /fineract/target/BOOT-INF/classes /app
+
+EXPOSE 8443
+
+ENV DRIVERCLASS_NAME=com.mysql.jdbc.Driver
+ENV PROTOCOL=jdbc
+ENV SUB_PROTOCOL=mysql
+ENV fineract_tenants_driver=com.mysql.jdbc.Driver
+ENV fineract_tenants_url=xxx
+ENV fineract_tenants_uid=xxx
+ENV fineract_tenants_pwd=xxx
+ENV FINERACT_DEFAULT_TENANTDB_HOSTNAME=xxx
+ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
+ENV FINERACT_DEFAULT_TENANTDB_UID=xxx
+ENV FINERACT_DEFAULT_TENANTDB_PWD=xxx
 
 ENTRYPOINT ["java", "-cp", "app:app/lib/*", "org.apache.fineract.ServerApplication"]
