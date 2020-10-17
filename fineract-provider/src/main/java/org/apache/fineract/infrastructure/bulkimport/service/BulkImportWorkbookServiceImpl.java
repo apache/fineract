@@ -283,7 +283,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         public DocumentData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final String location = rs.getString("location");
             final String fileName = rs.getString("file_name");
-            return new DocumentData(null, null, null, null, fileName, null, null, null, location, null);
+            return new DocumentData(fileName, null, location, null);
         }
     }
 }

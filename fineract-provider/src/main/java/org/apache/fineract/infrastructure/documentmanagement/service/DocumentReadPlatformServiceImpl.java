@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.documentmanagement.contentrepository.C
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         // scope for the particular entities
         final DocumentMapper mapper = new DocumentMapper(true, true);
         final String sql = "select " + mapper.schema() + " order by d.id";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId });
+        return this.jdbcTemplate.query(sql, mapper, entityType, entityId);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
             final DocumentMapper mapper) {
         final String sql = "select " + mapper.schema() + " and d.id=? ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });
+        return this.jdbcTemplate.queryForObject(sql, mapper, entityType, entityId, documentId);
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {
@@ -127,15 +128,15 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final String fileType = rs.getString("fileType");
             final String description = rs.getString("description");
             String location = null;
-            Integer storageType = null;
+            Integer storageTypeInt = null;
             if (!this.hideLocation) {
                 location = rs.getString("location");
             }
             if (!this.hideStorageType) {
-                storageType = rs.getInt("storageType");
+                storageTypeInt = rs.getInt("storageType");
             }
-            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location,
-                    storageType);
+            StorageType storageType = storageTypeInt != null ? StorageType.fromInt(storageTypeInt) : null;
+            return new DocumentData(fileName, fileType, location, storageType);
         }
     }
 
