@@ -600,21 +600,3 @@ gitProperties {
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
-
-task prepareConfigJson(dependsOn: 'generateGitProperties') {
-    doLast {
-        def versionForSwagger
-
-        if(project.ext.properties.containsKey("gitProps"))
-            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
-        else
-            versionForSwagger = "unknown"
-
-        copy {
-            from file('config/swagger/config.json.template')
-            into file('config/swagger')
-            rename { String filename -> return 'config.json' }
-            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
-        }
-    }
-}
