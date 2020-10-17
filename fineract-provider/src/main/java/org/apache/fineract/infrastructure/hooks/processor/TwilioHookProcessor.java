@@ -45,16 +45,20 @@ import retrofit.Callback;
 public class TwilioHookProcessor implements HookProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwilioHookProcessor.class);
+
     private final HookConfigurationRepository hookConfigurationRepository;
     private final TemplateMergeService templateMergeService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final ProcessorHelper processorHelper;
 
     @Autowired
     public TwilioHookProcessor(final HookConfigurationRepository hookConfigurationRepository,
-            final TemplateMergeService templateMergeService, final ClientRepositoryWrapper clientRepositoryWrapper) {
+            final TemplateMergeService templateMergeService, final ClientRepositoryWrapper clientRepositoryWrapper,
+            ProcessorHelper processorHelper) {
         this.hookConfigurationRepository = hookConfigurationRepository;
         this.templateMergeService = templateMergeService;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.processorHelper = processorHelper;
     }
 
     @Override
@@ -70,10 +74,10 @@ public class TwilioHookProcessor implements HookProcessor {
     private void sendRequest(final SmsProviderData smsProviderData, final String payload, String entityName, String actionName,
             final String tenantIdentifier, final String authToken, final Hook hook) {
 
-        final WebHookService service = ProcessorHelper.createWebHookService(smsProviderData.getUrl());
+        final WebHookService service = processorHelper.createWebHookService(smsProviderData.getUrl());
 
         @SuppressWarnings("rawtypes")
-        final Callback callback = ProcessorHelper.createCallback(smsProviderData.getUrl());
+        final Callback callback = processorHelper.createCallback(smsProviderData.getUrl());
 
         String apiKey = this.hookConfigurationRepository.findOneByHookIdAndFieldName(hook.getId(), apiKeyName);
         if (apiKey == null) {
