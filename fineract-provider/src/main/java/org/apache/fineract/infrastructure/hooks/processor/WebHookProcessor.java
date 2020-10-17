@@ -30,11 +30,19 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit.Callback;
 
 @Service
 public class WebHookProcessor implements HookProcessor {
+
+    private final ProcessorHelper processorHelper;
+
+    @Autowired
+    public WebHookProcessor(ProcessorHelper processorHelper) {
+        this.processorHelper = processorHelper;
+    }
 
     @Override
     public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
@@ -56,7 +64,6 @@ public class WebHookProcessor implements HookProcessor {
         }
 
         sendRequest(url, contentType, payload, entityName, actionName, tenantIdentifier, authToken);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -64,10 +71,10 @@ public class WebHookProcessor implements HookProcessor {
             final String actionName, final String tenantIdentifier, @SuppressWarnings("unused") final String authToken) {
 
         final String fineractEndpointUrl = System.getProperty("baseUrl");
-        final WebHookService service = ProcessorHelper.createWebHookService(url);
+        final WebHookService service = processorHelper.createWebHookService(url);
 
         @SuppressWarnings("rawtypes")
-        final Callback callback = ProcessorHelper.createCallback(url);
+        final Callback callback = processorHelper.createCallback(url);
 
         if (contentType.equalsIgnoreCase("json") || contentType.contains("json")) {
             final JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
@@ -77,7 +84,5 @@ public class WebHookProcessor implements HookProcessor {
             map = new Gson().fromJson(payload, map.getClass());
             service.sendFormRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, map, callback);
         }
-
     }
-
 }
