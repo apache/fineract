@@ -150,7 +150,7 @@ allprojects  {
             dependency "com.squareup.okhttp3:okhttp-android-support:$okhttpVersion"
             dependency "com.squareup.okhttp3:okhttp-urlconnection:$okhttpVersion"
             dependency "com.squareup.okhttp3:okhttp-sse:$okhttpVersion"
-            dependency "io.gsonfire:gson-fire:1.8.0"
+            dependency "io.gsonfire:gson-fire:1.8.4"
             dependency "org.threeten:threetenbp:1.4.1"
             dependency "io.swagger:swagger-core:1.6.1"
             dependency "io.swagger:swagger-annotations:1.6.1"
