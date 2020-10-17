@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResour
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -75,11 +76,10 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
         @Override
         public ImageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
             final String location = rs.getString("location");
-            final Integer storageType = JdbcSupport.getInteger(rs, "storageType");
-            return new ImageData(id, location, storageType, this.entityDisplayName);
+            final Integer storageTypeInt = JdbcSupport.getInteger(rs, "storageType");
+            StorageType storageType = storageTypeInt != null ? StorageType.fromInt(storageTypeInt) : null;
+            return new ImageData(location, storageType, this.entityDisplayName);
         }
     }
 
