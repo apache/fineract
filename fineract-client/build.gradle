@@ -78,6 +78,11 @@ compileJava {
     source += sourceSets.generated.java
 }
 
+tasks.withType(JavaCompile) {
+    // the generated code contains some warnings in build/generated/java/src/main/java/org/apache/fineract/client/auth/OAuthOkHttpClient.java#L71 that won't pass
+    options.compilerArgs -= ["-Werror"]
+}
+
 configurations {
     generatedCompile.extendsFrom implementation
     generatedRuntime.extendsFrom runtime

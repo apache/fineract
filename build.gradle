@@ -389,7 +389,7 @@ configure(project.fineractJavaProjects) {
             "-Xlint:varargs",
             "-Xlint:preview",
             "-Xlint:static",
-            // "-Werror" // TODO: @vidakovic fix this
+            "-Werror"
         ]
         // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 
