@@ -36,9 +36,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public final class JdbcSupport {
 
-    private JdbcSupport() {
-
-    }
+    private JdbcSupport() {}
 
     public static DateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
         DateTime dateTime = null;
