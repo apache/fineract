@@ -87,3 +87,7 @@ configurations {
     generatedCompile.extendsFrom implementation
     generatedRuntime.extendsFrom runtime
 }
+
+test {
+    useJUnitPlatform()
+}

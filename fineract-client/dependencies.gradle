@@ -39,6 +39,13 @@ dependencies {
             'commons-codec:commons-codec',
             )
     implementation('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client') {
-        exclude group: 'org.apache.oltu.oauth2' , module: 'org.apache.oltu.oauth2.common'
+        exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.7.0',
+            'com.google.truth:truth:1.0.1'
+            )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+            )
 }
