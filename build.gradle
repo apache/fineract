@@ -29,7 +29,11 @@ buildscript {
                 'fineract-client'
             ].contains(it.name)
         }
-
+        fineractPublishProjects = subprojects.findAll{
+            [
+                'fineract-client'
+            ].contains(it.name)
+        }
     }
     repositories {
         jcenter()
@@ -451,5 +455,46 @@ configure(project.fineractJavaProjects) {
         } else {
             dependsOn(spotlessApply)
         }
+    }
+}
+
+configure(project.fineractPublishProjects) {
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+
+                pom {
+                    name = 'Fineract'
+                    description = 'A secure, multi-tenanted microfinance platform'
+                    url = 'https://fineract.apache.org'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.html'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/apache/fineract.git'
+                        developerConnection = 'scm:git:git://github.com:apache/fineract.git'
+                        url = 'https://fineract.apache.org/'
+                    }
+                }
+            }
+        }
+
+        // TODO FINERACT-1102: Actually use this to deploy to ASF (Apache Software Foundation) Nexus Maven Repository
     }
 }
