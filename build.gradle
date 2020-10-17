@@ -328,6 +328,7 @@ allprojects  {
             '**/out/**',
             // Git build info
             "**/git.properties",
+            ".mailmap",
         ]
     }
 }
