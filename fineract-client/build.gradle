@@ -50,7 +50,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     modelPackage = 'org.apache.fineract.client.models'
     configOptions = [
         dateLibrary: 'java8',
-        useRxJava2: 'true',
+        useRxJava2: 'false',
         library: 'retrofit2',
         hideGenerationTimestamp: 'true',
     ]
