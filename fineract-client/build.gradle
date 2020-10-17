@@ -63,8 +63,27 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     finalizedBy = [licenseFormat]
 }
 
+task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = 'typescript-angular'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "$swaggerFile"
+    outputDir = "$buildDir/generated/typescript".toString()
+    apiPackage = 'org.apache.fineract.client.services'
+    invokerPackage = 'org.apache.fineract.client'
+    modelPackage = 'org.apache.fineract.client.models'
+    configOptions = [
+        apiModulePrefix: 'fineract',
+        configurationPrefix: 'fineract',
+        ngVersion: '10.0.0',
+        npmName: 'apache-fineract-client'
+    ]
+    finalizedBy = [licenseFormat]
+}
+
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn buildJavaSdk, spotlessJavaApply
+compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
 
 sourceSets {
     generated {
