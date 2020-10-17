@@ -40,28 +40,25 @@ public class ImageData {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageData.class);
 
-    @SuppressWarnings("unused")
-    private final Long imageId;
     private final String location;
-    private final Integer storageType;
+    private final StorageType storageType;
     private final String entityDisplayName;
 
     private File file;
     private ContentRepositoryUtils.ImageFileExtension fileExtension;
     private InputStream inputStream;
 
-    public ImageData(final Long imageId, final String location, final Integer storageType, final String entityDisplayName) {
-        this.imageId = imageId;
+    public ImageData(final String location, final StorageType storageType, final String entityDisplayName) {
         this.location = location;
         this.storageType = storageType;
         this.entityDisplayName = entityDisplayName;
     }
 
-    public byte[] getContent() {
+    private byte[] getContent() {
         try {
-            if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
+            if (this.storageType.equals(StorageType.S3) && this.inputStream != null) {
                 return IOUtils.toByteArray(this.inputStream);
-            } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
+            } else if (this.storageType.equals(StorageType.FILE_SYSTEM) && this.file != null) {
                 final FileInputStream fileInputStream = new FileInputStream(this.file);
                 return IOUtils.toByteArray(fileInputStream);
             }
@@ -71,14 +68,13 @@ public class ImageData {
         return null;
     }
 
-    public byte[] resizeImage(InputStream in, int maxWidth, int maxHeight) throws IOException {
+    private byte[] resizeImage(InputStream in, int maxWidth, int maxHeight) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         resizeImage(in, out, maxWidth, maxHeight);
         return out.toByteArray();
     }
 
-    public void resizeImage(InputStream in, OutputStream out, int maxWidth, int maxHeight) throws IOException {
-
+    private void resizeImage(InputStream in, OutputStream out, int maxWidth, int maxHeight) throws IOException {
         BufferedImage src = ImageIO.read(in);
         if (src.getWidth() <= maxWidth && src.getHeight() <= maxHeight) {
             out.write(getContent());
@@ -108,14 +104,14 @@ public class ImageData {
             return getContent();
         }
         byte[] out = null;
-        if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
+        if (this.storageType.equals(StorageType.S3) && this.inputStream != null) {
             try {
                 out = resizeImage(this.inputStream, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
                         maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException e) {
                 LOG.error("Error occured.", e);
             }
-        } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
+        } else if (this.storageType.equals(StorageType.FILE_SYSTEM) && this.file != null) {
             FileInputStream fis = null;
             try {
                 fis = new FileInputStream(this.file);
@@ -157,7 +153,7 @@ public class ImageData {
     }
 
     public StorageType storageType() {
-        return StorageType.fromInt(this.storageType);
+        return this.storageType;
     }
 
     public String name() {
