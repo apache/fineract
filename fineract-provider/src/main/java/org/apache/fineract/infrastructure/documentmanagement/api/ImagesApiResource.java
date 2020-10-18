@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import javax.ws.rs.Consumes;
@@ -43,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEntityTypeForImageManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPlatformService;
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageWritePlatformService;
@@ -144,9 +146,14 @@ public class ImagesApiResource {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
-        final byte[] resizedImage = imageData.getContentOfSize(maxWidth, maxHeight);
-        final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImage);
-        return Response.ok(clientImageAsBase64Text).build();
+        ImageData resizedImage = imageData.resize(imageData, maxWidth, maxHeight);
+        try {
+            byte[] resizedImageBytes = resizedImage.getInputStream().readAllBytes();
+            final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
+            return Response.ok(clientImageAsBase64Text).build();
+        } catch (IOException e) {
+            throw new ContentManagementException(imageData.getEntityDisplayName(), e.getMessage(), e);
+        }
     }
 
     @GET
@@ -163,8 +170,8 @@ public class ImagesApiResource {
         }
 
         final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
-
-        final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
+        final ImageData resizedImage = imageData.resize(imageData, maxWidth, maxHeight);
+        final ResponseBuilder response = Response.ok(resizedImage.getInputStream());
         final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
         response.header("Content-Disposition",
                 dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");

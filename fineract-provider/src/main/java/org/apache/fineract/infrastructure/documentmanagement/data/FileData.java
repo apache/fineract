@@ -56,7 +56,7 @@ public class FileData {
         return this.fileName;
     }
 
-    public InputStream file() {
+    public InputStream inputStream() {
         try {
             if (this.inputStream == null) {
                 return new FileInputStream(this.file);

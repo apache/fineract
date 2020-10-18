@@ -86,14 +86,15 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
     @Override
     public ImageData retrieveImage(String entityType, final Long entityId) {
         try {
-            Object owner;
-            String displayName = null;
+            String displayName;
             if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
-                owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-                displayName = ((Client) owner).getDisplayName();
+                Client owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+                displayName = owner.getDisplayName();
             } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
-                owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-                displayName = ((Staff) owner).displayName();
+                Staff owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+                displayName = owner.displayName();
+            } else {
+                displayName = "UnknownEntityType:" + entityType;
             }
             final ImageMapper imageMapper = new ImageMapper(displayName);
 
