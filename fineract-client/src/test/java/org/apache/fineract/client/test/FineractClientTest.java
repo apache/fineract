@@ -23,7 +23,6 @@ import static org.apache.fineract.client.util.Calls.ok;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import org.apache.fineract.client.services.ClientApi;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.Test;
 
@@ -36,10 +35,9 @@ public class FineractClientTest {
 
     @Test
     void testRetrieveAllClients() throws IOException {
-        FineractClient client = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
+        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
                 .basicAuth("mifos", "password").build();
-        ClientApi clientApi = client.createService(ClientApi.class);
-        assertThat(ok(clientApi.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
+        assertThat(ok(fineract.clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
                 .getTotalFilteredRecords()).isAtLeast(3);
     }
 
