@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import org.apache.fineract.client.util.FineractClient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -39,6 +40,14 @@ public class FineractClientTest {
                 .basicAuth("mifos", "password").build();
         assertThat(ok(fineract.clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
                 .getTotalFilteredRecords()).isAtLeast(3);
+    }
+
+    @Test
+    @Disabled // TODO remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed
+    void testInvalidOperations() throws IOException {
+        FineractClient.Builder builder = FineractClient.builder().baseURL("http://test/").tenant("default").basicAuth("mifos", "password");
+        builder.getApiClient().getAdapterBuilder().validateEagerly(true); // see FINERACT-1221
+        builder.build();
     }
 
     @Test

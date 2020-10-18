@@ -20,6 +20,7 @@ package org.apache.fineract.client.util;
 
 import org.apache.fineract.client.ApiClient;
 import org.apache.fineract.client.auth.ApiKeyAuth;
+import org.apache.fineract.client.auth.HttpBasicAuth;
 import org.apache.fineract.client.services.*;
 
 /**
@@ -243,46 +244,65 @@ public class FineractClient {
         workingDays = apiClient.createService(WorkingDaysApi.class);
     }
 
-    public static FineractClientBuilder builder() {
-        return new FineractClientBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     protected <S> S createService(Class<S> serviceClass) {
         return api.createService(serviceClass);
     }
 
-    public static class FineractClientBuilder {
+    public static class Builder {
 
+        private final ApiClient apiClient = new ApiClient();
         private String baseURL;
         private String tenant;
         private String username;
         private String password;
 
-        private FineractClientBuilder() {}
+        private Builder() {}
 
-        public FineractClientBuilder baseURL(String baseURL) {
+        public Builder baseURL(String baseURL) {
             this.baseURL = baseURL;
             return this;
         }
 
-        public FineractClientBuilder tenant(String tenant) {
+        public Builder tenant(String tenant) {
             this.tenant = tenant;
             return this;
         }
 
-        public FineractClientBuilder basicAuth(String username, String password) {
+        public Builder basicAuth(String username, String password) {
             this.username = username;
             this.password = password;
             return this;
         }
 
         public FineractClient build() {
-            ApiClient apiClient = new ApiClient("basicAuth", has("username", username), has("password", password));
+            // URL
             apiClient.getAdapterBuilder().baseUrl(has("baseURL", baseURL));
-            ApiKeyAuth authorization = new ApiKeyAuth("header", "fineract-platform-tenantid");
-            authorization.setApiKey(has("tenant", tenant));
-            apiClient.addAuthorization("tenantid", authorization);
+
+            // Tenant
+            ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
+            tenantAuth.setApiKey(has("tenant", tenant));
+            apiClient.addAuthorization("tenantid", tenantAuth);
+
+            // BASIC Auth
+            HttpBasicAuth basicAuth = new HttpBasicAuth();
+            basicAuth.setCredentials(has("username", username), has("password", password));
+            apiClient.addAuthorization("basicAuth", basicAuth);
+
             return new FineractClient(apiClient);
+        }
+
+        /**
+         * Obtain the internal Retrofit ApiClient. This method is typically not required to be invoked for simple API
+         * usages, but can be a handy back door for non-trivial advanced customizations of the API client.
+         *
+         * @return the {@link ApiClient} which {@link #build()} will use.
+         */
+        public ApiClient getApiClient() {
+            return apiClient;
         }
 
         private <T> T has(String propertyName, T value) throws IllegalStateException {
