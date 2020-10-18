@@ -99,19 +99,9 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
             final String sql = "select " + imageMapper.schema(entityType);
 
-            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] { entityId });
+            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId);
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
-            final ImageData result = contentRepository.fetchImage(imageData);
-
-            // Once we read content EofSensorInputStream, the wrappedStream
-            // object is becoming null. So further image source is becoming null
-            // For Amazon S3. If file is not present, already
-            // S3ContentRepository would have thrown this exception.
-            if (!result.available()) {
-                throw new ImageNotFoundException(entityType, entityId);
-            }
-
-            return result;
+            return contentRepository.fetchImage(imageData);
         } catch (final EmptyResultDataAccessException e) {
             throw new ImageNotFoundException("clients", entityId, e);
         }
