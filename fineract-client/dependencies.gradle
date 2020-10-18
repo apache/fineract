@@ -33,7 +33,6 @@ dependencies {
             'com.google.code.findbugs:jsr305',
             'com.google.code.gson:gson',
             'io.gsonfire:gson-fire',
-            'org.threeten:threetenbp',
             'org.springframework:spring-core',
             'org.springframework:spring-context',
             'javax.annotation:javax.annotation-api',
