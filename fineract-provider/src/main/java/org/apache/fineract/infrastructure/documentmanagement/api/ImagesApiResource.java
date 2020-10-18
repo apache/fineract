@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageResizer;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEntityTypeForImageManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPlatformService;
@@ -64,16 +65,18 @@ public class ImagesApiResource {
     private final ImageWritePlatformService imageWritePlatformService;
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
+    private final ImageResizer imageResizer;
 
     @Autowired
     public ImagesApiResource(final PlatformSecurityContext context, final ImageReadPlatformService readPlatformService,
             final ImageWritePlatformService imageWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer,
-            final FileUploadValidator fileUploadValidator) {
+            final FileUploadValidator fileUploadValidator, final ImageResizer imageResizer) {
         this.context = context;
         this.imageReadPlatformService = readPlatformService;
         this.imageWritePlatformService = imageWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.fileUploadValidator = fileUploadValidator;
+        this.imageResizer = imageResizer;
     }
 
     /**
@@ -146,7 +149,7 @@ public class ImagesApiResource {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
-        ImageData resizedImage = imageData.resize(imageData, maxWidth, maxHeight);
+        ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
         try {
             byte[] resizedImageBytes = resizedImage.getInputStream().readAllBytes();
             final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
@@ -170,7 +173,7 @@ public class ImagesApiResource {
         }
 
         final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
-        final ImageData resizedImage = imageData.resize(imageData, maxWidth, maxHeight);
+        final ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
         final ResponseBuilder response = Response.ok(resizedImage.getInputStream());
         final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
         response.header("Content-Disposition",
