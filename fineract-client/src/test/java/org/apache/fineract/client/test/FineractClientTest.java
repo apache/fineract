@@ -34,12 +34,24 @@ import org.junit.jupiter.api.Test;
  */
 public class FineractClientTest {
 
-    @Test
-    void testRetrieveAllClients() throws IOException {
-        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").build();
+    void checkClients(FineractClient fineract) throws IOException {
         assertThat(ok(fineract.clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
                 .getTotalFilteredRecords()).isAtLeast(3);
+    }
+
+    @Test
+    void testRetrieveAllClientsFromFineractDev() throws IOException {
+        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
+                .basicAuth("mifos", "password").build();
+        checkClients(fineract);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled once https://issues.apache.org/jira/browse/FINERACT-1209 is fixed
+    void testRetrieveAllClientsFromLocalhostWithInsecureSelfSignedCert() throws IOException {
+        FineractClient fineract = FineractClient.builder().baseURL("https://localhost:8443/fineract-provider/api/v1/").tenant("default")
+                .basicAuth("mifos", "password").insecure(true).build();
+        checkClients(fineract);
     }
 
     @Test

@@ -18,6 +18,16 @@
  */
 package org.apache.fineract.client.util;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.ApiClient;
@@ -386,6 +396,47 @@ public final class FineractClient {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(level);
             getApiClient().getOkBuilder().addInterceptor(logging);
+            return this;
+        }
+
+        /**
+         * Skip Fineract API host SSL certificate verification. DO NOT USE THIS when invoking a production server's API!
+         * This is intended for https://localhost:8443/ testing of development servers with self-signed certificates,
+         * only. If you do not understand what this is, do not use it. You WILL cause a security issue in your
+         * application due to the possibility of a "man in the middle" attack when this is enabled.
+         */
+        @SuppressWarnings("unused")
+        public Builder insecure(boolean insecure) {
+            // Nota bene: Similar code to this is also in Fineract Provider's
+            // org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper
+            if (insecure) {
+                HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;
+                apiClient.getOkBuilder().hostnameVerifier(insecureHostnameVerifier);
+
+                try {
+                    X509TrustManager insecureX509TrustManager = new X509TrustManager() {
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[] {};
+                        }
+                    };
+
+                    var sslContext = SSLContext.getInstance("SSL");
+                    sslContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
+                    SSLSocketFactory insecureSslSocketFactory = sslContext.getSocketFactory();
+
+                    apiClient.getOkBuilder().sslSocketFactory(insecureSslSocketFactory, insecureX509TrustManager);
+                } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                    throw new IllegalStateException("insecure() SSL configuration failed", e);
+                }
+            }
             return this;
         }
 
