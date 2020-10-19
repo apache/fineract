@@ -26,7 +26,7 @@ import org.apache.fineract.client.auth.ApiKeyAuth;
  *
  * @author Michael Vorburger.ch
  */
-public class FineractClient {
+public final class FineractClient {
 
     private final ApiClient apiClient;
 
@@ -42,7 +42,7 @@ public class FineractClient {
         return apiClient.createService(serviceClass);
     }
 
-    public static class FineractClientBuilder {
+    public static final class FineractClientBuilder {
 
         private String baseURL;
         private String tenant;
