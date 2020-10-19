@@ -49,7 +49,7 @@ buildscript {
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.3.0"
         classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.5"
     }
 }
