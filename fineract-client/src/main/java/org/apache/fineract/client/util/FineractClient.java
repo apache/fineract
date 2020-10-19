@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.client.util;
 
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.ApiClient;
 import org.apache.fineract.client.auth.ApiKeyAuth;
 import org.apache.fineract.client.auth.HttpBasicAuth;
@@ -275,6 +277,13 @@ public class FineractClient {
         public Builder basicAuth(String username, String password) {
             this.username = username;
             this.password = password;
+            return this;
+        }
+
+        public Builder logging(Level level) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(level);
+            getApiClient().getOkBuilder().addInterceptor(logging);
             return this;
         }
 
