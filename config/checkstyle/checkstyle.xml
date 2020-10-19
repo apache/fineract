@@ -32,6 +32,9 @@
         Checks included in MissingSwitchDefault are handled by ErrorProne
     -->
 
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/suppressions.xml"/>
+    </module>
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>

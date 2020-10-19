@@ -23,14 +23,116 @@ import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.ApiClient;
 import org.apache.fineract.client.auth.ApiKeyAuth;
 import org.apache.fineract.client.auth.HttpBasicAuth;
-import org.apache.fineract.client.services.*;
+import org.apache.fineract.client.services.AccountNumberFormatApi;
+import org.apache.fineract.client.services.AccountTransfersApi;
+import org.apache.fineract.client.services.AccountingClosureApi;
+import org.apache.fineract.client.services.AccountingRulesApi;
+import org.apache.fineract.client.services.AdhocQueryApiApi;
+import org.apache.fineract.client.services.AuditsApi;
+import org.apache.fineract.client.services.AuthenticationHttpBasicApi;
+import org.apache.fineract.client.services.BatchApiApi;
+import org.apache.fineract.client.services.CacheApi;
+import org.apache.fineract.client.services.CashierJournalsApi;
+import org.apache.fineract.client.services.CashiersApi;
+import org.apache.fineract.client.services.CentersApi;
+import org.apache.fineract.client.services.ChargesApi;
+import org.apache.fineract.client.services.ClientApi;
+import org.apache.fineract.client.services.ClientChargesApi;
+import org.apache.fineract.client.services.ClientIdentifierApi;
+import org.apache.fineract.client.services.ClientTransactionApi;
+import org.apache.fineract.client.services.ClientsAddressApi;
+import org.apache.fineract.client.services.CodeValuesApi;
+import org.apache.fineract.client.services.CodesApi;
+import org.apache.fineract.client.services.CurrencyApi;
+import org.apache.fineract.client.services.DataTablesApi;
+import org.apache.fineract.client.services.DefaultApi;
+import org.apache.fineract.client.services.DocumentsApi;
+import org.apache.fineract.client.services.EntityDataTableApi;
+import org.apache.fineract.client.services.EntityFieldConfigurationApi;
+import org.apache.fineract.client.services.ExternalServicesApi;
+import org.apache.fineract.client.services.FetchAuthenticatedUserDetailsApi;
+import org.apache.fineract.client.services.FixedDepositAccountApi;
+import org.apache.fineract.client.services.FixedDepositProductApi;
+import org.apache.fineract.client.services.FloatingRatesApi;
+import org.apache.fineract.client.services.GeneralLedgerAccountApi;
+import org.apache.fineract.client.services.GlobalConfigurationApi;
+import org.apache.fineract.client.services.GroupsApi;
+import org.apache.fineract.client.services.HolidaysApi;
+import org.apache.fineract.client.services.HooksApi;
+import org.apache.fineract.client.services.InterestRateChartApi;
+import org.apache.fineract.client.services.InterestRateSlabAKAInterestBandsApi;
+import org.apache.fineract.client.services.JournalEntriesApi;
+import org.apache.fineract.client.services.ListReportMailingJobHistoryApi;
+import org.apache.fineract.client.services.LoanChargesApi;
+import org.apache.fineract.client.services.LoanCollateralApi;
+import org.apache.fineract.client.services.LoanProductsApi;
+import org.apache.fineract.client.services.LoanReschedulingApi;
+import org.apache.fineract.client.services.LoanTransactionsApi;
+import org.apache.fineract.client.services.LoansApi;
+import org.apache.fineract.client.services.MakerCheckerOr4EyeFunctionalityApi;
+import org.apache.fineract.client.services.MappingFinancialActivitiesToAccountsApi;
+import org.apache.fineract.client.services.MifosxBatchJobsApi;
+import org.apache.fineract.client.services.MixMappingApi;
+import org.apache.fineract.client.services.MixReportApi;
+import org.apache.fineract.client.services.MixTaxonomyApi;
+import org.apache.fineract.client.services.NotesApi;
+import org.apache.fineract.client.services.NotificationApi;
+import org.apache.fineract.client.services.OfficesApi;
+import org.apache.fineract.client.services.PasswordPreferencesApi;
+import org.apache.fineract.client.services.PaymentTypeApi;
+import org.apache.fineract.client.services.PeriodicAccrualAccountingApi;
+import org.apache.fineract.client.services.PermissionsApi;
+import org.apache.fineract.client.services.PocketApi;
+import org.apache.fineract.client.services.ProvisioningCategoryApi;
+import org.apache.fineract.client.services.ProvisioningCriteriaApi;
+import org.apache.fineract.client.services.ProvisioningEntriesApi;
+import org.apache.fineract.client.services.RecurringDepositAccountApi;
+import org.apache.fineract.client.services.RecurringDepositAccountTransactionsApi;
+import org.apache.fineract.client.services.RecurringDepositProductApi;
+import org.apache.fineract.client.services.ReportMailingJobsApi;
+import org.apache.fineract.client.services.ReportsApi;
+import org.apache.fineract.client.services.RolesApi;
+import org.apache.fineract.client.services.RunReportsApi;
+import org.apache.fineract.client.services.SavingsAccountApi;
+import org.apache.fineract.client.services.SavingsChargesApi;
+import org.apache.fineract.client.services.SavingsProductApi;
+import org.apache.fineract.client.services.SchedulerApi;
+import org.apache.fineract.client.services.ScoreCardApi;
+import org.apache.fineract.client.services.SearchApiApi;
+import org.apache.fineract.client.services.SelfAccountTransferApi;
+import org.apache.fineract.client.services.SelfAuthenticationApi;
+import org.apache.fineract.client.services.SelfClientApi;
+import org.apache.fineract.client.services.SelfDividendApi;
+import org.apache.fineract.client.services.SelfLoanProductsApi;
+import org.apache.fineract.client.services.SelfLoansApi;
+import org.apache.fineract.client.services.SelfRunReportApi;
+import org.apache.fineract.client.services.SelfSavingsAccountApi;
+import org.apache.fineract.client.services.SelfScoreCardApi;
+import org.apache.fineract.client.services.SelfServiceRegistrationApi;
+import org.apache.fineract.client.services.SelfShareAccountsApi;
+import org.apache.fineract.client.services.SelfSpmApi;
+import org.apache.fineract.client.services.SelfThirdPartyTransferApi;
+import org.apache.fineract.client.services.SelfUserApi;
+import org.apache.fineract.client.services.SelfUserDetailsApi;
+import org.apache.fineract.client.services.ShareAccountApi;
+import org.apache.fineract.client.services.SpmApiLookUpTableApi;
+import org.apache.fineract.client.services.SpmSurveysApi;
+import org.apache.fineract.client.services.StaffApi;
+import org.apache.fineract.client.services.StandingInstructionsApi;
+import org.apache.fineract.client.services.StandingInstructionsHistoryApi;
+import org.apache.fineract.client.services.TaxComponentsApi;
+import org.apache.fineract.client.services.TaxGroupApi;
+import org.apache.fineract.client.services.TellerCashManagementApi;
+import org.apache.fineract.client.services.UserGeneratedDocumentsApi;
+import org.apache.fineract.client.services.UsersApi;
+import org.apache.fineract.client.services.WorkingDaysApi;
 
 /**
  * Fineract Client Java SDK API entry point. This is recommended to be used instead of {@link ApiClient}.
  *
  * @author Michael Vorburger.ch
  */
-public class FineractClient {
+public final class FineractClient {
 
     private final ApiClient api;
 
@@ -254,7 +356,7 @@ public class FineractClient {
         return api.createService(serviceClass);
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private final ApiClient apiClient = new ApiClient();
         private String baseURL;
