@@ -19,28 +19,22 @@
 dependencies {
     // project(':fineract-provider')
     implementation(
-            'io.swagger:swagger-core',
             'io.swagger:swagger-annotations',
             'com.squareup.retrofit2:retrofit',
             'com.squareup.retrofit2:adapter-java8',
-            'com.squareup.retrofit2:adapter-rxjava2',
-            'com.squareup.retrofit2:converter-jackson',
+            'com.squareup.retrofit2:adapter-rxjava2', // TODO https://github.com/OpenAPITools/openapi-generator/issues/7758
             'com.squareup.retrofit2:converter-scalars',
             'com.squareup.retrofit2:converter-gson',
-            'com.squareup.okhttp3:okhttp',
-            'com.squareup.okhttp3:okcurl',
-            'com.squareup.okhttp3:logging-interceptor',
-            'com.google.code.findbugs:jsr305',
-            'com.google.code.gson:gson',
             'io.gsonfire:gson-fire',
-            'org.springframework:spring-core',
-            'org.springframework:spring-context',
-            'javax.annotation:javax.annotation-api',
-            'commons-codec:commons-codec',
+            'com.google.code.findbugs:jsr305',
+            'com.squareup.okhttp3:logging-interceptor',
             )
+    // org.apache.oltu.oauth2 is used in org.apache.fineract.client.auth.OAuthOkHttpClient (only; can be excluded by consumers not requiring OAuth)
     implementation('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client') {
         exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
+        exclude group: 'org.slf4j'
     }
+
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
             'com.google.truth:truth:1.0.1'
