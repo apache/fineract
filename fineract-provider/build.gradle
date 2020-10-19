@@ -22,23 +22,11 @@ apply plugin: 'rebel'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.bmuschko.cargo'
-apply plugin: 'project-report'
 apply plugin: 'openjpa'
-apply plugin: "com.github.spotbugs"
-apply plugin: 'checkstyle'
-apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
-apply plugin: 'jacoco'
 apply plugin: "com.gorylenko.gradle-git-properties"
-apply plugin: "net.ltgt.errorprone"
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 apply plugin: 'distribution'
 apply plugin: 'signing'
-
-// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
-// set the classes directory to point to Eclipse's default build directory
-if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
-    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
-}
 
 // Configuration for the OpenJPA enhance task
 // https://github.com/radcortez/openjpa-gradle-plugin
@@ -88,21 +76,6 @@ resolve {
 }
 
 resolve.dependsOn prepareInputYaml
-
-// Configuration for JaCoCo code coverage task
-// https://www.eclemma.org/jacoco/
-jacoco {
-    toolVersion = jacocoVersion
-    reportsDir = file("$buildDir/reports/jacoco")
-}
-
-jacocoTestReport {
-    reports {
-        html.enabled=true
-        xml.enabled=true
-        html.destination file("${buildDir}/code-coverage")
-    }
-}
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
@@ -169,24 +142,9 @@ if (project.hasProperty('security') && project.getProperty('security') == 'oauth
 // Configuration for the modernizer plugin
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
-    includeTestClasses = true
-    failOnViolations = true
-
-    violationLogLevel="error"
-
-    javaVersion = project.targetCompatibility
-
-    ignorePackages = []
     ignoreClassNamePatterns = [
         '.*AbstractPersistableCustom',
         '.*EntityTables'
-    ]
-    ignoreGeneratedClasses = true
-
-    exclusions = []
-    exclusionPatterns = [
-        // To be removed when https://issues.apache.org/jira/browse/FINERACT-826 is fixed
-        'org/joda/time/.*'
     ]
 }
 
@@ -216,110 +174,6 @@ war {
         into "WEB-INF/" // no leading slash
     }
     enabled = true
-}
-
-// Configuration for the errorprone plugin
-// https://github.com/tbroyer/gradle-errorprone-plugin
-dependencies {
-    errorprone "com.google.errorprone:error_prone_core:2.4.0"
-}
-
-tasks.withType(JavaCompile) {
-    options.errorprone {
-        disableWarningsInGeneratedCode = true
-        excludedPaths = ".*/build/.*"
-        //Todo Remove necessary checks from this list
-        disable(
-                "UnusedVariable",
-                "TypeParameterUnusedInFormals",
-                "JdkObsolete",
-                "EmptyBlockTag",
-                "MissingSummary",
-                "InvalidParam",
-                "ReturnFromVoid",
-                "AlmostJavadoc",
-                "InvalidBlockTag",
-                )
-        //TODO gradually enable these checks
-        error(
-                "DefaultCharset",
-                "RemoveUnusedImports",
-                "WaitNotInLoop",
-                "ThreeLetterTimeZoneID",
-                "VariableNameSameAsType",
-                "UnnecessaryParentheses",
-                "MultipleTopLevelClasses",
-                "MixedMutabilityReturnType",
-                "MultiVariableDeclaration",
-                "AssertEqualsArgumentOrderChecker",
-                "EmptySetMultibindingContributions",
-                "BigDecimalEquals",
-                "MixedArrayDimensions",
-                "PackageLocation",
-                "UseBinds",
-                "BadImport",
-                "IntLongMath",
-                "FloatCast",
-                "ReachabilityFenceUsage",
-                "StreamResourceLeak",
-                "TruthIncompatibleType",
-                "ByteBufferBackingArray",
-                "SameNameButDifferent",
-                "OrphanedFormatString",
-                "CatchAndPrintStackTrace",
-                "ObjectToString",
-                "StringSplitter",
-                "AssertThrowsMultipleStatements",
-                "BoxedPrimitiveConstructor",
-                "EmptyCatch",
-                "BoxedPrimitiveEquality",
-                "SynchronizeOnNonFinalField",
-                "WildcardImport",
-                "FutureReturnValueIgnored",
-                "PrivateConstructorForNoninstantiableModule",
-                "ClassCanBeStatic",
-                "ClassNewInstance",
-                "UnnecessaryStaticImport",
-                "UnsafeFinalization",
-                "JodaPlusMinusLong",
-                "MutableMethodReturnType",
-                "SwitchDefault",
-                "VarTypeName",
-                "ArgumentSelectionDefectChecker",
-                "CompareToZero",
-                "InjectOnConstructorOfAbstractClass",
-                "ImmutableEnumChecker",
-                "NarrowingCompoundAssignment",
-                "MissingCasesInEnumSwitch",
-                "ReferenceEquality",
-                "UndefinedEquals",
-                "PublicConstructorForAbstractClass",
-                "UnescapedEntity",
-                "ModifyCollectionInEnhancedForLoop",
-                "NonCanonicalType",
-                "InvalidInlineTag",
-                "MutablePublicArray",
-                "StaticAssignmentInConstructor",
-                "ProtectedMembersInFinalClass",
-                "OperatorPrecedence",
-                "EqualsGetClass",
-                "EqualsUnsafeCast",
-                "DoubleBraceInitialization",
-                "UnnecessaryDefaultInEnumSwitch",
-                "UnusedNestedClass",
-                "UnusedMethod",
-                "ModifiedButNotUsed",
-                "InconsistentCapitalization",
-                "MissingOverride",
-                // "InvalidBlockTag",
-                // "InconsistentOverloads",
-                // "MethodCanBeStatic",
-                // "Var",
-                // "ConstantField",
-                // "UnnecessaryDefaultInEnumSwitch",
-                // "FieldCanBeFinal"
-                )
-    }
 }
 
 // Configuration for the Gradle Cargo plugin
@@ -414,13 +268,6 @@ test {
         showStandardStreams = false
         exceptionFormat "full"
     }
-}
-
-// Configuration for the Checkstyle plugin
-// https://docs.gradle.org/current/userguide/checkstyle_plugin.html
-dependencies {
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.36.2'
-    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
 // Configuration for SQL tasks
@@ -550,40 +397,6 @@ if( project.hasProperty("fineract.release") ) {
                     }
                 }
             }
-        }
-    }
-}
-
-// Configuration for spotbugs plugin
-// https://github.com/spotbugs/spotbugs-gradle-plugin
-
-// To generate an HTML report instead of XML
-spotbugs {
-    reportLevel = 'high'
-    showProgress = true
-}
-// https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
-spotbugsMain {
-    reports {
-        html {
-            enabled = true
-            stylesheet = 'fancy-hist.xsl'
-        }
-    }
-}
-spotbugsTest {
-    reports {
-        html {
-            enabled = true
-            stylesheet = 'fancy-hist.xsl'
-        }
-    }
-}
-spotbugsIntegrationTest {
-    reports {
-        html {
-            enabled = true
-            stylesheet = 'fancy-hist.xsl'
         }
     }
 }

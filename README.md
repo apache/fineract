@@ -208,7 +208,7 @@ Messaging configuration is disabled by default. If you want to enable it and reg
 Checkstyle and Spotless
 ============
 
-This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
+This project enforces its code conventions using [checkstyle.xml](config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
 
     `./gradlew spotlessApply`
 

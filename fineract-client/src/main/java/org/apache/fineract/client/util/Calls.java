@@ -27,7 +27,7 @@ import retrofit2.Response;
  *
  * @author Michael Vorburger.ch
  */
-public class Calls {
+public final class Calls {
 
     private Calls() {}
 
