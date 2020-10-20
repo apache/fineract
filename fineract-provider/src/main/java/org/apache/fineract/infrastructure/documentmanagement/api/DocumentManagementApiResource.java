@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ValidationException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,9 +63,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("{entityType}/{entityId}/documents")
 @Component
 @Scope("singleton")
+@Path("{entityType}/{entityId}/documents")
 @Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
         + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n"
         + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n"
@@ -125,19 +126,21 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
-            @FormDataParam("file") final @Parameter(description = "file") FormDataContentDisposition fileDetails,
+            @FormDataParam("file") @Parameter(description = "file") final FormDataContentDisposition fileDetails,
             @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
             @FormDataParam("name") @Parameter(description = "name") final String name,
             @FormDataParam("description") @Parameter(description = "description") final String description) {
 
-        /**
-         * TODO: also need to have a backup and stop reading from stream after max size is reached to protect against
-         * malicious clients
-         **/
+        // TODO: also need to have a backup and stop reading from stream after max size is reached to protect against
+        // malicious clients
+        // TODO: need to extract the actual file type and determine if they are permissable
 
-        /**
-         * TODO: need to extract the actual file type and determine if they are permissable
-         **/
+        // TODO: https://issues.apache.org/jira/browse/FINERACT-1229 could replace checking this in code by an
+        // annotation
+        if (fileDetails == null || bodyPart == null || bodyPart.getMediaType() == null) {
+            throw new ValidationException("Form Data missing");
+        }
+
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
 
@@ -164,6 +167,12 @@ public class DocumentManagementApiResource {
             @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
             @FormDataParam("name") @Parameter(description = "name") final String name,
             @FormDataParam("description") @Parameter(description = "description") final String description) {
+
+        // TODO: https://issues.apache.org/jira/browse/FINERACT-1229 could replace checking this in code by an
+        // annotation
+        if (inputStream == null || fileDetails == null || bodyPart == null || bodyPart.getMediaType() == null) {
+            throw new ValidationException("Form Data missing");
+        }
 
         final Set<String> modifiedParams = new HashSet<>();
         modifiedParams.add("name");

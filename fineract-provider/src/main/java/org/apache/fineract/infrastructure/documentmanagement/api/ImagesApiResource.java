@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
+import jakarta.validation.ValidationException;
 import java.io.InputStream;
 import java.util.Base64;
 import javax.ws.rs.Consumes;
@@ -52,10 +53,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("{entity}/{entityId}/images")
 @Component
 @Scope("singleton")
-
+@Path("{entity}/{entityId}/images")
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
@@ -81,6 +81,13 @@ public class ImagesApiResource {
     public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
+
+        // TODO: https://issues.apache.org/jira/browse/FINERACT-1229 could replace checking this in code by an
+        // annotation
+        if (inputStream == null || fileDetails == null || bodyPart == null || bodyPart.getMediaType() == null) {
+            throw new ValidationException("Form Data missing");
+        }
+
         validateEntityTypeforImage(entityName);
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
