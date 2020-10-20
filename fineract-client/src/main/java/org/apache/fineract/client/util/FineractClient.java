@@ -138,7 +138,7 @@ import org.apache.fineract.client.services.UsersApi;
 import org.apache.fineract.client.services.WorkingDaysApi;
 
 /**
- * Fineract Client Java SDK API entry point. This is recommended to be used instead of {@link ApiClient}.
+ * Fineract Client Java SDK API entry point. Use this instead of the {@link ApiClient}.
  *
  * @author Michael Vorburger.ch
  */
@@ -395,7 +395,7 @@ public final class FineractClient {
         public Builder logging(Level level) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(level);
-            getApiClient().getOkBuilder().addInterceptor(logging);
+            apiClient.getOkBuilder().addInterceptor(logging);
             return this;
         }
 
@@ -458,13 +458,23 @@ public final class FineractClient {
         }
 
         /**
-         * Obtain the internal Retrofit ApiClient. This method is typically not required to be invoked for simple API
+         * Obtain the internal Retrofit Builder. This method is typically not required to be invoked for simple API
          * usages, but can be a handy back door for non-trivial advanced customizations of the API client.
          *
          * @return the {@link ApiClient} which {@link #build()} will use.
          */
-        public ApiClient getApiClient() {
-            return apiClient;
+        public retrofit2.Retrofit.Builder getRetrofitBuilder() {
+            return apiClient.getAdapterBuilder();
+        }
+
+        /**
+         * Obtain the internal OkHttp Builder. This method is typically not required to be invoked for simple API
+         * usages, but can be a handy back door for non-trivial advanced customizations of the API client.
+         *
+         * @return the {@link ApiClient} which {@link #build()} will use.
+         */
+        public okhttp3.OkHttpClient.Builder getOkBuilder() {
+            return apiClient.getOkBuilder();
         }
 
         private <T> T has(String propertyName, T value) throws IllegalStateException {

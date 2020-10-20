@@ -54,10 +54,18 @@ public class FineractClientTest {
     }
 
     @Test
+    @Disabled // TODO FINERACT-1220
+    void testOfficesDateFormat() {
+        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
+                .basicAuth("mifos", "password").insecure(true).build();
+        ok(fineract.offices.retrieveOffices(true, null, null));
+    }
+
+    @Test
     @Disabled // TODO remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed
     void testInvalidOperations() {
         FineractClient.Builder builder = FineractClient.builder().baseURL("http://test/").tenant("default").basicAuth("mifos", "password");
-        builder.getApiClient().getAdapterBuilder().validateEagerly(true); // see FINERACT-1221
+        builder.getRetrofitBuilder().validateEagerly(true); // see FINERACT-1221
         builder.build();
     }
 
