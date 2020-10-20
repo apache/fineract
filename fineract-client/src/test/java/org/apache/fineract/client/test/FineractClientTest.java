@@ -22,7 +22,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.apache.fineract.client.util.Calls.ok;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,13 +33,13 @@ import org.junit.jupiter.api.Test;
  */
 public class FineractClientTest {
 
-    void checkClients(FineractClient fineract) throws IOException {
+    void checkClients(FineractClient fineract) {
         assertThat(ok(fineract.clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
                 .getTotalFilteredRecords()).isAtLeast(3);
     }
 
     @Test
-    void testRetrieveAllClientsFromFineractDev() throws IOException {
+    void testRetrieveAllClientsFromFineractDev() {
         FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
                 .basicAuth("mifos", "password").build();
         checkClients(fineract);
@@ -48,7 +47,7 @@ public class FineractClientTest {
 
     @Test
     @Disabled // TODO remove Disabled once https://issues.apache.org/jira/browse/FINERACT-1209 is fixed
-    void testRetrieveAllClientsFromLocalhostWithInsecureSelfSignedCert() throws IOException {
+    void testRetrieveAllClientsFromLocalhostWithInsecureSelfSignedCert() {
         FineractClient fineract = FineractClient.builder().baseURL("https://localhost:8443/fineract-provider/api/v1/").tenant("default")
                 .basicAuth("mifos", "password").insecure(true).build();
         checkClients(fineract);
@@ -56,14 +55,14 @@ public class FineractClientTest {
 
     @Test
     @Disabled // TODO remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed
-    void testInvalidOperations() throws IOException {
+    void testInvalidOperations() {
         FineractClient.Builder builder = FineractClient.builder().baseURL("http://test/").tenant("default").basicAuth("mifos", "password");
         builder.getApiClient().getAdapterBuilder().validateEagerly(true); // see FINERACT-1221
         builder.build();
     }
 
     @Test
-    void testFineractClientBuilder() throws IOException {
+    void testFineractClientBuilder() {
         assertThrows(IllegalStateException.class, () -> {
             FineractClient.builder().build();
         });
