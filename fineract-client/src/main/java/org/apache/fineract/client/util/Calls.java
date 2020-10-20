@@ -37,15 +37,20 @@ public final class Calls {
      * @param call
      *            the Call to execute
      * @return the body of the successful call (never null)
-     * @throws IOException
+     * @throws CallFailedRuntimeException
      *             thrown either if a problem occurred talking to the server, or the HTTP response code was not
      *             [200..300) successful
      */
-    public static <T> T ok(Call<T> call) throws IOException {
-        Response<T> response = call.execute();
+    public static <T> T ok(Call<T> call) throws CallFailedRuntimeException {
+        Response<T> response;
+        try {
+            response = call.execute();
+        } catch (IOException e) {
+            throw new CallFailedRuntimeException(call, e);
+        }
         if (response.isSuccessful()) {
             return response.body();
         }
-        throw new IOException("HTTP failed: " + call.request() + "; " + response);
+        throw new CallFailedRuntimeException(call, response);
     }
 }
