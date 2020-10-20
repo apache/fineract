@@ -428,7 +428,7 @@ public final class FineractClient {
                         }
                     };
 
-                    var sslContext = SSLContext.getInstance("SSL");
+                    SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
                     SSLSocketFactory insecureSslSocketFactory = sslContext.getSocketFactory();
 
