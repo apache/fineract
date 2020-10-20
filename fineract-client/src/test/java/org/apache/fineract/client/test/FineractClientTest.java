@@ -55,7 +55,7 @@ public class FineractClientTest {
 
     @Test
     @Disabled // TODO FINERACT-1220
-    void testOfficesDateFormat() throws IOException {
+    void testOfficesDateFormat() {
         FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
                 .basicAuth("mifos", "password").insecure(true).build();
         ok(fineract.offices.retrieveOffices(true, null, null));

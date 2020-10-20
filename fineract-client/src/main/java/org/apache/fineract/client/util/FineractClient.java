@@ -362,7 +362,7 @@ public final class FineractClient {
         return new Builder();
     }
 
-    protected <S> S createService(Class<S> serviceClass) {
+    public <S> S createService(Class<S> serviceClass) {
         return api.createService(serviceClass);
     }
 
