@@ -28,6 +28,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.ApiClient;
@@ -136,6 +137,9 @@ import org.apache.fineract.client.services.TellerCashManagementApi;
 import org.apache.fineract.client.services.UserGeneratedDocumentsApi;
 import org.apache.fineract.client.services.UsersApi;
 import org.apache.fineract.client.services.WorkingDaysApi;
+import org.apache.fineract.client.util.JSON.GsonCustomConverterFactory;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Fineract Client Java SDK API entry point. Use this instead of the {@link ApiClient}.
@@ -144,7 +148,7 @@ import org.apache.fineract.client.services.WorkingDaysApi;
  */
 public final class FineractClient {
 
-    private final ApiClient api;
+    private final Retrofit retrofit;
 
     public final AccountingClosureApi glClosures;
     public final AccountingRulesApi accountingRules;
@@ -250,125 +254,135 @@ public final class FineractClient {
     public final UsersApi users;
     public final WorkingDaysApi workingDays;
 
-    private FineractClient(ApiClient apiClient) {
-        api = apiClient;
+    private FineractClient(Retrofit retrofit) {
+        this.retrofit = retrofit;
 
-        glClosures = apiClient.createService(AccountingClosureApi.class);
-        accountingRules = apiClient.createService(AccountingRulesApi.class);
-        accountNumberFormats = apiClient.createService(AccountNumberFormatApi.class);
-        accountTransfers = apiClient.createService(AccountTransfersApi.class);
-        adhocQuery = apiClient.createService(AdhocQueryApiApi.class);
-        audits = apiClient.createService(AuditsApi.class);
-        authentication = apiClient.createService(AuthenticationHttpBasicApi.class);
-        batches = apiClient.createService(BatchApiApi.class);
-        caches = apiClient.createService(CacheApi.class);
-        cashiersJournal = apiClient.createService(CashierJournalsApi.class);
-        cashiers = apiClient.createService(CashiersApi.class);
-        centers = apiClient.createService(CentersApi.class);
-        charges = apiClient.createService(ChargesApi.class);
-        clients = apiClient.createService(ClientApi.class);
-        clientCharges = apiClient.createService(ClientChargesApi.class);
-        clientIdentifiers = apiClient.createService(ClientIdentifierApi.class);
-        clientAddresses = apiClient.createService(ClientsAddressApi.class);
-        clientTransactions = apiClient.createService(ClientTransactionApi.class);
-        codes = apiClient.createService(CodesApi.class);
-        codeValues = apiClient.createService(CodeValuesApi.class);
-        currencies = apiClient.createService(CurrencyApi.class);
-        dataTables = apiClient.createService(DataTablesApi.class);
-        legacy = apiClient.createService(DefaultApi.class);
-        documents = apiClient.createService(DocumentsApi.class);
-        entityDatatableChecks = apiClient.createService(EntityDataTableApi.class);
-        entityFieldConfigurations = apiClient.createService(EntityFieldConfigurationApi.class);
-        externalServices = apiClient.createService(ExternalServicesApi.class);
-        userDetails = apiClient.createService(FetchAuthenticatedUserDetailsApi.class);
-        fixedDepositAccounts = apiClient.createService(FixedDepositAccountApi.class);
-        fixedDepositProducts = apiClient.createService(FixedDepositProductApi.class);
-        floatingRates = apiClient.createService(FloatingRatesApi.class);
-        glAccounts = apiClient.createService(GeneralLedgerAccountApi.class);
-        globalConfigurations = apiClient.createService(GlobalConfigurationApi.class);
-        groups = apiClient.createService(GroupsApi.class);
-        holidays = apiClient.createService(HolidaysApi.class);
-        hooks = apiClient.createService(HooksApi.class);
-        interestRateCharts = apiClient.createService(InterestRateChartApi.class);
-        interestRateChartLabs = apiClient.createService(InterestRateSlabAKAInterestBandsApi.class);
-        journalEntries = apiClient.createService(JournalEntriesApi.class);
-        reportMailings = apiClient.createService(ListReportMailingJobHistoryApi.class);
-        loanCharges = apiClient.createService(LoanChargesApi.class);
-        loanCollaterals = apiClient.createService(LoanCollateralApi.class);
-        loanProducts = apiClient.createService(LoanProductsApi.class);
-        loanSchedules = apiClient.createService(LoanReschedulingApi.class);
-        loans = apiClient.createService(LoansApi.class);
-        loanTransactions = apiClient.createService(LoanTransactionsApi.class);
-        makerCheckers = apiClient.createService(MakerCheckerOr4EyeFunctionalityApi.class);
-        financialActivyAccountMappings = apiClient.createService(MappingFinancialActivitiesToAccountsApi.class);
-        jobs = apiClient.createService(MifosxBatchJobsApi.class);
-        mixMappings = apiClient.createService(MixMappingApi.class);
-        mixReports = apiClient.createService(MixReportApi.class);
-        mixTaxonomies = apiClient.createService(MixTaxonomyApi.class);
-        notes = apiClient.createService(NotesApi.class);
-        notifications = apiClient.createService(NotificationApi.class);
-        offices = apiClient.createService(OfficesApi.class);
-        passwordPreferences = apiClient.createService(PasswordPreferencesApi.class);
-        paymentTypes = apiClient.createService(PaymentTypeApi.class);
-        periodicAccrualAccounting = apiClient.createService(PeriodicAccrualAccountingApi.class);
-        permissions = apiClient.createService(PermissionsApi.class);
-        selfPockets = apiClient.createService(PocketApi.class);
-        provisioningCategories = apiClient.createService(ProvisioningCategoryApi.class);
-        provisioningCriterias = apiClient.createService(ProvisioningCriteriaApi.class);
-        provisioningEntries = apiClient.createService(ProvisioningEntriesApi.class);
-        recurringDepositAccounts = apiClient.createService(RecurringDepositAccountApi.class);
-        recurringDepositAccountTransactions = apiClient.createService(RecurringDepositAccountTransactionsApi.class);
-        recurringDepositProducts = apiClient.createService(RecurringDepositProductApi.class);
-        reportMailingJobs = apiClient.createService(ReportMailingJobsApi.class);
-        reports = apiClient.createService(ReportsApi.class);
-        roles = apiClient.createService(RolesApi.class);
-        reportsRun = apiClient.createService(RunReportsApi.class);
-        savingsAccounts = apiClient.createService(SavingsAccountApi.class);
-        savingsAccountCharges = apiClient.createService(SavingsChargesApi.class);
-        savingsProducts = apiClient.createService(SavingsProductApi.class);
-        jobsScheduler = apiClient.createService(SchedulerApi.class);
-        surveyScorecards = apiClient.createService(ScoreCardApi.class);
-        search = apiClient.createService(SearchApiApi.class);
-        selfAccountTransfers = apiClient.createService(SelfAccountTransferApi.class);
-        selfAuthentication = apiClient.createService(SelfAuthenticationApi.class);
-        selfClients = apiClient.createService(SelfClientApi.class);
-        selfShareProducts = apiClient.createService(SelfDividendApi.class);
-        selfLoanProducts = apiClient.createService(SelfLoanProductsApi.class);
-        selfLoans = apiClient.createService(SelfLoansApi.class);
-        selfReportsRun = apiClient.createService(SelfRunReportApi.class);
-        selfSavingsAccounts = apiClient.createService(SelfSavingsAccountApi.class);
-        selfSurveyScorecards = apiClient.createService(SelfScoreCardApi.class);
-        selfRegistration = apiClient.createService(SelfServiceRegistrationApi.class);
-        selfShareAccounts = apiClient.createService(SelfShareAccountsApi.class);
-        selfSurveys = apiClient.createService(SelfSpmApi.class);
-        selfThirdPartyBeneficiaries = apiClient.createService(SelfThirdPartyTransferApi.class);
-        selfUser = apiClient.createService(SelfUserApi.class);
-        selfUserDetails = apiClient.createService(SelfUserDetailsApi.class);
-        shareAccounts = apiClient.createService(ShareAccountApi.class);
-        surveyLookupTables = apiClient.createService(SpmApiLookUpTableApi.class);
-        surveys = apiClient.createService(SpmSurveysApi.class);
-        staff = apiClient.createService(StaffApi.class);
-        standingInstructions = apiClient.createService(StandingInstructionsApi.class);
-        standingInstructionsHistory = apiClient.createService(StandingInstructionsHistoryApi.class);
-        taxComponents = apiClient.createService(TaxComponentsApi.class);
-        taxGroups = apiClient.createService(TaxGroupApi.class);
-        tellers = apiClient.createService(TellerCashManagementApi.class);
-        templates = apiClient.createService(UserGeneratedDocumentsApi.class);
-        users = apiClient.createService(UsersApi.class);
-        workingDays = apiClient.createService(WorkingDaysApi.class);
+        glClosures = retrofit.create(AccountingClosureApi.class);
+        accountingRules = retrofit.create(AccountingRulesApi.class);
+        accountNumberFormats = retrofit.create(AccountNumberFormatApi.class);
+        accountTransfers = retrofit.create(AccountTransfersApi.class);
+        adhocQuery = retrofit.create(AdhocQueryApiApi.class);
+        audits = retrofit.create(AuditsApi.class);
+        authentication = retrofit.create(AuthenticationHttpBasicApi.class);
+        batches = retrofit.create(BatchApiApi.class);
+        caches = retrofit.create(CacheApi.class);
+        cashiersJournal = retrofit.create(CashierJournalsApi.class);
+        cashiers = retrofit.create(CashiersApi.class);
+        centers = retrofit.create(CentersApi.class);
+        charges = retrofit.create(ChargesApi.class);
+        clients = retrofit.create(ClientApi.class);
+        clientCharges = retrofit.create(ClientChargesApi.class);
+        clientIdentifiers = retrofit.create(ClientIdentifierApi.class);
+        clientAddresses = retrofit.create(ClientsAddressApi.class);
+        clientTransactions = retrofit.create(ClientTransactionApi.class);
+        codes = retrofit.create(CodesApi.class);
+        codeValues = retrofit.create(CodeValuesApi.class);
+        currencies = retrofit.create(CurrencyApi.class);
+        dataTables = retrofit.create(DataTablesApi.class);
+        legacy = retrofit.create(DefaultApi.class);
+        documents = retrofit.create(DocumentsApi.class);
+        entityDatatableChecks = retrofit.create(EntityDataTableApi.class);
+        entityFieldConfigurations = retrofit.create(EntityFieldConfigurationApi.class);
+        externalServices = retrofit.create(ExternalServicesApi.class);
+        userDetails = retrofit.create(FetchAuthenticatedUserDetailsApi.class);
+        fixedDepositAccounts = retrofit.create(FixedDepositAccountApi.class);
+        fixedDepositProducts = retrofit.create(FixedDepositProductApi.class);
+        floatingRates = retrofit.create(FloatingRatesApi.class);
+        glAccounts = retrofit.create(GeneralLedgerAccountApi.class);
+        globalConfigurations = retrofit.create(GlobalConfigurationApi.class);
+        groups = retrofit.create(GroupsApi.class);
+        holidays = retrofit.create(HolidaysApi.class);
+        hooks = retrofit.create(HooksApi.class);
+        interestRateCharts = retrofit.create(InterestRateChartApi.class);
+        interestRateChartLabs = retrofit.create(InterestRateSlabAKAInterestBandsApi.class);
+        journalEntries = retrofit.create(JournalEntriesApi.class);
+        reportMailings = retrofit.create(ListReportMailingJobHistoryApi.class);
+        loanCharges = retrofit.create(LoanChargesApi.class);
+        loanCollaterals = retrofit.create(LoanCollateralApi.class);
+        loanProducts = retrofit.create(LoanProductsApi.class);
+        loanSchedules = retrofit.create(LoanReschedulingApi.class);
+        loans = retrofit.create(LoansApi.class);
+        loanTransactions = retrofit.create(LoanTransactionsApi.class);
+        makerCheckers = retrofit.create(MakerCheckerOr4EyeFunctionalityApi.class);
+        financialActivyAccountMappings = retrofit.create(MappingFinancialActivitiesToAccountsApi.class);
+        jobs = retrofit.create(MifosxBatchJobsApi.class);
+        mixMappings = retrofit.create(MixMappingApi.class);
+        mixReports = retrofit.create(MixReportApi.class);
+        mixTaxonomies = retrofit.create(MixTaxonomyApi.class);
+        notes = retrofit.create(NotesApi.class);
+        notifications = retrofit.create(NotificationApi.class);
+        offices = retrofit.create(OfficesApi.class);
+        passwordPreferences = retrofit.create(PasswordPreferencesApi.class);
+        paymentTypes = retrofit.create(PaymentTypeApi.class);
+        periodicAccrualAccounting = retrofit.create(PeriodicAccrualAccountingApi.class);
+        permissions = retrofit.create(PermissionsApi.class);
+        selfPockets = retrofit.create(PocketApi.class);
+        provisioningCategories = retrofit.create(ProvisioningCategoryApi.class);
+        provisioningCriterias = retrofit.create(ProvisioningCriteriaApi.class);
+        provisioningEntries = retrofit.create(ProvisioningEntriesApi.class);
+        recurringDepositAccounts = retrofit.create(RecurringDepositAccountApi.class);
+        recurringDepositAccountTransactions = retrofit.create(RecurringDepositAccountTransactionsApi.class);
+        recurringDepositProducts = retrofit.create(RecurringDepositProductApi.class);
+        reportMailingJobs = retrofit.create(ReportMailingJobsApi.class);
+        reports = retrofit.create(ReportsApi.class);
+        roles = retrofit.create(RolesApi.class);
+        reportsRun = retrofit.create(RunReportsApi.class);
+        savingsAccounts = retrofit.create(SavingsAccountApi.class);
+        savingsAccountCharges = retrofit.create(SavingsChargesApi.class);
+        savingsProducts = retrofit.create(SavingsProductApi.class);
+        jobsScheduler = retrofit.create(SchedulerApi.class);
+        surveyScorecards = retrofit.create(ScoreCardApi.class);
+        search = retrofit.create(SearchApiApi.class);
+        selfAccountTransfers = retrofit.create(SelfAccountTransferApi.class);
+        selfAuthentication = retrofit.create(SelfAuthenticationApi.class);
+        selfClients = retrofit.create(SelfClientApi.class);
+        selfShareProducts = retrofit.create(SelfDividendApi.class);
+        selfLoanProducts = retrofit.create(SelfLoanProductsApi.class);
+        selfLoans = retrofit.create(SelfLoansApi.class);
+        selfReportsRun = retrofit.create(SelfRunReportApi.class);
+        selfSavingsAccounts = retrofit.create(SelfSavingsAccountApi.class);
+        selfSurveyScorecards = retrofit.create(SelfScoreCardApi.class);
+        selfRegistration = retrofit.create(SelfServiceRegistrationApi.class);
+        selfShareAccounts = retrofit.create(SelfShareAccountsApi.class);
+        selfSurveys = retrofit.create(SelfSpmApi.class);
+        selfThirdPartyBeneficiaries = retrofit.create(SelfThirdPartyTransferApi.class);
+        selfUser = retrofit.create(SelfUserApi.class);
+        selfUserDetails = retrofit.create(SelfUserDetailsApi.class);
+        shareAccounts = retrofit.create(ShareAccountApi.class);
+        surveyLookupTables = retrofit.create(SpmApiLookUpTableApi.class);
+        surveys = retrofit.create(SpmSurveysApi.class);
+        staff = retrofit.create(StaffApi.class);
+        standingInstructions = retrofit.create(StandingInstructionsApi.class);
+        standingInstructionsHistory = retrofit.create(StandingInstructionsHistoryApi.class);
+        taxComponents = retrofit.create(TaxComponentsApi.class);
+        taxGroups = retrofit.create(TaxGroupApi.class);
+        tellers = retrofit.create(TellerCashManagementApi.class);
+        templates = retrofit.create(UserGeneratedDocumentsApi.class);
+        users = retrofit.create(UsersApi.class);
+        workingDays = retrofit.create(WorkingDaysApi.class);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Create an implementation of the API endpoints defined by the {@code service} interface, using
+     * {@link Retrofit#create(Class)}. This method is typically not required to be invoked for standard API usage, but
+     * can be a handy back door for non-trivial advanced customizations of the API client if you have extended Fineract
+     * with your own REST APIs.
+     */
     public <S> S createService(Class<S> serviceClass) {
-        return api.createService(serviceClass);
+        return retrofit.create(serviceClass);
     }
 
     public static final class Builder {
 
-        private final ApiClient apiClient = new ApiClient();
+        private final JSON json = new JSON();
+        private final OkHttpClient.Builder okBuilder = new OkHttpClient.Builder();
+        private final Retrofit.Builder retrofitBuilder = new Retrofit.Builder().addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonCustomConverterFactory.create(json.getGson()));
+
         private String baseURL;
         private String tenant;
         private String username;
@@ -395,7 +409,7 @@ public final class FineractClient {
         public Builder logging(Level level) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(level);
-            apiClient.getOkBuilder().addInterceptor(logging);
+            okBuilder.addInterceptor(logging);
             return this;
         }
 
@@ -411,7 +425,7 @@ public final class FineractClient {
             // org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper
             if (insecure) {
                 HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;
-                apiClient.getOkBuilder().hostnameVerifier(insecureHostnameVerifier);
+                okBuilder.hostnameVerifier(insecureHostnameVerifier);
 
                 try {
                     X509TrustManager insecureX509TrustManager = new X509TrustManager() {
@@ -432,7 +446,7 @@ public final class FineractClient {
                     sslContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
                     SSLSocketFactory insecureSslSocketFactory = sslContext.getSocketFactory();
 
-                    apiClient.getOkBuilder().sslSocketFactory(insecureSslSocketFactory, insecureX509TrustManager);
+                    okBuilder.sslSocketFactory(insecureSslSocketFactory, insecureX509TrustManager);
                 } catch (NoSuchAlgorithmException | KeyManagementException e) {
                     throw new IllegalStateException("insecure() SSL configuration failed", e);
                 }
@@ -442,19 +456,21 @@ public final class FineractClient {
 
         public FineractClient build() {
             // URL
-            apiClient.getAdapterBuilder().baseUrl(has("baseURL", baseURL));
+            retrofitBuilder.baseUrl(has("baseURL", baseURL));
 
             // Tenant
             ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
             tenantAuth.setApiKey(has("tenant", tenant));
-            apiClient.addAuthorization("tenantid", tenantAuth);
+            okBuilder.addInterceptor(tenantAuth);
 
             // BASIC Auth
             HttpBasicAuth basicAuth = new HttpBasicAuth();
             basicAuth.setCredentials(has("username", username), has("password", password));
-            apiClient.addAuthorization("basicAuth", basicAuth);
+            okBuilder.addInterceptor(basicAuth);
 
-            return new FineractClient(apiClient);
+            retrofitBuilder.client(okBuilder.build());
+
+            return new FineractClient(retrofitBuilder.build());
         }
 
         /**
@@ -464,7 +480,7 @@ public final class FineractClient {
          * @return the {@link ApiClient} which {@link #build()} will use.
          */
         public retrofit2.Retrofit.Builder getRetrofitBuilder() {
-            return apiClient.getAdapterBuilder();
+            return retrofitBuilder;
         }
 
         /**
@@ -474,7 +490,7 @@ public final class FineractClient {
          * @return the {@link ApiClient} which {@link #build()} will use.
          */
         public okhttp3.OkHttpClient.Builder getOkBuilder() {
-            return apiClient.getOkBuilder();
+            return okBuilder;
         }
 
         private <T> T has(String propertyName, T value) throws IllegalStateException {

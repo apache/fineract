@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.apache.fineract.client.util.Calls.ok;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class FineractClientTest {
     @Test
     void testRetrieveAllClientsFromFineractDev() {
         FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").build();
+                .basicAuth("mifos", "password").logging(Level.BODY).build();
         checkClients(fineract);
     }
 
@@ -53,11 +54,10 @@ public class FineractClientTest {
         checkClients(fineract);
     }
 
-    @Test
-    @Disabled // TODO FINERACT-1220
+    @Test // FINERACT-1220
     void testOfficesDateFormat() {
         FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").insecure(true).build();
+                .basicAuth("mifos", "password").insecure(true).logging(Level.BODY).build();
         ok(fineract.offices.retrieveOffices(true, null, null));
     }
 
