@@ -22,6 +22,7 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
@@ -44,6 +46,20 @@ public class DataValidatorBuilder {
     private Integer arrayIndex;
     private Object value;
     private boolean ignoreNullValue = false;
+
+    /**
+     * Default constructor used to start a new "validation chain".
+     */
+    public DataValidatorBuilder() {
+        this(new ArrayList<>());
+    }
+
+    /**
+     * Constructor used to "continue" an existing "validation chain".
+     *
+     * @param dataValidationErrors
+     *            an existing list of {@link ApiParameterError} to add new validation errors to
+     */
 
     public DataValidatorBuilder(final List<ApiParameterError> dataValidationErrors) {
         this.dataValidationErrors = dataValidationErrors;
@@ -1103,4 +1119,15 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    /**
+     * Throws Exception if validation errors.
+     *
+     * @throws PlatformApiDataValidationException
+     *             unchecked exception (RuntimeException) thrown if there are any validation error
+     */
+    public void throwValidationErrors() throws PlatformApiDataValidationException {
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
 }
