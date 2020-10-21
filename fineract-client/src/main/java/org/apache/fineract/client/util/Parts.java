@@ -33,24 +33,26 @@ public final class Parts {
     private Parts() {}
 
     public static Part fromFile(File file) {
-        RequestBody rb = RequestBody.create(file, getMediaType(file.getName()));
+        RequestBody rb = RequestBody.create(file, mediaType(file.getName()));
         return Part.createFormData("file", file.getName(), rb);
     }
 
     public static Part fromFile(String fileName, byte[] bytes) {
-        RequestBody rb = RequestBody.create(bytes, getMediaType(fileName));
+        RequestBody rb = RequestBody.create(bytes, mediaType(fileName));
         return Part.createFormData("file", fileName, rb);
     }
 
+    // package local, for unit testing
     // TODO this logic should be on the Server, not have to be done by the client...
-    // There actually does seem to be some code related to MIME type guessing in Fineract, but test shows it doesn't
-    // work :(
-    private static MediaType getMediaType(String fileName) {
+    static MediaType mediaType(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
         int dotPos = fileName.lastIndexOf('.');
         if (dotPos == -1) {
             return null;
         }
-        String ext = fileName.substring(dotPos);
+        String ext = fileName.substring(dotPos + 1);
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
         switch (ext) {
             case "jpg":
