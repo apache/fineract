@@ -130,4 +130,9 @@ public final class ApiParameterError {
     public List<ApiErrorMessageArg> getArgs() {
         return this.args;
     }
+
+    @Override
+    public String toString() {
+        return "ApiParameterError{developerMessage=" + developerMessage + "; ... }";
+    }
 }

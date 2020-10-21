@@ -103,7 +103,7 @@ public class DocumentManagementApiResource {
             + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
-    public String retreiveAllDocuments(@Context final UriInfo uriInfo,
+    public String retrieveAllDocuments(@Context final UriInfo uriInfo,
             @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
