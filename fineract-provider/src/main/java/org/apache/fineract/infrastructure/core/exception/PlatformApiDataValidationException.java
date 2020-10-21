@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.exception;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 
 /**
  * Exception thrown when problem with an API request to the platform.
@@ -28,6 +29,12 @@ public class PlatformApiDataValidationException extends AbstractPlatformExceptio
 
     private final List<ApiParameterError> errors;
 
+    /**
+     * Constructor. Consider simply using {@link DataValidatorBuilder#throwValidationErrors()} directly.
+     *
+     * @param errors
+     *            list of {@link ApiParameterError} to throw
+     */
     public PlatformApiDataValidationException(List<ApiParameterError> errors) {
         super("validation.msg.validation.errors.exist", "Validation errors exist.");
         this.errors = errors;

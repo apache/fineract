@@ -52,24 +52,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("{entity}/{entityId}/images")
 @Component
 @Scope("singleton")
-
+@Path("{entity}/{entityId}/images")
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
     private final ImageWritePlatformService imageWritePlatformService;
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final FileUploadValidator fileUploadValidator;
 
     @Autowired
     public ImagesApiResource(final PlatformSecurityContext context, final ImageReadPlatformService readPlatformService,
-            final ImageWritePlatformService imageWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
+            final ImageWritePlatformService imageWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer,
+            final FileUploadValidator fileUploadValidator) {
         this.context = context;
         this.imageReadPlatformService = readPlatformService;
         this.imageWritePlatformService = imageWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.fileUploadValidator = fileUploadValidator;
     }
 
     /**
@@ -82,6 +84,7 @@ public class ImagesApiResource {
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
         validateEntityTypeforImage(entityName);
+        fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
         // and clients not setting mime type
@@ -103,6 +106,7 @@ public class ImagesApiResource {
     public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             final String jsonRequestBody) {
         validateEntityTypeforImage(entityName);
+
         final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
 
         final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(entityName, entityId, base64EncodedImage);
@@ -140,7 +144,7 @@ public class ImagesApiResource {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
-        byte[] resizedImage = imageData.getContentOfSize(maxWidth, maxHeight);
+        final byte[] resizedImage = imageData.getContentOfSize(maxWidth, maxHeight);
         final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImage);
         return Response.ok(clientImageAsBase64Text).build();
     }
@@ -161,7 +165,7 @@ public class ImagesApiResource {
         final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
 
         final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
-        String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
+        final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
         response.header("Content-Disposition",
                 dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");
 
