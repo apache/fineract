@@ -32,6 +32,7 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Deprecated // replaced by new ImageTest, can be deleted as FINERACT-1209 is fully implemented
 public class StaffImageApiTest {
 
     private RequestSpecification requestSpec;

@@ -24,6 +24,7 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated // replaced by new ImageTest, can be deleted as FINERACT-1209 is fully implemented
 public final class ImageHelper {
 
     private ImageHelper() {

@@ -69,6 +69,7 @@ import org.apache.fineract.client.services.GlobalConfigurationApi;
 import org.apache.fineract.client.services.GroupsApi;
 import org.apache.fineract.client.services.HolidaysApi;
 import org.apache.fineract.client.services.HooksApi;
+import org.apache.fineract.client.services.ImagesApi;
 import org.apache.fineract.client.services.InterestRateChartApi;
 import org.apache.fineract.client.services.InterestRateSlabAKAInterestBandsApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
@@ -194,6 +195,7 @@ public final class FineractClient {
     public final GroupsApi groups;
     public final HolidaysApi holidays;
     public final HooksApi hooks;
+    public final ImagesApi images;
     public final InterestRateChartApi interestRateCharts;
     public final InterestRateSlabAKAInterestBandsApi interestRateChartLabs;
     public final JournalEntriesApi journalEntries;
@@ -301,6 +303,7 @@ public final class FineractClient {
         groups = retrofit.create(GroupsApi.class);
         holidays = retrofit.create(HolidaysApi.class);
         hooks = retrofit.create(HooksApi.class);
+        images = retrofit.create(ImagesApi.class);
         interestRateCharts = retrofit.create(InterestRateChartApi.class);
         interestRateChartLabs = retrofit.create(InterestRateSlabAKAInterestBandsApi.class);
         journalEntries = retrofit.create(JournalEntriesApi.class);
