@@ -147,6 +147,15 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  */
 public final class FineractClient {
 
+    /**
+     * Constant to be used in requests where Fineract's API requires a dateFormat to be given. This matches the format
+     * in which LocalDate instances are serialized. (BTW: In a Java client API, it seems weird to have strong LocalDate
+     * (not String) instances, and then have to specify its format, see
+     * https://issues.apache.org/jira/browse/FINERACT-1233.)
+     */
+    // Matching org.apache.fineract.client.util.JSON.LocalDateTypeAdapter.formatter
+    public static final String DATE_FORMAT = "yyyy-mm-dd";
+
     private final Retrofit retrofit;
 
     public final AccountingClosureApi glClosures;

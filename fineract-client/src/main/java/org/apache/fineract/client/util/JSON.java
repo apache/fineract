@@ -97,22 +97,21 @@ class JSON {
     }
 
     /**
-     * GSON TypeAdapter for JSR-310 LocalDate type in Fineract API Format (<tt>[2009,1,1]</tt>).
+     * GSON TypeAdapter for JSR-310 LocalDate type, which Fineract API's RETURNS as JSON array in the
+     * <tt>[2009,1,1]</tt> format, but EXPECTS as String not Array and with a locale and dateFormat. Weird, but so it is
+     * (see FINERACT-1220 & FINERACT-1233).
      */
     public static class LocalDateTypeAdapter extends TypeAdapter<LocalDate> {
 
-        // Now unused: private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        // NB this format is referenced from org.apache.fineract.client.util.FineractClient.DATE_FORMAT
+        private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
         @Override
         public void write(JsonWriter out, LocalDate date) throws IOException {
             if (date == null) {
                 out.nullValue();
             } else {
-                out.beginArray();
-                out.value(date.getYear());
-                out.value(date.getMonthValue());
-                out.value(date.getDayOfMonth());
-                out.endArray();
+                out.value(formatter.format(date));
             }
         }
 
