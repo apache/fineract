@@ -56,6 +56,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     ]
     generateModelTests = false
     generateApiTests = false
+    ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
     // trick to make sure fineract.yaml is generated first
     dependsOn = [
         ':fineract-provider:compileJava'
