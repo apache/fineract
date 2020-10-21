@@ -121,7 +121,7 @@ public final class ContentRepositoryUtils {
     public static void validateImageMimeType(final String mimeType) {
         if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue())
                 || mimeType.equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) {
-            throw new ImageUploadException();
+            throw new ImageUploadException(mimeType);
         }
     }
 
