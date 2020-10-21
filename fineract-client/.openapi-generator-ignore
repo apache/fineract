@@ -9,3 +9,8 @@
 **/gradle*
 **/gradle
 **/src/main/AndroidManifest.xml
+
+# https://issues.apache.org/jira/browse/FINERACT-1231
+**/client/*.java
+!**/client/CollectionFormats.java
+!**/client/StringUtil.java
