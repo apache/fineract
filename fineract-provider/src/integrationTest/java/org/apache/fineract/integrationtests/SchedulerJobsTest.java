@@ -33,6 +33,7 @@ import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SchedulerJobsTest {
@@ -78,6 +79,7 @@ public class SchedulerJobsTest {
     }
 
     @Test
+    @Disabled // TODO FINERACT-1167
     public void testFlippingSchedulerStatus() throws InterruptedException {
         // Retrieving Status of Scheduler
         Boolean schedulerStatus = schedulerJobHelper.getSchedulerStatus();
