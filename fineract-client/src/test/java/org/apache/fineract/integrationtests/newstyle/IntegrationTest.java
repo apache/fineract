@@ -39,6 +39,8 @@ import org.apache.fineract.client.testutil.CallSubject;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 import retrofit2.Call;
 
@@ -47,6 +49,8 @@ import retrofit2.Call;
  *
  * @author Michael Vorburger.ch
  */
+// Allow keeping state between tests
+@TestInstance(Lifecycle.PER_CLASS)
 // TODO Remove @TestMethodOrder when https://github.com/junit-team/junit5/issues/1919 is available
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class IntegrationTest {
@@ -60,7 +64,7 @@ public abstract class IntegrationTest {
             // TODO change from Fineract.dev to https://localhost:8443/fineract-provider/api/v1/ after FINERACT-1209
             String url = System.getProperty("fineract.it.url", "https://demo.fineract.dev/fineract-provider/api/v1/");
             fineract = FineractClient.builder().baseURL(url).tenant("default").basicAuth("mifos", "password").insecure(true)
-                    .logging(Level.BODY).build();
+                    .logging(Level.NONE).build();
         }
         return fineract;
     }
