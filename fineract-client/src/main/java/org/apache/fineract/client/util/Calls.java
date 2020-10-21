@@ -42,15 +42,18 @@ public final class Calls {
      *             [200..300) successful
      */
     public static <T> T ok(Call<T> call) throws CallFailedRuntimeException {
-        Response<T> response;
-        try {
-            response = call.execute();
-        } catch (IOException e) {
-            throw new CallFailedRuntimeException(call, e);
-        }
+        Response<T> response = executeU(call);
         if (response.isSuccessful()) {
             return response.body();
         }
         throw new CallFailedRuntimeException(call, response);
+    }
+
+    public static <T> Response<T> executeU(Call<T> call) throws CallFailedRuntimeException {
+        try {
+            return call.execute();
+        } catch (IOException e) {
+            throw new CallFailedRuntimeException(call, e);
+        }
     }
 }
