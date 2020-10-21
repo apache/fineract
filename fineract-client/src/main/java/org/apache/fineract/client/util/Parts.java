@@ -37,7 +37,7 @@ public final class Parts {
         return Part.createFormData("file", file.getName(), rb);
     }
 
-    public static Part fromFile(String fileName, byte[] bytes) {
+    public static Part fromBytes(String fileName, byte[] bytes) {
         RequestBody rb = RequestBody.create(bytes, mediaType(fileName));
         return Part.createFormData("file", fileName, rb);
     }

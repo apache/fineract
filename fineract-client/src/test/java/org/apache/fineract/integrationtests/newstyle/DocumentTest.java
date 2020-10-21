@@ -43,7 +43,7 @@ public class DocumentTest extends IntegrationTest {
 
     @Test
     @Order(1)
-    void retrieveAllDocuments() throws IOException {
+	void retrieveAllDocuments() {
         assertThat(ok(fineract().documents.retrieveAllDocuments("clients", clientId))).isNotNull();
     }
 
@@ -100,14 +100,14 @@ public class DocumentTest extends IntegrationTest {
 
     @Test
     @Order(99)
-    void deleteDocument() throws IOException {
+    void deleteDocument() {
         ok(fineract().documents.deleteDocument("clients", clientId, documentId));
         assertThat(fineract().documents.getDocument("clients", clientId, documentId)).hasHttpStatus(404);
     }
 
     @Order(9999)
     @Test // FINERACT-1036
-    void createDocumentBadArgs() throws IOException {
+    void createDocumentBadArgs() {
         assertThat(fineract().documents.createDocument("clients", 123L, null, "test.pdf", null)).hasHttpStatus(400);
     }
 }
