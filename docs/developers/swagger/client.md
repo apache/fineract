@@ -19,13 +19,11 @@ System.out.println(ok(fineract.clients.retrieveAll(...).getTotalFilteredRecords(
 
 ## Generate API Client
 
-The API client is built as part of the overall Fineract Gradle build. If you want to save (maybe) some time you can try to execute just the following line in root directory of the project:
+The API client is built as part of the standard overall Fineract Gradle build.  The client JAR can be found in `fineract-client/build/libs` as `fineract-client.jar`.
 
-- Run `./gradlew :fineract-client:build`
+ If you need to save time to incrementally work on making small changes to Swagger annotations in an IDE, you can execute e.g. the following line in root directory of the project to exclude non-require Gradle tasks:
 
-The client JAR can be found in `fineract-client/build/libs`.
-
-Note: Build only `fineract-client` may or may not actually save you some build time. There are still project module dependencies that might trigger a complete build.
+    ./gradlew -x compileJava -x compileTest -x spotlessJava -x enhance resolve prepareInputYaml :fineract-client:buildJavaSdk
 
 ## Validate OpenAPI Spec File
 
