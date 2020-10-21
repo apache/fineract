@@ -31,7 +31,6 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
-import org.apache.fineract.client.ApiClient;
 import org.apache.fineract.client.auth.ApiKeyAuth;
 import org.apache.fineract.client.auth.HttpBasicAuth;
 import org.apache.fineract.client.services.AccountNumberFormatApi;
@@ -57,7 +56,7 @@ import org.apache.fineract.client.services.CodesApi;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.services.DefaultApi;
-import org.apache.fineract.client.services.DocumentsApi;
+import org.apache.fineract.client.services.DocumentsApiFixed;
 import org.apache.fineract.client.services.EntityDataTableApi;
 import org.apache.fineract.client.services.EntityFieldConfigurationApi;
 import org.apache.fineract.client.services.ExternalServicesApi;
@@ -182,7 +181,7 @@ public final class FineractClient {
     public final CurrencyApi currencies;
     public final DataTablesApi dataTables;
     public final @Deprecated DefaultApi legacy; // TODO FINERACT-1222
-    public final DocumentsApi documents;
+    public final DocumentsApiFixed documents;
     public final EntityDataTableApi entityDatatableChecks;
     public final EntityFieldConfigurationApi entityFieldConfigurations;
     public final ExternalServicesApi externalServices;
@@ -289,7 +288,7 @@ public final class FineractClient {
         currencies = retrofit.create(CurrencyApi.class);
         dataTables = retrofit.create(DataTablesApi.class);
         legacy = retrofit.create(DefaultApi.class);
-        documents = retrofit.create(DocumentsApi.class);
+        documents = retrofit.create(DocumentsApiFixed.class);
         entityDatatableChecks = retrofit.create(EntityDataTableApi.class);
         entityFieldConfigurations = retrofit.create(EntityFieldConfigurationApi.class);
         externalServices = retrofit.create(ExternalServicesApi.class);
