@@ -49,7 +49,7 @@ public class DocumentTest extends IntegrationTest {
 
     @Test
     @Order(2)
-    void createDocument() throws IOException {
+    void createDocument() {
         String name = "Test";
         Part part = Parts.fromFile(testFile);
         String description = null;
@@ -63,7 +63,7 @@ public class DocumentTest extends IntegrationTest {
 
     @Test
     @Order(3)
-    void getDocument() throws IOException {
+    void getDocument() {
         GetEntityTypeEntityIdDocumentsResponse doc = ok(fineract().documents.getDocument("clients", clientId, documentId));
         assertThat(doc.getName()).isEqualTo("Test");
         assertThat(doc.getFileName()).isEqualTo(testFile.getName());
@@ -72,9 +72,8 @@ public class DocumentTest extends IntegrationTest {
         assertThat(doc.getParentEntityType()).isEqualTo("clients");
         assertThat(doc.getParentEntityId()).isEqualTo(clientId);
         // TODO huh?! It's more than uploaded file; seems like a bug - it's including create body, not just file size
-        assertThat(doc.getSize()).isEqualTo(testFile.length() + 385);
-        // TODO huh?! MIME is always text/plain instead of image/jpeg... :(
-        assertThat(doc.getType()).isEqualTo("text/plain");
+        assertThat(doc.getSize()).isEqualTo(testFile.length() + 411);
+        assertThat(doc.getType()).isEqualTo("image/jpeg");
         // TODO doc.getStorageType() shouldn't be exposed by the API?!
     }
 
@@ -82,15 +81,14 @@ public class DocumentTest extends IntegrationTest {
     @Order(4)
     void downloadFile() throws IOException {
         ResponseBody r = ok(fineract().documents.downloadFile("clients", clientId, documentId));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain")); // TODO wrong, bug; needs to be "image/jpeg"
-                                                                            // (as above)
+        assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
         assertThat(r.bytes().length).isEqualTo(testFile.length());
         // NOK: assertThat(r.contentLength()).isEqualTo(testFile.length());
     }
 
     @Test
     @Order(10)
-    void updateDocument() throws IOException {
+    void updateDocument() {
         String newName = "Test changed name";
         String newDescription = getClass().getName();
         ok(fineract().documents.updateDocument("clients", clientId, documentId, null, newName, newDescription));
