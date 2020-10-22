@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.loanaccount.guarantor;
+package org.apache.fineract.integrationtests.guarantor;
 
 import com.google.gson.Gson;
 import java.util.HashMap;

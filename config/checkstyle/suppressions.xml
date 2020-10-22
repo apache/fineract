@@ -27,4 +27,6 @@
 
 <suppressions>
     <suppress files="[/\\]build[/\\]generated[/\\]" checks=".*"/>
+    <!-- TODO: fix integration test formatting -->
+    <suppress files="[/\\]integration-tests[/\\]src[/\\]test[/\\]main[/\\]" checks=".*"/>
 </suppressions>
