@@ -19,7 +19,7 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.5'
+        jacocoVersion = '0.8.6'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.7.2'
         oltuVersion = '1.0.1'
@@ -27,6 +27,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-provider',
+                'integration-tests',
                 'fineract-client'
             ].contains(it.name)
         }
@@ -88,6 +89,8 @@ allprojects  {
     dependencyManagement {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.0'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.4.RELEASE'
+            mavenBom 'org.junit:junit-bom:5.7.0'
         }
 
         dependencies {
@@ -359,19 +362,9 @@ configure(project.fineractJavaProjects) {
     sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
     sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
-    sourceSets {
-        integrationTest {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-        }
-    }
-
     configurations {
         implementation.setCanBeResolved(true)
         api.setCanBeResolved(true)
-
-        integrationTestCompile.extendsFrom testImplementation
-        integrationTestRuntime.extendsFrom testRuntime
     }
 
     tasks.withType(JavaCompile) {
@@ -416,6 +409,11 @@ configure(project.fineractJavaProjects) {
 
     // Configuration for the spotless plugin
     // https://github.com/diffplug/spotless/tree/main/plugin-gradle
+    dependencies {
+        spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar'
+        spotbugs 'com.github.spotbugs:spotbugs:4.1.4'
+    }
+
     spotless {
         java {
             targetExclude '**/build/**', '**/bin/**', '**/out/**'
@@ -625,14 +623,6 @@ configure(project.fineractJavaProjects) {
         }
     }
     spotbugsTest {
-        reports {
-            html {
-                enabled = true
-                stylesheet = 'fancy-hist.xsl'
-            }
-        }
-    }
-    spotbugsIntegrationTest {
         reports {
             html {
                 enabled = true

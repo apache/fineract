@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name="fineract"
+rootProject.name='fineract'
 include ':fineract-provider'
+include ':integration-tests'
 include ':fineract-client'

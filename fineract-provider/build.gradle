@@ -21,10 +21,9 @@ description = 'Fineract Provider'
 apply plugin: 'rebel'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'com.bmuschko.cargo'
 apply plugin: 'openjpa'
-apply plugin: "com.gorylenko.gradle-git-properties"
-apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
+apply plugin: 'com.gorylenko.gradle-git-properties'
+apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 
@@ -176,51 +175,6 @@ war {
     enabled = true
 }
 
-// Configuration for the Gradle Cargo plugin
-// https://github.com/bmuschko/gradle-cargo-plugin
-configurations
-{
-    tomcat
-}
-
-dependencies {
-    tomcat "org.apache.tomcat:tomcat:9.0.39@zip"
-}
-
-cargo {
-    containerId "tomcat9x"
-
-    // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
-    deployable {
-        file = file("${buildDir}/libs/fineract-provider.war")
-        context = 'fineract-provider'
-    }
-
-    local {
-        installer {
-            installConfiguration = configurations.tomcat
-            downloadDir = file("$buildDir/download")
-            extractDir = file("$buildDir/tomcat")
-        }
-        startStopTimeout = 240000
-        containerProperties {
-            property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
-            property 'cargo.tomcat.connector.keystorePass', 'openmf'
-            property 'cargo.tomcat.httpSecure', true
-            property 'cargo.tomcat.connector.sslProtocol', 'TLS'
-            property 'cargo.tomcat.connector.clientAuth', false
-            property 'cargo.protocol', 'https'
-            property 'cargo.servlet.port', 8443
-        }
-    }
-}
-
-cargoRunLocal.dependsOn war
-cargoStartLocal.dependsOn war
-cargoStartLocal.mustRunAfter "integrationTestClasses"
-cargoStartLocal.mustRunAfter "enhance"
-cargoStartLocal.mustRunAfter "resolve"
-
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
@@ -239,25 +193,6 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
                 exclude '**/core/boot/tests/**'
             }
         }
-    }
-}
-
-task integrationTest(type:Test) {
-    description = "Run integration tests (located in src/integrationTest/java). Starts Tomcat in daemon mode before executing the tests (and stops it after)."
-    dependsOn cargoStartLocal
-    finalizedBy cargoStopLocal
-
-    testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
-    classpath = project.sourceSets.integrationTest.runtimeClasspath
-}
-
-integrationTest {
-    useJUnitPlatform()
-    testLogging {
-        // FINERACT-927
-        events "skipped", "failed"
-        showStandardStreams = false
-        exceptionFormat "full"
     }
 }
 
