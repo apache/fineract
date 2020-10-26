@@ -154,7 +154,7 @@ public final class FineractClient {
      * https://issues.apache.org/jira/browse/FINERACT-1233.)
      */
     // Matching org.apache.fineract.client.util.JSON.LocalDateTypeAdapter.formatter
-    public static final String DATE_FORMAT = "yyyy-mm-dd";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private final Retrofit retrofit;
 
