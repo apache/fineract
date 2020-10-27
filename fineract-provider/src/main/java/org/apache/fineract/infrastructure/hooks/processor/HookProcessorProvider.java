@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.hooks.processor;
 
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.elasticSearchTemplateName;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsTemplateName;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.webTemplateName;
 
@@ -44,6 +45,8 @@ public class HookProcessorProvider implements ApplicationContextAware {
             processor = this.applicationContext.getBean("twilioHookProcessor", TwilioHookProcessor.class);
         } else if (templateName.equals(webTemplateName)) {
             processor = this.applicationContext.getBean("webHookProcessor", WebHookProcessor.class);
+        } else if (templateName.equals(elasticSearchTemplateName)) {
+            processor = this.applicationContext.getBean("elasticSearchHookProcessor", ElasticSearchHookProcessor.class);
         } else {
             processor = null;
         }
