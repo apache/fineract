@@ -38,6 +38,8 @@ public final class HookApiConstants {
 
     public static final String webTemplateName = "Web";
 
+    public static final String elasticSearchTemplateName = "Elastic Search";
+
     public static final String smsTemplateName = "SMS Bridge";
 
     public static final String payloadURLName = "Payload URL";
