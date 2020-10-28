@@ -1,0 +1,41 @@
+@startmindmap
+!includeurl https://cdn.jsdelivr.net/gh/HSLdevcom/hsl-plantuml-theme/hsl-theme.iuml
+
+title Crosscutting Concepts
+
++ Crosscutting Concepts
+++ Under the hood
++++ Persistence
++++ Process Control
++++ Transaction handling
++++ Session handling
++++ Communication and Integration
++++ Exception and error handling
++++ Parallelization / Threading
++++ Plausibility checks and validation
++++ Business Rules
++++ Batch
++++ Reporting
+++ Operation Concepts
++++ Administration
++++ Management
++++ Disaster-Recovery
++++ Skalierung
++++ Clusterring
++++ Monitoring, Logging, Protocolling
++++ High Availability
+-- Domain Concepts
+-- Architecture and Design Patterns
+-- User Experience (UX)
+--- User Interface
+--- Ergonomics
+--- Internationalization
+-- Security and Safety
+--- Security
+--- Safety
+-- Development Concepts
+--- Build, Test, Deploy
+--- Code generation
+--- Migration
+--- Configurability
+@endmindmap

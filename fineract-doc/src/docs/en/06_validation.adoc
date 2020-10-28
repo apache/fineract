@@ -1,0 +1,34 @@
+== Validation
+
+=== Programmatic
+
+Use the [DataValidatorBuilder](https://github.com/apache/fineract/search?q=%22class+DataValidatorBuilder%22), e.g. like so:
+
+[source,java]
+----
+new DataValidatorBuilder().resource("fileUpload")
+    .reset().parameter("Content-Length").value(contentLength).notBlank().integerGreaterThanNumber(0)
+    .reset().parameter("FormDataContentDisposition").value(fileDetails).notNull()
+    .throwValidationErrors();
+----
+
+Such code is often encapsulated in [`*Validator`](https://github.com/apache/fineract/search?q=Validator)
+classes (if more than a few lines, and/or reused from several places; avoid copy/paste), like so:
+
+[source,java]
+----
+public class YourThingValidator {
+
+    public void validate(YourThing thing) {
+        new DataValidatorBuilder().resource("yourThing")
+        ...
+        .throwValidationErrors();
+    }
+}
+----
+
+
+=== Declarative
+
+[FINERACT-1229](https://issues.apache.org/jira/browse/FINERACT-1229) is an open issue about adopting
+Bean Validation for _declarative_ instead of _programmatic_ (as above) validation.  Contributions welcome!

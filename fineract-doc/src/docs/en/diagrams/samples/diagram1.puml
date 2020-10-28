@@ -1,0 +1,104 @@
+@startuml
+' see: https://github.com/awslabs/aws-icons-for-plantuml
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/master/dist
+!includeurl AWSPuml/AWSCommon.puml
+!includeurl AWSPuml/EndUserComputing/all.puml
+!includeurl AWSPuml/Storage/SimpleStorageServiceS3.puml
+
+' see: https://github.com/aheil/EIP-PlantUML
+!includeurl https://raw.githubusercontent.com/aheil/EIP-PlantUML/main/dist/EIP-PlantUML.puml
+
+' see: https://github.com/Roemer/plantuml-office
+!define ICONURL https://raw.githubusercontent.com/Roemer/plantuml-office/master/office2014
+!includeurl ICONURL/Servers/database_server.puml
+!includeurl ICONURL/Servers/application_server.puml
+!includeurl ICONURL/Concepts/firewall_orange.puml
+!includeurl ICONURL/Clouds/cloud_disaster_red.puml
+
+' https://github.com/tupadr3/plantuml-icon-font-sprites
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.1.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/devicons/mysql.puml
+!includeurl ICONURL/font-awesome/database.puml
+!includeurl ICONURL/font-awesome-5/database.puml
+
+' https://github.com/rabelenda/cicon-plantuml-sprites
+!define SPRITESURL https://raw.githubusercontent.com/rabelenda/cicon-plantuml-sprites/v1.0/sprites
+!includeurl SPRITESURL/tomcat.puml
+!includeurl SPRITESURL/kafka.puml
+!includeurl SPRITESURL/java.puml
+!includeurl SPRITESURL/cassandra.puml
+
+' https://github.com/RicardoNiepel/Azure-PlantUML
+!define AzurePuml https://raw.githubusercontent.com/RicardoNiepel/Azure-PlantUML/release/2-1/dist
+!includeurl AzurePuml/AzureCommon.puml
+!includeurl AzurePuml/Databases/all.puml
+!includeurl AzurePuml/Compute/AzureFunction.puml
+
+' Remove shadows
+skinparam shadowing true
+
+actor "Person" as personAlias1
+AzureFunction(functionAlias, "Label", "Technology", "Optional Description")
+AzureCosmosDb(cosmosDbAlias, "Label", "Technology", "Optional Description")
+
+personAlias1 --> functionAlias
+functionAlias --> cosmosDbAlias
+
+rectangle "<$tomcat>\nwebapp" as webapp
+queue "<$kafka>" as kafka
+rectangle "<$java>\ndaemon" as daemon
+database "<$cassandra>" as cassandra
+
+webapp -> kafka
+kafka -> daemon
+daemon --> cassandra
+
+DEV_MYSQL(db)
+DEV_MYSQL(db4,label of db4,database,red) #DeepSkyBlue
+
+MsgChannel(channel1, "Channel 1")
+MsgChannel(channel2, "Channel 2")
+Message(msg, "Message")
+
+Send(channel1, msg)
+Send(msg, channel2)
+
+rectangle System1
+rectangle System2
+rectangle System3
+
+Message(source)
+Message(target)
+
+ControlBus("cb")
+
+Send(source, System1)
+Send(System1, System2)
+Send(System2, System3)
+Send(System3, target)
+
+System1 <--> cb
+System2 <--> cb
+System3 <--> cb
+
+SimpleStorageServiceS3(storageAlias, "Label", "Technology", "Optional Description")
+
+actor User
+[Third party application] as ThirdPartyApp
+
+package "Spring Boot Application" {
+    rectangle Controllers <<Spring REST controllers>>
+    rectangle DataStoreService <<Spring service>>
+    rectangle Repository <<Spring repository>>
+}
+
+User --> Controllers
+ThirdPartyApp --> Controllers
+storageAlias --> Controllers
+
+Controllers --> DataStoreService
+DataStoreService --> Repository
+
+@enduml
