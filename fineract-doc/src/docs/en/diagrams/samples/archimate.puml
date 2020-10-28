@@ -1,0 +1,64 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/ebbypeter/Archimate-PlantUML/master/Archimate.puml
+'!include <archimate/Archimate.puml>
+
+title Archimate Example - Relationships
+
+'LAYOUT_AS_SKETCH
+'LAYOUT_LEFT_RIGHT
+'LAYOUT_TOP_DOWN
+
+Business_Service(Service01, "Service 01")
+Application_Service(Service02, "Service 02")
+Technology_Service(Service03, "Service03")
+
+Rel_Composition_Right(Service01, Service02, "Composition")
+Rel_Aggregation(Service01, Service02, "Aggregation")
+Rel_Assignment(Service01, Service02, "Assignment")
+Rel_Specialization(Service01, Service02, "Specialization")
+Rel_Serving(Service01, Service02, "Serving")
+Rel_Association(Service02, Service03, "Association")
+Rel_Flow(Service02, Service03, "Flow")
+Rel_Realization(Service02, Service03, "Realization")
+Rel_Triggering(Service02, Service03, "Triggering")
+Rel_Access(Service02, Service03, "Access")
+Rel_Influence(Service02, Service03, " + Influence")
+
+Grouping(Example01, "Example 01"){
+    Strategy_Capability(TestCapability01, "Test Capability")
+    Business_Product(TestProduct01, "Test Product")
+    Application_Service(TestService01, "Test Service")
+    Technology_Device(TestDevice01, "Test Device")
+
+    Rel_Composition(TestCapability01, TestProduct01, "C-P")
+    Rel_Composition_Down(TestProduct01, TestService01, "P-S")
+    Rel_Composition_Left(TestService01, TestDevice01, "S-D")
+    Rel_Composition_Up(TestDevice01, TestCapability01, "D-C")
+}
+
+Lay_D(Service01, Example01)
+
+Group(Example02, "Group Type 02"){
+    Motivation_Stakeholder(StakeholderElement, "Stakeholder Description")
+    Business_Service(BService, "Business Service")
+}
+
+Motivation_Requirement(ReqPayrollStandard, "Do Payroll with a standard system")
+Motivation_Requirement(ReqBudgetPlanning, "Do budget planning within the ERP system")
+
+Application_Service(ASPayroll,"Payroll Service")
+Application_Service(ASBudgetPlanning,"Budget Planning Service")
+Application_Component(ACSAPFinanceAccRec, "SAP Finance - Accounts Recievables")
+Application_Component(ACSAPHR, "SAP Human Resources")
+Application_Component(ACSAPFin, "SAP Finance")
+Application_Component(ACSAP,"SAP")
+
+Rel_Realization_Up(ASPayroll, ReqPayrollStandard)
+Rel_Realization_Up(ASBudgetPlanning, ReqBudgetPlanning)
+Rel_Realization_Up(ACSAPFinanceAccRec, ASBudgetPlanning)
+Rel_Realization_Up(ACSAPHR, ASPayroll)
+
+Rel_Composition_Up(ACSAPFin, ACSAPFinanceAccRec)
+Rel_Composition_Up(ACSAP, ACSAPHR)
+Rel_Composition_Up(ACSAP, ACSAPFin)
+@enduml

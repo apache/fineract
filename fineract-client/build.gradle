@@ -18,8 +18,6 @@
  */
 description = 'Fineract Client'
 
-ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/swagger-ui/fineract.yaml".toString()
-
 apply plugin: 'org.openapi.generator'
 
 apply from: 'dependencies.gradle'

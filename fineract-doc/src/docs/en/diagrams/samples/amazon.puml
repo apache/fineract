@@ -1,0 +1,47 @@
+@startuml
+!include <awslib/AWSCommon>
+
+' Uncomment the following line to create simplified view
+!include <awslib/AWSSimplified>
+
+!include <awslib/General/Users>
+!include <awslib/Mobile/APIGateway>
+!include <awslib/SecurityIdentityAndCompliance/Cognito>
+!include <awslib/Compute/Lambda>
+!include <awslib/Database/DynamoDB>
+!include <awslib/Storage/SimpleStorageServiceS3>
+!include <awslib/InternetOfThings/IoTRule>
+!include <awslib/InternetOfThings/IoTAction>
+!include <awslib/Analytics/KinesisDataStreams>
+!include <awslib/ApplicationIntegration/SQSQueue>
+
+left to right direction
+
+agent "Published Event" as event #fff
+
+IoTRule(iotRule, "Action Error Rule", "error if Kinesis fails")
+KinesisDataStreams(eventStream, "IoT Events", "2 shards")
+SQSQueue(errorQueue, "Rule Error Queue", "failed Rule actions")
+
+event --> iotRule : JSON message
+iotRule --> eventStream : messages
+iotRule --> errorQueue : Failed action message
+
+Users(sources, "Events", "millions of users")
+APIGateway(votingAPI, "Voting API", "user votes")
+Cognito(userAuth, "User Authentication", "jwt to submit votes")
+Lambda(generateToken, "User Credentials", "return jwt")
+Lambda(recordVote, "Record Vote", "enter or update vote per user")
+DynamoDB(voteDb, "Vote Database", "one entry per user")
+
+SimpleStorageServiceS3(s3_partner, "Vendor's S3", "Technology", "Optional Description")
+SimpleStorageServiceS3(s3_internal, "Internal", "Technology", "Optional Description")
+
+s3_internal <- s3_partner
+
+sources --> userAuth
+sources --> votingAPI
+userAuth <--> generateToken
+votingAPI --> recordVote
+recordVote --> voteDb
+@enduml
