@@ -18,27 +18,22 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.data;
 
+import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ImageData {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImageData.class);
 
     private final String location;
     private final StorageType storageType;
     private final String entityDisplayName;
 
     private File file;
+    private ByteSource byteSource;
     private ContentRepositoryUtils.ImageFileExtension fileExtension;
-    private InputStream inputStream;
 
     public ImageData(final String location, final StorageType storageType, final String entityDisplayName) {
         this.location = location;
@@ -63,19 +58,15 @@ public class ImageData {
         }
     }
 
-    public void updateContent(final InputStream objectContent) {
-        this.inputStream = objectContent;
+    public void updateContent(final ByteSource byteSource) {
+        this.byteSource = byteSource;
     }
 
-    public InputStream getInputStream() {
+    public ByteSource getByteSource() {
         if (this.file != null) {
-            try {
-                return new FileInputStream(this.file);
-            } catch (FileNotFoundException e) {
-                throw new IllegalStateException("FileNotFoundException: " + file, e);
-            }
+            return Files.asByteSource(file);
         }
-        return this.inputStream;
+        return this.byteSource;
     }
 
     public String contentType() {

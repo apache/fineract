@@ -29,8 +29,10 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -109,8 +111,14 @@ public class S3ContentRepository implements ContentRepository {
 
     @Override
     public ImageData fetchImage(final ImageData imageData) {
-        final S3Object s3object = getObject(imageData.location());
-        imageData.updateContent(s3object.getObjectContent());
+        imageData.updateContent(new ByteSource() {
+
+            @Override
+            public InputStream openStream() throws IOException {
+                final S3Object s3object = getObject(imageData.location());
+                return s3object.getObjectContent();
+            }
+        });
         return imageData;
     }
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.data;
 
+import com.google.common.io.ByteSource;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -26,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import javax.imageio.ImageIO;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
@@ -42,26 +44,32 @@ public class ImageResizer {
         if (maxWidth == null && maxHeight != null) {
             return image;
         }
-        try (InputStream is = image.getInputStream()) {
-            InputStream resizedIS = resizeImage(image.getFileExtension(), is, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
+        try (InputStream is = image.getByteSource().openBufferedStream()) {
+            Optional<InputStream> optResizedIS = resizeImage(image.getFileExtension(), is, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
                     maxHeight != null ? maxHeight : Integer.MAX_VALUE);
+            if (optResizedIS.isPresent()) {
+                ImageData resizedImage = new ImageData(image.location(), image.storageType(), image.getEntityDisplayName());
+                resizedImage.updateContent(new ByteSource() {
 
-            ImageData resizedImage = new ImageData(image.location(), image.storageType(), image.getEntityDisplayName());
-            resizedImage.updateContent(resizedIS);
-            return resizedImage;
+                    @Override
+                    public InputStream openStream() throws IOException {
+                        return optResizedIS.get();
+                    }
+                });
+                return resizedImage;
+            }
+            return image;
         } catch (IOException e) {
             LOG.warn("resize() failed, returning original image: {}", e.getMessage(), e);
             return image;
         }
     }
 
-    private InputStream resizeImage(ImageFileExtension fileExtension, InputStream in, int maxWidth, int maxHeight) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
+    private Optional<InputStream> resizeImage(ImageFileExtension fileExtension, InputStream in, int maxWidth, int maxHeight)
+            throws IOException {
         BufferedImage src = ImageIO.read(in);
         if (src.getWidth() <= maxWidth && src.getHeight() <= maxHeight) {
-            in.reset();
-            return in;
+            return Optional.empty();
         }
         float widthRatio = (float) src.getWidth() / maxWidth;
         float heightRatio = (float) src.getHeight() / maxHeight;
@@ -78,8 +86,9 @@ public class ImageResizer {
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.drawImage(src, 0, 0, newWidth, newHeight, Color.BLACK, null);
         g.dispose();
-        ImageIO.write(target, fileExtension != null ? fileExtension.getValueWithoutDot() : "jpeg", os);
 
-        return new ByteArrayInputStream(os.toByteArray());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(target, fileExtension != null ? fileExtension.getValueWithoutDot() : "jpeg", os);
+        return Optional.of(new ByteArrayInputStream(os.toByteArray()));
     }
 }
