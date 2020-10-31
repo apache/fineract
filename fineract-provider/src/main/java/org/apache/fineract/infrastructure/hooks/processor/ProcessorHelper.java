@@ -121,20 +121,4 @@ public final class ProcessorHelper {
         final RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(url).setClient(new OkClient(client)).build();
         return restAdapter.create(WebHookService.class);
     }
-
-    public Callback createCallback(final String url, String payload) {
-
-        return new Callback() {
-
-            @Override
-            public void success(final Object o, final Response response) {
-                LOG.info("URL : {} \tStatus : {}", url, response.getStatus());
-            }
-
-            @Override
-            public void failure(final RetrofitError retrofitError) {
-                LOG.error("URL: {} - RetrofitError occured", url, retrofitError);
-            }
-        };
-    }
 }
