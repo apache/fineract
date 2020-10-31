@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
+import com.google.common.io.ByteSource;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
@@ -51,6 +52,8 @@ import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPl
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -59,6 +62,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
 public class ImagesApiResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ImagesApiResource.class);
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
@@ -151,7 +156,7 @@ public class ImagesApiResource {
 
         ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
         try {
-            byte[] resizedImageBytes = resizedImage.getInputStream().readAllBytes();
+            byte[] resizedImageBytes = resizedImage.getByteSource().read();
             final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
             return Response.ok(clientImageAsBase64Text).build();
         } catch (IOException e) {
@@ -174,14 +179,22 @@ public class ImagesApiResource {
 
         final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
         final ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
-        final ResponseBuilder response = Response.ok(resizedImage.getInputStream());
-        final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
-        response.header("Content-Disposition",
-                dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");
-
-        // TODO: Need a better way of determining image type
-
-        response.header("Content-Type", imageData.contentType());
+        ResponseBuilder response;
+        try {
+            ByteSource byteSource = resizedImage.getByteSource();
+            // TODO Where is this InputStream closed?! It needs to be AFTER it's read by JAX-RS.. how to do that?
+            InputStream is = byteSource.openBufferedStream();
+            response = Response.ok(is);
+            final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
+            response.header("Content-Disposition",
+                    dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");
+            response.header("Content-Length", byteSource.sizeIfKnown().or(-1L));
+            // TODO: Need a better way of determining image type
+            response.header("Content-Type", imageData.contentType());
+        } catch (IOException e) {
+            LOG.error("resizedImage.getByteSource().openBufferedStream() failed", e);
+            response = Response.serverError();
+        }
         return response.build();
     }
 
