@@ -73,7 +73,7 @@ public class S3ContentRepository implements ContentRepository {
     }
 
     @Override
-    public void deleteFile(final String documentName, final String documentPath) {
+    public void deleteFile(final String documentPath) {
         deleteObject(documentPath);
     }
 
@@ -99,7 +99,7 @@ public class S3ContentRepository implements ContentRepository {
     }
 
     @Override
-    public void deleteImage(final Long resourceId, final String location) {
+    public void deleteImage(final String location) {
         deleteObject(location);
     }
 
