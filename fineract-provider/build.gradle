@@ -260,15 +260,6 @@ integrationTest {
         exceptionFormat "full"
     }
 }
-test {
-    useJUnitPlatform()
-    testLogging {
-        // FINERACT-927
-        events "skipped", "failed"
-        showStandardStreams = false
-        exceptionFormat "full"
-    }
-}
 
 // Configuration for SQL tasks
 // https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html

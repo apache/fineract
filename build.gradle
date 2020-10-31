@@ -597,6 +597,16 @@ configure(project.fineractJavaProjects) {
         }
     }
 
+    test {
+        useJUnitPlatform()
+        testLogging {
+            // FINERACT-927
+            events "skipped", "failed"
+            showStandardStreams = false
+            exceptionFormat "full"
+        }
+    }
+
     // Configuration for spotbugs plugin
     // https://github.com/spotbugs/spotbugs-gradle-plugin
 
