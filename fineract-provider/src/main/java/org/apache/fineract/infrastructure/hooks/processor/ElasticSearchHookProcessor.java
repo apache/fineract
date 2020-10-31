@@ -23,7 +23,6 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.payl
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +38,6 @@ public class ElasticSearchHookProcessor implements HookProcessor {
 
     @Autowired
     private ProcessorHelper processorHelper;
-
-    private PrintWriter out = null;
 
     @Override
     public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
