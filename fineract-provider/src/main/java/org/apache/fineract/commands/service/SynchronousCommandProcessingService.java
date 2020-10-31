@@ -18,16 +18,9 @@
  */
 package org.apache.fineract.commands.service;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -45,8 +38,6 @@ import org.apache.fineract.infrastructure.hooks.event.HookEvent;
 import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -55,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SynchronousCommandProcessingService.class);
     private PlatformSecurityContext context;
     private final ApplicationContext applicationContext;
     private final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
@@ -90,15 +80,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
 
-        // final CommandProcessingResult result = handler.processCommand(command);
-        final CommandProcessingResult result;
-        try {
-            result = handler.processCommand(command);
-        } catch (Throwable t) {
-            // publish error event
-            publishErrorEvent(wrapper, command, t);
-            throw t;
-        }
+        final CommandProcessingResult result = handler.processCommand(command);
 
         final AppUser maker = this.context.authenticatedUser(wrapper);
 
@@ -143,8 +125,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         result.setRollbackTransaction(null);
 
-        // publishEvent(wrapper.entityName(), wrapper.actionName(), result);
-        publishEvent(wrapper.entityName(), wrapper.actionName(), command, result);
+        publishEvent(wrapper.entityName(), wrapper.actionName(), result);
 
         return result;
     }
@@ -225,68 +206,18 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         return rollbackTransaction;
     }
 
-    private void publishErrorEvent(CommandWrapper wrapper, JsonCommand command, Throwable t) {
+    private void publishEvent(final String entityName, final String actionName, final CommandProcessingResult result) {
 
-        ErrorInfo ex;
-        if (t instanceof RuntimeException) {
-            final RuntimeException e = (RuntimeException) t;
-            ex = ErrorHandler.handler(e);
-        } else {
-            ex = new ErrorInfo(500, 9999, "{\"Exception\": " + t.toString() + "}");
-        }
+        final String authToken = ThreadLocalContextUtil.getAuthToken();
+        final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
 
-        publishEvent(wrapper.entityName(), wrapper.actionName(), command, ex);
+        final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
+
+        final String serializedResult = this.toApiResultJsonSerializer.serialize(result);
+
+        final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
+
+        applicationContext.publishEvent(applicationEvent);
     }
-
-    private void publishEvent(final String entityName, final String actionName, JsonCommand command, final Object result) {
-        Gson gson = new Gson();
-        try {
-            final String authToken = ThreadLocalContextUtil.getAuthToken();
-            final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-            final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
-
-            final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
-
-            // TODO: Add support for publishing array events
-            if (command.json() != null && command.json().startsWith("{")) {
-                Type type = new TypeToken<Map<String, Object>>() {}.getType();
-                Map<String, Object> myMap = gson.fromJson(command.json(), type);
-
-                Map<String, Object> reqmap = new HashMap<>();
-                reqmap.put("entityName", entityName);
-                reqmap.put("actionName", actionName);
-                reqmap.put("createdBy", context.authenticatedUser().getId());
-                reqmap.put("createdByName", context.authenticatedUser().getUsername());
-                reqmap.put("createdByFullName", context.authenticatedUser().getDisplayName());
-
-                reqmap.put("request", myMap);
-                if (result instanceof CommandProcessingResult) {
-                    CommandProcessingResult resultCopy = CommandProcessingResult
-                            .fromCommandProcessingResult((CommandProcessingResult) result);
-
-                    reqmap.put("response", resultCopy);
-                } else if (result instanceof ErrorInfo) {
-                    ErrorInfo ex = (ErrorInfo) result;
-                    reqmap.put("status", "Exception");
-
-                    Map<String, Object> errorMap = gson.fromJson(ex.getMessage(), type);
-                    errorMap.put("errorCode", ex.getErrorCode());
-                    errorMap.put("statusCode", ex.getStatusCode());
-
-                    reqmap.put("response", errorMap);
-                }
-
-                reqmap.put("timestamp", Instant.now().toString());
-
-                final String serializedResult = this.toApiResultJsonSerializer.serialize(reqmap);
-
-                final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
-
-                applicationContext.publishEvent(applicationEvent);
-            }
-        } catch (Exception e) {
-            LOG.error("Error", e);
-        }
-    }
-
 }
