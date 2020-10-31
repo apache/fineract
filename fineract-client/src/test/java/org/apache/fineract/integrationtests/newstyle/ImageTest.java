@@ -24,6 +24,7 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.apache.fineract.client.services.ImagesApi;
 import org.apache.fineract.client.util.Parts;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import retrofit2.Call;
@@ -35,6 +36,7 @@ import retrofit2.http.Headers;
  *
  * @author Michael Vorburger.ch
  */
+@Disabled // TODO FINERACT-1247
 public class ImageTest extends IntegrationTest {
 
     // TODO This "new style" test is equivalent to the old StaffImageApiTest, so we could delete that (after
