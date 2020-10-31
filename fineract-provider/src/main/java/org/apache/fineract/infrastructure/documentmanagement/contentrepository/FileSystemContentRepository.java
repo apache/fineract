@@ -78,25 +78,22 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     @Override
-    public void deleteImage(final Long resourceId, final String location) {
-        final boolean fileDeleted = deleteFile(location);
-        if (!fileDeleted) {
-            // no need to throw an Error, simply log a warning
-            LOG.warn("Unable to delete image associated with clients with Id {}", resourceId);
-        }
+    public void deleteImage(final String location) {
+        deleteFileInternal(location);
     }
 
     @Override
-    public void deleteFile(final String fileName, final String documentPath) {
-        final boolean fileDeleted = deleteFile(documentPath);
-        if (!fileDeleted) {
-            throw new ContentManagementException(fileName, null);
-        }
+    public void deleteFile(final String documentPath) {
+        deleteFileInternal(documentPath);
     }
 
-    private boolean deleteFile(final String documentPath) {
+    private void deleteFileInternal(final String documentPath) {
         final File fileToBeDeleted = new File(documentPath);
-        return fileToBeDeleted.delete();
+        final boolean fileDeleted = fileToBeDeleted.delete();
+        if (!fileDeleted) {
+            // no need to throw an Error, what's a caller going to do about it, so simply log a warning
+            LOG.warn("Unable to delete file {}", documentPath);
+        }
     }
 
     @Override
