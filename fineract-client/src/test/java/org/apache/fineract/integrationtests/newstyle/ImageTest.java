@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 
@@ -83,10 +84,15 @@ public class ImageTest extends IntegrationTest {
     @Order(5)
     void getInlineOctetOutput() throws IOException {
         // 3505x1972 is the exact original size of testFile
-        ResponseBody r = ok(fineract().images.get("staff", 1L, 3505, 1972, "inline_octet"));
-        assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
-        assertThat(r.bytes().length).isEqualTo(testImage.length());
-        assertThat(r.contentLength()).isEqualTo(testImage.length());
+        Response<ResponseBody> r = okR(fineract().images.get("staff", 1L, 3505, 1972, "inline_octet"));
+        try (ResponseBody body = r.body()) {
+            assertThat(body.contentType()).isEqualTo(MediaType.get("image/jpeg"));
+            assertThat(body.bytes().length).isEqualTo(testImage.length());
+            assertThat(body.contentLength()).isEqualTo(testImage.length());
+        }
+
+        String expectedFileName = "test, testJPEG"; // without dot!
+        assertThat(Parts.fileName(r)).hasValue(expectedFileName);
     }
 
     @Test

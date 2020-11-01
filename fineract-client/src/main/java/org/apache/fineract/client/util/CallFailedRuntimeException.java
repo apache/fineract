@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 /**
- * Exception thrown by {@link Calls#ok(Call)} when {@link Call}s fail.
+ * Exception thrown by {@link Calls} utility when {@link Call}s fail.
  *
  * @author Michael Vorburger.ch
  */

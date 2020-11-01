@@ -43,6 +43,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * Integration Test for /documents API.
@@ -83,6 +84,10 @@ public abstract class IntegrationTest {
     // This method just makes it easier to use Calls.ok() in tests (it avoids having to static import)
     protected <T> T ok(Call<T> call) {
         return Calls.ok(call);
+    }
+
+    protected <T> Response<T> okR(Call<T> call) {
+        return Calls.okR(call);
     }
 
     // as above, avoids import static CallSubject.assertThat
