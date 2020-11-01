@@ -19,12 +19,21 @@
 package org.apache.fineract.client.util;
 
 import java.io.File;
+import java.util.Optional;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody.Part;
 import okhttp3.RequestBody;
+import org.apache.fineract.client.services.DocumentsApiFixed;
+import org.apache.fineract.client.services.ImagesApi;
+import retrofit2.Response;
 
 /**
  * Convenience Factory for {@link Part} (including {@link RequestBody}).
+ *
+ * {@link Part} is the argument of operations for binary uploads like
+ * {@link DocumentsApiFixed#createDocument(String, Long, Part, String, String)},
+ * {@link DocumentsApiFixed#updateDocument(String, Long, Long, Part, String, String)} and
+ * {@link ImagesApi#create(String, Long, Part)} and {@link ImagesApi#update(String, Long, Part)}.
  *
  * @author Michael Vorburger.ch
  */
@@ -84,5 +93,17 @@ public final class Parts {
             default:
                 return null;
         }
+    }
+
+    public static Optional<String> fileName(Response<?> response) {
+        String contentDisposition = response.headers().get("Content-Disposition");
+        if (contentDisposition == null) {
+            return Optional.empty();
+        }
+        int i = contentDisposition.indexOf("; filename=\"");
+        if (i == -1) {
+            return Optional.empty();
+        }
+        return Optional.of(contentDisposition.substring(i + "; filename=\"".length(), contentDisposition.length() - 1));
     }
 }
