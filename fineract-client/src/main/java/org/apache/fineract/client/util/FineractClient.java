@@ -453,7 +453,7 @@ public final class FineractClient {
                         }
                     };
 
-                    SSLContext sslContext = SSLContext.getInstance("SSL");
+                    SSLContext sslContext = SSLContext.getInstance("SSL"); // TODO "SSL" or "TLS" as in hooks.processor.ProcessorHelper?
                     sslContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
                     SSLSocketFactory insecureSslSocketFactory = sslContext.getSocketFactory();
 

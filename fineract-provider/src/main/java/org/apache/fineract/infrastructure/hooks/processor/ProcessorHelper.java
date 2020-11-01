@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.hooks.processor;
 
-import com.squareup.okhttp.OkHttpClient;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -26,22 +25,38 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import retrofit.Callback;
-import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
 
 @Service
 public final class ProcessorHelper {
 
+    // Nota bene: Similar code to insecure HTTPS is also in Fineract Client's
+    // org.apache.fineract.client.util.FineractClient.Builder.insecure()
+
     private static final Logger LOG = LoggerFactory.getLogger(ProcessorHelper.class);
+
+    @SuppressWarnings("unused")
+    private static final X509TrustManager insecureX509TrustManager = new X509TrustManager() {
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[] {};
+        }
+    };
 
     /**
      * Configure HTTP client to be "insecure", as in skipping host SSL certificate verification. While this can be
@@ -60,43 +75,23 @@ public final class ProcessorHelper {
     }
 
     private OkHttpClient createClient() {
-        final OkHttpClient client = new OkHttpClient();
+        var okBuilder = new OkHttpClient.Builder();
         if (insecureHttpClient) {
-            configureInsecureClient(client);
+            configureInsecureClient(okBuilder);
         }
-        return client;
+        return okBuilder.build();
     }
 
-    private void configureInsecureClient(final OkHttpClient client) {
-        client.setSslSocketFactory(insecureSSLContext.getSocketFactory());
-
-        final HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-
-            @Override
-            public boolean verify(final String hostname, final SSLSession session) {
-                return true;
-            }
-        };
-        client.setHostnameVerifier(hostnameVerifier);
+    private void configureInsecureClient(final OkHttpClient.Builder okBuilder) {
+        okBuilder.sslSocketFactory(insecureSSLContext.getSocketFactory(), insecureX509TrustManager);
+        HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;
+        okBuilder.hostnameVerifier(insecureHostnameVerifier);
     }
 
     private SSLContext createInsecureSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] certs = new TrustManager[] { new X509TrustManager() {
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            @Override
-            public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {}
-
-            @Override
-            public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {}
-        } };
-
-        SSLContext insecureSSLContext = SSLContext.getInstance("TLS");
-        insecureSSLContext.init(null, certs, new SecureRandom());
+        SSLContext insecureSSLContext = SSLContext.getInstance("TLS"); // TODO "TLS" or "SSL" as in
+        // FineractClient.Builder?
+        insecureSSLContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
         return insecureSSLContext;
     }
 
@@ -105,20 +100,23 @@ public final class ProcessorHelper {
         return new Callback() {
 
             @Override
-            public void success(final Object o, final Response response) {
-                LOG.info("URL: {} - Status: {}", url, response.getStatus());
+            public void onResponse(@SuppressWarnings("unused") Call call, retrofit2.Response response) {
+                LOG.info("URL: {} - Status: {}", url, response.code());
             }
 
             @Override
-            public void failure(final RetrofitError retrofitError) {
-                LOG.error("URL: {} - RetrofitError occured", url, retrofitError);
+            public void onFailure(@SuppressWarnings("unused") Call call, Throwable t) {
+                LOG.error("URL: {} - Retrofit failure occured", url, t);
             }
         };
     }
 
     public WebHookService createWebHookService(final String url) {
         final OkHttpClient client = createClient();
-        final RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(url).setClient(new OkClient(client)).build();
-        return restAdapter.create(WebHookService.class);
+        final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
+        retrofitBuilder.baseUrl(url);
+        retrofitBuilder.client(client);
+        final Retrofit retrofit = retrofitBuilder.build();
+        return retrofit.create(WebHookService.class);
     }
 }

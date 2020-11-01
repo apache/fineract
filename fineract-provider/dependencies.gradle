@@ -45,12 +45,13 @@ dependencies {
             'com.google.guava:guava',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',
-            'com.squareup.retrofit:retrofit',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
             'jakarta.validation:jakarta.validation-api',
-            'com.squareup.okhttp:okhttp',
-            'com.squareup.okhttp:okhttp-urlconnection',
+
+            'com.squareup.retrofit2:retrofit',
+            'com.squareup.okhttp3:okhttp',
+            'com.squareup.okhttp3:okhttp-urlconnection',
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',

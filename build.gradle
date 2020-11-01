@@ -21,7 +21,7 @@ buildscript {
     ext {
         jacocoVersion = '0.8.6'
         retrofitVersion = '2.9.0'
-        okhttpVersion = '4.7.2'
+        okhttpVersion = '4.9.0'
         oltuVersion = '1.0.1'
         fineractJavaProjects = subprojects.findAll{
             [
@@ -100,9 +100,6 @@ allprojects  {
 
             dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
             dependency 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated above in buildscript!
-            dependency 'com.squareup.retrofit:retrofit:1.9.0'
-            dependency 'com.squareup.okhttp:okhttp:2.7.5'
-            dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
             dependency 'com.google.guava:guava:30.0-jre'
             dependency 'com.google.code.gson:gson:2.8.6'
             dependency 'org.apache.commons:commons-email:1.5'
