@@ -40,28 +40,27 @@ public class ImageResizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageResizer.class);
 
-    public ImageData resize(ImageData image, Integer maxWidth, Integer maxHeight) {
+    public FileData resize(FileData fileData, Integer maxWidth, Integer maxHeight) {
         if (maxWidth == null && maxHeight != null) {
-            return image;
+            return fileData;
         }
-        try (InputStream is = image.getByteSource().openBufferedStream()) {
-            Optional<InputStream> optResizedIS = resizeImage(image.getFileExtension(), is, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
-                    maxHeight != null ? maxHeight : Integer.MAX_VALUE);
+        try (InputStream is = fileData.getByteSource().openBufferedStream()) {
+            Optional<InputStream> optResizedIS = resizeImage(ContentRepositoryUtils.imageExtensionFromFileName(fileData.name()), is,
+                    maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             if (optResizedIS.isPresent()) {
-                ImageData resizedImage = new ImageData(image.location(), image.storageType(), image.getEntityDisplayName());
-                resizedImage.updateContent(new ByteSource() {
+                FileData resizedImage = new FileData(new ByteSource() {
 
                     @Override
                     public InputStream openStream() throws IOException {
                         return optResizedIS.get();
                     }
-                });
+                }, fileData.name(), fileData.contentType());
                 return resizedImage;
             }
-            return image;
+            return fileData;
         } catch (IOException e) {
             LOG.warn("resize() failed, returning original image: {}", e.getMessage(), e);
-            return image;
+            return fileData;
         }
     }
 

@@ -113,14 +113,24 @@ public final class ContentRepositoryUtils {
         }
     }
 
+    public static ImageFileExtension imageExtensionFromFileName(String fileName) {
+        if (StringUtils.endsWith(fileName.toLowerCase(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
+            return ContentRepositoryUtils.ImageFileExtension.GIF;
+        } else if (StringUtils.endsWith(fileName, ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
+            return ContentRepositoryUtils.ImageFileExtension.PNG;
+        } else {
+            return ContentRepositoryUtils.ImageFileExtension.JPEG;
+        }
+    }
+
     /**
      * Validates that passed in Mime type maps to known image mime types
      *
      * @param mimeType
      */
     public static void validateImageMimeType(final String mimeType) {
-        if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue())
-                || mimeType.equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) {
+        if ((!mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) && !mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue())
+                && !mimeType.equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) {
             throw new ImageUploadException(mimeType);
         }
     }

@@ -21,22 +21,19 @@ package org.apache.fineract.infrastructure.documentmanagement.data;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 
 /**
- * Immutable data object represent document being managed on platform.
+ * Immutable data object representing a user document being managed on the platform.
  */
 public class DocumentData {
 
     private final Long id;
     private final String parentEntityType;
     private final Long parentEntityId;
-    @SuppressWarnings("unused")
     private final String name;
     private final String fileName;
-    @SuppressWarnings("unused")
     private final Long size;
     private final String type;
-    @SuppressWarnings("unused")
-    private final String description;
     private final String location;
+    private final String description;
     private final Integer storageType;
 
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
@@ -81,4 +78,15 @@ public class DocumentData {
         return this.id;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public Long getSize() {
+        return this.size;
+    }
 }

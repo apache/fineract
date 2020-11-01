@@ -18,34 +18,18 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.data;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.io.ByteSource;
 
 public class FileData {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileData.class);
-
-    private final File file;
     private final String fileName;
     private final String contentType;
-    private final InputStream inputStream;
+    private final ByteSource byteSource;
 
-    public FileData(final File file, final String fileName, final String contentType) {
-        this.file = file;
+    public FileData(final ByteSource byteSource, final String fileName, final String contentType) {
         this.fileName = fileName;
         this.contentType = contentType;
-        this.inputStream = null;
-    }
-
-    public FileData(final InputStream inputStream, final String fileName, final String contentType) {
-        this.file = null;
-        this.inputStream = inputStream;
-        this.fileName = fileName;
-        this.contentType = contentType;
+        this.byteSource = byteSource;
     }
 
     public String contentType() {
@@ -56,15 +40,7 @@ public class FileData {
         return this.fileName;
     }
 
-    public InputStream inputStream() {
-        try {
-            if (this.inputStream == null) {
-                return new FileInputStream(this.file);
-            }
-            return this.inputStream;
-        } catch (final FileNotFoundException e) {
-            LOG.error("Error occured.", e);
-            return null;
-        }
+    public ByteSource getByteSource() {
+        return this.byteSource;
     }
 }

@@ -46,7 +46,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -225,13 +224,8 @@ public class DocumentManagementApiResource {
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
-
         final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
-        final ResponseBuilder response = Response.ok(fileData.inputStream());
-        response.header("Content-Disposition", "attachment; filename=\"" + fileData.name() + "\"");
-        response.header("Content-Type", fileData.contentType());
-
-        return response.build();
+        return ContentResources.fileDataToResponse(fileData, "attachment");
     }
 
     @DELETE
