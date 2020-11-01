@@ -26,7 +26,6 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccou
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -389,7 +388,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                     }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null, dueDate,
                             installment.getDepositAmountOutstanding(getCurrency()),
-                            Date.from(installment.dueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()), null);
+                            Date.from(installment.dueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), null);
                     allTransactions.add(transaction);
                 }
             }
@@ -526,7 +525,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
@@ -625,7 +624,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
@@ -1157,11 +1156,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedBy = null;
         this.lockedInUntilDate = null;
 
-        this.activatedOnDate = Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.activatedOnDate = Date.from(now.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public void setClosedOnDate(final LocalDate closedOnDate) {
-        this.closedOnDate = Date.from(closedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = Date.from(closedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     @Override
@@ -1183,7 +1182,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final BigDecimal depositAmount = this.recurringDetail.mandatoryRecommendedDepositAmount();
         while (maturityDate.isAfter(installmentDate)) {
             final RecurringDepositScheduleInstallment installment = RecurringDepositScheduleInstallment.installment(this, installmentNumber,
-                    Date.from(installmentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), depositAmount);
+                    Date.from(installmentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), depositAmount);
             addDepositScheduleInstallment(installment);
             installmentDate = DepositAccountUtils.calculateNextDepositDate(installmentDate, frequency, recurringEvery);
             installmentNumber += 1;

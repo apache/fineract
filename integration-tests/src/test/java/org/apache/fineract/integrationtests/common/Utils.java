@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,7 +232,7 @@ public final class Utils {
     }
 
     public static LocalDate getLocalDateOfTenant() {
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDate today = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
         final ZoneId zone = ZoneId.of(TENANT_TIME_ZONE);
         if (zone != null) {
             today = LocalDate.now(zone);

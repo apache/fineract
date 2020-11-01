@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 public class LoanTransactionBuilder {
@@ -27,7 +27,7 @@ public class LoanTransactionBuilder {
     @SuppressWarnings("unused")
     private Money transactionAmount = new MoneyBuilder().build();
     @SuppressWarnings("unused")
-    private LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
+    private LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
     @SuppressWarnings("unused")
     private boolean repayment = false;
 

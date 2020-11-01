@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -435,7 +434,8 @@ public class LoanScheduleAssembler {
         }
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
+                Date.from(expectedDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
@@ -602,7 +602,8 @@ public class LoanScheduleAssembler {
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
+                Date.from(expectedDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);
@@ -650,7 +651,7 @@ public class LoanScheduleAssembler {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
 
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
@@ -669,7 +670,7 @@ public class LoanScheduleAssembler {
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
@@ -851,8 +852,8 @@ public class LoanScheduleAssembler {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         if (loan.getExpectedFirstRepaymentOnDate() == null) {
-            loan.setExpectedFirstRepaymentOnDate(
-                    Date.from(loan.fetchRepaymentScheduleInstallment(1).getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            loan.setExpectedFirstRepaymentOnDate(Date.from(
+                    loan.fetchRepaymentScheduleInstallment(1).getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         }
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
@@ -989,13 +990,13 @@ public class LoanScheduleAssembler {
 
             LocalDate duedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.dueDateParamName, arrayElement,
                     dateFormat, locale);
-            Date dueDate = Date.from(duedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date dueDate = Date.from(duedateLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
 
             LocalDate modifiedDuedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.modifiedDueDateParamName,
                     arrayElement, dateFormat, locale);
             Date modifiedDuedate = null;
             if (modifiedDuedateLocalDate != null) {
-                modifiedDuedate = Date.from(modifiedDuedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                modifiedDuedate = Date.from(modifiedDuedateLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
             boolean isSpecificToInstallment = true;
             if (isInsertInstallment) {

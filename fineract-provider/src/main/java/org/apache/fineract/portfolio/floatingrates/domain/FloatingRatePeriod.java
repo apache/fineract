@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.floatingrates.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
@@ -30,6 +29,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -137,7 +137,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchFromDate() {
-        return LocalDate.ofInstant(this.fromDate.toInstant(), ZoneId.systemDefault());
+        return LocalDate.ofInstant(this.fromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public FloatingRatePeriodData toData(final FloatingRateDTO floatingRateDTO) {
@@ -147,9 +147,10 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
             interest = interest.add(floatingRateDTO.fetchBaseRate(fetchFromDate()));
         }
 
-        final LocalDate fromDate = ZonedDateTime.ofInstant(getFromDate().toInstant(), ZoneId.systemDefault()).toLocalDate();
-        final LocalDate createdOn = ZonedDateTime.ofInstant(getCreatedOn().toInstant(), ZoneId.systemDefault()).toLocalDate();
-        final LocalDate modidiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), ZoneId.systemDefault()).toLocalDate();
+        final LocalDate fromDate = ZonedDateTime.ofInstant(getFromDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+        final LocalDate createdOn = ZonedDateTime.ofInstant(getCreatedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+        final LocalDate modidiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant())
+                .toLocalDate();
 
         return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(),
                 getCreatedBy().getUsername(), createdOn, getModifiedBy().getUsername(), modidiedOn);

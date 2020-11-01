@@ -34,7 +34,6 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.MonthDay;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +52,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 @Entity
@@ -135,12 +135,12 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         this.status = status;
         this.amount = amount;
         if (validFrom != null) {
-            this.validFrom = Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.validFrom = Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         if (validTill == null) {
             this.validTill = null;
         } else {
-            this.validTill = Date.from(validTill.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.validTill = Date.from(validTill.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         this.recurrenceType = recurrenceType;
         this.recurrenceFrequency = recurrenceFrequency;
@@ -171,13 +171,13 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(validFromParamName);
             actualChanges.put(validFromParamName, newValue);
-            this.validFrom = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.validFrom = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(validTillParamName);
             actualChanges.put(validTillParamName, newValue);
-            this.validTill = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.validTill = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
@@ -248,8 +248,8 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
 
         if (this.validTill != null && this.validFrom != null) {
             baseDataValidator.reset().parameter(validTillParamName)
-                    .value(LocalDate.ofInstant(this.validTill.toInstant(), ZoneId.systemDefault()))
-                    .validateDateAfter(LocalDate.ofInstant(this.validFrom.toInstant(), ZoneId.systemDefault()));
+                    .value(LocalDate.ofInstant(this.validTill.toInstant(), DateUtils.getDateTimeZoneOfTenant()))
+                    .validateDateAfter(LocalDate.ofInstant(this.validFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
         }
 
         if (AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence()) {

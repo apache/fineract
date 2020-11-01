@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,6 +27,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_tax_component_history")
@@ -50,8 +50,8 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
 
     private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
         this.percentage = percentage;
-        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,
@@ -62,7 +62,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     public LocalDate startDate() {
         LocalDate startDate = null;
         if (this.startDate != null) {
-            startDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return startDate;
     }
@@ -70,7 +70,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     public LocalDate endDate() {
         LocalDate endDate = null;
         if (this.endDate != null) {
-            endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
+            endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return endDate;
     }

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.calendar.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -281,7 +281,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
             }
             if (null != newMeetingDate) {
-                final Date endDate = Date.from(presentMeetingDate.minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                final Date endDate = Date
+                        .from(presentMeetingDate.minusDays(1).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                 calendarHistory.updateEndDate(endDate);
             }
             this.calendarHistoryRepository.save(calendarHistory);

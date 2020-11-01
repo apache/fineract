@@ -23,7 +23,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -736,7 +735,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 savingsAccountDataDTO.getGroup(), savingsAccountDataDTO.getSavingsProduct(), savingsAccountDataDTO.getApplicationDate(),
                 savingsAccountDataDTO.getAppliedBy());
         account.approveAndActivateApplication(
-                Date.from(savingsAccountDataDTO.getApplicationDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(savingsAccountDataDTO.getApplicationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
                 savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
 

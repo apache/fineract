@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.tax.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 
 @Entity
@@ -56,10 +56,10 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
 
         this.taxComponent = taxComponent;
         if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         if (endDate != null) {
-            this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
     }
 
@@ -105,7 +105,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     public LocalDate startDate() {
         LocalDate startDate = null;
         if (this.startDate != null) {
-            startDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return startDate;
     }
@@ -113,7 +113,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     public LocalDate endDate() {
         LocalDate endDate = null;
         if (this.endDate != null) {
-            endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
+            endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return endDate;
     }

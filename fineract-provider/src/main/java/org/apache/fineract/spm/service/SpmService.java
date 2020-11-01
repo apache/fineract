@@ -19,7 +19,6 @@
 package org.apache.fineract.spm.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -85,9 +84,9 @@ public class SpmService {
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         // set valid to for 100 years
         Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        cal.setTime(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         survey.setValidTo(cal.getTime());
         try {
             this.surveyRepository.saveAndFlush(survey);
@@ -135,16 +134,17 @@ public class SpmService {
         final Survey survey = findById(id);
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        cal.setTime(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         survey.setValidTo(cal.getTime());
 
         this.surveyRepository.save(survey);
     }
 
     public static ZonedDateTime getStartOfToday() {
-        return ZonedDateTime.now(ZoneId.systemDefault()).withHour(0).withMinute(0).withSecond(0).with(ChronoField.MILLI_OF_SECOND, 0);
+        return ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()).withHour(0).withMinute(0).withSecond(0)
+                .with(ChronoField.MILLI_OF_SECOND, 0);
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {

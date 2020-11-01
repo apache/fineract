@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.gcm.service;
 
 import java.io.IOException;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -110,7 +109,7 @@ public class NotificationSenderService {
                 if (res.getSuccess() != null && res.getSuccess() > 0) {
                     smsMessage.setStatusType(SmsMessageStatusType.SENT.getValue());
                     smsMessage.setDeliveredOnDate(
-                            Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                            Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
                 } else if (res.getFailure() != null && res.getFailure() > 0) {
                     smsMessage.setStatusType(SmsMessageStatusType.FAILED.getValue());
                 }

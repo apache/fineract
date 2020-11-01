@@ -27,7 +27,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -142,7 +141,7 @@ public class LoanTransactionsApiResource {
                 transactionDate = DateUtils.getLocalDateOfTenant();
             } else {
                 transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        ZoneId.systemDefault());
+                        DateUtils.getDateTimeZoneOfTenant());
             }
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanId, transactionDate);
         } else if (is(commandParam, "refundbycash")) {
@@ -155,7 +154,7 @@ public class LoanTransactionsApiResource {
                 transactionDate = DateUtils.getLocalDateOfTenant();
             } else {
                 transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        ZoneId.systemDefault());
+                        DateUtils.getDateTimeZoneOfTenant());
             }
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(loanId, transactionDate);
         } else {

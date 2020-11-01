@@ -21,12 +21,12 @@ package org.apache.fineract.interoperation.data;
 import jakarta.validation.constraints.NotNull;
 import java.beans.Transient;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.interoperation.domain.InteropActionState;
 
 public class InteropResponseData extends CommandProcessingResult {
@@ -100,6 +100,6 @@ public class InteropResponseData extends CommandProcessingResult {
     }
 
     protected static String format(LocalDateTime date) {
-        return date == null ? null : ZonedDateTime.of(date, ZoneId.systemDefault()).format(ISO_DATE_TIME_FORMATTER);
+        return date == null ? null : ZonedDateTime.of(date, DateUtils.getDateTimeZoneOfTenant()).format(ISO_DATE_TIME_FORMATTER);
     }
 }

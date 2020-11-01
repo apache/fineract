@@ -20,12 +20,12 @@ package org.apache.fineract.portfolio.shareproducts.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
@@ -78,8 +78,8 @@ public class ShareProductDividendAssembler {
         if (numberOfShareDays > 0) {
             double amountPerShareDay = amount.doubleValue() / numberOfShareDays;
             productDividendPayOutDetails = new ShareProductDividendPayOutDetails(productId, Money.of(currency, amount).getAmount(),
-                    Date.from(dividendPeriodStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                    Date.from(dividendPeriodEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    Date.from(dividendPeriodStartDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                    Date.from(dividendPeriodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
             for (ShareAccountData accountData : shareAccountDatas) {
                 long numberOfShareDaysPerAccount = numberOfSharesdaysPerAccount.get(accountData.getId());
                 double amountForAccount = numberOfShareDaysPerAccount * amountPerShareDay;

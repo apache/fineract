@@ -25,7 +25,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -230,7 +229,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
-            LocalDateTime currentDate = LocalDateTime.now(ZoneId.systemDefault());
+            LocalDateTime currentDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
 
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
             baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).validateDateBefore(currentDate.toLocalDate());

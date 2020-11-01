@@ -19,7 +19,7 @@
 package org.apache.fineract.notification.data;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 public class TopicSubscriberData {
 
@@ -39,7 +39,7 @@ public class TopicSubscriberData {
         this.id = id;
         this.topicId = topicId;
         this.userId = userId;
-        this.subscriptionDate = LocalDate.now(ZoneId.systemDefault());
+        this.subscriptionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
     }
 
     public Long getId() {

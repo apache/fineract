@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -345,7 +344,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
             Date date = (Date) details.get("dueDate");
-            LocalDate lastDepositDate = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
+            LocalDate lastDepositDate = LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant());
             Integer installmentNumber = (Integer) details.get("installment");
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
@@ -431,7 +430,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
 
         for (Date tbGap : tbGaps) {
-            LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), ZoneId.systemDefault()).toLocalDate();
+            LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
             int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getLocalDateOfTenant()));
             if (days < 1) {
                 continue;

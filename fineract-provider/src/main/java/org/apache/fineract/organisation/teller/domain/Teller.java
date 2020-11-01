@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
@@ -86,10 +86,10 @@ public class Teller extends AbstractPersistableCustom {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         if (endDate != null) {
-            this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         if (status != null) {
             this.status = status.getValue();
@@ -152,7 +152,7 @@ public class Teller extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         final String endDateParamName = "endDate";
@@ -163,7 +163,7 @@ public class Teller extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.endDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         final String statusParamName = "status";
@@ -227,7 +227,7 @@ public class Teller extends AbstractPersistableCustom {
     public LocalDate getStartLocalDate() {
         LocalDate startLocalDate = null;
         if (this.startDate != null) {
-            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return startLocalDate;
     }
@@ -243,7 +243,7 @@ public class Teller extends AbstractPersistableCustom {
     public LocalDate getEndLocalDate() {
         LocalDate endLocalDate = null;
         if (this.endDate != null) {
-            endLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
+            endLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return endLocalDate;
     }
