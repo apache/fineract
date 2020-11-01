@@ -52,7 +52,7 @@ public class DocumentTest extends IntegrationTest {
     void createDocument() {
         String name = "Test";
         Part part = Parts.fromFile(testFile);
-        String description = null;
+        String description = "The Description";
         var response = ok(fineract().documents.createDocument("clients", clientId, part, name, description));
         assertThat(response.getResourceId()).isNotNull();
         assertThat(response.getResourceIdentifier()).isNotEmpty();
@@ -65,12 +65,13 @@ public class DocumentTest extends IntegrationTest {
         GetEntityTypeEntityIdDocumentsResponse doc = ok(fineract().documents.getDocument("clients", clientId, documentId));
         assertThat(doc.getName()).isEqualTo("Test");
         assertThat(doc.getFileName()).isEqualTo(testFile.getName());
-        assertThat(doc.getDescription()).isNull();
+        assertThat(doc.getDescription()).isEqualTo("The Description");
         assertThat(doc.getId()).isEqualTo(documentId);
         assertThat(doc.getParentEntityType()).isEqualTo("clients");
         assertThat(doc.getParentEntityId()).isEqualTo(clientId);
-        // TODO huh?! It's more than uploaded file; seems like a bug - it's including create body, not just file size
-        assertThat(doc.getSize()).isEqualTo(testFile.length() + 411);
+        // TODO FINERACT-1251 It's more than uploaded file; seems like a bug - it's including create body, not just file
+        // size
+        assertThat(doc.getSize()).isEqualTo(testFile.length() + 618);
         assertThat(doc.getType()).isEqualTo("image/jpeg");
         // TODO doc.getStorageType() shouldn't be exposed by the API?!
     }
@@ -82,7 +83,7 @@ public class DocumentTest extends IntegrationTest {
         try (ResponseBody body = r.body()) {
             assertThat(body.contentType()).isEqualTo(MediaType.get("image/jpeg"));
             assertThat(body.bytes().length).isEqualTo(testFile.length());
-            assertThat(body.contentLength()).isEqualTo(-1); // TODO testFile.length()
+            assertThat(body.contentLength()).isEqualTo(testFile.length());
         }
         assertThat(Parts.fileName(r)).hasValue(testFile.getName());
     }
@@ -97,6 +98,9 @@ public class DocumentTest extends IntegrationTest {
         GetEntityTypeEntityIdDocumentsResponse doc = ok(fineract().documents.getDocument("clients", clientId, documentId));
         assertThat(doc.getName()).isEqualTo(newName);
         assertThat(doc.getDescription()).isEqualTo(newDescription);
+        // TODO FINERACT-1251 It's more than uploaded file; seems like a bug - it's including create body, not just file
+        // size
+        assertThat(doc.getSize()).isEqualTo(testFile.length() + 618);
     }
 
     @Test

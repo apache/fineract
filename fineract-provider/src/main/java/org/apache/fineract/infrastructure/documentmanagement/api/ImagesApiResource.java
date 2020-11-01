@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
-import com.google.common.io.ByteSource;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
@@ -37,14 +36,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
-import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageResizer;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEntityTypeForImageManagementException;
@@ -52,8 +50,6 @@ import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPl
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -62,8 +58,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
 public class ImagesApiResource {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImagesApiResource.class);
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
@@ -144,23 +138,23 @@ public class ImagesApiResource {
             return downloadClientImage(entityName, entityId, maxWidth, maxHeight, output);
         }
 
-        final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
+        final FileData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
 
         // TODO: Need a better way of determining image type
         String imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.JPEG.getValue();
-        if (StringUtils.endsWith(imageData.location(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
+        if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.GIF.getValue();
-        } else if (StringUtils.endsWith(imageData.location(), ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
+        } else if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
-        ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
+        FileData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
         try {
             byte[] resizedImageBytes = resizedImage.getByteSource().read();
             final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
             return Response.ok(clientImageAsBase64Text).build();
         } catch (IOException e) {
-            throw new ContentManagementException(imageData.getEntityDisplayName(), e.getMessage(), e);
+            throw new ContentManagementException(imageData.name(), e.getMessage(), e);
         }
     }
 
@@ -177,25 +171,10 @@ public class ImagesApiResource {
             this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
         }
 
-        final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
-        final ImageData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
-        ResponseBuilder response;
-        try {
-            ByteSource byteSource = resizedImage.getByteSource();
-            // TODO Where is this InputStream closed?! It needs to be AFTER it's read by JAX-RS.. how to do that?
-            InputStream is = byteSource.openBufferedStream();
-            response = Response.ok(is);
-            final String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
-            response.header("Content-Disposition",
-                    dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");
-            response.header("Content-Length", byteSource.sizeIfKnown().or(-1L));
-            // TODO: Need a better way of determining image type
-            response.header("Content-Type", imageData.contentType());
-        } catch (IOException e) {
-            LOG.error("resizedImage.getByteSource().openBufferedStream() failed", e);
-            response = Response.serverError();
-        }
-        return response.build();
+        final FileData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
+        final FileData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
+        return ContentResources.fileDataToResponse(resizedImage, resizedImage.name() + ImageFileExtension.JPEG,
+                "inline_octet".equals(output) ? "inline" : "attachment");
     }
 
     /**

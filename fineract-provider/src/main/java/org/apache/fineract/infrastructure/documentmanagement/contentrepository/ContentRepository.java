@@ -49,7 +49,7 @@ public interface ContentRepository {
 
     void deleteImage(String location);
 
-    ImageData fetchImage(ImageData imageData);
+    FileData fetchImage(ImageData imageData);
 
     StorageType getStorageType();
 

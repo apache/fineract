@@ -60,7 +60,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         // scope for the particular entities
         final DocumentMapper mapper = new DocumentMapper(true, true);
         final String sql = "select " + mapper.schema() + " order by d.id";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId });
+        return this.jdbcTemplate.query(sql, mapper, entityType, entityId);
     }
 
     @Override
@@ -85,17 +85,10 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         }
     }
 
-    /**
-     * @param entityType
-     * @param entityId
-     * @param documentId
-     * @param mapper
-     * @return
-     */
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
             final DocumentMapper mapper) {
         final String sql = "select " + mapper.schema() + " and d.id=? ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });
+        return this.jdbcTemplate.queryForObject(sql, mapper, entityType, entityId, documentId);
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {
@@ -117,7 +110,6 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
 
         @Override
         public DocumentData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final Long id = JdbcSupport.getLong(rs, "id");
             final Long parentEntityId = JdbcSupport.getLong(rs, "parentEntityId");
             final Long fileSize = JdbcSupport.getLong(rs, "fileSize");
@@ -138,5 +130,4 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
                     storageType);
         }
     }
-
 }

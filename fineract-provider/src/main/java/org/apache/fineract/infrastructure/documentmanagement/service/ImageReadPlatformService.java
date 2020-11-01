@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.service;
 
-import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 
 public interface ImageReadPlatformService {
 
-    ImageData retrieveImage(String entityType, Long entityId);
+    FileData retrieveImage(String entityType, Long entityId);
 
 }

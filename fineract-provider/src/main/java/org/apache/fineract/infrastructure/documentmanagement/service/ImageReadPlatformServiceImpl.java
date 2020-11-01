@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.EntityTypeForImages;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
+import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -84,7 +85,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
     }
 
     @Override
-    public ImageData retrieveImage(String entityType, final Long entityId) {
+    public FileData retrieveImage(String entityType, final Long entityId) {
         try {
             String displayName;
             if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
