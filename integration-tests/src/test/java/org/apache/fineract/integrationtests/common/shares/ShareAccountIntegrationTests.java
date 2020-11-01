@@ -26,13 +26,13 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -202,7 +202,8 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals(
-                        simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                        simple.format(
+                                Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())),
                         simple.format(date));
             }
         }
@@ -252,7 +253,8 @@ public class ShareAccountIntegrationTests {
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date rejectedDate = cal.getTime();
-        Assertions.assertEquals(simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Assertions.assertEquals(
+                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())),
                 simple.format(rejectedDate));
 
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
@@ -276,7 +278,8 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Date transactionDate = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date transactionDate = Date
+                        .from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                 Assertions.assertEquals(simple.format(transactionDate), simple.format(date));
             }
         }
@@ -363,7 +366,8 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals(
-                        simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                        simple.format(
+                                Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())),
                         simple.format(date));
             }
         }

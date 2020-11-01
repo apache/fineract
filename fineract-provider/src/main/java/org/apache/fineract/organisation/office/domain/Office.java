@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.office.domain;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -39,6 +38,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 
@@ -89,7 +89,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
         this.parent = parent;
-        this.openingDate = Date.from(openingDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.openingDate = Date.from(openingDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         if (parent != null) {
             this.parent.addChild(this);
         }
@@ -136,7 +136,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(openingDateParamName);
-            this.openingDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.openingDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         final String nameParamName = "name";
@@ -167,7 +167,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     public LocalDate getOpeningLocalDate() {
         LocalDate openingLocalDate = null;
         if (this.openingDate != null) {
-            openingLocalDate = LocalDate.ofInstant(this.openingDate.toInstant(), ZoneId.systemDefault());
+            openingLocalDate = LocalDate.ofInstant(this.openingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return openingLocalDate;
     }

@@ -29,7 +29,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localePa
 
 import com.google.gson.JsonArray;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -53,6 +52,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.api.HolidayApiConstants;
 import org.apache.fineract.organisation.office.domain.Office;
 
@@ -150,7 +150,7 @@ public class Holiday extends AbstractPersistableCustom {
                 actualChanges.put(dateFormatParamName, dateFormatAsInput);
                 actualChanges.put(localeParamName, localeAsInput);
                 final LocalDate newValue = command.localDateValueOfParameterNamed(fromDateParamName);
-                this.fromDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                this.fromDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
 
             if (command.isChangeInLocalDateParameterNamed(toDateParamName, getToDateLocalDate())) {
@@ -160,7 +160,7 @@ public class Holiday extends AbstractPersistableCustom {
                 actualChanges.put(localeParamName, localeAsInput);
 
                 final LocalDate newValue = command.localDateValueOfParameterNamed(toDateParamName);
-                this.toDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                this.toDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
 
             if (command.isChangeInLocalDateParameterNamed(repaymentsRescheduledToParamName, getRepaymentsRescheduledToLocalDate())) {
@@ -170,7 +170,7 @@ public class Holiday extends AbstractPersistableCustom {
                 actualChanges.put(localeParamName, localeAsInput);
 
                 final LocalDate newValue = command.localDateValueOfParameterNamed(repaymentsRescheduledToParamName);
-                this.repaymentsRescheduledTo = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                this.repaymentsRescheduledTo = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
 
             if (command.hasParameter(officesParamName)) {
@@ -233,15 +233,15 @@ public class Holiday extends AbstractPersistableCustom {
         }
 
         if (fromDate != null) {
-            this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.fromDate = Date.from(fromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (toDate != null) {
-            this.toDate = Date.from(toDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.toDate = Date.from(toDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (repaymentsRescheduledTo != null) {
-            this.repaymentsRescheduledTo = Date.from(repaymentsRescheduledTo.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.repaymentsRescheduledTo = Date.from(repaymentsRescheduledTo.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         this.status = status;
@@ -264,7 +264,7 @@ public class Holiday extends AbstractPersistableCustom {
     public LocalDate getRepaymentsRescheduledToLocalDate() {
         LocalDate repaymentsRescheduledTo = null;
         if (this.repaymentsRescheduledTo != null) {
-            repaymentsRescheduledTo = LocalDate.ofInstant(this.repaymentsRescheduledTo.toInstant(), ZoneId.systemDefault());
+            repaymentsRescheduledTo = LocalDate.ofInstant(this.repaymentsRescheduledTo.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return repaymentsRescheduledTo;
     }
@@ -280,7 +280,7 @@ public class Holiday extends AbstractPersistableCustom {
     public LocalDate getFromDateLocalDate() {
         LocalDate fromDate = null;
         if (this.fromDate != null) {
-            fromDate = LocalDate.ofInstant(this.fromDate.toInstant(), ZoneId.systemDefault());
+            fromDate = LocalDate.ofInstant(this.fromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return fromDate;
     }
@@ -288,7 +288,7 @@ public class Holiday extends AbstractPersistableCustom {
     public LocalDate getToDateLocalDate() {
         LocalDate toDate = null;
         if (this.toDate != null) {
-            toDate = LocalDate.ofInstant(this.toDate.toInstant(), ZoneId.systemDefault());
+            toDate = LocalDate.ofInstant(this.toDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return toDate;
     }

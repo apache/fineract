@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -112,8 +111,8 @@ public class FloatingRate extends AbstractPersistableCustom {
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
         return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods, currentUser, currentUser,
-                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
     }
 
     private static List<FloatingRatePeriod> getRatePeriods(final AppUser currentUser, final JsonCommand command) {
@@ -126,7 +125,7 @@ public class FloatingRate extends AbstractPersistableCustom {
             final JsonObject ratePeriodObject = ratePeriod.getAsJsonObject();
             final JsonParserHelper helper = new JsonParserHelper();
             final Date fromDate = Date.from(helper.extractLocalDateNamed("fromDate", ratePeriod, new HashSet<String>())
-                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             final BigDecimal interestRate = ratePeriodObject.get("interestRate").getAsBigDecimal();
             final boolean isDifferentialToBaseLendingRate = helper.parameterExists("isDifferentialToBaseLendingRate", ratePeriod)
                     ? ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean()
@@ -207,11 +206,11 @@ public class FloatingRate extends AbstractPersistableCustom {
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         if (this.floatingRatePeriods != null) {
             for (FloatingRatePeriod ratePeriod : this.floatingRatePeriods) {
-                LocalDate fromDate = LocalDate.ofInstant(ratePeriod.getFromDate().toInstant(), ZoneId.systemDefault());
+                LocalDate fromDate = LocalDate.ofInstant(ratePeriod.getFromDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());
                 if (fromDate.isAfter(today)) {
                     ratePeriod.setActive(false);
                     ratePeriod.setModifiedBy(appUser);
-                    ratePeriod.setModifiedOn(Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    ratePeriod.setModifiedOn(Date.from(today.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
                 }
             }
         }

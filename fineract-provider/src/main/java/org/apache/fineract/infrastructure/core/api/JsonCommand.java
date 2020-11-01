@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.MonthDay;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,6 +35,7 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
@@ -368,7 +368,7 @@ public final class JsonCommand {
     public boolean isChangeInDateParameterNamed(final String parameterName, final Date existingValue) {
         LocalDate localDate = null;
         if (existingValue != null) {
-            localDate = LocalDate.ofInstant(existingValue.toInstant(), ZoneId.systemDefault());
+            localDate = LocalDate.ofInstant(existingValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return isChangeInLocalDateParameterNamed(parameterName, localDate);
     }
@@ -417,7 +417,7 @@ public final class JsonCommand {
         if (localDate == null) {
             return null;
         }
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,6 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction;
@@ -72,7 +72,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
         this.savingsAccount = savingsAccount;
         this.amount = amount;
         this.transactionType = transactionType.getValue();
-        this.transactionDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.transactionDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.createdDate = new Date();
         this.reversed = reversed;
     }
@@ -115,7 +115,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
     public LocalDate getTransactionDate() {
         LocalDate transactionDate = null;
         if (this.transactionDate != null) {
-            transactionDate = LocalDate.ofInstant(this.transactionDate.toInstant(), ZoneId.systemDefault());
+            transactionDate = LocalDate.ofInstant(this.transactionDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return transactionDate;
     }

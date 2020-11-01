@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -116,7 +115,7 @@ public final class SavingsAccountSummary {
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.totalInterestEarned = totalEarned.getAmount();
     }
 

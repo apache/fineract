@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -171,7 +170,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 // go ahead if the recurrence is not null
                 if (StringUtils.isNotBlank(recurrence)) {
                     // set the start ZonedDateTime to the current tenant date time
-                    ZonedDateTime startDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+                    ZonedDateTime startDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
 
                     // check if the start ZonedDateTime was updated
                     if (changes.containsKey(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
@@ -253,7 +252,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
         for (ReportMailingJob reportMailingJob : reportMailingJobCollection) {
             // get the tenant's date as a ZonedDateTime object
-            final ZonedDateTime localDateTimeOftenant = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+            final ZonedDateTime localDateTimeOftenant = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
             final ZonedDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
 
             if (nextRunDateTime != null && nextRunDateTime.isBefore(localDateTimeOftenant)) {
@@ -394,7 +393,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      **/
     private void createReportMailingJobRunHistroryAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
             final ZonedDateTime jobStartDateTime, final String jobRunStatus) {
-        final ZonedDateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+        final ZonedDateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
         final String errorLogToString = (errorLog != null) ? errorLog.toString() : null;
         final ReportMailingJobRunHistory reportMailingJobRunHistory = ReportMailingJobRunHistory.newInstance(reportMailingJob,
                 jobStartDateTime, jobEndDateTime, jobRunStatus, null, errorLogToString);

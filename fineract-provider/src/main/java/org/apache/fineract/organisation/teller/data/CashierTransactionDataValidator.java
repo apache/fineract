@@ -21,7 +21,6 @@ package org.apache.fineract.organisation.teller.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -80,8 +79,8 @@ public class CashierTransactionDataValidator {
 
     public void validateCashierAllowedDateAndTime(final Cashier cashier, final Teller teller) {
         Long staffId = cashier.getStaff().getId();
-        final LocalDate fromDate = LocalDate.ofInstant(cashier.getStartDate().toInstant(), ZoneId.systemDefault());
-        final LocalDate endDate = LocalDate.ofInstant(cashier.getEndDate().toInstant(), ZoneId.systemDefault());
+        final LocalDate fromDate = LocalDate.ofInstant(cashier.getStartDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate endDate = LocalDate.ofInstant(cashier.getEndDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());
         final LocalDate tellerFromDate = teller.getStartLocalDate();
         final LocalDate tellerEndDate = teller.getEndLocalDate();
         /**
@@ -116,7 +115,7 @@ public class CashierTransactionDataValidator {
             String sql = "select c.id from m_cashiers c where c.staff_id = " + user.getStaff().getId() + " AND "
                     + " (case when c.full_day then '" + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date " + " else ('"
                     + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date and " + " TIME('"
-                    + ZonedDateTime.of(localDateTime, ZoneId.systemDefault())
+                    + ZonedDateTime.of(localDateTime, DateUtils.getDateTimeZoneOfTenant())
                     + "') BETWEEN TIME(c.start_time) AND TIME(c.end_time)  ) end)";
             try {
                 Long cashierId = this.jdbcTemplate.queryForObject(sql, Long.class);

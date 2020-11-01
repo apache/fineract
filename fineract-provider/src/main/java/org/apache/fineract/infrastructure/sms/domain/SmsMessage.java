@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.sms.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -121,7 +121,8 @@ public class SmsMessage extends AbstractPersistableCustom {
         this.mobileNo = mobileNo;
         this.message = message;
         this.smsCampaign = smsCampaign;
-        this.submittedOnDate = Date.from(LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.submittedOnDate = Date
+                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.isNotification = isNotification;
     }
 

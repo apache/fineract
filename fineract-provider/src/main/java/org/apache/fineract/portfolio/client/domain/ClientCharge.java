@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +31,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
@@ -115,7 +115,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         this.charge = charge;
         this.penaltyCharge = charge.isPenalty();
         this.chargeTime = charge.getChargeTimeType();
-        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.chargeCalculation = charge.getChargeCalculation();
 
         BigDecimal chargeAmount = charge.getAmount();
@@ -221,7 +221,7 @@ public class ClientCharge extends AbstractPersistableCustom {
     public LocalDate getDueLocalDate() {
         LocalDate dueDate = null;
         if (this.dueDate != null) {
-            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
+            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return dueDate;
     }

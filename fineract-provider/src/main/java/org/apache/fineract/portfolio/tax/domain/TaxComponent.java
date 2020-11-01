@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -98,7 +97,7 @@ public class TaxComponent extends AbstractAuditableCustom {
             this.creditAccountType = creditAccountType.getValue();
         }
         this.creditAcount = creditAcount;
-        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public static TaxComponent createTaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType,
@@ -119,9 +118,9 @@ public class TaxComponent extends AbstractAuditableCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(TaxApiConstants.percentageParamName);
             changes.put(TaxApiConstants.percentageParamName, newValue);
 
-            LocalDate oldStartDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            LocalDate oldStartDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
             updateStartDate(command, changes, true);
-            LocalDate newStartDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            LocalDate newStartDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
 
             TaxComponentHistory history = TaxComponentHistory.createTaxComponentHistory(this.percentage, oldStartDate, newStartDate);
             this.taxComponentHistories.add(history);
@@ -139,11 +138,11 @@ public class TaxComponent extends AbstractAuditableCustom {
             if (startDateFromUI != null) {
                 startDate = startDateFromUI;
             }
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             changes.put(TaxApiConstants.startDateParamName, startDate);
         } else if (setAsCurrentDate) {
             changes.put(TaxApiConstants.startDateParamName, startDate);
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
     }
@@ -155,7 +154,7 @@ public class TaxComponent extends AbstractAuditableCustom {
     public LocalDate startDate() {
         LocalDate startDate = null;
         if (this.startDate != null) {
-            startDate = LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
+            startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return startDate;
     }

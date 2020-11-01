@@ -19,13 +19,13 @@
 package org.apache.fineract.adhocquery.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -64,7 +64,7 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                 if (adhoc.getReportRunFrequency() != null) {
                     if (adhoc.getLastRun() != null) {
                         LocalDate start = adhoc.getLastRun().toLocalDate();
-                        LocalDate end = ZonedDateTime.now(ZoneId.systemDefault()).toLocalDate();
+                        LocalDate end = ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
                         switch (ReportRunFrequency.fromId(adhoc.getReportRunFrequency())) {
                             case DAILY:
                                 next = start.plusDays(1);

@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
@@ -61,7 +60,7 @@ public class TFAccessToken extends AbstractPersistableCustom {
     public TFAccessToken() {}
 
     public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
-        ZonedDateTime validFrom = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
+        ZonedDateTime validFrom = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
         ZonedDateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
 
         return new TFAccessToken(token, user, Date.from(validFrom.toInstant()), Date.from(validTo.toInstant()), true);
@@ -80,8 +79,8 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public AccessTokenData toTokenData() {
-        return new AccessTokenData(this.token, getValidFromDate().atZone(ZoneId.systemDefault()),
-                getValidToDate().atZone(ZoneId.systemDefault()));
+        return new AccessTokenData(this.token, getValidFromDate().atZone(DateUtils.getDateTimeZoneOfTenant()),
+                getValidToDate().atZone(DateUtils.getDateTimeZoneOfTenant()));
     }
 
     public String getToken() {
@@ -97,11 +96,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getValidFromDate() {
-        return ZonedDateTime.ofInstant(validFrom.toInstant(), ZoneId.systemDefault()).toLocalDateTime();
+        return ZonedDateTime.ofInstant(validFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime();
     }
 
     public LocalDateTime getValidToDate() {
-        return ZonedDateTime.ofInstant(validTo.toInstant(), ZoneId.systemDefault()).toLocalDateTime();
+        return ZonedDateTime.ofInstant(validTo.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime();
     }
 
     public void setToken(String token) {

@@ -314,7 +314,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = emailCampaign.getNextTriggerDate();
-        emailCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(ZoneId.systemDefault()).toInstant()));
+        emailCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         // calculate new trigger date and insert into next trigger date
 
         /**
@@ -340,7 +340,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final DateTimeFormatter simpleDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         final LocalDateTime newTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-        emailCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
+        emailCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         this.emailCampaignRepository.saveAndFlush(emailCampaign);
     }
 
@@ -388,7 +388,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                         .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
                 final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-                emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
+                emailCampaign
+                        .setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
                 this.emailCampaignRepository.saveAndFlush(emailCampaign);
             }
         }
@@ -539,7 +540,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-            emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
+            emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
             this.emailCampaignRepository.saveAndFlush(emailCampaign);
         }
 
@@ -557,7 +558,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     private LocalDateTime tenantDateTime() {
-        LocalDateTime today = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime today = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         if (tenant != null) {

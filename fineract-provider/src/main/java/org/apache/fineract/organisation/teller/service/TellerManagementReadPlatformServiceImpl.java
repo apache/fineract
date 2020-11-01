@@ -22,13 +22,13 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -599,8 +599,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String endTime = rs.getString("end_time");
 
             return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description,
-                    Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                    Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), fullDay, startTime, endTime);
+                    Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                    Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), fullDay, startTime, endTime);
         }
     }
 
@@ -750,11 +750,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             Date txnDate = null;
             if (txnLocalDate != null) {
-                txnDate = Date.from(txnLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                txnDate = Date.from(txnLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
             Date createdDate = null;
             if (createdLocalDate != null) {
-                createdDate = Date.from(createdLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                createdDate = Date.from(createdLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
 
             final Long officeId = rs.getLong("office_id");

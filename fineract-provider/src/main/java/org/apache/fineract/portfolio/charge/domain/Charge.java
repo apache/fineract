@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.charge.domain;
 
 import java.math.BigDecimal;
 import java.time.MonthDay;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +40,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -558,7 +558,7 @@ public class Charge extends AbstractPersistableCustom {
     public MonthDay getFeeOnMonthDay() {
         MonthDay feeOnMonthDay = null;
         if (this.feeOnDay != null && this.feeOnMonth != null) {
-            feeOnMonthDay = MonthDay.now(ZoneId.systemDefault()).withMonth(this.feeOnMonth).withDayOfMonth(this.feeOnDay);
+            feeOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(this.feeOnMonth).withDayOfMonth(this.feeOnDay);
         }
         return feeOnMonthDay;
     }

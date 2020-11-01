@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -169,7 +169,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     }
 
     public LocalDate dueDate() {
-        return (this.dueDate == null) ? null : LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
+        return (this.dueDate == null) ? null : LocalDate.ofInstant(this.dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public Money payInstallment(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -198,7 +198,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private void checkIfInstallmentObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
     }
 

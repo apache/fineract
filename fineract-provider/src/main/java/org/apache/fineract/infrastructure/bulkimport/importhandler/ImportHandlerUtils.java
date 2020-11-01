@@ -21,12 +21,12 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -145,7 +145,7 @@ public final class ImportHandlerUtils {
             return null;
         }
 
-        LocalDate localDate = LocalDate.ofInstant(c.getDateCellValue().toInstant(), ZoneId.systemDefault());
+        LocalDate localDate = LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
         return localDate;
     }
 

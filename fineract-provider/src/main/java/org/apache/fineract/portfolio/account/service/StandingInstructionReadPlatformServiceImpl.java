@@ -30,7 +30,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.MonthDay;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -437,7 +436,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             final Integer recurrenceOnDay = JdbcSupport.getInteger(rs, "recurrenceOnDay");
             final Integer recurrenceOnMonth = JdbcSupport.getInteger(rs, "recurrenceOnMonth");
             if (recurrenceOnDay != null) {
-                recurrenceOnMonthDay = MonthDay.now(ZoneId.systemDefault()).withMonth(recurrenceOnMonth).withDayOfMonth(recurrenceOnDay);
+                recurrenceOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(recurrenceOnMonth)
+                        .withDayOfMonth(recurrenceOnDay);
             }
 
             final Integer transferType = rs.getInt("transferType");

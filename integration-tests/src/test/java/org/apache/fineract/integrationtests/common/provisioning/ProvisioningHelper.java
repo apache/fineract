@@ -21,12 +21,12 @@ package org.apache.fineract.integrationtests.common.provisioning;
 import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -42,7 +42,8 @@ public final class ProvisioningHelper {
         map.put("loanProducts", addLoanProducts(loanProducts));
         map.put("definitions", addProvisioningCategories(categories, liability, expense));
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        String formattedString = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        String formattedString = simple
+                .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         Random rand = new Random();
         String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
         map.put("criteriaName", criteriaName);
@@ -56,7 +57,8 @@ public final class ProvisioningHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())));
+        map.put("date",
+                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())));
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }
@@ -67,7 +69,8 @@ public final class ProvisioningHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant())));
+        map.put("date",
+                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())));
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }

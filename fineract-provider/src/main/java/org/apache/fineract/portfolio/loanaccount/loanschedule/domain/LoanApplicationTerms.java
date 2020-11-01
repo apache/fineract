@@ -21,12 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -1369,7 +1369,7 @@ public final class LoanApplicationTerms {
     public Date getRepaymentStartFromDate() {
         Date dateValue = null;
         if (this.repaymentsStartingFromDate != null) {
-            dateValue = Date.from(this.repaymentsStartingFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            dateValue = Date.from(this.repaymentsStartingFromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         return dateValue;
     }
@@ -1377,7 +1377,7 @@ public final class LoanApplicationTerms {
     public Date getInterestChargedFromDate() {
         Date dateValue = null;
         if (this.interestChargedFromDate != null) {
-            dateValue = Date.from(this.interestChargedFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            dateValue = Date.from(this.interestChargedFromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
         return dateValue;
     }

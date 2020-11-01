@@ -19,10 +19,10 @@
 package org.apache.fineract.integrationtests.common;
 
 import com.google.gson.Gson;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +155,8 @@ public class CenterDomain implements Comparable<CenterDomain> {
         } else {
             map.put("active", "false");
             if (submittedDate == null) {
-                map.put("submittedOnDate", Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                map.put("submittedOnDate",
+                        Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
             } else {
                 map.put("submittedOnDate", submittedDate);
             }

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.commands.domain;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
@@ -31,6 +30,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
@@ -103,7 +103,7 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, ZonedDateTime.now(ZoneId.systemDefault()));
+                command.json(), maker, ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
     }
 
     protected CommandSource() {

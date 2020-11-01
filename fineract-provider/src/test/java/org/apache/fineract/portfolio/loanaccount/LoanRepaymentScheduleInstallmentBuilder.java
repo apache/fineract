@@ -19,8 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -31,9 +31,9 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 
     private final Loan loan = null;
     private Integer installmentNumber = Integer.valueOf(1);
-    private final LocalDate fromDate = LocalDate.now(ZoneId.systemDefault());
-    private LocalDate dueDate = LocalDate.now(ZoneId.systemDefault());
-    private final LocalDate latestTransactionDate = LocalDate.now(ZoneId.systemDefault());
+    private final LocalDate fromDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+    private LocalDate dueDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+    private final LocalDate latestTransactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
     private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
     private Money principal = new MoneyBuilder().build();
     private Money interest = new MoneyBuilder().build();

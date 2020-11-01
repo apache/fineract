@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.bulkimport.domain;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -78,7 +78,7 @@ public class ImportDocument extends AbstractPersistableCustom {
         final Boolean completed = Boolean.FALSE;
         final Integer successCount = 0;
         final Integer failureCount = 0;
-        final LocalDateTime endTime = LocalDateTime.now(ZoneId.systemDefault());
+        final LocalDateTime endTime = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
 
         return new ImportDocument(document, importTime, endTime, completed, entityType, createdBy, totalRecords, successCount,
                 failureCount);
@@ -88,8 +88,8 @@ public class ImportDocument extends AbstractPersistableCustom {
             final Integer entityType, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
             final Integer failureCount) {
         this.document = document;
-        this.importTime = Date.from(importTime.atZone(ZoneId.systemDefault()).toInstant());
-        this.endTime = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+        this.importTime = Date.from(importTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endTime = Date.from(endTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.completed = completed;
         this.entityType = entityType;
         this.createdBy = createdBy;
@@ -100,7 +100,7 @@ public class ImportDocument extends AbstractPersistableCustom {
     }
 
     public void update(final LocalDateTime endTime, final Integer successCount, final Integer errorCount) {
-        this.endTime = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+        this.endTime = Date.from(endTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.completed = Boolean.TRUE;
         this.successCount = successCount;
         this.failureCount = errorCount;

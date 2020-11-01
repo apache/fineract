@@ -24,7 +24,6 @@ import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.clientsA
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -107,7 +106,7 @@ public class Meeting extends AbstractPersistableCustom {
             actualChanges.put(meetingDateParamName, valueAsInput);
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
-            this.meetingDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.meetingDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
 
             if (!isValidMeetingDate(this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
                 throw new NotValidRecurringDateException("meeting", "Not a valid meeting date", this.meetingDate);
@@ -168,7 +167,7 @@ public class Meeting extends AbstractPersistableCustom {
     public LocalDate getMeetingDateLocalDate() {
         LocalDate meetingDateLocalDate = null;
         if (this.meetingDate != null) {
-            meetingDateLocalDate = LocalDate.ofInstant(this.meetingDate.toInstant(), ZoneId.systemDefault());
+            meetingDateLocalDate = LocalDate.ofInstant(this.meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return meetingDateLocalDate;
     }
@@ -186,7 +185,7 @@ public class Meeting extends AbstractPersistableCustom {
         final Calendar calendar = calendarInstance.getCalendar();
         LocalDate meetingDateLocalDate = null;
         if (meetingDate != null) {
-            meetingDateLocalDate = LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault());
+            meetingDateLocalDate = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
 
         if (meetingDateLocalDate == null

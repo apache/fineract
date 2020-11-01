@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -170,9 +170,9 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         BigDecimal interestOverdue = BigDecimal.ZERO;
         BigDecimal feeOverdue = BigDecimal.ZERO;
         BigDecimal penaltyOverdue = BigDecimal.ZERO;
-        LocalDate overDueSince = LocalDate.now(ZoneId.systemDefault());
+        LocalDate overDueSince = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isBefore(LocalDate.now(ZoneId.systemDefault()))) {
+            if (installment.getDueDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
                 principalOverdue = principalOverdue.add(installment.getPrincipalOutstanding(loan.getCurrency()).getAmount());
                 interestOverdue = interestOverdue.add(installment.getInterestOutstanding(loan.getCurrency()).getAmount());
                 feeOverdue = feeOverdue.add(installment.getFeeChargesOutstanding(loan.getCurrency()).getAmount());
@@ -265,7 +265,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             BigDecimal interestOverdue = BigDecimal.ZERO;
             BigDecimal feeOverdue = BigDecimal.ZERO;
             BigDecimal penaltyOverdue = BigDecimal.ZERO;
-            LocalDate overDueSince = LocalDate.now(ZoneId.systemDefault());
+            LocalDate overDueSince = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
 
             for (LoanSchedulePeriodData loanSchedulePeriodData : entry.getValue()) {
                 if (!loanSchedulePeriodData.getComplete()) {
