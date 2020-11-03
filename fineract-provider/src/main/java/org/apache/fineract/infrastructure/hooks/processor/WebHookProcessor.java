@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import retrofit.Callback;
+import retrofit2.Callback;
 
 @Service
 public class WebHookProcessor implements HookProcessor {
@@ -78,11 +78,11 @@ public class WebHookProcessor implements HookProcessor {
 
         if (contentType.equalsIgnoreCase("json") || contentType.contains("json")) {
             final JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
-            service.sendJsonRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, json, callback);
+            service.sendJsonRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, json).enqueue(callback);
         } else {
             Map<String, String> map = new HashMap<>();
             map = new Gson().fromJson(payload, map.getClass());
-            service.sendFormRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, map, callback);
+            service.sendFormRequest(entityName, actionName, tenantIdentifier, fineractEndpointUrl, map).enqueue(callback);
         }
     }
 }

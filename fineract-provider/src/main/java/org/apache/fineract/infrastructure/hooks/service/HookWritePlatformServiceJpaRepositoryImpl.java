@@ -30,6 +30,7 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.webT
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,7 +68,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import retrofit.RetrofitError;
 
 @Service
 public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatformService {
@@ -282,15 +282,10 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             if (conf.getFieldName().equals(payloadURLName)) {
                 try {
                     final WebHookService service = processorHelper.createWebHookService(fieldValue);
-                    service.sendEmptyRequest();
-                } catch (RetrofitError re) {
-                    // Swallow error if it's because of method not supported or
-                    // if url throws 404 - required for integration test,
-                    // url generated on 1st POST request
-                    if (re.getResponse() == null) {
-                        String errorMessage = "url.invalid";
-                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
-                    }
+                    service.sendEmptyRequest().execute();
+                } catch (IOException re) {
+                    String errorMessage = "url.invalid";
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
                 }
             }
         }

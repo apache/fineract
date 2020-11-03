@@ -61,21 +61,16 @@ public class HookIntegrationTest {
     @Test
     public void shouldSendOfficeCreationNotification() {
         // Subject to https://echo-webhook.herokuapp.com being up
-        // See
-        // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
+        // See http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
         final String uniqueId = UUID.randomUUID().toString();
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
+        final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "/";
         final Integer hookId = this.hookHelper.createHook(payloadURL);
         Assertions.assertNotNull(hookId);
         final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
         Assertions.assertNotNull(createdOfficeID);
         try {
-
-            /**
-             * sleep for a three seconds after each failure to increase the likelihood of the previous request for
-             * creating office completing
-             **/
-
+            // sleep for a three seconds after each failure to increase the likelihood of the previous request for
+            // creating office completing
             for (int i = 0; i < 6; i++) {
                 try {
                     final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
@@ -98,12 +93,11 @@ public class HookIntegrationTest {
         } finally {
             this.hookHelper.deleteHook(hookId.longValue());
         }
-
     }
 
     @Test
     public void createUpdateAndDeleteHook() {
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn/";
         final String updateURL = "http://localhost";
 
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
@@ -116,6 +110,5 @@ public class HookIntegrationTest {
         this.hookHelper.deleteHook(hookId);
         this.hookHelper.verifyDeleteHook(hookId);
         LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}", hookId);
-
     }
 }

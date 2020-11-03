@@ -21,14 +21,13 @@ package org.apache.fineract.infrastructure.hooks.processor;
 import com.google.gson.JsonObject;
 import java.util.Map;
 import org.apache.fineract.infrastructure.hooks.processor.data.SmsProviderData;
-import retrofit.Callback;
-import retrofit.client.Response;
-import retrofit.http.Body;
-import retrofit.http.FieldMap;
-import retrofit.http.FormUrlEncoded;
-import retrofit.http.GET;
-import retrofit.http.Header;
-import retrofit.http.POST;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
 
 public interface WebHookService {
 
@@ -40,27 +39,25 @@ public interface WebHookService {
 
     // Ping
     @GET("/")
-    Response sendEmptyRequest();
+    Call<Void> sendEmptyRequest();
 
     // Template - Web
     @POST("/")
-    void sendJsonRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
-            @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result,
-            Callback<Response> callBack);
+    Call<Void> sendJsonRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+            @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result);
 
     @FormUrlEncoded
     @POST("/")
-    void sendFormRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+    Call<Void> sendFormRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader,
-            @FieldMap Map<String, String> params, Callback<Response> callBack);
+            @FieldMap Map<String, String> params);
 
     // Template - SMS Bridge
     @POST("/")
-    void sendSmsBridgeRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
-            @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result,
-            Callback<Response> callBack);
+    Call<Void> sendSmsBridgeRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
+            @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result);
 
     @POST("/configuration")
-    String sendSmsBridgeConfigRequest(@Body SmsProviderData config);
+    Call<String> sendSmsBridgeConfigRequest(@Body SmsProviderData config);
 
 }
