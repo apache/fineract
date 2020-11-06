@@ -18,48 +18,18 @@
  */
 package org.apache.fineract.client.test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.apache.fineract.client.util.Calls.ok;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Illustrates use of Fineract SDK REST Client.
+ * Tests a few technical aspect of the Fineract SDK REST Client.
  *
  * @author Michael Vorburger.ch
  */
-public class FineractClientTest {
-
-    void checkClients(FineractClient fineract) {
-        assertThat(ok(fineract.clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 100, null, null, null))
-                .getTotalFilteredRecords()).isAtLeast(3);
-    }
-
-    @Test
-    void testRetrieveAllClientsFromFineractDev() {
-        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").logging(Level.BODY).build();
-        checkClients(fineract);
-    }
-
-    @Test
-    @Disabled // TODO remove Disabled once https://issues.apache.org/jira/browse/FINERACT-1209 is fixed
-    void testRetrieveAllClientsFromLocalhostWithInsecureSelfSignedCert() {
-        FineractClient fineract = FineractClient.builder().baseURL("https://localhost:8443/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").insecure(true).build();
-        checkClients(fineract);
-    }
-
-    @Test // FINERACT-1220
-    void testOfficesDateFormat() {
-        FineractClient fineract = FineractClient.builder().baseURL("https://demo.fineract.dev/fineract-provider/api/v1/").tenant("default")
-                .basicAuth("mifos", "password").insecure(true).logging(Level.BODY).build();
-        ok(fineract.offices.retrieveOffices(true, null, null));
-    }
+public class FineractClientTechnicalTest {
 
     @Test
     @Disabled // TODO remove Ignore once https://issues.apache.org/jira/browse/FINERACT-1221 is fixed

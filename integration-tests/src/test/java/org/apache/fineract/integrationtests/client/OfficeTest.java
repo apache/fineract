@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.newstyle;
+package org.apache.fineract.integrationtests.client;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,13 +39,15 @@ public class OfficeTest extends IntegrationTest {
         // NB parentId(1) always exists (Head Office)
         // NB name random() because Office Names have to be unique
         // TODO requiring dateFormat(..).locale(..) is dumb :( see https://issues.apache.org/jira/browse/FINERACT-1233
-        assertThat(ok(fineract().offices.createOffice(new PostOfficesRequest().name("TestOffice-" + random()).parentId(1L)
-                .openingDate(LocalDate.now()).dateFormat(dateFormat()).locale("en_US"))).getOfficeId()).isGreaterThan(0);
+        assertThat(ok(fineract().offices.createOffice(new PostOfficesRequest().name("TestOffice_" + random()).parentId(1L)
+                .openingDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat(dateFormat()).locale("en_US"))).getOfficeId()).isGreaterThan(0);
     }
 
     @Test
     @Order(2)
-    void retrieveOneExisting() {
-        assertThat(ok(fineract().offices.retrieveOffices(true, null, null)).size()).isAtLeast(2);
+    void retrieveOneExistingInclDateFormat() { // see FINERACT-1220 re. what this tests re. Date Format
+        List<GetOfficesResponse> response = ok(fineract().offices.retrieveOffices(true, null, null));
+        assertThat(response.size()).isAtLeast(1);
+        assertThat(response.get(0).getOpeningDate()).isNotNull();
     }
 }

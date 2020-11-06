@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Deprecated // TODO move this into new org.apache.fineract.integrationtests.client.StaffTest
 public class StaffTest {
 
     private RequestSpecification requestSpec;
@@ -61,7 +62,6 @@ public class StaffTest {
 
     @Test
     public void testStaffCreateValidationError() {
-
         final String noOfficeJson = StaffHelper.createStaffWithJSONFields("firstname", "lastname");
         final String noFirstnameJson = StaffHelper.createStaffWithJSONFields("officeId", "lastname");
         final String noLastnameJson = StaffHelper.createStaffWithJSONFields("officeId", "firstname");

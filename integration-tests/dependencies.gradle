@@ -23,6 +23,7 @@ dependencies {
     tomcat 'org.apache.tomcat:tomcat:9.0.39@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
+            project(path: ':fineract-client', configuration: 'runtimeElements'),
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
             'com.google.truth:truth:1.0.1',
             'com.google.truth.extensions:truth-java8-extension:1.0.1',
