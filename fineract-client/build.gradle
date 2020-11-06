@@ -103,7 +103,11 @@ compileJava {
 }
 
 tasks.withType(JavaCompile) {
-    // the generated code contains some warnings in build/generated/java/src/main/java/org/apache/fineract/client/auth/OAuthOkHttpClient.java#L71 that won't pass
+    // the generated code in build/generated/java/src/main/java/org/apache/fineract/client/auth/OAuthOkHttpClient.java#L71 currently uses deprecated RequestBody.create(MediaType,String)
+    // TODO FINERACT-1247 why does this not work:
+    //   options.compilerArgs -= ["-Xlint:deprecation"]
+    //   options.compilerArgs += ["-Xlint:-deprecation"]
+    // So we just have to use:
     options.compilerArgs -= ["-Werror"]
 }
 

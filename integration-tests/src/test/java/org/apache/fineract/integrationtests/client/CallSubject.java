@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.client.testutil;
+package org.apache.fineract.integrationtests.client;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;

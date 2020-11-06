@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.newstyle;
+package org.apache.fineract.integrationtests.client;
 
 import java.util.Optional;
 import org.apache.fineract.client.models.GetClientsResponse;
@@ -39,14 +39,14 @@ public class ClientTest extends IntegrationTest {
 
     @Test
     @Order(2)
-    void retrieveOneExisting() {
-        assertThat(retrieveOne()).isPresent();
+    void retrieveAnyExisting() {
+        assertThat(retrieveFirst()).isPresent();
     }
 
     // The following are not tests, but helpful utilities for other tests
 
     public Long getClientId() {
-        return retrieveOne().orElseGet(this::create);
+        return retrieveFirst().orElseGet(this::create);
     }
 
     Long create() {
@@ -56,13 +56,13 @@ public class ClientTest extends IntegrationTest {
         // TODO why dateFormat and locale required even when no activationDate?!
         // https://issues.apache.org/jira/browse/FINERACT-1233
         return (long) ok(fineract().clients
-                .create5(new PostClientsRequest().officeId(1).fullname("TestClient").dateFormat(dateFormat()).locale("en_US")))
+                .create6(new PostClientsRequest().officeId(1).fullname("TestClient").dateFormat(dateFormat()).locale("en_US")))
                         .getClientId();
     }
 
-    Optional<Long> retrieveOne() {
+    Optional<Long> retrieveFirst() {
         GetClientsResponse clients = ok(
-                fineract().clients.retrieveAll20(null, null, null, null, null, null, null, null, 0, 1, null, null, false));
+                fineract().clients.retrieveAll21(null, null, null, null, null, null, null, null, 0, 1, null, null, false));
         if (clients.getTotalFilteredRecords() > 0) {
             // TODO rm long cast, see https://issues.apache.org/jira/browse/FINERACT-1230
             return Optional.of((long) clients.getPageItems().get(0).getId());

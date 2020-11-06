@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.newstyle;
+package org.apache.fineract.integrationtests.client;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody.Part;
 import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.GetEntityTypeEntityIdDocumentsResponse;
-import org.apache.fineract.client.models.PostEntityTypeEntityIdDocumentsResponse;
 import org.apache.fineract.client.util.Parts;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -54,9 +53,7 @@ public class DocumentTest extends IntegrationTest {
         String name = "Test";
         Part part = Parts.fromFile(testFile);
         String description = null;
-        // TODO used var in tests when moved from fineract-client (Java 8 only) to new module
-        PostEntityTypeEntityIdDocumentsResponse response = ok(
-                fineract().documents.createDocument("clients", clientId, part, name, description));
+        var response = ok(fineract().documents.createDocument("clients", clientId, part, name, description));
         assertThat(response.getResourceId()).isNotNull();
         assertThat(response.getResourceIdentifier()).isNotEmpty();
         documentId = response.getResourceId();

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.newstyle;
+package org.apache.fineract.integrationtests.client;
 
 import com.google.common.truth.BigDecimalSubject;
 import com.google.common.truth.BooleanSubject;
@@ -35,7 +35,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Random;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
-import org.apache.fineract.client.testutil.CallSubject;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
 import org.junit.jupiter.api.MethodOrderer;
@@ -62,9 +61,9 @@ public abstract class IntegrationTest {
 
     protected FineractClient fineract() {
         if (fineract == null) {
-            // TODO change from Fineract.dev to https://localhost:8443/fineract-provider/api/v1/ after FINERACT-1209
-            String url = System.getProperty("fineract.it.url", "https://demo.fineract.dev/fineract-provider/api/v1/");
-            fineract = FineractClient.builder().baseURL(url).tenant("default").basicAuth("mifos", "password").insecure(true)
+            String url = System.getProperty("fineract.it.url", "https://localhost:8443/fineract-provider/api/v1/");
+            // insecure(true) should *ONLY* ever be used for https://localhost:8443, NOT in real clients!!
+            fineract = FineractClient.builder().insecure(true).baseURL(url).tenant("default").basicAuth("mifos", "password")
                     .logging(Level.NONE).build();
         }
         return fineract;
