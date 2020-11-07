@@ -46,12 +46,12 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private GroupSheetPopulator groupSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private LoanProductSheetPopulator productSheetPopulator;
-    private ExtrasSheetPopulator extrasSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final GroupSheetPopulator groupSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final LoanProductSheetPopulator productSheetPopulator;
+    private final ExtrasSheetPopulator extrasSheetPopulator;
 
     public LoanWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
@@ -432,21 +432,20 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             Name groupName = loanWorkbook.createName();
 
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                loanOfficerName.setNameName("Staff_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(loanOfficerName, "Staff_" + officeNames.get(i));
                 loanOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
             if (officeNameToBeginEndIndexesOfClients != null) {
-                clientName.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(clientName, "Client_" + officeNames.get(i));
                 clientName.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfClients[0] + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
             if (officeNameToBeginEndIndexesOfGroups != null) {
-                groupName.setNameName("Group_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(groupName, "Group_" + officeNames.get(i));
                 groupName.setRefersToFormula(TemplatePopulateImportConstants.GROUP_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfGroups[0] + ":$B$" + officeNameToBeginEndIndexesOfGroups[1]);
             }
-
         }
 
         // Product Name
@@ -499,28 +498,28 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             Name graceOnInterestChargedName = loanWorkbook.createName();
             Name startDateName = loanWorkbook.createName();
             String productName = products.get(i).getName().replaceAll("[ ]", "_");
-            fundName.setNameName("FUND_" + productName);
-            principalName.setNameName("PRINCIPAL_" + productName);
-            minPrincipalName.setNameName("MIN_PRINCIPAL_" + productName);
-            maxPrincipalName.setNameName("MAX_PRINCIPAL_" + productName);
-            noOfRepaymentName.setNameName("NO_REPAYMENT_" + productName);
-            minNoOfRepayment.setNameName("MIN_REPAYMENT_" + productName);
-            maxNoOfRepaymentName.setNameName("MAX_REPAYMENT_" + productName);
-            repaymentEveryName.setNameName("REPAYMENT_EVERY_" + productName);
-            repaymentFrequencyName.setNameName("REPAYMENT_FREQUENCY_" + productName);
-            interestName.setNameName("INTEREST_" + productName);
-            minInterestName.setNameName("MIN_INTEREST_" + productName);
-            maxInterestName.setNameName("MAX_INTEREST_" + productName);
-            interestFrequencyName.setNameName("INTEREST_FREQUENCY_" + productName);
-            amortizationName.setNameName("AMORTIZATION_" + productName);
-            interestTypeName.setNameName("INTEREST_TYPE_" + productName);
-            interestCalculationPeriodName.setNameName("INTEREST_CALCULATION_" + productName);
-            transactionProcessingStrategyName.setNameName("STRATEGY_" + productName);
-            arrearsToleranceName.setNameName("ARREARS_TOLERANCE_" + productName);
-            graceOnPrincipalPaymentName.setNameName("GRACE_PRINCIPAL_" + productName);
-            graceOnInterestPaymentName.setNameName("GRACE_INTEREST_PAYMENT_" + productName);
-            graceOnInterestChargedName.setNameName("GRACE_INTEREST_CHARGED_" + productName);
-            startDateName.setNameName("START_DATE_" + productName);
+            setSanitized(fundName, "FUND_" + productName);
+            setSanitized(principalName, "PRINCIPAL_" + productName);
+            setSanitized(minPrincipalName, "MIN_PRINCIPAL_" + productName);
+            setSanitized(maxPrincipalName, "MAX_PRINCIPAL_" + productName);
+            setSanitized(noOfRepaymentName, "NO_REPAYMENT_" + productName);
+            setSanitized(minNoOfRepayment, "MIN_REPAYMENT_" + productName);
+            setSanitized(maxNoOfRepaymentName, "MAX_REPAYMENT_" + productName);
+            setSanitized(repaymentEveryName, "REPAYMENT_EVERY_" + productName);
+            setSanitized(repaymentFrequencyName, "REPAYMENT_FREQUENCY_" + productName);
+            setSanitized(interestName, "INTEREST_" + productName);
+            setSanitized(minInterestName, "MIN_INTEREST_" + productName);
+            setSanitized(maxInterestName, "MAX_INTEREST_" + productName);
+            setSanitized(interestFrequencyName, "INTEREST_FREQUENCY_" + productName);
+            setSanitized(amortizationName, "AMORTIZATION_" + productName);
+            setSanitized(interestTypeName, "INTEREST_TYPE_" + productName);
+            setSanitized(interestCalculationPeriodName, "INTEREST_CALCULATION_" + productName);
+            setSanitized(transactionProcessingStrategyName, "STRATEGY_" + productName);
+            setSanitized(arrearsToleranceName, "ARREARS_TOLERANCE_" + productName);
+            setSanitized(graceOnPrincipalPaymentName, "GRACE_PRINCIPAL_" + productName);
+            setSanitized(graceOnInterestPaymentName, "GRACE_INTEREST_PAYMENT_" + productName);
+            setSanitized(graceOnInterestChargedName, "GRACE_INTEREST_CHARGED_" + productName);
+            setSanitized(startDateName, "START_DATE_" + productName);
             if (products.get(i).getFundName() != null) {
                 fundName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$C$" + (i + 2));
             }
@@ -547,5 +546,4 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             startDateName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$X$" + (i + 2));
         }
     }
-
 }

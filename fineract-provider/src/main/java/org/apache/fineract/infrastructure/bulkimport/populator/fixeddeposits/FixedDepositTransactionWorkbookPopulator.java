@@ -44,11 +44,11 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private ExtrasSheetPopulator extrasSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final ExtrasSheetPopulator extrasSheetPopulator;
 
-    private List<SavingsAccountData> savingsAccounts;
+    private final List<SavingsAccountData> savingsAccounts;
 
     public FixedDepositTransactionWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             ExtrasSheetPopulator extrasSheetPopulator, List<SavingsAccountData> savingsAccounts) {
@@ -144,7 +144,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = savingsTransactionWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
-                name.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(name, "Client_" + officeNames.get(i));
                 name.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfClients[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
@@ -178,8 +178,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveSavings.size(); j++) {
             Name name = savingsTransactionWorkbook.createName();
-            name.setNameName(
-                    "Account_" + clientsWithActiveSavings.get(j).replace(" ", "_") + "_" + clientIdsWithActiveSavings.get(j) + "_");
+            setSanitized(name, "Account_" + clientsWithActiveSavings.get(j) + "_" + clientIdsWithActiveSavings.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME + "!$Q$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$Q$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);

@@ -40,14 +40,14 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private List<CodeValueData> clientTypeCodeValues;
-    private List<CodeValueData> genderCodeValues;
-    private List<CodeValueData> clientClassificationCodeValues;
-    private List<CodeValueData> addressTypesCodeValues;
-    private List<CodeValueData> stateProvinceCodeValues;
-    private List<CodeValueData> countryCodeValues;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final List<CodeValueData> clientTypeCodeValues;
+    private final List<CodeValueData> genderCodeValues;
+    private final List<CodeValueData> clientClassificationCodeValues;
+    private final List<CodeValueData> addressTypesCodeValues;
+    private final List<CodeValueData> stateProvinceCodeValues;
+    private final List<CodeValueData> countryCodeValues;
 
     public ClientPersonWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
             List<CodeValueData> clientTypeCodeValues, List<CodeValueData> genderCodeValues, List<CodeValueData> clientClassification,
@@ -340,11 +340,10 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
             Integer[] officeNameToBeginEndIndexesOfStaff = personnelSheetPopulator.getOfficeNameToBeginEndIndexesOfStaff().get(i);
             if (officeNameToBeginEndIndexesOfStaff != null) {
                 Name name = clientWorkbook.createName();
-                name.setNameName("Staff_" + offices.get(i).name().trim().replaceAll("[ )(]", "_"));
+                setSanitized(name, "Staff_" + offices.get(i).name());
                 name.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfStaff[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
         }
     }
-
 }

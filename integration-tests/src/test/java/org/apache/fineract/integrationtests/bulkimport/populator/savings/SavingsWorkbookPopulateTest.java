@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.populator.savings;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -37,7 +39,6 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -60,47 +61,46 @@ public class SavingsWorkbookPopulateTest {
         // in order to populate helper sheets
         OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
         Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
-        Assertions.assertNotNull(outcome_office_creation, "Could not create office");
+        assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
         Integer outcome_client_creation = ClientHelper.createClient(requestSpec, responseSpec);
-        Assertions.assertNotNull(outcome_client_creation, "Could not create client");
+        assertNotNull(outcome_client_creation, "Could not create client");
 
         // in order to populate helper sheets
         Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
-        Assertions.assertNotNull(outcome_group_creation, "Could not create group");
+        assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
         Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
-        Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
+        assertNotNull(outcome_staff_creation, "Could not create staff");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         String jsonSavingsProduct = savingsProductHelper.build();
         Integer outcome_sp_creaction = SavingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
-        Assertions.assertNotNull(outcome_sp_creaction, "Could not create Savings product");
+        assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
         SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         Workbook workbook = savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
 
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstOfficeRow = officeSheet.getRow(1);
-        Assertions.assertNotNull(firstOfficeRow.getCell(1), "No offices found ");
+        assertNotNull(firstOfficeRow.getCell(1), "No offices found ");
 
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
         Row firstClientRow = clientSheet.getRow(1);
-        Assertions.assertNotNull(firstClientRow.getCell(1), "No clients found ");
+        assertNotNull(firstClientRow.getCell(1), "No clients found ");
 
         Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         Row firstGroupRow = groupSheet.getRow(1);
-        Assertions.assertNotNull(firstGroupRow.getCell(1), "No groups found ");
+        assertNotNull(firstGroupRow.getCell(1), "No groups found ");
 
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
         Row firstStaffRow = staffSheet.getRow(1);
-        Assertions.assertNotNull(firstStaffRow.getCell(1), "No staff found ");
+        assertNotNull(firstStaffRow.getCell(1), "No staff found ");
 
         Sheet productSheet = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
         Row firstProductRow = productSheet.getRow(1);
-        Assertions.assertNotNull(firstProductRow.getCell(1), "No products found ");
-
+        assertNotNull(firstProductRow.getCell(1), "No products found ");
     }
 }

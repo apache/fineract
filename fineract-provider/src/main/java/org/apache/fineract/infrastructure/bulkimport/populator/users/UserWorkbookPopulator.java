@@ -40,9 +40,9 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class UserWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private RoleSheetPopulator roleSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final RoleSheetPopulator roleSheetPopulator;
 
     public UserWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
             RoleSheetPopulator roleSheetPopulator) {
@@ -105,7 +105,7 @@ public class UserWorkbookPopulator extends AbstractWorkbookPopulator {
             Name userOfficeName = userWorkbook.createName();
 
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                userOfficeName.setNameName("Staff_" + offices.get(i).name().trim().replaceAll("[ )(]", "_"));
+                setSanitized(userOfficeName, "Staff_" + offices.get(i).name());
                 userOfficeName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
