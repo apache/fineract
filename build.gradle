@@ -561,6 +561,7 @@ configure(project.fineractJavaProjects) {
                     "ClassNewInstance",
                     "UnnecessaryStaticImport",
                     "UnsafeFinalization",
+                    "JavaTimeDefaultTimeZone",
                     "JodaPlusMinusLong",
                     "MutableMethodReturnType",
                     "SwitchDefault",
