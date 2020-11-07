@@ -24,10 +24,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
+    private static final Pattern NAME_REGEX = Pattern.compile("[ @#&()<>,;.:$£€§°\\\\/=!\\?\\-\\+\\*\"\\[\\]]");
 
     protected void writeInt(int colIndex, Row row, int value) {
         row.createCell(colIndex).setCellValue(value);
@@ -162,4 +165,11 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
         }
     }
 
+    /**
+     * See {@link Name#setNameName(String)} and https://issues.apache.org/jira/browse/FINERACT-1256.
+     */
+    protected void setSanitized(Name poiName, String roughName) {
+        String sanitized = NAME_REGEX.matcher(roughName.trim()).replaceAll("_");
+        poiName.setNameName(sanitized);
+    }
 }

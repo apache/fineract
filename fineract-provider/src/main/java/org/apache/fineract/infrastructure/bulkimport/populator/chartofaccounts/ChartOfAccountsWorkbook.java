@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChartOfAccountsWorkbook.class);
-    private List<GLAccountData> glAccounts;
+    private final List<GLAccountData> glAccounts;
     private Map<String, List<String>> accountTypeToAccountNameAndTag;
     private Map<Integer, Integer[]> accountTypeToBeginEndIndexesofAccountNames;
     private List<String> accountTypesNoDuplicatesList;
@@ -76,7 +76,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
     private void addToaccountTypeToAccountNameMap(String key, String value) {
         List<String> values = accountTypeToAccountNameAndTag.get(key);
         if (values == null) {
-            values = new ArrayList<String>();
+            values = new ArrayList<>();
         }
         if (!values.contains(value)) {
             values.add(value);
@@ -128,14 +128,14 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
             Name tags = chartOfAccountsWorkbook.createName();
             Integer[] tagValueBeginEndIndexes = accountTypeToBeginEndIndexesofAccountNames.get(i);
             if (accountTypeToBeginEndIndexesofAccountNames != null) {
-                tags.setNameName("Tags_" + accountTypesNoDuplicatesList.get(i));
+                setSanitized(tags, "Tags_" + accountTypesNoDuplicatesList.get(i));
                 tags.setRefersToFormula(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME + "!$S$" + tagValueBeginEndIndexes[0]
                         + ":$S$" + tagValueBeginEndIndexes[1]);
             }
             Name accountNames = chartOfAccountsWorkbook.createName();
             Integer[] accountNamesBeginEndIndexes = accountTypeToBeginEndIndexesofAccountNames.get(i);
             if (accountNamesBeginEndIndexes != null) {
-                accountNames.setNameName("AccountName_" + accountTypesNoDuplicatesList.get(i));
+                setSanitized(accountNames, "AccountName_" + accountTypesNoDuplicatesList.get(i));
                 accountNames.setRefersToFormula(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME + "!$Q$"
                         + accountNamesBeginEndIndexes[0] + ":$Q$" + accountNamesBeginEndIndexes[1]);
             }
@@ -163,15 +163,15 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
 
     private void setLookupTable(Sheet chartOfAccountsSheet) {
         accountTypesNoDuplicatesList = new ArrayList<>();
-        for (int i = 0; i < glAccounts.size(); i++) {
-            if (!accountTypesNoDuplicatesList.contains(glAccounts.get(i).getType().getValue())) {
-                accountTypesNoDuplicatesList.add(glAccounts.get(i).getType().getValue());
+        for (GLAccountData glAccount : glAccounts) {
+            if (!accountTypesNoDuplicatesList.contains(glAccount.getType().getValue())) {
+                accountTypesNoDuplicatesList.add(glAccount.getType().getValue());
             }
         }
         int rowIndex = 1;
         int startIndex = 1;
         int accountTypeIndex = 0;
-        accountTypeToBeginEndIndexesofAccountNames = new HashMap<Integer, Integer[]>();
+        accountTypeToBeginEndIndexesofAccountNames = new HashMap<>();
         for (String accountType : accountTypesNoDuplicatesList) {
             startIndex = rowIndex + 1;
             Row row = chartOfAccountsSheet.createRow(rowIndex);
