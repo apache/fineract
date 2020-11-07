@@ -45,11 +45,11 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private List<LoanAccountData> loans;
-    private List<SavingsAccountData> savings;
-    private List<CodeValueData> guarantorRelationshipTypes;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final List<LoanAccountData> loans;
+    private final List<SavingsAccountData> savings;
+    private final List<CodeValueData> guarantorRelationshipTypes;
 
     public GuarantorWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             List<LoanAccountData> loans, List<SavingsAccountData> savings, List<CodeValueData> guarantorRelationshipTypes) {
@@ -240,7 +240,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
 
     private void setNames(Sheet worksheet) {
         Workbook addGurarantorWorkbook = worksheet.getWorkbook();
-        ArrayList<String> officeNames = new ArrayList<String>(officeSheetPopulator.getOfficeNames());
+        ArrayList<String> officeNames = new ArrayList<>(officeSheetPopulator.getOfficeNames());
 
         // Office Names
         Name officeGroup = addGurarantorWorkbook.createName();
@@ -258,7 +258,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = addGurarantorWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
-                name.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(name, "Client_" + officeNames.get(i));
                 name.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfClients[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
@@ -266,9 +266,9 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
 
         // Counting clients with active loans and starting and end addresses of
         // cells
-        HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<String, Integer[]>();
-        ArrayList<String> clientsWithActiveLoans = new ArrayList<String>();
-        ArrayList<String> clientIdsWithActiveLoans = new ArrayList<String>();
+        HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<>();
+        ArrayList<String> clientsWithActiveLoans = new ArrayList<>();
+        ArrayList<String> clientIdsWithActiveLoans = new ArrayList<>();
         int startIndex = 1;
         int endIndex = 1;
         String clientName = "";
@@ -292,7 +292,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveLoans.size(); j++) {
             Name name = addGurarantorWorkbook.createName();
-            name.setNameName("Account_" + clientsWithActiveLoans.get(j).replaceAll(" ", "_") + "_" + clientIdsWithActiveLoans.get(j) + "_");
+            setSanitized(name, "Account_" + clientsWithActiveLoans.get(j) + "_" + clientIdsWithActiveLoans.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME + "!$CE$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[0] + ":$CE$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[1]);
@@ -300,8 +300,8 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         /// savings
         // Counting clients with active savings and starting and end addresses
         /// of cells for naming
-        ArrayList<String> clientsWithActiveSavings = new ArrayList<String>();
-        ArrayList<String> clientIdsWithActiveSavings = new ArrayList<String>();
+        ArrayList<String> clientsWithActiveSavings = new ArrayList<>();
+        ArrayList<String> clientIdsWithActiveSavings = new ArrayList<>();
         clientName = "";
         clientId = "";
         for (int i = 0; i < savings.size(); i++) {
@@ -322,8 +322,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveSavings.size(); j++) {
             Name name = addGurarantorWorkbook.createName();
-            name.setNameName("SavingsAccount_" + clientsWithActiveSavings.get(j).replaceAll(" ", "_") + "_"
-                    + clientIdsWithActiveSavings.get(j) + "_");
+            setSanitized(name, "SavingsAccount_" + clientsWithActiveSavings.get(j) + "_" + clientIdsWithActiveSavings.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME + "!$CG$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$CG$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);

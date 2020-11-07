@@ -41,9 +41,9 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class SharedAccountWorkBookPopulator extends AbstractWorkbookPopulator {
 
-    private SharedProductsSheetPopulator sharedProductsSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private SavingsAccountSheetPopulator savingsAccountSheetPopulator;
+    private final SharedProductsSheetPopulator sharedProductsSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final SavingsAccountSheetPopulator savingsAccountSheetPopulator;
 
     public SharedAccountWorkBookPopulator(SharedProductsSheetPopulator sharedProductsSheetPopulator,
             ClientSheetPopulator clientSheetPopulator, SavingsAccountSheetPopulator savingsAccountSheetPopulator) {
@@ -150,25 +150,25 @@ public class SharedAccountWorkBookPopulator extends AbstractWorkbookPopulator {
 
             String productName = products.get(i).getName().replaceAll("[ ]", "_");
 
-            currecyName.setNameName("CURRENCY_" + productName);
+            setSanitized(currecyName, "CURRENCY_" + productName);
             currecyName.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$C$" + (i + 2));
 
-            decimalPlacesName.setNameName("DECIMAL_PLACES_" + productName);
+            setSanitized(decimalPlacesName, "DECIMAL_PLACES_" + productName);
             decimalPlacesName.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$D$" + (i + 2));
 
-            todaysPriceName.setNameName("TODAYS_PRICE_" + productName);
+            setSanitized(todaysPriceName, "TODAYS_PRICE_" + productName);
             todaysPriceName.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$E$" + (i + 2));
 
-            currencyInMultiplesName.setNameName("CURRENCY_IN_MULTIPLES_" + productName);
+            setSanitized(currencyInMultiplesName, "CURRENCY_IN_MULTIPLES_" + productName);
             currencyInMultiplesName.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$F$" + (i + 2));
 
-            chargesName1.setNameName("CHARGES_NAME_1_" + productName);
+            setSanitized(chargesName1, "CHARGES_NAME_1_" + productName);
             chargesName1.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$I$" + (i + 2));
 
-            chargesName2.setNameName("CHARGES_NAME_2_" + productName);
+            setSanitized(chargesName2, "CHARGES_NAME_2_" + productName);
             chargesName2.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$K$" + (i + 2));
 
-            chargesName3.setNameName("CHARGES_NAME_3_" + productName);
+            setSanitized(chargesName3, "CHARGES_NAME_3_" + productName);
             chargesName3.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$M$" + (i + 2));
         }
 

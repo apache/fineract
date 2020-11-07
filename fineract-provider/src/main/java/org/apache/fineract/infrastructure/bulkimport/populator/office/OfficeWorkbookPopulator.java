@@ -37,7 +37,7 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class OfficeWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private List<OfficeData> offices;
+    private final List<OfficeData> offices;
 
     public OfficeWorkbookPopulator(List<OfficeData> offices) {
         this.offices = offices;
@@ -118,6 +118,5 @@ public class OfficeWorkbookPopulator extends AbstractWorkbookPopulator {
                     "IF(ISERROR(VLOOKUP($B" + (rowNo + 1) + ",$H$2:$I$" + (offices.size() + 1) + ",2,FALSE)),\"\",(VLOOKUP($B" + (rowNo + 1)
                             + ",$H$2:$I$" + (offices.size() + 1) + ",2,FALSE)))");
         }
-
     }
 }

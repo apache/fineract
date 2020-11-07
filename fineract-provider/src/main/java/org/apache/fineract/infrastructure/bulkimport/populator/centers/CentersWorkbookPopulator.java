@@ -40,9 +40,9 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private GroupSheetPopulator groupSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final GroupSheetPopulator groupSheetPopulator;
 
     public CentersWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
             GroupSheetPopulator groupSheetPopulator) {
@@ -231,7 +231,5 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
         }
-
     }
-
 }

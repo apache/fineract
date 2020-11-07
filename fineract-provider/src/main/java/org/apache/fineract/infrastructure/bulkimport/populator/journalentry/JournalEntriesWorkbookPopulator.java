@@ -39,9 +39,9 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private GlAccountSheetPopulator glAccountSheetPopulator;
-    private ExtrasSheetPopulator extrasSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final GlAccountSheetPopulator glAccountSheetPopulator;
+    private final ExtrasSheetPopulator extrasSheetPopulator;
 
     public JournalEntriesWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, GlAccountSheetPopulator glAccountSheetPopulator,
             ExtrasSheetPopulator extrasSheetPopulator) {
@@ -169,9 +169,7 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
 
     private void setDefaults(Sheet worksheet) {
         for (Integer rowNo = 1; rowNo < 1000; rowNo++) {
-            Row row = worksheet.createRow(rowNo);
+            worksheet.createRow(rowNo);
         }
-
     }
-
 }

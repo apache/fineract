@@ -41,10 +41,10 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private CenterSheetPopulator centerSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final CenterSheetPopulator centerSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
 
     public GroupsWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
             CenterSheetPopulator centerSheetPopulator, ClientSheetPopulator clientSheetPopulator) {
@@ -241,17 +241,15 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
             Name centerName = centerWorkbook.createName();
 
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                loanOfficerName.setNameName("Staff_" + offices.get(i).name().trim().replaceAll("[ )(]", "_"));
+                setSanitized(loanOfficerName, "Staff_" + offices.get(i).name());
                 loanOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
             if (officeNameToBeginEndIndexesOfCenters != null) {
-                centerName.setNameName("Center_" + offices.get(i).name().trim().replaceAll("[ )(]", "_"));
+                setSanitized(centerName, "Center_" + offices.get(i).name());
                 centerName.setRefersToFormula(TemplatePopulateImportConstants.CENTER_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfCenters[0] + ":$B$" + officeNameToBeginEndIndexesOfCenters[1]);
             }
         }
-
     }
-
 }
