@@ -638,24 +638,13 @@ configure(project.fineractJavaProjects) {
         }
     }
 
-    // Configuration for the modernizer plugin
-    // https://github.com/andygoossens/gradle-modernizer-plugin
+    // Configuration for https://github.com/andygoossens/gradle-modernizer-plugin
     modernizer {
         includeTestClasses = true
         failOnViolations = true
-
         violationLogLevel="error"
-
         javaVersion = project.targetCompatibility
-
-        ignorePackages = []
         ignoreGeneratedClasses = true
-
-        exclusions = []
-        exclusionPatterns = [
-            // To be removed when https://issues.apache.org/jira/browse/FINERACT-826 is fixed
-            'org/joda/time/.*'
-        ]
     }
 }
 
