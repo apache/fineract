@@ -44,6 +44,13 @@ public class CommandProcessingResult implements Serializable {
     private final Long glimId;
     private Boolean rollbackTransaction;
 
+    public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult) {
+        return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId, commandResult.clientId,
+                commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, commandResult.resourceId,
+                commandResult.transactionId, commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
+                commandResult.rollbackTransaction, commandResult.subResourceId);
+    }
+
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final Long gsimId,
             final Long glimId, final String transactionId, final Map<String, Object> changes, final Long productId,
