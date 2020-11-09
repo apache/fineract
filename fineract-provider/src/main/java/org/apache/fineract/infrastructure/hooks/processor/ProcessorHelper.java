@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 @Service
 public final class ProcessorHelper {
@@ -116,7 +117,25 @@ public final class ProcessorHelper {
         final Retrofit.Builder retrofitBuilder = new Retrofit.Builder();
         retrofitBuilder.baseUrl(url);
         retrofitBuilder.client(client);
+        retrofitBuilder.addConverterFactory(GsonConverterFactory.create());
         final Retrofit retrofit = retrofitBuilder.build();
         return retrofit.create(WebHookService.class);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Callback createCallback(final String url, String payload) {
+
+        return new Callback() {
+
+            @Override
+            public void onResponse(@SuppressWarnings("unused") Call call, retrofit2.Response response) {
+                LOG.info("URL: {} - Status: {}", url, response.code());
+            }
+
+            @Override
+            public void onFailure(@SuppressWarnings("unused") Call call, Throwable t) {
+                LOG.error("URL: {} - Retrofit failure occured", url, t);
+            }
+        };
     }
 }
