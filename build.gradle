@@ -96,7 +96,7 @@ allprojects  {
     dependencyManagement {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.0'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.4.RELEASE'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.5.RELEASE'
             mavenBom 'org.junit:junit-bom:5.7.0'
         }
 
