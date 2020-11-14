@@ -74,7 +74,7 @@ Instructions to execute Integration Tests
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew clean integrationTest`
+1. `./gradlew clean test`
 
 
 Instructions to run and debug in Eclipse IDE
