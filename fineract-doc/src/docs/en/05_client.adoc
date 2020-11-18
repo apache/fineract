@@ -6,17 +6,14 @@ Apache Fineract supports client code generation using https://openapi-generator.
 
 The `fineract-client.jar` will eventually be available on Maven Central (watch https://issues.apache.org/jira/browse/FINERACT-1102[FINERACT-1102]). Until it is, you can quite easily build the latest and greatest version locally from source, see below.
 
-The https://github.com/apache/fineract/search?q=FineractClient.java[`FineractClient`] is the entry point to the _Fineract SDK Java API Client_. https://github.com/apache/fineract/search?q=Calls.java[`Calls`] is a convenient and recommended utility to simplify the use of the https://square.github.io/retrofit/2.x/retrofit/retrofit2/Call.html[`retrofit2.Call`] type which all API operations return. Their benefit is illustrated e.g. in the https://github.com/apache/fineract/search?q=FineractClientTest.java[`FineractClientTest`], but in short:
+The https://github.com/apache/fineract/search?q=FineractClient.java[`FineractClient`] is the entry point to the _Fineract SDK Java API Client_. https://github.com/apache/fineract/search?q=Calls.java[`Calls`] is a convenient and recommended utility to simplify the use of the https://square.github.io/retrofit/2.x/retrofit/retrofit2/Call.html[`retrofit2.Call`] type which all API operations return. This permits you to use the API like the https://github.com/apache/fineract/search?q=FineractClientDemo.java[`FineractClientDemo`] illustrates:
 
 [source,java]
-// /home/spaddo/workspace/fineract/vidakovic-fineract-develop/
 ----
 import org.apache.fineract.client.util.FineractClient;
 import static org.apache.fineract.client.util.Calls.ok;
 
-include::{rootdir}/fineract-client/src/test/java/org/apache/fineract/client/test/FineractClientTest.java[lines=44..45]
-
-System.out.println(ok(fineract.clients.retrieveAll(...).getTotalFilteredRecords());
+include::{rootdir}/fineract-client/src/test/java/org/apache/fineract/client/test/FineractClientDemo.java[tags=documentation]
 ----
 
 === Generate API Client

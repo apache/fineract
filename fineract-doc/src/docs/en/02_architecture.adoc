@@ -33,7 +33,7 @@ Mifos was an idea born out of a wish to create and deploy technology that allows
 === System Overview
 
 .Platform System Overview
-image::images/platform-systemview.png[]
+image::platform-systemview.png[]
 
 Financial institutions deliver their services to customers through a variety of means today.
 
@@ -53,7 +53,7 @@ The platform is the core engine of the MIS. It hides alot of the complexity that
 As ALL capabilities of the platform are exposed through an API, The API docs are the best place to view a detailed breakdown of what the platform does. See online API Documentation.
 
 .Platform Functional Overview
-image::images/platform-categories.png[]
+image::platform-categories.png[]
 
 At a higher level though we see the capabilities fall into the following categories:
 
@@ -170,7 +170,7 @@ Within each vertical slice is some common packaging structure:
 NOTE: The implementation of the platform code to process commands through handlers whilst supporting maker-checker and authorisation checks is a little bit convoluted at present and is an area pin-pointed for clean up to make it easier to on board new platform developers. In the mean time below content is used to explain its workings at present.
 
 .CQRS
-image::images/command-query.png[]
+image::command-query.png[]
 
 Taking into account example shown above for the *users* resource.
 
