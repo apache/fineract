@@ -10,6 +10,8 @@ include::colophon.adoc[]
 
 include::01_introduction.adoc[]
 
+include::deployment.adoc[]
+
 include::02_architecture.adoc[]
 
 include::03_oauth.adoc[]
