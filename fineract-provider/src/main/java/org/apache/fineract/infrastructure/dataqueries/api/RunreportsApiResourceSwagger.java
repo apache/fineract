@@ -19,26 +19,23 @@
 package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 
 /**
- * Created by sanyam on 5/8/17.
+ * Created by sanyam on 5/8/17. Fixed ;) by Michael Vorburger.ch on 2020/11/21.
  */
 final class RunreportsApiResourceSwagger {
 
-    private RunreportsApiResourceSwagger() {
+    private RunreportsApiResourceSwagger() {}
 
-    }
+    @Schema
+    public static final class RunReportsResponse {
 
-    @Schema(description = "GetReportNameResponse")
-    public static final class GetReportNameResponse {
+        private RunReportsResponse() {}
 
-        private GetReportNameResponse() {
-
-        }
-
-        public ResultsetColumnHeaderData columnHeaders;
-        public ResultsetRowData row;
+        public List<ResultsetColumnHeaderData> columnHeaders;
+        public List<ResultsetRowData> data;
     }
 }

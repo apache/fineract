@@ -14,3 +14,6 @@
 **/client/*.java
 !**/client/CollectionFormats.java
 !**/client/StringUtil.java
+
+# https://issues.apache.org/jira/browse/FINERACT-1263
+**/services/RunReportsApi.java
