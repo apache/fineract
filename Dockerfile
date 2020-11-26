@@ -36,10 +36,10 @@ COPY --from=builder /fineract/target/BOOT-INF/classes /app
 
 EXPOSE 8443
 
-ENV DRIVERCLASS_NAME=com.mysql.jdbc.Driver
+ENV DRIVERCLASS_NAME=com.mysql.cj.jdbc.Driver
 ENV PROTOCOL=jdbc
 ENV SUB_PROTOCOL=mysql
-ENV fineract_tenants_driver=com.mysql.jdbc.Driver
+ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
 ENV fineract_tenants_url=xxx
 ENV fineract_tenants_uid=xxx
 ENV fineract_tenants_pwd=xxx

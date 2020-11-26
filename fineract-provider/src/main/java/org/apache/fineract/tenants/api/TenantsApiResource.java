@@ -104,7 +104,7 @@ public class TenantsApiResource {
         PreparedStatement tenantServerConsStatement = null;
 
         try {
-            final String url = driverConfig.constructProtocol(schemaServer, schemaServerPort, "");
+            final String url = driverConfig.constructProtocol(schemaServer, schemaServerPort, "", "");
             newDBConnection = DriverManager.getConnection(url, dbUsername, dbPassword);
             newDBStatement = newDBConnection.createStatement();
             newDBStatement.executeUpdate("CREATE DATABASE IF NOT EXISTS `fineract_" + tenantIdentifier + "`;");

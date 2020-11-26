@@ -59,13 +59,13 @@ spec:
         image: apache/fineract:latest
         env:
         - name: DRIVERCLASS_NAME
-          value: com.mysql.jdbc.Driver
+          value: com.mysql.cj.jdbc.Driver
         - name: PROTOCOL
           value: jdbc
         - name: SUB_PROTOCOL
           value: mysql
         - name: fineract_tenants_driver
-          value: com.mysql.jdbc.Driver
+          value: com.mysql.cj.jdbc.Driver
         - name: fineract_tenants_url
           value: jdbc:mysql://fineractmysql:3306/fineract_tenants
         - name: fineract_tenants_uid

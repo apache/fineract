@@ -43,10 +43,10 @@ services:
     depends_on:
       - fineractmysql
     environment:
-      - DRIVERCLASS_NAME=com.mysql.jdbc.Driver
+      - DRIVERCLASS_NAME=com.mysql.cj.jdbc.Driver
       - PROTOCOL=jdbc
       - SUB_PROTOCOL=mysql
-      - fineract_tenants_driver=com.mysql.jdbc.Driver
+      - fineract_tenants_driver=com.mysql.cj.jdbc.Driver
       - fineract_tenants_url=jdbc:mysql://fineractmysql:3306/fineract_tenants
       - fineract_tenants_uid=root
       - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
@@ -67,6 +67,6 @@ services:
 
 # https://issues.apache.org/jira/browse/FINERACT-762
 # To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
-# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
+# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.cj.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
 # and remove ":thin:" from SUB_PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
 # bundled in the container by the Dockerfile, but just not used by default.
