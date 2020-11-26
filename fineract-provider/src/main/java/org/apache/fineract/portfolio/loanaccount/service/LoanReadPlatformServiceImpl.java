@@ -431,8 +431,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper();
         String sql = "select " + mapper.schema();
-        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper, LoanTransactionType.REPAYMENT.getValue(),
-                loanId);
+        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper,
+                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId });
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         return LoanTransactionData.templateOnTop(loanTransactionData, paymentOptions);
     }

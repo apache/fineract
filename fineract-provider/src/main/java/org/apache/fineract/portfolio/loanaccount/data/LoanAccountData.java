@@ -1016,6 +1016,11 @@ public final class LoanAccountData {
 
         EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
 
+        // this case handles the semi-month
+        if (product.hasSemiMonthEnabled()) {
+            termPeriodFrequencyType = new EnumOptionData(Long.valueOf(2), "repaymentFrequency.periodFrequencyType.months", "Months");
+        }
+
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (final ChargeData charge : product.charges()) {
             if (!charge.isOverdueInstallmentCharge()) {
