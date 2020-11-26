@@ -461,13 +461,7 @@ configure(project.fineractJavaProjects) {
         lineEndings 'UNIX'
     }
 
-    compileJava {
-        if (project.hasProperty('automatedBuild')) {
-            dependsOn(spotlessCheck)
-        } else {
-            dependsOn(spotlessApply)
-        }
-    }
+    compileJava.dependsOn spotlessCheck
 
     // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
     // set the classes directory to point to Eclipse's default build directory
