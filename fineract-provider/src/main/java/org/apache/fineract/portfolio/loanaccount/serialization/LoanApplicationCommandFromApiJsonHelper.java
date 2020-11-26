@@ -634,7 +634,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             atLeastOneParameterPassedForUpdate = true;
             final Integer repaymentEveryType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(repaymentEveryTypeParameterName,
                     element);
-            baseDataValidator.reset().parameter(repaymentEveryTypeParameterName).value(repaymentEveryType).notNull().inMinMaxRange(0, 3);
+            baseDataValidator.reset().parameter(repaymentEveryTypeParameterName).value(repaymentEveryType).notNull().inMinMaxRange(0, 5);
         }
         final String repaymentFrequencyNthDayTypeParameterName = "repaymentFrequencyNthDayType";
         final String repaymentFrequencyDayOfWeekTypeParameterName = "repaymentFrequencyDayOfWeekType";

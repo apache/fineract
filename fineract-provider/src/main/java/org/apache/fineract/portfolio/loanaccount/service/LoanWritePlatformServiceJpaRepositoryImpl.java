@@ -2380,7 +2380,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             for (final Loan loan : loans) {
                 // apply holiday
-                loan.applyHolidayToRepaymentScheduleDates(holiday);
+                loan.applyHolidayToRepaymentScheduleDates(holiday, this.loanUtilService);
             }
             this.loanRepositoryWrapper.save(loans);
             holiday.processed();
