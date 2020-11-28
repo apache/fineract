@@ -399,7 +399,7 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal number = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (number.compareTo(BigDecimal.ZERO) <= 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".not.greater.than.zero");
@@ -422,7 +422,7 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal number = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (number.compareTo(BigDecimal.ZERO) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".not.zero.or.greater");
@@ -806,7 +806,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder inMinAndMaxAmountRange(final BigDecimal minimumAmount, final BigDecimal maximumAmount) {
         if (minimumAmount != null && maximumAmount != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(minimumAmount) < 0 || amount.compareTo(maximumAmount) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".amount.is.not.within.min.max.range");
@@ -824,7 +824,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notLessThanMin(final BigDecimal min) {
         if (min != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(min) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.less.than.min");
@@ -841,7 +841,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notGreaterThanMax(final BigDecimal max) {
         if (max != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(max) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.max");

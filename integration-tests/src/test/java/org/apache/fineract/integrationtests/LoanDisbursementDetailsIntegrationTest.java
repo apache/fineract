@@ -210,21 +210,20 @@ public class LoanDisbursementDetailsIntegrationTest {
         assertEquals(period.get("dueDate").toString(), expectedRepaymentSchedule.getDueDate());
         assertEquals(period.get("principalLoanBalanceOutstanding"), expectedRepaymentSchedule.getPrincipalLoanBalanceOutstanding());
         LOG.info("{}", period.get("totalOriginalDueForPeriod").toString());
-        assertEquals(Float.valueOf(period.get("totalOriginalDueForPeriod").toString()),
+        assertEquals(Float.parseFloat(period.get("totalOriginalDueForPeriod").toString()),
                 expectedRepaymentSchedule.getTotalOriginalDueForPeriod().floatValue(), 0.0f);
 
-        assertEquals(Float.valueOf(period.get("totalOutstandingForPeriod").toString()).floatValue(),
+        assertEquals(Float.parseFloat(period.get("totalOutstandingForPeriod").toString()),
                 expectedRepaymentSchedule.getTotalOutstandingForPeriod(), 0.0f);
 
         if (position != 0 && position != 3) {
 
-            assertEquals(Float.valueOf(period.get("interestOutstanding").toString()).floatValue(),
-                    expectedRepaymentSchedule.getInterestOutstanding(), 0.0f);
-            assertEquals(Float.valueOf(period.get("principalOutstanding").toString()).floatValue(),
-                    expectedRepaymentSchedule.getPrincipalOutstanding(), 0.0f);
-            assertEquals(Float.valueOf(period.get("principalDue").toString()).floatValue(), expectedRepaymentSchedule.getPrincipalDue(),
+            assertEquals(Float.parseFloat(period.get("interestOutstanding").toString()), expectedRepaymentSchedule.getInterestOutstanding(),
                     0.0f);
-            assertEquals(Float.valueOf(period.get("principalOriginalDue").toString()).floatValue(),
+            assertEquals(Float.parseFloat(period.get("principalOutstanding").toString()),
+                    expectedRepaymentSchedule.getPrincipalOutstanding(), 0.0f);
+            assertEquals(Float.parseFloat(period.get("principalDue").toString()), expectedRepaymentSchedule.getPrincipalDue(), 0.0f);
+            assertEquals(Float.parseFloat(period.get("principalOriginalDue").toString()),
                     expectedRepaymentSchedule.getPrincipalOriginalDue(), 0.0f);
             assertEquals(period.get("fromDate").toString(), expectedRepaymentSchedule.getFromDate());
         }
@@ -416,7 +415,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         /* Validate Edit */
         ArrayList<HashMap> disbursementDetails = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanDetail(this.requestSpec,
                 this.responseSpec, this.loanID, "disbursementDetails");
-        assertEquals(Float.valueOf(updatedPrincipal), disbursementDetails.get(0).get("principal"));
+        assertEquals(Float.parseFloat(updatedPrincipal), disbursementDetails.get(0).get("principal"));
         ArrayList expectedDisbursementDate = (ArrayList) disbursementDetails.get(0).get("expectedDisbursementDate");
         String date = formatExpectedDisbursementDate(expectedDisbursementDate.toString());
         assertEquals(updatedExpectedDisbursementDate, date);

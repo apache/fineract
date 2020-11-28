@@ -727,7 +727,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        Float balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         // DISBURSE
@@ -736,7 +736,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf("12000");
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + Float.parseFloat("12000");
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
@@ -744,7 +744,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
     }
@@ -816,7 +816,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        Float balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         // DISBURSE first Tranche
@@ -825,7 +825,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf("25000");
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + Float.parseFloat("25000");
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         // DISBURSE Second Tranche
@@ -834,7 +834,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf("25000") + Float.valueOf("20000");
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + Float.parseFloat("25000") + Float.parseFloat("20000");
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
@@ -842,7 +842,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
     }
@@ -862,13 +862,13 @@ public class ClientLoanIntegrationTest {
         DecimalFormat twoDForm = new DecimalFormat("#");
         HashMap chargeDetail = getloanCharge(amountPercentage, loanCharges);
         Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(amount)))
-                .compareTo(Float.valueOf(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountOrPercentage")))))) == 0);
+                .compareTo(Float.parseFloat(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountOrPercentage")))))) == 0);
         Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(outstanding)))
-                .compareTo(Float.valueOf(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountOutstanding")))))) == 0);
-        Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(amountPaid)))
-                .compareTo(Float.valueOf(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountPaid")))))) == 0);
-        Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(amountWaived)))
-                .compareTo(Float.valueOf(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountWaived")))))) == 0);
+                .compareTo(Float.valueOf(twoDForm.format(Float.parseFloat(String.valueOf(chargeDetail.get("amountOutstanding")))))) == 0);
+        Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.parseFloat(amountPaid)))
+                .compareTo(Float.valueOf(twoDForm.format(Float.parseFloat(String.valueOf(chargeDetail.get("amountPaid")))))) == 0);
+        Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.parseFloat(amountWaived)))
+                .compareTo(Float.valueOf(twoDForm.format(Float.parseFloat(String.valueOf(chargeDetail.get("amountWaived")))))) == 0);
     }
 
     private void validateNumberForEqual(String val, String val2) {
@@ -1071,69 +1071,73 @@ public class ClientLoanIntegrationTest {
 
         assertEquals(new ArrayList<>(Arrays.asList(2011, 10, 20)), loanSchedule.get(1).get("dueDate"),
                 "Checking for Due Date for 1st Month");
-        assertEquals(Float.valueOf("2911.49"), loanSchedule.get(1).get("principalOriginalDue"), "Checking for Principal Due for 1st Month");
-        assertEquals(Float.valueOf("240.00"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
+        assertEquals(Float.parseFloat("2911.49"), loanSchedule.get(1).get("principalOriginalDue"),
+                "Checking for Principal Due for 1st Month");
+        assertEquals(Float.parseFloat("240.00"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2011, 11, 20)), loanSchedule.get(2).get("dueDate"),
                 "Checking for Due Date for 2nd Month");
-        assertEquals(Float.valueOf("2969.72"), loanSchedule.get(2).get("principalDue"), "Checking for Principal Due for 2nd Month");
-        assertEquals(Float.valueOf("181.77"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
+        assertEquals(Float.parseFloat("2969.72"), loanSchedule.get(2).get("principalDue"), "Checking for Principal Due for 2nd Month");
+        assertEquals(Float.parseFloat("181.77"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2011, 12, 20)), loanSchedule.get(3).get("dueDate"),
                 "Checking for Due Date for 3rd Month");
-        assertEquals(Float.valueOf("3029.11"), loanSchedule.get(3).get("principalDue"), "Checking for Principal Due for 3rd Month");
-        assertEquals(Float.valueOf("122.38"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
+        assertEquals(Float.parseFloat("3029.11"), loanSchedule.get(3).get("principalDue"), "Checking for Principal Due for 3rd Month");
+        assertEquals(Float.parseFloat("122.38"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2012, 1, 20)), loanSchedule.get(4).get("dueDate"),
                 "Checking for Due Date for 4th Month");
-        assertEquals(Float.valueOf("3089.68"), loanSchedule.get(4).get("principalDue"), "Checking for Principal Due for 4th Month");
-        assertEquals(Float.valueOf("61.79"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
+        assertEquals(Float.parseFloat("3089.68"), loanSchedule.get(4).get("principalDue"), "Checking for Principal Due for 4th Month");
+        assertEquals(Float.parseFloat("61.79"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
     }
 
     private void verifyLoanRepaymentScheduleForEqualPrincipal(final ArrayList<HashMap> loanSchedule) {
         LOG.info("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 7, 2)), loanSchedule.get(1).get("dueDate"), "Checking for Due Date for 1st Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(1).get("principalOriginalDue"), "Checking for Principal Due for 1st Month");
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(1).get("principalOriginalDue"),
+                "Checking for Principal Due for 1st Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 8, 2)), loanSchedule.get(2).get("dueDate"), "Checking for Due Date for 2nd Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(2).get("principalDue"), "Checking for Principal Due for 2nd Month");
-        assertEquals(Float.valueOf("191700"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(2).get("principalDue"), "Checking for Principal Due for 2nd Month");
+        assertEquals(Float.parseFloat("191700"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 9, 2)), loanSchedule.get(3).get("dueDate"), "Checking for Due Date for 3rd Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(3).get("principalDue"), "Checking for Principal Due for 3rd Month");
-        assertEquals(Float.valueOf("183300"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(3).get("principalDue"), "Checking for Principal Due for 3rd Month");
+        assertEquals(Float.parseFloat("183300"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 10, 2)), loanSchedule.get(4).get("dueDate"),
                 "Checking for Due Date for 4th Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(4).get("principalDue"), "Checking for Principal Due for 4th Month");
-        assertEquals(Float.valueOf("175000"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(4).get("principalDue"), "Checking for Principal Due for 4th Month");
+        assertEquals(Float.parseFloat("175000"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 11, 2)), loanSchedule.get(5).get("dueDate"),
                 "Checking for Due Date for 5th Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(5).get("principalDue"), "Checking for Principal Due for 5th Month");
-        assertEquals(Float.valueOf("166700"), loanSchedule.get(5).get("interestOriginalDue"), "Checking for Interest Due for 5th Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(5).get("principalDue"), "Checking for Principal Due for 5th Month");
+        assertEquals(Float.parseFloat("166700"), loanSchedule.get(5).get("interestOriginalDue"), "Checking for Interest Due for 5th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 12, 2)), loanSchedule.get(6).get("dueDate"),
                 "Checking for Due Date for 6th Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(6).get("principalDue"), "Checking for Principal Due for 6th Month");
-        assertEquals(Float.valueOf("158300"), loanSchedule.get(6).get("interestOriginalDue"), "Checking for Interest Due for 6th Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(6).get("principalDue"), "Checking for Principal Due for 6th Month");
+        assertEquals(Float.parseFloat("158300"), loanSchedule.get(6).get("interestOriginalDue"), "Checking for Interest Due for 6th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2015, 4, 2)), loanSchedule.get(10).get("dueDate"),
                 "Checking for Due Date for 10th Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(10).get("principalDue"), "Checking for Principal Due for 10th Month");
-        assertEquals(Float.valueOf("125000"), loanSchedule.get(10).get("interestOriginalDue"), "Checking for Interest Due for 10th Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(10).get("principalDue"), "Checking for Principal Due for 10th Month");
+        assertEquals(Float.parseFloat("125000"), loanSchedule.get(10).get("interestOriginalDue"),
+                "Checking for Interest Due for 10th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2016, 2, 2)), loanSchedule.get(20).get("dueDate"),
                 "Checking for Due Date for 20th Month");
-        assertEquals(Float.valueOf("416700"), loanSchedule.get(20).get("principalDue"), "Checking for Principal Due for 20th Month");
-        assertEquals(Float.valueOf("41700"), loanSchedule.get(20).get("interestOriginalDue"), "Checking for Interest Due for 20th Month");
+        assertEquals(Float.parseFloat("416700"), loanSchedule.get(20).get("principalDue"), "Checking for Principal Due for 20th Month");
+        assertEquals(Float.parseFloat("41700"), loanSchedule.get(20).get("interestOriginalDue"),
+                "Checking for Interest Due for 20th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2016, 6, 2)), loanSchedule.get(24).get("dueDate"),
                 "Checking for Due Date for 24th Month");
-        assertEquals(Float.valueOf("415900"), loanSchedule.get(24).get("principalDue"), "Checking for Principal Due for 24th Month");
-        assertEquals(Float.valueOf("8300"), loanSchedule.get(24).get("interestOriginalDue"), "Checking for Interest Due for 24th Month");
+        assertEquals(Float.parseFloat("415900"), loanSchedule.get(24).get("principalDue"), "Checking for Principal Due for 24th Month");
+        assertEquals(Float.parseFloat("8300"), loanSchedule.get(24).get("interestOriginalDue"), "Checking for Interest Due for 24th Month");
 
     }
 
@@ -1143,53 +1147,56 @@ public class ClientLoanIntegrationTest {
         assertEquals(new ArrayList<>(Arrays.asList(2014, 7, 2)), loanSchedule.get(1).get("dueDate"), "Checking for Due Date for 1st Month");
         validateNumberForEqualWithMsg("Checking for Principal Due for 1st Month",
                 String.valueOf(loanSchedule.get(1).get("principalOriginalDue")), "0.0");
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 8, 2)), loanSchedule.get(2).get("dueDate"), "Checking for Due Date for 2nd Month");
         validateNumberForEqualWithMsg("Checking for Principal Due for 2nd Month", "0.0",
                 String.valueOf(loanSchedule.get(2).get("principalOriginalDue")));
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 9, 2)), loanSchedule.get(3).get("dueDate"), "Checking for Due Date for 3rd Month");
         validateNumberForEqualWithMsg("Checking for Principal Due for 3rd Month", "0.0",
                 String.valueOf(loanSchedule.get(3).get("principalDue")));
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 10, 2)), loanSchedule.get(4).get("dueDate"),
                 "Checking for Due Date for 4th Month");
         validateNumberForEqualWithMsg("Checking for Principal Due for 4th Month", "0",
                 String.valueOf(loanSchedule.get(4).get("principalDue")));
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 11, 2)), loanSchedule.get(5).get("dueDate"),
                 "Checking for Due Date for 5th Month");
         validateNumberForEqualWithMsg("Checking for Principal Due for 5th Month", "0",
                 String.valueOf(loanSchedule.get(5).get("principalDue")));
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(5).get("interestOriginalDue"), "Checking for Interest Due for 5th Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(5).get("interestOriginalDue"), "Checking for Interest Due for 5th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 12, 2)), loanSchedule.get(6).get("dueDate"),
                 "Checking for Due Date for 6th Month");
-        assertEquals(Float.valueOf("526300"), loanSchedule.get(6).get("principalDue"), "Checking for Principal Due for 6th Month");
-        assertEquals(Float.valueOf("200000"), loanSchedule.get(6).get("interestOriginalDue"), "Checking for Interest Due for 6th Month");
+        assertEquals(Float.parseFloat("526300"), loanSchedule.get(6).get("principalDue"), "Checking for Principal Due for 6th Month");
+        assertEquals(Float.parseFloat("200000"), loanSchedule.get(6).get("interestOriginalDue"), "Checking for Interest Due for 6th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2015, 1, 2)), loanSchedule.get(7).get("dueDate"), "Checking for Due Date for 7th Month");
-        assertEquals(Float.valueOf("526300"), loanSchedule.get(7).get("principalDue"), "Checking for Principal Due for 7th Month");
-        assertEquals(Float.valueOf("189500"), loanSchedule.get(7).get("interestOriginalDue"), "Checking for Interest Due for 7th Month");
+        assertEquals(Float.parseFloat("526300"), loanSchedule.get(7).get("principalDue"), "Checking for Principal Due for 7th Month");
+        assertEquals(Float.parseFloat("189500"), loanSchedule.get(7).get("interestOriginalDue"), "Checking for Interest Due for 7th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2015, 4, 2)), loanSchedule.get(10).get("dueDate"),
                 "Checking for Due Date for 10th Month");
-        assertEquals(Float.valueOf("526300"), loanSchedule.get(10).get("principalDue"), "Checking for Principal Due for 10th Month");
-        assertEquals(Float.valueOf("157900"), loanSchedule.get(10).get("interestOriginalDue"), "Checking for Interest Due for 10th Month");
+        assertEquals(Float.parseFloat("526300"), loanSchedule.get(10).get("principalDue"), "Checking for Principal Due for 10th Month");
+        assertEquals(Float.parseFloat("157900"), loanSchedule.get(10).get("interestOriginalDue"),
+                "Checking for Interest Due for 10th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2016, 2, 2)), loanSchedule.get(20).get("dueDate"),
                 "Checking for Due Date for 20th Month");
-        assertEquals(Float.valueOf("526300"), loanSchedule.get(20).get("principalDue"), "Checking for Principal Due for 20th Month");
-        assertEquals(Float.valueOf("52600"), loanSchedule.get(20).get("interestOriginalDue"), "Checking for Interest Due for 20th Month");
+        assertEquals(Float.parseFloat("526300"), loanSchedule.get(20).get("principalDue"), "Checking for Principal Due for 20th Month");
+        assertEquals(Float.parseFloat("52600"), loanSchedule.get(20).get("interestOriginalDue"),
+                "Checking for Interest Due for 20th Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2016, 6, 2)), loanSchedule.get(24).get("dueDate"),
                 "Checking for Due Date for 24th Month");
-        assertEquals(Float.valueOf("526600"), loanSchedule.get(24).get("principalDue"), "Checking for Principal Due for 24th Month");
-        assertEquals(Float.valueOf("10500"), loanSchedule.get(24).get("interestOriginalDue"), "Checking for Interest Due for 24th Month");
+        assertEquals(Float.parseFloat("526600"), loanSchedule.get(24).get("principalDue"), "Checking for Principal Due for 24th Month");
+        assertEquals(Float.parseFloat("10500"), loanSchedule.get(24).get("interestOriginalDue"),
+                "Checking for Interest Due for 24th Month");
     }
 
     private void addCharges(List<HashMap> charges, Integer chargeId, String amount, String duedate) {
@@ -1310,18 +1317,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatDisbursement, loanCharges, "100", "0.00", "100.0", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3301.49"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatDisbursement, loanCharges, "100", "0.00", "100.0", "0.0");
@@ -1329,11 +1336,11 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "150.00", "50.0", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2911.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2911.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("150.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("150.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240.00"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), "29 October 2011", "100"));
         loanSchedule.clear();
@@ -1348,13 +1355,13 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "100.00", "50.0", "50.0");
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3251.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3251.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3251.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2969.72"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3251.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2969.72"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("181.77"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("181.77"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         secondInstallment = loanSchedule.get(2);
@@ -1381,21 +1388,21 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("100", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2811.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2811.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("150.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("150.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3129.11"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3129.11"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("50.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("122.38"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("50.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("122.38"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "10 January 2012", "100"));
         loanSchedule.clear();
@@ -1405,11 +1412,11 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3239.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("100"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("100"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -1417,12 +1424,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3139.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3139.68"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3139.68"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3139.68"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3139.68"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3089.68"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("50.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("50.00"), JournalEntry.TransactionType.CREDIT));
     }
 
     /***
@@ -1490,18 +1497,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.0", "120.00", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3300.60"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3300.60"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.00", "120.00", "0.0");
@@ -1509,11 +1516,11 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "90.89", "29.11", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2911.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2911.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("149.11"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("149.11"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240.00"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentageSpecifiedDueDateCharge), "29 October 2011", "1"));
         loanSchedule.clear();
@@ -1528,13 +1535,13 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "61.19", "29.11", "29.70");
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3271.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3271.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3271.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2969.72"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3271.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2969.72"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("181.77"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("181.77"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         secondInstallment = loanSchedule.get(2);
@@ -1561,21 +1568,21 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("120", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2791.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2791.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("149.11"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("149.11"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.78"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.78"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.78"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3149.11"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.78"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3149.11"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("30.29"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("122.38"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("30.29"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("122.38"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
         loanSchedule.clear();
@@ -1585,11 +1592,11 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3240.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -1597,12 +1604,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3120.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3120.58"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3120.58"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3120.58"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3120.58"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3089.68"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("30.90"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("30.90"), JournalEntry.TransactionType.CREDIT));
     }
 
     /***
@@ -1670,18 +1677,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.0", "126.06", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3309.06"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3309.06"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.00", "126.06", "0.0");
@@ -1689,11 +1696,11 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "94.53", "31.51", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2911.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2911.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("157.57"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("157.57"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240.00"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentageSpecifiedDueDateCharge), "29 October 2011", "1"));
         loanSchedule.clear();
@@ -1709,13 +1716,13 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "63.02", "31.51", "31.51");
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3277.55"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3277.55"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3277.55"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2969.72"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3277.55"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2969.72"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("181.77"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("181.77"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         secondInstallment = loanSchedule.get(2);
@@ -1742,21 +1749,21 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("120", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2791.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2791.49"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("157.57"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("157.57"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3303"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3303"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3303"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3149.11"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3303"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3149.11"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("122.38"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("31.51"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("122.38"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
         loanSchedule.clear();
@@ -1766,11 +1773,11 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3241.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -1778,12 +1785,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3121.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3121.19"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3121.19"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3121.19"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3121.19"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3089.68"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("31.51"), JournalEntry.TransactionType.CREDIT));
     }
 
     /***
@@ -1847,16 +1854,16 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("200.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("200.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("200.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("200.00"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), "29 September 2011", "100"));
@@ -1867,12 +1874,12 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatSpecifiedDueDate, loanCharges, "100", "100.00", "0.0", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "29 September 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "29 September 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3301.49"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatDisbursement, loanCharges, "100", "0.00", "100.0", "0.0");
@@ -1880,8 +1887,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "150.00", "50.0", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), "29 October 2011", "100"));
@@ -1898,15 +1905,15 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "100.00", "50.0", "50.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("50.0"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("50.0"), JournalEntry.TransactionType.DEBIT));
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3251.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3251.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3251.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3251.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3251.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3251.49"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -1922,9 +1929,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer flatPenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", true));
@@ -1941,14 +1948,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "10 January 2012", "100"));
         loanSchedule.clear();
@@ -1958,10 +1965,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3239.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("100"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("100"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -1969,12 +1976,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3139.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make over payment for repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3220.60"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3220.60"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3220.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3139.68"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3220.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3139.68"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("80.92"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("80.92"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
@@ -2045,24 +2052,24 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.0", "120.00", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3300.60"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3300.60"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.00", "120.00", "0.0");
@@ -2070,8 +2077,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "90.89", "29.11", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentageSpecifiedDueDateCharge), "29 October 2011", "1"));
@@ -2088,15 +2095,15 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "61.19", "29.11", "29.70");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("29.7"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("29.7"), JournalEntry.TransactionType.DEBIT));
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3271.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3271.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3271.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3271.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3271.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3271.49"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -2112,9 +2119,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer percentagePenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1", true));
@@ -2131,14 +2138,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.78"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.78"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.78"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.78"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.78"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.78"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
         loanSchedule.clear();
@@ -2148,10 +2155,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3240.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -2159,12 +2166,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3120.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make over payment for repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3220.58"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3220.58"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3220.58"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3120.58"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3220.58"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3120.58"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
@@ -2233,16 +2240,16 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("126.04"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("126.04"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("126.04"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("126.04"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentageSpecifiedDueDateCharge), "29 September 2011", "1"));
@@ -2253,12 +2260,12 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageSpecifiedDueDateCharge, loanCharges, "1", "126.06", "0.0", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "29 September 2011",
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "29 September 2011",
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3309.06"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3309.06"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.00", "126.06", "0.0");
@@ -2266,8 +2273,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "94.53", "31.51", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentageSpecifiedDueDateCharge), "29 October 2011", "1"));
@@ -2285,15 +2292,15 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "63.02", "31.51", "31.51");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("31.51"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("31.51"), JournalEntry.TransactionType.DEBIT));
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3277.55"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3277.55"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3277.55"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3277.55"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3277.55"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3277.55"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -2309,9 +2316,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer amountPlusInterestPercentagePenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1", true));
@@ -2328,14 +2335,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3303"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3303"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3303"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3303"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3303"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3303"), JournalEntry.TransactionType.CREDIT));
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
         loanSchedule.clear();
@@ -2345,10 +2352,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3241.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -2356,12 +2363,12 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3121.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make over payment for repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3221.61"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3221.61"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3221.61"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3121.19"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3221.61"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3121.19"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100.42"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.42"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
@@ -2428,18 +2435,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("100.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatDisbursement, loanCharges, "100", "0.00", "100.0", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3301.49"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatDisbursement, loanCharges, "100", "0.00", "100.0", "0.0");
@@ -2447,8 +2454,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(flatInstallmentFee, loanCharges, "50", "150.00", "50.0", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), "29 October 2011", "100"));
@@ -2466,9 +2473,9 @@ public class ClientLoanIntegrationTest {
 
         /*
          * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.CREDIT));
+         * JournalEntry(Float.parseFloat("50.0"), JournalEntry.TransactionType.CREDIT));
          * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.DEBIT));
+         * JournalEntry(Float.parseFloat("50.0"), JournalEntry.TransactionType.DEBIT));
          */
         final String jobName = "Add Accrual Transactions";
 
@@ -2479,10 +2486,10 @@ public class ClientLoanIntegrationTest {
         checkAccrualTransactions(loanSchedule, loanID);
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3251.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3251.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3251.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3251.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3251.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3251.49"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -2498,9 +2505,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer flatPenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", true));
@@ -2517,14 +2524,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.49"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatPenaltySpecifiedDueDate), "10 January 2012", "100"));
@@ -2535,10 +2542,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3239.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("100"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("100"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -2546,10 +2553,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3139.68", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3139.68"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3139.68"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3139.68"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3139.68"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3139.68"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3139.68"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -2620,18 +2627,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("120.00"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.0", "120.00", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3300.60"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3300.60"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageDisbursementCharge, loanCharges, "1", "0.00", "120.00", "0.0");
@@ -2639,8 +2646,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(percentageInstallmentFee, loanCharges, "1", "90.89", "29.11", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentageSpecifiedDueDateCharge), "29 October 2011", "1"));
@@ -2658,9 +2665,9 @@ public class ClientLoanIntegrationTest {
 
         /*
          * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.CREDIT));
+         * JournalEntry(Float.parseFloat("29.7"), JournalEntry.TransactionType.CREDIT));
          * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.DEBIT));
+         * JournalEntry(Float.parseFloat("29.7"), JournalEntry.TransactionType.DEBIT));
          */
 
         final String jobName = "Add Accrual Transactions";
@@ -2672,10 +2679,10 @@ public class ClientLoanIntegrationTest {
         checkAccrualTransactions(loanSchedule, loanID);
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3271.49"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3271.49"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3271.49"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3271.49"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3271.49"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3271.49"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -2691,9 +2698,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer percentagePenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1", true));
@@ -2710,14 +2717,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3300.60"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3300.60"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3301.78"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3301.78"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3301.78"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3301.78"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3301.78"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3301.78"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(percentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
@@ -2728,10 +2735,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3240.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -2739,10 +2746,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3120.58", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3120.58"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3120.58"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3120.58"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3120.58"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3120.58"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3120.58"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -2813,18 +2820,18 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
-                new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.0", "126.06", "0.0");
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3309.06"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3309.06"), loanID);
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.00", "126.06", "0.0");
@@ -2832,8 +2839,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "94.53", "31.51", "0.0");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentageSpecifiedDueDateCharge), "29 October 2011", "1"));
@@ -2852,9 +2859,9 @@ public class ClientLoanIntegrationTest {
 
         /*
          * this.journalEntryHelper.checkJournalEntryForAssetAccount( assetAccount, "20 September 2011", new
-         * JournalEntry( Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
+         * JournalEntry( Float.parseFloat("31.51"), JournalEntry.TransactionType.CREDIT));
          * this.journalEntryHelper.checkJournalEntryForExpenseAccount (expenseAccount, "20 September 2011", new
-         * JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.DEBIT));
+         * JournalEntry(Float.parseFloat("31.51"), JournalEntry.TransactionType.DEBIT));
          */
 
         final String jobName = "Add Accrual Transactions";
@@ -2866,10 +2873,10 @@ public class ClientLoanIntegrationTest {
         checkAccrualTransactions(loanSchedule, loanID);
 
         LOG.info("----------Make repayment 2------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3277.55"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3277.55"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3277.55"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3277.55"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3277.55"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3277.55"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -2885,9 +2892,9 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("60.59", String.valueOf(thirdInstallment.get("interestOutstanding")));
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 December 2011",
-                new JournalEntry(Float.valueOf("61.79"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("61.79"), JournalEntry.TransactionType.DEBIT));
 
         Integer amountPlusInterestPercentagePenaltySpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1", true));
@@ -2904,14 +2911,14 @@ public class ClientLoanIntegrationTest {
 
         // checking the journal entry as applied penalty has been collected
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 October 2011",
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3309.06"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3309.06"), JournalEntry.TransactionType.CREDIT));
 
         LOG.info("----------Make repayment 3 advance------------");
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3303"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3303"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 November 2011",
-                new JournalEntry(Float.valueOf("3303"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3303"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3303"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3303"), JournalEntry.TransactionType.CREDIT));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                 String.valueOf(amountPlusInterestPercentagePenaltySpecifiedDueDate), "10 January 2012", "1"));
@@ -2922,10 +2929,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3241.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Pay applied penalty ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("120"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("120"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("120"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("120"), JournalEntry.TransactionType.CREDIT));
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         fourthInstallment = loanSchedule.get(4);
@@ -2933,10 +2940,10 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("3121.19", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
 
         LOG.info("----------Make repayment 4 ------------");
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3121.19"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3121.19"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012",
-                new JournalEntry(Float.valueOf("3121.19"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("3121.19"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("3121.19"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("3121.19"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3012,7 +3019,7 @@ public class ClientLoanIntegrationTest {
         /***
          * Make payment for installment #1
          */
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3200"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         firstInstallment = loanSchedule.get(1);
@@ -3033,7 +3040,7 @@ public class ClientLoanIntegrationTest {
         /***
          * Make payment for installment #2
          */
-        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3200"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         /***
@@ -3057,7 +3064,7 @@ public class ClientLoanIntegrationTest {
         /***
          * Make payment with due amount of 3rd installment on 4th installment date
          */
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3200"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
 
@@ -3074,7 +3081,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("100", String.valueOf(fourthInstallment.get("interestPaid")));
         validateNumberForEqual("0.00", String.valueOf(fourthInstallment.get("interestOutstanding")));
 
-        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3000"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.parseFloat("3000"), loanID);
 
         /***
          * verify loan is closed as we paid full amount
@@ -3093,17 +3100,17 @@ public class ClientLoanIntegrationTest {
             final ArrayList<Integer> dueDateAsArray = (ArrayList<Integer>) repayment.get("dueDate");
             final LocalDate transactionDate = LocalDate.of(dueDateAsArray.get(0), dueDateAsArray.get(1), dueDateAsArray.get(2));
 
-            final Float interestPortion = BigDecimal.valueOf(Double.valueOf(repayment.get("interestDue").toString()))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("interestWaived").toString())))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("interestWrittenOff").toString()))).floatValue();
+            final Float interestPortion = BigDecimal.valueOf(Double.parseDouble(repayment.get("interestDue").toString()))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("interestWaived").toString())))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("interestWrittenOff").toString()))).floatValue();
 
-            final Float feePortion = BigDecimal.valueOf(Double.valueOf(repayment.get("feeChargesDue").toString()))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("feeChargesWaived").toString())))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("feeChargesWrittenOff").toString()))).floatValue();
+            final Float feePortion = BigDecimal.valueOf(Double.parseDouble(repayment.get("feeChargesDue").toString()))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("feeChargesWaived").toString())))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("feeChargesWrittenOff").toString()))).floatValue();
 
-            final Float penaltyPortion = BigDecimal.valueOf(Double.valueOf(repayment.get("penaltyChargesDue").toString()))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("penaltyChargesWaived").toString())))
-                    .subtract(BigDecimal.valueOf(Double.valueOf(repayment.get("penaltyChargesWrittenOff").toString()))).floatValue();
+            final Float penaltyPortion = BigDecimal.valueOf(Double.parseDouble(repayment.get("penaltyChargesDue").toString()))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("penaltyChargesWaived").toString())))
+                    .subtract(BigDecimal.valueOf(Double.parseDouble(repayment.get("penaltyChargesWrittenOff").toString()))).floatValue();
 
             this.loanTransactionHelper.checkAccrualTransactionForRepayment(transactionDate, interestPortion, feePortion, penaltyPortion,
                     loanID);
@@ -3179,7 +3186,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2517.29", "11.62", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
-        Float earlyPayment = Float.valueOf("4000");
+        Float earlyPayment = Float.parseFloat("4000");
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysDate.add(Calendar.DAY_OF_MONTH, -5);
         final String LOAN_SECOND_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
@@ -3198,7 +3205,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqualWithMsg("verify pre-close amount", "3551.93", prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3292,7 +3299,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3370,7 +3377,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2517.29", "11.62", "1.16", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
-        Float earlyPayment = Float.valueOf("4000");
+        Float earlyPayment = Float.parseFloat("4000");
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysDate.add(Calendar.DAY_OF_MONTH, -5);
         final String LOAN_SECOND_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
@@ -3388,7 +3395,7 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3474,7 +3481,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2517.29", "11.62", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
-        Float earlyPayment = Float.valueOf("4000");
+        Float earlyPayment = Float.parseFloat("4000");
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysDate.add(Calendar.DAY_OF_MONTH, -5);
         final String LOAN_SECOND_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
@@ -3499,7 +3506,7 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -3597,7 +3604,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2517.29", "11.62", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
-        Float earlyPayment = Float.valueOf("5100");
+        Float earlyPayment = Float.parseFloat("5100");
         repaymentDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         repaymentDate.add(Calendar.DAY_OF_MONTH, -5);
         final String LOAN_SECOND_REPAYMENT_DATE = dateFormat.format(repaymentDate.getTime());
@@ -3616,7 +3623,7 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -3734,7 +3741,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -3823,7 +3830,7 @@ public class ClientLoanIntegrationTest {
         repaymentDate.add(Calendar.DAY_OF_MONTH, -7 * 2);
         final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(repaymentDate.getTime());
         Float totalDueForCurrentPeriod = (Float) loanSchedule.get(1).get("totalDueForPeriod");
-        totalDueForCurrentPeriod = totalDueForCurrentPeriod - Float.valueOf("252.89");
+        totalDueForCurrentPeriod = totalDueForCurrentPeriod - Float.parseFloat("252.89");
         this.loanTransactionHelper.makeRepayment(LOAN_FIRST_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -3949,7 +3956,7 @@ public class ClientLoanIntegrationTest {
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
@@ -4192,7 +4199,7 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqualWithMsg("verify pre-close amount", preCloseAmount, prepayAmount);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String loanRepaymentDate = dateFormat.format(todaysDate.getTime());
-        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.valueOf(prepayAmount), loanID);
+        this.loanTransactionHelper.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
@@ -4423,8 +4430,9 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(fourMonthsfromNow, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = {
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4437,7 +4445,7 @@ public class ClientLoanIntegrationTest {
 
         final String threeMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.parseFloat("2290"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         firstInstallment = loanSchedule.get(1);
@@ -4448,13 +4456,13 @@ public class ClientLoanIntegrationTest {
 
         final String twoMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.parseFloat("2290"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, twoMonthsfromNow,
-                new JournalEntry(Float.valueOf("2290"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2000"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("2290"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, twoMonthsfromNow,
-                new JournalEntry(Float.valueOf("50"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("50"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4467,13 +4475,13 @@ public class ClientLoanIntegrationTest {
 
         final String oneMonthfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.valueOf("4580"), loanID);
+        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.parseFloat("4580"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, oneMonthfromNow,
-                new JournalEntry(Float.valueOf("4580"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("4000"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("4580"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("4000"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, oneMonthfromNow,
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("480"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("480"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4493,10 +4501,10 @@ public class ClientLoanIntegrationTest {
                 .setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
+        this.loanTransactionHelper.makeRefundByCash(now, Float.parseFloat("20"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4511,13 +4519,13 @@ public class ClientLoanIntegrationTest {
         // paid: principal 1980, interest 240, fees 50, penalty 0
         // refund 2000 means paid: principal 0, interest 220, fees 50, penalty 0
 
-        this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("2000"), loanID);
+        this.loanTransactionHelper.makeRefundByCash(now, Float.parseFloat("2000"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("2000"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("1980"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("1980"), JournalEntry.TransactionType.DEBIT));
 
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4597,10 +4605,10 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(fourMonthsfromNow, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("1440"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("300.00"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("1440"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("300.00"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4613,7 +4621,7 @@ public class ClientLoanIntegrationTest {
 
         final String threeMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.parseFloat("2290"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         firstInstallment = loanSchedule.get(1);
@@ -4624,10 +4632,10 @@ public class ClientLoanIntegrationTest {
 
         final String twoMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.parseFloat("2290"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, twoMonthsfromNow,
-                new JournalEntry(Float.valueOf("2290"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2290"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("2290"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2290"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4640,10 +4648,10 @@ public class ClientLoanIntegrationTest {
 
         final String oneMonthfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.valueOf("4580"), loanID);
+        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.parseFloat("4580"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, oneMonthfromNow,
-                new JournalEntry(Float.valueOf("4580"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("4580"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("4580"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("4580"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4663,10 +4671,10 @@ public class ClientLoanIntegrationTest {
                 .setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
+        this.loanTransactionHelper.makeRefundByCash(now, Float.parseFloat("20"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4681,13 +4689,13 @@ public class ClientLoanIntegrationTest {
         // paid: principal 1980, interest 240, fees 50, penalty 0
         // refund 2000 means paid: principal 0, interest 220, fees 50, penalty 0
 
-        this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("2000"), loanID);
+        this.loanTransactionHelper.makeRefundByCash(now, Float.parseFloat("2000"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("2000"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("1980"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("1980"), JournalEntry.TransactionType.DEBIT));
 
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4783,8 +4791,9 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(fourMonthsfromNow, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("12000.00"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = {
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4797,7 +4806,7 @@ public class ClientLoanIntegrationTest {
 
         final String threeMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(threeMonthsfromNow, Float.parseFloat("2290"), loanID);
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         firstInstallment = loanSchedule.get(1);
@@ -4808,13 +4817,13 @@ public class ClientLoanIntegrationTest {
 
         final String twoMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.valueOf("2290"), loanID);
+        this.loanTransactionHelper.makeRepayment(twoMonthsfromNow, Float.parseFloat("2290"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, twoMonthsfromNow,
-                new JournalEntry(Float.valueOf("2290"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("2000"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("2290"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, twoMonthsfromNow,
-                new JournalEntry(Float.valueOf("50"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("240"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("50"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("240"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4827,13 +4836,13 @@ public class ClientLoanIntegrationTest {
 
         final String oneMonthfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.valueOf("4580"), loanID);
+        this.loanTransactionHelper.makeRepayment(oneMonthfromNow, Float.parseFloat("4580"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, oneMonthfromNow,
-                new JournalEntry(Float.valueOf("4580"), JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(Float.valueOf("4000"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("4580"), JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(Float.parseFloat("4000"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, oneMonthfromNow,
-                new JournalEntry(Float.valueOf("100"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("480"), JournalEntry.TransactionType.CREDIT));
+                new JournalEntry(Float.parseFloat("100"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("480"), JournalEntry.TransactionType.CREDIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4861,7 +4870,7 @@ public class ClientLoanIntegrationTest {
         this.accountTransferHelper.refundLoanByTransfer(now, clientID, loanID, clientID, savingsId, FROM_LOAN_ACCOUNT_TYPE,
                 TO_SAVINGS_ACCOUNT_TYPE, transferAmountValue.toString());
 
-        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        Float toSavingsBalance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
 
         HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
@@ -4872,8 +4881,8 @@ public class ClientLoanIntegrationTest {
                 "Verifying From Savings Account Balance after Account Transfer");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -4903,11 +4912,11 @@ public class ClientLoanIntegrationTest {
                 "Verifying From Savings Account Balance after Account Transfer");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, now,
-                new JournalEntry(Float.valueOf("2000"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.valueOf("1980"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.parseFloat("1980"), JournalEntry.TransactionType.DEBIT));
 
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, now,
-                new JournalEntry(Float.valueOf("20"), JournalEntry.TransactionType.DEBIT));
+                new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -5007,7 +5016,7 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         LOG.info("---------------------------------- Make repayment 1 --------------------------------------");
-        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("2676.24"), loanID);
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.parseFloat("2676.24"), loanID);
 
         LOG.info("---------------------------------- FORECLOSE LOAN ----------------------------------------");
         this.loanTransactionHelper.forecloseLoan("08 November 2011", loanID);

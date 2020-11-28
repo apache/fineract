@@ -204,8 +204,8 @@ public class AccountTransferTest {
         this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, fromClientID, toSavingsID, FROM_SAVINGS_ACCOUNT_TYPE,
                 TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
-        fromSavingsBalance -= Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
-        toSavingsBalance += Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
+        fromSavingsBalance -= Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT);
+        toSavingsBalance += Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT);
 
         HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
         assertEquals(fromSavingsBalance, fromSavingsSummaryAfter.get("accountBalance"),
@@ -215,9 +215,9 @@ public class AccountTransferTest {
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
                 "Verifying To Savings Account Balance after Account Transfer");
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT) };
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -312,9 +312,9 @@ public class AccountTransferTest {
                 "Verifying To Loan Repayment Amount after Account Transfer");
 
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -433,9 +433,9 @@ public class AccountTransferTest {
                 "Verifying From Savings Account Balance after Account Transfer");
 
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);

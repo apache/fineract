@@ -87,13 +87,13 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
                 fraction = numberOfDaysInterestCalculationGrace.doubleValue() * every.doubleValue();
             break;
             case WEEKS:
-                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.valueOf("7.0") * every.doubleValue());
+                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.parseDouble("7.0") * every.doubleValue());
             break;
             case MONTHS:
-                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.valueOf("30.0") * every.doubleValue());
+                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.parseDouble("30.0") * every.doubleValue());
             break;
             case YEARS:
-                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.valueOf("365.0") * every.doubleValue());
+                fraction = numberOfDaysInterestCalculationGrace.doubleValue() / (Double.parseDouble("365.0") * every.doubleValue());
             break;
             case INVALID:
                 fraction = Double.valueOf("0");

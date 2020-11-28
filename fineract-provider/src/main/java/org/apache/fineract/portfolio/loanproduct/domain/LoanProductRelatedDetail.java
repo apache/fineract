@@ -238,7 +238,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Override
     public BigDecimal getNominalInterestRatePerPeriod() {
         return this.nominalInterestRatePerPeriod == null ? null
-                : BigDecimal.valueOf(Double.valueOf(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
+                : BigDecimal.valueOf(Double.parseDouble(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
     @Override
@@ -249,7 +249,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Override
     public BigDecimal getAnnualNominalInterestRate() {
         return this.annualNominalInterestRate == null ? null
-                : BigDecimal.valueOf(Double.valueOf(this.annualNominalInterestRate.stripTrailingZeros().toString()));
+                : BigDecimal.valueOf(Double.parseDouble(this.annualNominalInterestRate.stripTrailingZeros().toString()));
     }
 
     @Override

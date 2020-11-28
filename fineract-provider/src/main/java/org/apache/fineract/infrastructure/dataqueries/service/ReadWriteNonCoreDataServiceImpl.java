@@ -1811,8 +1811,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         if ("DECIMAL".equalsIgnoreCase(colType)) {
-            final BigDecimal currentDecimal = BigDecimal.valueOf(Double.valueOf(currValue));
-            final BigDecimal newDecimal = BigDecimal.valueOf(Double.valueOf(pValue));
+            final BigDecimal currentDecimal = BigDecimal.valueOf(Double.parseDouble(currValue));
+            final BigDecimal newDecimal = BigDecimal.valueOf(Double.parseDouble(pValue));
 
             return currentDecimal.compareTo(newDecimal) != 0;
         }
