@@ -80,7 +80,7 @@ public class SchedulerJobsTestResults {
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String MINIMUM_OPENING_BALANCE = "1000";
 
-    static Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
+    static Float SP_BALANCE = Float.parseFloat(MINIMUM_OPENING_BALANCE);
 
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -847,7 +847,7 @@ public class SchedulerJobsTestResults {
 
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
-        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
+        Float balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
         final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, String.valueOf(balance));
         Assertions.assertNotNull(savingsProductID);
 
@@ -883,22 +883,23 @@ public class SchedulerJobsTestResults {
         fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
         assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
 
         fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
 
         HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
+        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance")
+                - Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
 
         String JobName = "Transfer Interest To Savings";
         this.schedulerJobHelper.executeAndAwaitJob(JobName);
         fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        assertEquals(Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT), fixedDepositSummary.get("accountBalance"),
+        assertEquals(Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT), fixedDepositSummary.get("accountBalance"),
                 "Verifying opening Balance");
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + interestPosted;
+        balance = Float.parseFloat(MINIMUM_OPENING_BALANCE) + interestPosted;
         validateNumberForEqualExcludePrecission(String.valueOf(balance), String.valueOf(summary.get("accountBalance")));
     }
 
@@ -991,7 +992,7 @@ public class SchedulerJobsTestResults {
 
     private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#", new DecimalFormatSymbols(Locale.US));
-        Assertions.assertTrue(
-                Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
+        Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.parseFloat(val)))
+                .compareTo(Float.valueOf(twoDForm.format(Float.parseFloat(val2)))) == 0);
     }
 }

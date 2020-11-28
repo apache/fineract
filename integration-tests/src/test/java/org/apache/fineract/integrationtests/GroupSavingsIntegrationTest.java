@@ -584,21 +584,21 @@ public class GroupSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        balance += Float.parseFloat(DEPOSIT_AMOUNT);
         assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
         assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        balance -= Float.parseFloat(WITHDRAW_AMOUNT);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
         assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         Integer newWithdrawTransactionId = this.savingsAccountHelper.updateSavingsAccountTransaction(savingsId, withdrawTransactionId,
                 WITHDRAW_AMOUNT_ADJUSTED);
         HashMap newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, newWithdrawTransactionId);
-        balance = balance + Float.valueOf(WITHDRAW_AMOUNT) - Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
+        balance = balance + Float.parseFloat(WITHDRAW_AMOUNT) - Float.parseFloat(WITHDRAW_AMOUNT_ADJUSTED);
         assertEquals(Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"), "Verifying adjusted Amount");
         assertEquals(balance, newWithdrawTransaction.get("runningBalance"), "Verifying Balance after adjust");
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
@@ -610,7 +610,7 @@ public class GroupSavingsIntegrationTest {
         newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         Assertions.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        balance += Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
+        balance += Float.parseFloat(WITHDRAW_AMOUNT_ADJUSTED);
         assertEquals(balance, summary.get("accountBalance"), "Verifying Balance After Undo Transaction");
 
         error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "5000",
