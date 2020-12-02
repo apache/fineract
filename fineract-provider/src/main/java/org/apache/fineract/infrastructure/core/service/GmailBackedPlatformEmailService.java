@@ -65,10 +65,13 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         email.setAuthenticator(new DefaultAuthenticator(authuser, authpwd));
         email.setDebug(false); // true if you want to debug
         email.setHostName(smtpCredentialsData.getHost());
-
+        
         try {
             if (smtpCredentialsData.isUseTLS()) {
                 email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
+                email.setSslSmtpPort(smtpCredentialsData.getPort());
+            } else {
+            	email.setSmtpPort(Integer.valueOf(smtpCredentialsData.getPort()));
             }
             email.setFrom(smtpCredentialsData.getFromEmail(), smtpCredentialsData.getFromName());
 
