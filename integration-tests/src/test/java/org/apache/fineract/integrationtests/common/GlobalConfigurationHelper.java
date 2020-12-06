@@ -88,9 +88,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 30 global configurations.
-        Assertions.assertEquals(30, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(30, actualGlobalConfigurations.size());
+        // There are currently 31 global configurations.
+        Assertions.assertEquals(31, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(31, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
