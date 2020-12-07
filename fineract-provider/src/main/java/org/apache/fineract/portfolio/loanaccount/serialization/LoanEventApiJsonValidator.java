@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -161,7 +162,7 @@ public final class LoanEventApiJsonValidator {
 
         final Set<String> transactionParameters = new HashSet<>(
                 Arrays.asList("transactionDate", "transactionAmount", "externalId", "note", "locale", "dateFormat", "paymentTypeId",
-                        "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "loanId"));
+                        "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "loanId", "manual"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
@@ -178,6 +179,22 @@ public final class LoanEventApiJsonValidator {
 
         final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+        // validate manual
+        final JsonObject jsonObject = this.fromApiJsonHelper.extractJsonObjectNamed("manual", element);
+        if (jsonObject != null) {
+            final BigDecimal principalPortion = jsonObject.get("principalPortion").getAsBigDecimal();
+            baseDataValidator.reset().parameter("principalPortion").value(principalPortion).ignoreIfNull().zeroOrPositiveAmount();
+
+            final BigDecimal interestPortion = jsonObject.get("interestPortion").getAsBigDecimal();
+            baseDataValidator.reset().parameter("interestPortion").value(interestPortion).ignoreIfNull().zeroOrPositiveAmount();
+
+            final BigDecimal feeChargesPortion = jsonObject.get("feeChargesPortion").getAsBigDecimal();
+            baseDataValidator.reset().parameter("feeChargesPortion").value(feeChargesPortion).ignoreIfNull().zeroOrPositiveAmount();
+
+            final BigDecimal penaltyChargesPortion = jsonObject.get("penaltyChargesPortion").getAsBigDecimal();
+            baseDataValidator.reset().parameter("penaltyChargesPortion").value(penaltyChargesPortion).ignoreIfNull().zeroOrPositiveAmount();
+        }
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

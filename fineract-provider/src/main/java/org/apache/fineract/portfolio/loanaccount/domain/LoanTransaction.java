@@ -133,6 +133,9 @@ public class LoanTransaction extends AbstractPersistableCustom {
     @JoinColumn(name = "loan_transaction_id", referencedColumnName = "id", nullable = false)
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
+    @Column(name = "is_manual_repayment", nullable = false)
+    private boolean isManualRepayment = false;
+
     protected LoanTransaction() {
         /*
          * this.loan = null; this.dateOf = null; this.typeOf = null; this.submittedOnDate = DateUtils.getDateOfTenant();
@@ -801,6 +804,15 @@ public class LoanTransaction extends AbstractPersistableCustom {
     public boolean isPaymentTransaction() {
         return this.isNotReversed() && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement()
                 || this.isNonMonetaryTransaction() || this.isIncomePosting());
+    }
+
+    public boolean isManualRepayment() {
+        return isManualRepayment;
+    }
+
+    public void setManualPaymentComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
+        updateComponents(principal, interest, feeCharges, penaltyCharges);
+        this.isManualRepayment = true;
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
