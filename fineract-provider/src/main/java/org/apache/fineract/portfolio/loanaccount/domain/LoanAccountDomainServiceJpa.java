@@ -18,18 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -80,6 +68,19 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
@@ -137,10 +138,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Transactional
     @Override
-    public LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate, BigDecimal transactionAmount,
-                                         PaymentDetail paymentDetail, String noteText, String txnExternalId, boolean isRecoveryRepayment,
-                                         boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
-                                         boolean isLoanToLoanTransfer, LoanManualRepaymentData manualRepaymentData) {
+    public LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId, boolean isRecoveryRepayment,
+            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, boolean isLoanToLoanTransfer,
+            LoanManualRepaymentData manualRepaymentData) {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_MAKE_REPAYMENT,
@@ -169,12 +170,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     txnExternalId, currentDateTime, currentUser);
 
             if (manualRepaymentData != null) {
-                newRepaymentTransaction.setManualPaymentComponents(
-                        manualRepaymentData.getPrincipalPortion(),
-                        manualRepaymentData.getInterestPortion(),
-                        manualRepaymentData.getFeeChargesPortion(),
-                        manualRepaymentData.getPenaltyChargesPortion()
-                );
+                newRepaymentTransaction.setManualPaymentComponents(manualRepaymentData.getPrincipalPortion(),
+                        manualRepaymentData.getInterestPortion(), manualRepaymentData.getFeeChargesPortion(),
+                        manualRepaymentData.getPenaltyChargesPortion());
             }
         }
 

@@ -18,14 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
@@ -41,6 +33,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor} which is more convenient for concrete
@@ -230,7 +231,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
         // to.
-        if ((loanTransaction.isRepayment() && !loanTransaction.isManualRepayment()) || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+        if ((loanTransaction.isRepayment() && !loanTransaction.isManualRepayment()) || loanTransaction.isInterestWaiver()
+                || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
         Money transactionAmountUnprocessed = processTransaction(loanTransaction, currency, installments, chargeAmountToProcess);
@@ -282,11 +284,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     // the
                     // current installment?
                     if (loanTransaction.isManualRepayment()) {
-                        transactionAmountUnprocessed = handleTransactionThatIsManualPayment(currentInstallment,
-                                installments, loanTransaction, transactionDate, transactionAmountUnprocessed,
-                                transactionMappings);
-                    }
-                    else if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
+                        transactionAmountUnprocessed = handleTransactionThatIsManualPayment(currentInstallment, installments,
+                                loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
+                    } else if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
                             transactionAmountUnprocessed)) {
                         transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
                                 installments, loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
@@ -310,16 +310,18 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return transactionAmountUnprocessed;
     }
 
-    private Money handleTransactionThatIsManualPayment(LoanRepaymentScheduleInstallment currentInstallment, List<LoanRepaymentScheduleInstallment> installments,
-                                                       LoanTransaction loanTransaction, LocalDate transactionDate, Money transactionAmountUnprocessed,
-                                                       List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+    private Money handleTransactionThatIsManualPayment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, LocalDate transactionDate,
+            Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
 
-        Money penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, loanTransaction.getPenaltyChargesPortion(currency));
+        Money penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate,
+                loanTransaction.getPenaltyChargesPortion(currency));
         transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-        Money feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+        Money feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate,
+                loanTransaction.getFeeChargesPortion(currency));
         transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         Money interestPortion = currentInstallment.payInterestComponent(transactionDate, loanTransaction.getInterestPortion(currency));
