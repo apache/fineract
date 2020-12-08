@@ -391,6 +391,10 @@ public class LoanScheduleAssembler {
 
         final Integer installmentAmountInMultiplesOf = loanProduct.getInstallmentAmountInMultiplesOf();
 
+        BigDecimal minFloatingRateInterest = null;
+        minFloatingRateInterest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.minFloatingRateInterest,
+                element);
+
         List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
         if (loanProduct.isLinkedToFloatingInterestRate()) {
             final BigDecimal interestRateDiff = this.fromApiJsonHelper
@@ -403,9 +407,10 @@ public class LoanScheduleAssembler {
             } catch (final FloatingRateNotFoundException ex) {
                 // Do not do anything
             }
+
             FloatingRateDTO floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, expectedDisbursementDate, interestRateDiff,
                     baseLendingRatePeriods);
-            Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);
+            Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO, minFloatingRateInterest);
 
             LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
             final LocalDate dateValue = null;
@@ -450,7 +455,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, minFloatingRateInterest);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

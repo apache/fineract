@@ -66,6 +66,10 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
         return this.interestRate;
     }
 
+    public void setInterestRate(BigDecimal newInterestRate) {
+        this.interestRate = newInterestRate;
+    }
+
     public boolean isDifferentialToBaseLendingRate() {
         return this.isDifferentialToBaseLendingRate;
     }
