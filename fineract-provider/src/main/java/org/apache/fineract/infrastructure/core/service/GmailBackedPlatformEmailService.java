@@ -68,11 +68,10 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
 
         try {
             if (smtpCredentialsData.isUseTLS()) {
-                email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
-                email.setSslSmtpPort(smtpCredentialsData.getPort());
-            } else {
-                email.setSmtpPort(Integer.parseInt(smtpCredentialsData.getPort()));
+                // FINERACT-1070: NOT email.setSSLOnConnect(true); email.setSslSmtpPort(smtpCredentialsData.getPort());
+                email.setStartTLSRequired(true);
             }
+            email.setSmtpPort(Integer.parseInt(smtpCredentialsData.getPort()));
             email.setFrom(smtpCredentialsData.getFromEmail(), smtpCredentialsData.getFromName());
 
             email.setSubject(emailDetails.getSubject());
