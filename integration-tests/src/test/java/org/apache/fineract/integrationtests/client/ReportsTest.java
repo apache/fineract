@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Integration Test for /staff API.
+ * Integration Test for /runreports/ API.
  *
  * @author Michael Vorburger.ch
  */
