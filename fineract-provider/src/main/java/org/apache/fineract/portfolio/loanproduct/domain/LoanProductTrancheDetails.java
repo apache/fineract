@@ -37,15 +37,19 @@ public class LoanProductTrancheDetails {
     @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal outstandingLoanBalance;
 
+    @Column(name = "is_revolving")
+    private boolean isRevolving;
+
     protected LoanProductTrancheDetails() {
         // TODO Auto-generated constructor stub
     }
 
     public LoanProductTrancheDetails(final boolean multiDisburseLoan, final Integer maxTrancheCount,
-            final BigDecimal outstandingLoanBalance) {
+            final BigDecimal outstandingLoanBalance, final boolean isRevolving) {
         this.multiDisburseLoan = multiDisburseLoan;
         this.maxTrancheCount = maxTrancheCount;
         this.outstandingLoanBalance = outstandingLoanBalance;
+        this.isRevolving = isRevolving;
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges, final String localeAsInput) {
@@ -54,6 +58,15 @@ public class LoanProductTrancheDetails {
             actualChanges.put(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, newValue);
             this.multiDisburseLoan = newValue;
         }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.REVOLVING_LOAN_PARAMETER_NAME, this.isRevolving)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.REVOLVING_LOAN_PARAMETER_NAME, newValue);
+            this.isRevolving = newValue;
+        }
+
+        // XXX TODO: maybe check that there is no way for creating a product that is revolving but don't have
+        // multiDisburse flag
 
         if (this.multiDisburseLoan) {
             if (command.isChangeInIntegerParameterNamed(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, this.maxTrancheCount)) {
@@ -86,6 +99,10 @@ public class LoanProductTrancheDetails {
 
     public Integer maxTrancheCount() {
         return this.maxTrancheCount;
+    }
+
+    public boolean isRevolving() {
+        return this.isRevolving;
     }
 
 }

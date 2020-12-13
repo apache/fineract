@@ -560,7 +560,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
                     + " lp.is_linked_to_floating_interest_rates as isLoanProductLinkedToFloatingRate, "
                     + " lp.allow_variabe_installments as isvariableInstallmentsAllowed, "
-                    + " lp.allow_multiple_disbursals as multiDisburseLoan,"
+                    + " lp.allow_multiple_disbursals as multiDisburseLoan," + " lp.is_revolving as isRevolving,"
+                    + " l.revolving_start_date as revolvingPeriodStartDate, l.revolving_end_date as revolvingPeriodEndDate,"
                     + " lp.can_define_fixed_emi_amount as canDefineInstallmentAmount,"
                     + " c.id as clientId, c.account_no as clientAccountNo, c.display_name as clientName, c.office_id as clientOfficeId,"
                     + " g.id as groupId, g.account_no as groupAccountNo, g.display_name as groupName,"
@@ -706,6 +707,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
             final Boolean canDefineInstallmentAmount = rs.getBoolean("canDefineInstallmentAmount");
             final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
+
+            final Boolean isRevolving = rs.getBoolean("isRevolving");
+            final LocalDate revolvingPeriodStartDate = JdbcSupport.getLocalDate(rs, "revolvingPeriodStartDate");
+            final LocalDate revolvingPeriodEndDate = JdbcSupport.getLocalDate(rs, "revolvingPeriodEndDate");
 
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
@@ -968,8 +973,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing,
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
-                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
-                    minFloatingRateInterest);
+                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, 
+                    minFloatingRateInterest, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
         }
     }
 
