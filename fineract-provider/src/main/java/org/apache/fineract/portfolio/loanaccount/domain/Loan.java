@@ -6534,6 +6534,30 @@ public class Loan extends AbstractPersistableCustom {
         }
     }
 
+    /**
+     * Update loan transaction mappings to most updated installements to avoid FK conflict while replacing installments.
+     */
+    public void updateLoanTransactionMappings() {
+        for (LoanTransaction transaction : this.loanTransactions) {
+            Collection<LoanTransactionToRepaymentScheduleMapping> mappings = transaction.getLoanTransactionToRepaymentScheduleMappings();
+            mappings = mappings.stream().map(mapping -> {
+                LoanRepaymentScheduleInstallment oldMappedInstallment = mapping.getLoanRepaymentScheduleInstallment();
+                LoanRepaymentScheduleInstallment newInstallmentToBeMapped = this.repaymentScheduleInstallments.stream()
+                        .filter(installment -> {
+                            return installment.getId() == null
+                                    && installment.getInstallmentNumber().equals(oldMappedInstallment.getInstallmentNumber());
+                        }).findFirst().orElse(null);
+
+                if (newInstallmentToBeMapped != null) {
+                    mapping.setInstallment(newInstallmentToBeMapped);
+                }
+
+                return mapping;
+            }).collect(Collectors.toSet());
+            transaction.updateLoanTransactionToRepaymentScheduleMappings(mappings);
+        }
+    }
+
     public Integer getLoanSubStatus() {
         return this.loanSubStatus;
     }

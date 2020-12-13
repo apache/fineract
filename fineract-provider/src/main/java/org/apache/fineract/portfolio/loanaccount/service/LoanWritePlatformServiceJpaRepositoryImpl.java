@@ -2748,6 +2748,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
 
+        loan.updateLoanTransactionMappings();
+
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (command.entityId() != null && changedTransactionDetail != null) {
