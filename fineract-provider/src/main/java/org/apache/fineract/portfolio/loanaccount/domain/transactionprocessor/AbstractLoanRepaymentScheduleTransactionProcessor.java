@@ -230,7 +230,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
         // to.
-        if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+        if ((loanTransaction.isRepayment() && !loanTransaction.isManualRepayment()) || loanTransaction.isInterestWaiver()
+                || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }
         Money transactionAmountUnprocessed = processTransaction(loanTransaction, currency, installments, chargeAmountToProcess);
@@ -278,10 +279,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (transactionAmountUnprocessed.isGreaterThanZero()) {
                 if (currentInstallment.isNotFullyPaidOff()) {
 
-                    // is this transaction early/late/on-time with respect to
+                    // is this transaction manual/early/late/on-time with respect to
                     // the
                     // current installment?
-                    if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
+                    if (loanTransaction.isManualRepayment()) {
+                        transactionAmountUnprocessed = handleTransactionThatIsManualPayment(currentInstallment, installments,
+                                loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
+                    } else if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
                             transactionAmountUnprocessed)) {
                         transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
                                 installments, loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
@@ -303,6 +307,34 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
         return transactionAmountUnprocessed;
+    }
+
+    private Money handleTransactionThatIsManualPayment(LoanRepaymentScheduleInstallment currentInstallment,
+            List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, LocalDate transactionDate,
+            Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+        Money transactionAmountRemaining = transactionAmountUnprocessed;
+        MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+
+        Money penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate,
+                loanTransaction.getPenaltyChargesPortion(currency));
+        transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+        Money feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate,
+                loanTransaction.getFeeChargesPortion(currency));
+        transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
+        Money interestPortion = currentInstallment.payInterestComponent(transactionDate, loanTransaction.getInterestPortion(currency));
+        transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+
+        Money principalPortion = currentInstallment.payPrincipalComponent(transactionDate, loanTransaction.getPrincipalPortion(currency));
+        transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+
+        if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
+                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+        }
+
+        return transactionAmountRemaining;
     }
 
     private Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {

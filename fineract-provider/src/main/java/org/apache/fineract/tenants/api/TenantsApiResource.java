@@ -136,7 +136,7 @@ public class TenantsApiResource {
                             + tenantIdentifier + "\",\"" + tenantName + "\",\"Asia/Kolkata\",NULL,NULL,NULL,NULL," + newTenantId + ","
                             + newTenantId + ");");
         } catch (SQLException e3) {
-            throw new Exception("Failed to create new tenant: " + e3.getMessage());
+            throw new Exception("Failed to create new tenant: " + e3.getMessage(), e3);
         } finally {
             if (newDBStatement != null && !newDBStatement.isClosed()) {
                 newDBStatement.close();

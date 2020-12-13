@@ -127,6 +127,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanManualRepaymentData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -872,7 +873,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -886,14 +887,34 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
+
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+        final JsonElement manualPaymentJson = command.jsonElement("manual");
+        LoanManualRepaymentData manualRepaymentData = null;
+        if (manualPaymentJson != null) {
+            changes.put("manual", manualPaymentJson.getAsJsonObject());
+
+            final JsonObject manualPaymentJsonObject = manualPaymentJson.getAsJsonObject();
+            final BigDecimal principalPortion = manualPaymentJsonObject.get("principalPortion").getAsBigDecimal();
+            final BigDecimal interestPortion = manualPaymentJsonObject.get("interestPortion").getAsBigDecimal();
+            final BigDecimal feeChargesPortion = manualPaymentJsonObject.get("feeChargesPortion").getAsBigDecimal();
+            final BigDecimal penaltyChargesPortion = manualPaymentJsonObject.get("penaltyChargesPortion").getAsBigDecimal();
+
+            manualRepaymentData = new LoanManualRepaymentData(loan.getCurrency(), principalPortion, interestPortion, feeChargesPortion,
+                    penaltyChargesPortion);
+            // transactionAmount defined by manual portions
+            transactionAmount = principalPortion.add(interestPortion).add(feeChargesPortion).add(penaltyChargesPortion);
+        }
+
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final Boolean isHolidayValidationDone = false;
         final HolidayDetailDTO holidayDetailDto = null;
         boolean isAccountTransfer = false;
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail,
-                noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false,
+                manualRepaymentData);
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
