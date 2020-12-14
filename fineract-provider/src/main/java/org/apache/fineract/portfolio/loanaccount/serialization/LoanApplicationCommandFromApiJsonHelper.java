@@ -503,7 +503,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .isOneOfTheseValues(1, 360, 364, 365);
         }
 
-        validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
         validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
         if (!dataValidationErrors.isEmpty()) {
