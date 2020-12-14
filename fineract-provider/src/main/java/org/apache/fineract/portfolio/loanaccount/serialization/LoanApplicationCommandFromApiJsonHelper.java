@@ -88,7 +88,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
-            LoanApiConstants.lastApplication, LoanApiConstants.daysInYearTypeParameterName)); // glim specific
+            LoanApiConstants.lastApplication, LoanApiConstants.minFloatingRateInterest, LoanApiConstants.daysInYearTypeParameterName)); // glim specific
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -379,6 +379,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (createStandingInstructionAtDisbursement) {
                 baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).notNull().longGreaterThanZero();
             }
+        }
+
+        final String minFloatingRateInterestParameterName = "minFloatingRateInterest";
+        if (this.fromApiJsonHelper.parameterExists(minFloatingRateInterestParameterName, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            final BigDecimal minFloatingRateInterest = this.fromApiJsonHelper.extractBigDecimalNamed(minFloatingRateInterestParameterName,
+                    element, locale);
+            baseDataValidator.reset().parameter(minFloatingRateInterestParameterName).value(minFloatingRateInterest).positiveAmount();
         }
 
         // charges

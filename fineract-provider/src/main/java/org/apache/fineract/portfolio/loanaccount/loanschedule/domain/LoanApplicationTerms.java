@@ -1009,6 +1009,7 @@ public final class LoanApplicationTerms {
 
         BigDecimal periodicInterestRate = BigDecimal.ZERO;
         BigDecimal loanTermFrequencyBigDecimal = BigDecimal.ONE;
+
         if (isForPMT) {
             loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.repaymentEvery);
         } else {

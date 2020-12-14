@@ -627,6 +627,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lir.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
+                    + " l.min_floating_rate_interest as minFloatingRateInterest, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
                     + " lp.can_use_for_topup as canUseForTopup, " + " l.is_topup as isTopup, " + " topup.closure_loan_id as closureLoanId, "
@@ -764,6 +765,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
             final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
             final BigDecimal interestRateDifferential = rs.getBigDecimal("interestRateDifferential");
+            final BigDecimal minFloatingRateInterest = rs.getBigDecimal("minFloatingRateInterest");
             final boolean isFloatingInterestRate = rs.getBoolean("isFloatingInterestRate");
 
             final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
@@ -966,7 +968,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing,
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
-                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization);
+                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
+                    minFloatingRateInterest);
         }
     }
 

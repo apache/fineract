@@ -192,6 +192,11 @@ public class LoanAssembler {
         if (loanProduct.isMultiDisburseLoan() || loanProduct.canDefineInstallmentAmount()) {
             fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName, element);
         }
+
+        BigDecimal minFloatingRateInterest = null;
+        minFloatingRateInterest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.minFloatingRateInterest,
+                element);
+
         BigDecimal maxOutstandingLoanBalance = null;
         if (loanProduct.isMultiDisburseLoan()) {
             disbursementDetails = this.loanUtilService.fetchDisbursementData(element.getAsJsonObject());
@@ -266,21 +271,23 @@ public class LoanAssembler {
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(), loanProduct,
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates);
+                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                    minFloatingRateInterest);
 
         } else if (group != null) {
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates);
+                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                    minFloatingRateInterest);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates);
+                    isFloatingInterestRate, interestRateDifferential, rates, minFloatingRateInterest);
 
         }
 

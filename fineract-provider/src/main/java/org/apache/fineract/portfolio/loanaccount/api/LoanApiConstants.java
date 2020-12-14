@@ -131,5 +131,5 @@ public interface LoanApiConstants {
     String isEqualAmortizationParam = "isEqualAmortization";
     String applicationId = "applicationId";
     String lastApplication = "lastApplication";
-
+    String minFloatingRateInterest = "minFloatingRateInterest";
 }

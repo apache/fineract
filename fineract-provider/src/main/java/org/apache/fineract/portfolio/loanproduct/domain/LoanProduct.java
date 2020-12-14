@@ -1410,10 +1410,18 @@ public class LoanProduct extends AbstractPersistableCustom {
         return this.floatingRates;
     }
 
-    public Collection<FloatingRatePeriodData> fetchInterestRates(final FloatingRateDTO floatingRateDTO) {
+    public Collection<FloatingRatePeriodData> fetchInterestRates(final FloatingRateDTO floatingRateDTO,
+            final BigDecimal minFloatingRateInterest) {
         Collection<FloatingRatePeriodData> applicableRates = new ArrayList<>(1);
         if (isLinkedToFloatingInterestRate()) {
             applicableRates = getFloatingRates().fetchInterestRates(floatingRateDTO);
+        }
+        if (minFloatingRateInterest != null) {
+            for (FloatingRatePeriodData periodData : applicableRates) {
+                if (periodData.getInterestRate().compareTo(minFloatingRateInterest) < 0) {
+                    periodData.setInterestRate(minFloatingRateInterest);
+                }
+            }
         }
         return applicableRates;
     }
