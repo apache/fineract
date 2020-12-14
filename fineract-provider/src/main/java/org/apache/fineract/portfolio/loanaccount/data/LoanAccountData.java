@@ -945,7 +945,7 @@ public final class LoanAccountData {
                 overdueCharges, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
-                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled,  minFloatingRateInterest, 
+                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest,
                 isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
 
     }
@@ -1294,7 +1294,8 @@ public final class LoanAccountData {
                 isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, originalSchedule,
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
-                isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest, isRevolving, revolvingPeriodStartDate,
+                revolvingPeriodEndDate);
     }
 
     /*
@@ -1603,8 +1604,8 @@ public final class LoanAccountData {
             final Integer minimumGap, final Integer maximumGap, final EnumOptionData subStatus, final Boolean canUseForTopup,
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final boolean isTopup, final Long closureLoanId,
             final String closureLoanAccountNo, final BigDecimal topupAmount, final boolean isEqualAmortization, final List<RateData> rates,
-            final Boolean isRatesEnabled, final BigDecimal minFloatingRateInterest, final Boolean isRevolving, final LocalDate revolvingPeriodStartDate,
-            final LocalDate revolvingPeriodEndDate) {
+            final Boolean isRatesEnabled, final BigDecimal minFloatingRateInterest, final Boolean isRevolving,
+            final LocalDate revolvingPeriodStartDate, final LocalDate revolvingPeriodEndDate) {
 
         this.id = id;
         this.accountNo = accountNo;

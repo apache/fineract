@@ -973,8 +973,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing,
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
-                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, 
-                    minFloatingRateInterest, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, minFloatingRateInterest,
+                    isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
         }
     }
 

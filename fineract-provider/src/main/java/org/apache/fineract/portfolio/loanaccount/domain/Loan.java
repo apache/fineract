@@ -28,6 +28,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -428,7 +429,7 @@ public class Loan extends AbstractPersistableCustom {
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates, , minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                interestRateDifferential, rates, minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
@@ -543,7 +544,7 @@ public class Loan extends AbstractPersistableCustom {
                         .from(revolvingPeriodStartDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                 if (revolvingPeriodEndDate != null) {
                     this.revolvingPeriodEndDate = Date
-                            .from(revolvingPeriodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                            .from(revolvingPeriodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).with(LocalTime.MAX).toInstant());
                 }
             }
         }
