@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+		{
+			"type": "gradle",
+			"id": "/Users/tomermoshe/dev/fineractfineract-provider:bootRunfineract-provider",
+			"script": "fineract-provider:bootRun",
+			"description": "Runs this project as a Spring Boot application.",
+			"group": "application",
+			"project": "fineract-provider",
+			"buildFile": "/Users/tomermoshe/dev/fineract/fineract-provider/build.gradle",
+			"rootProject": "fineract",
+			"projectFolder": "/Users/tomermoshe/dev/fineract",
+			"workspaceFolder": "/Users/tomermoshe/dev/fineract",
+			"args": "-Psecutiry=oauth --debug-jvm",
+			"javaDebug": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"label": "gradle: fineract-provider:bootRun:debug"
+		}
+	]
+}
