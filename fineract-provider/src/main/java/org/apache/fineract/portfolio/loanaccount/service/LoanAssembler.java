@@ -198,6 +198,8 @@ public class LoanAssembler {
                 element);
 
         BigDecimal maxOutstandingLoanBalance = null;
+        LocalDate revolvingPeriodStartDate = null;
+        LocalDate revolvingPeriodEndDate = null;
         if (loanProduct.isMultiDisburseLoan()) {
             disbursementDetails = this.loanUtilService.fetchDisbursementData(element.getAsJsonObject());
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
@@ -209,9 +211,16 @@ public class LoanAssembler {
             }
 
             if (disbursementDetails.size() > loanProduct.maxTrancheCount()) {
-                final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
+                final String errorMessage = "Number of tranche shouldn't be greater than " + loanProduct.maxTrancheCount();
                 throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
                         loanProduct.maxTrancheCount(), disbursementDetails.size());
+            }
+
+            if (loanProduct.isRevolving()) {
+                revolvingPeriodStartDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.revolvingPeriodStartParameterName,
+                        element);
+                revolvingPeriodEndDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.revolvingPeriodEndParameterName,
+                        element);
             }
         }
         final Set<LoanCollateral> collateral = this.loanCollateralAssembler.fromParsedJson(element);
@@ -272,7 +281,7 @@ public class LoanAssembler {
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    minFloatingRateInterest);
+                    minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
 
         } else if (group != null) {
 
@@ -280,14 +289,15 @@ public class LoanAssembler {
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    minFloatingRateInterest);
+                    minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates, minFloatingRateInterest);
+                    isFloatingInterestRate, interestRateDifferential, rates, minFloatingRateInterest, revolvingPeriodStartDate,
+                    revolvingPeriodEndDate);
 
         }
 

@@ -88,7 +88,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
-            LoanApiConstants.lastApplication, LoanApiConstants.minFloatingRateInterest, LoanApiConstants.daysInYearTypeParameterName)); // glim specific
+            LoanApiConstants.lastApplication, // glim specific
+            LoanApiConstants.minFloatingRateInterest,LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.revolvingPeriodStartParameterName,
+            LoanApiConstants.revolvingPeriodEndParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -502,9 +504,26 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+        validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.revolvingPeriodStartParameterName, element)) {
+            if (!loanProduct.isRevolving()) {} // TODO throw an exception
+
+            final LocalDate revolvingPeriodStartDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(LoanApiConstants.revolvingPeriodStartParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.revolvingPeriodStartParameterName).value(revolvingPeriodStartDate)
+                    .notNull();
+
+            if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.revolvingPeriodEndParameterName, element)) {
+                final LocalDate revolvingPeriodEndDate = this.fromApiJsonHelper
+                        .extractLocalDateNamed(LoanApiConstants.revolvingPeriodEndParameterName, element);
+                baseDataValidator.reset().parameter(LoanApiConstants.revolvingPeriodEndParameterName).value(revolvingPeriodEndDate)
+                        .ignoreIfNull().validateDateAfter(revolvingPeriodStartDate);
+            }
         }
     }
 
@@ -948,7 +967,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
-        validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+        validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
 
         if (!dataValidationErrors.isEmpty()) {
@@ -1095,8 +1114,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
     }
 
-    public void validateLoanMultiDisbursementdate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+    public void validateLoanMultiDisbursementDate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
             LocalDate expectedDisbursement, BigDecimal totalPrincipal) {
+        this.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursement, totalPrincipal, null);
+    }
+
+    public void validateLoanMultiDisbursementDate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            LocalDate expectedDisbursement, BigDecimal totalPrincipal, final Loan loan) {
 
         this.validateDisbursementsAreDatewiseOrdered(element, baseDataValidator);
 
@@ -1106,7 +1130,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.disbursementDataParameterName, element) && expectedDisbursement != null
                 && totalPrincipal != null) {
 
-            BigDecimal tatalDisbursement = BigDecimal.ZERO;
+            BigDecimal totalDisbursement = BigDecimal.ZERO;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
             List<LocalDate> expectedDisbursementDates = new ArrayList<>();
@@ -1145,12 +1169,17 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                             .parameterAtIndexArray(LoanApiConstants.disbursementPrincipalParameterName, i).value(principal).notBlank();
                     if (principal != null) {
-                        tatalDisbursement = tatalDisbursement.add(principal);
+                        totalDisbursement = totalDisbursement.add(principal);
                     }
                     i++;
                 } while (i < variationArray.size());
 
-                if (tatalDisbursement.compareTo(totalPrincipal) > 0) {
+                // TODO: add check loan disbursement dates are in the revolving period
+                if (loan != null && loan.loanProduct().isRevolving()) {
+                    totalDisbursement = totalDisbursement.subtract(loan.getSummary().getTotalPrincipalRepaid());
+                }
+
+                if (totalDisbursement.compareTo(totalPrincipal) > 0) {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementPrincipalParameterName)
                             .failWithCode(LoanApiConstants.APPROVED_AMOUNT_IS_LESS_THAN_SUM_OF_TRANCHES);
                 }

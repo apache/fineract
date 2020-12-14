@@ -2638,7 +2638,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate) {
+    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate, final Loan loan) {
         final String json = command.json();
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -2651,8 +2651,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
 
-        loanApplicationCommandFromApiJsonHelper.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate,
-                principal);
+        loanApplicationCommandFromApiJsonHelper.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate,
+                principal, loan);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -2690,7 +2690,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(errorMessage);
         }
-        validateMultiDisbursementData(command, expectedDisbursementDate);
+        validateMultiDisbursementData(command, expectedDisbursementDate, loan);
 
         this.validateForAddAndDeleteTranche(loan);
 
@@ -2702,7 +2702,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         if (loan.getDisbursementDetails().size() > loan.loanProduct().maxTrancheCount()) {
-            final String errorMessage = "Number of tranche shouldn't be greter than " + loan.loanProduct().maxTrancheCount();
+            final String errorMessage = "Number of tranche shouldn't be greater than " + loan.loanProduct().maxTrancheCount();
             throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
                     loan.loanProduct().maxTrancheCount(), loan.getDisbursementDetails().size());
         }
@@ -2747,6 +2747,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.processPostDisbursementTransactions();
             }
         }
+
+        loan.updateLoanTransactionMappings();
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 

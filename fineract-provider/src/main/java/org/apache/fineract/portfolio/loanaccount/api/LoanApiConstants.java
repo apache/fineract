@@ -22,6 +22,8 @@ public interface LoanApiConstants {
 
     String emiAmountParameterName = "fixedEmiAmount";
     String maxOutstandingBalanceParameterName = "maxOutstandingLoanBalance";
+    String revolvingPeriodStartParameterName = "revolvingPeriodStartDate";
+    String revolvingPeriodEndParameterName = "revolvingPeriodEndDate";
     String disbursementDataParameterName = "disbursementData";
     String disbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";

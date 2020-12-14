@@ -283,9 +283,11 @@ public class LoanProduct extends AbstractPersistableCustom {
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME);
         Integer maxTrancheCount = null;
         BigDecimal outstandingLoanBalance = null;
+        boolean isRevolving = false;
         if (multiDisburseLoan) {
             outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME);
             maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME);
+            isRevolving = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.REVOLVING_LOAN_PARAMETER_NAME);
         }
 
         final Integer graceOnArrearsAgeing = command
@@ -352,7 +354,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, externalId,
                 useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                isRevolving, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuarantorFunds,
                 loanProductGuaranteeDetails, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
                 canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates,
@@ -582,8 +584,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String externalId,
             final boolean useBorrowerCycle, final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
             final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
-            final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType,
-            final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
+            final boolean isRevolving, final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA,
+            final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
             final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
@@ -659,7 +661,8 @@ public class LoanProduct extends AbstractPersistableCustom {
             loanConfigurableAttributes.updateLoanProduct(this);
         }
 
-        this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
+        this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                isRevolving);
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
@@ -1219,6 +1222,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public Integer maxTrancheCount() {
         return this.loanProducTrancheDetails.maxTrancheCount();
+    }
+
+    public boolean isRevolving() {
+        return this.loanProducTrancheDetails.isRevolving();
     }
 
     public boolean isInterestRecalculationEnabled() {

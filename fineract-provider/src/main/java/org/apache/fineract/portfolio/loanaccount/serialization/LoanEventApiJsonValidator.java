@@ -451,7 +451,7 @@ public final class LoanEventApiJsonValidator {
                     .failWithCode(LoanApiConstants.ALREADY_DISBURSED);
         }
 
-        fromApiJsonDeserializer.validateLoanMultiDisbursementdate(element, baseDataValidator, actualDisbursementDate, approvedPrincipal);
+        fromApiJsonDeserializer.validateLoanMultiDisbursementDate(element, baseDataValidator, actualDisbursementDate, approvedPrincipal);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
