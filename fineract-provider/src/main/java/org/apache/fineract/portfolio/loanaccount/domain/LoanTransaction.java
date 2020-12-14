@@ -749,30 +749,30 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public void updateLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> mappings) {
         Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings = new ArrayList<>();
-        for (LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping : mappings) {
-            updateMapingDetail(retainMappings, updatedrepaymentScheduleMapping);
+        for (LoanTransactionToRepaymentScheduleMapping updatedRepaymentScheduleMapping : mappings) {
+            updateMappingDetail(retainMappings, updatedRepaymentScheduleMapping);
         }
         this.loanTransactionToRepaymentScheduleMappings.retainAll(retainMappings);
     }
 
-    private boolean updateMapingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
-            final LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping) {
+    private boolean updateMappingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
+            final LoanTransactionToRepaymentScheduleMapping updatedRepaymentScheduleMapping) {
         boolean isMappingUpdated = false;
         for (LoanTransactionToRepaymentScheduleMapping repaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
-            if (updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId() != null
+            if (updatedRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId() != null
                     && repaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate()
-                            .equals(updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate())) {
-                repaymentScheduleMapping.setComponents(updatedrepaymentScheduleMapping.getPrincipalPortion(),
-                        updatedrepaymentScheduleMapping.getInterestPortion(), updatedrepaymentScheduleMapping.getFeeChargesPortion(),
-                        updatedrepaymentScheduleMapping.getPenaltyChargesPortion());
+                            .equals(updatedRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate())) {
+                repaymentScheduleMapping.setComponents(updatedRepaymentScheduleMapping.getPrincipalPortion(),
+                        updatedRepaymentScheduleMapping.getInterestPortion(), updatedRepaymentScheduleMapping.getFeeChargesPortion(),
+                        updatedRepaymentScheduleMapping.getPenaltyChargesPortion());
                 isMappingUpdated = true;
                 retainMappings.add(repaymentScheduleMapping);
                 break;
             }
         }
         if (!isMappingUpdated) {
-            this.loanTransactionToRepaymentScheduleMappings.add(updatedrepaymentScheduleMapping);
-            retainMappings.add(updatedrepaymentScheduleMapping);
+            this.loanTransactionToRepaymentScheduleMappings.add(updatedRepaymentScheduleMapping);
+            retainMappings.add(updatedRepaymentScheduleMapping);
         }
         return isMappingUpdated;
     }

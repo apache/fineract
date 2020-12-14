@@ -1826,6 +1826,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LocalDate lastCompoundingDate = startDate;
             LocalDate compoundingDate = startDate;
             boolean addUncompounded = true;
+
+            // This is an endless loop in some scenarios. Observed when tenant was configured with timezone Kolkata
+            // while running in Israel.
             while (compoundingDate.isBefore(endDate)) {
                 if (loanApplicationTerms.allowCompoundingOnEod()) {
                     compoundingDate = compoundingDate.minusDays(1);
@@ -2420,8 +2423,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
         }
         periods.addAll(loanScheduleModel.getPeriods());
-        LoanScheduleModel loanScheduleModelwithPeriodChanges = LoanScheduleModel.withLoanScheduleModelPeriods(periods, loanScheduleModel);
-        return LoanScheduleDTO.from(retainedInstallments, loanScheduleModelwithPeriodChanges);
+        LoanScheduleModel loanScheduleModelWithPeriodChanges = LoanScheduleModel.withLoanScheduleModelPeriods(periods, loanScheduleModel);
+        return LoanScheduleDTO.from(retainedInstallments, loanScheduleModelWithPeriodChanges);
     }
 
     public List<LoanRepaymentScheduleInstallment> fetchRetainedInstallments(

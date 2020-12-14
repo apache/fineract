@@ -153,4 +153,8 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
     public BigDecimal getPenaltyChargesPortion() {
         return this.penaltyChargesPortion;
     }
+
+    public void setInstallment(final LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
+    }
 }

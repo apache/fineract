@@ -11621,7 +11621,9 @@ Request Body:
             "Activation Date": "01 December 2016 00:00",
             "dateFormat": "dd MMMM yyyy HH:mm"
         }
-    }]
+		}],
+    "revolvingPeriodStartDate": "02 December 2020",
+    "revolvingPeriodEndDate": "02 December 2021"
 }
 					</code>
 					<code class="method-response">
@@ -17122,7 +17124,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion, rates
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion, rates, isRevolving
 							</td>
 						</tr>
 					</table>
@@ -17393,6 +17395,104 @@ Request Body:
 					<code class="method-response">
 {
 	"resourceId": 3
+}
+					</code>
+					<code class="method-request">
+POST loanproducts
+Content-Type: application/json
+Request Body:
+{
+	"name": "Revolving Credit",
+	"shortName": "REV",
+	"fundId": 1,
+	"includeInBorrowerCycle": false,
+	"useBorrowerCycle": false,
+	"currencyCode": "GBP",
+	"digitsAfterDecimal": 2,
+	"inMultiplesOf": 0,
+	"principal": 5000000,
+	"minPrincipal": 1,
+	"maxPrincipal": 100000000,
+	"numberOfRepayments": 36,
+	"minNumberOfRepayments": 1,
+	"maxNumberOfRepayments": 1000,
+	"repaymentEvery": 1,
+	"repaymentFrequencyType": 2,
+	"interestRatePerPeriod": 11,
+	"interestRateFrequencyType": 3,
+	"amortizationType": 1,
+	"interestType": 0,
+	"interestCalculationPeriodType": 0,
+	"allowPartialPeriodInterestCalcualtion": false,
+	"transactionProcessingStrategyId": 5,
+	"graceOnArrearsAgeing": 30,
+	"overdueDaysForNPA": 30,
+	"accountMovesOutOfNPAOnlyOnArrearsCompletion": false,
+	"accountingRule": 4,
+	"principalVariationsForBorrowerCycle": [],
+	"interestRateVariationsForBorrowerCycle": [],
+	"numberOfRepaymentVariationsForBorrowerCycle": [],
+	"multiDisburseLoan": true,
+	"maxTrancheCount": 1000,
+	"outstandingLoanBalance": 500000000,
+	"daysInYearType": 1,
+	"daysInMonthType": 1,
+	"isInterestRecalculationEnabled": true,
+	"holdGuaranteeFunds": false,
+	"principalThresholdForLastInstallment": 50,
+	"installmentAmountInMultiplesOf": 1,
+	"canDefineInstallmentAmount": false,
+	"isEqualAmortization": false,
+	"interestRecalculationCompoundingMethod": 3,
+	"rescheduleStrategyMethod": 1,
+	"recalculationRestFrequencyType": 4,
+	"recalculationRestFrequencyInterval": 1,
+	"isArrearsBasedOnOriginalSchedule": false,
+	"preClosureInterestCalculationStrategy": 2,
+	"recalculationCompoundingFrequencyType": 4,
+	"recalculationCompoundingFrequencyInterval": 1,
+	"fundSourceAccountId": 12,
+	"loanPortfolioAccountId": 13,
+	"receivableInterestAccountId": 17,
+	"receivableFeeAccountId": 18,
+	"receivablePenaltyAccountId": 21,
+	"transfersInSuspenseAccountId": 22,
+	"interestOnLoanAccountId": 7,
+	"incomeFromFeeAccountId": 8,
+	"incomeFromPenaltyAccountId": 19,
+	"incomeFromRecoveryAccountId": 23,
+	"writeOffAccountId": 24,
+	"overpaymentLiabilityAccountId": 15,
+	"isLinkedToFloatingInterestRates": false,
+	"allowVariableInstallments": false,
+	"canUseForTopup": true,
+	"rates": [],
+	"paymentChannelToFundSourceMappings": [],
+	"feeToIncomeAccountMappings": [],
+	"penaltyToIncomeAccountMappings": [],
+	"charges": [
+			{
+					"id": 1
+			}
+	],
+	"allowAttributeOverrides": {
+			"amortizationType": true,
+			"interestType": true,
+			"transactionProcessingStrategyId": true,
+			"interestCalculationPeriodType": true,
+			"inArrearsTolerance": true,
+			"repaymentEvery": true,
+			"graceOnPrincipalAndInterestPayment": true,
+			"graceOnArrearsAgeing": true
+	},
+	"dateFormat": "dd MMMM yyyy",
+	"locale": "en",
+	"isRevolving": true
+}
+					</code>
+					<code class="method-response">
+{
+	"resourceId": 4
 }
 					</code>
 
@@ -47948,7 +48048,8 @@ Request Body:
 						</tr>
 						<tr class=alt>
 							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
-								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)
+								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true),
+								 revolvingPeriodStartDate, revolvingPeriodEndDate
 							</td>
 						</tr>
 					</table>
