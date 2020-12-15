@@ -337,10 +337,10 @@ public class LoanScheduleAssembler {
         final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
 
         DaysInYearType daysInYearType = null;
-        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName,
-                element, Locale.getDefault());
+        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper
+                .extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName, element, Locale.getDefault());
         if (daysInYearTypeIntFromApplication != null) {
-            daysInYearType = DaysInYearType .fromInt(daysInYearTypeIntFromApplication);
+            daysInYearType = DaysInYearType.fromInt(daysInYearTypeIntFromApplication);
         } else {
             daysInYearType = loanProduct.fetchDaysInYearType();
         }
