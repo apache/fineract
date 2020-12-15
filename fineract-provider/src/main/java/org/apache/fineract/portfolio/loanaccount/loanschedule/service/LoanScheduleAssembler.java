@@ -336,7 +336,14 @@ public class LoanScheduleAssembler {
          */
         final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
 
-        final DaysInYearType daysInYearType = loanProduct.fetchDaysInYearType();
+        DaysInYearType daysInYearType = null;
+        final Integer daysInYearTypeIntFromApplication = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName,
+                element, Locale.getDefault());
+        if (daysInYearTypeIntFromApplication != null) {
+            daysInYearType = DaysInYearType .fromInt(daysInYearTypeIntFromApplication);
+        } else {
+            daysInYearType = loanProduct.fetchDaysInYearType();
+        }
 
         final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
         RecalculationFrequencyType recalculationFrequencyType = null;

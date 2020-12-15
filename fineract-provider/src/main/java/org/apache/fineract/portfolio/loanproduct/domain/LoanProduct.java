@@ -299,7 +299,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean isInterestRecalculationEnabled = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
         final DaysInMonthType daysInMonthType = DaysInMonthType
-                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME));
 
         final DaysInYearType daysInYearType = DaysInYearType
                 .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));

@@ -11566,7 +11566,7 @@ Request Body:
 						<tr class=alt>
 							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
 								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true),
-								 minFloatingRateInterest
+								 minFloatingRateInterest,daysInYearType,
 							</td>
 						</tr>
 					</table>
@@ -11601,6 +11601,7 @@ Request Body:
     "linkAccountId" : "1",
     "fixedEmiAmount":1100,
     "maxOutstandingLoanBalance":"35000",
+    "daysInYearType":1,
     "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
     					"principal":22000,"approvedPrincipal":22000}],
     "datatables": [{

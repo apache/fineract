@@ -89,7 +89,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
-            LoanApiConstants.minFloatingRateInterest, LoanApiConstants.revolvingPeriodStartParameterName,
+            LoanApiConstants.minFloatingRateInterest,LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.revolvingPeriodStartParameterName,
             LoanApiConstants.revolvingPeriodEndParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -494,6 +494,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.datatables, element);
             baseDataValidator.reset().parameter(LoanApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearTypeParameterName, element)) {
+            final Integer daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.daysInYearTypeParameterName,
+                    element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanApiConstants.daysInYearTypeParameterName).value(daysInYearType).notNull()
+                    .isOneOfTheseValues(1, 360, 364, 365);
         }
 
         validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
