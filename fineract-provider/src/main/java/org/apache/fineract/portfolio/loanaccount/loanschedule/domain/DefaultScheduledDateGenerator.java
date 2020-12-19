@@ -60,12 +60,14 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate dueRepaymentPeriodDate = null;
         if (isFirstRepayment && firstRepaymentPeriodDate != null) {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
-        } else if (isFirstRepayment && firstRepaymentPeriodDate == null) {
-            if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
-                dueRepaymentPeriodDate = LocalDate.of(lastRepaymentDate.getYear(), lastRepaymentDate.getMonthValue(),
-                        loanApplicationTerms.getFirstDateForSemi().getDayOfMonth());
-            }
         } else {
+            if (isFirstRepayment && firstRepaymentPeriodDate == null) {
+                if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+                    dueRepaymentPeriodDate = LocalDate.of(lastRepaymentDate.getYear(), lastRepaymentDate.getMonthValue(),
+                            loanApplicationTerms.getFirstDateForSemi().getDayOfMonth());
+                    return dueRepaymentPeriodDate;
+                }
+            }
             LocalDate seedDate = null;
             String reccuringString = null;
             boolean isLeapYear = this.isLeapYear(lastRepaymentDate.getYear());
