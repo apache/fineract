@@ -44,6 +44,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -294,9 +295,16 @@ public class LoanImportHandler implements ImportHandler {
                 EnumOptionData chargeOneAmountTypeEnum = ImportHandlerUtils
                         .getChargeAmountTypeEnum(ImportHandlerUtils.readAsString(LoanConstants.CHARGE_AMOUNT_TYPE_1, row));
 
+                BigDecimal chargeAmount;
+                BigDecimal amountOrPercentage = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_1, row));
+                if (chargeOneAmountTypeEnum.getValue().equalsIgnoreCase("1")) {
+                    chargeAmount = amountOrPercentage;
+                } else {
+                    chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
+                }
+
                 charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row),
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_1, row)), chargeOneAmountTypeEnum,
-                        chargeOneTimeTypeEnum));
+                        chargeAmount, chargeOneAmountTypeEnum, chargeOneTimeTypeEnum));
             } else {
                 charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row), null));
             }
@@ -309,14 +317,22 @@ public class LoanImportHandler implements ImportHandler {
                 EnumOptionData chargeTwoAmountTypeEnum = ImportHandlerUtils
                         .getChargeAmountTypeEnum(ImportHandlerUtils.readAsString(LoanConstants.CHARGE_AMOUNT_TYPE_2, row));
 
+                BigDecimal chargeAmount;
+                BigDecimal amountOrPercentage = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_2, row));
+                if (chargeTwoTimeTypeEnum.getValue().equalsIgnoreCase("1")) {
+                    chargeAmount = amountOrPercentage;
+                } else {
+                    chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
+                }
+
                 charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_2, row)), chargeTwoAmountTypeEnum,
-                        chargeTwoTimeTypeEnum));
+                        chargeAmount, chargeTwoAmountTypeEnum, chargeTwoTimeTypeEnum));
             } else {
                 charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row), null));
             }
         }
         statuses.add(status);
+
         if (loanType != null) {
             if (loanType.equals("individual")) {
                 Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),

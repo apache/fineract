@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -90,9 +91,10 @@ public class LoanDisbursalDateValidationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A LOAN
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
         @SuppressWarnings("unchecked")
         List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID,
-                this.responseForbiddenError);
+                this.responseForbiddenError, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
 
         Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
                 "error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date");

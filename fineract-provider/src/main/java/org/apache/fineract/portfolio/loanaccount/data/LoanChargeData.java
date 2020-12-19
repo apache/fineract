@@ -401,6 +401,10 @@ public class LoanChargeData {
         return isInstalmentFee;
     }
 
+    public EnumOptionData getChargeCalculationType() {
+        return chargeCalculationType;
+    }
+
     public BigDecimal amountOrPercentage() {
         return this.amountOrPercentage;
     }

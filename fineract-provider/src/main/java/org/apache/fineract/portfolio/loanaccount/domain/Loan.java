@@ -344,6 +344,9 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
 
+    @Column(name = "net_disbursal_amount", scale = 6, precision = 19, nullable = false)
+    private BigDecimal netDisbursalAmount;
+
     @Column(name = "fixed_emi_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal fixedEmiAmount;
 
@@ -519,6 +522,14 @@ public class Loan extends AbstractPersistableCustom {
 
         // rates added here
         this.rates = rates;
+
+        // Add net get net disbursal amount from charges and principal
+        this.netDisbursalAmount = this.approvedPrincipal;
+        if (loanCharges != null && !loanCharges.isEmpty()) {
+            for (LoanCharge charge : loanCharges) {
+                this.netDisbursalAmount = this.netDisbursalAmount.subtract(charge.amount());
+            }
+        }
 
     }
 
@@ -1847,7 +1858,7 @@ public class Loan extends AbstractPersistableCustom {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 Date actualDisbursementDate = null;
                 LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                        principal);
+                        principal, this.netDisbursalAmount);
                 disbursementDetails.updateLoan(this);
                 if (!loanDisbursementDetail.equals(disbursementDetails)) {
                     loanDisbursementDetail.copy(disbursementDetails);
@@ -1858,7 +1869,7 @@ public class Loan extends AbstractPersistableCustom {
         } else {
             Date actualDisbursementDate = null;
             LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                    principal);
+                    principal, this.netDisbursalAmount);
             disbursementDetails.updateLoan(this);
             this.disbursementDetails.add(disbursementDetails);
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
@@ -2183,6 +2194,9 @@ public class Loan extends AbstractPersistableCustom {
 
             BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
 
+            BigDecimal netDisbursalAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName);
+
             if (approvedLoanAmount != null) {
 
                 // Approved amount has to be less than or equal to principal
@@ -2201,6 +2215,7 @@ public class Loan extends AbstractPersistableCustom {
 
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
+                    actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
                 } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
@@ -4362,7 +4377,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public boolean isSyncDisbursementWithMeeting() {
-        return this.syncDisbursementWithMeeting == null ? false : this.syncDisbursementWithMeeting;
+        return this.syncDisbursementWithMeeting != null && this.syncDisbursementWithMeeting;
     }
 
     public Date getClosedOnDate() {
@@ -4517,23 +4532,29 @@ public class Loan extends AbstractPersistableCustom {
     public void applyHolidayToRepaymentScheduleDates(final Holiday holiday, final LoanUtilService loanUtilService) {
         final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(this, holiday.getFromDateLocalDate());
+        final LoanApplicationTerms loanApplicationTerms = this.constructLoanApplicationTerms(scheduleGeneratorDTO);
 
-        LocalDate rescheduleFromDate = holiday.getFromDateLocalDate();
+        // LocalDate rescheduleFromDate = holiday.getFromDateLocalDate();
         LocalDate adjustedRescheduleToDate = null;
 
         if (holiday.getReScheduleType().isResheduleToNextRepaymentDate()) {
-            LocalDate rescheduleToDate = holiday.getToDateLocalDate();
+            final LocalDate rescheduleToDate = holiday.getToDateLocalDate();
             for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.getRepaymentScheduleInstallments()) {
                 if (rescheduleToDate.isEqual(loanRepaymentScheduleInstallment.getDueDate())) {
                     adjustedRescheduleToDate = rescheduleToDate;
-                } else if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())) {
-                    if (this.getLoanProduct().getFirstSemiDate() != null && this.getLoanProduct().getSecondSemiDate() != null) {
-                        if (rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(15))) {
+                    break;
+                } else {
+                    if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
+                        if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
+                                && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(15))) {
                             adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
+                            break;
                         }
                     } else {
-                        if (rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(30))) {
+                        if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
+                                && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(30))) {
                             adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
+                            break;
                         }
                     }
                 }
@@ -4542,30 +4563,17 @@ public class Loan extends AbstractPersistableCustom {
             adjustedRescheduleToDate = holiday.getRepaymentsRescheduledToLocalDate();
         }
 
-        final LoanApplicationTerms loanApplicationTerms = this.constructLoanApplicationTerms(scheduleGeneratorDTO);
-
-        // List<LoanTermVariationsData> removeLoanTermVariationsData = new ArrayList<>();
-        // for (LoanTermVariationsData loanTermVariation :
-        // loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
-        // if (rescheduleFromDate.isBefore(loanTermVariation.getTermApplicableFrom())) {
-        // LocalDate applicableDate = scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate,
-        // loanApplicationTerms,
-        // false);
-        // if (loanTermVariation.getTermApplicableFrom().equals(applicableDate)) {
-        // LocalDate adjustedDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedApplicableDate,
-        // loanApplicationTerms, false);
-        // loanTermVariation.setApplicableFromDate(adjustedDate);
-        // loanTermVariationsData.add(loanTermVariation);
-        // }
-        // }
-        // }
-
         // first repayment's from date is same as disbursement date.
         LocalDate tmpFromDate = getDisbursementDate();
 
         // Loop through all loanRepayments
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+
+            if (adjustedRescheduleToDate == null) {
+                break;
+            }
+
             final LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
 
             // update from date if it's not same as previous installament's due
@@ -4573,9 +4581,6 @@ public class Loan extends AbstractPersistableCustom {
             if (!loanRepaymentScheduleInstallment.getFromDate().isEqual(tmpFromDate)) {
                 loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
             }
-            // if (oldDueDate.isAfter(holiday.getToDateLocalDate())) {
-            // break;
-            // }
 
             if (oldDueDate.equals(holiday.getFromDateLocalDate()) || oldDueDate.isAfter(holiday.getFromDateLocalDate())) {
                 // FIXME: AA do we need to apply non-working days.
@@ -4584,8 +4589,6 @@ public class Loan extends AbstractPersistableCustom {
 
                 adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedRescheduleToDate, loanApplicationTerms,
                         false);
-
-                // final LocalDate newRepaymentDate = holiday.getRepaymentsRescheduledToLocalDate();
                 loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
             }
             tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
@@ -5145,6 +5148,14 @@ public class Loan extends AbstractPersistableCustom {
 
     public BigDecimal getApprovedPrincipal() {
         return this.approvedPrincipal;
+    }
+
+    public BigDecimal getNetDisbursalAmount() {
+        return netDisbursalAmount;
+    }
+
+    public void setNetDisbursalAmount(BigDecimal netDisbursalAmount) {
+        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public BigDecimal getTotalOverpaid() {
@@ -5728,7 +5739,7 @@ public class Loan extends AbstractPersistableCustom {
             }
             BigDecimal waivedChargeAmount = null;
             disbursementData.add(new DisbursementData(loanDisbursementDetails.getId(), expectedDisbursementDate, actualDisbursementDate,
-                    loanDisbursementDetails.principal(), null, null, waivedChargeAmount));
+                    loanDisbursementDetails.principal(), this.netDisbursalAmount, null, null, waivedChargeAmount));
         }
 
         return disbursementData;

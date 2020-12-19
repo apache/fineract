@@ -456,6 +456,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             } else {
                 changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, null);
             }
+            final BigDecimal netDisbursalAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName);
+            if (netDisbursalAmount != null) {
+                loan.setNetDisbursalAmount(netDisbursalAmount);
+            }
         }
         if (!changes.isEmpty()) {
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);

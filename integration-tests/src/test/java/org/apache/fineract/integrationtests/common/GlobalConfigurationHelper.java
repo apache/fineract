@@ -269,7 +269,7 @@ public class GlobalConfigurationHelper {
         HashMap<String, Object> roundingModeDefault = new HashMap<>();
         roundingModeDefault.put("id", 23);
         roundingModeDefault.put("name", "rounding-mode");
-        roundingModeDefault.put("value", 6);
+        roundingModeDefault.put("value", 4);
         roundingModeDefault.put("enabled", true);
         roundingModeDefault.put("trapDoor", true);
         defaults.add(roundingModeDefault);

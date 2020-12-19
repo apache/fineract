@@ -612,9 +612,9 @@ public class LoanTransaction extends AbstractPersistableCustom {
             paymentDetailData = this.paymentDetail.toData();
         }
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
-                currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
-                this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance,
-                this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed);
+                currencyData, getTransactionDate(), this.amount, this.loan.getNetDisbursalAmount(), this.principalPortion,
+                this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion, this.overPaymentPortion, this.externalId,
+                transfer, null, outstandingLoanBalance, this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
@@ -629,6 +629,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
         thisTransactionData.put("date", getTransactionDate());
         thisTransactionData.put("currency", currencyData);
         thisTransactionData.put("amount", this.amount);
+        thisTransactionData.put("netDisbursalAmount", this.loan.getNetDisbursalAmount());
         thisTransactionData.put("principalPortion", this.principalPortion);
         thisTransactionData.put("interestPortion", this.interestPortion);
         thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
