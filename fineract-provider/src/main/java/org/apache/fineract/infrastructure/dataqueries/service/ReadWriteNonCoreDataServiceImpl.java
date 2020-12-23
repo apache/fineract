@@ -1352,9 +1352,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
         if (appTable.equalsIgnoreCase("m_savings_account_transaction")) {
             scopedSQL = "select o.id as officeId, null as groupId, null as clientId, x.id as savingsId, null as loanId, null as entityId from "
-                    + appTable + " as t " + " join m_office o on o.id = t.office_id "
-                    + " join m_savings_account x on t.savings_account_id = x.id "
-                    + " where t.id = " + appTableId + " and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'";
+                    + appTable + " as t "
+                    + " join m_office o on o.id = t.office_id join m_savings_account x on t.savings_account_id = x.id where t.id = "
+                    + appTableId + " and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'";
         }
         if (scopedSQL == null) {
             throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
