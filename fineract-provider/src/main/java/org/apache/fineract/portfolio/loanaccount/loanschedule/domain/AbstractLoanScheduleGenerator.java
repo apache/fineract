@@ -1846,8 +1846,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LocalDate compoundingDate = startDate;
             boolean addUncompounded = true;
 
-            // This is an endless loop in some scenarios. Observed when tenant was configured with timezone Kolkata
-            // while running in Israel.
             while (compoundingDate.isBefore(endDate)) {
                 if (loanApplicationTerms.allowCompoundingOnEod()) {
                     compoundingDate = compoundingDate.minusDays(1);

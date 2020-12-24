@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -110,19 +111,17 @@ public final class CalendarUtils {
     }
 
     private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
-        final DateTime periodStart = new DateTime(
-                java.util.Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final Date seed = convertToiCal4JCompatibleDate(seedDate);
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
-        return nextRecDate == null ? null
-                : ZonedDateTime.ofInstant(nextRecDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+        return nextRecDate == null ? null : ZonedDateTime.ofInstant(nextRecDate.toInstant(), ZoneId.systemDefault()).toLocalDate();
     }
 
     private static Date convertToiCal4JCompatibleDate(final LocalDate inputDate) {
         // Date format in iCal4J is hard coded
         Date formattedDate = null;
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String seedDateStr = df.format(java.util.Date.from(inputDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final String seedDateStr = df.format(java.util.Date.from(inputDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         try {
             formattedDate = new Date(seedDateStr, "yyyy-MM-dd");
         } catch (final ParseException e) {
