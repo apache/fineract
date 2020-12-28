@@ -2460,8 +2460,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public boolean canDisburse(final LocalDate actualDisbursementLocalDate) {
-        final Date actualDisbursementDate = Date
-                .from(actualDisbursementLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        final Date actualDisbursementDate = Date.from(actualDisbursementLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date lastDisburseDate = this.actualDisbursementDate;
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));

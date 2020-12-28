@@ -250,8 +250,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             ScheduleCurrentPeriodParams currentPeriodParams = new ScheduleCurrentPeriodParams(currency,
                     interestCalculationGraceOnRepaymentPeriodFraction);
             if (loanApplicationTerms.isMultiDisburseLoan()) {
-                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods,
-                        scheduledDueDate);
+                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms,
+                        chargesDueAtTimeOfDisbursement, scheduleParams, periods, scheduledDueDate);
 
                 updateEMIorPrincipalPaymentForMultiDisbursement(mc, loanApplicationTerms, scheduleParams, isBalanceChangedByDisbursement);
             }
@@ -447,7 +447,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 totalOutstanding);
     }
 
-    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
+    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms,
+            LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
         Money totalCumulativePrincipal = scheduleParams.getTotalCumulativePrincipal();
         int periodNumber = scheduleParams.getPeriodNumber();
         Money principal = loanApplicationTerms.getPrincipal();
