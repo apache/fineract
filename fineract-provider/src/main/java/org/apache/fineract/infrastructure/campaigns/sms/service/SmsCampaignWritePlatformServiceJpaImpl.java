@@ -409,7 +409,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final SmsCampaign smsCampaign = this.smsCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new SmsCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
-        smsCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        smsCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(ZoneId.systemDefault()).toInstant()));
         // calculate new trigger date and insert into next trigger date
 
         /**
@@ -436,7 +436,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
         final LocalDateTime newTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-        smsCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        smsCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
     }
 
@@ -482,7 +482,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
             this.smsCampaignRepository.saveAndFlush(smsCampaign);
         }
 
@@ -645,7 +645,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(ZoneId.systemDefault()).toInstant()));
         }
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
 
@@ -682,7 +682,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     }
 
     private LocalDateTime tenantDateTime() {
-        LocalDateTime today = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDateTime today = LocalDateTime.now(ZoneId.systemDefault());
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         if (tenant != null) {

@@ -32,6 +32,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -39,7 +40,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -4489,8 +4489,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar
-                .setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4659,8 +4658,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar
-                .setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         this.loanTransactionHelper.makeRefundByCash(now, Float.valueOf("20"), loanID);
@@ -4851,8 +4849,7 @@ public class ClientLoanIntegrationTest {
 
         // FINERACT-885: As loan may not have started exactly four months ago,
         // make final payment today and not four months from start (as that may be in the future)
-        fourMonthsfromNowCalendar
-                .setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
         final String FROM_LOAN_ACCOUNT_TYPE = "1";

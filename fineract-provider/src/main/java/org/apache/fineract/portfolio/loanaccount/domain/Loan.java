@@ -29,6 +29,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1062,8 +1063,8 @@ public class Loan extends AbstractPersistableCustom {
                 waiveLoanChargeTransaction.getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         addLoanTransaction(waiveLoanChargeTransaction);
-        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled() && (loanCharge.getDueLocalDate() == null
-                || LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).isAfter(loanCharge.getDueLocalDate()))) {
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                && (loanCharge.getDueLocalDate() == null || LocalDate.now(ZoneId.systemDefault()).isAfter(loanCharge.getDueLocalDate()))) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
         }
         // Waive of charges whose due date falls after latest 'repayment'
@@ -1328,9 +1329,8 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void updateLoanScheduleDependentDerivedFields() {
-        this.expectedMaturityDate = Date
-                .from(determineExpectedMaturityDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-        this.actualMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.expectedMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.actualMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     private void updateLoanSummaryDerivedFields() {
@@ -1479,7 +1479,7 @@ public class Loan extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(submittedOnDateParamName);
-            this.submittedOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String expectedDisbursementDateParamName = "expectedDisbursementDate";
@@ -1491,7 +1491,7 @@ public class Loan extends AbstractPersistableCustom {
             actualChanges.put("recalculateLoanSchedule", true);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(expectedDisbursementDateParamName);
-            this.expectedDisbursementDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.expectedDisbursementDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             removeFirstDisbursementTransaction();
         }
 
@@ -1505,7 +1505,7 @@ public class Loan extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(repaymentsStartingFromDateParamName);
             if (newValue != null) {
-                this.expectedFirstRepaymentOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.expectedFirstRepaymentOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.expectedFirstRepaymentOnDate = null;
             }
@@ -1528,7 +1528,7 @@ public class Loan extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(interestChargedFromDateParamName);
             if (newValue != null) {
-                this.interestChargedFromDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.interestChargedFromDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.interestChargedFromDate = null;
             }
@@ -1761,7 +1761,7 @@ public class Loan extends AbstractPersistableCustom {
                         locale);
                 if (date != null) {
                     returnObject.put(LoanApiConstants.disbursementDateParameterName,
-                            Date.from(date.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 }
             }
         }
@@ -1892,7 +1892,7 @@ public class Loan extends AbstractPersistableCustom {
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
                 Charge chargeDefinition = trancheCharge.getCharge();
                 final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, null, null, null,
-                        LocalDate.ofInstant(expectedDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null, null);
+                        LocalDate.ofInstant(expectedDisbursementDate.toInstant(), ZoneId.systemDefault()), null, null);
                 loanCharge.update(this);
                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
                         disbursementDetails);
@@ -2005,10 +2005,10 @@ public class Loan extends AbstractPersistableCustom {
         this.externalId = externalId;
         this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
         this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType().getValue();
-        this.submittedOnDate = Date.from(submittedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.submittedOnDate = Date.from(submittedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.submittedBy = currentUser;
         this.expectedDisbursementDate = Date
-                .from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                .from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
         this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
 
@@ -2095,9 +2095,9 @@ public class Loan extends AbstractPersistableCustom {
             final Locale locale = new Locale(command.locale());
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
-            this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.rejectedBy = currentUser;
-            this.closedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.closedBy = currentUser;
 
             actualChanges.put("locale", command.locale());
@@ -2144,9 +2144,9 @@ public class Loan extends AbstractPersistableCustom {
             final Locale locale = new Locale(command.locale());
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
-            this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.withdrawnBy = currentUser;
-            this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.closedBy = currentUser;
 
             actualChanges.put("locale", command.locale());
@@ -2256,13 +2256,13 @@ public class Loan extends AbstractPersistableCustom {
                             loanProduct.maxTrancheCount(), disbursementDetails.size());
                 }
             }
-            this.approvedOnDate = Date.from(approvedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.approvedOnDate = Date.from(approvedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.approvedBy = currentUser;
             actualChanges.put("locale", command.locale());
             actualChanges.put("dateFormat", command.dateFormat());
             actualChanges.put("approvedOnDate", approvedOnDateChange);
 
-            final LocalDate submittalDate = LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            final LocalDate submittalDate = LocalDate.ofInstant(this.submittedOnDate.toInstant(), ZoneId.systemDefault());
             if (approvedOn.isBefore(submittalDate)) {
                 final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
                         + submittalDate.toString();
@@ -2271,8 +2271,7 @@ public class Loan extends AbstractPersistableCustom {
             }
 
             if (expecteddisbursementDate != null) {
-                this.expectedDisbursementDate = Date
-                        .from(expecteddisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.expectedDisbursementDate = Date.from(expecteddisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 actualChanges.put("expectedDisbursementDate", expectedDisbursementDate);
 
                 if (expecteddisbursementDate.isBefore(approvedOn)) {
@@ -2379,7 +2378,7 @@ public class Loan extends AbstractPersistableCustom {
         validateDisbursementDateIsOnHoliday(holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
 
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
-                && (fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
+                && (fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now(ZoneId.systemDefault()))
                         || isDisbursementMissed())) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
         }
@@ -2430,10 +2429,9 @@ public class Loan extends AbstractPersistableCustom {
                 final boolean isSpecificToInstallment = false;
                 final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled = scheduleGeneratorDTO
                         .isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
-                Date effectiveDateFrom = Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                Date effectiveDateFrom = Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 if (!isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled && actualDisbursementDate.equals(nextPossibleRepaymentDate)) {
-                    effectiveDateFrom = Date
-                            .from(nextPossibleRepaymentDate.plusDays(1).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    effectiveDateFrom = Date.from(nextPossibleRepaymentDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
                 LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
                         effectiveDateFrom, emiAmount, dateValue, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
@@ -2446,7 +2444,7 @@ public class Loan extends AbstractPersistableCustom {
         if (rescheduledRepaymentDate != null && this.loanProduct.isMultiDisburseLoan()) {
             final boolean isSpecificToInstallment = false;
             LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.DUE_DATE.getValue(),
-                    Date.from(nextPossibleRepaymentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), emiAmount,
+                    Date.from(nextPossibleRepaymentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), emiAmount,
                     rescheduledRepaymentDate, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
             this.loanTermVariations.add(loanVariationTerms);
         }
@@ -2463,7 +2461,7 @@ public class Loan extends AbstractPersistableCustom {
 
     public boolean canDisburse(final LocalDate actualDisbursementLocalDate) {
         final Date actualDisbursementDate = Date
-                .from(actualDisbursementLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                .from(actualDisbursementLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date lastDisburseDate = this.actualDisbursementDate;
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));
@@ -2507,7 +2505,7 @@ public class Loan extends AbstractPersistableCustom {
         Money disburseAmount = this.loanRepaymentScheduleDetail.getPrincipal().zero();
         BigDecimal principalDisbursed = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
         if (this.actualDisbursementDate == null) {
-            this.actualDisbursementDate = Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.actualDisbursementDate = Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         BigDecimal diff = BigDecimal.ZERO;
         Collection<LoanDisbursementDetails> details = fetchUndisbursedDetail();
@@ -2517,7 +2515,7 @@ public class Loan extends AbstractPersistableCustom {
                 disburseAmount = disburseAmount.zero();
                 for (LoanDisbursementDetails disbursementDetails : details) {
                     disbursementDetails.updateActualDisbursementDate(
-                            Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     disburseAmount = disburseAmount.plus(disbursementDetails.principal());
                 }
             }
@@ -2533,7 +2531,7 @@ public class Loan extends AbstractPersistableCustom {
             } else {
                 for (LoanDisbursementDetails disbursementDetails : details) {
                     disbursementDetails.updateActualDisbursementDate(
-                            Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     disbursementDetails.updatePrincipal(principalDisbursed);
                 }
             }
@@ -2628,8 +2626,8 @@ public class Loan extends AbstractPersistableCustom {
     private boolean isDisbursementMissed() {
         boolean isDisbursementMissed = false;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-            if (disbursementDetail.actualDisbursementDate() == null && LocalDate.now(DateUtils.getDateTimeZoneOfTenant())
-                    .isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
+            if (disbursementDetail.actualDisbursementDate() == null
+                    && LocalDate.now(ZoneId.systemDefault()).isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
                 isDisbursementMissed = true;
                 break;
             }
@@ -2778,11 +2776,10 @@ public class Loan extends AbstractPersistableCustom {
         for (final LoanCharge charge : charges()) {
             Date actualDisbursementDate = getActualDisbursementDate(charge);
             if ((charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
-                    && disbursedOn.equals(LocalDate.ofInstant(actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()))
+                    && disbursedOn.equals(LocalDate.ofInstant(actualDisbursementDate.toInstant(), ZoneId.systemDefault()))
                     && (actualDisbursementDate != null) && !charge.isWaived() && !charge.isFullyPaid())
                     || (charge.getCharge().getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())
-                            && disbursedOn
-                                    .equals(LocalDate.ofInstant(actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()))
+                            && disbursedOn.equals(LocalDate.ofInstant(actualDisbursementDate.toInstant(), ZoneId.systemDefault()))
                             && (actualDisbursementDate != null) && !charge.isWaived() && !charge.isFullyPaid())) {
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                     charge.markAsFullyPaid();
@@ -2792,8 +2789,7 @@ public class Loan extends AbstractPersistableCustom {
                     chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
                     disbursentMoney = disbursentMoney.plus(charge.amount());
                 }
-            } else if (disbursedOn
-                    .equals(LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()))) {
+            } else if (disbursedOn.equals(LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), ZoneId.systemDefault()))) {
                 /**
                  * create a Charge applied transaction if Up front Accrual, None or Cash based accounting is enabled
                  **/
@@ -2821,8 +2817,9 @@ public class Loan extends AbstractPersistableCustom {
         if (getExpectedFirstRepaymentOnDate() != null
                 && (disbursedOn.isAfter(this.fetchRepaymentScheduleInstallment(1).getDueDate())
                         || disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()))
-                && Date.from(disbursedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())
-                        .compareTo(this.actualDisbursementDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+                && Date.from(disbursedOn.atStartOfDay(ZoneId.systemDefault()).toInstant()).compareTo(this.actualDisbursementDate) == 0
+                        ? Boolean.TRUE
+                        : Boolean.FALSE) {
             final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: "
                     + getExpectedFirstRepaymentOnDate().toString();
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
@@ -3321,8 +3318,8 @@ public class Loan extends AbstractPersistableCustom {
                     LoanStatus.fromInt(this.loanStatus));
             this.loanStatus = statusEnum.getValue();
 
-            this.closedOnDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-            this.actualMaturityDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closedOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.actualMaturityDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
             final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                     LoanStatus.fromInt(this.loanStatus));
@@ -3335,7 +3332,7 @@ public class Loan extends AbstractPersistableCustom {
         if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
                 && this.status().isClosedObligationsMet()) {
             Date closedDate = this.getClosedOnDate();
-            LocalDate closedLocalDate = LocalDate.ofInstant(closedDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate closedLocalDate = LocalDate.ofInstant(closedDate.toInstant(), ZoneId.systemDefault());
             reverseTransactionsOnOrAfter(retreiveListOfIncomePostingTransactions(), closedDate);
             reverseTransactionsOnOrAfter(retreiveListOfAccrualTransactions(), closedDate);
             HashMap<String, BigDecimal> cumulativeIncomeFromInstallments = new HashMap<>();
@@ -3461,7 +3458,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public LocalDate possibleNextRepaymentDate() {
-        LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate earliestUnpaidInstallmentDate = LocalDate.now(ZoneId.systemDefault());
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.isNotFullyPaidOff()) {
@@ -3502,7 +3499,7 @@ public class Loan extends AbstractPersistableCustom {
 
         final Money totalInterestOutstanding = getTotalInterestOutstandingOnLoan();
         Money possibleInterestToWaive = totalInterestOutstanding.copy();
-        LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
 
         if (totalInterestOutstanding.isGreaterThanZero()) {
             // find earliest known instance of overdue interest and default to
@@ -3511,8 +3508,8 @@ public class Loan extends AbstractPersistableCustom {
             for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
 
                 final Money outstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
-                if (scheduledRepayment.isOverdueOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        && scheduledRepayment.isNotFullyPaidOff() && outstandingForPeriod.isGreaterThanZero()) {
+                if (scheduledRepayment.isOverdueOn(LocalDate.now(ZoneId.systemDefault())) && scheduledRepayment.isNotFullyPaidOff()
+                        && outstandingForPeriod.isGreaterThanZero()) {
                     transactionDate = scheduledRepayment.getDueDate();
                     possibleInterestToWaive = outstandingForPeriod;
                     break;
@@ -3673,8 +3670,8 @@ public class Loan extends AbstractPersistableCustom {
             final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed("transactionDate");
             final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
-            this.closedOnDate = Date.from(writtenOffOnLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-            this.writtenOffOnDate = Date.from(writtenOffOnLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closedOnDate = Date.from(writtenOffOnLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.writtenOffOnDate = Date.from(writtenOffOnLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.closedBy = currentUser;
             changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
             changes.put("writtenOffOnDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -3761,7 +3758,7 @@ public class Loan extends AbstractPersistableCustom {
         final LocalDate closureDate = command.localDateValueOfParameterNamed("transactionDate");
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
-        this.closedOnDate = Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closedOnDate = Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.REPAID_IN_FULL, closureDate);
@@ -3792,7 +3789,7 @@ public class Loan extends AbstractPersistableCustom {
                     this.loanStatus = statusEnum.getValue();
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
                 }
-                this.closedOnDate = Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.closedOnDate = Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 loanTransaction = LoanTransaction.writeoff(this, getOffice(), closureDate, txnExternalId,
                         DateUtils.getLocalDateTimeOfTenant(), currentUser);
                 final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, getLoanTransactions());
@@ -3826,7 +3823,7 @@ public class Loan extends AbstractPersistableCustom {
                     this.loanStatus = statusEnum.getValue();
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
                 }
-                this.closedOnDate = Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.closedOnDate = Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else if (totalLoanOverpayment.isGreaterThanZero()) {
                 final String errorMessage = "The loan is marked as 'Overpaid' and cannot be moved to 'Closed (obligations met).";
                 throw new InvalidLoanStateTransitionException("close", "loan.is.overpaid", errorMessage, totalLoanOverpayment.toString());
@@ -3855,13 +3852,12 @@ public class Loan extends AbstractPersistableCustom {
             changes.put("status", LoanEnumerations.status(this.loanStatus));
         }
 
-        this.closedOnDate = Date.from(rescheduledOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-        this.rescheduledOnDate = Date.from(rescheduledOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closedOnDate = Date.from(rescheduledOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.rescheduledOnDate = Date.from(rescheduledOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("rescheduledOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
-        final LocalDate rescheduledOnLocalDate = LocalDate.ofInstant(this.rescheduledOnDate.toInstant(),
-                DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate rescheduledOnLocalDate = LocalDate.ofInstant(this.rescheduledOnDate.toInstant(), ZoneId.systemDefault());
         if (rescheduledOnLocalDate.isBefore(getDisbursementDate())) {
             final String errorMessage = "The date on which a loan is rescheduled cannot be before the loan disbursement date: "
                     + getDisbursementDate().toString();
@@ -3961,17 +3957,17 @@ public class Loan extends AbstractPersistableCustom {
 
     public boolean isSubmittedOnDateAfter(final LocalDate compareDate) {
         return this.submittedOnDate == null ? false
-                : LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isAfter(compareDate);
+                : LocalDate.ofInstant(this.submittedOnDate.toInstant(), ZoneId.systemDefault()).isAfter(compareDate);
     }
 
     public LocalDate getSubmittedOnDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.submittedOnDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public LocalDate getApprovedOnDate() {
         LocalDate date = null;
         if (this.approvedOnDate != null) {
-            date = LocalDate.ofInstant(this.approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            date = LocalDate.ofInstant(this.approvedOnDate.toInstant(), ZoneId.systemDefault());
         }
         return date;
     }
@@ -3979,7 +3975,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getExpectedDisbursedOnLocalDate() {
         LocalDate expectedDisbursementDate = null;
         if (this.expectedDisbursementDate != null) {
-            expectedDisbursementDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            expectedDisbursementDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
         return expectedDisbursementDate;
     }
@@ -3987,7 +3983,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getDisbursementDate() {
         LocalDate disbursementDate = getExpectedDisbursedOnLocalDate();
         if (this.actualDisbursementDate != null) {
-            disbursementDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            disbursementDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
         return disbursementDate;
     }
@@ -3999,7 +3995,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getWrittenOffDate() {
         LocalDate writtenOffDate = null;
         if (this.writtenOffOnDate != null) {
-            writtenOffDate = LocalDate.ofInstant(this.writtenOffOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            writtenOffDate = LocalDate.ofInstant(this.writtenOffOnDate.toInstant(), ZoneId.systemDefault());
         }
         return writtenOffDate;
     }
@@ -4008,14 +4004,14 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate expectedDisbursementDate = null;
         if (this.expectedDisbursementDate != null) {
-            expectedDisbursementDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            expectedDisbursementDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
 
         Collection<LoanDisbursementDetails> details = fetchUndisbursedDetail();
         if (!details.isEmpty()) {
             for (LoanDisbursementDetails disbursementDetails : details) {
                 expectedDisbursementDate = LocalDate.ofInstant(disbursementDetails.expectedDisbursementDate().toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                        ZoneId.systemDefault());
             }
         }
         return expectedDisbursementDate;
@@ -4040,7 +4036,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getExpectedFirstRepaymentOnDate() {
         LocalDate firstRepaymentDate = null;
         if (this.expectedFirstRepaymentOnDate != null) {
-            firstRepaymentDate = LocalDate.ofInstant(this.expectedFirstRepaymentOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            firstRepaymentDate = LocalDate.ofInstant(this.expectedFirstRepaymentOnDate.toInstant(), ZoneId.systemDefault());
         }
         return firstRepaymentDate;
     }
@@ -4054,8 +4050,8 @@ public class Loan extends AbstractPersistableCustom {
                 isRegenerationRequired = true;
             }
         }
-        return !LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                .isEqual(actualDisbursedOnDate) || isRegenerationRequired;
+        return !LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), ZoneId.systemDefault()).isEqual(actualDisbursedOnDate)
+                || isRegenerationRequired;
     }
 
     private boolean isRepaymentScheduleRegenerationRequiredForDisbursement(final LocalDate actualDisbursementDate) {
@@ -4103,7 +4099,7 @@ public class Loan extends AbstractPersistableCustom {
         for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
 
             final Money interestOutstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
-            if (scheduledRepayment.isOverdueOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+            if (scheduledRepayment.isOverdueOn(LocalDate.now(ZoneId.systemDefault()))) {
                 cumulativeInterestOverdue = cumulativeInterestOverdue.plus(interestOutstandingForPeriod);
             }
         }
@@ -4134,7 +4130,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getInterestChargedFromDate() {
         LocalDate interestChargedFrom = null;
         if (this.interestChargedFromDate != null) {
-            interestChargedFrom = LocalDate.ofInstant(this.interestChargedFromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            interestChargedFrom = LocalDate.ofInstant(this.interestChargedFromDate.toInstant(), ZoneId.systemDefault());
         }
         return interestChargedFrom;
     }
@@ -4481,7 +4477,7 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         if (latestRepaymentDate != null) {
-            this.expectedMaturityDate = Date.from(latestRepaymentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.expectedMaturityDate = Date.from(latestRepaymentDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -4535,7 +4531,7 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         if (latestRepaymentDate != null) {
-            this.expectedMaturityDate = Date.from(latestRepaymentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.expectedMaturityDate = Date.from(latestRepaymentDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -5081,7 +5077,7 @@ public class Loan extends AbstractPersistableCustom {
         final LocalDate expectedDisbursementDate = command
                 .localDateValueOfParameterNamed(LoanApiConstants.updatedDisbursementDateParameterName);
         disbursementDetails.updateExpectedDisbursementDateAndAmount(
-                Date.from(expectedDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), principal);
+                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), principal);
         actualChanges.put(LoanApiConstants.disbursementDateParameterName,
                 command.stringValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName));
         actualChanges.put(LoanApiConstants.disbursementIdParameterName,
@@ -5120,7 +5116,7 @@ public class Loan extends AbstractPersistableCustom {
 
     public BigDecimal retriveLastEmiAmount() {
         BigDecimal emiAmount = this.fixedEmiAmount;
-        Date startDate = Date.from(this.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        Date startDate = Date.from(this.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
         for (LoanTermVariations loanTermVariations : this.loanTermVariations) {
             if (loanTermVariations.getTermType().isEMIAmountVariation() && !startDate.after(loanTermVariations.getTermApplicableFrom())) {
                 startDate = loanTermVariations.getTermApplicableFrom();
@@ -5171,7 +5167,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getExpectedMaturityDate() {
         LocalDate expectedMaturityDate = null;
         if (this.expectedMaturityDate != null) {
-            expectedMaturityDate = LocalDate.ofInstant(this.expectedMaturityDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            expectedMaturityDate = LocalDate.ofInstant(this.expectedMaturityDate.toInstant(), ZoneId.systemDefault());
         }
         return expectedMaturityDate;
     }
@@ -5179,7 +5175,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getMaturityDate() {
         LocalDate maturityDate = getExpectedMaturityDate();
         if (this.actualMaturityDate != null) {
-            maturityDate = LocalDate.ofInstant(this.actualMaturityDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            maturityDate = LocalDate.ofInstant(this.actualMaturityDate.toInstant(), ZoneId.systemDefault());
         }
         return maturityDate;
     }
@@ -5312,7 +5308,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     private void reverseTransactionsOnOrAfter(List<LoanTransaction> transactions, Date date) {
-        LocalDate refDate = LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        LocalDate refDate = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
         for (LoanTransaction loanTransaction : transactions) {
             if (!loanTransaction.getTransactionDate().isBefore(refDate)) {
                 loanTransaction.reverse();
@@ -5346,13 +5342,13 @@ public class Loan extends AbstractPersistableCustom {
 
         if (existingIncomeTransaction == null) {
             LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(),
-                    Date.from(compoundingDetail.getEffectiveDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                    Date.from(compoundingDetail.getEffectiveDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                     compoundingDetail.getAmount(), interest, fee, penalties, currentUser);
             addLoanTransaction(transaction);
         } else if (existingIncomeTransaction.getAmount(getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
             existingIncomeTransaction.reverse();
             LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(),
-                    Date.from(compoundingDetail.getEffectiveDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                    Date.from(compoundingDetail.getEffectiveDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                     compoundingDetail.getAmount(), interest, fee, penalties, currentUser);
             addLoanTransaction(transaction);
         }
@@ -5594,15 +5590,15 @@ public class Loan extends AbstractPersistableCustom {
             feeCharges = feeCharges.plus(scheduledRepayment.getFeeChargesOutstanding(loanCurrency()));
             penaltyCharges = penaltyCharges.plus(scheduledRepayment.getPenaltyChargesOutstanding(loanCurrency()));
         }
-        return new LoanRepaymentScheduleInstallment(null, 0, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()),
-                LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), totalPrincipal.getAmount(), totalInterest.getAmount(),
-                feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
+        return new LoanRepaymentScheduleInstallment(null, 0, LocalDate.now(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()),
+                totalPrincipal.getAmount(), totalInterest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount(), false,
+                compoundingDetails);
     }
 
     public LocalDate getAccruedTill() {
         LocalDate accruedTill = null;
         if (this.accruedTill != null) {
-            accruedTill = LocalDate.ofInstant(this.accruedTill.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            accruedTill = LocalDate.ofInstant(this.accruedTill.toInstant(), ZoneId.systemDefault());
         }
         return accruedTill;
     }
@@ -5612,7 +5608,7 @@ public class Loan extends AbstractPersistableCustom {
         if (this.interestRecalculatedOn == null) {
             interestRecalculatedOn = getDisbursementDate();
         } else {
-            interestRecalculatedOn = LocalDate.ofInstant(this.interestRecalculatedOn.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            interestRecalculatedOn = LocalDate.ofInstant(this.interestRecalculatedOn.toInstant(), ZoneId.systemDefault());
         }
         return interestRecalculatedOn;
     }
@@ -5720,12 +5716,12 @@ public class Loan extends AbstractPersistableCustom {
 
             if (loanDisbursementDetails.expectedDisbursementDate() != null) {
                 expectedDisbursementDate = LocalDate.ofInstant(loanDisbursementDetails.expectedDisbursementDate().toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                        ZoneId.systemDefault());
             }
 
             if (loanDisbursementDetails.actualDisbursementDate() != null) {
                 actualDisbursementDate = LocalDate.ofInstant(loanDisbursementDetails.actualDisbursementDate().toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                        ZoneId.systemDefault());
             }
             BigDecimal waivedChargeAmount = null;
             disbursementData.add(new DisbursementData(loanDisbursementDetails.getId(), expectedDisbursementDate, actualDisbursementDate,
@@ -5873,7 +5869,7 @@ public class Loan extends AbstractPersistableCustom {
     public void updateRescheduledOnDate(LocalDate rescheduledOnDate) {
 
         if (rescheduledOnDate != null) {
-            this.rescheduledOnDate = Date.from(rescheduledOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.rescheduledOnDate = Date.from(rescheduledOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -6042,7 +6038,7 @@ public class Loan extends AbstractPersistableCustom {
 
     public LocalDate possibleNextRefundDate() {
 
-        final LocalDate now = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate now = LocalDate.now(ZoneId.systemDefault());
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
@@ -6106,11 +6102,11 @@ public class Loan extends AbstractPersistableCustom {
             if ((loanTermVariations.getTermType().isDueDateVariation()
                     && loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate))
                     || (loanTermVariations.getTermType().isEMIAmountVariation() && loanTermVariations.getTermApplicableFrom()
-                            .compareTo(Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) == 0
+                            .compareTo(Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant())) == 0
                                     ? Boolean.TRUE
                                     : Boolean.FALSE)
                     || loanTermVariations.getTermApplicableFrom()
-                            .after(Date.from(actualDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()))) {
+                            .after(Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
                 iterator.remove();
             }
         }
@@ -6150,13 +6146,12 @@ public class Loan extends AbstractPersistableCustom {
                 charge.setActive(false);
             } else if (charge.isTrancheDisbursementCharge() && actualDisbursementDate.equals(LocalDate.ofInstant(
                     charge.getTrancheDisbursementCharge().getloanDisbursementDetails().actualDisbursementDate().toInstant(),
-                    DateUtils.getDateTimeZoneOfTenant()))) {
+                    ZoneId.systemDefault()))) {
                 charge.resetToOriginal(loanCurrency());
             }
         }
         for (final LoanDisbursementDetails details : this.disbursementDetails) {
-            if (actualDisbursementDate
-                    .equals(LocalDate.ofInstant(details.actualDisbursementDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()))) {
+            if (actualDisbursementDate.equals(LocalDate.ofInstant(details.actualDisbursementDate().toInstant(), ZoneId.systemDefault()))) {
                 this.loanRepaymentScheduleDetail.setPrincipal(getDisbursedAmount().subtract(details.principal()));
                 details.updateActualDisbursementDate(null);
             }
@@ -6219,7 +6214,7 @@ public class Loan extends AbstractPersistableCustom {
      */
     public LocalDate getNextPossibleRepaymentDateForRescheduling() {
         List<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
-        LocalDate nextRepaymentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate nextRepaymentDate = LocalDate.now(ZoneId.systemDefault());
         for (LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails) {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();

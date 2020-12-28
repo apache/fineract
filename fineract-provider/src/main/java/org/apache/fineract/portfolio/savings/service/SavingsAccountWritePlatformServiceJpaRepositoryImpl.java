@@ -31,6 +31,7 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -514,8 +515,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
             List<SavingsAccountTransaction> savingTransactions = account.getTransactions();
             for (SavingsAccountTransaction savingTransaction : savingTransactions) {
-                if (Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())
-                        .before(savingTransaction.getDateOf())) {
+                if (Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).before(savingTransaction.getDateOf())) {
                     throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.LAST_TRANSACTION_DATE);
                 }
             }
@@ -1697,7 +1697,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     || transaction.getTransactionLocalDate().isAfter(transferDate)) {
                 throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
                         TransferApiConstants.transferClientSavingsException,
-                        LocalDate.ofInstant(transaction.createdDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()), transferDate);
+                        LocalDate.ofInstant(transaction.createdDate().toInstant(), ZoneId.systemDefault()), transferDate);
             }
 
         }

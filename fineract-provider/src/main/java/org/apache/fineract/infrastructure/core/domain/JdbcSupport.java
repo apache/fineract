@@ -26,9 +26,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -43,7 +43,7 @@ public final class JdbcSupport {
         ZonedDateTime dateTime = null;
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            dateTime = ZonedDateTime.ofInstant(new Date(dateValue.getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            dateTime = ZonedDateTime.ofInstant(new Date(dateValue.getTime()).toInstant(), ZoneId.systemDefault());
         }
         return dateTime;
     }
@@ -61,7 +61,7 @@ public final class JdbcSupport {
         LocalDate localDate = null;
         final Date dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            localDate = LocalDate.ofInstant(dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localDate = LocalDate.ofInstant(dateValue.toInstant(), ZoneId.systemDefault());
         }
         return localDate;
     }
@@ -70,7 +70,7 @@ public final class JdbcSupport {
         LocalTime localTime = null;
         final Date timeValue = rs.getTimestamp(columnName);
         if (timeValue != null) {
-            localTime = LocalTime.ofInstant(timeValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localTime = LocalTime.ofInstant(timeValue.toInstant(), ZoneId.systemDefault());
         }
         return localTime;
     }

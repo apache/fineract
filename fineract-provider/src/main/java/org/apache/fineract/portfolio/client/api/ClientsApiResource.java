@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -61,7 +62,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -462,7 +462,7 @@ public class ClientsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-        return this.toApiJsonSerializer.serialize(
-                (transferDate != null ? LocalDate.ofInstant(transferDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()) : null));
+        return this.toApiJsonSerializer
+                .serialize((transferDate != null ? LocalDate.ofInstant(transferDate.toInstant(), ZoneId.systemDefault()) : null));
     }
 }

@@ -22,12 +22,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -246,23 +246,23 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.APPROVAL_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate",
-                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     params.addValue("loanToDate",
-                            Date.from(searchConditions.getLoanToDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     sql.append(" ( ml.approvedon_date between :loanFromDate and :loanToDate ) ");
                 } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.CREATED_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate",
-                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     params.addValue("loanToDate",
-                            Date.from(searchConditions.getLoanToDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     sql.append(" ( ml.submittedon_date between :loanFromDate and :loanToDate ) ");
                 } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.DISBURSAL_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate",
-                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     params.addValue("loanToDate",
-                            Date.from(searchConditions.getLoanToDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            Date.from(searchConditions.getLoanToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     sql.append(" ( ml.disbursedon_date between :loanFromDate and :loanToDate ) ");
                 }
             }

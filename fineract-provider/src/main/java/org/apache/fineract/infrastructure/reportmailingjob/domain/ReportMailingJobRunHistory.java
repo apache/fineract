@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import javax.persistence.Column;
@@ -28,7 +29,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
@@ -106,16 +106,14 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
      * @return the startDateTime
      */
     public ZonedDateTime getStartDateTime() {
-        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), ZoneId.systemDefault()) : null;
     }
 
     /**
      * @return the endDateTime
      */
     public ZonedDateTime getEndDateTime() {
-        return (this.endDateTime != null) ? ZonedDateTime.ofInstant(this.endDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+        return (this.endDateTime != null) ? ZonedDateTime.ofInstant(this.endDateTime.toInstant(), ZoneId.systemDefault()) : null;
     }
 
     /**

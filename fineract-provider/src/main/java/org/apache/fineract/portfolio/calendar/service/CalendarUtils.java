@@ -168,10 +168,8 @@ public final class CalendarUtils {
             return null;
         }
         final Date seed = convertToiCal4JCompatibleDate(seedDate);
-        final DateTime periodStart = new DateTime(
-                java.util.Date.from(periodStartDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
-        final DateTime periodEnd = new DateTime(
-                java.util.Date.from(periodEndDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        final DateTime periodStart = new DateTime(java.util.Date.from(periodStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        final DateTime periodEnd = new DateTime(java.util.Date.from(periodEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         final Value value = new Value(Value.DATE.getValue());
         final DateList recurringDates = recur.getDates(seed, periodStart, periodEnd, value, maxCount);
@@ -187,8 +185,7 @@ public final class CalendarUtils {
         for (@SuppressWarnings("rawtypes")
         final Iterator iterator = dates.iterator(); iterator.hasNext();) {
             final Date date = (Date) iterator.next();
-            recurringDates
-                    .add(adjustDate(LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant()), seedDate, frequencyType));
+            recurringDates.add(adjustDate(LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()), seedDate, frequencyType));
         }
 
         if (isSkippMeetingOnFirstDay) {
@@ -348,7 +345,7 @@ public final class CalendarUtils {
 
         final Date endDate = recur.getUntil();
         if (endDate != null) {
-            final LocalDate date = LocalDate.ofInstant(endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            final LocalDate date = LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMMM yy");
             final String formattedDate = date.format(fmt);
             humanReadable += ", until " + formattedDate;

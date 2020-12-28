@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -450,7 +451,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(ZoneId.systemDefault());
         final LocalDate recalculateFrom = null;
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchPrepaymentDetail(scheduleGeneratorDTO, onDate);
@@ -1138,8 +1139,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                             }
                         } else if (data.isDueForDisbursement(fromDate, dueDate)) {
-                            if (!excludePastUndisbursed || (excludePastUndisbursed && (data.isDisbursed()
-                                    || !data.disbursementDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))))) {
+                            if (!excludePastUndisbursed || (excludePastUndisbursed
+                                    && (data.isDisbursed() || !data.disbursementDate().isBefore(LocalDate.now(ZoneId.systemDefault()))))) {
                                 principal = principal.add(data.amount());
                                 LoanSchedulePeriodData periodData = null;
                                 if (data.getChargeAmount() == null) {
@@ -1621,9 +1622,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("organisationstartdate",
-                (organisationStartDate == null) ? formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        : formatter.format(LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant())));
+        paramMap.put("organisationstartdate", (organisationStartDate == null) ? formatter.format(LocalDate.now(ZoneId.systemDefault()))
+                : formatter.format(LocalDate.ofInstant(organisationStartDate.toInstant(), ZoneId.systemDefault())));
 
         return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
     }
@@ -1649,9 +1649,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
         paramMap.put("tilldate", formatter.format(tillDate));
-        paramMap.put("organisationstartdate",
-                (organisationStartDate == null) ? formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        : formatter.format(LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant())));
+        paramMap.put("organisationstartdate", (organisationStartDate == null) ? formatter.format(LocalDate.now(ZoneId.systemDefault()))
+                : formatter.format(LocalDate.ofInstant(organisationStartDate.toInstant(), ZoneId.systemDefault())));
 
         return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
     }
@@ -2068,7 +2067,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(ZoneId.systemDefault());
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN);
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
@@ -2086,13 +2085,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService
                     .retrieveInterestRatePeriods(loanData.loanProductId());
             for (final InterestRatePeriodData rate : intRates) {
-                if (rate.getFromDate().compareTo(
-                        Date.from(loanData.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) > 0
+                if (rate.getFromDate()
+                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) > 0
                         && loanData.isFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
-                } else if (rate.getFromDate().compareTo(
-                        Date.from(loanData.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) <= 0) {
+                } else if (rate.getFromDate()
+                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) <= 0) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
                     break;
@@ -2118,9 +2117,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         rate.setEffectiveInterestRate(effectiveInterestRate);
 
-        if (rate.getFromDate()
-                .compareTo(Date.from(loan.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) < 0) {
-            rate.setFromDate(Date.from(loan.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        if (rate.getFromDate().compareTo(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) < 0) {
+            rate.setFromDate(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
     }
 

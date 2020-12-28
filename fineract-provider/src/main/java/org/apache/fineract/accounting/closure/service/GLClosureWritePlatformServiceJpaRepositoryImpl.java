@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.closure.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
@@ -35,7 +36,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.slf4j.Logger;
@@ -151,7 +151,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         if (realCause.getMessage().contains("office_id_closing_date")) {
             throw new GLClosureDuplicateException(command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()),
                     LocalDate.ofInstant(command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()).toInstant(),
-                            DateUtils.getDateTimeZoneOfTenant()));
+                            ZoneId.systemDefault()));
         }
 
         LOG.error("Error occured.", dve);

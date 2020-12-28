@@ -41,7 +41,7 @@ public final class DateUtils {
 
     public static ZoneId getDateTimeZoneOfTenant() {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        ZoneId zone = ZoneId.systemDefault();
+        ZoneId zone = null;
         if (tenant != null) {
             zone = ZoneId.of(tenant.getTimezoneId());
         }
@@ -58,18 +58,30 @@ public final class DateUtils {
     }
 
     public static Date getDateOfTenant() {
-        return Date.from(getLocalDateOfTenant().atStartOfDay(getDateTimeZoneOfTenant()).toInstant());
+        return Date.from(getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public static LocalDate getLocalDateOfTenant() {
+
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+
         final ZoneId zone = getDateTimeZoneOfTenant();
-        LocalDate today = LocalDate.now(zone);
+        if (zone != null) {
+            today = LocalDate.now(zone);
+        }
+
         return today;
     }
 
     public static LocalDateTime getLocalDateTimeOfTenant() {
+
+        LocalDateTime today = LocalDateTime.now(ZoneId.systemDefault());
+
         final ZoneId zone = getDateTimeZoneOfTenant();
-        LocalDateTime today = LocalDateTime.now(zone);
+        if (zone != null) {
+            today = LocalDateTime.now(zone);
+        }
+
         return today;
     }
 

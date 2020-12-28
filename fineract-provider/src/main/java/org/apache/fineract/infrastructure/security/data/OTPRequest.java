@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.data;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
@@ -32,7 +33,7 @@ public class OTPRequest {
     }
 
     public static OTPRequest create(String token, int tokenLiveTimeInSec, boolean extendedAccessToken, OTPDeliveryMethod deliveryMethod) {
-        final OTPMetadata metadata = new OTPMetadata(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()),
+        final OTPMetadata metadata = new OTPMetadata(DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault()),
                 tokenLiveTimeInSec, extendedAccessToken, deliveryMethod);
         return new OTPRequest(token, metadata);
     }
@@ -47,6 +48,6 @@ public class OTPRequest {
 
     public boolean isValid() {
         ZonedDateTime expireTime = metadata.getRequestTime().plusSeconds(metadata.getTokenLiveTimeInSec());
-        return ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()).isBefore(expireTime);
+        return ZonedDateTime.now(ZoneId.systemDefault()).isBefore(expireTime);
     }
 }

@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +29,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
@@ -52,8 +52,7 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     private Date endDate;
 
     public static StaffAssignmentHistory createNew(final Group center, final Staff staff, final LocalDate startDate) {
-        return new StaffAssignmentHistory(center, staff, Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                null);
+        return new StaffAssignmentHistory(center, staff, Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), null);
     }
 
     protected StaffAssignmentHistory() {
@@ -72,11 +71,11 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public void updateStartDate(final LocalDate startDate) {
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void updateEndDate(final LocalDate endDate) {
-        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {
@@ -84,7 +83,7 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getStartDate() {
-        return LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
     }
 
     public boolean isCurrentRecord() {

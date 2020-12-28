@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +42,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -226,7 +226,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 if (localDate != null) {
                     // update the value of the "submittedOnDate" variable
-                    submittedOnDate = Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    submittedOnDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -251,7 +251,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     rescheduleFromInstallment = installment.getInstallmentNumber();
 
                     // update the value of the "rescheduleFromDate" variable
-                    rescheduleFromDate = Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -262,7 +262,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 if (localDate != null) {
                     // update the value of the "adjustedDueDate"variable
-                    adjustedDueDate = Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    adjustedDueDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
 
@@ -308,16 +308,16 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         if (rescheduleFromDate != null && endDate != null && emi != null) {
             LoanTermVariations parent = null;
-            LocalDate rescheduleFromLocDate = LocalDate.ofInstant(rescheduleFromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-            LocalDate endDateLocDate = LocalDate.ofInstant(endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate rescheduleFromLocDate = LocalDate.ofInstant(rescheduleFromDate.toInstant(), ZoneId.systemDefault());
+            LocalDate endDateLocDate = LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
             final Integer termType = LoanTermVariationType.EMI_AMOUNT.getValue();
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getDueDate().isEqual(rescheduleFromLocDate) || installment.getDueDate().isEqual(endDateLocDate)
                         || (installment.getDueDate().isAfter(rescheduleFromLocDate) && installment.getDueDate().isBefore(endDateLocDate))) {
                     createLoanTermVariations(termType, loan,
-                            Date.from(installment.getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                            Date.from(installment.getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                             loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
                 }
                 if (installment.getDueDate().isAfter(endDateLocDate)) {
@@ -429,8 +429,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             && activeLoanTermVariation.fetchDateValue().equals(dueDateVariationInCurrentRequest.fetchTermApplicaDate())) {
                         activeLoanTermVariation.markAsInactive();
                         rescheduleFromDate = activeLoanTermVariation.fetchTermApplicaDate();
-                        dueDateVariationInCurrentRequest.setTermApplicableFrom(
-                                Date.from(rescheduleFromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                        dueDateVariationInCurrentRequest
+                                .setTermApplicableFrom(Date.from(rescheduleFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
                         while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
                             currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
@@ -440,9 +440,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             changeMap.put(currentScheduleDate, modifiedScheduleDate);
                         }
                         if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            activeLoanTermVariation
-                                    .setTermApplicableFrom(Date.from(changeMap.get(activeLoanTermVariation.fetchTermApplicaDate())
-                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            activeLoanTermVariation.setTermApplicableFrom(Date.from(changeMap
+                                    .get(activeLoanTermVariation.fetchTermApplicaDate()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
                         }
                     }
                 }
@@ -490,7 +489,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
 
             loan.updateRescheduledByUser(appUser);
-            loan.updateRescheduledOnDate(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+            loan.updateRescheduledOnDate(LocalDate.now(ZoneId.systemDefault()));
 
             // update the status of the request
             loanRescheduleRequest.approve(appUser, approvedOnDate);

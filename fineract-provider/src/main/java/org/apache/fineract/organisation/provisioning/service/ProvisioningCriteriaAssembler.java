@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +32,6 @@ import java.util.Set;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.provisioning.constants.ProvisioningCriteriaConstants;
 import org.apache.fineract.organisation.provisioning.domain.LoanProductProvisionCriteria;
@@ -122,8 +122,8 @@ public class ProvisioningCriteriaAssembler {
                 jsonElement);
 
         ProvisioningCriteria criteria = new ProvisioningCriteria(criteriaName, platformSecurityContext.authenticatedUser(),
-                ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()), platformSecurityContext.authenticatedUser(),
-                ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+                ZonedDateTime.now(ZoneId.systemDefault()), platformSecurityContext.authenticatedUser(),
+                ZonedDateTime.now(ZoneId.systemDefault()));
         return criteria;
     }
 
