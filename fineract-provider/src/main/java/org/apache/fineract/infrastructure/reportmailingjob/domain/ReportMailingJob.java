@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -35,7 +36,6 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
@@ -129,7 +129,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
         this.startDateTime = null;
 
         if (startDateTime != null) {
-            this.startDateTime = Date.from(startDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDateTime = Date.from(startDateTime.atZone(ZoneId.systemDefault()).toInstant());
         }
 
         this.recurrence = recurrence;
@@ -142,13 +142,13 @@ public class ReportMailingJob extends AbstractAuditableCustom {
         this.previousRunDateTime = null;
 
         if (previousRunDateTime != null) {
-            this.previousRunDateTime = Date.from(previousRunDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.previousRunDateTime = Date.from(previousRunDateTime.atZone(ZoneId.systemDefault()).toInstant());
         }
 
         this.nextRunDateTime = null;
 
         if (nextRunDateTime != null) {
-            this.nextRunDateTime = Date.from(nextRunDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.nextRunDateTime = Date.from(nextRunDateTime.atZone(ZoneId.systemDefault()).toInstant());
         }
 
         this.previousRunStatus = null;
@@ -201,7 +201,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
                 .integerValueOfParameterNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
         final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
                 .newInstance(emailAttachmentFileFormatId);
-        LocalDateTime startDateTime = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDateTime startDateTime = LocalDateTime.now(ZoneId.systemDefault());
 
         if (jsonCommand.hasParameter(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
             final String startDateTimeString = jsonCommand
@@ -308,13 +308,13 @@ public class ReportMailingJob extends AbstractAuditableCustom {
                     .withLocale(jsonCommand.extractLocale());
             final LocalDateTime newStartDateTime = LocalDateTime.parse(newStartDateTimeString, dateTimeFormatter);
             final LocalDateTime oldStartDateTime = (this.startDateTime != null)
-                    ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime()
+                    ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), ZoneId.systemDefault()).toLocalDateTime()
                     : null;
 
             if ((oldStartDateTime != null) && !newStartDateTime.equals(oldStartDateTime)) {
                 actualChanges.put(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME, newStartDateTimeString);
 
-                this.startDateTime = Date.from(newStartDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.startDateTime = Date.from(newStartDateTime.atZone(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -375,8 +375,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      * @return the value of the startDateTime property
      **/
     public ZonedDateTime getStartDateTime() {
-        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), ZoneId.systemDefault()) : null;
     }
 
     /**
@@ -460,8 +459,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      * @return the previousRunDateTime
      */
     public ZonedDateTime getPreviousRunDateTime() {
-        return (this.previousRunDateTime != null)
-                ? ZonedDateTime.ofInstant(this.previousRunDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
+        return (this.previousRunDateTime != null) ? ZonedDateTime.ofInstant(this.previousRunDateTime.toInstant(), ZoneId.systemDefault())
                 : null;
     }
 
@@ -469,9 +467,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      * @return the nextRunDateTime
      */
     public ZonedDateTime getNextRunDateTime() {
-        return (this.nextRunDateTime != null)
-                ? ZonedDateTime.ofInstant(this.nextRunDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+        return (this.nextRunDateTime != null) ? ZonedDateTime.ofInstant(this.nextRunDateTime.toInstant(), ZoneId.systemDefault()) : null;
     }
 
     /**

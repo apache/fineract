@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +34,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
@@ -123,7 +123,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 guarantorFundingDetails.add(fundingDetails);
                 if (loan.isDisbursed()
                         || (loan.isApproved() && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled()))) {
-                    this.guarantorDomainService.assignGuarantor(fundingDetails, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+                    this.guarantorDomainService.assignGuarantor(fundingDetails, LocalDate.now(ZoneId.systemDefault()));
                     loan.updateGuaranteeAmount(fundingDetails.getAmount());
                 }
             }
@@ -310,7 +310,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         GuarantorFundStatusType fundStatusType = GuarantorFundStatusType.DELETED;
         if (guarantorForDelete.getLoan().isDisbursed() || guarantorForDelete.getLoan().isApproved()) {
             fundStatusType = GuarantorFundStatusType.WITHDRAWN;
-            this.guarantorDomainService.releaseGuarantor(guarantorFundingDetails, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+            this.guarantorDomainService.releaseGuarantor(guarantorFundingDetails, LocalDate.now(ZoneId.systemDefault()));
         }
         guarantorForDelete.updateStatus(guarantorFundingDetails, fundStatusType);
     }

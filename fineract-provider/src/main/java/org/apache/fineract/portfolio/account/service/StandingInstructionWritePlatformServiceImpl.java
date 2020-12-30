@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +38,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -199,7 +199,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             boolean isDueForTransfer = false;
             AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
             StandingInstructionType instructionType = data.instructionType();
-            LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+            LocalDate transactionDate = LocalDate.now(ZoneId.systemDefault());
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
                 PeriodFrequencyType frequencyType = data.recurrenceFrequency();
@@ -228,7 +228,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = LocalDate.now(ZoneId.systemDefault()).equals(standingInstructionDuesData.dueDate());
                 }
             }
 
@@ -245,8 +245,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    this.jdbcTemplate.update(updateQuery,
-                            Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), data.getId());
+                    this.jdbcTemplate.update(updateQuery, Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                            data.getId());
                 }
 
             }

@@ -20,13 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.command;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GuarantorJSONinputParams;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 
@@ -91,7 +91,7 @@ public class GuarantorCommand {
     }
 
     public Date getDobAsDate() {
-        return Date.from(this.dob.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        return Date.from(this.dob.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void validateForCreate() {

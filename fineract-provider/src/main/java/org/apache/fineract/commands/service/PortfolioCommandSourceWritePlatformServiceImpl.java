@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.service;
 
 import com.google.gson.JsonElement;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Random;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -30,7 +31,6 @@ import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotA
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -187,7 +187,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         final CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
         validateIsUpdateAllowed();
         final AppUser maker = this.context.authenticatedUser();
-        commandSourceInput.markAsRejected(maker, ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+        commandSourceInput.markAsRejected(maker, ZonedDateTime.now(ZoneId.systemDefault()));
         this.commandSourceRepository.save(commandSourceInput);
         return makerCheckerId;
     }

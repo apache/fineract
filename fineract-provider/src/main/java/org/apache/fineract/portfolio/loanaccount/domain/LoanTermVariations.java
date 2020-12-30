@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,7 +33,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
@@ -120,10 +120,10 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LoanTermVariationsData toData() {
-        LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
         LocalDate dateValue = null;
         if (this.dateValue != null) {
-            dateValue = LocalDate.ofInstant(this.dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            dateValue = LocalDate.ofInstant(this.dateValue.toInstant(), ZoneId.systemDefault());
         }
         EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
         return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
@@ -134,7 +134,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchTermApplicaDate() {
-        return LocalDate.ofInstant(this.termApplicableFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
     }
 
     public BigDecimal getTermValue() {
@@ -146,7 +146,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchDateValue() {
-        return this.dateValue == null ? null : LocalDate.ofInstant(this.dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dateValue == null ? null : LocalDate.ofInstant(this.dateValue.toInstant(), ZoneId.systemDefault());
     }
 
     public void setTermApplicableFrom(Date termApplicableFrom) {

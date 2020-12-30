@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.service;
 
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -94,8 +95,7 @@ public class DeviceRegistrationWritePlatformServiceImpl implements DeviceRegistr
         Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         deviceRegistration.setClient(client);
         deviceRegistration.setRegistrationId(registrationId);
-        deviceRegistration
-                .setUpdatedOnDate(Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        deviceRegistration.setUpdatedOnDate(Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault()).toInstant()));
         return deviceRegistration;
     }
 

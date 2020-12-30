@@ -20,8 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
@@ -193,7 +193,7 @@ public final class LoanSchedulePeriodData {
         this.totalOutstandingForPeriod = this.feeChargesOutstanding;
         this.totalActualCostOfLoanForPeriod = this.feeChargesDue;
         this.totalInstallmentAmountForPeriod = null;
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -255,7 +255,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = interestDueOnPrincipalOutstanding.add(feeChargesDueForPeriod);
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -326,7 +326,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = totalActualCostOfLoanForPeriod;
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;

@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,7 +189,7 @@ public class ShareProductDataSerializer {
 
         AppUser createdBy = platformSecurityContext.authenticatedUser();
         AppUser modifiedBy = createdBy;
-        ZonedDateTime createdDate = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
+        ZonedDateTime createdDate = DateUtils.getLocalDateTimeOfTenant().atZone(ZoneId.systemDefault());
         ZonedDateTime modifiedOn = createdDate;
         ShareProduct product = new ShareProduct(productName, shortName, description, externalId, currency, totalNumberOfShares,
                 sharesIssued, unitPrice, shareCapitalValue, minimumClientShares, nominalClientShares, maximumClientShares, marketPriceSet,
@@ -222,7 +223,7 @@ public class ShareProductDataSerializer {
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
                 ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id,
-                        Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), shareValue);
+                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
                 set.add(obj);
             }
         }
@@ -240,7 +241,7 @@ public class ShareProductDataSerializer {
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
                 ShareProductMarketPrice obj = new ShareProductMarketPrice(
-                        Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), shareValue);
+                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
                 set.add(obj);
             }
         }

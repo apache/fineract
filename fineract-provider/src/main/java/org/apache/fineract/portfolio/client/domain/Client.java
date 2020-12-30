@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -266,7 +267,7 @@ public final class Client extends AbstractPersistableCustom {
             officeJoiningDate = activationDate;
         }
 
-        LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate submittedOnDate = LocalDate.now(ZoneId.systemDefault());
         if (active && submittedOnDate.isAfter(activationDate)) {
             submittedOnDate = activationDate;
         }
@@ -297,7 +298,7 @@ public final class Client extends AbstractPersistableCustom {
             this.accountNumber = accountNo;
         }
 
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.submittedBy = currentUser;
 
         this.status = status.getValue();
@@ -321,11 +322,11 @@ public final class Client extends AbstractPersistableCustom {
         }
 
         if (activationDate != null) {
-            this.activationDate = Date.from(activationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.activationDate = Date.from(activationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.activatedBy = currentUser;
         }
         if (officeJoiningDate != null) {
-            this.officeJoiningDate = Date.from(officeJoiningDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.officeJoiningDate = Date.from(officeJoiningDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         if (StringUtils.isNotBlank(firstname)) {
             this.firstname = firstname.trim();
@@ -364,7 +365,7 @@ public final class Client extends AbstractPersistableCustom {
             this.gender = gender;
         }
         if (dateOfBirth != null) {
-            this.dateOfBirth = Date.from(dateOfBirth.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dateOfBirth = Date.from(dateOfBirth.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         this.clientType = clientType;
         this.clientClassification = clientClassification;
@@ -433,7 +434,7 @@ public final class Client extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        this.activationDate = Date.from(activationLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.activationDate = Date.from(activationLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
@@ -612,7 +613,7 @@ public final class Client extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
-            this.activationDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.activationDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.officeJoiningDate = this.activationDate;
         }
 
@@ -623,7 +624,7 @@ public final class Client extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
-            this.dateOfBirth = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dateOfBirth = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.submittedOnDateParamName, getSubmittedOnDate())) {
@@ -633,7 +634,7 @@ public final class Client extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-            this.submittedOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         validateUpdate();
@@ -746,13 +747,13 @@ public final class Client extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.submittedOnDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activationDate != null) {
-            activationLocalDate = LocalDate.ofInstant(this.activationDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            activationLocalDate = LocalDate.ofInstant(this.activationDate.toInstant(), ZoneId.systemDefault());
         }
         return activationLocalDate;
     }
@@ -760,7 +761,7 @@ public final class Client extends AbstractPersistableCustom {
     public LocalDate getOfficeJoiningLocalDate() {
         LocalDate officeJoiningLocalDate = null;
         if (this.officeJoiningDate != null) {
-            officeJoiningLocalDate = LocalDate.ofInstant(this.officeJoiningDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            officeJoiningLocalDate = LocalDate.ofInstant(this.officeJoiningDate.toInstant(), ZoneId.systemDefault());
         }
         return officeJoiningLocalDate;
     }
@@ -952,19 +953,19 @@ public final class Client extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosureDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.closureDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.closureDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public LocalDate getRejectedDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.rejectionDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.rejectionDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public LocalDate getWithdrawalDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.withdrawalDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.withdrawalDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public LocalDate getReopenedDate() {
-        return this.reopenedDate == null ? null : LocalDate.ofInstant(this.reopenedDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.reopenedDate == null ? null : LocalDate.ofInstant(this.reopenedDate.toInstant(), ZoneId.systemDefault());
     }
 
     public CodeValue gender() {
@@ -998,7 +999,7 @@ public final class Client extends AbstractPersistableCustom {
     public LocalDate dateOfBirthLocalDate() {
         LocalDate dateOfBirth = null;
         if (this.dateOfBirth != null) {
-            dateOfBirth = LocalDate.ofInstant(this.dateOfBirth.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            dateOfBirth = LocalDate.ofInstant(this.dateOfBirth.toInstant(), ZoneId.systemDefault());
         }
         return dateOfBirth;
     }

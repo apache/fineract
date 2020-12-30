@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -167,7 +167,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
         LocalDate localDate = null;
 
         if (this.rescheduleFromDate != null) {
-            localDate = LocalDate.ofInstant(this.rescheduleFromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localDate = LocalDate.ofInstant(this.rescheduleFromDate.toInstant(), ZoneId.systemDefault());
         }
 
         return localDate;
@@ -194,7 +194,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
         LocalDate localDate = null;
 
         if (this.submittedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localDate = LocalDate.ofInstant(this.submittedOnDate.toInstant(), ZoneId.systemDefault());
         }
 
         return localDate;
@@ -214,7 +214,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
         LocalDate localDate = null;
 
         if (this.approvedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localDate = LocalDate.ofInstant(this.approvedOnDate.toInstant(), ZoneId.systemDefault());
         }
 
         return localDate;
@@ -234,7 +234,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
         LocalDate localDate = null;
 
         if (this.rejectedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.rejectedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            localDate = LocalDate.ofInstant(this.rejectedOnDate.toInstant(), ZoneId.systemDefault());
         }
 
         return localDate;
@@ -274,7 +274,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.approvedByUser = approvedByUser;
-            this.approvedOnDate = Date.from(approvedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.approvedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.statusEnum = LoanStatus.APPROVED.getValue();
         }
     }
@@ -293,7 +293,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.rejectedByUser = approvedByUser;
-            this.rejectedOnDate = Date.from(approvedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.rejectedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.statusEnum = LoanStatus.REJECTED.getValue();
         }
     }

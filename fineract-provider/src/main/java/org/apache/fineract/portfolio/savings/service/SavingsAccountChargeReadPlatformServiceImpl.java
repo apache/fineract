@@ -23,13 +23,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.MonthDay;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -124,7 +124,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
             final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
             if (feeOnDay != null && feeOnMonth != null) {
-                feeOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(feeOnMonth).withDayOfMonth(feeOnDay);
+                feeOnMonthDay = MonthDay.now(ZoneId.systemDefault()).withMonth(feeOnMonth).withDayOfMonth(feeOnDay);
             }
 
             final int chargeCalculation = rs.getInt("chargeCalculation");

@@ -31,13 +31,13 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -787,13 +787,13 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate fromDateLocal = LocalDate.now(ZoneId.systemDefault());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
         fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate dueDateLocal = LocalDate.now(ZoneId.systemDefault());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
         dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
@@ -891,13 +891,13 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate fromDateLocal = LocalDate.now(ZoneId.systemDefault());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
         fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate dueDateLocal = LocalDate.now(ZoneId.systemDefault());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
         dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
@@ -1042,7 +1042,7 @@ public class AccountingScenarioIntegrationTest {
 
     private LocalDate getDateAsLocalDate(String dateAsString) throws ParseException {
         DateFormat df = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        LocalDate date = LocalDate.ofInstant(df.parse(dateAsString).toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        LocalDate date = LocalDate.ofInstant(df.parse(dateAsString).toInstant(), ZoneId.systemDefault());
 
         return date;
     }

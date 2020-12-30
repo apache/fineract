@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.MonthDay;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -45,7 +46,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.format.number.NumberStyleFormatter;
 
 /**
@@ -309,8 +309,7 @@ public class JsonParserHelper {
                 final Integer month = dateArray.get(1).getAsInt();
                 final Integer day = dateArray.get(2).getAsInt();
 
-                value = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).with(YEAR_OF_ERA, year).with(MONTH_OF_YEAR, month)
-                        .with(DAY_OF_MONTH, day);
+                value = LocalDate.now(ZoneId.systemDefault()).with(YEAR_OF_ERA, year).with(MONTH_OF_YEAR, month).with(DAY_OF_MONTH, day);
             }
 
         }

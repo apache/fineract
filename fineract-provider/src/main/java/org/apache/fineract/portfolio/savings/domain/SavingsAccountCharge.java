@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.MonthDay;
+import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -45,7 +46,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -212,7 +212,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             this.feeInterval = (feeInterval == null) ? chargeDefinition.feeInterval() : feeInterval;
         }
 
-        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         this.chargeCalculation = chargeDefinition.getChargeCalculation();
         if (chargeCalculation != null) {
@@ -393,7 +393,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     public void update(final BigDecimal amount, final LocalDate dueDate, final MonthDay feeOnMonthDay, final Integer feeInterval) {
         final BigDecimal transactionAmount = BigDecimal.ZERO;
         if (dueDate != null) {
-            this.dueDate = Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             if (isWeeklyFee()) {
                 this.feeOnDay = dueDate.get(ChronoField.DAY_OF_WEEK);
             }
@@ -455,7 +455,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             actualChanges.put(localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
-            this.dueDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             if (this.isWeeklyFee()) {
                 this.feeOnDay = newValue.get(ChronoField.DAY_OF_WEEK);
             }
@@ -525,7 +525,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     public LocalDate getDueLocalDate() {
         LocalDate dueDate = null;
         if (this.dueDate != null) {
-            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), ZoneId.systemDefault());
         }
         return dueDate;
     }
@@ -760,7 +760,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     public void updateToNextDueDateFrom(final LocalDate startingDate) {
         if (isAnnualFee() || isMonthlyFee() || isWeeklyFee()) {
-            this.dueDate = Date.from(getNextDueDateFrom(startingDate).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(getNextDueDateFrom(startingDate).atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -814,15 +814,15 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     public void updateNextDueDateForRecurringFees() {
         if (isAnnualFee() || isMonthlyFee() || isWeeklyFee()) {
-            LocalDate nextDueLocalDate = LocalDate.ofInstant(dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate nextDueLocalDate = LocalDate.ofInstant(dueDate.toInstant(), ZoneId.systemDefault());
             nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
-            this.dueDate = Date.from(nextDueLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(nextDueLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
     public void updateToPreviousDueDate() {
         if (isAnnualFee() || isMonthlyFee() || isWeeklyFee()) {
-            LocalDate nextDueLocalDate = LocalDate.ofInstant(dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate nextDueLocalDate = LocalDate.ofInstant(dueDate.toInstant(), ZoneId.systemDefault());
             if (isAnnualFee()) {
                 nextDueLocalDate = nextDueLocalDate.withMonth(this.feeOnMonth).minusYears(1);
                 nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
@@ -834,7 +834,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                 nextDueLocalDate = setDayOfWeek(nextDueLocalDate);
             }
 
-            this.dueDate = Date.from(nextDueLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(nextDueLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
@@ -864,7 +864,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     public void inactiavateCharge(final LocalDate inactivationOnDate) {
-        this.inactivationDate = Date.from(inactivationOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.inactivationDate = Date.from(inactivationOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.status = false;
         this.amountOutstanding = BigDecimal.ZERO;
         this.paid = true;

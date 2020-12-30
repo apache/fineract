@@ -250,8 +250,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             ScheduleCurrentPeriodParams currentPeriodParams = new ScheduleCurrentPeriodParams(currency,
                     interestCalculationGraceOnRepaymentPeriodFraction);
             if (loanApplicationTerms.isMultiDisburseLoan()) {
-                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods,
-                        scheduledDueDate);
+                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms,
+                        chargesDueAtTimeOfDisbursement, scheduleParams, periods, scheduledDueDate);
 
                 updateEMIorPrincipalPaymentForMultiDisbursement(mc, loanApplicationTerms, scheduleParams, isBalanceChangedByDisbursement);
             }
@@ -447,7 +447,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 totalOutstanding);
     }
 
-    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
+    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms,
+            LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
         Money totalCumulativePrincipal = scheduleParams.getTotalCumulativePrincipal();
         int periodNumber = scheduleParams.getPeriodNumber();
         Money principal = loanApplicationTerms.getPrincipal();
@@ -1846,8 +1847,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LocalDate compoundingDate = startDate;
             boolean addUncompounded = true;
 
-            // This is an endless loop in some scenarios. Observed when tenant was configured with timezone Kolkata
-            // while running in Israel.
             while (compoundingDate.isBefore(endDate)) {
                 if (loanApplicationTerms.allowCompoundingOnEod()) {
                     compoundingDate = compoundingDate.minusDays(1);

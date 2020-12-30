@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +42,6 @@ import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -437,8 +437,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         // final boolean clientPendingApprovalAllowed =
         // this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
 
-        return CenterData.template(officeIdDefaulted, accountNo, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), officeOptions,
-                staffOptions, groupMembersOptions, totalCollected, totalOverdue, totaldue, installmentDue);
+        return CenterData.template(officeIdDefaulted, accountNo, LocalDate.now(ZoneId.systemDefault()), officeOptions, staffOptions,
+                groupMembersOptions, totalCollected, totalOverdue, totaldue, installmentDue);
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
@@ -514,7 +514,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
         validateForGenerateCollectionSheet(staffId);
-        LocalDate localDate = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        LocalDate localDate = LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault());
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String passeddate = formatter.format(localDate);
         String sql = centerCalendarMapper.schema();
@@ -539,7 +539,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
         for (CenterData centerData : centerDataArray) {
             if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(
-                    LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), isSkipRepaymentOnFirstMonthEnabled,
+                    LocalDate.ofInstant(meetingDate.toInstant(), ZoneId.systemDefault()), isSkipRepaymentOnFirstMonthEnabled,
                     numberOfDays)) {
                 if (staffCenterDataArray.size() <= 0) {
                     Collection<CenterData> meetingFallCenter = new ArrayList<>();

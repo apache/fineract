@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,7 +30,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
@@ -53,8 +53,8 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     private Date endDate;
 
     public static LoanOfficerAssignmentHistory createNew(final Loan loan, final Staff loanOfficer, final LocalDate startDate) {
-        return new LoanOfficerAssignmentHistory(loan, loanOfficer,
-                Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), null);
+        return new LoanOfficerAssignmentHistory(loan, loanOfficer, Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                null);
     }
 
     protected LoanOfficerAssignmentHistory() {
@@ -73,11 +73,11 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public void updateStartDate(final LocalDate startDate) {
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void updateEndDate(final LocalDate endDate) {
-        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {
@@ -85,7 +85,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getStartDate() {
-        return LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return LocalDate.ofInstant(this.startDate.toInstant(), ZoneId.systemDefault());
     }
 
     public boolean hasStartDateBefore(final LocalDate matchingDate) {
@@ -103,12 +103,11 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
      * @return
      */
     public boolean isEndDateAfter(final LocalDate compareDate) {
-        return this.endDate == null ? false
-                : LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isAfter(compareDate);
+        return this.endDate == null ? false : LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault()).isAfter(compareDate);
     }
 
     public LocalDate getEndDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault()), null);
     }
 
     public boolean isSameLoanOfficer(final Staff staff) {
