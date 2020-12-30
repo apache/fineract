@@ -43,7 +43,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.8.0'
         classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.6.0'
