@@ -140,7 +140,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 scheduleParams.setOutstandingBalanceAsPerRest(Money.of(currency, disburseAmt));
             }
 
-            // Set Fixed Principal Amount
+            // update amortization(EMI or fixed principal) with fixed multi disburse balance
             updateAmortization(mc, loanApplicationTerms, scheduleParams.getPeriodNumber(), scheduleParams.getOutstandingBalance());
         }
 
@@ -450,8 +450,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
         Money totalCumulativePrincipal = scheduleParams.getTotalCumulativePrincipal();
         int periodNumber = scheduleParams.getPeriodNumber();
-        Money principal = getPrincipalToBeScheduled(loanApplicationTerms);
-        if (loanApplicationTerms.getAmortizationMethod().isEqualPrincipal()) {
+        Money principal = loanApplicationTerms.getPrincipal();
+        if (loanApplicationTerms.getAmortizationMethod().isEqualPrincipal() && isBalanceChangedByDisbursement) {
             loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, principal.minus(totalCumulativePrincipal));
         } else if (loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
             loanApplicationTerms.setFixedEmiAmount(null);
@@ -1323,11 +1323,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      */
     private Money getPrincipalToBeScheduled(final LoanApplicationTerms loanApplicationTerms) {
         Money principalToBeScheduled;
+        // TODO validate it - should-multi disburse return approved principal?
         if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
             principalToBeScheduled = loanApplicationTerms.getApprovedPrincipal();
-//        if (loanApplicationTerms.isMultiDisburseLoan()) {
-//            principalToBeScheduled = loanApplicationTerms.getPrincipal();
-            // TODO validate it
         } else {
             principalToBeScheduled = loanApplicationTerms.getPrincipal();
         }
