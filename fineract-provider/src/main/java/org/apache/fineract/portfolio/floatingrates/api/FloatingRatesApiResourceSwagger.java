@@ -53,6 +53,8 @@ final class FloatingRatesApiResourceSwagger {
         public Boolean isBaseLendingRate;
         @Schema(example = "true")
         public Boolean isActive;
+        @Schema(example = "true")
+        public Boolean allowHistoricRatePeriods;
         public Set<PostFloatingRatesRatePeriods> ratePeriods;
     }
 
@@ -147,6 +149,8 @@ final class FloatingRatesApiResourceSwagger {
         public Boolean isBaseLendingRate;
         @Schema(example = "true")
         public Boolean isActive;
+        @Schema(example = "true")
+        public Boolean allowHistoricRatePeriods;
         public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
     }
 

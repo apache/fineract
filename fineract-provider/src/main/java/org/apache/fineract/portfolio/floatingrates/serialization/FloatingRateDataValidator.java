@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 public class FloatingRateDataValidator {
 
     private final Set<String> supportedParametersForFloatingRates = new HashSet<>(
-            Arrays.asList("name", "isBaseLendingRate", "isActive", "ratePeriods"));
+            Arrays.asList("name", "isBaseLendingRate", "isActive", "ratePeriods", "allowHistoricRatePeriods"));
     private final Set<String> supportedParametersForFloatingRatePeriods = new HashSet<>(
             Arrays.asList("fromDate", "interestRate", "isDifferentialToBaseLendingRate", "locale", "dateFormat"));
 
@@ -104,9 +104,10 @@ public class FloatingRateDataValidator {
     private void validateRatePeriods(DataValidatorBuilder baseDataValidator, JsonElement element, boolean isBaseLendingRate,
             boolean isBLRModifiedAsNonBLR) {
         if (this.fromApiJsonHelper.parameterExists("ratePeriods", element)) {
+
+            final Boolean allowHistoricRatePeriods = this.fromApiJsonHelper.extractBooleanNamed("allowHistoricRatePeriods", element);
             final JsonArray ratePeriods = this.fromApiJsonHelper.extractJsonArrayNamed("ratePeriods", element);
             baseDataValidator.reset().parameter("ratePeriods").value(ratePeriods).notBlank().jsonArrayNotEmpty();
-
             if (ratePeriods != null) {
                 List<LocalDate> fromDates = new ArrayList<>();
                 for (int i = 0; i < ratePeriods.size(); i++) {
@@ -116,8 +117,12 @@ public class FloatingRateDataValidator {
                             this.supportedParametersForFloatingRatePeriods);
 
                     final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed("fromDate", ratePeriod);
-                    baseDataValidator.reset().parameter("fromDate").parameterAtIndexArray("fromDate", i + 1).value(fromDate).notBlank()
-                            .validateDateAfter(DateUtils.getLocalDateOfTenant().plusDays(1));
+                    if (allowHistoricRatePeriods != null && allowHistoricRatePeriods) {
+                        baseDataValidator.reset().parameter("fromDate").parameterAtIndexArray("fromDate", i + 1).value(fromDate).notBlank();
+                    } else {
+                        baseDataValidator.reset().parameter("fromDate").parameterAtIndexArray("fromDate", i + 1).value(fromDate).notBlank()
+                                .validateDateAfter(DateUtils.getLocalDateOfTenant().plusDays(1));
+                    }
                     if (fromDate != null) {
                         fromDates.add(fromDate);
                     }
