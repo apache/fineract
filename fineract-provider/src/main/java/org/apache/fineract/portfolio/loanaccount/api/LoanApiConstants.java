@@ -134,4 +134,5 @@ public interface LoanApiConstants {
     String applicationId = "applicationId";
     String lastApplication = "lastApplication";
     String minFloatingRateInterest = "minFloatingRateInterest";
+    String activateOnApproval = "activateOnApproval";
 }

@@ -827,6 +827,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_UNDO_DISBURSAL,
                     constructEntityMap(BusinessEntity.LOAN, loan));
+
         }
 
         return new CommandProcessingResultBuilder() //

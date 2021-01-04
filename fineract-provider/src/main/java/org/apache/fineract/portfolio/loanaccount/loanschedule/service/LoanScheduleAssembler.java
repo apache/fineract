@@ -235,6 +235,7 @@ public class LoanScheduleAssembler {
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
+        final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
         LocalDate calculatedRepaymentsStartingFromDate = repaymentsStartingFromDate;
 
         final Boolean synchDisbursement = this.fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
@@ -304,9 +305,10 @@ public class LoanScheduleAssembler {
                 validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar, isSkipMeetingOnFirstDay, numberOfDays);
             }
         }
-
-        validateMinimumDaysBetweenDisbursalAndFirstRepayment(expectedDisbursementDate, calculatedRepaymentsStartingFromDate,
-                loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment());
+        if (activateOnApproval == null || !activateOnApproval) {
+            validateMinimumDaysBetweenDisbursalAndFirstRepayment(expectedDisbursementDate, calculatedRepaymentsStartingFromDate,
+                    loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment());
+        }
 
         // grace details
         final Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
@@ -462,7 +464,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, activateOnApproval, null);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

@@ -629,7 +629,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lir.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
-                    + " l.min_floating_rate_interest as minFloatingRateInterest, "
+                    + " l.min_floating_rate_interest as minFloatingRateInterest, " + " l.activate_on_approval as activateOnApproval, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
                     + " lp.can_use_for_topup as canUseForTopup, " + " l.is_topup as isTopup, " + " topup.closure_loan_id as closureLoanId, "
@@ -772,6 +772,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
             final BigDecimal interestRateDifferential = rs.getBigDecimal("interestRateDifferential");
             final BigDecimal minFloatingRateInterest = rs.getBigDecimal("minFloatingRateInterest");
+            final Boolean activateOnApproval = rs.getBoolean("activateOnApproval");
             final boolean isFloatingInterestRate = rs.getBoolean("isFloatingInterestRate");
 
             final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
@@ -975,7 +976,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
                     canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, minFloatingRateInterest,
-                    isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                    activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
         }
     }
 

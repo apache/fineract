@@ -197,6 +197,11 @@ public class LoanAssembler {
         minFloatingRateInterest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.minFloatingRateInterest,
                 element);
 
+        Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
+        if (activateOnApproval == null) {
+            activateOnApproval = false;
+        }
+
         BigDecimal maxOutstandingLoanBalance = null;
         LocalDate revolvingPeriodStartDate = null;
         LocalDate revolvingPeriodEndDate = null;
@@ -281,7 +286,7 @@ public class LoanAssembler {
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                    minFloatingRateInterest, activateOnApproval, revolvingPeriodStartDate, revolvingPeriodEndDate);
 
         } else if (group != null) {
 
@@ -289,15 +294,15 @@ public class LoanAssembler {
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    minFloatingRateInterest, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                    minFloatingRateInterest, activateOnApproval, revolvingPeriodStartDate, revolvingPeriodEndDate);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates, minFloatingRateInterest, revolvingPeriodStartDate,
-                    revolvingPeriodEndDate);
+                    isFloatingInterestRate, interestRateDifferential, rates, minFloatingRateInterest, activateOnApproval,
+                    revolvingPeriodStartDate, revolvingPeriodEndDate);
 
         }
 

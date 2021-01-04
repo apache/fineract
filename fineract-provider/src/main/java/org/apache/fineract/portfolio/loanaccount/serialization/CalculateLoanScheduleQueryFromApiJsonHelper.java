@@ -70,7 +70,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.revolvingPeriodStartParameterName, LoanApiConstants.revolvingPeriodEndParameterName,
-            LoanApiConstants.minFloatingRateInterest, LoanApiConstants.daysInYearTypeParameterName));
+            LoanApiConstants.minFloatingRateInterest, LoanApiConstants.activateOnApproval, LoanApiConstants.daysInYearTypeParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -124,8 +124,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName, element);
         }
 
-        validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
-                repaymentsStartingFromDate);
+        final String activateOnApprovalParameterName = "activateOnApproval";
+        final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(activateOnApprovalParameterName, element);
+
+        if (activateOnApproval == null || !activateOnApproval) {
+            validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
+                    repaymentsStartingFromDate);
+        }
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

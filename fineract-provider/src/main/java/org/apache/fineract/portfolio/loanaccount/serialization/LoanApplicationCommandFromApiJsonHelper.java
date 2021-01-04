@@ -89,7 +89,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
-            LoanApiConstants.minFloatingRateInterest, LoanApiConstants.daysInYearTypeParameterName,
+            LoanApiConstants.minFloatingRateInterest, LoanApiConstants.activateOnApproval, LoanApiConstants.daysInYearTypeParameterName,
             LoanApiConstants.revolvingPeriodStartParameterName, LoanApiConstants.revolvingPeriodEndParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;

@@ -515,6 +515,8 @@ final class LoansApiResourceSwagger {
         public String expectedDisbursementDate;
         @Schema(example = "2")
         public Integer transactionProcessingStrategyId;
+        @Schema(example = "true")
+        public Boolean activateOnApproval;
     }
 
     @Schema(description = "PostLoansResponse")
@@ -548,6 +550,8 @@ final class LoansApiResourceSwagger {
             public Long totalOverdue;
             @Schema(example = "0")
             public Long totalActualCostOfLoanForPeriod;
+            @Schema(example = "true")
+            public Boolean activateOnApproval;
         }
 
         public GetLoansLoanIdResponse.GetLoansLoanIdCurrency currency;

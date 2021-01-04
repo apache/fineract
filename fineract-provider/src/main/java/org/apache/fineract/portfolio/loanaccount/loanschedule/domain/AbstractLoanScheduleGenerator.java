@@ -89,13 +89,20 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         final int numberOfRepayments = loanApplicationTerms.fetchNumberOfRepaymentsAfterExceptions();
         LoanScheduleParams scheduleParams = null;
+        LocalDate periodStartDate = null;
+        if (loanApplicationTerms.isActivatedOnApproval()
+                && loanApplicationTerms.getSeedDate().compareTo(loanApplicationTerms.getExpectedDisbursementDate()) < 0) {
+            periodStartDate = loanApplicationTerms.getSeedDate();
+        } else {
+            periodStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+        }
+
         if (loanScheduleParams == null) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedDisbursementDate(), getPrincipalToBeScheduled(loanApplicationTerms));
+                    periodStartDate, getPrincipalToBeScheduled(loanApplicationTerms));
         } else if (!loanScheduleParams.isPartialUpdate()) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedDisbursementDate(), getPrincipalToBeScheduled(loanApplicationTerms),
-                    loanScheduleParams);
+                    periodStartDate, getPrincipalToBeScheduled(loanApplicationTerms), loanScheduleParams);
         } else {
             scheduleParams = loanScheduleParams;
         }
@@ -214,7 +221,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 continue;
             }
 
-            if (scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) {
+            if (!loanApplicationTerms.isActivatedOnApproval() && scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) {
                 throw new ScheduleDateException("Due date can't be before period start date", scheduledDueDate);
             }
 
@@ -454,9 +461,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Money principal = loanApplicationTerms.getPrincipal();
         if (loanApplicationTerms.getAmortizationMethod().isEqualPrincipal() && isBalanceChangedByDisbursement) {
             loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, principal.minus(totalCumulativePrincipal));
-        } else if (loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
+        } else if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+                && loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
             loanApplicationTerms.setFixedEmiAmount(null);
-            updateFixedInstallmentAmount(mc, loanApplicationTerms, periodNumber, principal);
+            updateFixedInstallmentAmount(mc, loanApplicationTerms, periodNumber, principal.minus(totalCumulativePrincipal));
         }
     }
 

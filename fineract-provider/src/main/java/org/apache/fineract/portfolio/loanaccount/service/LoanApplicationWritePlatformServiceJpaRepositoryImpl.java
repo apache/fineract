@@ -1424,6 +1424,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
             }
 
+            if (loan.shouldActivateOnApproval()) {
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+            }
+
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
