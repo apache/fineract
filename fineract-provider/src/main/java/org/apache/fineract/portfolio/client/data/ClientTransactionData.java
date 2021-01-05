@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
@@ -43,18 +44,19 @@ public final class ClientTransactionData {
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
+    private final Map<String, Map<String, Object>> datatables;
 
     public static ClientTransactionData create(Long id, Long officeId, String officeName, EnumOptionData type, LocalDate date,
             CurrencyData currency, PaymentDetailData paymentDetailData, BigDecimal amount, String externalId, LocalDate submittedOnDate,
-            boolean reversed) {
+            boolean reversed, Map<String, Map<String, Object>> datatables) {
         final Collection<PaymentTypeData> paymentTypeOptions = null;
         return new ClientTransactionData(id, officeId, officeName, type, date, currency, paymentDetailData, amount, externalId,
-                submittedOnDate, reversed, paymentTypeOptions);
+                submittedOnDate, reversed, paymentTypeOptions, datatables);
     }
 
     private ClientTransactionData(Long id, Long officeId, String officeName, EnumOptionData type, LocalDate date, CurrencyData currency,
             PaymentDetailData paymentDetailData, BigDecimal amount, String externalId, LocalDate submittedOnDate, boolean reversed,
-            Collection<PaymentTypeData> paymentTypeOptions) {
+            Collection<PaymentTypeData> paymentTypeOptions, Map<String, Map<String, Object>> datatables) {
 
         this.id = id;
         this.officeId = officeId;
@@ -68,6 +70,7 @@ public final class ClientTransactionData {
         this.submittedOnDate = submittedOnDate;
         this.reversed = reversed;
         this.paymentTypeOptions = paymentTypeOptions;
+        this.datatables = datatables;
     }
 
 }
