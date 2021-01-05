@@ -30,4 +30,4 @@ data:
     CREATE DATABASE IF NOT EXISTS `fineract_default`;
 
     # create root user and grant rights
-    GRANT ALL ON *.* TO 'root'@'%';
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
