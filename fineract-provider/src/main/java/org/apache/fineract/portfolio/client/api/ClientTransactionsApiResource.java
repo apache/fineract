@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
+import com.google.common.base.Splitter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,6 +26,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,6 +37,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -87,8 +91,8 @@ public class ClientTransactionsApiResource {
             @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
-        SearchParameters searchParameters = SearchParameters.forPagination(offset, limit);
+        Map<String, Map<String, Object>> dataTableFilters = createFilterMap(uriInfo);
+        SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, dataTableFilters);
         final Page<ClientTransactionData> clientTransactions = this.clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
                 searchParameters);
 
@@ -150,4 +154,29 @@ public class ClientTransactionsApiResource {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
+    private Map<String, Map<String, Object>> createFilterMap(final UriInfo uriInfo) {
+        final int filterKeyIndex = 0;
+        final int dataTableIndex = 1;
+        final int columnIndex = 2;
+        Map<String, Map<String, Object>> filterMap = new HashMap<>();
+        final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+        for (String parameter : queryParameters.keySet()) {
+
+            String[] filterData = Splitter.on('.').splitToList(parameter).toArray(new String[0]);
+            if (filterData.length != 3 || !filterData[filterKeyIndex].equalsIgnoreCase("filter")) {
+                continue;
+            }
+
+            Object value = queryParameters.get(parameter).get(0);
+            if (filterMap.containsKey(filterData[dataTableIndex])) {
+                filterMap.get(filterData[dataTableIndex]).put(filterData[columnIndex], value);
+                continue;
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put(filterData[columnIndex], value);
+            filterMap.put(filterData[dataTableIndex], map);
+        }
+        return filterMap;
+    }
 }
