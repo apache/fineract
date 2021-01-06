@@ -546,7 +546,12 @@ public class Loan extends AbstractPersistableCustom {
 
         // Optional Floating rate minimum value
         this.minFloatingRateInterest = minFloatingRateInterest;
-        this.activateOnApproval = activateOnApproval;
+
+        if (activateOnApproval != null) {
+            this.activateOnApproval = activateOnApproval;
+        } else {
+            this.activateOnApproval = loanProduct.shouldActivateOnApproval();
+        }
 
         if (loanProduct.isRevolving()) {
             if (revolvingPeriodStartDate != null) {

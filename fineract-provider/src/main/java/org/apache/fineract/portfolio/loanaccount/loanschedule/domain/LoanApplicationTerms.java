@@ -321,6 +321,8 @@ public final class LoanApplicationTerms {
         final boolean isInterestRecalculationEnabled = loanProductRelatedDetail.isInterestRecalculationEnabled();
         final boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = false;
         final boolean isEqualAmortization = loanProductRelatedDetail.isEqualAmortization();
+        final boolean finalActivateOnApproval = activateOnApproval != null ? activateOnApproval
+                : loanProductRelatedDetail.shouldActivateOnApproval();
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, ((nthDay != null) ? nthDay.getValue() : null), dayOfWeek, amortizationMethod,
                 interestMethod, interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate,
@@ -334,7 +336,7 @@ public final class LoanApplicationTerms {
                 loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isFirstRepaymentDateAllowedOnHoliday,
-                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, activateOnApproval, approvedOnDate);
+                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, finalActivateOnApproval, approvedOnDate);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -1363,7 +1365,7 @@ public final class LoanApplicationTerms {
                 this.repaymentPeriodFrequencyType, this.numberOfRepayments, this.principalGrace, this.recurringMoratoriumOnPrincipalPeriods,
                 this.interestPaymentGrace, this.interestChargingGrace, this.amortizationMethod, this.inArrearsTolerance.getAmount(),
                 this.graceOnArrearsAgeing, this.daysInMonthType.getValue(), this.daysInYearType.getValue(),
-                this.interestRecalculationEnabled, this.isEqualAmortization);
+                this.interestRecalculationEnabled, this.isEqualAmortization, this.activateOnApproval);
     }
 
     public Integer getLoanTermFrequency() {

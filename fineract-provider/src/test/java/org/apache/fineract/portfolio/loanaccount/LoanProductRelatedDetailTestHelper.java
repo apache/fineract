@@ -161,6 +161,6 @@ public final class LoanProductRelatedDetailTestHelper {
                 repayEvery, repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization);
+                isEqualAmortization, false);
     }
 }

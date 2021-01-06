@@ -95,6 +95,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer overpaymentLiabilityAccountId;
         @Schema(example = "41")
         public Integer writeOffAccountId;
+        @Schema(example = "true")
+        public Boolean activateOnApproval;
     }
 
     @Schema(description = "PostLoanProductsResponse")

@@ -129,6 +129,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "activate_on_approval", nullable = true)
+    private boolean activateOnApproval = false;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -137,14 +140,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
-            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
+            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
+            final boolean activateOnApproval) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization);
+                isEqualAmortization, activateOnApproval);
     }
 
     protected LoanProductRelatedDetail() {
@@ -159,7 +163,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
-            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
+            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
+            final boolean activateOnApproval) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -186,6 +191,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.daysInYearType = daysInYearType;
         this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
         this.isEqualAmortization = isEqualAmortization;
+        this.activateOnApproval = activateOnApproval;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -507,6 +513,12 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.isEqualAmortization = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ACTIVATE_ON_APPROVAL_PARAM_NAME, this.activateOnApproval)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ACTIVATE_ON_APPROVAL_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.ACTIVATE_ON_APPROVAL_PARAM_NAME, newValue);
+            this.activateOnApproval = newValue;
+        }
+
         validateRepaymentPeriodWithGraceSettings();
 
         return actualChanges;
@@ -670,6 +682,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public void setEqualAmortization(boolean isEqualAmortization) {
         this.isEqualAmortization = isEqualAmortization;
+    }
+
+    public boolean shouldActivateOnApproval() {
+        return activateOnApproval;
+    }
+
+    public void setActivateOnApproval(boolean activateOnApproval) {
+        this.activateOnApproval = activateOnApproval;
     }
 
     public void setNominalInterestRatePerPeriod(BigDecimal nominalInterestRatePerPeriod) {

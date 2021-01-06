@@ -187,6 +187,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "activate_on_approval", nullable = true)
+    private boolean activateOnApproval = false;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -347,6 +350,10 @@ public class LoanProduct extends AbstractPersistableCustom {
                 ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
                 : false;
 
+        final boolean activateOnApproval = command.parameterExists(LoanProductConstants.ACTIVATE_ON_APPROVAL_PARAM_NAME)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ACTIVATE_ON_APPROVAL_PARAM_NAME)
+                : false;
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -354,14 +361,14 @@ public class LoanProduct extends AbstractPersistableCustom {
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, externalId,
                 useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                isRevolving, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuarantorFunds,
-                loanProductGuaranteeDetails, principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates,
-                floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
-                defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
-                minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates);
+                isRevolving, activateOnApproval, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
+                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
+                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes,
+                isLinkedToFloatingInterestRates, floatingRate, interestRateDifferential, minDifferentialLendingRate,
+                maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
+                isVariableInstallmentsAllowed, minimumGapBetweenInstallments, maximumGapBetweenInstallments,
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates);
 
     }
 
@@ -584,9 +591,9 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String externalId,
             final boolean useBorrowerCycle, final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
             final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
-            final boolean isRevolving, final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA,
-            final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
-            final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
+            final boolean isRevolving, final boolean activateOnApproval, final Integer graceOnArrearsAgeing,
+            final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
+            final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
             final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
@@ -629,7 +636,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
-                isInterestRecalculationEnabled, isEqualAmortization);
+                isInterestRecalculationEnabled, isEqualAmortization, activateOnApproval);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
@@ -675,6 +682,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
+        this.activateOnApproval = activateOnApproval;
 
         if (rates != null) {
             this.rates = rates;
@@ -1447,6 +1455,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public void setEqualAmortization(boolean isEqualAmortization) {
         this.isEqualAmortization = isEqualAmortization;
+    }
+
+    public boolean shouldActivateOnApproval() {
+        return activateOnApproval;
+    }
+
+    public void setActivateOnApproval(boolean activateOnApproval) {
+        this.activateOnApproval = activateOnApproval;
     }
 
     public List<Rate> getRates() {

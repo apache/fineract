@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,7 +80,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validate(final String json) {
+    public void validate(final String json, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -127,7 +128,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         final String activateOnApprovalParameterName = "activateOnApproval";
         final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(activateOnApprovalParameterName, element);
 
-        if (activateOnApproval == null || !activateOnApproval) {
+        if (activateOnApproval != null ? !activateOnApproval : !loanProduct.shouldActivateOnApproval()) {
             validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
                     repaymentsStartingFromDate);
         }

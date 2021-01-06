@@ -134,6 +134,8 @@ public interface LoanProductConstants {
 
     String IS_EQUAL_AMORTIZATION_PARAM = "isEqualAmortization";
 
+    String ACTIVATE_ON_APPROVAL_PARAM_NAME = "activateOnApproval";
+
     String RATES_PARAM_NAME = "rates";
 
 }

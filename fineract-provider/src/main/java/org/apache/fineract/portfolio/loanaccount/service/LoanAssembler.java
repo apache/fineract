@@ -197,9 +197,9 @@ public class LoanAssembler {
         minFloatingRateInterest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.minFloatingRateInterest,
                 element);
 
-        Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
-        if (activateOnApproval == null) {
-            activateOnApproval = false;
+        Boolean activateOnApproval = null;
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.activateOnApproval, element)) {
+            activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
         }
 
         BigDecimal maxOutstandingLoanBalance = null;
