@@ -258,7 +258,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (loanApplicationTerms.isMultiDisburseLoan()) {
                 final BigDecimal chargesDueAtTrenchDisbursement = deriveTotalChargesDueAtTrenchDisbursement(loanCharges);
                 boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms,
-                chargesDueAtTrenchDisbursement, scheduleParams, periods, scheduledDueDate);
+                        chargesDueAtTrenchDisbursement, scheduleParams, periods, scheduledDueDate);
 
                 updateEMIorPrincipalPaymentForMultiDisbursement(mc, loanApplicationTerms, scheduleParams, isBalanceChangedByDisbursement);
             }
@@ -1986,7 +1986,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
         return chargesDueAtTimeOfDisbursement;
     }
-    
+
     private BigDecimal deriveTotalChargesDueAtTrenchDisbursement(final Set<LoanCharge> loanCharges) {
         BigDecimal chargesDue = BigDecimal.ZERO;
         for (final LoanCharge loanCharge : loanCharges) {
