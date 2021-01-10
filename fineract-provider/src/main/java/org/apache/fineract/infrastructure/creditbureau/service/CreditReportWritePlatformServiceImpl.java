@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,14 +100,9 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
             if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
 
-                // CreditBureauToken creditBureauToken = this.thitsaWorksCreditBureauIntegrationWritePlatformService
-                // .createToken(creditBureauID);
-
                 CreditBureauReportData reportobj = this.thitsaWorksCreditBureauIntegrationWritePlatformService
                         .getCreditReportFromThitsaWorks(command);
 
-                // return new
-                // CommandProcessingResultBuilder().withCreditReport(reportobj).withCreditBureauToken(creditBureauToken).build();
                 return new CommandProcessingResultBuilder().withCreditReport(reportobj).build();
             }
 
@@ -121,6 +118,28 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             handleTokenDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
+
+    }
+
+    @Override
+    @Transactional
+    public String addCreditReport(Long bureauId, File creditReport, FormDataContentDisposition fileDetail) {
+
+        Optional<String> creditBureauName = getCreditBureau(bureauId);
+        String responseMessage = null;
+
+        if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
+            responseMessage = this.thitsaWorksCreditBureauIntegrationWritePlatformService.addCreditReport(bureauId, creditReport,
+                    fileDetail);
+        } else {
+
+            baseDataValidator.reset().failWithCode("creditBureau.has.not.been.Integrated");
+            throw new PlatformApiDataValidationException("creditBureau.has.not.been.Integrated", "creditBureau.has.not.been.Integrated",
+                    dataValidationErrors);
+
+        }
+
+        return responseMessage;
 
     }
 

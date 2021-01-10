@@ -41,7 +41,7 @@ public class CreateCreditBureauLoanProductMappingCommandHandler implements NewCo
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
 
-        return this.writePlatformService.addCreditBureauLoanProductMapping(command.getCreditBureauId(), command);
+        return this.writePlatformService.addCreditBureauLoanProductMapping(command.getOrganisationCreditBureauId(), command);
     }
 
 }

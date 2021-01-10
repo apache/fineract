@@ -61,14 +61,14 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
     @Transactional
     @Override
-    public CommandProcessingResult addCreditBureauLoanProductMapping(Long creditBureau_id, JsonCommand command) {
+    public CommandProcessingResult addCreditBureauLoanProductMapping(Long organisationCreditBureauId, JsonCommand command) {
         this.context.authenticatedUser();
 
-        this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureau_id);
+        this.fromApiJsonDeserializer.validateForCreate(command.json(), organisationCreditBureauId);
 
         final long lpid = command.longValueOfParameterNamed("loanProductId");
 
-        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getOne(creditBureau_id);
+        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getOne(organisationCreditBureauId);
 
         final LoanProduct lp = this.loanProductRepository.getOne(lpid);
 

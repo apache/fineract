@@ -20,7 +20,11 @@
 package org.apache.fineract.infrastructure.creditbureau.api;
 
 import com.google.gson.Gson;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -66,6 +70,7 @@ public class CreditBureauIntegrationAPI {
     private final DefaultToApiJsonSerializer<CreditReportData> toCreditReportApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final CreditReportWritePlatformService creditReportWritePlatformService;
     private final CreditReportReadPlatformService creditReportReadPlatformService;
     private final DefaultToApiJsonSerializer<CreditReportData> toApiJsonSerializer;
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationAPI.class);
@@ -82,6 +87,7 @@ public class CreditBureauIntegrationAPI {
         this.toCreditReportApiJsonSerializer = toCreditReportApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.creditReportWritePlatformService = creditReportWritePlatformService;
         this.creditReportReadPlatformService = creditReportReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
 
@@ -100,6 +106,18 @@ public class CreditBureauIntegrationAPI {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toCreditReportApiJsonSerializer.serialize(result);
 
+    }
+
+    // submit loan file of clients to Credit Bureau
+    @POST
+    @Path("addCreditReport")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public String addCreditReport(@FormDataParam("file") final File creditReport, @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") final UriInfo uriInfo, @FormDataParam("file") FormDataContentDisposition fileDetail,
+            @QueryParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId) {
+
+        final String responseMessage = this.creditReportWritePlatformService.addCreditReport(creditBureauId, creditReport, fileDetail);
+        return this.toCreditReportApiJsonSerializer.serialize(responseMessage);
     }
 
     // saves fetched-creditreport into database

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import java.io.File;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
@@ -31,5 +33,8 @@ public interface CreditReportWritePlatformService {
 
     // deletes creditReports which are saved in database
     CommandProcessingResult deleteCreditReport(Long creditBureauId, JsonCommand command);
+
+    // upload CreditReport to CreditBureau
+    String addCreditReport(Long creditBureauId, File creditReport, FormDataContentDisposition fileDetail);
 
 }
