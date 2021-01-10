@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.common.truth.Truth;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -1872,8 +1873,9 @@ public class FixedDepositTest {
         principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
         maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
         LOG.info("{}", principal.toString());
-        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
 
+        Truth.assertWithMessage("Verifying Maturity amount for Fixed Deposit Account").that(maturityAmount).isAnyOf(principal,
+                principal - 1); // FINERACT-887
     }
 
     @Test
