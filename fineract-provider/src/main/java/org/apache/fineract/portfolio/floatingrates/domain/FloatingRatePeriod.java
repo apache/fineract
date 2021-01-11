@@ -149,11 +149,13 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
 
         final LocalDate fromDate = ZonedDateTime.ofInstant(getFromDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
         final LocalDate createdOn = ZonedDateTime.ofInstant(getCreatedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-        final LocalDate modidiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant())
+        final LocalDate modifiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant())
                 .toLocalDate();
 
-        return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(),
-                getCreatedBy().getUsername(), createdOn, getModifiedBy().getUsername(), modidiedOn);
+        String createdBy = getCreatedBy() != null ? getCreatedBy().getUsername() : null;
+        String modifiedBy = getModifiedBy() != null ? getModifiedBy().getUsername() : null;
+        return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(), createdBy, createdOn,
+                modifiedBy, modifiedOn);
     }
 
 }
