@@ -86,7 +86,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
         private final String schemaSql;
         private final DataSource dataSource;
-        private Map<String, Map<String, Object>> filter;
+        private Map<String, Map<String, List<Object>>> filter;
 
         ClientTransactionMapper(DataSource dataSource) {
             final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -101,7 +101,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             return this.schemaSql;
         }
 
-        public String schema(Map<String, Map<String, Object>> filter) {
+        public String schema(Map<String, Map<String, List<Object>>> filter) {
             this.filter = filter;
             if (filter.isEmpty()) {
                 return schema();
@@ -119,9 +119,16 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append(SCHEMA_SQL_JOIN_DATA_TABLES);
             for (String tableName : filter.keySet()) {
                 sqlBuilder.append("join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = savt.id ");
-                Map<String, Object> columnFilters = filter.get(tableName);
+                Map<String, List<Object>> columnFilters = filter.get(tableName);
                 for (String columnName : columnFilters.keySet()) {
-                    sqlBuilder.append(" and " + tableName + "." + columnName + " = " + columnFilters.get(columnName) + " ");
+                    List list = columnFilters.get(columnName);
+                    if (list.size() == 1) {
+                        sqlBuilder.append(" and " + tableName + "." + columnName + " = " + list.get(0) + " ");
+                        continue;
+                    }
+                    if (list.size() == 2) {
+                        sqlBuilder.append(" and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ");
+                    }
                 }
             }
             return sqlBuilder.toString();

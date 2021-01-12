@@ -26,7 +26,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -91,7 +93,7 @@ public class ClientTransactionsApiResource {
             @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-        Map<String, Map<String, Object>> dataTableFilters = createFilterMap(uriInfo);
+        Map<String, Map<String, List<Object>>> dataTableFilters = createFilterMap(uriInfo);
         SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, dataTableFilters);
         final Page<ClientTransactionData> clientTransactions = this.clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
                 searchParameters);
@@ -154,26 +156,32 @@ public class ClientTransactionsApiResource {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
-    private Map<String, Map<String, Object>> createFilterMap(final UriInfo uriInfo) {
+    @SuppressWarnings("unchecked")
+    private Map<String, Map<String, List<Object>>> createFilterMap(final UriInfo uriInfo) {
         final int filterKeyIndex = 0;
         final int dataTableIndex = 1;
         final int columnIndex = 2;
-        Map<String, Map<String, Object>> filterMap = new HashMap<>();
+        Map<String, Map<String, List<Object>>> filterMap = new HashMap<>();
         final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
         for (String parameter : queryParameters.keySet()) {
 
             String[] filterData = Splitter.on('.').splitToList(parameter).toArray(new String[0]);
-            if (filterData.length != 3 || !filterData[filterKeyIndex].equalsIgnoreCase("filter")) {
+            if (filterData.length < 3 || !filterData[filterKeyIndex].equalsIgnoreCase("filter")) {
                 continue;
             }
 
-            Object value = queryParameters.get(parameter).get(0);
+            List value;
+            if (filterData.length > 3 && filterData[3].equals("period")) {
+                value = Arrays.asList(queryParameters.get(parameter).get(0).split("\\s*,\\s*"));
+            } else {
+                value = queryParameters.get(parameter);
+            }
             if (filterMap.containsKey(filterData[dataTableIndex])) {
                 filterMap.get(filterData[dataTableIndex]).put(filterData[columnIndex], value);
                 continue;
             }
 
-            Map<String, Object> map = new HashMap<>();
+            Map<String, List<Object>> map = new HashMap<>();
             map.put(filterData[columnIndex], value);
             filterMap.put(filterData[dataTableIndex], map);
         }

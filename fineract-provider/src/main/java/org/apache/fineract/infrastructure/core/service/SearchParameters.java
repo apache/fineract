@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
@@ -53,7 +54,7 @@ public final class SearchParameters {
     private final boolean isSelfUser;
 
     // Data tables filters
-    private final Map<String, Map<String, Object>> dataTableFilters;
+    private final Map<String, Map<String, List<Object>>> dataTableFilters;
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
@@ -171,7 +172,7 @@ public final class SearchParameters {
     }
 
     public static SearchParameters forPagination(final Integer offset, final Integer limit,
-            Map<String, Map<String, Object>> dataTableFilters) {
+            Map<String, Map<String, List<Object>>> dataTableFilters) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
         final Long staffId = null;
@@ -256,7 +257,8 @@ public final class SearchParameters {
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
-            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser, final Map<String, Map<String, Object>> dataTableFilters) {
+            final Long savingsId, final Boolean orphansOnly, boolean isSelfUser,
+            final Map<String, Map<String, List<Object>>> dataTableFilters) {
         this.sqlSearch = sqlSearch;
         this.officeId = officeId;
         this.externalId = externalId;
@@ -555,7 +557,7 @@ public final class SearchParameters {
         return this.isSelfUser;
     }
 
-    public Map<String, Map<String, Object>> getDataTableFilters() {
+    public Map<String, Map<String, List<Object>>> getDataTableFilters() {
         return dataTableFilters;
     }
 
