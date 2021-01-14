@@ -692,9 +692,9 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         // Semi-month details
         this.firstDateForSemi = firstSemiMonthDate == null ? null
-                : Date.from(firstSemiMonthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                : Date.from(firstSemiMonthDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.secondDateForSemi = secondSemiMonthDate == null ? null
-                : Date.from(secondSemiMonthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                : Date.from(secondSemiMonthDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public MonetaryCurrency getCurrency() {
@@ -1240,14 +1240,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public LocalDate getFirstSemiDate() {
         if (this.firstDateForSemi != null) {
-            return LocalDate.ofInstant(this.firstDateForSemi.toInstant(), ZoneId.systemDefault());
+            return LocalDate.ofInstant(this.firstDateForSemi.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return null;
     }
 
     public LocalDate getSecondSemiDate() {
         if (this.secondDateForSemi != null) {
-            return LocalDate.ofInstant(this.secondDateForSemi.toInstant(), ZoneId.systemDefault());
+            return LocalDate.ofInstant(this.secondDateForSemi.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return null;
     }

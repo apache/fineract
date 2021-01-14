@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -252,6 +253,33 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 6);
 
         // Semi-Month Details
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.SEMI_MONTH_START_DATE, element)) {
+            final LocalDate firstSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_START_DATE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_START_DATE).value(firstSemiDate).notNull();
+
+            final LocalDate secondSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_SECOND_DATE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).value(secondSemiDate).notNull()
+                    .validateDateAfter(firstSemiDate);
+
+            if (firstSemiDate.getMonth() != secondSemiDate.getMonth()) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "first.and.second.semi.dates.must.be.thesame.month", "First and second semi dates must be in the same month");
+            }
+
+            final int difference = Math.abs(firstSemiDate.getDayOfMonth() - secondSemiDate.getDayOfMonth());
+            if (difference < 14) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "date.difference.cannot.be.less.than.14",
+                        "days difference between first and second semi dates cannot be less than 14 days");
+            }
+            if (difference > 18) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "date.difference.cannot.be.greater.than.18",
+                        "days difference between first and second semi dates cannot be greater than 18 days");
+            }
+        }
 
         // settings
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerNamed("amortizationType", element, Locale.getDefault());
