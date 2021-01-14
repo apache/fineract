@@ -5154,6 +5154,11 @@ public class Loan extends AbstractPersistableCustom {
         return netDisbursalAmount;
     }
 
+    public BigDecimal deductFromNetDisbursalAmount(final BigDecimal subtrahend) {
+        this.netDisbursalAmount = this.netDisbursalAmount.subtract(subtrahend);
+        return netDisbursalAmount;
+    }
+
     public void setNetDisbursalAmount(BigDecimal netDisbursalAmount) {
         this.netDisbursalAmount = netDisbursalAmount;
     }
