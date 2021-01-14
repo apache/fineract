@@ -143,11 +143,11 @@ You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Insta
 Now e.g. from your Google Cloud shell, run the following commands:
 
 1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
-1. `./kubectl-startup`
+1. `./kubectl-startup.sh`
 
 To shutdown and reset your Cluster, run:
 
-    ./kubectl-shutdown
+    ./kubectl-shutdown.sh
 
 Using Minikube
 --------------
@@ -176,7 +176,7 @@ You can check Fineract logs using:
 
 To shutdown and reset your cluster, run:
 
-    ./kubectl-shutdown
+    ./kubectl-shutdown.sh
 
 We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
 
