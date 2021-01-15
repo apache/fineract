@@ -65,10 +65,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @SuppressWarnings({ "unchecked" })
-
+@TestMethodOrder(MethodName.class)
 public class SchedulerJobsTestResults {
 
     private static final String FROM_ACCOUNT_TYPE_LOAN = "1";
