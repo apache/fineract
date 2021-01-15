@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.common.truth.Truth;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -158,8 +159,8 @@ public class SchedulerJobsTestResults {
                 annualFeeDueDateAsArrayList.get(2));
         LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-        Assertions.assertTrue(nextDueDateForAnnualFee.isAfter(todaysDate), "Verifying that all due Annual Fees have been paid ");
-
+        Truth.assertWithMessage("Verifying that all due Annual Fees have been paid").that(nextDueDateForAnnualFee)
+                .isGreaterThan(todaysDate);
     }
 
     @Test
