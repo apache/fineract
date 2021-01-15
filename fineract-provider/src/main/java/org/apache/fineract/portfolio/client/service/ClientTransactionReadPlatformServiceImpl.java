@@ -35,12 +35,15 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.client.data.ClientSavingsAccountTransactionData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 import org.apache.fineract.portfolio.client.exception.ClientTransactionNotFoundException;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,13 +57,17 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     private final JdbcTemplate jdbcTemplate;
     private final ClientTransactionMapper clientTransactionMapper;
+    private final ClientSavingsAccountTransactionMapper clientSavingsAccountTransactionMapper;
     private final PaginationHelper<ClientTransactionData> paginationHelper;
+    private final PaginationHelper<ClientSavingsAccountTransactionData> paginationSavingsAccountHelper;
 
     @Autowired
     public ClientTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientTransactionMapper = new ClientTransactionMapper(dataSource);
+        this.clientSavingsAccountTransactionMapper = new ClientSavingsAccountTransactionMapper(dataSource);
         this.paginationHelper = new PaginationHelper<>();
+        this.paginationSavingsAccountHelper = new PaginationHelper<ClientSavingsAccountTransactionData>();
     }
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
@@ -134,23 +141,6 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             return sqlBuilder.toString();
         }
 
-        @SuppressWarnings("unchecked")
-        public List<String> getTableColumns(DataSource dataSource, String tableName) {
-            try {
-                return JdbcUtils.extractDatabaseMetaData(dataSource, (dbmd) -> {
-                    ResultSet rs = dbmd.getColumns("", "%", tableName + "%", null);
-                    List<String> list = new ArrayList();
-                    while (rs.next()) {
-                        String columnName = rs.getString("COLUMN_NAME");
-                        list.add(columnName);
-                    }
-                    return list;
-                });
-            } catch (MetaDataAccessException ex) {
-                throw new RuntimeException("Get table column name list failed", ex);
-            }
-        }
-
         @Override
         public ClientTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("transactionId");
@@ -205,6 +195,128 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     }
 
+    private static final class ClientSavingsAccountTransactionMapper implements RowMapper<ClientSavingsAccountTransactionData> {
+
+        private static final String SCHEMA_SQL_SELECTION_PART = " tr.id as transactionId, tr.transaction_type_enum as transactionType, "
+                + " tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
+                + " tr.created_date as submittedOnDate, tr.running_balance_derived as runningBalance, "
+                + " tr.is_reversed as reversed, sa.id as savingsId, sa.account_no as accountNo, "
+                + " sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, "
+                + " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, "
+                + " curr.display_symbol as currencyDisplaySymbol, tr.is_manual as postInterestAsOn  ";
+        private static final String SCHEMA_SQL_FROM_PART = " from m_savings_account sa  ";
+        private static final String SCHEMA_SQL_JOIN_PART = "join m_savings_account_transaction tr on tr.savings_account_id = sa.id "
+                + " join m_currency curr on curr.code = sa.currency_code ";
+
+        private final String schemaSql;
+        private final DataSource dataSource;
+        private Map<String, Map<String, List<Object>>> filter;
+
+        ClientSavingsAccountTransactionMapper(DataSource dataSource) {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
+            sqlBuilder.append(SCHEMA_SQL_FROM_PART);
+            sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
+            this.schemaSql = sqlBuilder.toString();
+            this.dataSource = dataSource;
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        public String schema(Map<String, Map<String, List<Object>>> filter) {
+            this.filter = filter;
+            if (filter.isEmpty()) {
+                return schema();
+            }
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
+            for (String tableName : filter.keySet()) {
+                List<String> columnNames = getTableColumns(this.dataSource, tableName);
+                for (String columnName : columnNames) {
+                    sqlBuilder.append(", " + tableName + "." + columnName + " as " + tableName + "_" + columnName);
+                }
+            }
+            sqlBuilder.append(SCHEMA_SQL_FROM_PART);
+            sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
+
+            for (String tableName : filter.keySet()) {
+                sqlBuilder.append("join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = tr.id ");
+                Map<String, List<Object>> columnFilters = filter.get(tableName);
+                for (String columnName : columnFilters.keySet()) {
+                    List list = columnFilters.get(columnName);
+                    if (list.size() == 1) {
+                        sqlBuilder.append(" and " + tableName + "." + columnName + " = " + list.get(0) + " ");
+                        continue;
+                    }
+                    if (list.size() == 2) {
+                        sqlBuilder.append(" and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ");
+                    }
+                }
+            }
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public ClientSavingsAccountTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+            final Long id = rs.getLong("transactionId");
+            final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
+            final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
+
+            final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
+            final BigDecimal outstandingChargeAmount = null;
+            final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
+            final boolean reversed = rs.getBoolean("reversed");
+
+            final Long savingsId = rs.getLong("savingsId");
+            final String accountNo = rs.getString("accountNo");
+            final boolean postInterestAsOn = rs.getBoolean("postInterestAsOn");
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
+
+            Map<String, Map<String, Object>> dataTablesMap = new HashMap<>();
+            for (String tableName : filter.keySet()) {
+                Map<String, Object> map = new HashMap<>();
+                List<String> columnNames = getTableColumns(this.dataSource, tableName);
+                for (String column : columnNames) {
+                    map.put(column, rs.getObject(tableName + "_" + column));
+                }
+                dataTablesMap.put(tableName, map);
+            }
+
+            return ClientSavingsAccountTransactionData.create(id, transactionType, savingsId, accountNo, date, currency, amount,
+                    outstandingChargeAmount, runningBalance, reversed, submittedOnDate, postInterestAsOn, dataTablesMap);
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> getTableColumns(DataSource dataSource, String tableName) {
+        try {
+            return JdbcUtils.extractDatabaseMetaData(dataSource, (dbmd) -> {
+                ResultSet rs = dbmd.getColumns("", "%", tableName + "%", null);
+                List<String> list = new ArrayList();
+                while (rs.next()) {
+                    String columnName = rs.getString("COLUMN_NAME");
+                    list.add(columnName);
+                }
+                return list;
+            });
+        } catch (MetaDataAccessException ex) {
+            throw new RuntimeException("Get table column name list failed", ex);
+        }
+    }
+
     @Override
     public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters searchParameters) {
         Object[] parameters = new Object[1];
@@ -252,4 +364,27 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         }
     }
 
+    @Override
+    public Page<ClientSavingsAccountTransactionData> retrieveAllSavingsAccountTransactions(Long clientId,
+            SearchParameters searchParameters) {
+        Object[] parameters = new Object[1];
+
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ")
+                .append(this.clientSavingsAccountTransactionMapper.schema(searchParameters.getDataTableFilters()))
+                .append(" where sa.client_id = ? ");
+        parameters[0] = clientId;
+
+        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        // apply limit and offsets
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationSavingsAccountHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), parameters,
+                this.clientSavingsAccountTransactionMapper);
+    }
 }

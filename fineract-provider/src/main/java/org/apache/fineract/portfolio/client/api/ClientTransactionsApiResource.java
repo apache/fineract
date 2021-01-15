@@ -53,6 +53,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.data.ClientSavingsAccountTransactionData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class ClientTransactionsApiResource {
     private final PlatformSecurityContext context;
     private final ClientTransactionReadPlatformService clientTransactionReadPlatformService;
     private final DefaultToApiJsonSerializer<ClientTransactionData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<ClientSavingsAccountTransactionData> toApiJsonSavingsAccountSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -73,11 +75,13 @@ public class ClientTransactionsApiResource {
     public ClientTransactionsApiResource(final PlatformSecurityContext context,
             final ClientTransactionReadPlatformService clientTransactionReadPlatformService,
             final DefaultToApiJsonSerializer<ClientTransactionData> toApiJsonSerializer,
+            final DefaultToApiJsonSerializer<ClientSavingsAccountTransactionData> toApiJsonSavingsAccountSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientTransactionReadPlatformService = clientTransactionReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.toApiJsonSavingsAccountSerializer = toApiJsonSavingsAccountSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
@@ -154,6 +158,32 @@ public class ClientTransactionsApiResource {
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
+    @GET
+    @Path("savings")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List Client Savings Account Transactions", description = "The list capability of client savings account transaction can support pagination."
+            + "\n\n" + "Example Requests:\n\n" + "clients/189/transactions/savings\n\n"
+            + "clients/189/transactions/savings?offset=10&limit=50\n\n"
+            + "clients/189/transactions/savings?filter.ccpayment.title=\"Master Card\"\n\n"
+            + "clients/189/transactions/savings?filter.ccpayment.creation.period='2020-12-21 12:14:13','2020-12-21 12:14:16'")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class))) })
+    public String retrieveAllClientSavingsAccountTransactions(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId, @Context final UriInfo uriInfo,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
+        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+        Map<String, Map<String, List<Object>>> dataTableFilters = createFilterMap(uriInfo);
+        SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, dataTableFilters);
+        final Page<ClientSavingsAccountTransactionData> clientTransactions = this.clientTransactionReadPlatformService
+                .retrieveAllSavingsAccountTransactions(clientId, searchParameters);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSavingsAccountSerializer.serialize(settings, clientTransactions,
+                ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @SuppressWarnings("unchecked")

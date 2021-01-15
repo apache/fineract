@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.service;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.portfolio.client.data.ClientSavingsAccountTransactionData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,5 +35,8 @@ public interface ClientTransactionReadPlatformService {
 
     @Transactional(readOnly = true)
     ClientTransactionData retrieveTransaction(Long clientId, Long transactionId);
+
+    @Transactional(readOnly = true)
+    Page<ClientSavingsAccountTransactionData> retrieveAllSavingsAccountTransactions(Long clientId, SearchParameters parameters);
 
 }
