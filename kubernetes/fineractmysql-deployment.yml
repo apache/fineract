@@ -107,14 +107,14 @@ spec:
             - containerPort: 3306
               name: fineractmysql
           volumeMounts:
-            - name: fineractmysql-persistent-storage
-              mountPath: /var/lib/mysql/
             - name: fineractmysql-initdb
               mountPath: /docker-entrypoint-initdb.d/
+            - name: fineractmysql-persistent-storage
+              mountPath: /var/lib/mysql/
       volumes:
-        - name: fineractmysql-persistent-storage
-          persistentVolumeClaim:
-            claimName: fineractmysql-pv-claim
         - name: fineractmysql-initdb
           configMap:
             name: fineractmysql-initdb
+        - name: fineractmysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: fineractmysql-pv-claim
