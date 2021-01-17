@@ -99,7 +99,7 @@ public class CurrencyData implements Serializable {
             return false;
         }
         CurrencyData that = (CurrencyData) o;
-        return Objects.equals(decimalPlaces, that.decimalPlaces) && Objects.equals(code, that.code) && Objects.equals(name, that.name)
+        return (decimalPlaces == that.decimalPlaces) && Objects.equals(code, that.code) && Objects.equals(name, that.name)
                 && Objects.equals(inMultiplesOf, that.inMultiplesOf) && Objects.equals(displaySymbol, that.displaySymbol)
                 && Objects.equals(nameCode, that.nameCode) && Objects.equals(displayLabel, that.displayLabel);
     }
