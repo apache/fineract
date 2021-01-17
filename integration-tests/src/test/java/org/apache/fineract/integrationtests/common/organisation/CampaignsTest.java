@@ -69,15 +69,15 @@ public class CampaignsTest {
 
         // Set up mock server for message-gateway
         this.client.when(request().withMethod("GET").withPath("/smsbridges"))
-                .respond(response().withContentType(MediaType.APPLICATION_JSON).withBody("[\n" + //
-                        "    {\n" + //
-                        "        \"id\": 1,\n" + //
-                        "        \"tenantId\": 1,\n" + //
-                        "        \"phoneNo\": \"+1234567890\",\n" + //
-                        "        \"providerName\": \"Dummy SMS Provider - Testing\",\n" + //
-                        "        \"providerDescription\": \"Dummy, just for testing\"\n" + //
-                        "    }\n" + //
-                        "]") //
+                .respond(response().withContentType(MediaType.APPLICATION_JSON).withBody("[\n" //
+                        + "    {\n" //
+                        + "        \"id\": 1,\n" //
+                        + "        \"tenantId\": 1,\n" //
+                        + "        \"phoneNo\": \"+1234567890\",\n" //
+                        + "        \"providerName\": \"Dummy SMS Provider - Testing\",\n" //
+                        + "        \"providerDescription\": \"Dummy, just for testing\"\n" //
+                        + "     }\n" //
+                        + "]") //
                 );
     }
 
