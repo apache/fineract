@@ -721,10 +721,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             return false;
         }
         SavingsAccountCharge that = (SavingsAccountCharge) o;
-        return Objects.equals(penaltyCharge, that.penaltyCharge) && Objects.equals(paid, that.paid) && Objects.equals(waived, that.waived)
-                && Objects.equals(status, that.status) && Objects.equals(savingsAccount, that.savingsAccount)
-                && Objects.equals(charge, that.charge) && Objects.equals(chargeTime, that.chargeTime)
-                && dueDate.compareTo(that.dueDate) == 0
+        return (penaltyCharge == that.penaltyCharge) && (paid == that.paid) && (waived == that.waived) && (status == that.status)
+                && Objects.equals(savingsAccount, that.savingsAccount) && Objects.equals(charge, that.charge)
+                && Objects.equals(chargeTime, that.chargeTime) && dueDate.compareTo(that.dueDate) == 0
                         ? Boolean.TRUE
                         : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
                                 && Objects.equals(feeInterval, that.feeInterval)
@@ -800,7 +799,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     private LocalDate setDayOfMonth(LocalDate nextDueLocalDate) {
         int maxDayOfMonth = nextDueLocalDate.lengthOfMonth();
-        int newDayOfMonth = (this.feeOnDay.intValue() < maxDayOfMonth) ? this.feeOnDay.intValue() : maxDayOfMonth;
+        int newDayOfMonth = (this.feeOnDay.intValue() < maxDayOfMonth) ? this.feeOnDay : maxDayOfMonth;
         nextDueLocalDate = nextDueLocalDate.withDayOfMonth(newDayOfMonth);
         return nextDueLocalDate;
     }
@@ -885,6 +884,6 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
      *
      */
     public boolean canOverriteSavingAccountRules() {
-        return !(this.isSavingsActivation() || this.isWithdrawalFee());
+        return (!this.isSavingsActivation() && !this.isWithdrawalFee());
     }
 }

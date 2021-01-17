@@ -495,15 +495,15 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.4.0"
+        errorprone "com.google.errorprone:error_prone_core:2.5.1"
     }
 
     tasks.withType(JavaCompile) {
         options.errorprone {
             disableWarningsInGeneratedCode = true
             excludedPaths = ".*/build/.*"
-            //Todo Remove necessary checks from this list
             disable(
+                    // TODO Remove disabled checks from this list, by fixing remaining usages
                     "UnusedVariable",
                     "TypeParameterUnusedInFormals",
                     "JdkObsolete",
@@ -513,8 +513,8 @@ configure(project.fineractJavaProjects) {
                     "ReturnFromVoid",
                     "AlmostJavadoc",
                     "InvalidBlockTag",
+                    "JavaUtilDate", // TODO FINERACT-1298
                     )
-            //TODO gradually enable these checks
             error(
                     "DefaultCharset",
                     "RemoveUnusedImports",
@@ -586,6 +586,7 @@ configure(project.fineractJavaProjects) {
                     "ModifiedButNotUsed",
                     "InconsistentCapitalization",
                     "MissingOverride",
+                    // TODO enable these remaining checks (one by one)
                     // "InvalidBlockTag",
                     // "InconsistentOverloads",
                     // "MethodCanBeStatic",
