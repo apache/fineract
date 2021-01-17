@@ -506,7 +506,6 @@ configure(project.fineractJavaProjects) {
                     // TODO Remove disabled checks from this list, by fixing remaining usages
                     "UnusedVariable",
                     "TypeParameterUnusedInFormals",
-                    "JdkObsolete",
                     "EmptyBlockTag",
                     "MissingSummary",
                     "InvalidParam",
