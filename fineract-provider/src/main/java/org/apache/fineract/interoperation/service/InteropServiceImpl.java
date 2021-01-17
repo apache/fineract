@@ -558,7 +558,7 @@ public class InteropServiceImpl implements InteropService {
         MoneyData requestFee = request.getFspFee();
         if (requestFee != null) {
             if (!savingsAccount.getCurrency().getCode().equals(requestFee.getCurrency())) {
-                throw new UnsupportedOperationException();
+                throw new HttpClientErrorException(HttpStatus.resolve(400));
             }
             // TODO: compare with calculated quote fee
             total = MathUtil.add(total, requestFee.getAmount());
@@ -566,7 +566,7 @@ public class InteropServiceImpl implements InteropService {
         MoneyData requestCommission = request.getFspCommission();
         if (requestCommission != null) {
             if (!savingsAccount.getCurrency().getCode().equals(requestCommission.getCurrency())) {
-                throw new UnsupportedOperationException();
+                throw new HttpClientErrorException(HttpStatus.resolve(400));
             }
             // TODO: compare with calculated quote commission
             total = MathUtil.subtractToZero(total, requestCommission.getAmount());
