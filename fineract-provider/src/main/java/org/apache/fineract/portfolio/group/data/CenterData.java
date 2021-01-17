@@ -38,7 +38,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 public final class CenterData implements Serializable {
 
     private final Long id;
-    private String accountNo;
+    private final String accountNo;
     private final String name;
     private final String externalId;
     private final Long officeId;
@@ -276,7 +276,7 @@ public final class CenterData implements Serializable {
             return false;
         }
         CenterData that = (CenterData) o;
-        return Objects.equals(active, that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
+        return (active == that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
                 && Objects.equals(name, that.name) && Objects.equals(externalId, that.externalId) && Objects.equals(officeId, that.officeId)
                 && Objects.equals(officeName, that.officeName) && Objects.equals(staffId, that.staffId)
                 && Objects.equals(staffName, that.staffName) && Objects.equals(hierarchy, that.hierarchy)
