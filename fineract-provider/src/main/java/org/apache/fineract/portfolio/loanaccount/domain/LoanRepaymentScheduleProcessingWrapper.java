@@ -82,8 +82,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         } else if (loanCharge.getChargeCalculation().isPercentageOfUnutilizedAmount()) {
                             if (!loanCharge.isRevolvingPeriodInstalmentFee() || (loanCharge.isRevolvingPeriodInstalmentFee()
                                     && period.getLoan().isDateInRevolvingPeriod(period.getDueDate()))) {
-                                BigDecimal disbursedAmount = period.getLoan().getExpectedDisbursedAmount(period.getDueDate());
-                                amount = period.getLoan().getApprovedPrincipal().subtract(disbursedAmount);
+                                amount = period.getLoan().calcUnutilizeAmount(period.getDueDate());
                             }
                         } else {
                             amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount());
@@ -192,8 +191,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         } else if (loanCharge.getChargeCalculation().isPercentageOfUnutilizedAmount()) {
                             if (!loanCharge.isRevolvingPeriodInstalmentFee() || (loanCharge.isRevolvingPeriodInstalmentFee()
                                     && period.getLoan().isDateInRevolvingPeriod(period.getDueDate()))) {
-                                BigDecimal disbursedAmount = period.getLoan().getExpectedDisbursedAmount(period.getDueDate());
-                                amount = period.getLoan().getApprovedPrincipal().subtract(disbursedAmount);
+                                amount = period.getLoan().calcUnutilizeAmount(period.getDueDate());
                             }
                         } else {
                             amount = amount.add(period.getPrincipal(currency).getAmount());

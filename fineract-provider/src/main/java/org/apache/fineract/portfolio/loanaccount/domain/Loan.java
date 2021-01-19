@@ -951,8 +951,7 @@ public class Loan extends AbstractPersistableCustom {
                 }
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
-                // Try Calculate Amount Percentage Applied To for PERCENT_OF_UNUTILIZED_AMOUNT - but it will be
-                // calculated later
+                // Returns zero as unutilized amount will be calculated later
                 amount = BigDecimal.ZERO;
             break;
             default:
@@ -1022,9 +1021,9 @@ public class Loan extends AbstractPersistableCustom {
                 percentOf = installment.getInterestCharged(getCurrency());
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
-                BigDecimal disbursedAmount = getExpectedDisbursedAmount(installment.getDueDate());
-                percentOf = Money.of(getCurrency(), this.approvedPrincipal.subtract(disbursedAmount));
-                LOG.info("Calculate Installment UNUTILIZED_AMOUNT percentOf: {}, disbursed: {}", percentOf, disbursedAmount);
+                BigDecimal unutilizeAmount = calcUnutilizeAmount(installment.getDueDate());
+                percentOf = Money.of(getCurrency(), unutilizeAmount);
+                LOG.info("Calculate Installment UNUTILIZED_AMOUNT percentOf: {}, unutilizeAmount: {}", percentOf, unutilizeAmount);
             break;
             default:
             break;
@@ -1758,9 +1757,9 @@ public class Loan extends AbstractPersistableCustom {
                 amount = installment.getInterestOutstanding(getCurrency());
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
-                BigDecimal disbursedAmount = getExpectedDisbursedAmount(installment.getDueDate());
-                amount = Money.of(getCurrency(), this.approvedPrincipal.subtract(disbursedAmount));
-                LOG.info("Calculate Overdue Installment UNUTILIZED_AMOUNT amount: {}, disbursed: {}", amount, disbursedAmount);
+                BigDecimal unutilizeAmount = calcUnutilizeAmount(installment.getDueDate());
+                amount = Money.of(getCurrency(), unutilizeAmount);
+                LOG.info("Calculate Overdue Installment UNUTILIZED_AMOUNT amount: {}, unutilizeAmount: {}", amount, unutilizeAmount);
             break;
             default:
             break;
@@ -2688,7 +2687,7 @@ public class Loan extends AbstractPersistableCustom {
         return principal;
     }
 
-    public BigDecimal getExpectedDisbursedAmount(LocalDate untilDate) {
+    private BigDecimal getExpectedDisbursedAmount(LocalDate untilDate) {
         BigDecimal principal = BigDecimal.ZERO;
         if (untilDate != null) {
             for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
@@ -2701,6 +2700,20 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return principal;
+    }
+
+    public BigDecimal calcUnutilizeAmount(LocalDate untilDate) {
+        BigDecimal disbursedAmount = getExpectedDisbursedAmount(untilDate);
+        BigDecimal unutilizedAmount = this.approvedPrincipal.subtract(disbursedAmount);
+
+        if (this.loanProduct.isRevolving()) {
+            BigDecimal totalRepaid = getLoanTransactions().stream().filter(
+                    loanTransaction -> loanTransaction.isPaymentTransaction() && loanTransaction.getTransactionDate().isBefore(untilDate))
+                    .map(LoanTransaction::getPrincipalPortion).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            unutilizedAmount = unutilizedAmount.add(totalRepaid);
+        }
+        return unutilizedAmount;
     }
 
     private void removeDisbursementDetail() {
@@ -3235,6 +3248,11 @@ public class Loan extends AbstractPersistableCustom {
                 }
             }
         }
+
+        if (charges().stream().anyMatch(LoanCharge::isRevolvingPeriodInstalmentFee)) {
+            reprocess = true;
+        }
+
         if (reprocess) {
             if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);

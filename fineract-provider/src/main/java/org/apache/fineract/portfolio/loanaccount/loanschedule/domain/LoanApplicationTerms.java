@@ -481,6 +481,7 @@ public final class LoanApplicationTerms {
         this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
 
         this.principal = principal;
+        this.originalProposedPrincipal = principal;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.repaymentsStartingFromDate = repaymentsStartingFromDate;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
