@@ -4987,13 +4987,22 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public boolean isDateInRevolvingPeriod(LocalDate date) {
-        if (this.loanProduct.isRevolving() && this.getRevolvingPeriodStartDate() != null && this.getRevolvingPeriodEndDate() != null) {
-            LocalDate revolvingPeriodStartDate = LocalDate.ofInstant(this.getRevolvingPeriodStartDate().toInstant(),
-                    ZoneId.systemDefault());
-            LocalDate revolvingPeriodEndDate = LocalDate.ofInstant(this.getRevolvingPeriodEndDate().toInstant(), ZoneId.systemDefault());
+        if (this.loanProduct.isRevolving()) {
+            boolean isRevolvingStartDateValid = true;
+            if (this.getRevolvingPeriodStartDate() != null) {
+                LocalDate revolvingPeriodStartDate = LocalDate.ofInstant(this.getRevolvingPeriodStartDate().toInstant(),
+                        ZoneId.systemDefault());
+                isRevolvingStartDateValid = date.isAfter(revolvingPeriodStartDate) || date.isEqual(revolvingPeriodStartDate);
+            }
 
-            return (date.isBefore(revolvingPeriodEndDate) || date.isEqual(revolvingPeriodEndDate))
-                    && (date.isAfter(revolvingPeriodStartDate) || date.isEqual(revolvingPeriodStartDate));
+            boolean isRevolvingEndValid = true;
+            if (this.getRevolvingPeriodEndDate() != null) {
+                LocalDate revolvingPeriodEndDate = LocalDate.ofInstant(this.getRevolvingPeriodEndDate().toInstant(),
+                        ZoneId.systemDefault());
+                isRevolvingEndValid = date.isBefore(revolvingPeriodEndDate) || date.isEqual(revolvingPeriodEndDate);
+            }
+
+            return isRevolvingEndValid && isRevolvingStartDateValid;
         }
         return false;
     }

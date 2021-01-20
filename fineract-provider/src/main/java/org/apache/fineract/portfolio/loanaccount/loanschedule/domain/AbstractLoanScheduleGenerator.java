@@ -2076,13 +2076,21 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // If revolving loan
         LocalDate revolvingPeriodEndDate = loanApplicationTerms.getRevolvingPeriodEndDate();
         LocalDate revolvingPeriodStartDate = loanApplicationTerms.getRevolvingPeriodStartDate();
-        if (inRevolvingPeriodOnly && revolvingPeriodStartDate != null && revolvingPeriodEndDate != null) {
 
-            if (!untilDate.isAfter(revolvingPeriodEndDate) && !untilDate.isBefore(revolvingPeriodStartDate)) {
 
-                // Reduce repaid amount from unutilized amount
+        if (inRevolvingPeriodOnly) {
+            boolean isRevolvingStartDateValid = true;
+            if (revolvingPeriodStartDate != null) {
+                isRevolvingStartDateValid = !untilDate.isBefore(revolvingPeriodStartDate);
+            }
+            boolean isRevolvingEndDateValid = true;
+            if (revolvingPeriodEndDate != null) {
+                isRevolvingEndDateValid = !untilDate.isAfter(revolvingPeriodEndDate);
+            }
+
+            // If date in a valid revolving period
+            if (isRevolvingStartDateValid && isRevolvingEndDateValid) {
                 if (transactions != null && !transactions.isEmpty()) {
-
                     BigDecimal totalRepaid = transactions.stream()
                             .filter(loanTransaction -> loanTransaction.isPaymentTransaction()
                                     && loanTransaction.getTransactionDate().isBefore(untilDate))
