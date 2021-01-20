@@ -353,6 +353,7 @@ configure(project.fineractJavaProjects) {
 
     apply plugin: 'java-library'
     apply plugin: 'idea'
+    apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: "net.ltgt.errorprone"

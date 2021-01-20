@@ -2366,8 +2366,8 @@ public class Loan extends AbstractPersistableCustom {
          * cash based accounting is selected
          **/
 
-        if ((isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct() && isMultiDisburmentLoan()
-                && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan()) {
+        if (((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())
+                && isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                     actualDisbursementDate, createdDate, currentUser);
             addLoanTransaction(interestAppliedTransaction);
