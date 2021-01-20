@@ -211,6 +211,8 @@ public final class LoanApplicationTerms {
     private Boolean activateOnApproval = false;
     private Date approvedOnDate;
 
+    private BigDecimal basicInterestRate;
+
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, Integer nthDay, DayOfWeekType weekDayType,
@@ -466,6 +468,7 @@ public final class LoanApplicationTerms {
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType;
         this.annualNominalInterestRate = annualNominalInterestRate;
+        this.basicInterestRate = annualNominalInterestRate;
         this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
         this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
 
@@ -1583,11 +1586,24 @@ public final class LoanApplicationTerms {
     public void updateAnnualNominalInterestRate(BigDecimal annualNominalInterestRate) {
         if (annualNominalInterestRate != null) {
             this.annualNominalInterestRate = annualNominalInterestRate;
+            if (this.basicInterestRate == null) {
+                this.basicInterestRate = annualNominalInterestRate;
+            }
+        }
+    }
+
+    public void updateBasicInterestRate(BigDecimal interestRate) {
+        if (interestRate != null) {
+            this.basicInterestRate = interestRate;
         }
     }
 
     public BigDecimal getAnnualNominalInterestRate() {
         return this.annualNominalInterestRate;
+    }
+
+    public BigDecimal getBasicInterestRate() {
+        return this.basicInterestRate;
     }
 
     public void updateInterestChargedFromDate(LocalDate interestChargedFromDate) {

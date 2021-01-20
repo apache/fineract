@@ -58,7 +58,8 @@ public class LoanRescheduleRequestDataValidator {
                     RescheduleLoansApiConstants.rescheduleReasonIdParamName, RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
                     RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
                     RescheduleLoansApiConstants.adjustedDueDateParamName, RescheduleLoansApiConstants.recalculateInterestParamName,
-                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName));
+                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName,
+                    RescheduleLoansApiConstants.isSpecificToInstallmentParamName));
 
     private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
@@ -194,12 +195,6 @@ public class LoanRescheduleRequestDataValidator {
                         .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
             }
 
-        }
-
-        if (loan.isMultiDisburmentLoan()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
-                    "Loan rescheduling is not supported for multidisbursement loans");
         }
 
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
