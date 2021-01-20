@@ -1639,7 +1639,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_WAIVE_CHARGE,
                 constructEntityMap(BusinessEntity.LOAN_CHARGE, loanCharge));
         Integer loanInstallmentNumber = null;
-        if (loanCharge.isInstalmentFee()) {
+        if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
             LoanInstallmentCharge chargePerInstallment = null;
             if (!StringUtils.isBlank(command.json())) {
                 final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
@@ -1767,7 +1767,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         Integer loanInstallmentNumber = null;
         BigDecimal amount = loanCharge.amountOutstanding();
-        if (loanCharge.isInstalmentFee()) {
+        if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
             LoanInstallmentCharge chargePerInstallment = null;
             final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
             final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
@@ -2821,7 +2821,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         Integer loanInstallmentNumber = null;
         BigDecimal amount = loanCharge.amountOutstanding();
-        if (loanCharge.isInstalmentFee()) {
+        if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
             LoanInstallmentCharge chargePerInstallment = null;
             final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
             final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");

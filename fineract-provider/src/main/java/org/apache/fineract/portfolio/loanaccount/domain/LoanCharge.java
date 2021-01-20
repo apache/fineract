@@ -54,10 +54,14 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name = "m_loan_charge")
 public class LoanCharge extends AbstractPersistableCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanCharge.class);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
@@ -177,13 +181,15 @@ public class LoanCharge extends AbstractPersistableCustom {
         }
 
         BigDecimal loanCharge = BigDecimal.ZERO;
-        if (ChargeTimeType.fromInt(chargeDefinition.getChargeTimeType()).equals(ChargeTimeType.INSTALMENT_FEE)) {
+        if (ChargeTimeType.fromInt(chargeDefinition.getChargeTimeType()).equals(ChargeTimeType.INSTALMENT_FEE)
+                || ChargeTimeType.fromInt(chargeDefinition.getChargeTimeType()).equals(ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE)) {
             BigDecimal percentage = amount;
             if (percentage == null) {
                 percentage = chargeDefinition.getAmount();
             }
             loanCharge = loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation()),
-                    percentage);
+                    percentage,
+                    ChargeTimeType.fromInt(chargeDefinition.getChargeTimeType()).equals(ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE));
         }
 
         // If charge type is specified due date and loan is multi disburment
@@ -281,7 +287,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 this.percentage = null;
                 this.amountPercentageAppliedTo = null;
                 this.amountPaid = null;
-                if (isInstalmentFee()) {
+                if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
                     if (numberOfRepayments == null) {
                         numberOfRepayments = this.loan.fetchNumberOfInstallmensAfterExceptions();
                     }
@@ -297,6 +303,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             case PERCENT_OF_AMOUNT_AND_INTEREST:
             case PERCENT_OF_INTEREST:
             case PERCENT_OF_DISBURSEMENT_AMOUNT:
+            case PERCENT_OF_UNUTILIZED_AMOUNT:
                 this.percentage = chargeAmount;
                 this.amountPercentageAppliedTo = amountPercentageAppliedTo;
                 if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
@@ -310,7 +317,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             break;
         }
         this.amountOrPercentage = chargeAmount;
-        if (this.loan != null && isInstalmentFee()) {
+        if (this.loan != null && (isInstalmentFee() || isRevolvingPeriodInstalmentFee())) {
             updateInstallmentCharges();
         }
     }
@@ -347,7 +354,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
-        if (isInstalmentFee()) {
+        if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
             final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
             final Money amountWaived = chargePerInstallment.waive(currency);
             if (this.amountWaived == null) {
@@ -392,7 +399,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 case INVALID:
                 break;
                 case FLAT:
-                    if (isInstalmentFee()) {
+                    if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
                         if (numberOfRepayments == null) {
                             numberOfRepayments = this.loan.fetchNumberOfInstallmensAfterExceptions();
                         }
@@ -405,6 +412,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                 case PERCENT_OF_INTEREST:
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                case PERCENT_OF_UNUTILIZED_AMOUNT:
                     this.percentage = amount;
                     this.amountPercentageAppliedTo = loanPrincipal;
                     if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
@@ -415,7 +423,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             }
             this.amountOrPercentage = amount;
             this.amountOutstanding = calculateOutstanding();
-            if (this.loan != null && isInstalmentFee()) {
+            if (this.loan != null && (isInstalmentFee() || isRevolvingPeriodInstalmentFee())) {
                 updateInstallmentCharges();
             }
         }
@@ -485,7 +493,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 case INVALID:
                 break;
                 case FLAT:
-                    if (isInstalmentFee()) {
+                    if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
                         this.amount = newValue.multiply(BigDecimal.valueOf(this.loan.fetchNumberOfInstallmensAfterExceptions()));
                     } else {
                         this.amount = newValue;
@@ -496,12 +504,13 @@ public class LoanCharge extends AbstractPersistableCustom {
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                 case PERCENT_OF_INTEREST:
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                case PERCENT_OF_UNUTILIZED_AMOUNT:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = amount;
                     loanCharge = BigDecimal.ZERO;
-                    if (isInstalmentFee()) {
+                    if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
                         loanCharge = this.loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(this.chargeCalculation),
-                                this.percentage);
+                                this.percentage, isRevolvingPeriodInstalmentFee());
                     }
                     if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
                         loanCharge = percentageOf(this.amountPercentageAppliedTo);
@@ -511,7 +520,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 break;
             }
             this.amountOrPercentage = newValue;
-            if (isInstalmentFee()) {
+            if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
                 updateInstallmentCharges();
             }
         }
@@ -567,6 +576,10 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public boolean isInstalmentFee() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.INSTALMENT_FEE);
+    }
+
+    public boolean isRevolvingPeriodInstalmentFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE);
     }
 
     public boolean isOverdueInstallmentCharge() {
@@ -766,7 +779,7 @@ public class LoanCharge extends AbstractPersistableCustom {
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
         Money processAmount = Money.zero(incrementBy.getCurrency());
-        if (isInstalmentFee()) {
+        if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
             if (installmentNumber == null) {
                 processAmount = getUnpaidInstallmentLoanCharge().updatePaidAmountBy(incrementBy, feeAmount);
             } else {
@@ -943,7 +956,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     public void updateWaivedAmount(MonetaryCurrency currency) {
-        if (isInstalmentFee()) {
+        if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
             this.amountWaived = BigDecimal.ZERO;
             for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
                 final Money amountWaived = chargePerInstallment.updateWaivedAndAmountPaidThroughChargePaymentAmount(currency);
@@ -982,7 +995,7 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public Money undoPaidOrPartiallyAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
         Money processAmount = Money.zero(incrementBy.getCurrency());
-        if (isInstalmentFee()) {
+        if (isInstalmentFee() || isRevolvingPeriodInstalmentFee()) {
             if (installmentNumber == null) {
                 processAmount = getLastPaidOrPartiallyPaidInstallmentLoanCharge(incrementBy.getCurrency()).undoPaidAmountBy(incrementBy,
                         feeAmount);
