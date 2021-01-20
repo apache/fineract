@@ -96,11 +96,7 @@ spec:
                   key: password
           livenessProbe:
             exec:
-              command:
-                - mysqladmin
-                - ping
-                - -h
-                - localhost
+              command: ["sh","-c","mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}"]
             failureThreshold: 10
             timeoutSeconds: 10
           ports:
