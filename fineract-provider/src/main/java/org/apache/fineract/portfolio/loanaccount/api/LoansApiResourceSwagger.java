@@ -515,6 +515,8 @@ final class LoansApiResourceSwagger {
         public String expectedDisbursementDate;
         @Schema(example = "2")
         public Integer transactionProcessingStrategyId;
+        @Schema(example = "360", allowableValues = "1, 360, 364, 36")
+        public Integer daysInYearType;
     }
 
     @Schema(description = "PostLoansResponse")
