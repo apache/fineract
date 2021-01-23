@@ -25,7 +25,7 @@ dependencies {
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
-            'com.google.truth:truth:1.0.1',
+            'com.google.truth:truth:1.1.1',
             'com.google.truth.extensions:truth-java8-extension:1.1.1',
             'org.awaitility:awaitility',
             // 'com.google.code.gson:gson',
