@@ -101,12 +101,12 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createCreditBureauLoanProductMapping(final long creditBureauId) {
+    public CommandWrapperBuilder createCreditBureauLoanProductMapping(final long organisationCreditBureauId) {
         this.actionName = "CREATE";
         this.entityName = "CREDITBUREAU_LOANPRODUCT_MAPPING";
         this.entityId = creditBureauId;
         this.href = "/creditBureauConfiguration/template";
-        this.creditBureauId = creditBureauId;
+        this.organisationCreditBureauId = organisationCreditBureauId;
         return this;
     }
 
@@ -114,7 +114,7 @@ public class CommandWrapperBuilder {
         this.actionName = "CREATE";
         this.entityName = "CREDITBUREAU_CONFIGURATION";
         this.entityId = creditBureauId;
-        this.href = "/creditBureauConfigurationData/";
+        this.href = "/addCreditBureauConfigurationData/";
         return this;
     }
 
@@ -122,7 +122,7 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "CREDITBUREAU_CONFIGURATION";
         this.entityId = configurationId;
-        this.href = "/creditBureauConfigurationData/";
+        this.href = "/updateCreditBureauConfigurationData/";
         return this;
     }
 

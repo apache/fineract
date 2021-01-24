@@ -231,13 +231,13 @@ public class CreditBureauConfigurationAPI {
     }
 
     @POST
-    @Path("/mappings/{CreditBureauId}")
+    @Path("/mappings/{organisationCreditBureauId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createCreditBureauLoanProductMapping(@PathParam("CreditBureauId") final Long CreditBureauId,
+    public String createCreditBureauLoanProductMapping(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCreditBureauLoanProductMapping(CreditBureauId)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCreditBureauLoanProductMapping(organisationCreditBureauId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

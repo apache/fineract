@@ -23,7 +23,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.File;
+import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportWritePlatformServiceImpl;
 import org.apache.fineract.infrastructure.creditbureau.service.ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl;
@@ -60,7 +62,11 @@ public class ThitsaworksCreditBureauTest {
     static String url = "url";
     static String token = "token";
     static Long uniqueId = 8113399260L;
-    static File file;
+    static byte[] file;
+    static File report;
+    static String fileName;
+    static UriInfo uriInfo;
+    static FormDataContentDisposition fileData;
 
     static String testresult = "{   'Data': {'BorrowerInfo': {'MainIdentifier': '2113439293', 'Name': 'Aung Khant Min',"
             + "            'NRC': '13/MiFoS(N)163525', 'Gender': '', 'DOB': '1990-01-20', 'FatherName': '', 'Address': '',"
@@ -86,10 +92,10 @@ public class ThitsaworksCreditBureauTest {
         String searchResult = "{\"Data\":[{\"UniqueID\":\"8113399260\",\"NRC\":\"12/KaMaRa(N)253426\",\"FullName\":\"Aye Aye\",\"DOB\":\"1990-05-22,1991-05-22\",\"FatherFullName\":\"U Aye Myint Maung\",\"Location\":\"Yangon-Thongwa,Twantay,Yankin\",\"Flag\":\"[{\\\"WriteOff\\\":1}]\",\"Active\":\"Y\"}],\"MessageDtm\":\"8/1/2020 6:39:00 PM UTC\",\"SubscriptionID\":\"317A1FF8-625D-41BA-BE0F-F8ED8A644A7C\",\"CallerIP\":\"207.46.228.155\",\"URI\":\"https://qa-mmcix-api.azurewebsites.net/20200324/api/Search/SimpleSearch?nrc=253426\",\"ResponseMessage\":\"Record found\"}";
 
         when(this.thitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.okHttpConnectionMethod(userName, password, subscriptionKey,
-                subscriptionId, url, token, file, uniqueId, nrcID, process)).thenReturn(searchResult);
+                subscriptionId, url, token, report, fileData, uniqueId, nrcID, process)).thenReturn(searchResult);
 
         final String search = thitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.okHttpConnectionMethod(userName, password,
-                subscriptionKey, subscriptionId, url, token, file, uniqueId, nrcID, process);
+                subscriptionKey, subscriptionId, url, token, report, fileData, uniqueId, nrcID, process);
 
         when(thitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.extractUniqueId(search)).thenCallRealMethod();
 
@@ -105,10 +111,10 @@ public class ThitsaworksCreditBureauTest {
         String curentNrc = "13/MiFoS(N)163525";
 
         when(this.thitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.okHttpConnectionMethod(userName, password, subscriptionKey,
-                subscriptionId, url, token, file, uniqueId, nrcID, process)).thenReturn(testresult);
+                subscriptionId, url, token, report, fileData, uniqueId, nrcID, process)).thenReturn(testresult);
 
         String creditReport = thitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.okHttpConnectionMethod(userName, password,
-                subscriptionKey, subscriptionId, url, token, file, uniqueId, nrcID, process);
+                subscriptionKey, subscriptionId, url, token, report, fileData, uniqueId, nrcID, process);
 
         JsonObject resultObject = JsonParser.parseString(creditReport).getAsJsonObject();
         String data = resultObject.get("Data").toString();

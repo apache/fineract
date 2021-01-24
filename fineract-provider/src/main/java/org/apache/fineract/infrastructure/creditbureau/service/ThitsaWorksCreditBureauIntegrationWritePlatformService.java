@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.File;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
@@ -30,8 +31,10 @@ public interface ThitsaWorksCreditBureauIntegrationWritePlatformService {
     Long extractUniqueId(String jsonResult);
 
     String okHttpConnectionMethod(String userName, String password, String subscriptionKey, String subscriptionId, String url, String token,
-            File report, Long uniqueId, String nrcId, String process);
+            File report, FormDataContentDisposition fileDetail, Long uniqueId, String nrcId, String process);
 
     CreditBureauReportData getCreditReportFromThitsaWorks(JsonCommand command);
+
+    String addCreditReport(Long bureauId, File creditReport, FormDataContentDisposition fileDetail);
 
 }
