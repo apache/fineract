@@ -170,7 +170,7 @@ public final class ChargeEnumerations {
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
                 optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT.getValue().longValue(),
-                        ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT.getCode(), "% Unutilized Amount");
+                        ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT.getCode(), "% annually of Unutilized Amount");
             break;
             default:
                 optionData = new EnumOptionData(ChargeCalculationType.INVALID.getValue().longValue(),

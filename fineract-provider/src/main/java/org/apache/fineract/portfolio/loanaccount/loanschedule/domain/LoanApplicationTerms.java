@@ -1131,7 +1131,8 @@ public final class LoanApplicationTerms {
         return outstandingBalance.getAmount().multiply(interestRate, mc);
     }
 
-    private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
+    public long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
+        // Potential issue with days in year for "actual" and leap year. validate if should return 366 for leap year.
 
         // check if daysInYears is set if so change periodsInOneYear to days set
         // in db

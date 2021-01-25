@@ -45,8 +45,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -131,6 +133,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.TransactionHelper;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -144,6 +147,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -987,7 +991,7 @@ public class Loan extends AbstractPersistableCustom {
         Money amount = Money.zero(getCurrency());
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            if (isRevolvingPeriodInstalmentFee && isDateInRevolvingPeriod(installment.getDueDate())) {
+            if (isRevolvingPeriodInstalmentFee && isInstallmentInRevolvingPeriod(installment)) {
                 amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
             } else if (!isRevolvingPeriodInstalmentFee) {
                 amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
@@ -1021,9 +1025,9 @@ public class Loan extends AbstractPersistableCustom {
                 percentOf = installment.getInterestCharged(getCurrency());
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
-                BigDecimal unutilizeAmount = calcUnutilizeAmount(installment.getDueDate());
-                percentOf = Money.of(getCurrency(), unutilizeAmount);
-                LOG.info("Calculate Installment UNUTILIZED_AMOUNT percentOf: {}, unutilizeAmount: {}", percentOf, unutilizeAmount);
+                BigDecimal unutilizeAmount = calcUnutilizeChargeAmount(installment.getFromDate(), installment.getDueDate(), percentage);
+                amount.plus(Money.of(getCurrency(), unutilizeAmount));
+                LOG.info("Calculate Installment UNUTILIZED_AMOUNT, unutilize charge: {}", unutilizeAmount);
             break;
             default:
             break;
@@ -1731,7 +1735,7 @@ public class Loan extends AbstractPersistableCustom {
         if (graceDate.isAfter(installment.getDueDate())) {
 
             amount = calculateOverdueAmountPercentageAppliedTo(installment, loanCharge.getChargeCalculation());
-            if (loanCharge.isRevolvingPeriodInstalmentFee() && !isDateInRevolvingPeriod(installment.getDueDate())) {
+            if (loanCharge.isRevolvingPeriodInstalmentFee() && !isInstallmentInRevolvingPeriod(installment)) {
                 amount = Money.zero(getCurrency());
             }
             if (!amount.isGreaterThanZero()) {
@@ -1757,9 +1761,7 @@ public class Loan extends AbstractPersistableCustom {
                 amount = installment.getInterestOutstanding(getCurrency());
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
-                BigDecimal unutilizeAmount = calcUnutilizeAmount(installment.getDueDate());
-                amount = Money.of(getCurrency(), unutilizeAmount);
-                LOG.info("Calculate Overdue Installment UNUTILIZED_AMOUNT amount: {}, unutilizeAmount: {}", amount, unutilizeAmount);
+                LOG.info("Calculate Overdue Installment UNUTILIZED AppliedTo, return {} for now", amount);
             break;
             default:
             break;
@@ -2694,7 +2696,7 @@ public class Loan extends AbstractPersistableCustom {
                 Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
                         : disbursementDetail.expectedDisbursementDate();
                 LocalDate disbursedLocalDate = LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault());
-                if (disbursedLocalDate.isBefore(untilDate) || disbursedLocalDate.isEqual(untilDate)) {
+                if (disbursedLocalDate.isBefore(untilDate)) {
                     principal = principal.add(disbursementDetail.principal());
                 }
             }
@@ -2702,18 +2704,85 @@ public class Loan extends AbstractPersistableCustom {
         return principal;
     }
 
-    public BigDecimal calcUnutilizeAmount(LocalDate untilDate) {
-        BigDecimal disbursedAmount = getExpectedDisbursedAmount(untilDate);
+    private boolean checkDateBetween(LocalDate dateToCheck, LocalDate startDate, LocalDate endDate) {
+        return (startDate == null || !dateToCheck.isBefore(startDate)) && (endDate == null || !dateToCheck.isAfter(endDate));
+    }
+
+    private boolean checkDateBetween(Date dateToCheck, LocalDate startDate, LocalDate endDate) {
+        return checkDateBetween(LocalDate.ofInstant(dateToCheck.toInstant(), ZoneId.systemDefault()), startDate, endDate);
+    }
+
+    private boolean checkDateBetween(LocalDate dateToCheck, Date startDate, Date endDate) {
+        return checkDateBetween(
+                dateToCheck,
+                LocalDate.ofInstant(startDate.toInstant(), ZoneId.systemDefault()),
+                LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault())
+        );
+    }
+
+    public BigDecimal calcUnutilizeChargeAmount(LocalDate periodStart, LocalDate periodEnd, final BigDecimal chargePercentage) {
+
+        final MathContext mc = createMathContext();
+        long loanTermPeriodsInOneYear = 365; // TODO applicationTerms.calculatePeriodsInOneYear(this.paymentPeriodsInOneYearCalculator);
+        final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
+        final BigDecimal oneDayUnutilizedChargeRate = chargePercentage.divide(loanTermPeriodsInYearBigDecimal, mc).divide(BigDecimal.valueOf(100), mc);
+
+        // Calc disbursed until start period
+        BigDecimal disbursedAmount = getExpectedDisbursedAmount(periodStart);
         BigDecimal unutilizedAmount = this.approvedPrincipal.subtract(disbursedAmount);
 
-        if (this.loanProduct.isRevolving()) {
-            BigDecimal totalRepaid = getLoanTransactions().stream().filter(
-                    loanTransaction -> loanTransaction.isPaymentTransaction() && loanTransaction.getTransactionDate().isBefore(untilDate))
-                    .map(LoanTransaction::getPrincipalPortion).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Stream<TransactionHelper> disbursementsInPeriodStream = this.getDisbursementDetails().stream()
+                .filter(disbursementDetail -> {
+                    Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ?
+                            disbursementDetail.actualDisbursementDate() : disbursementDetail.expectedDisbursementDate();
+                    return checkDateBetween(disbursedDate, periodStart, periodEnd);
+                })
+                .map(disbursementDetail -> {
+                    Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ?
+                            disbursementDetail.actualDisbursementDate() : disbursementDetail.expectedDisbursementDate();
+                    return new TransactionHelper(LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault()),
+                            disbursementDetail.principal().negate());
+                });
+        Stream<TransactionHelper> transactionInPeriodStream = Stream.empty();
 
-            unutilizedAmount = unutilizedAmount.add(totalRepaid);
+        if (this.getLoanProduct().isRevolving()) {
+            BigDecimal totalUntilPeriodStartRepaid = getLoanTransactions().stream().filter(
+                    loanTransaction -> loanTransaction.isPaymentTransaction() && loanTransaction.getTransactionDate().isBefore(periodStart))
+                    .map(loanTransaction -> loanTransaction.getPrincipalPortion(getCurrency()))
+                    .map(Money::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            unutilizedAmount = unutilizedAmount.add(totalUntilPeriodStartRepaid);
+
+            transactionInPeriodStream = getLoanTransactions().stream()
+                    .filter(transaction -> transaction.isPaymentTransaction() &&
+                            checkDateBetween(transaction.getTransactionDate(), periodStart, periodEnd) &&
+                            checkDateBetween(transaction.getTransactionDate(), getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate()))
+                    .map(loanTransaction -> new TransactionHelper(loanTransaction.getTransactionDate(),
+                                                                  loanTransaction.getPrincipalPortion(getCurrency()).getAmount()));
         }
-        return unutilizedAmount;
+
+        BigDecimal chargeAmount = BigDecimal.ZERO;
+        LocalDate fromCalcDate = periodStart;
+        // For calculating unutilized amount disbursements are negative and transactions are positive
+        List<TransactionHelper> transactionsAndDisbursements =  Stream.concat(disbursementsInPeriodStream, transactionInPeriodStream)
+                .sorted(Comparator.comparing(TransactionHelper::getDate))
+                .collect(Collectors.toList());
+
+        // Add last date that the fee will be calculated for.
+        var revolvingEndDate = Optional.ofNullable(revolvingPeriodEndDate).map(date -> LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()));
+        LocalDate lastDateCalculatedFor = this.getLoanProduct().isRevolving() && revolvingEndDate.isPresent() &&
+                                        revolvingEndDate.get().isBefore(periodEnd) ? revolvingEndDate.get() : periodEnd;
+        transactionsAndDisbursements.add(new TransactionHelper(lastDateCalculatedFor, BigDecimal.ZERO));
+
+        for (TransactionHelper transactionOrDisbursement :transactionsAndDisbursements) {
+            unutilizedAmount = unutilizedAmount.add(transactionOrDisbursement.getAmount());
+            BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(Math.toIntExact(ChronoUnit.DAYS.between(fromCalcDate, transactionOrDisbursement.getDate())));
+            chargeAmount = chargeAmount.add(numberOfDaysInPeriod.multiply(oneDayUnutilizedChargeRate, mc).multiply(unutilizedAmount, mc));
+
+            fromCalcDate = transactionOrDisbursement.getDate();
+        }
+
+        return chargeAmount;
     }
 
     private void removeDisbursementDetail() {
@@ -2773,8 +2842,7 @@ public class Loan extends AbstractPersistableCustom {
 
     public LoanScheduleModel regenerateScheduleModel(final ScheduleGeneratorDTO scheduleGeneratorDTO) {
 
-        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-        final MathContext mc = new MathContext(8, roundingMode);
+        final MathContext mc = createMathContext();
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
         LoanScheduleGenerator loanScheduleGenerator = null;
@@ -2798,6 +2866,12 @@ public class Loan extends AbstractPersistableCustom {
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
                 scheduleGeneratorDTO.getHolidayDetailDTO());
         return loanSchedule;
+    }
+
+    @NotNull
+    private MathContext createMathContext() {
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+        return new MathContext(8, roundingMode);
     }
 
     private BigDecimal constructFloatingInterestRates(final BigDecimal annualNominalInterestRate, final FloatingRateDTO floatingRateDTO,
@@ -4986,7 +5060,11 @@ public class Loan extends AbstractPersistableCustom {
         return loanChargePerInstallments;
     }
 
-    public boolean isDateInRevolvingPeriod(LocalDate date) {
+    public boolean isInstallmentInRevolvingPeriod(LoanRepaymentScheduleInstallment installment) {
+        return isDateInRevolvingPeriod(installment.getFromDate()) || isDateInRevolvingPeriod(installment.getDueDate());
+    }
+
+    private boolean isDateInRevolvingPeriod(LocalDate date) {
         if (this.loanProduct.isRevolving()) {
             boolean isRevolvingStartDateValid = true;
             if (this.getRevolvingPeriodStartDate() != null) {
@@ -5590,8 +5668,7 @@ public class Loan extends AbstractPersistableCustom {
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory().create(interestMethod);
 
-        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-        final MathContext mc = new MathContext(8, roundingMode);
+        final MathContext mc = createMathContext();
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(generatorDTO);
 
@@ -5606,8 +5683,7 @@ public class Loan extends AbstractPersistableCustom {
         LoanRepaymentScheduleInstallment installment = null;
 
         if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
-            final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-            final MathContext mc = new MathContext(8, roundingMode);
+            final MathContext mc = createMathContext();
 
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
             final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
