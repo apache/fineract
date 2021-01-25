@@ -408,7 +408,7 @@ public final class SearchParameters {
 
     public static Integer getCheckedLimit(final Integer limit) {
 
-        final Integer maxLimitAllowed = 200;
+        final Integer maxLimitAllowed = 20;
         // default to max limit first off
         Integer checkedLimit = maxLimitAllowed;
 

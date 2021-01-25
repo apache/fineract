@@ -79,36 +79,40 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     @Override
     public Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, final Long status, final String entity,
             final Long productId) {
+        final StringBuilder sqlCountRowsBuilder = new StringBuilder(200);
+        sqlCountRowsBuilder.append(this.entityDataTableChecksMapper.getSqlCountRows());
+
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(this.entityDataTableChecksMapper.schema());
+        sqlBuilder.append("select ").append(this.entityDataTableChecksMapper.schema());
 
-        if (status != null || entity != null || productId != null) {
-            sqlBuilder.append(" where ");
-        }
         List<Object> paramList = new ArrayList<>();
+
+        String where = " where ";
         if (status != null) {
-            sqlBuilder.append(" status_enum = ? ");
+            sqlBuilder.append(where).append(" status_enum = ? ");
             paramList.add(status);
+            sqlCountRowsBuilder.append(where).append(" status_enum = ").append(status);
+            where = " and ";
         }
-
         if (entity != null) {
-            sqlBuilder.append(" and t.application_table_name = ? ");
+            sqlBuilder.append(where).append(" t.application_table_name = ? ");
             paramList.add(entity);
+            sqlCountRowsBuilder.append(where).append(" t.application_table_name = '").append(entity).append("' ");
+            where = " and ";
+        }
+        if (productId != null) {
+            sqlBuilder.append(where).append(" t.product_id = ? ");
+            paramList.add(productId);
+            sqlCountRowsBuilder.append(where).append(" t.product_id = ").append(productId);
         }
 
-        if (productId != null) {
-            sqlBuilder.append(" and t.product_id = ? ");
-            paramList.add(productId);
-        }
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
             if (searchParameters.isOffset()) {
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRowsBuilder.toString(), sqlBuilder.toString(), paramList.toArray(),
                 entityDataTableChecksMapper);
 
     }
@@ -188,6 +192,16 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
 
     protected static final class EntityDataTableChecksMapper implements RowMapper<EntityDataTableChecksData> {
 
+        private final String sqlCountRows = "SELECT COUNT(t.id ) from m_entity_datatable_check as t "
+                + "left join m_product_loan lp on lp.id = t.product_id and t.application_table_name = 'm_loan' "
+                + "left join m_savings_product sp on sp.id = t.product_id and t.application_table_name = 'm_savings_account' ";
+        private final String schema = " t.id as id, t.application_table_name as entity, t.status_enum as status,  "
+                + "t.system_defined as systemDefined, t.x_registered_table_name as datatableName,  "
+                + "t.product_id as productId,  (CASE t.application_table_name WHEN 'm_loan' THEN lp.name "
+                + "WHEN 'm_savings_account' THEN sp.name ELSE NULL  END) as productName " + "from m_entity_datatable_check as t  "
+                + "left join m_product_loan lp on lp.id = t.product_id and t.application_table_name = 'm_loan' "
+                + "left join m_savings_product sp on sp.id = t.product_id and t.application_table_name = 'm_savings_account' ";
+
         @Override
         public EntityDataTableChecksData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -207,13 +221,11 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         }
 
         public String schema() {
-            return " t.id as id, " + "t.application_table_name as entity, " + "t.status_enum as status,  "
-                    + "t.system_defined as systemDefined,  " + "t.x_registered_table_name as datatableName,  "
-                    + "t.product_id as productId,  " + "(CASE t.application_table_name " + "WHEN 'm_loan' THEN lp.name "
-                    + "WHEN 'm_savings_account' THEN sp.name " + "ELSE NULL  " + "END) as productName "
-                    + "from m_entity_datatable_check as t  "
-                    + "left join m_product_loan lp on lp.id = t.product_id and t.application_table_name = 'm_loan' "
-                    + "left join m_savings_product sp on sp.id = t.product_id and t.application_table_name = 'm_savings_account' ";
+            return this.schema;
+        }
+
+        public String getSqlCountRows() {
+            return sqlCountRows;
         }
     }
 

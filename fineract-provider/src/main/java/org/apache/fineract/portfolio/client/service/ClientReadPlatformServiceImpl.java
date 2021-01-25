@@ -193,27 +193,33 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String underHierarchySearchString = userOfficeHierarchy + "%";
         final String appUserID = String.valueOf(context.authenticatedUser().getId());
 
-        // if (searchParameters.isScopedByOfficeHierarchy()) {
-        // this.context.validateAccessRights(searchParameters.getHierarchy());
-        // underHierarchySearchString = searchParameters.getHierarchy() + "%";
-        // }
+        final StringBuilder sqlCountRowsBuilder = new StringBuilder(200);
+        sqlCountRowsBuilder.append(this.clientMapper.getSqlCountRows());
+
         List<Object> paramList = new ArrayList<>(Arrays.asList(underHierarchySearchString, underHierarchySearchString));
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
         sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
+
+        sqlCountRowsBuilder.append(" where (o.hierarchy like '").append(underHierarchySearchString)
+                .append("' or transferToOffice.hierarchy like '").append(underHierarchySearchString).append("') ");
 
         if (searchParameters != null) {
             if (searchParameters.isSelfUser()) {
                 sqlBuilder.append(
                         " and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
                 paramList.add(appUserID);
+
+                sqlCountRowsBuilder.append(
+                        " and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ")
+                        .append(appUserID).append(") ");
             }
 
             final String extraCriteria = buildSqlStringFromClientCriteria(this.clientMapper.schema(), searchParameters, paramList);
 
             if (StringUtils.isNotBlank(extraCriteria)) {
                 sqlBuilder.append(" and (").append(extraCriteria).append(")");
+                sqlCountRowsBuilder.append(" and (").append(extraCriteria).append(")");
             }
 
             if (searchParameters.isOrderByRequested()) {
@@ -232,9 +238,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 }
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
-                this.clientMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRowsBuilder.toString(), sqlBuilder.toString(),
+                paramList.toArray(), this.clientMapper);
     }
 
     private String buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters, List<Object> paramList) {
@@ -308,12 +313,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String hierarchy = this.context.officeHierarchy();
             final String hierarchySearchString = hierarchy + "%";
 
-            final String sql = "select " + this.clientMapper.schema()
+            final String sql = this.clientMapper.schema()
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
             final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
                     new Object[] { hierarchySearchString, hierarchySearchString, clientId });
 
-            final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
+            final String clientGroupsSql = this.clientGroupsMapper.parentGroupsSchema();
 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
                     new Object[] { clientId });
@@ -562,11 +567,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private static final class ClientMapper implements RowMapper<ClientData> {
 
+        private final String sqlCountRows;
         private final String schema;
 
         ClientMapper() {
             final StringBuilder builder = new StringBuilder(400);
-
+            builder.append("SELECT ");
             builder.append(
                     "c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus, ");
             builder.append(
@@ -629,11 +635,35 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_code_value cvConstitution on cvConstitution.id = cnp.constitution_cv_id ");
             builder.append("left join m_code_value cvMainBusinessLine on cvMainBusinessLine.id = cnp.main_business_line_cv_id ");
 
+            final StringBuilder sqlCountRowsBuilder = new StringBuilder(200);
+            sqlCountRowsBuilder.append("SELECT COUNT(c.id)");
+            sqlCountRowsBuilder.append("from m_client c ");
+            sqlCountRowsBuilder.append("join m_office o on o.id = c.office_id ");
+            sqlCountRowsBuilder.append("left join m_client_non_person cnp on cnp.client_id = c.id ");
+            sqlCountRowsBuilder.append("left join m_staff s on s.id = c.staff_id ");
+            sqlCountRowsBuilder.append("left join m_savings_product sp on sp.id = c.default_savings_product ");
+            sqlCountRowsBuilder.append("left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+            sqlCountRowsBuilder.append("left join m_appuser sbu on sbu.id = c.submittedon_userid ");
+            sqlCountRowsBuilder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
+            sqlCountRowsBuilder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
+            sqlCountRowsBuilder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            sqlCountRowsBuilder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
+            sqlCountRowsBuilder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
+            sqlCountRowsBuilder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
+            sqlCountRowsBuilder.append("left join m_code_value cvConstitution on cvConstitution.id = cnp.constitution_cv_id ");
+            sqlCountRowsBuilder
+                    .append("left join m_code_value cvMainBusinessLine on cvMainBusinessLine.id = cnp.main_business_line_cv_id ");
+
             this.schema = builder.toString();
+            this.sqlCountRows = sqlCountRowsBuilder.toString();
         }
 
         public String schema() {
             return this.schema;
+        }
+
+        public String getSqlCountRows() {
+            return sqlCountRows;
         }
 
         @Override
@@ -736,7 +766,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ParentGroupsMapper implements RowMapper<GroupGeneralData> {
 
         public String parentGroupsSchema() {
-            return "gp.id As groupId , gp.account_no as accountNo, gp.display_name As groupName from m_client cl JOIN m_group_client gc ON cl.id = gc.client_id "
+            return "SELECT gp.id As groupId , gp.account_no as accountNo, gp.display_name As groupName from m_client cl JOIN m_group_client gc ON cl.id = gc.client_id "
                     + "JOIN m_group gp ON gp.id = gc.group_id WHERE cl.id  = ?";
         }
 

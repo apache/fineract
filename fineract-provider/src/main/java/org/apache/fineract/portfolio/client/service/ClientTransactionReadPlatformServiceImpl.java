@@ -67,12 +67,13 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         this.clientTransactionMapper = new ClientTransactionMapper(dataSource);
         this.clientSavingsAccountTransactionMapper = new ClientSavingsAccountTransactionMapper(dataSource);
         this.paginationHelper = new PaginationHelper<>();
-        this.paginationSavingsAccountHelper = new PaginationHelper<ClientSavingsAccountTransactionData>();
+        this.paginationSavingsAccountHelper = new PaginationHelper<>();
     }
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
 
-        private static final String SCHEMA_SQL_SELECTION_PART = "tr.id as transactionId, tr.transaction_type_enum as transactionType,  "
+        private static final String SCHEMA_SQL_COUNT_SELECTION = "SELECT COUNT(tr.id) ";
+        private static final String SCHEMA_SQL_SELECTION_PART = "SELECT tr.id as transactionId, tr.transaction_type_enum as transactionType,  "
                 + "tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
                 + "tr.created_date as submittedOnDate, tr.is_reversed as reversed, "
                 + "tr.external_id as externalId, o.name as officeName, o.id as officeId, "
@@ -92,6 +93,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                 + "join m_savings_account_transaction savt on savt.savings_account_id = sav.id ";
 
         private final String schemaSql;
+        private String sqlCountRows;
         private final DataSource dataSource;
         private Map<String, Map<String, List<Object>>> filter;
 
@@ -100,7 +102,14 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
             sqlBuilder.append(SCHEMA_SQL_FROM_PART);
             sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
+
+            final StringBuilder sqlCountRowsBuilder = new StringBuilder(400);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_COUNT_SELECTION);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_FROM_PART);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_JOIN_PART);
+
             this.schemaSql = sqlBuilder.toString();
+            this.sqlCountRows = sqlCountRowsBuilder.toString();
             this.dataSource = dataSource;
         }
 
@@ -108,11 +117,18 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             return this.schemaSql;
         }
 
+        public String getSqlCountRows() {
+            return sqlCountRows;
+        }
+
         public String schema(Map<String, Map<String, List<Object>>> filter) {
             this.filter = filter;
             if (filter.isEmpty()) {
                 return schema();
             }
+            final StringBuilder sqlCountRowsBuilder = new StringBuilder(400);
+            sqlCountRowsBuilder.append(this.sqlCountRows);
+
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
             for (String tableName : filter.keySet()) {
@@ -124,20 +140,28 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append(SCHEMA_SQL_FROM_PART);
             sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
             sqlBuilder.append(SCHEMA_SQL_JOIN_DATA_TABLES);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_JOIN_DATA_TABLES);
             for (String tableName : filter.keySet()) {
-                sqlBuilder.append("join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = savt.id ");
+                String joinTable = "join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = savt.id ";
+                sqlBuilder.append(joinTable);
+                sqlCountRowsBuilder.append(joinTable);
                 Map<String, List<Object>> columnFilters = filter.get(tableName);
                 for (String columnName : columnFilters.keySet()) {
                     List list = columnFilters.get(columnName);
                     if (list.size() == 1) {
-                        sqlBuilder.append(" and " + tableName + "." + columnName + " = " + list.get(0) + " ");
+                        String where = " and " + tableName + "." + columnName + " = " + list.get(0) + " ";
+                        sqlBuilder.append(where);
+                        sqlCountRowsBuilder.append(where);
                         continue;
                     }
                     if (list.size() == 2) {
-                        sqlBuilder.append(" and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ");
+                        String where = " and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ";
+                        sqlBuilder.append(where);
+                        sqlCountRowsBuilder.append(where);
                     }
                 }
             }
+            this.sqlCountRows = sqlCountRowsBuilder.toString();
             return sqlBuilder.toString();
         }
 
@@ -197,7 +221,8 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     private static final class ClientSavingsAccountTransactionMapper implements RowMapper<ClientSavingsAccountTransactionData> {
 
-        private static final String SCHEMA_SQL_SELECTION_PART = " tr.id as transactionId, tr.transaction_type_enum as transactionType, "
+        private static final String SCHEMA_SQL_COUNT_SELECTION = "SELECT COUNT(tr.id) ";
+        private static final String SCHEMA_SQL_SELECTION_PART = "SELECT tr.id as transactionId, tr.transaction_type_enum as transactionType, "
                 + " tr.transaction_date as transactionDate, tr.amount as transactionAmount, "
                 + " tr.created_date as submittedOnDate, tr.running_balance_derived as runningBalance, "
                 + " tr.is_reversed as reversed, sa.id as savingsId, sa.account_no as accountNo, "
@@ -209,6 +234,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                 + " join m_currency curr on curr.code = sa.currency_code ";
 
         private final String schemaSql;
+        private String sqlCountRows;
         private final DataSource dataSource;
         private Map<String, Map<String, List<Object>>> filter;
 
@@ -217,7 +243,14 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
             sqlBuilder.append(SCHEMA_SQL_FROM_PART);
             sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
+
+            final StringBuilder sqlCountRowsBuilder = new StringBuilder(400);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_COUNT_SELECTION);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_FROM_PART);
+            sqlCountRowsBuilder.append(SCHEMA_SQL_JOIN_PART);
+
             this.schemaSql = sqlBuilder.toString();
+            this.sqlCountRows = sqlCountRowsBuilder.toString();
             this.dataSource = dataSource;
         }
 
@@ -225,11 +258,18 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             return this.schemaSql;
         }
 
+        public String getSqlCountRows() {
+            return sqlCountRows;
+        }
+
         public String schema(Map<String, Map<String, List<Object>>> filter) {
             this.filter = filter;
             if (filter.isEmpty()) {
                 return schema();
             }
+            final StringBuilder sqlCountRowsBuilder = new StringBuilder(400);
+            sqlCountRowsBuilder.append(this.sqlCountRows);
+
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(SCHEMA_SQL_SELECTION_PART);
             for (String tableName : filter.keySet()) {
@@ -242,16 +282,22 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append(SCHEMA_SQL_JOIN_PART);
 
             for (String tableName : filter.keySet()) {
-                sqlBuilder.append("join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = tr.id ");
+                String joinTable = "join  " + tableName + "  on " + tableName + ".savings_account_transaction_id = tr.id ";
+                sqlBuilder.append(joinTable);
+                sqlCountRowsBuilder.append(joinTable);
                 Map<String, List<Object>> columnFilters = filter.get(tableName);
                 for (String columnName : columnFilters.keySet()) {
                     List list = columnFilters.get(columnName);
                     if (list.size() == 1) {
-                        sqlBuilder.append(" and " + tableName + "." + columnName + " = " + list.get(0) + " ");
+                        String where = " and " + tableName + "." + columnName + " = " + list.get(0) + " ";
+                        sqlBuilder.append(where);
+                        sqlCountRowsBuilder.append(where);
                         continue;
                     }
                     if (list.size() == 2) {
-                        sqlBuilder.append(" and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ");
+                        String where = " and " + tableName + "." + columnName + " between " + list.get(0) + " and " + list.get(1) + " ";
+                        sqlBuilder.append(where);
+                        sqlCountRowsBuilder.append(where);
                     }
                 }
             }
@@ -319,14 +365,9 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     @Override
     public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters searchParameters) {
-        Object[] parameters = new Object[1];
-
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ").append(this.clientTransactionMapper.schema(searchParameters.getDataTableFilters()))
-                .append(" where c.id = ? ");
-        parameters[0] = clientId;
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        sqlBuilder.append(this.clientTransactionMapper.schema(searchParameters.getDataTableFilters()))
+                .append(" where c.id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
 
         // apply limit and offsets
         if (searchParameters.isLimited()) {
@@ -336,6 +377,10 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             }
         }
 
+        Object[] parameters = new Object[1];
+        parameters[0] = clientId;
+
+        String sqlCountRows = this.clientTransactionMapper.getSqlCountRows() + " where c.id = " + clientId;
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), parameters,
                 this.clientTransactionMapper);
     }
@@ -343,7 +388,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     @Override
     public Collection<ClientTransactionData> retrieveAllTransactions(Long clientId, Long chargeId) {
         Object[] parameters = new Object[1];
-        String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? ";
+        String sql = this.clientTransactionMapper.schema() + " where c.id = ? ";
         if (chargeId != null) {
             parameters = new Object[2];
             parameters[1] = chargeId;
@@ -357,7 +402,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     @Override
     public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId) {
         try {
-            final String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
+            final String sql = this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
             return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId });
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientTransactionNotFoundException(clientId, transactionId, e);
@@ -367,15 +412,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     @Override
     public Page<ClientSavingsAccountTransactionData> retrieveAllSavingsAccountTransactions(Long clientId,
             SearchParameters searchParameters) {
-        Object[] parameters = new Object[1];
-
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ")
-                .append(this.clientSavingsAccountTransactionMapper.schema(searchParameters.getDataTableFilters()))
-                .append(" where sa.client_id = ? ");
-        parameters[0] = clientId;
 
-        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        sqlBuilder.append(this.clientSavingsAccountTransactionMapper.schema(searchParameters.getDataTableFilters()))
+                .append(" where sa.client_id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+
         // apply limit and offsets
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
@@ -383,7 +424,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
+
+        Object[] parameters = new Object[1];
+        parameters[0] = clientId;
+
+        String sqlCountRows = this.clientSavingsAccountTransactionMapper.getSqlCountRows() + " where sa.client_id = " + clientId;
         return this.paginationSavingsAccountHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), parameters,
                 this.clientSavingsAccountTransactionMapper);
     }
