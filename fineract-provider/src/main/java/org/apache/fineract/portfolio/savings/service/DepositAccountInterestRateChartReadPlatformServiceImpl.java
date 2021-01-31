@@ -293,7 +293,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             Long interestRateChartSlabId = null;
             int ircIndex = 0;// Interest rate chart index
             int ircdIndex = 0;// Interest rate chart Slabs index
-            rs.previous();
+
             while (rs.next()) {
                 Long tempIrcdId = rs.getLong("ircdId");
                 if (interestRateChartSlabId == null || interestRateChartSlabId.equals(tempIrcdId)) {
@@ -306,7 +306,6 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                         chartSlabData.addIncentives(incentiveData);
                     }
                 } else {
-                    rs.previous();
                     break;
                 }
 
