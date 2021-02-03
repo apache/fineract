@@ -69,7 +69,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -2419,7 +2418,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosedOnDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.closedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return this.closedOnDate == null ? null : LocalDate.ofInstant(this.closedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public SavingsAccountSummary getSummary() {
