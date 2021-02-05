@@ -111,6 +111,7 @@ Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 Now to run a new Fineract instance you can simply:
 
 1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
 1. `docker-compose build`
 1. `docker-compose up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
