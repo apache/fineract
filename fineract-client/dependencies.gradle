@@ -37,8 +37,8 @@ dependencies {
 
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api',
-            'com.google.truth:truth:1.1.2',
-            'com.google.truth.extensions:truth-java8-extension:1.1.2'
+            'com.google.truth:truth',
+            'com.google.truth.extensions:truth-java8-extension'
             )
     testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine'
