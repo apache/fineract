@@ -24,7 +24,7 @@ dependencies {
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
-            'org.junit.jupiter:junit-jupiter-api:5.7.0',
+            'org.junit.jupiter:junit-jupiter-api',
             'com.google.truth:truth:1.1.2',
             'com.google.truth.extensions:truth-java8-extension:1.1.2',
             'org.awaitility:awaitility',
@@ -41,6 +41,6 @@ dependencies {
         exclude group: 'com.sun.xml.bind'
     }
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+            'org.junit.jupiter:junit-jupiter-engine'
             )
 }
