@@ -67,7 +67,7 @@ public class TenantDatabaseUpgradeService {
             if (connection.isAutoUpdateEnabled()) {
 
                 String connectionProtocol = driverConfig.constructProtocol(connection.getSchemaServer(), connection.getSchemaServerPort(),
-                        connection.getSchemaName());
+                        connection.getSchemaName(), connection.getSchemaConnectionParameters());
                 DriverDataSource source = new DriverDataSource(Thread.currentThread().getContextClassLoader(),
                         driverConfig.getDriverClassName(), connectionProtocol, connection.getSchemaUsername(),
                         connection.getSchemaPassword());
@@ -100,12 +100,14 @@ public class TenantDatabaseUpgradeService {
         String dbPort = getEnvVar("FINERACT_DEFAULT_TENANTDB_PORT", "3306");
         String dbUid = getEnvVar("FINERACT_DEFAULT_TENANTDB_UID", "root");
         String dbPwd = getEnvVar("FINERACT_DEFAULT_TENANTDB_PWD", "mysql");
+        String dbConnParams = getEnvVar("FINERACT_DEFAULT_TENANTDB_CONN_PARAMS", "");
         LOG.info("upgradeTenantDB: FINERACT_DEFAULT_TENANTDB_HOSTNAME = {}, FINERACT_DEFAULT_TENANTDB_PORT = {}", dbHostname, dbPort);
 
         final Flyway flyway = Flyway.configure().dataSource(tenantDataSource).locations("sql/migrations/list_db").outOfOrder(true)
                 // FINERACT-773
                 .placeholders(Map.of("fineract_default_tenantdb_hostname", dbHostname, "fineract_default_tenantdb_port", dbPort,
-                        "fineract_default_tenantdb_uid", dbUid, "fineract_default_tenantdb_pwd", dbPwd))
+                        "fineract_default_tenantdb_uid", dbUid, "fineract_default_tenantdb_pwd", dbPwd,
+                        "fineract_default_tenantdb_conn_params", dbConnParams))
                 .configuration(Map.of("flyway.table", "schema_version")) // FINERACT-979
                 .load();
 

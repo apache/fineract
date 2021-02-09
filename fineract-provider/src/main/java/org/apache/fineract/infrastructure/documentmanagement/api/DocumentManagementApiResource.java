@@ -46,7 +46,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -62,9 +61,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("{entityType}/{entityId}/documents")
 @Component
 @Scope("singleton")
+@Path("{entityType}/{entityId}/documents")
 @Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n"
         + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n"
         + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n"
@@ -81,16 +80,19 @@ public class DocumentManagementApiResource {
     private final DocumentWritePlatformService documentWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<DocumentData> toApiJsonSerializer;
+    private final FileUploadValidator fileUploadValidator;
 
     @Autowired
     public DocumentManagementApiResource(final PlatformSecurityContext context,
             final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer,
+            final FileUploadValidator fileUploadValidator) {
         this.context = context;
         this.documentReadPlatformService = documentReadPlatformService;
         this.documentWritePlatformService = documentWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.fileUploadValidator = fileUploadValidator;
     }
 
     @GET
@@ -100,7 +102,7 @@ public class DocumentManagementApiResource {
             + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
-    public String retreiveAllDocuments(@Context final UriInfo uriInfo,
+    public String retrieveAllDocuments(@Context final UriInfo uriInfo,
             @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
@@ -125,19 +127,16 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
-            @FormDataParam("file") final @Parameter(description = "file") FormDataContentDisposition fileDetails,
+            @FormDataParam("file") @Parameter(description = "file") final FormDataContentDisposition fileDetails,
             @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
             @FormDataParam("name") @Parameter(description = "name") final String name,
             @FormDataParam("description") @Parameter(description = "description") final String description) {
 
-        /**
-         * TODO: also need to have a backup and stop reading from stream after max size is reached to protect against
-         * malicious clients
-         **/
+        // TODO: stop reading from stream after max size is reached to protect against malicious clients
+        // TODO: need to extract the actual file type and determine if they are permissible
 
-        /**
-         * TODO: need to extract the actual file type and determine if they are permissable
-         **/
+        fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
+
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
 
@@ -174,6 +173,7 @@ public class DocumentManagementApiResource {
          ***/
         DocumentCommand documentCommand = null;
         if (inputStream != null && fileDetails.getFileName() != null) {
+            fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
             modifiedParams.add("fileName");
             modifiedParams.add("size");
             modifiedParams.add("type");
@@ -224,13 +224,8 @@ public class DocumentManagementApiResource {
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
-
         final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
-        final ResponseBuilder response = Response.ok(fileData.file());
-        response.header("Content-Disposition", "attachment; filename=\"" + fileData.name() + "\"");
-        response.header("Content-Type", fileData.contentType());
-
-        return response.build();
+        return ContentResources.fileDataToResponse(fileData, "attachment");
     }
 
     @DELETE

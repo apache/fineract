@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.note.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,7 +32,6 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -72,9 +72,9 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
             final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
             final String note = rs.getString("note");
-            final DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+            final ZonedDateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
             final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
+            final ZonedDateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");

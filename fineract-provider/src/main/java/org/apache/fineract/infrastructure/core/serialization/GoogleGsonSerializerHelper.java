@@ -21,6 +21,9 @@ package org.apache.fineract.infrastructure.core.serialization;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.time.LocalDate;
+import java.time.MonthDay;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,9 +34,6 @@ import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
 import org.apache.fineract.infrastructure.core.api.ParameterListExclusionStrategy;
 import org.apache.fineract.infrastructure.core.api.ParameterListInclusionStrategy;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.springframework.stereotype.Service;
 
 /**
@@ -102,7 +102,7 @@ public final class GoogleGsonSerializerHelper {
     public static void registerTypeAdapters(final GsonBuilder builder) {
         builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
         builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+        builder.registerTypeAdapter(ZonedDateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
     }
 }

@@ -1,0 +1,30 @@
+:doctitle: Fineract Documentation
+
+include::config.adoc[]
+
+= Fineract Documentation
+
+include::preface.adoc[]
+
+include::colophon.adoc[]
+
+include::01_introduction.adoc[]
+
+include::deployment.adoc[]
+
+include::02_architecture.adoc[]
+
+include::03_oauth.adoc[]
+
+// include::04_api.adoc[]
+
+include::05_client.adoc[]
+
+include::06_validation.adoc[]
+
+include::glossary.adoc[]
+
+include::indices.adoc[]
+
+include::appendix.adoc[]
+

@@ -42,7 +42,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
     @Column(name = "stale_Period")
     private int stalePeriod;
 
-    private boolean is_active;
+    private boolean isActive;
 
     @ManyToOne
     private OrganisationCreditBureau organisation_creditbureau;
@@ -56,11 +56,11 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
     }
 
     public CreditBureauLoanProductMapping(boolean isCreditCheckMandatory, boolean skipCreditCheckInFailure, int stalePeriod,
-            boolean is_active, OrganisationCreditBureau organisationCreditbureau, LoanProduct loanProduct) {
+            boolean isActive, OrganisationCreditBureau organisationCreditbureau, LoanProduct loanProduct) {
         this.isCreditCheckMandatory = isCreditCheckMandatory;
         this.skipCreditCheckInFailure = skipCreditCheckInFailure;
         this.stalePeriod = stalePeriod;
-        this.is_active = is_active;
+        this.isActive = isActive;
         this.organisation_creditbureau = organisationCreditbureau;
         this.loanProduct = loanProduct;
     }
@@ -70,7 +70,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
         Boolean isCreditCheckMandatory = false;
         Boolean skipCreditCheckInFailure = false;
         Integer stalePeriod = -1;
-        Boolean is_active = false;
+        Boolean isActive = false;
         if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory") != null) {
             isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");
         }
@@ -83,11 +83,11 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
             stalePeriod = command.integerValueOfParameterNamed("stalePeriod");
         }
 
-        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("is_active")) {
-            is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isActive")) {
+            isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
         }
 
-        return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, is_active,
+        return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, isActive,
                 organisation_creditbureau, loanProduct);
 
     }
@@ -117,11 +117,11 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
     }
 
     public boolean isIs_active() {
-        return this.is_active;
+        return this.isActive;
     }
 
-    public void setIs_active(boolean is_active) {
-        this.is_active = is_active;
+    public void setIs_active(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public OrganisationCreditBureau getOrganisationCreditbureau() {

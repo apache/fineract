@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,8 +39,6 @@ import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaig
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -138,7 +138,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final EnumOptionData status = EmailCampaignStatusEnumerations.status(statusId);
-            final DateTime nextTriggerDate = JdbcSupport.getDateTime(rs, "nextTriggerDate");
+            final ZonedDateTime nextTriggerDate = JdbcSupport.getDateTime(rs, "nextTriggerDate");
             final LocalDate lastTriggerDate = JdbcSupport.getLocalDate(rs, "lastTriggerDate");
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
@@ -150,7 +150,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final LocalDate activatedOnDate = JdbcSupport.getLocalDate(rs, "activatedOnDate");
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String recurrence = rs.getString("recurrence");
-            final DateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
+            final ZonedDateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
             final EmailCampaignTimeLine emailCampaignTimeLine = new EmailCampaignTimeLine(submittedOnDate, submittedByUsername,
                     activatedOnDate, activatedByUsername, closedOnDate, closedByUsername);
 

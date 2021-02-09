@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.infrastructure.survey.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -33,7 +36,6 @@ import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.infrastructure.survey.data.ClientScoresOverview;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 import org.apache.fineract.infrastructure.survey.data.SurveyDataTableData;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -138,7 +140,9 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         while (rs.next()) {
             scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                    rs.getDouble("poverty_line"), new LocalDate(rs.getTimestamp("date").getTime()), rs.getLong("id"), surveyName));
+                    rs.getDouble("poverty_line"),
+                    LocalDate.ofInstant(new Date(rs.getTimestamp("date").getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant()),
+                    rs.getLong("id"), surveyName));
         }
 
         return scoresOverviews;
@@ -167,8 +171,9 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
             while (rs.next()) {
                 scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                        rs.getDouble("poverty_line"), new LocalDate(rs.getTimestamp("date").getTime()), rs.getLong("id"),
-                        rs.getString("surveyName")));
+                        rs.getDouble("poverty_line"),
+                        LocalDate.ofInstant(new Date(rs.getTimestamp("date").getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant()),
+                        rs.getLong("id"), rs.getString("surveyName")));
             }
 
         }

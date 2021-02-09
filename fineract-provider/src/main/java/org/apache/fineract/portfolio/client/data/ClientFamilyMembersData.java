@@ -20,9 +20,9 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.joda.time.LocalDate;
 
 public final class ClientFamilyMembersData implements Serializable {
 

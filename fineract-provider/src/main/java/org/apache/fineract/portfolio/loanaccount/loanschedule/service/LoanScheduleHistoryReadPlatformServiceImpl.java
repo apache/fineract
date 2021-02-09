@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.lang3.ObjectUtils;
@@ -35,8 +37,6 @@ import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLo
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -169,7 +169,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 Integer daysInPeriod = Integer.valueOf(0);
                 if (fromDate != null) {
-                    daysInPeriod = Days.daysBetween(fromDate, dueDate).getDays();
+                    daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
                     loanTermInDays = Integer.valueOf(loanTermInDays.intValue() + daysInPeriod.intValue());
                 }
 

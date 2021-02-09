@@ -35,6 +35,8 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,7 +69,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -114,9 +115,6 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -400,7 +398,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.externalId = externalId;
         this.status = status.getValue();
         this.accountType = accountType.getValue();
-        this.submittedOnDate = submittedOnDate.toDate();
+        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.submittedBy = submittedBy;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
@@ -724,7 +722,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         Money periodStartingBalance;
         if (this.startInterestCalculationDate != null) {
-            LocalDate startInterestCalculationDate = new LocalDate(this.startInterestCalculationDate);
+            LocalDate startInterestCalculationDate = LocalDate.ofInstant(this.startInterestCalculationDate.toInstant(),
+                    DateUtils.getDateTimeZoneOfTenant());
             final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
 
             if (transaction == null) {
@@ -908,7 +907,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -919,7 +918,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (isDateInTheFuture(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Transaction date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName + ".transaction.in.the.future",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -928,8 +927,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         if (transactionDTO.getTransactionDate().isBefore(getActivationLocalDate())) {
-            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()),
-                    getActivationLocalDate().toString(transactionDTO.getFormatter())).toArray();
+            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
+                    getActivationLocalDate().format(transactionDTO.getFormatter())).toArray();
             final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg." + resourceTypeName + ".transaction.before.activation.date", defaultUserMessage, "transactionDate",
@@ -961,13 +960,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activatedOnDate != null) {
-            activationLocalDate = new LocalDate(this.activatedOnDate);
+            activationLocalDate = LocalDate.ofInstant(this.activatedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return activationLocalDate;
     }
 
     public LocalDate getWithdrawnOnDate() {
-        return withdrawnOnDate == null ? null : new LocalDate(withdrawnOnDate);
+        return withdrawnOnDate == null ? null : LocalDate.ofInstant(withdrawnOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     // startInterestCalculationDate is set during migration so that there is no
@@ -975,7 +974,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public LocalDate getStartInterestCalculationDate() {
         LocalDate startInterestCalculationLocalDate = null;
         if (this.startInterestCalculationDate != null) {
-            startInterestCalculationLocalDate = new LocalDate(this.startInterestCalculationDate);
+            startInterestCalculationLocalDate = LocalDate.ofInstant(this.startInterestCalculationDate.toInstant(),
+                    DateUtils.getDateTimeZoneOfTenant());
         } else {
             startInterestCalculationLocalDate = getActivationLocalDate();
         }
@@ -988,7 +988,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -999,7 +999,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (isDateInTheFuture(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Transaction date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -1008,8 +1008,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         if (transactionDTO.getTransactionDate().isBefore(getActivationLocalDate())) {
-            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()),
-                    getActivationLocalDate().toString(transactionDTO.getFormatter())).toArray();
+            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
+                    getActivationLocalDate().format(transactionDTO.getFormatter())).toArray();
             final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
                     defaultUserMessage, "transactionDate", defaultUserArgs);
@@ -1022,11 +1022,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isAccountLocked(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Withdrawal is not allowed. No withdrawals are allowed until after "
-                    + getLockedInUntilLocalDate().toString(transactionDTO.getFormatter());
+                    + getLockedInUntilLocalDate().format(transactionDTO.getFormatter());
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg.savingsaccount.transaction.withdrawals.blocked.during.lockin.period", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()),
-                    getLockedInUntilLocalDate().toString(transactionDTO.getFormatter()));
+                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
+                    getLockedInUntilLocalDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
@@ -1225,7 +1225,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     protected LocalDate getLockedInUntilLocalDate() {
         LocalDate lockedInUntilLocalDate = null;
         if (this.lockedInUntilDate != null) {
-            lockedInUntilLocalDate = new LocalDate(this.lockedInUntilDate);
+            lockedInUntilLocalDate = LocalDate.ofInstant(this.lockedInUntilDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return lockedInUntilLocalDate;
     }
@@ -1267,7 +1267,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             actualChanges.put(SavingsApiConstants.submittedOnDateParamName, newValueAsString);
             actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
             actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
-            this.submittedOnDate = newValue.toDate();
+            this.submittedOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.accountNoParamName, this.accountNumber)) {
@@ -1724,19 +1724,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean isSubmittedOnDateAfter(final LocalDate compareDate) {
-        return this.submittedOnDate == null ? false : new LocalDate(this.submittedOnDate).isAfter(compareDate);
+        return this.submittedOnDate == null ? false
+                : LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isAfter(compareDate);
     }
 
     public LocalDate getSubmittedOnDate() {
-        return submittedOnDate == null ? null : new LocalDate(submittedOnDate);
+        return submittedOnDate == null ? null : LocalDate.ofInstant(submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public LocalDate getApprovedOnDate() {
-        return approvedOnDate == null ? null : new LocalDate(approvedOnDate);
+        return approvedOnDate == null ? null : LocalDate.ofInstant(approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public LocalDate getRejectedOnDate() {
-        return rejectedOnDate == null ? null : new LocalDate(rejectedOnDate);
+        return rejectedOnDate == null ? null : LocalDate.ofInstant(rejectedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public void removeSavingsOfficer(final LocalDate unassignDate) {
@@ -1824,7 +1825,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     protected LocalDate getSubmittedOnLocalDate() {
         LocalDate submittedOn = null;
         if (this.submittedOnDate != null) {
-            submittedOn = new LocalDate(this.submittedOnDate);
+            submittedOn = LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return submittedOn;
     }
@@ -1832,7 +1833,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     private LocalDate getApprovedOnLocalDate() {
         LocalDate approvedOnLocalDate = null;
         if (this.approvedOnDate != null) {
-            approvedOnLocalDate = new LocalDate(this.approvedOnDate);
+            approvedOnLocalDate = LocalDate.ofInstant(this.approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return approvedOnLocalDate;
     }
@@ -1874,7 +1875,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
         final String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
 
-        this.approvedOnDate = approvedOn.toDate();
+        this.approvedOnDate = Date.from(approvedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.approvedBy = currentUser;
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
@@ -1883,8 +1884,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate submittalDate = getSubmittedOnLocalDate();
         if (approvedOn.isBefore(submittalDate)) {
 
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.print(submittalDate);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.format(submittalDate);
 
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
@@ -1996,12 +1997,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if (transaction.isAnnualFeeAndNotReversed()) {
                 if (lastAnnualFeeTransactionDate == null) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = lastAnnualFeeTransactionDate.toDate();
+                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                 }
 
                 if (transaction.transactionLocalDate().isAfter(lastAnnualFeeTransactionDate)) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = lastAnnualFeeTransactionDate.toDate();
+                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                 }
             }
         }
@@ -2034,11 +2035,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
         final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
 
-        this.rejectedOnDate = rejectedOn.toDate();
+        this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.rejectedBy = currentUser;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = rejectedOn.toDate();
+        this.closedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2050,8 +2051,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (rejectedOn.isBefore(submittalDate)) {
 
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.print(submittalDate);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.format(submittalDate);
 
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
@@ -2102,9 +2103,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
-        this.withdrawnOnDate = withdrawnOn.toDate();
+        this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.withdrawnBy = currentUser;
-        this.closedOnDate = withdrawnOn.toDate();
+        this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2115,8 +2116,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate submittalDate = getSubmittedOnLocalDate();
         if (withdrawnOn.isBefore(submittalDate)) {
 
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.print(submittalDate);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.format(submittalDate);
 
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
@@ -2160,14 +2161,14 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate activationDate = command.localDateValueOfParameterNamed(SavingsApiConstants.activatedOnDateParamName);
 
         this.status = SavingsAccountStatusType.ACTIVE.getValue();
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.activatedOnDateParamName, activationDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.activatedOnDateParamName, activationDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
@@ -2175,7 +2176,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.withdrawnBy = null;
         this.closedOnDate = null;
         this.closedBy = null;
-        this.activatedOnDate = activationDate.toDate();
+        this.activatedOnDate = Date.from(activationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
@@ -2183,8 +2184,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
          * if (annualFeeSettingsSet()) { updateToNextAnnualFeeDueDateFrom(getActivationLocalDate()); }
          */
         if (this.client != null && this.client.isActivatedAfter(activationDate)) {
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(this.client.getActivationLocalDate());
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.format(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -2193,8 +2194,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         if (this.group != null && this.group.isActivatedAfter(activationDate)) {
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(this.client.getActivationLocalDate());
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.format(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -2205,8 +2206,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate approvalDate = getApprovedOnLocalDate();
         if (activationDate.isBefore(approvalDate)) {
 
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(approvalDate);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.format(approvalDate);
 
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approval.date");
@@ -2305,7 +2306,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
         if (closedDate.isBefore(getActivationLocalDate())) {
@@ -2344,13 +2345,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.format(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = closedDate.toDate();
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.closedBy = currentUser;
 
         return actualChanges;
@@ -2379,16 +2380,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
             case INVALID:
             break;
             case DAYS:
-                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency).toDate();
+                lockedInUntilLocalDate = Date.from(activationLocalDate.plusDays(this.lockinPeriodFrequency)
+                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             break;
             case WEEKS:
-                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency).toDate();
+                lockedInUntilLocalDate = Date.from(activationLocalDate.plusWeeks(this.lockinPeriodFrequency)
+                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             break;
             case MONTHS:
-                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency).toDate();
+                lockedInUntilLocalDate = Date.from(activationLocalDate.plusMonths(this.lockinPeriodFrequency)
+                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             break;
             case YEARS:
-                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
+                lockedInUntilLocalDate = Date.from(activationLocalDate.plusYears(this.lockinPeriodFrequency)
+                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
@@ -2413,7 +2418,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosedOnDate() {
-        return ObjectUtils.defaultIfNull(new LocalDate(this.closedOnDate), null);
+        return this.closedOnDate == null ? null : LocalDate.ofInstant(this.closedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public SavingsAccountSummary getSummary() {
@@ -2562,11 +2567,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (savingsAccountCharge.isOnSpecifiedDueDate()) {
             if (getActivationLocalDate() != null && chargeDueDate.isBefore(getActivationLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().toString(formatter))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().format(formatter))
                         .failWithCodeNoParameterAddedToErrorCode("before.activationDate");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             } else if (getSubmittedOnLocalDate() != null && chargeDueDate.isBefore(getSubmittedOnLocalDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnLocalDate().toString(formatter))
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnLocalDate().format(formatter))
                         .failWithCodeNoParameterAddedToErrorCode("before.submittedOnDate");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
@@ -2660,13 +2665,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         if (getActivationLocalDate() != null && transactionDate.isBefore(getActivationLocalDate())) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().toString(formatter))
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().format(formatter))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
         if (DateUtils.isDateInTheFuture(transactionDate)) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(formatter))
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.format(formatter))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -2690,8 +2695,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
 
             Date currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-            if (currentAnnualFeeNextDueDate != null && new LocalDate(currentAnnualFeeNextDueDate).isEqual(transactionDate)) {
-                baseDataValidator.reset().parameter("dueDate").value(transactionDate.toString(formatter))
+            if (currentAnnualFeeNextDueDate != null && LocalDate
+                    .ofInstant(currentAnnualFeeNextDueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isEqual(transactionDate)) {
+                baseDataValidator.reset().parameter("dueDate").value(transactionDate.format(formatter))
                         .failWithCodeNoParameterAddedToErrorCode("transaction.exists.on.date");
 
                 throw new PlatformApiDataValidationException(dataValidationErrors);

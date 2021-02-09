@@ -1,4 +1,4 @@
-Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds)
+Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract) [![Swagger Validation](https://validator.swagger.io/validator?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml)](https://validator.swagger.io/validator/debug?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml) [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds)
 ============
 
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
@@ -59,7 +59,7 @@ The tenants database connection details are configured [via environment variable
 Instructions to build a WAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean bootWar` to build a traditional WAR file which will be created at `build/libs` directory.
+2. Run `./gradlew clean war` to build a traditional WAR file which will be created at `build/libs` directory.
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
@@ -74,7 +74,7 @@ Instructions to execute Integration Tests
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew clean integrationTest`
+1. `./gradlew clean test`
 
 
 Instructions to run and debug in Eclipse IDE
@@ -83,12 +83,9 @@ Instructions to run and debug in Eclipse IDE
 It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
 To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
 
-1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
-2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
-3. Do a clean build of the project in Eclipse (Project->Clean...)
+1. Import the fineract-provider project into your Eclipse workspace (File->Import->Gradle->Existing Gradle Project into Workspace, choose root directory fineract/fineract-provider)
+2. Do a clean build of the project in Eclipse (Project->Clean...)
 3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
-
-If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
 
 You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
 
@@ -114,6 +111,7 @@ Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 Now to run a new Fineract instance you can simply:
 
 1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
 1. `docker-compose build`
 1. `docker-compose up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
@@ -146,11 +144,11 @@ You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Insta
 Now e.g. from your Google Cloud shell, run the following commands:
 
 1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
-1. `./kubectl-startup`
+1. `./kubectl-startup.sh`
 
 To shutdown and reset your Cluster, run:
 
-    ./kubectl-shutdown
+    ./kubectl-shutdown.sh
 
 Using Minikube
 --------------
@@ -179,7 +177,13 @@ You can check Fineract logs using:
 
 To shutdown and reset your cluster, run:
 
-    ./kubectl-shutdown
+    ./kubectl-shutdown.sh
+
+To shutdown and reset your cluster, run:
+
+    minikube ssh
+
+    sudo rm -rf /mnt/data/
 
 We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
 
@@ -203,10 +207,15 @@ Instructions to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
+Instructions to enable ActiveMQ
+============
+Messaging configuration is disabled by default. If you want to enable it and register some message listeners, application needs to be started with the proper Spring profile, ie `-Dspring.profiles.active=activeMqEnabled` (or one of the other Spring ways to configure it).
+
+
 Checkstyle and Spotless
 ============
 
-This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
+This project enforces its code conventions using [checkstyle.xml](config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations:
 
     `./gradlew spotlessApply`
 

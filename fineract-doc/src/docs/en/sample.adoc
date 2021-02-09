@@ -1,0 +1,25 @@
+:doctitle: Fineract Documentation
+
+include::config.adoc[]
+
+= Fineract Documentation
+
+IMPORTANT: @vidakovic migrate old documentation!
+
+.Amazon
+[plantuml,amazon,svg]
+----
+include::diagrams/samples/amazon.puml[]
+----
+
+.C4 Diagram
+[plantuml,c4,svg]
+----
+include::diagrams/samples/c4.puml[]
+----
+
+.Mindmap
+[plantuml,mindmap,svg]
+----
+include::diagrams/samples/mindmap.puml[]
+----

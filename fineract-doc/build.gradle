@@ -1,0 +1,128 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+apply plugin: 'org.asciidoctor.jvm.convert'
+apply plugin: 'org.asciidoctor.jvm.pdf'
+apply plugin: 'org.asciidoctor.jvm.revealjs'
+// apply plugin: 'org.asciidoctor.jvm.epub'
+// apply plugin: 'org.asciidoctor.kindlegen.base'
+
+// NOTE: need to wait for new release of Swagger to Asciidoc plugin
+
+//if(file("$swaggerFile").exists()) {
+//    apply plugin: 'io.github.lhotari.swagger2markup'
+//
+//    convertSwagger2markup {
+//        swaggerInput file("$swaggerFile").getAbsolutePath()
+//        outputDir file("$buildDir/generated/asciidoc")
+//        config = [
+//            'swagger2markup.markupLanguage': 'ASCIIDOC',
+//            'swagger2markup.pathsGroupedBy': 'TAGS'
+//        ]
+//        dependsOn ':fineract-provider:resolve'
+//    }
+//
+//    asciidoctor.dependsOn convertSwagger2markup
+//}
+
+asciidoctorj {
+    version = '2.4.0'
+
+    attributes = [
+        revnumber: {
+            project.version.toString()
+        },
+        generated: "${buildDir}/generated/asciidoc",
+        imagesdir: 'images',
+        diagrams: 'diagrams',
+        years: '2015-2020',
+        revnumber: "$releaseVersion".toString(),
+        rootdir: "$rootDir".toString(),
+        baseurl: 'fineract.apache.org'
+    ]
+
+    modules {
+        pdf.version '1.5.3'
+        diagram.version '2.0.2'
+        epub.version '1.5.0-alpha.18'
+        revealjs.version '4.0.1'
+    }
+
+    fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/
+    fatalWarnings missingIncludes()
+}
+
+asciidoctor {
+    languages 'en'
+
+    baseDir 'src/docs'
+    sourceDir 'src/docs'
+    sources {
+        include('index.adoc')
+    }
+    outputDir 'build/docs/html'
+}
+
+// asciidoctorEpub {
+//     languages 'en'
+//
+//     baseDir 'src/docs'
+//     sourceDir 'src/docs'
+//     sources {
+//         include('index.adoc')
+//     }
+//     outputDir 'build/docs/epub'
+//     ebookFormats 'epub3'
+// }
+
+asciidoctorPdf {
+    languages 'en'
+
+    baseDir 'src/docs'
+    sourceDir 'src/docs'
+    sources {
+        include('index.adoc')
+    }
+    outputDir 'build/docs/pdf'
+
+    // TODO: @vidakovic prepare a nicer theme
+    // theme 'fineract-default'
+    // pdfThemes {
+    //     local 'fineract-default', {
+    //         themeDir = "$projectDir/src/resources/themes"
+    //     }
+    // }
+    // fontsDir "$projectDir/src/resources/fonts"
+}
+
+task doc(type: Zip) {
+    dependsOn asciidoctor, asciidoctorPdf
+
+    into("$project.name-$project.version") {
+        from("$buildDir/docs/html") {
+            include "**/*"
+        }
+    }
+    from ("$buildDir/docs/pdf") {
+        include "index.pdf"
+        rename {
+            "$project.name-$project.version\\.pdf"
+        }
+    }
+    archiveName "$project.name-$project.version\\.zip"
+}

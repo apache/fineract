@@ -21,12 +21,12 @@ package org.apache.fineract.portfolio.shareaccounts.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -65,7 +65,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
         public ShareAccountTransactionData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Long accountId = rs.getLong("account_id");
-            final LocalDate purchasedDate = new LocalDate(rs.getDate("transaction_date"));
+            final LocalDate purchasedDate = rs.getDate("transaction_date").toLocalDate();
             final Long numberOfShares = JdbcSupport.getLong(rs, "total_shares");
             final BigDecimal purchasedPrice = rs.getBigDecimal("unit_price");
             final Integer status = rs.getInt("status_enum");

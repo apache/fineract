@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.data;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 public final class ImportData {
 

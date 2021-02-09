@@ -88,6 +88,13 @@ spec:
       containers:
         - image: mysql:5.7
           name: mysql
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+            limits:
+              memory: "5Gi"
+              cpu: "2000m"
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
@@ -96,25 +103,30 @@ spec:
                   key: password
           livenessProbe:
             exec:
-              command:
-                - mysqladmin
-                - ping
-                - -h
-                - localhost
+              command: ["sh","-c","mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}"]
             failureThreshold: 10
             timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -uroot -p${MYSQL_PASSWORD}
+            failureThreshold: 10
+            initialDelaySeconds: 5
+            periodSeconds: 5
           ports:
             - containerPort: 3306
               name: fineractmysql
           volumeMounts:
-            - name: fineractmysql-persistent-storage
-              mountPath: /var/lib/mysql/
             - name: fineractmysql-initdb
               mountPath: /docker-entrypoint-initdb.d/
+            - name: fineractmysql-persistent-storage
+              mountPath: /var/lib/mysql/
       volumes:
-        - name: fineractmysql-persistent-storage
-          persistentVolumeClaim:
-            claimName: fineractmysql-pv-claim
         - name: fineractmysql-initdb
           configMap:
             name: fineractmysql-initdb
+        - name: fineractmysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: fineractmysql-pv-claim

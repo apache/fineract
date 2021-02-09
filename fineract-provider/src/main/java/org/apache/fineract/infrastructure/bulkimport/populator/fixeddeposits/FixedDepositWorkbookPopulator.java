@@ -45,10 +45,10 @@ import org.slf4j.LoggerFactory;
 public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
 
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositWorkbookPopulator.class);
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private FixedDepositProductSheetPopulator productSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final FixedDepositProductSheetPopulator productSheetPopulator;
 
     public FixedDepositWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             PersonnelSheetPopulator personnelSheetPopulator, FixedDepositProductSheetPopulator fixedDepositProductSheetPopulator) {
@@ -195,12 +195,12 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
             Name clientName = savingsWorkbook.createName();
             Name fieldOfficerName = savingsWorkbook.createName();
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                fieldOfficerName.setNameName("Staff_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(fieldOfficerName, "Staff_" + officeNames.get(i));
                 fieldOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
             if (officeNameToBeginEndIndexesOfClients != null) {
-                clientName.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(clientName, "Client_" + officeNames.get(i));
                 clientName.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfClients[0] + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
@@ -231,13 +231,13 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
             FixedDepositProductData product = products.get(i);
             String productName = product.getName().replaceAll("[ ]", "_");
 
-            interestCompoundingPeriodName.setNameName("Interest_Compouding_" + productName);
-            interestPostingPeriodName.setNameName("Interest_Posting_" + productName);
-            interestCalculationName.setNameName("Interest_Calculation_" + productName);
-            daysInYearName.setNameName("Days_In_Year_" + productName);
-            minDepositName.setNameName("Min_Deposit_" + productName);
-            maxDepositName.setNameName("Max_Deposit_" + productName);
-            depositName.setNameName("Deposit_" + productName);
+            setSanitized(interestCompoundingPeriodName, "Interest_Compouding_" + productName);
+            setSanitized(interestPostingPeriodName, "Interest_Posting_" + productName);
+            setSanitized(interestCalculationName, "Interest_Calculation_" + productName);
+            setSanitized(daysInYearName, "Days_In_Year_" + productName);
+            setSanitized(minDepositName, "Min_Deposit_" + productName);
+            setSanitized(maxDepositName, "Max_Deposit_" + productName);
+            setSanitized(depositName, "Deposit_" + productName);
             interestCompoundingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$E$" + (i + 2));
             interestPostingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$F$" + (i + 2));
             interestCalculationName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$G$" + (i + 2));
@@ -247,15 +247,15 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
             maxDepositName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$M$" + (i + 2));
 
             if (product.getMinDepositTermType() != null) {
-                minDepositTermTypeName.setNameName("Term_Type_" + productName);
+                setSanitized(minDepositTermTypeName, "Term_Type_" + productName);
                 minDepositTermTypeName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$P$" + (i + 2));
             }
             if (product.getLockinPeriodFrequency() != null) {
-                lockinPeriodName.setNameName("Lockin_Period_" + productName);
+                setSanitized(lockinPeriodName, "Lockin_Period_" + productName);
                 lockinPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$I$" + (i + 2));
             }
             if (product.getLockinPeriodFrequencyType() != null) {
-                lockinPeriodFrequencyName.setNameName("Lockin_Frequency_" + productName);
+                setSanitized(lockinPeriodFrequencyName, "Lockin_Frequency_" + productName);
                 lockinPeriodFrequencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$J$" + (i + 2));
             }
         }

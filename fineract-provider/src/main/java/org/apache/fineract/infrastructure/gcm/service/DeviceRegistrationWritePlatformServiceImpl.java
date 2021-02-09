@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.service;
 
+import java.util.Date;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -93,7 +94,8 @@ public class DeviceRegistrationWritePlatformServiceImpl implements DeviceRegistr
         Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         deviceRegistration.setClient(client);
         deviceRegistration.setRegistrationId(registrationId);
-        deviceRegistration.setUpdatedOnDate(DateUtils.getLocalDateTimeOfTenant().toDate());
+        deviceRegistration
+                .setUpdatedOnDate(Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
         return deviceRegistration;
     }
 

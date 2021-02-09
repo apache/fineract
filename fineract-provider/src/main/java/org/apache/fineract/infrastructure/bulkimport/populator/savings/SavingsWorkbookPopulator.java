@@ -43,11 +43,11 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private GroupSheetPopulator groupSheetPopulator;
-    private PersonnelSheetPopulator personnelSheetPopulator;
-    private SavingsProductSheetPopulator productSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final GroupSheetPopulator groupSheetPopulator;
+    private final PersonnelSheetPopulator personnelSheetPopulator;
+    private final SavingsProductSheetPopulator productSheetPopulator;
 
     public SavingsWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
@@ -322,17 +322,17 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             Name fieldOfficerName = savingsWorkbook.createName();
             Name groupName = savingsWorkbook.createName();
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                fieldOfficerName.setNameName("Staff_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(fieldOfficerName, "Staff_" + officeNames.get(i));
                 fieldOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
             if (officeNameToBeginEndIndexesOfClients != null) {
-                clientName.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(clientName, "Client_" + officeNames.get(i));
                 clientName.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfClients[0] + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
             if (officeNameToBeginEndIndexesOfGroups != null) {
-                groupName.setNameName("Group_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(groupName, "Group_" + officeNames.get(i));
                 groupName.setRefersToFormula(TemplatePopulateImportConstants.GROUP_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfGroups[0] + ":$B$" + officeNameToBeginEndIndexesOfGroups[1]);
             }
@@ -366,19 +366,19 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             Name allowOverdraftName = savingsWorkbook.createName();
             Name overdraftLimitName = savingsWorkbook.createName();
             SavingsProductData product = products.get(i);
-            String productName = product.getName().replaceAll("[ ]", "_");
+            String productName = product.getName();
             if (product.getNominalAnnualInterestRate() != null) {
-                interestRateName.setNameName("Interest_Rate_" + productName);
+                setSanitized(interestRateName, "Interest_Rate_" + productName);
                 interestRateName.setRefersToFormula("Products!$C$" + (i + 2));
             }
-            interestCompoundingPeriodName.setNameName("Interest_Compouding_" + productName);
-            interestPostingPeriodName.setNameName("Interest_Posting_" + productName);
-            interestCalculationName.setNameName("Interest_Calculation_" + productName);
-            daysInYearName.setNameName("Days_In_Year_" + productName);
-            currencyName.setNameName("Currency_" + productName);
-            decimalPlacesName.setNameName("Decimal_Places_" + productName);
-            withdrawalFeeName.setNameName("Withdrawal_Fee_" + productName);
-            allowOverdraftName.setNameName("Overdraft_" + productName);
+            setSanitized(interestCompoundingPeriodName, "Interest_Compouding_" + productName);
+            setSanitized(interestPostingPeriodName, "Interest_Posting_" + productName);
+            setSanitized(interestCalculationName, "Interest_Calculation_" + productName);
+            setSanitized(daysInYearName, "Days_In_Year_" + productName);
+            setSanitized(currencyName, "Currency_" + productName);
+            setSanitized(decimalPlacesName, "Decimal_Places_" + productName);
+            setSanitized(withdrawalFeeName, "Withdrawal_Fee_" + productName);
+            setSanitized(allowOverdraftName, "Overdraft_" + productName);
 
             interestCompoundingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$D$" + (i + 2));
             interestPostingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$E$" + (i + 2));
@@ -389,26 +389,25 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             withdrawalFeeName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$N$" + (i + 2));
             allowOverdraftName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$O$" + (i + 2));
             if (product.getOverdraftLimit() != null) {
-                overdraftLimitName.setNameName("Overdraft_Limit_" + productName);
+                setSanitized(overdraftLimitName, "Overdraft_Limit_" + productName);
                 overdraftLimitName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$P$" + (i + 2));
             }
             if (product.getMinRequiredOpeningBalance() != null) {
-                minOpeningBalanceName.setNameName("Min_Balance_" + productName);
+                setSanitized(minOpeningBalanceName, "Min_Balance_" + productName);
                 minOpeningBalanceName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$H$" + (i + 2));
             }
             if (product.getLockinPeriodFrequency() != null) {
-                lockinPeriodName.setNameName("Lockin_Period_" + productName);
+                setSanitized(lockinPeriodName, "Lockin_Period_" + productName);
                 lockinPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$I$" + (i + 2));
             }
             if (product.getLockinPeriodFrequencyType() != null) {
-                lockinPeriodFrequencyName.setNameName("Lockin_Frequency_" + productName);
+                setSanitized(lockinPeriodFrequencyName, "Lockin_Frequency_" + productName);
                 lockinPeriodFrequencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$J$" + (i + 2));
             }
             if (product.getCurrency().currencyInMultiplesOf() != null) {
-                inMultiplesOfName.setNameName("In_Multiples_" + productName);
+                setSanitized(inMultiplesOfName, "In_Multiples_" + productName);
                 inMultiplesOfName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$M$" + (i + 2));
             }
         }
     }
-
 }

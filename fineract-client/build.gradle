@@ -1,0 +1,121 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+description = 'Fineract Client'
+
+apply plugin: 'org.openapi.generator'
+
+apply from: 'dependencies.gradle'
+
+// TODO: @vidakovic we should publish this lib to Maven Central; do in separate PR
+
+openApiMeta {
+    generatorName = 'Fineract'
+    packageName = 'org.apache.fineract.client'
+    outputFolder = "$buildDir/meta".toString()
+}
+
+openApiValidate {
+    inputSpec = "$swaggerFile"
+    recommend = true
+}
+
+task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = 'java'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "$swaggerFile"
+    outputDir = "$buildDir/generated/java".toString()
+    groupId = 'org.apache.fineract'
+    apiPackage = 'org.apache.fineract.client.services'
+    invokerPackage = 'org.apache.fineract.client'
+    modelPackage = 'org.apache.fineract.client.models'
+    configOptions = [
+        dateLibrary: 'java8',
+        useRxJava2: 'false',
+        library: 'retrofit2',
+        hideGenerationTimestamp: 'true',
+    ]
+    generateModelTests = false
+    generateApiTests = false
+    ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
+    // trick to make sure fineract.yaml is generated first
+    dependsOn = [
+        ':fineract-provider:compileJava'
+    ]
+    finalizedBy = [licenseFormat]
+}
+
+task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = 'typescript-angular'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "$swaggerFile"
+    outputDir = "$buildDir/generated/typescript".toString()
+    apiPackage = 'org.apache.fineract.client.services'
+    invokerPackage = 'org.apache.fineract.client'
+    modelPackage = 'org.apache.fineract.client.models'
+    configOptions = [
+        apiModulePrefix: 'fineract',
+        configurationPrefix: 'fineract',
+        ngVersion: '10.0.0',
+        npmName: 'apache-fineract-client'
+    ]
+    finalizedBy = [licenseFormat]
+}
+
+// TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
+compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
+
+sourceSets {
+    generated {
+        java {
+            srcDir "$buildDir/generated/java/src/main/java"
+        }
+    }
+}
+
+java {
+    // keep this at Java 8, not 11; see https://issues.apache.org/jira/browse/FINERACT-1214
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava {
+    source += sourceSets.generated.java
+}
+
+tasks.withType(JavaCompile) {
+    // the generated code in build/generated/java/src/main/java/org/apache/fineract/client/auth/OAuthOkHttpClient.java#L71 currently uses deprecated RequestBody.create(MediaType,String)
+    // TODO FINERACT-1247 why does this not work:
+    //   options.compilerArgs -= ["-Xlint:deprecation"]
+    //   options.compilerArgs += ["-Xlint:-deprecation"]
+    // So we just have to use:
+    options.compilerArgs -= ["-Werror"]
+}
+
+configurations {
+    generatedCompile.extendsFrom implementation
+    generatedRuntime.extendsFrom runtime
+}
+
+test {
+    useJUnitPlatform()
+}

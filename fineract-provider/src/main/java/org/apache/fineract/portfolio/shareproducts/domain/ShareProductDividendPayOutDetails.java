@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +33,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_share_product_dividend_pay_out")
@@ -76,7 +77,7 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
     public LocalDate getDividendPeriodEndDateAsLocalDate() {
         LocalDate dividendPeriodEndDate = null;
         if (this.dividendPeriodEndDate != null) {
-            dividendPeriodEndDate = new LocalDate(this.dividendPeriodEndDate);
+            dividendPeriodEndDate = LocalDate.ofInstant(this.dividendPeriodEndDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return dividendPeriodEndDate;
     }

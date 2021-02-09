@@ -24,10 +24,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -36,42 +37,40 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public final class JdbcSupport {
 
-    private JdbcSupport() {
+    private JdbcSupport() {}
 
-    }
-
-    public static DateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        DateTime dateTime = null;
+    public static ZonedDateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
+        ZonedDateTime dateTime = null;
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            dateTime = new DateTime(dateValue.getTime());
+            dateTime = ZonedDateTime.ofInstant(new Date(dateValue.getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return dateTime;
     }
 
-    public static DateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        DateTime dateTime = null;
+    public static ZonedDateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
+        ZonedDateTime dateTime = null;
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            dateTime = new DateTime(dateValue.getTime()).withZone(getDateTimeZoneOfTenant());
+            dateTime = ZonedDateTime.ofInstant(new Date(dateValue.getTime()).toInstant(), getDateTimeZoneOfTenant());
         }
         return dateTime;
     }
 
     public static LocalDate getLocalDate(final ResultSet rs, final String columnName) throws SQLException {
         LocalDate localDate = null;
-        final Date dateValue = rs.getDate(columnName);
+        final Date dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            localDate = new LocalDate(dateValue);
+            localDate = LocalDate.ofInstant(dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return localDate;
     }
 
     public static LocalTime getLocalTime(final ResultSet rs, final String columnName) throws SQLException {
         LocalTime localTime = null;
-        final Date timeValue = rs.getTime(columnName);
+        final Date timeValue = rs.getTimestamp(columnName);
         if (timeValue != null) {
-            localTime = new LocalTime(timeValue);
+            localTime = LocalTime.ofInstant(timeValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return localTime;
     }

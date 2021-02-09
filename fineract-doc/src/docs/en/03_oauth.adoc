@@ -1,0 +1,41 @@
+== OAuth
+
+Fineract has (basic) OAuth (2.0?) support. Here's how to use it:
+
+=== Build
+
+You must re-build the distribution JAR (or WAR) using the special `-Psecurity=oauth` flag:
+
+----
+./gradlew bootJAR -Psecurity=oauth
+java -jar build/libs/fineract-provider.jar
+----
+
+Downloads from https://fineract.apache.org, or using e.g. the https://hub.docker.com/r/apache/fineract container image, or on https://www.fineract.dev, this will not work, because they have not been built using this flag.
+
+=== Invoke `/fineract-provider/api/oauth/token`
+
+----
+curl [--insecure] --location --request POST \
+'https://localhost:8443/fineract-provider/api/oauth/token' \
+--header 'Fineract-Platform-TenantId: default' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'username=mifos' \
+--data-urlencode 'password=password' \
+--data-urlencode 'client_id=community-app' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'client_secret=123'
+----
+
+Note that the `client_id` and `client_secret` are stored in the `oauth_client_details` table in the database.
+
+=== Invoke APIs and pass `Authorization: bearer ...` header
+
+----
+curl --location --request GET \
+'https://localhost:8443/fineract-provider/api/v1/clients' \
+--header 'Fineract-Platform-TenantId: default' \
+--header 'Authorization: bearer RzfUyQ0wEnxxq4PyFCF1J-XGFCI'
+----
+
+NOTE: See also https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#authentication_oauth

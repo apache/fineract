@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,10 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "scheduled_email_messages_outbound")
@@ -107,7 +108,8 @@ public class EmailMessage extends AbstractPersistableCustom {
         this.emailSubject = emailSubject;
         this.message = message;
         this.campaignName = campaignName;
-        this.submittedOnDate = LocalDate.now().toDate();
+        this.submittedOnDate = Date
+                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public Map<String, Object> update(final JsonCommand command) {

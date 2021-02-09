@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.charge.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.MonthDay;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +33,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountChargeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 
 /**
  * Immutable data object for charge data.

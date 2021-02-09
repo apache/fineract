@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
-import org.joda.time.LocalDate;
 
 public final class TaxUtils {
 
@@ -39,7 +39,7 @@ public final class TaxUtils {
         Map<TaxComponent, BigDecimal> map = new HashMap<>(3);
         if (amount != null) {
             final double amountVal = amount.doubleValue();
-            double cent_percentage = Double.valueOf("100.0");
+            double cent_percentage = Double.parseDouble("100.0");
             for (TaxGroupMappings groupMappings : taxGroupMappings) {
                 if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
                     TaxComponent component = groupMappings.getTaxComponent();
@@ -80,7 +80,7 @@ public final class TaxUtils {
         if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             double percentageVal = 0;
             double amountVal = amount.doubleValue();
-            double cent_percentage = Double.valueOf("100.0");
+            double cent_percentage = Double.parseDouble("100.0");
             for (TaxGroupMappings groupMappings : taxGroupMappings) {
                 if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
                     TaxComponent component = groupMappings.getTaxComponent();

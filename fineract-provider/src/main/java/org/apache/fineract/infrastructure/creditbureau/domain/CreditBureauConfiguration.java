@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
@@ -56,7 +59,7 @@ public class CreditBureauConfiguration extends AbstractPersistableCustom {
 
     }
 
-    public CreditBureauConfiguration fromJson(JsonCommand command, OrganisationCreditBureau organisation_creditbureau) {
+    public static CreditBureauConfiguration fromJson(JsonCommand command, OrganisationCreditBureau organisation_creditbureau) {
         final String configkey = command.stringValueOfParameterNamed("configkey");
         final String value = command.stringValueOfParameterNamed("value");
         final String description = command.stringValueOfParameterNamed("description");
@@ -95,6 +98,35 @@ public class CreditBureauConfiguration extends AbstractPersistableCustom {
 
     public void setOrganisation_creditbureau(OrganisationCreditBureau organisation_creditbureau) {
         this.organisationCreditbureau = organisation_creditbureau;
+    }
+
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+        final String configurationKey = "configurationKey";
+
+        if (command.isChangeInStringParameterNamed(configurationKey, this.configurationKey)) {
+            final String newValue = command.stringValueOfParameterNamed(configurationKey);
+            actualChanges.put(configurationKey, newValue);
+            this.configurationKey = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String value = "value";
+        if (command.isChangeInStringParameterNamed(value, this.value)) {
+            final String newValue = command.stringValueOfParameterNamed(value);
+            actualChanges.put(value, newValue);
+            this.value = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String description = "description";
+        if (command.isChangeInStringParameterNamed(description, this.configurationKey)) {
+            final String newValue = command.stringValueOfParameterNamed(description);
+            actualChanges.put(description, newValue);
+            this.description = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        return actualChanges;
     }
 
 }

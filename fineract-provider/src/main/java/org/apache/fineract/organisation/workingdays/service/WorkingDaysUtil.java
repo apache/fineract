@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.organisation.workingdays.service;
 
+import java.time.LocalDate;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.joda.time.LocalDate;
 
 public final class WorkingDaysUtil {
 

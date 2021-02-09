@@ -23,6 +23,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.MonthDay;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
@@ -31,14 +35,10 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.MonthDay;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Immutable representation of a command.
@@ -368,7 +368,7 @@ public final class JsonCommand {
     public boolean isChangeInDateParameterNamed(final String parameterName, final Date existingValue) {
         LocalDate localDate = null;
         if (existingValue != null) {
-            localDate = LocalDate.fromDateFields(existingValue);
+            localDate = LocalDate.ofInstant(existingValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return isChangeInLocalDateParameterNamed(parameterName, localDate);
     }
@@ -376,7 +376,7 @@ public final class JsonCommand {
     public boolean isChangeInTimeParameterNamed(final String parameterName, final Date existingValue, final String timeFormat) {
         LocalDateTime time = null;
         if (existingValue != null) {
-            DateTimeFormatter timeFormtter = DateTimeFormat.forPattern(timeFormat);
+            DateTimeFormatter timeFormtter = DateTimeFormatter.ofPattern(timeFormat);
             time = LocalDateTime.parse(existingValue.toString(), timeFormtter);
         }
         return isChangeInLocalTimeParameterNamed(parameterName, time);
@@ -417,7 +417,7 @@ public final class JsonCommand {
         if (localDate == null) {
             return null;
         }
-        return localDate.toDateTimeAtStartOfDay().toDate();
+        return Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {
@@ -441,6 +441,12 @@ public final class JsonCommand {
     public Map<String, String> mapValueOfParameterNamed(final String json) {
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
         final Map<String, String> value = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
+        return value;
+    }
+
+    public Map<String, Object> mapObjectValueOfParameterNamed(final String json) {
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> value = this.fromApiJsonHelper.extractObjectMap(typeOfMap, json);
         return value;
     }
 

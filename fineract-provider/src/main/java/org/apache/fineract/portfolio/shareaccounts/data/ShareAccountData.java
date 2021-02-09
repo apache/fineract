@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.shareaccounts.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -29,7 +30,6 @@ import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class ShareAccountData implements Serializable, AccountData {

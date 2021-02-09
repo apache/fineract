@@ -33,18 +33,31 @@ public abstract class ApplicationExitUtil {
     private ApplicationExitUtil() {}
 
     public static void waitForKeyPressToCleanlyExit(ConfigurableApplicationContext ctx) throws IOException {
+        // In some environments, System.console() is not available (e.g. "./gradlew bootRun", or in a container, or in
+        // Eclipse, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429.
+        //
+        // Also (but as a separate problem), e.g. in Eclipse, the Shutdown Hooks are not invoked on Exit with the Red
+        // Button of the Console view (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016); that's a problem e.g.
+        // in the case of MariaDB4j, because then mysqld won't be stopped; same problem similarly applies on any other
+        // library else that relies on an orderly Spring Context / JVM shutdown.
+        //
+        if (System.console() == null) {
+            LOG.info("\nNo Console available, running until stopped by signal/Ctrl-C...");
+            boolean interrupted = false;
+            do {
+                try {
+                    Thread.sleep(Long.MAX_VALUE);
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            } while (!interrupted);
+        } else {
+            LOG.info("\nHit Enter to quit...");
+            BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+            d.readLine();
 
-        // NOTE: In Eclipse, the Shutdown Hooks are not invoked on exit (red
-        // button).. In the case of MariaDB4j that's a problem because then the
-        // mysqld won't be stopped, so:
-        // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016)
-        LOG.info("\nHit Enter to quit...");
-        // NOTE: In Eclipse, System.console() is not available.. so:
-        // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429)
-        BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-        d.readLine();
-
-        ctx.stop();
-        ctx.close();
+            ctx.stop();
+            ctx.close();
+        }
     }
 }

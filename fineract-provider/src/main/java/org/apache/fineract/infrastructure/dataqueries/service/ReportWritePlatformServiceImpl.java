@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepository;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportParameterNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.serialization.ReportCommandFromApiJsonDeserializer;
+import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
@@ -62,20 +63,20 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     private final ReportParameterUsageRepository reportParameterUsageRepository;
     private final ReportParameterRepository reportParameterRepository;
     private final PermissionRepository permissionRepository;
-    private final ReadReportingService readReportingService;
+    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     @Autowired
     public ReportWritePlatformServiceImpl(final PlatformSecurityContext context,
             final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ReportRepository reportRepository,
             final ReportParameterRepository reportParameterRepository, final ReportParameterUsageRepository reportParameterUsageRepository,
-            final PermissionRepository permissionRepository, final ReadReportingService readReportingService) {
+            final PermissionRepository permissionRepository, final ReportingProcessServiceProvider reportingProcessServiceProvider) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.reportRepository = reportRepository;
         this.reportParameterRepository = reportParameterRepository;
         this.reportParameterUsageRepository = reportParameterUsageRepository;
         this.permissionRepository = permissionRepository;
-        this.readReportingService = readReportingService;
+        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
     }
 
     @Transactional
@@ -87,7 +88,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             this.fromApiJsonDeserializer.validate(command.json());
 
-            final Report report = Report.fromJson(command, this.readReportingService.getAllowedReportTypes());
+            final Report report = Report.fromJson(command, this.reportingProcessServiceProvider.findAllReportingTypes());
             final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
             report.update(reportParameterUsages);
 
@@ -121,7 +122,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
-            final Map<String, Object> changes = report.update(command, this.readReportingService.getAllowedReportTypes());
+            final Map<String, Object> changes = report.update(command, this.reportingProcessServiceProvider.findAllReportingTypes());
 
             if (changes.containsKey("reportParameters")) {
                 final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);

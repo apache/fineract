@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -30,7 +31,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
-import org.joda.time.LocalDate;
 
 /**
  * {@link SavingsAccountSummary} encapsulates all the summary details of a {@link SavingsAccount}.
@@ -115,7 +115,7 @@ public final class SavingsAccountSummary {
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-        this.lastInterestCalculationDate = interestCalculationDate.toDate();
+        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.totalInterestEarned = totalEarned.getAmount();
     }
 

@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.infrastructure.security.data;
 
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 public class AccessTokenData {
 
     private final String token;
 
-    private final DateTime validFrom;
-    private final DateTime validTo;
+    private final ZonedDateTime validFrom;
+    private final ZonedDateTime validTo;
 
-    public AccessTokenData(String token, DateTime validFrom, DateTime validTo) {
+    public AccessTokenData(String token, ZonedDateTime validFrom, ZonedDateTime validTo) {
         this.token = token;
         this.validFrom = validFrom;
         this.validTo = validTo;
@@ -37,11 +37,11 @@ public class AccessTokenData {
         return token;
     }
 
-    public DateTime getValidFrom() {
+    public ZonedDateTime getValidFrom() {
         return validFrom;
     }
 
-    public DateTime getValidTo() {
+    public ZonedDateTime getValidTo() {
         return validTo;
     }
 }

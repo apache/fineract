@@ -23,6 +23,8 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +35,6 @@ import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfiguration;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfigurationRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -261,17 +260,17 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
         templateData.put("token", request.getToken());
         templateData.put("tokenlivetime", request.getMetadata().getTokenLiveTimeInSec());
 
-        DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("HH:mm:ss");
-        DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         final LocalDateTime requestTime = request.getMetadata().getRequestTime().toLocalDateTime();
         final LocalDateTime expireTime = requestTime.plusSeconds(request.getMetadata().getTokenLiveTimeInSec());
 
-        templateData.put("requestdate", requestTime.toLocalDate().toString(dateFormatter));
-        templateData.put("requesttime", requestTime.toLocalTime().toString(timeFormatter));
+        templateData.put("requestdate", requestTime.toLocalDate().format(dateFormatter));
+        templateData.put("requesttime", requestTime.toLocalTime().format(timeFormatter));
 
-        templateData.put("expiredate", expireTime.toLocalDate().toString(dateFormatter));
-        templateData.put("expiretime", expireTime.toLocalTime().toString(timeFormatter));
+        templateData.put("expiredate", expireTime.toLocalDate().format(dateFormatter));
+        templateData.put("expiretime", expireTime.toLocalTime().format(timeFormatter));
 
         return templateData;
     }

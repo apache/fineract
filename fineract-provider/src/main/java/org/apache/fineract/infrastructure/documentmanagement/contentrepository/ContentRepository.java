@@ -26,9 +26,10 @@ import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 
+/**
+ * Repository which stores Files (AKA Documents) and Images.
+ */
 public interface ContentRepository {
-
-    StorageType type = null;
 
     // TODO:Vishwas Need to move these settings to the Database
     Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
@@ -38,7 +39,7 @@ public interface ContentRepository {
 
     String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand);
 
-    void deleteFile(String fileName, String documentPath);
+    void deleteFile(String documentPath);
 
     FileData fetchFile(DocumentData documentData);
 
@@ -46,9 +47,9 @@ public interface ContentRepository {
 
     String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName);
 
-    void deleteImage(Long resourceId, String location);
+    void deleteImage(String location);
 
-    ImageData fetchImage(ImageData imageData);
+    FileData fetchImage(ImageData imageData);
 
     StorageType getStorageType();
 

@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.joda.time.LocalDate;
 
 public interface LoanAccrualWritePlatformService {
 

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.group.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing groups.
@@ -38,7 +38,7 @@ import org.joda.time.LocalDate;
 public final class CenterData implements Serializable {
 
     private final Long id;
-    private String accountNo;
+    private final String accountNo;
     private final String name;
     private final String externalId;
     private final Long officeId;
@@ -276,7 +276,7 @@ public final class CenterData implements Serializable {
             return false;
         }
         CenterData that = (CenterData) o;
-        return Objects.equals(active, that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
+        return (active == that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
                 && Objects.equals(name, that.name) && Objects.equals(externalId, that.externalId) && Objects.equals(officeId, that.officeId)
                 && Objects.equals(officeName, that.officeName) && Objects.equals(staffId, that.staffId)
                 && Objects.equals(staffName, that.staffName) && Objects.equals(hierarchy, that.hierarchy)

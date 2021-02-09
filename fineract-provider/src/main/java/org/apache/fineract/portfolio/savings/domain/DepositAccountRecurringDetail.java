@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandato
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +40,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_deposit_account_recurring_detail")

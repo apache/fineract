@@ -30,7 +30,10 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -90,19 +93,17 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSum
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class InteropServiceImpl implements InteropService {
@@ -224,8 +225,8 @@ public class InteropServiceImpl implements InteropService {
                 return true;
             }
 
-            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().toDateTimeAtStartOfDay().toDate().toInstant()
-                    .atZone(zoneId).toLocalDateTime();
+            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
+                    .toLocalDateTime();
             return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0) && (transactionsFrom == null
                     || transactionsFrom.compareTo(transactionDate.withHour(23).withMinute(59).withSecond(59)) <= 0);
         };
@@ -247,7 +248,7 @@ public class InteropServiceImpl implements InteropService {
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
-            throw new UnsupportedOperationException(
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                     "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
         }
 
@@ -280,7 +281,7 @@ public class InteropServiceImpl implements InteropService {
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
-            throw new UnsupportedOperationException(
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                     "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
         }
 
@@ -330,7 +331,7 @@ public class InteropServiceImpl implements InteropService {
         if (transactionType.isDebit()) {
             fee = savingsAccount.calculateWithdrawalFee(request.getAmount().getAmount());
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount().add(fee))) {
-                throw new UnsupportedOperationException("Not enough balance amount for requested amount plus fees!");
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Not enough balance amount for requested amount plus fees!");
             }
         } else {
             fee = BigDecimal.ZERO;
@@ -363,10 +364,10 @@ public class InteropServiceImpl implements InteropService {
             BigDecimal total = calculateTotalTransferAmount(request, savingsAccount);
 
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) {
-                throw new UnsupportedOperationException("Not enough balance amount for requested amount plus fees!");
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Not enough balance amount for requested amount plus fees!");
             }
             if (findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue()) != null) {
-                throw new UnsupportedOperationException("Transfer amount was already put on hold " + transferCode);
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Transfer amount was already put on hold " + transferCode);
             }
 
             PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
@@ -399,7 +400,7 @@ public class InteropServiceImpl implements InteropService {
         String transferCode = request.getTransferCode();
 
         if (findTransaction(savingsAccount, transferCode, (isDebit ? WITHDRAWAL : DEPOSIT).getValue()) != null) {
-            throw new UnsupportedOperationException("Transfer was already committed with code: " + transferCode);
+            throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Transfer was already committed with code: " + transferCode);
         }
 
         LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
@@ -410,16 +411,17 @@ public class InteropServiceImpl implements InteropService {
         if (isDebit) {
             SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue());
             if (holdTransaction == null) {
-                throw new UnsupportedOperationException("Missing onhold transaction for transfer: " + transferCode);
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Missing onhold transaction for transfer: " + transferCode);
             }
 
             BigDecimal totalTransferAmount = calculateTotalTransferAmount(request, savingsAccount);
             if (holdTransaction.getAmount().compareTo(totalTransferAmount) != 0) {
-                throw new UnsupportedOperationException("Transfer request amount plus fees does not match with onhold amount!");
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                        "Transfer request amount plus fees does not match with onhold amount!");
             }
 
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount()), totalTransferAmount)) {
-                throw new UnsupportedOperationException("Not enough balance amount!");
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Not enough balance amount!");
             }
 
             if (holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
@@ -474,7 +476,8 @@ public class InteropServiceImpl implements InteropService {
 
             savingsAccountRepository.save(savingsAccount);
         } else {
-            throw new UnsupportedOperationException("No active onhold transaction exists with transferCode " + request.getTransferCode());
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                    "No active onhold transaction exists with transferCode " + request.getTransferCode());
         }
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
@@ -495,7 +498,7 @@ public class InteropServiceImpl implements InteropService {
 
             return InteropKycResponseData.build(accountKyc);
         } catch (final EmptyResultDataAccessException e) {
-            throw new UnsupportedOperationException("Error in retrieving KYC information: " + e);
+            throw new HttpClientErrorException(HttpStatus.NO_CONTENT, "Error in retrieving KYC information: " + e);
         }
     }
 
@@ -525,7 +528,7 @@ public class InteropServiceImpl implements InteropService {
     private Loan validateAndGetLoan(String accountId) {
         Loan loan = loanRepository.findNonClosedLoanByAccountNumber(accountId);
         if (loan == null) {
-            throw new UnsupportedOperationException("Loan not found for the given account No: " + accountId);
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Loan not found for the given account No: " + accountId);
         }
         return loan;
     }
@@ -537,12 +540,12 @@ public class InteropServiceImpl implements InteropService {
 
         ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
         if (!savingsAccount.getCurrency().getCode().equals(requestCurrency.getCode())) {
-            throw new UnsupportedOperationException("Account and request has different currencies!");
+            throw new HttpClientErrorException(HttpStatus.CONFLICT, "Account and request has different currencies!");
         }
 
         SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
         if (!savingsAccount.isTransactionAllowed(transactionType, request.getExpirationLocalDate())) {
-            throw new UnsupportedOperationException("Transaction not allowed on account!");
+            throw new HttpClientErrorException(HttpStatus.NOT_ACCEPTABLE, "Transaction not allowed on account!");
         }
 
         request.normalizeAmounts(savingsAccount.getCurrency());
@@ -555,7 +558,7 @@ public class InteropServiceImpl implements InteropService {
         MoneyData requestFee = request.getFspFee();
         if (requestFee != null) {
             if (!savingsAccount.getCurrency().getCode().equals(requestFee.getCurrency())) {
-                throw new UnsupportedOperationException();
+                throw new HttpClientErrorException(HttpStatus.resolve(400));
             }
             // TODO: compare with calculated quote fee
             total = MathUtil.add(total, requestFee.getAmount());
@@ -563,7 +566,7 @@ public class InteropServiceImpl implements InteropService {
         MoneyData requestCommission = request.getFspCommission();
         if (requestCommission != null) {
             if (!savingsAccount.getCurrency().getCode().equals(requestCommission.getCurrency())) {
-                throw new UnsupportedOperationException();
+                throw new HttpClientErrorException(HttpStatus.resolve(400));
             }
             // TODO: compare with calculated quote commission
             total = MathUtil.subtractToZero(total, requestCommission.getAmount());
@@ -581,7 +584,7 @@ public class InteropServiceImpl implements InteropService {
             dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
         }
 
-        return DateTimeFormat.forPattern(dateFormat).withLocale(locale);
+        return DateTimeFormatter.ofPattern(dateFormat).withLocale(locale);
     }
 
     PaymentType findPaymentType() {

@@ -1,0 +1,39 @@
+== Introduction
+
+=== Platform for Digital Financial Services
+
+Apache Fineract (\’fīn-,ә-,rakt\) is open source software for financial services.
+
+Fineract provides a reliable, robust, and affordable solution for entrepreneurs, financial institutions, and service providers to offer financial services to the world’s 2 billion underbanked and unbanked. Fineract is aimed at innovative mobile and cloud-based solutions, and enables digital transaction accounts for all.
+
+Fineract 1.x is a mature platform with open APIs, while Fineract CN is a cloud native, microservice architecture also supporting open banking APIs.
+
+=== About
+
+Apache Fineract can be deployed in any environment: cloud or on-premise. It can support front end interfaces on or offline, mobile or PC. It’s extensible enough to support any organizational type or delivery channel, and flexible enough to support any product, service, or lending methodology. For any organization, big or small, it provides the client data management, loan and savings portfolio management, integrated real time accounting, and social and financial reporting needed to bring digital financial services to a modern connected world.
+
+Fineract 1.x compares well to other core banking systems and draws from requirements in credit unions, microfinance institutions, and small non-banking financial institutions. Features include flexible product configuration, KYC documentation support, business rule sets, payment transactions, and portfolio management. It includes an open API that dates to 2011 and is deployed in relatively high transaction volume environments.
+
+Fineract CN operates on the principle that financial services are an innovative space and so each fineract microservice encapsulates a domain that can be combined with other microservices to create new platform offerings. Fineract CN microservices can be combined to create new software platforms for digital financial service providers. Fineract CN is still in its early days, but preliminary tests have shown that a simple single-instance laptop deployment of Fineract CN can process over 1000 transactions/second. Fineract CN also includes a fully Apache-licensed backoffice UI.
+
+Fineract 1.x began incubation at Apache in December 2015 and is used by an active community of companies who build solutions for both financial inclusion and fintech innovation.
+
+=== Contribute
+
+The Apache Fineract community welcomes contributors who want to support the Fineract technology. Our community builds everything from this website, to the Fineract code to documentation and best practices information.
+
+We especially welcome additions and corrections to the documentation, wiki, and website to improve the user experience. Bug reports and fixes and additions to the Apache Fineract code are welcome. Helping users learn best practices also earns good karma in our community.
+
+=== Mailing Lists
+
+Users & Developers
+
+If you use, build on top of, deploy or are building contributions and modifications to Apache Fineract, this is the list for you.
+To subscribe, send a blank email to dev-subscribe@fineract.apache.org.
+To unsubscribe later, just send a blank email to dev-unsubscribe@fineract.apache.org.
+You can also read the archives on lists.apache.org or on MarkMail.org.
+Commits
+
+This list receives an email whenever new code is contributed to Apache Fineract.
+To subscribe, send a blank email to commits-subscribe@fineract.apache.org.
+You can also read the archives.
