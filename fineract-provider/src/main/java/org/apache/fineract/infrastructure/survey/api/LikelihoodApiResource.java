@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
 @Path("/likelihood")
 @Component
 @Scope("singleton")
-
+@Tag(name = "Likelihood", description = "")
 public class LikelihoodApiResource {
 
     private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;

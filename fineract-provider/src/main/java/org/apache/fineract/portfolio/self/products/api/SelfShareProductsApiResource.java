@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.self.products.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Component;
 @Path("/self/products/share")
 @Component
 @Scope("singleton")
+@Tag(name = "Self Share Products", description = "")
 public class SelfShareProductsApiResource {
 
     private final ProductsApiResource productsApiResource;

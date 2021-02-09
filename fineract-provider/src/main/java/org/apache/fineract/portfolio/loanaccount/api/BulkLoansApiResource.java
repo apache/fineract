@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Component;
 @Path("/loans/loanreassignment")
 @Component
 @Scope("singleton")
+@Tag(name = "Bulk Loans", description = "")
 public class BulkLoansApiResource {
 
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("officeId", "fromLoanOfficerId", "assignmentDate",
