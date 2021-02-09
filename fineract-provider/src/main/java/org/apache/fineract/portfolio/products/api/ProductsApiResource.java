@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -58,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Path("/products/{type}")
 @Component
 @Scope("singleton")
-
+@Tag(name = "Products", description = "")
 public class ProductsApiResource {
 
     private final ApplicationContext applicationContext;

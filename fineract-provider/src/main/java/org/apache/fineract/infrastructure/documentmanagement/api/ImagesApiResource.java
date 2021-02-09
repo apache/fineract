@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -57,6 +58,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
+@Tag(name = "Images", description = "")
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
