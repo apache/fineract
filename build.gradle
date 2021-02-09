@@ -97,7 +97,7 @@ allprojects  {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.3'
             mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.5.RELEASE'
-            mavenBom 'org.junit:junit-bom:5.7.0'
+            mavenBom 'org.junit:junit-bom:5.7.1'
         }
 
         dependencies {
@@ -109,6 +109,8 @@ allprojects  {
             dependency 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated above in buildscript!
             dependency 'com.google.guava:guava:30.1-jre'
             dependency 'com.google.code.gson:gson:2.8.6'
+            dependency 'com.google.truth:truth:1.1.2'
+            dependency 'com.google.truth.extensions:truth-java8-extension:1.1.2'
             dependency 'org.apache.commons:commons-email:1.5'
             dependency 'commons-io:commons-io:2.8.0'
             dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
