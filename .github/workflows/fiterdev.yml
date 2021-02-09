@@ -1,47 +1,47 @@
-name: FITER DEV BUILD
+# name: FITER DEV BUILD
 
-on:
-  push:
-    branches:
-      - fiter-dev
+# on:
+#   push:
+#     branches:
+#       - fiter-dev
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v1
-      - uses: kamiazya/setup-graphviz@v1
+#     steps:
+#       - uses: actions/checkout@v1
+#       - uses: kamiazya/setup-graphviz@v1
 
-      - name: Set up JDK 12
-        uses: actions/setup-java@v1
-        with:
-          java-version: 12
+#       - name: Set up JDK 12
+#         uses: actions/setup-java@v1
+#         with:
+#           java-version: 12
 
-      - name: Build with Gradles
-        run: ./gradlew clean bootWar
+#       - name: Build with Gradles
+#         run: ./gradlew clean bootWar
 
-      - name: Deploy to server
-        run: |
-          echo "$TEST_SERVER_SSH_KEY" > key.pem
-          chmod 400 key.pem
-          echo "Stopping the tomcat and removing the old war file"
-          ssh -i key.pem -o StrictHostKeyChecking=no -l ubuntu $TEST_SERVER_URL '/home/ubuntu/stopserver.sh'
-        env:
-          TEST_SERVER_SSH_KEY: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
-          TEST_SERVER_URL: ${{ secrets.FINERACTDEV_SERVER_URL }}
+#       - name: Deploy to server
+#         run: |
+#           echo "$TEST_SERVER_SSH_KEY" > key.pem
+#           chmod 400 key.pem
+#           echo "Stopping the tomcat and removing the old war file"
+#           ssh -i key.pem -o StrictHostKeyChecking=no -l ubuntu $TEST_SERVER_URL '/home/ubuntu/stopserver.sh'
+#         env:
+#           TEST_SERVER_SSH_KEY: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
+#           TEST_SERVER_URL: ${{ secrets.FINERACTDEV_SERVER_URL }}
 
-      - name: deploy the war file
-        uses: garygrossgarten/github-action-scp@release
-        with:
-           host: ${{ secrets.FINERACTDEV_SERVER_URL }}
-           username: ubuntu
-           privateKey: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
-           local: "build/libs/fineract-provider.war"
-           remote: "/opt/tomcat/webapps/fineract-provider.war"
+#       - name: deploy the war file
+#         uses: garygrossgarten/github-action-scp@release
+#         with:
+#            host: ${{ secrets.FINERACTDEV_SERVER_URL }}
+#            username: ubuntu
+#            privateKey: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
+#            local: "build/libs/fineract-provider.war"
+#            remote: "/opt/tomcat/webapps/fineract-provider.war"
 
-      - name: start the server after deployment
-        run: ssh -i key.pem -o StrictHostKeyChecking=no -l ubuntu $TEST_SERVER_URL '/home/ubuntu/startserver.sh'
-        env:
-          TEST_SERVER_SSH_KEY: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
-          TEST_SERVER_URL: ${{ secrets.FINERACTDEV_SERVER_URL }}
+#       - name: start the server after deployment
+#         run: ssh -i key.pem -o StrictHostKeyChecking=no -l ubuntu $TEST_SERVER_URL '/home/ubuntu/startserver.sh'
+#         env:
+#           TEST_SERVER_SSH_KEY: ${{ secrets.NEWCONCEPT_SERVER_SSH_KEY }}
+#           TEST_SERVER_URL: ${{ secrets.FINERACTDEV_SERVER_URL }}
