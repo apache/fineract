@@ -33,6 +33,11 @@ Beware that this database container database keeps its state inside the containe
 
 Tomcat v9 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required.)
 
+Instructions to resolve the spotless
+============
+
+Run the following command:
+1. `./gradlew fineract-provider:spotlessapply`
 
 Instructions how to run for local development
 ============
