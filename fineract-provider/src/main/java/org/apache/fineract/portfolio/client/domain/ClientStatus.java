@@ -69,7 +69,7 @@ public enum ClientStatus {
 
         ClientStatus clientStatus = ClientStatus.INVALID;
 
-        if (StringUtils.isEmpty(clientString)) {
+        if (!StringUtils.hasText(clientString)) {
             return clientStatus;
         }
 

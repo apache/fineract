@@ -43,7 +43,7 @@ public class AppuserClientMapperReadServiceImpl implements AppuserClientMapperRe
         return this.jdbcTemplate.queryForObject(
                 "select case when (count(*) > 0) then true else false end "
                         + " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
-                new Object[] { clientId, appUserId }, Boolean.class);
+                Boolean.class, clientId, appUserId);
     }
 
     @Override

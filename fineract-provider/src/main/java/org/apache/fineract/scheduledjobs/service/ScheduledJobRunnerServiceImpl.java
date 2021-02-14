@@ -449,16 +449,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         // Updating closing balance
         String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
-        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[] {}, Long.class);
+        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, Long.class);
 
         for (Long officeId : officeIds) {
             String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
-            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] { officeId }, Long.class);
+            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, Long.class, officeId);
             for (Long accountId : accountIds) {
                 final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance "
                         + "is not null order by created_date desc, entry_date desc limit 1";
-                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] { officeId, accountId },
-                        BigDecimal.class);
+                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, BigDecimal.class, officeId, accountId);
                 List<TrialBalance> tbRows = this.trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
                 BigDecimal closingBalance = null;
                 if (!CollectionUtils.isEmpty(closingBalanceData)) {
