@@ -1,4 +1,5 @@
-/**
+/*
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -33,7 +34,7 @@ public class ReportsTest extends IntegrationTest {
 
     @Test
     void listReports() {
-        assertThat(ok(fineract().reports.retrieveReportList())).hasSize(115);
+        assertThat(ok(fineract().reports.retrieveReportList())).hasSize(117);
     }
 
     @Test
