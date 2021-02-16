@@ -1,0 +1,41 @@
+fineractServer:
+  replicas: 1
+  image:
+    name: apache/fineract
+    tag: latest
+  extraEnv:
+    DRIVERCLASS_NAME: org.drizzle.jdbc.DrizzleDriver
+    PROTOCOL: jdbc
+    SUB_PROTOCOL: mysql:thin
+    fineract_tenants_driver: org.drizzle.jdbc.DrizzleDriver
+    FINERACT_DEFAULT_TENANTDB_PORT: "3306"
+  extraSecretEnv: {}
+
+fineractUI:
+  image:
+    name: openmf/community-app
+    tag: latest
+
+# Any other parameter from https://artifacthub.io/packages/helm/bitnami/mysql
+# TODO: support non-root user
+mysql:
+  enabled: true
+  # Required because db driver doesn't support mysql 8...
+  image:
+    tag: '5.7'
+  auth:
+    rootPassword: ozIRdODs8Jvs3BzZywgK
+    database: fineract_tenants
+    # username: fineract
+    # password: ihcqsCcsX6
+  initdbScripts:
+    create_db.sql: |
+      # create databases
+      CREATE DATABASE IF NOT EXISTS `fineract_tenants`;
+      CREATE DATABASE IF NOT EXISTS `fineract_default`;
+
+      # create root user and grant rights
+      GRANT ALL ON *.* TO 'root'@'%';
+
+service:
+  type: ClusterIP
