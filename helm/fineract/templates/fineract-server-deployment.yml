@@ -31,8 +31,6 @@ spec:
       app: fineract-backend
       tier: backend
       instance: {{ .Release.Name }}
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -75,3 +73,15 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          readinessProbe:
+            httpGet:
+              path: /fineract-provider/actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /fineract-provider/actuator/health
+              port: 8080
+            initialDelaySeconds: 300
+            timeoutSeconds: 10

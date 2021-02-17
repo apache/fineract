@@ -1,0 +1,38 @@
+{{- if .Values.ingress.enabled -}}
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: /fineract-provider
+            pathType: Prefix
+            backend:
+              serviceName: {{ .Release.Name }}-backend
+              servicePort: http
+          - path: /
+            pathType: Prefix
+            backend:
+              serviceName: {{ .Release.Name }}-ui
+              servicePort: 80
+  {{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+{{- end -}}

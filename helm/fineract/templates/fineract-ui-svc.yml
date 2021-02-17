@@ -23,6 +23,7 @@ metadata:
     app: fineract
     tier: ui
   name: {{ .Release.Name }}-ui
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
     - protocol: TCP

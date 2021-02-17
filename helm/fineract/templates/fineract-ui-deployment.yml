@@ -25,13 +25,12 @@ metadata:
     app: fineract
     tier: ui
 spec:
+  replicas: {{ .Values.fineractUI.replicas }}
   selector:
     matchLabels:
       app: fineract
       tier: ui
       instance: {{ .Release.Name }}
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -45,3 +44,15 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
