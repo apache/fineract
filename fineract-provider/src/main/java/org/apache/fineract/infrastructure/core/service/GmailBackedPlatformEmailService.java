@@ -18,20 +18,22 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
+import java.util.Properties;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.EmailDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
 
     private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
+    private static final Logger LOG = LoggerFactory.getLogger(GmailBackedPlatformEmailService.class);
 
     @Autowired
     public GmailBackedPlatformEmailService(final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
@@ -55,31 +57,41 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
 
     @Override
     public void sendDefinedEmail(EmailDetail emailDetails) {
-        final Email email = new SimpleEmail();
         final SMTPCredentialsData smtpCredentialsData = this.externalServicesReadPlatformService.getSMTPCredentials();
 
         final String authuser = smtpCredentialsData.getUsername();
         final String authpwd = smtpCredentialsData.getPassword();
 
-        // Very Important, Don't use email.setAuthentication()
-        email.setAuthenticator(new DefaultAuthenticator(authuser, authpwd));
-        email.setDebug(false); // true if you want to debug
-        email.setHostName(smtpCredentialsData.getHost());
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(smtpCredentialsData.getHost()); // smtp.gmail.com
+        mailSender.setPort(Integer.parseInt(smtpCredentialsData.getPort())); // 587
+
+        // Important: Enable less secure app access for the gmail account used in the following authentication
+        mailSender.setUsername(authuser); // use valid gmail address
+        mailSender.setPassword(authpwd); // use password of the above gmail account
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.debug", "true");
 
         try {
             if (smtpCredentialsData.isUseTLS()) {
-                // FINERACT-1070: NOT email.setSSLOnConnect(true); email.setSslSmtpPort(smtpCredentialsData.getPort());
-                email.setStartTLSRequired(true);
+                if (smtpCredentialsData.getPort().equals("465")) {
+                    props.put("mail.smtp.starttls.enable", "false");
+                } else if (smtpCredentialsData.getPort().equals("587")) {
+                    props.put("mail.smtp.starttls.enable", "true");
+                }
             }
-            email.setSmtpPort(Integer.parseInt(smtpCredentialsData.getPort()));
-            email.setFrom(smtpCredentialsData.getFromEmail(), smtpCredentialsData.getFromName());
 
-            email.setSubject(emailDetails.getSubject());
-            email.setMsg(emailDetails.getBody());
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(smtpCredentialsData.getFromEmail());
+            message.setTo(emailDetails.getAddress(), emailDetails.getContactName());
+            message.setSubject(emailDetails.getSubject());
+            message.setText(emailDetails.getBody());
+            mailSender.send(message);
 
-            email.addTo(emailDetails.getAddress(), emailDetails.getContactName());
-            email.send();
-        } catch (EmailException e) {
+        } catch (Exception e) {
             throw new PlatformEmailSendException(e);
         }
     }
