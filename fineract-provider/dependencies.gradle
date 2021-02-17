@@ -68,12 +68,15 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
+            'com.sun.activation:javax.activation:1.2.0',
+
             // JAX-B dependencies for JDK 9+
             'jakarta.xml.bind:jakarta.xml.bind-api',
 
             'org.dom4j:dom4j',
 
             'javax.cache:cache-api',
+
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
