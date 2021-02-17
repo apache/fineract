@@ -454,6 +454,16 @@ public class LoanScheduleAssembler {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
+        LocalDate revolvingPeriodStartDate = null;
+        LocalDate revolvingPeriodEndDate = null;
+
+        if (loanProduct.isRevolving()) {
+            revolvingPeriodStartDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.revolvingPeriodStartParameterName,
+                    element);
+            revolvingPeriodEndDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.revolvingPeriodEndParameterName,
+                    element);
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -465,7 +475,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization, activateOnApproval, null);
+                allowCompoundingOnEod, isEqualAmortization, activateOnApproval, null, revolvingPeriodStartDate, revolvingPeriodEndDate);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

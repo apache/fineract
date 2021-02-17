@@ -93,7 +93,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
                     LoanCharge loanCharge = chargePaidBy.getLoanCharge();
                     transferCharges.add(loanCharge);
-                    if (loanCharge.isInstalmentFee()) {
+                    if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                         chargePaidDetails.addAll(loanCharge.fetchRepaymentInstallment(currency));
                     }
                 }
@@ -397,7 +397,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         LoanInstallmentCharge chargePerInstallment = null;
         for (final LoanCharge loanCharge : charges) {
             if (loanCharge.getAmountOutstanding(currency).isGreaterThanZero() && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isInstalmentFee()) {
+                if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                     LoanInstallmentCharge unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
                     if (chargePerInstallment == null || chargePerInstallment.getRepaymentInstallment().getDueDate()
                             .isAfter(unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
@@ -629,7 +629,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (final LoanCharge loanCharge : charges) {
             boolean isPaidOrPartiallyPaid = loanCharge.isPaidOrPartiallyPaid(currency);
             if (isPaidOrPartiallyPaid && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isInstalmentFee()) {
+                if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                     LoanInstallmentCharge paidLoanChargePerInstallment = loanCharge
                             .getLastPaidOrPartiallyPaidInstallmentLoanCharge(currency);
                     if (chargePerInstallment == null

@@ -950,6 +950,11 @@ public class Loan extends AbstractPersistableCustom {
                     amount = getPrincpal().getAmount();
                 }
             break;
+            case PERCENT_OF_UNUTILIZED_AMOUNT:
+                // Try Calculate Amount Percentage Applied To for PERCENT_OF_UNUTILIZED_AMOUNT - but it will be
+                // calculated later
+                amount = BigDecimal.ZERO;
+            break;
             default:
             break;
         }
@@ -974,14 +979,20 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     private BigDecimal calculatePerInstallmentChargeAmount(final LoanCharge loanCharge) {
-        return calculatePerInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage());
+        return calculatePerInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(),
+                loanCharge.isRevolvingPeriodInstalmentFee());
     }
 
-    public BigDecimal calculatePerInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage) {
+    public BigDecimal calculatePerInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage,
+            boolean isRevolvingPeriodInstalmentFee) {
         Money amount = Money.zero(getCurrency());
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
+            if (isRevolvingPeriodInstalmentFee && isDateInRevolvingPeriod(installment.getDueDate())) {
+                amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
+            } else if (!isRevolvingPeriodInstalmentFee) {
+                amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
+            }
         }
         return amount.getAmount();
     }
@@ -1009,6 +1020,11 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case PERCENT_OF_INTEREST:
                 percentOf = installment.getInterestCharged(getCurrency());
+            break;
+            case PERCENT_OF_UNUTILIZED_AMOUNT:
+                BigDecimal disbursedAmount = getExpectedDisbursedAmount(installment.getDueDate());
+                percentOf = Money.of(getCurrency(), this.approvedPrincipal.subtract(disbursedAmount));
+                LOG.info("Calculate Installment UNUTILIZED_AMOUNT percentOf: {}, disbursed: {}", percentOf, disbursedAmount);
             break;
             default:
             break;
@@ -1200,7 +1216,7 @@ public class Loan extends AbstractPersistableCustom {
             BigDecimal totalChargeAmt = BigDecimal.ZERO;
             if (loanCharge.getChargeCalculation().isPercentageBased()) {
                 chargeAmt = loanCharge.getPercentage();
-                if (loanCharge.isInstalmentFee()) {
+                if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                     totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
                 }
             } else {
@@ -1696,7 +1712,7 @@ public class Loan extends AbstractPersistableCustom {
                 amount = calculateAmountPercentageAppliedTo(loanCharge);
             }
             chargeAmt = loanCharge.getPercentage();
-            if (loanCharge.isInstalmentFee()) {
+            if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                 totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
             }
         } else {
@@ -1714,7 +1730,11 @@ public class Loan extends AbstractPersistableCustom {
         LocalDate graceDate = DateUtils.getLocalDateOfTenant().minusDays(penaltyWaitPeriod);
         Money amount = Money.zero(getCurrency());
         if (graceDate.isAfter(installment.getDueDate())) {
+
             amount = calculateOverdueAmountPercentageAppliedTo(installment, loanCharge.getChargeCalculation());
+            if (loanCharge.isRevolvingPeriodInstalmentFee() && !isDateInRevolvingPeriod(installment.getDueDate())) {
+                amount = Money.zero(getCurrency());
+            }
             if (!amount.isGreaterThanZero()) {
                 loanCharge.setActive(false);
             }
@@ -1736,6 +1756,11 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case PERCENT_OF_INTEREST:
                 amount = installment.getInterestOutstanding(getCurrency());
+            break;
+            case PERCENT_OF_UNUTILIZED_AMOUNT:
+                BigDecimal disbursedAmount = getExpectedDisbursedAmount(installment.getDueDate());
+                amount = Money.of(getCurrency(), this.approvedPrincipal.subtract(disbursedAmount));
+                LOG.info("Calculate Overdue Installment UNUTILIZED_AMOUNT amount: {}, disbursed: {}", amount, disbursedAmount);
             break;
             default:
             break;
@@ -2658,6 +2683,21 @@ public class Loan extends AbstractPersistableCustom {
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (disbursementDetail.actualDisbursementDate() != null) {
                 principal = principal.add(disbursementDetail.principal());
+            }
+        }
+        return principal;
+    }
+
+    public BigDecimal getExpectedDisbursedAmount(LocalDate untilDate) {
+        BigDecimal principal = BigDecimal.ZERO;
+        if (untilDate != null) {
+            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+                Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
+                        : disbursementDetail.expectedDisbursementDate();
+                LocalDate disbursedLocalDate = LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault());
+                if (disbursedLocalDate.isBefore(untilDate) || disbursedLocalDate.isEqual(untilDate)) {
+                    principal = principal.add(disbursementDetail.principal());
+                }
             }
         }
         return principal;
@@ -4906,12 +4946,14 @@ public class Loan extends AbstractPersistableCustom {
 
     public List<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
         final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
-        if (loanCharge.isInstalmentFee()) {
+        if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.isRecalculatedInterestComponent()) {
+                if (installment.isRecalculatedInterestComponent()
+                        || (loanCharge.isRevolvingPeriodInstalmentFee() && !isDateInRevolvingPeriod(installment.getDueDate()))) {
                     continue;
                 }
+
                 BigDecimal amount = BigDecimal.ZERO;
                 if (loanCharge.getChargeCalculation().isFlat()) {
                     amount = loanCharge.amountOrPercentage();
@@ -4924,6 +4966,18 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return loanChargePerInstallments;
+    }
+
+    public boolean isDateInRevolvingPeriod(LocalDate date) {
+        if (this.loanProduct.isRevolving() && this.getRevolvingPeriodStartDate() != null && this.getRevolvingPeriodEndDate() != null) {
+            LocalDate revolvingPeriodStartDate = LocalDate.ofInstant(this.getRevolvingPeriodStartDate().toInstant(),
+                    ZoneId.systemDefault());
+            LocalDate revolvingPeriodEndDate = LocalDate.ofInstant(this.getRevolvingPeriodEndDate().toInstant(), ZoneId.systemDefault());
+
+            return (date.isBefore(revolvingPeriodEndDate) || date.isEqual(revolvingPeriodEndDate))
+                    && (date.isAfter(revolvingPeriodStartDate) || date.isEqual(revolvingPeriodStartDate));
+        }
+        return false;
     }
 
     public void validateAccountStatus(final LoanEvent event) {
@@ -5280,7 +5334,7 @@ public class Loan extends AbstractPersistableCustom {
             if (!loanCharge.isDueAtDisbursement()) {
                 updateOverdueScheduleInstallment(loanCharge);
                 if (loanCharge.getDueLocalDate() == null || !lastRepaymentDate.isBefore(loanCharge.getDueLocalDate())) {
-                    if ((loanCharge.isInstalmentFee() || !loanCharge.isWaived())
+                    if ((loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee() || !loanCharge.isWaived())
                             && (loanCharge.getDueLocalDate() == null || !lastTransactionDate.isAfter(loanCharge.getDueLocalDate()))) {
                         recalculateLoanCharge(loanCharge, generatorDTO.getPenaltyWaitPeriod());
                         loanCharge.updateWaivedAmount(getCurrency());
@@ -5588,6 +5642,13 @@ public class Loan extends AbstractPersistableCustom {
             interestChargedFromDate = getDisbursementDate();
         }
 
+        LocalDate revolvingPeriodStartDate = null;
+        LocalDate revolvingPeriodEndDate = null;
+        if (this.loanProduct.isRevolving()) {
+            revolvingPeriodStartDate = LocalDate.ofInstant(this.getRevolvingPeriodStartDate().toInstant(), ZoneId.systemDefault());
+            revolvingPeriodEndDate = LocalDate.ofInstant(this.getRevolvingPeriodEndDate().toInstant(), ZoneId.systemDefault());
+        }
+
         final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(scheduleGeneratorDTO.getApplicationCurrency(),
                 loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(),
                 getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
@@ -5598,7 +5659,8 @@ public class Loan extends AbstractPersistableCustom {
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
-                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), this.activateOnApproval, this.approvedOnDate);
+                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), this.activateOnApproval, this.approvedOnDate,
+                revolvingPeriodStartDate, revolvingPeriodEndDate);
         return loanApplicationTerms;
     }
 
@@ -5872,6 +5934,13 @@ public class Loan extends AbstractPersistableCustom {
         List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
         annualNominalInterestRate = constructFloatingInterestRates(annualNominalInterestRate, floatingRateDTO, loanTermVariations);
 
+        LocalDate revolvingPeriodStartDate = null;
+        LocalDate revolvingPeriodEndDate = null;
+        if (this.loanProduct.isRevolving()) {
+            revolvingPeriodStartDate = LocalDate.ofInstant(this.getRevolvingPeriodStartDate().toInstant(), ZoneId.systemDefault());
+            revolvingPeriodEndDate = LocalDate.ofInstant(this.getRevolvingPeriodEndDate().toInstant(), ZoneId.systemDefault());
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDayType,
                 dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
                 inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData,
@@ -5880,7 +5949,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, this.activateOnApproval, this.approvedOnDate);
+                false, this.activateOnApproval, this.approvedOnDate, revolvingPeriodStartDate, revolvingPeriodEndDate);
     }
 
     /**
@@ -6383,7 +6452,7 @@ public class Loan extends AbstractPersistableCustom {
 
                                 loanCharge.getAmountPaid(getCurrency())));
                     }
-                } else if (loanCharge.isInstalmentFee()) {
+                } else if (loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) {
                     LoanInstallmentCharge loanInstallmentCharge = loanCharge.getInstallmentLoanCharge(installment.getInstallmentNumber());
                     if (loanCharge.isPenaltyCharge()) {
                         penaltyAccoutedForCurrentPeriod = penaltyAccoutedForCurrentPeriod

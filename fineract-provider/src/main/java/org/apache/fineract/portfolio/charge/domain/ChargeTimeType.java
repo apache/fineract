@@ -37,7 +37,10 @@ public enum ChargeTimeType {
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for loan
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
 
-    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee");
+    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"),
+
+    REVOLVING_PERIOD_INSTALLMENT_FEE(17, "chargeTimeType.RevolvingPeriodInstalmentFee"); // only for revolving loan
+                                                                                         // charges
 
     private final Integer value;
     private final String code;
@@ -58,12 +61,12 @@ public enum ChargeTimeType {
     public static Object[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
-                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue() };
+                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE.getValue() };
     }
 
     public static Object[] validLoanChargeValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
-                ChargeTimeType.INSTALMENT_FEE.getValue() };
+                ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE.getValue() };
     }
 
     public static Object[] validSavingsValues() {
@@ -134,6 +137,9 @@ public enum ChargeTimeType {
                 case 16:
                     chargeTimeType = SAVINGS_NOACTIVITY_FEE;
                 break;
+                case 17:
+                    chargeTimeType = REVOLVING_PERIOD_INSTALLMENT_FEE;
+                break;
                 default:
                     chargeTimeType = INVALID;
                 break;
@@ -182,12 +188,17 @@ public enum ChargeTimeType {
         return this.value.equals(ChargeTimeType.INSTALMENT_FEE.getValue());
     }
 
+    public boolean isRevolvingPeriodInstalmentFee() {
+        return this.value.equals(ChargeTimeType.REVOLVING_PERIOD_INSTALLMENT_FEE.getValue());
+    }
+
     public boolean isOverdueInstallment() {
         return this.value.equals(ChargeTimeType.OVERDUE_INSTALLMENT.getValue());
     }
 
     public boolean isAllowedLoanChargeTime() {
-        return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement();
+        return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement()
+                || isRevolvingPeriodInstalmentFee();
     }
 
     public boolean isAllowedClientChargeTime() {
