@@ -154,7 +154,7 @@ public class ClasspathHellDuplicatesChecker {
                 // (2.25.1) has a non-optional Package-Import
                 // for javax.inject, but we made javax.inject:javax.inject
                 // <optional>true in odlparent, and don't bundle it.
-                || resourcePath.startsWith("javax/inject/")
+                || resourcePath.startsWith("javax/inject/") || resourcePath.startsWith("javax/activation/")
                 // Java 9 modules
                 || resourcePath.endsWith("module-info.class") || resourcePath.contains("findbugs")
                 // list newly introduced in INFRAUTILS-52, because classgraph
@@ -167,5 +167,6 @@ public class ClasspathHellDuplicatesChecker {
                 // Pentaho reports harmless duplicates
                 || resourcePath.endsWith("overview.html") || resourcePath.endsWith("classic-engine.properties")
                 || resourcePath.endsWith("loader.properties");
+
     }
 }
