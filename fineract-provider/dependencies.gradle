@@ -81,7 +81,7 @@ dependencies {
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.1',
             'com.squareup.retrofit2:converter-gson',
-            'com.sun.activation:jakarta.activation:1.2.2'
+            'com.sun.activation:jakarta.activation:1.2.0'
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
