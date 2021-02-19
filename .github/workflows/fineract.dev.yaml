@@ -8,7 +8,7 @@
 # Created by Michael Vorburger.ch for Fineract in May 2020.
 #
 
-name: Deploy to https://www.fineract.dev
+name: Sonar scan
 
 on:
   push:
@@ -17,20 +17,31 @@ on:
 
 jobs:
   setup-build-deploy:
-    name: Deploy on Fineract.dev
-    if: github.repository == 'apache/fineract'
+    name: Sonar scan
     runs-on: ubuntu-latest
 
     steps:
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
-
       - uses: actions/checkout@v2
-
-      - run: gcloud components install beta
-
-      - run: JOBS=$(gcloud beta builds list --ongoing --format="value[terminator=' '](id)") && [ ! -z "$JOBS" ] && echo "Cancelling $JOBS..." && gcloud builds cancel $JOBS --no-user-output-enabled || true
-
-      - run: gcloud beta builds triggers run deploy-demo --branch master --format=none
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonarqube --info

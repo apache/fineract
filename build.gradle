@@ -68,6 +68,15 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.0' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.0' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
+    id "org.sonarqube" version "3.1.1"
+}
+
+sonarqube {
+  properties {
+    property "sonar.projectKey", "one-acre-fund_fineract"
+    property "sonar.organization", "one-acre-fund"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
 }
 
 description = '''\
