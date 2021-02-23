@@ -17,3 +17,4 @@ jobs:
           owner: apache
           base: develop
           head: develop
+          auto_approve: true
