@@ -1,0 +1,19 @@
+name: Sync Fork with apache/fineract develop branch
+
+on:
+  schedule:
+    - cron: '0 0 14,28 * *' # At 00:00 on day-of-month 14 and 28.
+  workflow_dispatch: # on button click
+
+jobs:
+  sync:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: tgymnich/fork-sync@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: muellners
+          base: develop
+          head: develop
