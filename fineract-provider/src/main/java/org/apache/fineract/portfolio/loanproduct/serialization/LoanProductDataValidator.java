@@ -256,11 +256,11 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.SEMI_MONTH_START_DATE, element)) {
             final LocalDate firstSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_START_DATE,
                     element);
-            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_START_DATE).value(firstSemiDate).notNull();
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_START_DATE).value(firstSemiDate).notBlank();
 
             final LocalDate secondSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_SECOND_DATE,
                     element);
-            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).value(secondSemiDate).notNull()
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).value(secondSemiDate).notBlank()
                     .validateDateAfter(firstSemiDate);
 
             if (firstSemiDate.getMonth() != secondSemiDate.getMonth()) {
