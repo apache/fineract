@@ -927,9 +927,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(semiMonthFirstDateParamName);
             if (newValue != null) {
-                this.firstDateForSemi = java.sql.Date.valueOf(newValue);
-            } else {
-                this.firstDateForSemi = null;
+                this.firstDateForSemi = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
         }
 
@@ -937,14 +935,12 @@ public class LoanProduct extends AbstractPersistableCustom {
         if (command.isChangeInLocalDateParameterNamed(semiMonthSecondDateParamName, getSecondSemiDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(semiMonthSecondDateParamName);
             actualChanges.put(semiMonthSecondDateParamName, valueAsInput);
-            actualChanges.put(semiMonthSecondDateParamName, dateFormatAsInput);
+            actualChanges.put(dateFormatParamName, dateFormatAsInput);
             actualChanges.put(localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(semiMonthSecondDateParamName);
             if (newValue != null) {
-                this.secondDateForSemi = java.sql.Date.valueOf(newValue);
-            } else {
-                this.secondDateForSemi = null;
+                this.secondDateForSemi = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
             }
         }
 
