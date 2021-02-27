@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -286,7 +285,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 LOG.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
             break;
             case SEMI_MONTH:
-                dueRepaymentPeriodDate = startDate.plus(Period.ofDays(repaidEvery));
+                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
             break;
         }
         return dueRepaymentPeriodDate;
