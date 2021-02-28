@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Component;
 @Path("/savingsaccounts/{savingsId}/onholdtransactions")
 @Component
 @Scope("singleton")
+@Tag(name = "Deposit Account On Hold Fund Transactions", description = "")
 public class DepositAccountOnHoldFundTransactionsApiResource {
 
     private final PlatformSecurityContext context;

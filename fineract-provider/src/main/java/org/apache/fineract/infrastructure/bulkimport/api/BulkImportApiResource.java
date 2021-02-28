@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Component;
 @Path("/imports")
 @Component
 @Scope("singleton")
+@Tag(name = "Bulk Import", description = "")
 public class BulkImportApiResource {
 
     private final String resourceNameForPermissions = "IMPORT";

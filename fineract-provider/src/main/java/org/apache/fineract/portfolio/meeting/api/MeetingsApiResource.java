@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.meeting.api;
 
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESOURCE_NAME;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Component;
 @Path("/{entityType}/{entityId}/meetings")
 @Component
 @Scope("singleton")
+@Tag(name = "Meetings", description = "")
 public class MeetingsApiResource {
 
     private final PlatformSecurityContext context;

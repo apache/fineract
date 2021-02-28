@@ -20,6 +20,7 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Path("/clients/{clientId}/familymembers")
 @Component
 @Scope("singleton")
+@Tag(name = "Client Family Member", description = "")
 public class ClientFamilyMembersApiResources {
 
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",

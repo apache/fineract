@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Component;
 @Path("/fixeddepositaccounts/{fixedDepositAccountId}/transactions")
 @Component
 @Scope("singleton")
+@Tag(name = "Fixed Deposit Account Transactions", description = "")
 public class FixedDepositAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
