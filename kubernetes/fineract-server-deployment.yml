@@ -61,6 +61,18 @@ spec:
       containers:
       - name: fineract-server
         image: apache/fineract:latest
+        livenessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/liveness
+            port: 8443
+          initialDelaySeconds: 90
+          periodSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/readiness
+            port: 8443
+          initialDelaySeconds: 90
+          periodSeconds: 1
         env:
         - name: DRIVERCLASS_NAME
           value: org.drizzle.jdbc.DrizzleDriver
