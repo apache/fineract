@@ -16,7 +16,7 @@
 #
 
 {{- define "mysql_host" -}}
-{{ .Release.Name }}-mysql
+{{ .Release.Name }}-mysql.{{ .Release.Namespace }}
 {{- end -}}
 
 {{- define "mysql_url" -}}
