@@ -207,7 +207,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java-8.0.22'
+    driver 'mysql:mysql-connector-java:8.0.23'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader

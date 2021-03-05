@@ -61,7 +61,7 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
-            'com.mysql.cj.jdbc.Driver',
+            'mysql:mysql-connector-java:8.0.23',
             'org.flywaydb:flyway-core',
 
             'com.github.librepdf:openpdf',
