@@ -88,9 +88,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 30 global configurations.
-        Assertions.assertEquals(30, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(30, actualGlobalConfigurations.size());
+        // There are currently 31 global configurations.
+        Assertions.assertEquals(31, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(31, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -361,6 +361,14 @@ public class GlobalConfigurationHelper {
         isInterestAppropriationEnabled.put("enabled", false);
         isInterestAppropriationEnabled.put("trapDoor", false);
         defaults.add(isInterestAppropriationEnabled);
+
+        HashMap<String, Object> isBlockLoanOverpayment = new HashMap<>();
+        isBlockLoanOverpayment.put("id", 35);
+        isBlockLoanOverpayment.put("name", "block-loan-overpayment");
+        isBlockLoanOverpayment.put("value", 0);
+        isBlockLoanOverpayment.put("enabled", false);
+        isBlockLoanOverpayment.put("trapDoor", false);
+        defaults.add(isBlockLoanOverpayment);
 
         return defaults;
     }
