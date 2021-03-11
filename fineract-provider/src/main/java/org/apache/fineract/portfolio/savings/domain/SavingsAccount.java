@@ -1142,7 +1142,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // and should be checked after processing all transactions
         if (isOverdraft()) {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
-                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+                overdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         } else {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
@@ -1213,7 +1213,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         BigDecimal transactionAmount = null;
         if (isOverdraft()) {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
-                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+                overdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         } else {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
