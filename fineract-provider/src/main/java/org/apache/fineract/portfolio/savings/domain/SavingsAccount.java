@@ -1237,7 +1237,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isOverdraft()) {
             if (runningBalanceTransaction.plus(overdraftLimit).minus(amountPaid).isLessThanZero()) {
-                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+                overdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         } else {
             if (runningBalanceTransaction.minus(amountPaid).isLessThanZero()) {
@@ -1247,7 +1247,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     }
 
-    private void OverdraftLimitExceededException(final String paramName, final BigDecimal accountBalance, final BigDecimal withdrawalFee,
+    private void overdraftLimitExceededException(final String paramName, final BigDecimal accountBalance, final BigDecimal withdrawalFee,
             final BigDecimal transactionAmount) {
         String showMessageForLimitExaustion = "Overdraft Limit is Exceeded";
         throw new PlatformDataIntegrityException(showMessageForLimitExaustion, showMessageForLimitExaustion);
