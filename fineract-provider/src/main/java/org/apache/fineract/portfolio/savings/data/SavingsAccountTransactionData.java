@@ -120,6 +120,10 @@ public final class SavingsAccountTransactionData implements Serializable {
         return savingsAccountId;
     }
 
+    public BigDecimal getRunningBalance() {
+        return this.runningBalance;
+    }
+
     public SavingsAccountTransactionEnumData getTransactionType() {
         return transactionType;
     }

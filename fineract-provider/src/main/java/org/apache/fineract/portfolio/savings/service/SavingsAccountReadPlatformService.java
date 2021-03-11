@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -62,4 +63,5 @@ public interface SavingsAccountReadPlatformService {
 
     String retrieveAccountNumberByAccountId(Long accountId);
 
+    BigDecimal retrieveRunningBalanceBySavingsAccountIdAndDate(Long savingsId, LocalDate transactionDate);
 }

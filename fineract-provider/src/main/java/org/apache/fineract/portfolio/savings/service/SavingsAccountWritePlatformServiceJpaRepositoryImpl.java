@@ -31,6 +31,7 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -134,6 +135,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
     private final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
@@ -160,7 +162,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final SavingsAccountAssembler savingAccountAssembler,
+            final SavingsAccountReadPlatformService savingsAccountReadPlatformService, final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
             final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
@@ -180,6 +182,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
+        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountTransactionDataValidator = savingsAccountTransactionDataValidator;
         this.savingsAccountChargeDataValidator = savingsAccountChargeDataValidator;
@@ -1288,6 +1291,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
+
+        Long accountNumber = Long.parseLong(account.getAccountNumber(), 10);
+
+        ZoneId defaultZoneId = ZoneId.systemDefault();
+        Date transactionCurrentDate = Date.from(transactionDate.atStartOfDay(defaultZoneId).toInstant());
+
+        BigDecimal savingsAccountTransaction = this.savingsAccountReadPlatformService
+                .retrieveRunningBalanceBySavingsAccountIdAndDate(accountNumber, transactionDate);
+        account.validateAccountBalanceByDateDoesNotBecomeNegative("." + SavingsAccountTransactionType.PAY_CHARGE.getCode(),
+                savingsAccountTransaction, amountPaid);
 
         account.validateAccountBalanceDoesNotBecomeNegative("." + SavingsAccountTransactionType.PAY_CHARGE.getCode(),
                 depositAccountOnHoldTransactions);

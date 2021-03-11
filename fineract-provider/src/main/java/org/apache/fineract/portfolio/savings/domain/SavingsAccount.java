@@ -76,6 +76,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
@@ -1141,7 +1142,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // and should be checked after processing all transactions
         if (isOverdraft()) {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
-                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        } else {
+            if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
+                throw new InsufficientAccountBalanceException("chargeAmount", getAccountBalance(), null, transactionAmount);
             }
         }
 
@@ -1208,9 +1213,45 @@ public class SavingsAccount extends AbstractPersistableCustom {
         BigDecimal transactionAmount = null;
         if (isOverdraft()) {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
-                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        } else {
+            if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
+                throw new InsufficientAccountBalanceException("chargeAmount", getAccountBalance(), null, transactionAmount);
             }
         }
+    }
+
+    public void validateAccountBalanceByDateDoesNotBecomeNegative(final String transactionAction,
+            final BigDecimal savingsAccountTransactionData, final BigDecimal amountPaid) {
+
+        // SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransactionRepository
+        // .findOneBySavingsAccountIdAndDate(accountNumber, transactionDate);
+
+        final Money runningBalanceTransaction = Money.of(this.currency, savingsAccountTransactionData);
+
+        Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+
+        BigDecimal withdrawalFee = null;
+        BigDecimal transactionAmount = null;
+
+        if (isOverdraft()) {
+            if (runningBalanceTransaction.plus(overdraftLimit).minus(amountPaid).isLessThanZero()) {
+                OverdraftLimitExceededException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        } else {
+            if (runningBalanceTransaction.minus(amountPaid).isLessThanZero()) {
+                throw new InsufficientAccountBalanceException("chargeAmount", getAccountBalance(), null, transactionAmount);
+            }
+        }
+
+    }
+
+    private void OverdraftLimitExceededException(final String paramName, final BigDecimal accountBalance, final BigDecimal withdrawalFee,
+            final BigDecimal transactionAmount) {
+        String showMessageForLimitExaustion = "Overdraft Limit is Exceeded";
+        throw new PlatformDataIntegrityException(showMessageForLimitExaustion, showMessageForLimitExaustion);
+
     }
 
     protected boolean isAccountLocked(final LocalDate transactionDate) {

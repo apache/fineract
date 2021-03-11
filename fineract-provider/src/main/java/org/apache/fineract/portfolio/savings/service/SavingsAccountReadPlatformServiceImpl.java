@@ -1240,4 +1240,18 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
+
+    @Override
+    public BigDecimal retrieveRunningBalanceBySavingsAccountIdAndDate(Long savingsId, LocalDate transactionDate) {
+
+        try {
+            final String sql = "select running_balance_derived " + " from m_savings_account_transaction sat "
+                    + " where sat.savings_account_id = ? " + " and sat.transaction_date <= ? and is_reversed=0 "
+                    + " ORDER BY sat.transaction_date DESC " + " Limit 1 ";
+
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { savingsId, formatter.format(transactionDate) }, BigDecimal.class);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new SavingsAccountNotFoundException(savingsId, e);
+        }
+    }
 }
