@@ -1,0 +1,45 @@
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+  tags:
+    include:
+    - '*'
+
+pr:
+  - master
+  - release/*
+  - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+name: Fineract_$(Date:yyyyMMdd)$(Rev:.r)
+
+steps:
+  - task: HelmInstaller@1
+    inputs:
+      helmVersionToInstall: latest
+
+  - script: |
+      # Lint
+      helm lint helm/fineract
+    displayName: Validate Helm chart
+
+  - task: HelmDeploy@0
+    displayName: Package Helm Chart
+    inputs:
+      command: package
+      chartPath: $(System.DefaultWorkingDirectory)/helm/fineract
+      destination: $(Build.ArtifactStagingDirectory)
+      updatedependency: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Helm chart
+    # Only publish develop branch
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+      ArtifactName: "fineract"
+      publishLocation: "Container"
