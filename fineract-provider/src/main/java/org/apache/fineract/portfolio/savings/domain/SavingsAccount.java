@@ -1230,7 +1230,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         final Money runningBalanceTransaction = Money.of(this.currency, savingsAccountTransactionData);
 
-        Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+        // Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
 
         BigDecimal withdrawalFee = null;
         BigDecimal transactionAmount = null;
