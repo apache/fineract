@@ -202,6 +202,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder withHref(final String href) {
+        this.href = href;
+        return this;
+    }
+
     public CommandWrapperBuilder withNoJsonBody() {
         this.json = null;
         return this;

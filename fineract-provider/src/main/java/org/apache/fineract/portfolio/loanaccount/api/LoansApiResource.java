@@ -926,7 +926,7 @@ public class LoansApiResource {
                                   @QueryParam("href") @Parameter(description = "href : loans | loanproducts") final String href,
                                    @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().rescheduleLoan(href, resourceId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().rescheduleLoan(href, resourceId).withJson(apiRequestBodyAsJson).withHref(href).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

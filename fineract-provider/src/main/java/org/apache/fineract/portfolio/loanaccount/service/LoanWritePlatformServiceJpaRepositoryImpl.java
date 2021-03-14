@@ -1249,6 +1249,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
+    public CommandProcessingResult rescheduleLoan(Long resourceId, String href, JsonCommand command) {
+        // TODO: Implement resheduling logic
+        return null;
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult closeLoan(final Long loanId, final JsonCommand command) {
 
         AppUser currentUser = getAppUserIfPresent();
