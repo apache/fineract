@@ -789,6 +789,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder rescheduleLoan(final String href, final Long resourceId) {
+        this.actionName = "RESCHEDULE";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.href = href.equals("loans") ? "/loans/" + resourceId : "/loanproducts/" + resourceId;
+        return this;
+    }
+
     public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";
         this.entityName = "LOAN";
