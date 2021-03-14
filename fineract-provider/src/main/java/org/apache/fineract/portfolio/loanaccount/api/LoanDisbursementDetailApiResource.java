@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +48,7 @@ import org.springframework.stereotype.Component;
 @Path("/loans/{loanId}/disbursements")
 @Component
 @Scope("singleton")
+@Tag(name = "Loan Disbursement Details", description = "")
 public class LoanDisbursementDetailApiResource {
 
     private final Set<String> responseDataParameters = new HashSet<>(

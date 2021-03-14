@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -75,8 +76,8 @@ import org.springframework.stereotype.Component;
 
 @Path("/interoperation") // api/v1/
 @Component
-@Scope
-
+@Scope("singleton")
+@Tag(name = "Inter Operation", description = "")
 public class InteropApiResource {
 
     private PlatformSecurityContext context;

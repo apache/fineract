@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.rate.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Component;
 @Path("/rates")
 @Component
 @Scope("singleton")
+@Tag(name = "Rate", description = "")
 public class RateApiResource {
 
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "percentage", "productApply", "active"));

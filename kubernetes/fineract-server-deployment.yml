@@ -61,6 +61,25 @@ spec:
       containers:
       - name: fineract-server
         image: apache/fineract:latest
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "200m"
+            memory: "0.5Gi"
+        livenessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 1
         env:
         - name: DRIVERCLASS_NAME
           value: org.drizzle.jdbc.DrizzleDriver

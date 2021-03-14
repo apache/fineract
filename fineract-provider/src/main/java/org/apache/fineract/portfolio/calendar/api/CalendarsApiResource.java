@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.calendar.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +63,7 @@ import org.springframework.stereotype.Component;
 @Path("/{entityType}/{entityId}/calendars")
 @Component
 @Scope("singleton")
+@Tag(name = "Calendar", description = "")
 public class CalendarsApiResource {
 
     /**

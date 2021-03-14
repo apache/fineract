@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.sms.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import java.util.Date;
 import javax.ws.rs.Consumes;
@@ -54,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-
+@Tag(name = "SMS", description = "")
 public class SmsApiResource {
 
     private final String resourceNameForPermissions = "SMS";

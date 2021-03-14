@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.gcm.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.ws.rs.Consumes;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Component;
 @Path("/self/device/registration")
 @Component
 @Scope("singleton")
+@Tag(name = "Device Registration", description = "")
 public class DeviceRegistrationApiResource {
 
     private final PlatformSecurityContext context;
