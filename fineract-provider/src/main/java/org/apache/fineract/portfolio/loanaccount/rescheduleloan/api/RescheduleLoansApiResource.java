@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Component;
 @Path("/rescheduleloans")
 @Component
 @Scope("singleton")
+@Tag(name = "Reschedule Loans", description = "")
 public class RescheduleLoansApiResource {
 
     private final DefaultToApiJsonSerializer<LoanRescheduleRequestData> loanRescheduleRequestToApiJsonSerializer;

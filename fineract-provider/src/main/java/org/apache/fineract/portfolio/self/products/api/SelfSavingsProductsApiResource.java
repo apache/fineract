@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.self.products.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Component;
 @Path("/self/savingsproducts")
 @Component
 @Scope("singleton")
+@Tag(name = "Self Savings Products", description = "")
 public class SelfSavingsProductsApiResource {
 
     private final SavingsProductsApiResource savingsProductsApiResource;

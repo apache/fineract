@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -50,7 +51,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-
+@Tag(name = "Fineract Entity", description = "")
 public class FineractEntityApiResource {
 
     private final PlatformSecurityContext context;

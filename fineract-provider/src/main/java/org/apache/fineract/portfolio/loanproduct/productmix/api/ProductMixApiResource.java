@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.productmix.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Path("/loanproducts/{productId}/productmix")
 @Component
 @Scope("singleton")
+@Tag(name = "Product Mix", description = "")
 public class ProductMixApiResource {
 
     private final String resourceNameForPermissions = "PRODUCTMIX";

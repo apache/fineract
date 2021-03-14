@@ -250,6 +250,9 @@ springBoot {
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+    }
 }
 
 bootWar {

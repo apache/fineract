@@ -57,6 +57,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
+
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
