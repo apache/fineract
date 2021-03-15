@@ -26,7 +26,7 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(
-            //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
+            'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
@@ -44,6 +44,7 @@ dependencies {
 
             'com.google.guava:guava',
             'com.google.code.gson:gson',
+            'org.json:json',
             'com.sun.jersey:jersey-core',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
@@ -61,7 +62,6 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
-            'org.drizzle.jdbc:drizzle-jdbc',
             'org.flywaydb:flyway-core',
 
             'com.github.librepdf:openpdf',
@@ -79,8 +79,28 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.1',
-            'com.squareup.retrofit2:converter-gson'
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.0',
+            'com.squareup.retrofit2:converter-gson',
+
+            'org.apache.pdfbox:pdfbox',
+
+            'org.pentaho.reporting.engine:classic-core',
+            'org.pentaho.reporting.engine:classic-extensions',
+            'org.pentaho.reporting.engine:classic-extensions-scripting',
+            'org.pentaho.reporting.engine:wizard-core',
+            'org.pentaho.reporting.designer:wizard-xul',
+            'org.pentaho.reporting.library:libbase',
+            'org.pentaho.reporting.library:libdocbundle',
+            'org.pentaho.reporting.library:libfonts',
+            'org.pentaho.reporting.library:libformat',
+            'org.pentaho.reporting.library:libformula',
+            'org.pentaho.reporting.library:libloader',
+            'org.pentaho.reporting.library:librepository',
+            'org.pentaho.reporting.library:libserializer',
+            'org.pentaho.reporting.library:libsparkline',
+            'org.pentaho.reporting.library:libxml',
+            'mysql:mysql-connector-java',
+
             )
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'

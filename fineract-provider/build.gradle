@@ -26,6 +26,15 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+repositories {
+    jcenter()
+    maven {
+        url "https://public.nexus.pentaho.org/repository/omni/"
+    }
+}
 
 // Configuration for the OpenJPA enhance task
 // https://github.com/radcortez/openjpa-gradle-plugin
@@ -207,7 +216,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
+    driver 'mysql:mysql-connector-java:5.1.49'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -218,7 +227,7 @@ configurations.driver.each {File file ->
 task createDB {
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
         sql.execute( 'create database '+"`$dbName`" )
     }
 }
@@ -226,13 +235,13 @@ task createDB {
 task dropDB {
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }
 task setBlankPassword {
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
         sql.execute('USE `fineract_tenants`')
         sql.execute('UPDATE fineract_tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
     }
@@ -250,13 +259,10 @@ springBoot {
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
-    }
 }
 
 bootWar {
-    enabled = false
+    enabled = true
 }
 
 tasks.withType(Tar) {

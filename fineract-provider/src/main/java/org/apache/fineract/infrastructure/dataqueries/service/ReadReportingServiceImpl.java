@@ -198,7 +198,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-        sql = this.genericDataService.wrapSQL(sql);
+        if (!name.equalsIgnoreCase("FullParameterList")) {
+            sql = this.genericDataService.wrapSQL(sql);
+        }
 
         return sql;
     }
@@ -220,6 +222,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
+        String reportType = "Table";
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName
                 + "' and self_service_user_report = ?";
         validateReportName(reportName);
@@ -230,9 +233,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, isSelfServiceUserReport);
 
         if (rs.next()) {
-            return rs.getString("report_type");
+            reportType = rs.getString("report_type");
         }
-        throw new ReportNotFoundException(reportName);
+        return reportType;
     }
 
     @Override

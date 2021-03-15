@@ -33,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 /**
@@ -76,10 +74,6 @@ public class TenantDatabaseUpgradeService {
                         .placeholderReplacement(false).configuration(Map.of("flyway.table", "schema_version")) // FINERACT-979
                         .load();
 
-                // Should be removed later when all instances are stabilized
-                // :FINERACT-1008
-                repairFlywayVersionSkip(flyway.getConfiguration().getDataSource());
-
                 try {
                     flyway.repair();
                     flyway.migrate();
@@ -111,10 +105,6 @@ public class TenantDatabaseUpgradeService {
                 .configuration(Map.of("flyway.table", "schema_version")) // FINERACT-979
                 .load();
 
-        // Should be removed later when all instances are stabilized
-        // :FINERACT-1008
-        repairFlywayVersionSkip(flyway.getConfiguration().getDataSource());
-
         flyway.repair();
         flyway.migrate();
     }
@@ -125,41 +115,5 @@ public class TenantDatabaseUpgradeService {
             return defaultValue;
         }
         return value;
-    }
-
-    private void repairFlywayVersionSkip(DataSource source) {
-        JdbcTemplate template = new JdbcTemplate(source);
-        LOG.info("repairFlywayVersionSkip: Check whether the version table is in old format ");
-        SqlRowSet ts = template.queryForRowSet("SHOW TABLES LIKE 'schema_version';");
-        if (ts.next()) {
-            SqlRowSet rs = template.queryForRowSet("SHOW  COLUMNS FROM `schema_version` LIKE 'version_rank';");
-            if (rs.next()) {
-                LOG.info("repairFlywayVersionSkip: The schema_version table is in old format, executing repair ");
-                template.execute("CREATE TABLE `schema_version_history` (  `version_rank` int(11) NOT NULL, "
-                        + " `installed_rank` int(11) NOT NULL,  `version` varchar(50) NOT NULL,  `description` varchar(200) NOT NULL,  "
-                        + "`type` varchar(20) NOT NULL,  `script` varchar(1000) NOT NULL,  `checksum` int(11) DEFAULT NULL, "
-                        + " `installed_by` varchar(100) NOT NULL,  `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-                        + " `execution_time` int(11) NOT NULL,  `success` tinyint(1) NOT NULL,  PRIMARY KEY (`version`), "
-                        + " KEY `schema_version_vr_idx` (`version_rank`),  KEY `schema_version_ir_idx` (`installed_rank`), "
-                        + " KEY `schema_version_s_idx` (`success`));");
-                template.execute("INSERT INTO schema_version_history select * from schema_version;");
-                template.execute("DROP TABLE schema_version;");
-                template.execute("CREATE TABLE `schema_version` ( `installed_rank` int(11) NOT NULL, "
-                        + "  `version` varchar(50) DEFAULT NULL,   `description` varchar(200) NOT NULL,   `type` varchar(20) NOT NULL,  "
-                        + " `script` varchar(1000) NOT NULL,   `checksum` int(11) DEFAULT NULL,   `installed_by` varchar(100) NOT NULL,  "
-                        + " `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,   `execution_time` int(11) NOT NULL, "
-                        + "  `success` tinyint(1) NOT NULL,   PRIMARY KEY (`installed_rank`),   KEY `flyway_schema_history_s_idx` (`success`) );");
-                template.execute("INSERT INTO schema_version (installed_rank, version, description, type, script, checksum, "
-                        + "installed_by, installed_on, execution_time, success) SELECT installed_rank, version, description, type, "
-                        + "script, checksum, installed_by, installed_on, execution_time, success FROM schema_version_history;");
-                template.execute("DROP TABLE schema_version_history;");
-
-                LOG.info("repairFlywayVersionSkip: The schema_version repair completed.");
-            } else {
-                LOG.info("repairFlywayVersionSkip: The schema_version table format is new, aborting repair");
-            }
-        } else {
-            LOG.info("repairFlywayVersionSkip: The schema_version table does not exist, aborting repair");
-        }
     }
 }
