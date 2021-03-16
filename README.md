@@ -187,6 +187,67 @@ To shutdown and reset your cluster, run:
 
 We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
 
+Using Helm
+----------
+
+A [Helm](https://helm.sh/) chart is provided at [helm/fineract](helm/fineract). If you're familiar with Helm you probably know what to do. Here are some detailed steps:
+
+### Prerequisites
+
+* A Kubernetes cluster
+* Helm installed
+
+### Running
+
+1. Configure your values overrides
+
+Just like any typical Helm chart, you'll need to craft a custom `my-values.yaml` file that would define/override any of the values exposed into the default [values.yaml](helm/fineract/values.yaml), or the dependent [bitnami/mysql](https://artifacthub.io/packages/helm/bitnami/redis) chart it depends on.
+
+Check out the content of those files to understand the supported overrides.
+
+Some mandatory overrides include `mysql.auth.password` and `mysql.auth.rootPassword`.
+
+You may also want to set `global.storageClass`, which MySQL will use, according to your needs, as well as enable the ingress (disabled by default).
+
+Sample `my-values.yaml` file:
+
+```yaml
+global:
+  storageClass: my-storage-class
+
+mysql:
+  auth:
+    password: blah
+    rootPassword: blih
+
+ingress:
+  enables: true
+  hosts:
+  - fineract.example.com
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+```
+
+1. Install and run
+
+```sh
+# From the root of the repository...
+# Install chart dependencies
+helm dependency update helm/fineract
+
+# Installe your release
+helm upgrade --install --values my-values.yaml --namespace fineract --create-namespace my-fineract helm/fineract
+```
+
+You should see a few pods popping up in your namespace, depending on your replica configuration:
+
+```sh
+$ kubectl get pods --namespace fineract
+NAME                                READY   STATUS    RESTARTS   AGE
+fineract-backend-645c7fff69-p28cf   1/1     Running   0          121m
+fineract-mysql-0                    1/1     Running   0          121m
+fineract-ui-6fdcf99746-ndblt        1/1     Running   0          121m
+```
 
 Instructions to download Gradle wrapper
 ============
