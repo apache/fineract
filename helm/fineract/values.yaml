@@ -23,6 +23,7 @@ fineractServer:
     name: apache/fineract
     tag: latest
   # key/value pairs to pass as environment variables to the backend pods
+  # They will be evaluated as Helm templates
   extraEnv:
     DRIVERCLASS_NAME: org.drizzle.jdbc.DrizzleDriver
     PROTOCOL: jdbc
@@ -30,13 +31,22 @@ fineractServer:
     fineract_tenants_driver: org.drizzle.jdbc.DrizzleDriver
     FINERACT_DEFAULT_TENANTDB_PORT: "3306"
   # sensitive key/value pairs to pass as environment variables to the backend pods as secrets
+  # They will be evaluated as Helm templates
   extraSecretEnv: {}
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
 
 fineractUI:
   replicas: 1
   image:
     name: openmf/community-app
     tag: latest
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "100Mi"
 
 # Globals will be available to subcharts
 global:
@@ -52,8 +62,8 @@ mysql:
     tag: '5.7'
   auth:
     # Please change these...
-    rootPassword: ozIRdODs8Jvs3BzZywgK
-    password: ihcqsCcsX6
+    rootPassword: ''
+    password: ''
     username: fineract
   initdbScripts:
     # WARNING! These db init scripts will only be executed on a brand new, uninitialized instance!

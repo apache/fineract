@@ -36,7 +36,7 @@ fineract_tenants_pwd: {{ include "mysql_password" . | b64enc }}
 FINERACT_DEFAULT_TENANTDB_PWD: {{ include "mysql_password" . | b64enc }}
 {{ if .Values.extraSecretEnv }}
 {{- range $key, $value := .Values.extraSecretEnv }}
-{{ $key }}: {{ $value | b64enc }}
+{{ $key }}: {{ tpl $value $ | b64enc }}
 {{- end }}
 {{- end }}
 {{- end -}}

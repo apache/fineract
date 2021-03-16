@@ -38,11 +38,13 @@ spec:
         tier: backend
         instance: {{ .Release.Name }}
       annotations:
+        # Force a pod restart if secret values change
         checksum/secrets: {{ include "secrets" . | sha256sum }}
     spec:
       initContainers:
         - name: wait-db
           image: jwilder/dockerize
+          # We don't care about having the latest...
           imagePullPolicy: IfNotPresent
           args:
           - -wait
@@ -64,10 +66,11 @@ spec:
               value: {{ include "mysql_user" . }}
             - name: FINERACT_DEFAULT_TENANTDB_UID
               value: {{ include "mysql_user" . }}
-            {{ if .Values.fineractServer.extraEnv }}
+            {{- if .Values.fineractServer.extraEnv }}
             {{- range $key, $value := .Values.fineractServer.extraEnv }}
             - name: {{ $key | quote}}
-              value: {{ $value | quote }}
+              value: |-
+                {{- tpl $value $ | nindent 16 }}
             {{- end }}
             {{- end }}
           ports:
@@ -75,13 +78,15 @@ spec:
               name: http
           readinessProbe:
             httpGet:
-              path: /fineract-provider/actuator/health
+              path: /fineract-provider/actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 15
+            initialDelaySeconds: 90
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
-              path: /fineract-provider/actuator/health
+              path: /fineract-provider/actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 300
+            initialDelaySeconds: 90
             timeoutSeconds: 10
+          resources:
+            {{- .Values.fineractServer.resources | toYaml | nindent 12 }}
