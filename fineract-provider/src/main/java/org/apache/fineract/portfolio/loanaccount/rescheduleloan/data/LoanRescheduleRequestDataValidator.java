@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
+import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +60,10 @@ public class LoanRescheduleRequestDataValidator {
                     RescheduleLoansApiConstants.rescheduleReasonIdParamName, RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
                     RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
                     RescheduleLoansApiConstants.adjustedDueDateParamName, RescheduleLoansApiConstants.recalculateInterestParamName,
-                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName));
+                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName,
+                    RescheduleLoansApiConstants.changeRepaymentSchedule, RescheduleLoansApiConstants.repayEvery,
+                    RescheduleLoansApiConstants.repaymentFrequencyType, RescheduleLoansApiConstants.semiMonthFirstDate,
+                    RescheduleLoansApiConstants.semiMonthSecondDate));
 
     private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
@@ -168,6 +173,52 @@ public class LoanRescheduleRequestDataValidator {
         if (adjustedDueDate != null && rescheduleFromDate != null && adjustedDueDate.isBefore(rescheduleFromDate)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
                     "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
+        }
+
+        final Boolean changedSchedule = this.fromJsonHelper.extractBooleanNamed(RescheduleLoansApiConstants.changeRepaymentSchedule,
+                jsonElement);
+        if (changedSchedule) {
+
+            final Integer repaymentEvery = this.fromJsonHelper.extractIntegerWithLocaleNamed(RescheduleLoansApiConstants.repayEvery,
+                    jsonElement);
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.repayEvery).value(repaymentEvery).notNull()
+                    .integerGreaterThanZero();
+
+            final Integer repaymentFrequencyType = this.fromJsonHelper
+                    .extractIntegerNamed(RescheduleLoansApiConstants.repaymentFrequencyType, jsonElement, Locale.getDefault());
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.repaymentFrequencyType).value(repaymentFrequencyType)
+                    .notNull().inMinMaxRange(0, 6);
+
+            // Validate Semi-Month Details
+            if (this.fromJsonHelper.parameterExists(LoanProductConstants.SEMI_MONTH_START_DATE, jsonElement)
+                    && this.fromJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_START_DATE, jsonElement) != null
+                    && this.fromJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_SECOND_DATE, jsonElement) != null) {
+                final LocalDate firstSemiDate = this.fromJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_START_DATE,
+                        jsonElement);
+                dataValidatorBuilder.reset().parameter(LoanProductConstants.SEMI_MONTH_START_DATE).value(firstSemiDate).notBlank();
+
+                final LocalDate secondSemiDate = this.fromJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_SECOND_DATE,
+                        jsonElement);
+                dataValidatorBuilder.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).value(secondSemiDate).notBlank()
+                        .validateDateAfter(firstSemiDate);
+
+                if (firstSemiDate.getMonth() != secondSemiDate.getMonth()) {
+                    dataValidatorBuilder.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                            "first.and.second.semi.dates.must.be.thesame.month", "First and second semi dates must be in the same month");
+                }
+
+                final int difference = Math.abs(firstSemiDate.getDayOfMonth() - secondSemiDate.getDayOfMonth());
+                if (difference < 14) {
+                    dataValidatorBuilder.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                            "date.difference.cannot.be.less.than.14",
+                            "days difference between first and second semi dates cannot be less than 14 days");
+                }
+                if (difference > 18) {
+                    dataValidatorBuilder.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                            "date.difference.cannot.be.greater.than.18",
+                            "days difference between first and second semi dates cannot be greater than 18 days");
+                }
+            }
         }
 
         // at least one of the following must be provided => graceOnPrincipal,

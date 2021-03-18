@@ -16,32 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.handler;
+package org.apache.fineract.portfolio.loanaccount.rescheduleloan.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "LOAN", action = "RESCHEDULE")
-public class RescheduleLoanCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "RESCHEDULELOAN", action = "BULK_RESCHEDULE")
+public class LoanRescheduleRequestJobCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
 
     @Autowired
-    public RescheduleLoanCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
+    public LoanRescheduleRequestJobCommandHandler(LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
+        this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.rescheduleLoan(command.entityId(), command.getUrl(), command);
+    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+        return this.loanRescheduleRequestWritePlatformService.rescheduleJob(jsonCommand.entityId(), jsonCommand);
     }
 }

@@ -914,25 +914,6 @@ public class LoansApiResource {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
-    @POST
-    @Path("reschedule")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Reschedule associated Loan Accounts", description = "New application terms\n\n")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PostLoansRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PostLoansRequest.class))) })
-    public String rescheduleLoans(@QueryParam("resourceId") @Parameter(description = "loanId | loanProductId") final Long resourceId,
-                                  @QueryParam("href") @Parameter(description = "href : loans | loanproducts") final String href,
-                                   @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().rescheduleLoan(href, resourceId).withJson(apiRequestBodyAsJson).withHref(href).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")

@@ -28,15 +28,21 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestData;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestEnumerations;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestTimelineData;
+import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -51,13 +57,18 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanRescheduleRequestRowMapper loanRescheduleRequestRowMapper = new LoanRescheduleRequestRowMapper();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final LoanDropdownReadPlatformService dropdownReadPlatformService;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public LoanRescheduleRequestReadPlatformServiceImpl(final RoutingDataSource dataSource, LoanRepositoryWrapper loanRepositoryWrapper,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService,
+            final LoanDropdownReadPlatformService dropdownReadPlatformService, final LoanRepository loanRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.loanRepository = loanRepository;
     }
 
     private static final class LoanRescheduleRequestRowMapper implements RowMapper<LoanRescheduleRequestData> {
@@ -75,6 +86,11 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("lr.reschedule_from_date as rescheduleFromDate, ");
             sqlBuilder.append("lr.recalculate_interest as recalculateInterest, ");
             sqlBuilder.append("lr.reschedule_reason_cv_id as rescheduleReasonCvId, ");
+            sqlBuilder.append("lr.change_schedule as changeSchedule, ");
+            sqlBuilder.append("lr.repay_every as repayEvery, ");
+            sqlBuilder.append("lr.repayment_period_frequency_enum as repaymentFrequencyType, ");
+            sqlBuilder.append("lr.start_date_semi_month as firstSemiDate, ");
+            sqlBuilder.append("lr.close_date_semi_month as secondSemiDate, ");
             sqlBuilder.append("cv.code_value as rescheduleReasonCvValue, ");
             sqlBuilder.append("lr.reschedule_reason_comment as rescheduleReasonComment, ");
 
@@ -139,6 +155,13 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final String rescheduleReasonComment = rs.getString("rescheduleReasonComment");
             final Boolean recalculateInterest = rs.getBoolean("recalculateInterest");
 
+            final Boolean changeSchedule = rs.getBoolean("changeSchedule");
+            final Integer repayEvery = JdbcSupport.getInteger(rs, "repayEvery");
+            final EnumOptionData repaymentFrequencyType = LoanEnumerations
+                    .repaymentFrequencyType(PeriodFrequencyType.fromInt(JdbcSupport.getInteger(rs, "repaymentFrequencyType")));
+            final LocalDate firstSemiDate = JdbcSupport.getLocalDate(rs, "firstSemiDate");
+            final LocalDate secondSemiDate = JdbcSupport.getLocalDate(rs, "secondSemiDate");
+
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String submittedByFirstname = rs.getString("submittedByFirstname");
@@ -154,6 +177,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final String rejectedByFirstname = rs.getString("rejectedByFirstname");
             final String rejectedByLastname = rs.getString("rejectedByLastname");
             final Collection<CodeValueData> rescheduleReasons = null;
+            final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
             final LoanRescheduleRequestTimelineData timeline = new LoanRescheduleRequestTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                     rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname);
@@ -172,7 +196,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
             return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
                     rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId,
-                    recalculateInterest, rescheduleReasons, loanTermVariations);
+                    recalculateInterest, changeSchedule, repayEvery, repaymentFrequencyType, firstSemiDate, secondSemiDate,
+                    rescheduleReasons, loanTermVariations, repaymentFrequencyTypeOptions);
         }
 
         private LoanTermVariationsData fetchLoanTermVariation(final ResultSet rs) throws SQLException {
@@ -219,9 +244,17 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final LocalDate rescheduleFromDate = JdbcSupport.getLocalDate(rs, "rescheduleFromDate");
             final Long rescheduleReasonCvId = JdbcSupport.getLong(rs, "rescheduleReasonCvId");
             final String rescheduleReasonCvValue = rs.getString("rescheduleReasonCvValue");
+
+            final Boolean changeSchedule = rs.getBoolean("changeSchedule");
+            final Integer repayEvery = JdbcSupport.getInteger(rs, "repayEvery");
+            final EnumOptionData repaymentFrequencyType = LoanEnumerations
+                    .repaymentFrequencyType(PeriodFrequencyType.fromInt(JdbcSupport.getInteger(rs, "repaymentFrequencyType")));
+            final LocalDate firstSemiDate = JdbcSupport.getLocalDate(rs, "firstSemiDate");
+            final LocalDate secondSemiDate = JdbcSupport.getLocalDate(rs, "secondSemiDate");
+
             final CodeValueData rescheduleReasonCodeValue = CodeValueData.instance(rescheduleReasonCvId, rescheduleReasonCvValue);
             return LoanRescheduleRequestData.instance(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
-                    rescheduleReasonCodeValue);
+                    rescheduleReasonCodeValue, changeSchedule, repayEvery, repaymentFrequencyType, firstSemiDate, secondSemiDate);
         }
     }
 
@@ -255,26 +288,36 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     }
 
     @Override
-    public LoanRescheduleRequestData retrieveAllRescheduleReasons(String loanRescheduleReason) {
+    public LoanRescheduleRequestData retrieveAllRescheduleReasons(Long loanId, String loanRescheduleReason) {
+        final Loan loan = this.loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
         final List<CodeValueData> rescheduleReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(loanRescheduleReason));
         final Long id = null;
-        final Long loanId = null;
+        // final Long loanId = null;
         final LoanRescheduleRequestStatusEnumData statusEnum = null;
         final Integer rescheduleFromInstallment = null;
         final LocalDate rescheduleFromDate = null;
         final CodeValueData rescheduleReasonCodeValue = null;
         final String rescheduleReasonComment = null;
+        final Boolean changeSchedule = false;
+        final Integer repayEvery = loan.repaymentScheduleDetail().getRepayEvery();
+        final EnumOptionData repaymentPeriodFrequencyType = LoanEnumerations
+                .repaymentFrequencyType(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
+        final LocalDate firstDateForSemi = loan.loanProduct().getFirstSemiDate();
+        final LocalDate secondDateForSemi = loan.loanProduct().getSecondSemiDate();
         final LoanRescheduleRequestTimelineData timeline = null;
         final String clientName = null;
         final String loanAccountNumber = null;
         final Long clientId = null;
         final Boolean recalculateInterest = null;
         final Collection<LoanTermVariationsData> loanTermVariationsData = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = this.dropdownReadPlatformService
+                .retrieveRepaymentFrequencyTypeOptions();
 
         return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
                 rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
-                rescheduleReasons, loanTermVariationsData);
+                changeSchedule, repayEvery, repaymentPeriodFrequencyType, firstDateForSemi, secondDateForSemi, rescheduleReasons,
+                loanTermVariationsData, repaymentFrequencyTypeOptions);
     }
 
     @Override

@@ -202,11 +202,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder withHref(final String href) {
-        this.href = href;
-        return this;
-    }
-
     public CommandWrapperBuilder withNoJsonBody() {
         this.json = null;
         return this;
@@ -791,14 +786,6 @@ public class CommandWrapperBuilder {
         this.entityId = null;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/transactions/template?command=repayment";
-        return this;
-    }
-
-    public CommandWrapperBuilder rescheduleLoan(final String href, final Long resourceId) {
-        this.actionName = "RESCHEDULE";
-        this.entityName = "LOAN";
-        this.entityId = null;
-        this.href = href.equals("loans") ? "/loans/" + resourceId : "/loanproducts/" + resourceId;
         return this;
     }
 
@@ -2520,6 +2507,14 @@ public class CommandWrapperBuilder {
         this.entityName = entityName;
         this.entityId = requestId;
         this.href = "/rescheduleloans/" + requestId + "?command=reject";
+        return this;
+    }
+
+    public CommandWrapperBuilder loanRescheduleRequestJob(final Long productId) {
+        this.actionName = "BULK_RESCHEDULE";
+        this.entityName = "RESCHEDULELOAN";
+        this.entityId = productId;
+        this.href = "/loanproducts/" + productId;
         return this;
     }
 

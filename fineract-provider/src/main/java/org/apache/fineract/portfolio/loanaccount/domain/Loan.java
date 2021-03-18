@@ -6162,6 +6162,16 @@ public class Loan extends AbstractPersistableCustom {
         return reversedTransactions;
     }
 
+    public LoanRepaymentScheduleInstallment getLastCompletedInstallment() {
+        LoanRepaymentScheduleInstallment completedInstallment = null;
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (installment.isPrincipalCompleted(this.loanCurrency()) && installment.isInterestCompleted(this.loanCurrency())) {
+                completedInstallment = installment;
+            }
+        }
+        return completedInstallment;
+    }
+
     private void updateLoanToLastDisbursalState(LocalDate actualDisbursementDate) {
 
         for (final LoanCharge charge : charges()) {
