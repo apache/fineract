@@ -107,7 +107,7 @@ allprojects  {
 
             dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
             dependency 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated above in buildscript!
-            dependency 'com.google.guava:guava:30.1-jre'
+            dependency 'com.google.guava:guava:30.1.1-jre'
             dependency 'com.google.code.gson:gson:2.8.6'
             dependency 'com.google.truth:truth:1.1.2'
             dependency 'com.google.truth.extensions:truth-java8-extension:1.1.2'
