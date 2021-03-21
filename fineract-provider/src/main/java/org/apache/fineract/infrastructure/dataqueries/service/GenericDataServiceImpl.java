@@ -263,7 +263,7 @@ public class GenericDataServiceImpl implements GenericDataService {
         final String sql = "select v.id, v.code_score, v.code_value from m_code m " + " join m_code_value v on v.code_id = m.id "
                 + " where m.code_name = ? order by v.order_position, v.id";
 
-        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] {codeName});
+        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] { codeName });
 
         rsValues.beforeFirst();
         while (rsValues.next()) {
@@ -281,9 +281,8 @@ public class GenericDataServiceImpl implements GenericDataService {
 
         final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
         if (codeId != null) {
-            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id =?"
-                    + " order by v.order_position, v.id";
-            final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, Integer.class, new Object[] {codeId});
+            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id =?" + " order by v.order_position, v.id";
+            final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, Integer.class, new Object[] { codeId });
             rsValues.beforeFirst();
             while (rsValues.next()) {
                 final Integer id = rsValues.getInt("id");
@@ -298,10 +297,9 @@ public class GenericDataServiceImpl implements GenericDataService {
     private SqlRowSet getDatatableMetaData(final String datatable) {
 
         final String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
-                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = ?"
-                + " order by ORDINAL_POSITION";
+                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = ?" + " order by ORDINAL_POSITION";
 
-        final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] {datatable});
+        final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] { datatable });
         if (columnDefinitions.next()) {
             return columnDefinitions;
         }
@@ -312,7 +310,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     private SqlRowSet getDatatableCodeData(final String aDatatable, final String aColumnName) {
         String datatableColumnName = aDatatable.toLowerCase().replaceAll("\\s", "_") + "_" + aColumnName;
         final String sql = "select mc.id,mc.code_name from m_code mc join x_table_column_code_mappings xcc on xcc.code_id = mc.id where xcc.column_alias_name=?";
-        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] {datatableColumnName});
+        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] { datatableColumnName });
 
         return rsValues;
     }
