@@ -163,4 +163,9 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
         }
         return transactionAmountRemaining;
     }
+
+    @Override
+    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
+        return true;
+    }
 }
