@@ -28,6 +28,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
@@ -157,6 +158,7 @@ public final class FineractClient {
     // Matching org.apache.fineract.client.util.JSON.LocalDateTypeAdapter.formatter
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
+    private final OkHttpClient okHttpClient;
     private final Retrofit retrofit;
 
     public final AccountingClosureApi glClosures;
@@ -264,7 +266,8 @@ public final class FineractClient {
     public final UsersApi users;
     public final WorkingDaysApi workingDays;
 
-    private FineractClient(Retrofit retrofit) {
+    private FineractClient(OkHttpClient okHttpClient, Retrofit retrofit) {
+        this.okHttpClient = okHttpClient;
         this.retrofit = retrofit;
 
         glClosures = retrofit.create(AccountingClosureApi.class);
@@ -377,6 +380,14 @@ public final class FineractClient {
         return new Builder();
     }
 
+    public OkHttpClient okHttpClient() {
+        return this.okHttpClient;
+    }
+
+    public HttpUrl baseURL() {
+        return this.retrofit.baseUrl();
+    }
+
     /**
      * Create an implementation of the API endpoints defined by the {@code service} interface, using
      * {@link Retrofit#create(Class)}. This method is typically not required to be invoked for standard API usage, but
@@ -480,9 +491,10 @@ public final class FineractClient {
             basicAuth.setCredentials(has("username", username), has("password", password));
             okBuilder.addInterceptor(basicAuth);
 
-            retrofitBuilder.client(okBuilder.build());
+            OkHttpClient okHttpClient = okBuilder.build();
+            retrofitBuilder.client(okHttpClient);
 
-            return new FineractClient(retrofitBuilder.build());
+            return new FineractClient(okHttpClient, retrofitBuilder.build());
         }
 
         /**
