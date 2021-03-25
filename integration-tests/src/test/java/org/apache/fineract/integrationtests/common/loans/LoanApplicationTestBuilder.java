@@ -42,6 +42,7 @@ public class LoanApplicationTestBuilder {
     private static final String LOCALE = "en_GB";
     public static final String DEFAULT_STRATEGY = "1";
     public static final String RBI_INDIA_STRATEGY = "4";
+    public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "6";
 
     private String principal = "10,000";
     private String glimPrincipal = "1000";
