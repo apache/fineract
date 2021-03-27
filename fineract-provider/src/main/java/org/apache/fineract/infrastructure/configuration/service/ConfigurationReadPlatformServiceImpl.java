@@ -62,7 +62,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         sql += "  order by c.id";
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm,
-                new Object[] { DataTableApiConstant.CATEGORY_PPI });
+                survey ? new Object[] { DataTableApiConstant.CATEGORY_PPI } : new Object[] {});
 
         return new GlobalConfigurationData(globalConfiguration);
     }

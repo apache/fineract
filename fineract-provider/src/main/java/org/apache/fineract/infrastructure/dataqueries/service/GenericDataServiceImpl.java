@@ -281,7 +281,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
         final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
         if (codeId != null) {
-            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id =?" + " order by v.order_position, v.id";
+            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id =? order by v.order_position, v.id";
             final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, Integer.class, new Object[] { codeId });
             rsValues.beforeFirst();
             while (rsValues.next()) {
@@ -297,7 +297,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     private SqlRowSet getDatatableMetaData(final String datatable) {
 
         final String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
-                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = ?" + " order by ORDINAL_POSITION";
+                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = ? order by ORDINAL_POSITION";
 
         final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql, String.class, new Object[] { datatable });
         if (columnDefinitions.next()) {
