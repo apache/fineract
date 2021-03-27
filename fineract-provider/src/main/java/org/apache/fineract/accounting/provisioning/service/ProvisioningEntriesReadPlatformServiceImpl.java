@@ -57,7 +57,6 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(Date date) {
         String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-        formattedDate = "'" + formattedDate + "'";
         LoanProductProvisioningEntryMapper mapper = new LoanProductProvisioningEntryMapper();
         final String sql = mapper.schema();
         return this.jdbcTemplate.query(sql, mapper, new Object[] { formattedDate, formattedDate, formattedDate });
