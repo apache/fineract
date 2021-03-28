@@ -27,9 +27,7 @@ CREATE TABLE `m_creditbureau_token` (
   `issued` varchar(128) DEFAULT NULL,
   `expiryDate` DATE DEFAULT NULL,
    PRIMARY KEY (`id`)
-)
-COLLATE='utf8mb4_general_ci'
-ENGINE=InnoDB;
+);
 
 CREATE TABLE `m_creditreport` (
   `id` INT(128) NOT NULL AUTO_INCREMENT,
@@ -38,9 +36,7 @@ CREATE TABLE `m_creditreport` (
   `creditReports` BLOB DEFAULT NULL,
    PRIMARY KEY (`id`),
    CONSTRAINT `cbId` FOREIGN KEY (`creditBureauId`) REFERENCES `m_creditbureau` (`id`)
-)
-COLLATE='utf8mb4_general_ci'
-ENGINE=InnoDB;
+);
 
 
 ALTER TABLE m_creditbureau_configuration
