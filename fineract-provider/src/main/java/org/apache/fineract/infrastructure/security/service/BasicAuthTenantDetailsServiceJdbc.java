@@ -49,7 +49,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
     private static final class TenantMapper implements RowMapper<FineractPlatformTenant> {
 
         private final boolean isReport;
-        private final StringBuilder sqlBuilder = new StringBuilder(" t.id, ts.id as connectionId , ")//
+        private final StringBuilder sqlBuilder = new StringBuilder("SELECT t.id, ts.id as connectionId, ")//
                 .append(" t.timezone_id as timezoneId , t.name,t.identifier, ts.schema_name as schemaName, ts.schema_server as schemaServer,")//
                 .append(" ts.schema_server_port as schemaServerPort, ts.schema_connection_parameters as schemaConnectionParameters, ts.auto_update as autoUpdate,")//
                 .append(" ts.schema_username as schemaUsername, ts.schema_password as schemaPassword , ts.pool_initial_size as initialSize,")//
@@ -60,7 +60,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
                 .append(" ts.pool_min_evictable_idle_time_millis as poolMinEvictableIdleTimeMillis,")//
                 .append(" ts.deadlock_max_retries as maxRetriesOnDeadlock,")//
                 .append(" ts.deadlock_max_retry_interval as maxIntervalBetweenRetries ")//
-                .append(" from tenants t left join tenant_server_connections ts ");
+                .append("FROM tenants t LEFT JOIN tenant_server_connections ts ");
 
         TenantMapper(boolean isReport) {
             this.isReport = isReport;
@@ -68,10 +68,11 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
 
         public String schema() {
             if (this.isReport) {
-                this.sqlBuilder.append(" on t.report_Id = ts.id");
+                this.sqlBuilder.append(" ON t.report_Id = ts.id");
             } else {
-                this.sqlBuilder.append(" on t.oltp_Id = ts.id");
+                this.sqlBuilder.append(" ON t.oltp_Id = ts.id");
             }
+            this.sqlBuilder.append(" WHERE t.identifier = ?");
             return this.sqlBuilder.toString();
         }
 
@@ -138,9 +139,9 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
 
         try {
             final TenantMapper rm = new TenantMapper(isReport);
-            final String sql = "select  " + rm.schema() + " where t.identifier like ?";
+            final String sql = rm.schema();
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
+            return this.jdbcTemplate.queryForObject(sql, rm, tenantIdentifier);
         } catch (final EmptyResultDataAccessException e) {
             throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.", e);
         }
