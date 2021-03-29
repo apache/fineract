@@ -19,9 +19,9 @@
 
 -- two tables added: ReportCategoryList and FullReportList (FINERACT-1306)
 INSERT INTO stretchy_report (report_name, report_type, report_category, report_sql, description, core_report, use_report)
-SELECT "ReportCategoryList", 'Table', '(NULL)', '(NULL)', '(NULL)', 1, 1
+SELECT 'ReportCategoryList', 'Table', NULL, NULL, NULL, 1, 1
 ON DUPLICATE key UPDATE report_name = 'ReportCategoryList';
 
 INSERT INTO stretchy_report (report_name, report_type, report_category, report_sql, description, core_report, use_report)
-SELECT "FullReportList", 'Table', '(NULL)', '(NULL)', '(NULL)', 1, 1
+SELECT 'FullReportList', 'Table', NULL, NULL, NULL, 1, 1
 ON DUPLICATE key UPDATE report_name = 'FullReportList';
