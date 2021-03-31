@@ -344,8 +344,7 @@ public final class ImportHandlerUtils {
 
     public static String getCodeByName(Sheet sheet, String name) {
         String sheetName = sheet.getSheetName();
-        sheetName.equals(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME);
-        {
+        if (sheetName.equals(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME)) {
             for (Row row : sheet) {
                 for (Cell cell : row) {
                     if (name != null) {
