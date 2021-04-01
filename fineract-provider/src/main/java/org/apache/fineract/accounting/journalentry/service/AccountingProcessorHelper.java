@@ -252,6 +252,8 @@ public class AccountingProcessorHelper {
 
         }
 
+        // some comment
+
         return new SavingsDTO(loanId, loanProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
                 accrualBasedAccountingEnabled, newSavingsTransactions);
     }
