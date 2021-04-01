@@ -1123,7 +1123,7 @@ public class AccountingProcessorHelper {
              ***/
             if (accountMappingTypeId == CashAccountsForLoan.FUND_SOURCE.getValue()) {
                 final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
-                        .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(loanProductId,
+                        .findProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(loanProductId,
                                 PortfolioProductType.LOAN.getValue(), accountMappingTypeId, paymentTypeId);
                 if (paymentChannelSpecificAccountMapping != null) {
                     accountMapping = paymentChannelSpecificAccountMapping;
@@ -1200,7 +1200,7 @@ public class AccountingProcessorHelper {
              ***/
             if (accountMappingTypeId == CashAccountsForSavings.SAVINGS_REFERENCE.getValue()) {
                 final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
-                        .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(savingsProductId,
+                        .findProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(savingsProductId,
                                 PortfolioProductType.SAVING.getValue(), accountMappingTypeId, paymentTypeId);
                 if (paymentChannelSpecificAccountMapping != null) {
                     accountMapping = paymentChannelSpecificAccountMapping;
@@ -1224,7 +1224,7 @@ public class AccountingProcessorHelper {
 
             if (accountMappingTypeId == CashAccountsForShares.SHARES_REFERENCE.getValue()) {
                 final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
-                        .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(shareProductId,
+                        .findProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(shareProductId,
                                 PortfolioProductType.SHARES.getValue(), accountMappingTypeId, paymentTypeId);
                 if (paymentChannelSpecificAccountMapping != null) {
                     accountMapping = paymentChannelSpecificAccountMapping;
