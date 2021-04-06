@@ -66,7 +66,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
 
-                final String columnName = rsmd.getColumnName(i + 1);
+                final String columnName = rsmd.getColumnLabel(i + 1);
                 final String columnType = rsmd.getColumnTypeName(i + 1);
 
                 final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
@@ -76,7 +76,7 @@ public class GenericDataServiceImpl implements GenericDataService {
             while (rs.next()) {
                 final List<String> columnValues = new ArrayList<>();
                 for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                    final String columnName = rsmd.getColumnName(i + 1);
+                    final String columnName = rsmd.getColumnLabel(i + 1);
                     final String columnValue = rs.getString(columnName);
                     columnValues.add(columnValue);
                 }
