@@ -64,9 +64,10 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     @Override
     public List<SurveyDataTableData> retrieveAllSurveys() {
 
-        String sql = this.retrieveAllSurveySQL("");
+        String sql = this.retrieveAllSurveySQL();
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, this.context.authenticatedUser().getId(),
+                DataTableApiConstant.CATEGORY_PPI);
 
         final List<SurveyDataTableData> surveyDataTables = new ArrayList<>();
         while (rs.next()) {
@@ -83,30 +84,29 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
         return surveyDataTables;
     }
 
-    private String retrieveAllSurveySQL(String andClause) {
+    private String retrieveAllSurveySQL() {
         // PERMITTED datatables
-        return "select application_table_name, cf.enabled, registered_table_name" + " from x_registered_table "
-                + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
-                + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " and x_registered_table.category = " + DataTableApiConstant.CATEGORY_PPI + andClause
-                + " order by application_table_name, registered_table_name";
+        return "SELECT application_table_name, cf.enabled, registered_table_name FROM x_registered_table "
+                + " LEFT JOIN c_configuration cf ON x_registered_table.registered_table_name = cf.name WHERE EXISTS (SELECT 'f'"
+                + " FROM m_appuser_role ur JOIN m_role r ON r.id = ur.role_id"
+                + " LEFT JOIN m_role_permission rp ON rp.role_id = r.id LEFT JOIN m_permission p ON p.id = rp.permission_id"
+                + " WHERE ur.appuser_id = ?"
+                + " AND (p.code IN ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') OR p.code = concat('READ_', registered_table_name))) "
+                + " AND x_registered_table.category = ? ORDER BY application_table_name, registered_table_name";
     }
 
     @Override
     public SurveyDataTableData retrieveSurvey(String surveyName) {
         SQLInjectionValidator.validateSQLInput(surveyName);
-        final String sql = "select cf.enabled, application_table_name, registered_table_name" + " from x_registered_table "
-                + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
-                + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId() + " and registered_table_name='" + surveyName + "'"
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " order by application_table_name, registered_table_name";
+        final String sql = "SELECT cf.enabled, application_table_name, registered_table_name FROM x_registered_table "
+                + " LEFT JOIN c_configuration cf ON x_registered_table.registered_table_name = cf.name WHERE EXISTS (SELECT 'f'"
+                + " FROM m_appuser_role ur  JOIN m_role r ON r.id = ur.role_id"
+                + " LEFT JOIN m_role_permission rp ON rp.role_id = r.id LEFT JOIN m_permission p ON p.id = rp.permission_id"
+                + " WHERE ur.appuser_id = ? AND registered_table_name = ?"
+                + " AND (p.code IN ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') OR p.code = concat('READ_', registered_table_name))) "
+                + " ORDER BY application_table_name, registered_table_name";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, this.context.authenticatedUser().getId(), surveyName);
 
         SurveyDataTableData datatableData = null;
         while (rs.next()) {
@@ -151,23 +151,24 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     @Override
     public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(Long clientId) {
         final String surveyNameSql = retrieveAllSurveyNameSQL();
-        final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql);
+        final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql, this.context.authenticatedUser().getId(),
+                DataTableApiConstant.CATEGORY_PPI);
 
         ArrayList<String> sqls = new ArrayList<>();
 
         while (surveyNames.next()) {
             sqls.add("SELECT '" + surveyNames.getString("name")
                     + "' as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM " + surveyNames.getString("name")
-                    + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyNames.getString("name") + "' AND enabled = '"
-                    + LikelihoodStatus.ENABLED + "' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
+                    + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyNames.getString("name") + "' AND enabled = ?"
+                    + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                     + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
-                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = " + clientId);
+                    + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ?");
         }
 
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         for (String sql : sqls) {
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, LikelihoodStatus.ENABLED, clientId);
 
             while (rs.next()) {
                 scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
@@ -183,13 +184,12 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     private String retrieveAllSurveyNameSQL() {
         // PERMITTED datatables
-        return "select cf.name from x_registered_table " + " join c_configuration cf on x_registered_table.registered_table_name = cf.name "
-                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " and x_registered_table.category = " + DataTableApiConstant.CATEGORY_PPI
-                + " order by application_table_name, registered_table_name";
+        return "SELECT cf.name FROM x_registered_table JOIN c_configuration cf ON x_registered_table.registered_table_name = cf.name "
+                + " WHERE EXISTS (SELECT 'f'" + " FROM m_appuser_role ur JOIN m_role r on r.id = ur.role_id"
+                + " LEFT JOIN m_role_permission rp ON rp.role_id = r.id LEFT JOIN m_permission p ON p.id = rp.permission_id"
+                + " WHERE ur.appuser_id = ?"
+                + " AND (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
+                + " AND x_registered_table.category = ? ORDER BY application_table_name, registered_table_name";
     }
 
     @Override
