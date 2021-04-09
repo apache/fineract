@@ -25,7 +25,7 @@ import org.owasp.esapi.codecs.MySQLCodec;
 import org.owasp.esapi.codecs.MySQLCodec.Mode;
 
 /** This is used for general ESAPI (The OWASP Enterprise Security API) utils. */
-public class EsapiUtils {
+public final class EsapiUtils {
 
     private EsapiUtils() {
         throw new IllegalStateException("Utility class");
