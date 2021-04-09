@@ -103,6 +103,10 @@ dependencies {
     }
     implementation ('org.owasp.esapi:esapi:2.2.3.0') {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'commons-collections', module: 'commons-collections'
+        exclude group: 'commons-lang', module: 'commons-lang'
+        exclude group: 'spotbugs-annotations', module: 'spotbugs-annotations'
     }
 
     runtimeOnly('org.ehcache:ehcache') {
