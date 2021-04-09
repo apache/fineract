@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.EsapiUtils;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.infrastructure.survey.data.ClientScoresOverview;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
@@ -97,7 +98,6 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     @Override
     public SurveyDataTableData retrieveSurvey(String surveyName) {
-        SQLInjectionValidator.validateSQLInput(surveyName);
         final String sql = "SELECT cf.enabled, application_table_name, registered_table_name FROM x_registered_table "
                 + " LEFT JOIN c_configuration cf ON x_registered_table.registered_table_name = cf.name WHERE EXISTS (SELECT 'f'"
                 + " FROM m_appuser_role ur  JOIN m_role r ON r.id = ur.role_id"
@@ -157,10 +157,14 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
         ArrayList<String> sqls = new ArrayList<>();
 
         while (surveyNames.next()) {
-            sqls.add("SELECT '" + surveyNames.getString("name")
-                    + "' as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM " + surveyNames.getString("name")
-                    + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyNames.getString("name") + "' AND enabled = ?"
-                    + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
+            final String surveyName = surveyNames.getString("name");
+            SQLInjectionValidator.validateSQLInput(surveyName);
+            // The option for Prepared Statements (with Parameterized Queries) is not feasible for SELECT ? FROM ?
+            // Use ESAPI MySQL Escaping
+            final String encodedSurveyName = EsapiUtils.encodeForMySQL(surveyName);
+            sqls.add("SELECT '" + encodedSurveyName + "' as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "
+                    + encodedSurveyName + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + encodedSurveyName
+                    + "' AND enabled = ?" + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                     + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
                     + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ?");
         }

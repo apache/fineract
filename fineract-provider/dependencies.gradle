@@ -101,6 +101,9 @@ dependencies {
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
     }
+    implementation ('org.owasp.esapi:esapi:2.2.3.0') {
+        exclude group: 'org.slf4j', module: 'slf4j-simple'
+    }
 
     runtimeOnly('org.ehcache:ehcache') {
         exclude group: 'com.sun.activation'
