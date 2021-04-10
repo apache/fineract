@@ -160,12 +160,14 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final String surveyName = surveyNames.getString("name");
             SQLInjectionValidator.validateSQLInput(surveyName);
             // The option for Prepared Statements (with Parameterized Queries) is not feasible for SELECT ? FROM ?
-            // Use ESAPI MySQL Escaping
+            // Keep as is, possibly validate using `validateSQLInput` ?
+            // Use ESAPI MySQL Escaping for input parameters
             final String encodedSurveyName = EsapiUtils.encodeForMySQL(surveyName);
-            sqls.add("SELECT '" + encodedSurveyName + "' as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "
-                    + encodedSurveyName + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + encodedSurveyName
-                    + "' AND enabled = ?" + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
-                    + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
+            sqls.add("SELECT " + surveyName + " as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM `"
+                    + surveyName + "` tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + encodedSurveyName + "' AND enabled = ?"
+                    + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
+                    + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id" // TODO
+                                                                                                              // FINERACT-1344
                     + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ?");
         }
 
