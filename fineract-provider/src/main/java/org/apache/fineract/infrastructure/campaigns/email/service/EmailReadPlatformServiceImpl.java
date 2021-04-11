@@ -130,9 +130,9 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     @Override
     public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = " + sqlPlusLimit;
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum =? " + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] { EmailMessageStatusType.PENDING.getValue() });
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.PENDING.getValue());
     }
 
     @Override
@@ -140,15 +140,15 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
         final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] { EmailMessageStatusType.SENT.getValue() });
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.SENT.getValue());
     }
 
     @Override
     public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
         final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
-        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum = " + sqlPlusLimit;
+        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum =? " + sqlPlusLimit;
 
-        return this.jdbcTemplate.queryForList(sql, Long.class, new Object[] { EmailMessageStatusType.SENT.getValue() });
+        return this.jdbcTemplate.queryForList(sql, Long.class, EmailMessageStatusType.SENT.getValue());
     }
 
     @Override
@@ -156,7 +156,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
         final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] { EmailMessageStatusType.DELIVERED.getValue() });
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.DELIVERED.getValue());
     }
 
     @Override
@@ -164,7 +164,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
         final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] { EmailMessageStatusType.FAILED.getValue() });
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.FAILED.getValue());
     }
 
     @Override
