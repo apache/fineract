@@ -49,9 +49,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
     private static final class TenantMapper implements RowMapper<FineractPlatformTenant> {
 
-        private final String tenantIdentifier;
-
-        private final StringBuilder sqlBuilder = new StringBuilder("SELECT t.id, ts.id as connectionId, ")//
+        private final StringBuilder sqlBuilder = new StringBuilder("t.id, ts.id as connectionId , ")//
                 .append(" t.timezone_id as timezoneId , t.name,t.identifier, ts.schema_name as schemaName, ts.schema_server as schemaServer,")//
                 .append(" ts.schema_server_port as schemaServerPort, ts.schema_connection_parameters as schemaConnectionParameters, ts.auto_update as autoUpdate,")//
                 .append(" ts.schema_username as schemaUsername, ts.schema_password as schemaPassword , ts.pool_initial_size as initialSize,")//
@@ -62,28 +60,21 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
                 .append(" ts.pool_min_evictable_idle_time_millis as poolMinEvictableIdleTimeMillis,")//
                 .append(" ts.deadlock_max_retries as maxRetriesOnDeadlock,")//
                 .append(" ts.deadlock_max_retry_interval as maxIntervalBetweenRetries ")//
-                .append("FROM tenants t LEFT JOIN tenant_server_connections ts ON t.oltp_Id=ts.id ");
-
-        TenantMapper(String aTenantIdentifier) {
-            this.tenantIdentifier = aTenantIdentifier;
-        }
+                .append(" from tenants t left join tenant_server_connections ts on t.oltp_Id=ts.id ");
 
         public String schema() {
-            if (tenantIdentifier != null) {
-                this.sqlBuilder.append(" WHERE t.identifier = ?");
-            }
             return this.sqlBuilder.toString();
         }
 
         @Override
         public FineractPlatformTenant mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
-            final String identifier = rs.getString("identifier");
+            final String tenantIdentifier = rs.getString("identifier");
             final String name = rs.getString("name");
             final String timezoneId = rs.getString("timezoneId");
             final FineractPlatformTenantConnection connection = getDBConnection(rs);
 
-            return new FineractPlatformTenant(id, identifier, name, timezoneId, connection);
+            return new FineractPlatformTenant(id, tenantIdentifier, name, timezoneId, connection);
         }
 
         // gets the DB connection
@@ -136,22 +127,22 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
     @Override
     @Cacheable(value = "tenantsById")
-    public FineractPlatformTenant loadTenantById(final String aTenantIdentifier) {
+    public FineractPlatformTenant loadTenantById(final String tenantIdentifier) {
 
         try {
-            final TenantMapper rm = new TenantMapper(aTenantIdentifier);
-            final String sql = rm.schema();
+            final TenantMapper rm = new TenantMapper();
+            final String sql = "select " + rm.schema() + " where t.identifier = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, aTenantIdentifier);
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
         } catch (final EmptyResultDataAccessException e) {
-            throw new InvalidTenantIdentiferException("The tenant identifier: " + aTenantIdentifier + " is not valid.", e);
+            throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.", e);
         }
     }
 
     @Override
     public List<FineractPlatformTenant> findAllTenants() {
-        final TenantMapper rm = new TenantMapper(null);
-        final String sql = rm.schema();
+        final TenantMapper rm = new TenantMapper();
+        final String sql = "select  " + rm.schema();
 
         final List<FineractPlatformTenant> fineractPlatformTenants = this.jdbcTemplate.query(sql, rm, new Object[] {});
         return fineractPlatformTenants;

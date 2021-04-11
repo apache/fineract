@@ -39,7 +39,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
-import org.apache.fineract.infrastructure.dataqueries.service.DatatableReportingProcessService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
@@ -61,16 +60,13 @@ public class RunreportsApiResource {
     private final PlatformSecurityContext context;
     private final ReadReportingService readExtraDataAndReportingService;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
-    private final DatatableReportingProcessService datatableReportingProcessService;
 
     @Autowired
     public RunreportsApiResource(final PlatformSecurityContext context, final ReadReportingService readExtraDataAndReportingService,
-            final ReportingProcessServiceProvider reportingProcessServiceProvider,
-            DatatableReportingProcessService aDatatableReportingProcessService) {
+            final ReportingProcessServiceProvider reportingProcessServiceProvider) {
         this.context = context;
         this.readExtraDataAndReportingService = readExtraDataAndReportingService;
         this.reportingProcessServiceProvider = reportingProcessServiceProvider;
-        datatableReportingProcessService = aDatatableReportingProcessService;
     }
 
     @GET
@@ -108,10 +104,6 @@ public class RunreportsApiResource {
 
         // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
         queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
-
-        if (parameterType) {
-            return datatableReportingProcessService.processRequest(reportName, queryParams);
-        }
 
         String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
         ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
