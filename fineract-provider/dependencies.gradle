@@ -79,7 +79,7 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.1',
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.2',
             'com.squareup.retrofit2:converter-gson'
             )
     implementation ('org.apache.activemq:activemq-broker') {
