@@ -865,4 +865,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
+    @Override
+    public Collection<Long> retrieveUserClients(Long aUserID) {
+        String sql = "SELECT  m.client_id FROM m_selfservice_user_client_mapping m INNER JOIN m_client c ON c.id = m.client_id WHERE m.appuser_id = ?";
+        return jdbcTemplate.queryForList(sql, Long.class, new Object[] { aUserID });
+    }
 }
