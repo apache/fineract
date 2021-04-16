@@ -20,7 +20,7 @@ package org.apache.fineract.mix.report.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.service.XBRLResultServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ public class ReadTaxonomyMappingServiceImplTest {
 
     @Test
     public void shouldCorrectlyGetGLCode() {
-        final ArrayList<String> result = this.readService.getGLCodes("{12000}+{11000}");
+        final List<String> result = this.readService.getGLCodes("{12000}+{11000}");
         assertEquals("12000", result.get(0));
         assertEquals("11000", result.get(1));
     }

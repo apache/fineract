@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +87,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             }
             // <taxonomyId, value>
             final HashMap<MixTaxonomyData, BigDecimal> resultMap = new HashMap<>();
-            setupBalanceMap(getAccountSql(startDate, endDate));
+            setupBalanceMap(getAccountSql(), startDate, endDate);
             for (final Map.Entry<String, String> entry : configMap.entrySet()) {
                 final BigDecimal value = processMappingString(entry.getValue());
                 if (value != null) {
@@ -100,48 +101,34 @@ public class XBRLResultServiceImpl implements XBRLResultService {
         return null;
     }
 
-    private String getAccountSql(final Date startDate, final Date endDate) {
-        final String sql = "select debits.glcode as 'glcode', debits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
+    private String getAccountSql() {
+        return "select debits.glcode as 'glcode', debits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
-                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate
-                // "and (acc_gl_journal_entry.office_id=${branch} or
-                // ${branch}=1) "
-                // +
-                + " group by glcode " + "order by glcode) debits " + "LEFT OUTER JOIN "
+                + "from acc_gl_journal_entry,acc_gl_account where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=2 and acc_gl_journal_entry.entry_date <= ? "
+                + "and acc_gl_journal_entry.entry_date > ? group by glcode order by glcode) debits LEFT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
-                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate
-                // "and (acc_gl_journal_entry.office_id=${branch} or
-                // ${branch}=1) "
-                // +
-                + " group by glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode " + "union "
+                + "from acc_gl_journal_entry,acc_gl_account where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=1 and acc_gl_journal_entry.entry_date <= ? "
+                + "and acc_gl_journal_entry.entry_date > ? "
+                + "group by glcode order by glcode) credits on debits.glcode=credits.glcode union "
                 + "select credits.glcode as 'glcode', credits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
-                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate
-                // "and (acc_gl_journal_entry.office_id=${branch} or
-                // ${branch}=1) "
-                // +
-                + " group by glcode " + "order by glcode) debits " + "RIGHT OUTER JOIN "
+                + "from acc_gl_journal_entry,acc_gl_account where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=2 and acc_gl_journal_entry.entry_date <= ? "
+                + "and acc_gl_journal_entry.entry_date > ? group by glcode order by glcode) debits RIGHT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
-                + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
-                + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate
-                // "and (acc_gl_journal_entry.office_id=${branch} or
-                // ${branch}=1) "
-                // +
-                + " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
-        return sql;
+                + "from acc_gl_journal_entry,acc_gl_account where acc_gl_account.id = acc_gl_journal_entry.account_id "
+                + "and acc_gl_journal_entry.type_enum=1 and acc_gl_journal_entry.entry_date <= ? "
+                + "and acc_gl_journal_entry.entry_date > ? "
+                + "group by name, glcode order by glcode) credits on debits.glcode = credits.glcode;";
     }
 
-    private void setupBalanceMap(final String sql) {
+    private void setupBalanceMap(final String sql, final Date startDate, final Date endDate) {
         if (this.accountBalanceMap == null) {
             this.accountBalanceMap = new HashMap<>();
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, endDate, startDate, endDate, startDate, endDate, startDate, endDate,
+                    startDate);
             while (rs.next()) {
                 this.accountBalanceMap.put(rs.getString("glcode"), rs.getBigDecimal("balance"));
             }
@@ -150,7 +137,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
 
     // Calculate Taxonomy value from expression
     private BigDecimal processMappingString(String mappingString) {
-        final ArrayList<String> glCodes = getGLCodes(mappingString);
+        final List<String> glCodes = getGLCodes(mappingString);
         for (final String glcode : glCodes) {
 
             final BigDecimal balance = this.accountBalanceMap.get(glcode);
@@ -169,12 +156,12 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
 
-        return new BigDecimal(eval);
+        return BigDecimal.valueOf(eval);
     }
 
-    public ArrayList<String> getGLCodes(final String template) {
+    public List<String> getGLCodes(final String template) {
 
-        final ArrayList<String> placeholders = new ArrayList<>();
+        final List<String> placeholders = new ArrayList<>();
 
         if (template != null) {
 
