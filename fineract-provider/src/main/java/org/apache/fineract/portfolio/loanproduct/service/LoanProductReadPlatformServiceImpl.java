@@ -129,10 +129,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         boolean whereClauseFlag = inClause != null && !inClause.trim().isEmpty();
         if (whereClauseFlag) {
-            sqlBuilder.append(" WHERE lp.id IN (" + inClause + ") ");
+            sqlBuilder.append(" WHERE lp.id IN (");
+            sqlBuilder.append(inClause);
+            sqlBuilder.append(") ");
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, whereClauseFlag ? aCriteriaID : new Object[] {});
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, whereClauseFlag ? new Object[] { aCriteriaID } : new Object[] {});
     }
 
     @Override
