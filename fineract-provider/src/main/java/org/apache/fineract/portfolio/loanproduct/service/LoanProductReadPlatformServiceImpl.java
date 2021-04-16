@@ -117,21 +117,22 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     }
 
     @Override
-    public Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClause) {
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClause, Long aCriteriaID) {
 
         this.context.authenticatedUser();
 
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
-        String sql = "select " + rm.schema();
+        StringBuilder sqlBuilder = new StringBuilder("SELECT");
+        sqlBuilder.append(' ');
+        sqlBuilder.append(rm.schema());
 
-        if (inClause != null && !inClause.trim().isEmpty()) {
-            sql += " where lp.id in (" + inClause + ") ";
-            // Here no need to check injection as this is internal where clause
-            // SQLInjectionValidator.validateSQLInput(inClause);
+        boolean whereClauseFlag = inClause != null && !inClause.trim().isEmpty();
+        if (whereClauseFlag) {
+            sqlBuilder.append(" WHERE lp.id IN (" + inClause + ") ");
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, whereClauseFlag ? aCriteriaID : new Object[] {});
     }
 
     @Override

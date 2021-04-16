@@ -118,8 +118,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         try {
             String criteriaName = retrieveCriteriaName(criteriaId);
             Collection<LoanProductData> loanProducts = loanProductReaPlatformService.retrieveAllLoanProductsForLookup(
-                    "select product_id from m_loanproduct_provisioning_mapping where m_loanproduct_provisioning_mapping.criteria_id="
-                            + criteriaId);
+                    "SELECT lpm.product_id FROM m_loanproduct_provisioning_mapping lpm WHERE lpm.criteria_id = ?", criteriaId);
             List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
             return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, loanProducts, definitions);
         } catch (EmptyResultDataAccessException e) {

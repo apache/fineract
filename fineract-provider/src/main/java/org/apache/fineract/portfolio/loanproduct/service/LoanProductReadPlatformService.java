@@ -26,7 +26,7 @@ public interface LoanProductReadPlatformService {
 
     Collection<LoanProductData> retrieveAllLoanProducts();
 
-    Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClass);
+    Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClass, Long aCriteriaID);
 
     Collection<LoanProductData> retrieveAllLoanProductsForLookup();
 
