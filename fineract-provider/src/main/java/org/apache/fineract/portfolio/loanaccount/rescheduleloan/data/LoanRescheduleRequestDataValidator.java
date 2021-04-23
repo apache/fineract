@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
+import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +59,8 @@ public class LoanRescheduleRequestDataValidator {
                     RescheduleLoansApiConstants.rescheduleReasonIdParamName, RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
                     RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
                     RescheduleLoansApiConstants.adjustedDueDateParamName, RescheduleLoansApiConstants.recalculateInterestParamName,
-                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName));
+                    RescheduleLoansApiConstants.endDateParamName, RescheduleLoansApiConstants.emiParamName,
+                    RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
 
     private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
@@ -177,7 +179,8 @@ public class LoanRescheduleRequestDataValidator {
                 && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.extraTermsParamName, jsonElement)
                 && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.newInterestRateParamName, jsonElement)
                 && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.adjustedDueDateParamName, jsonElement)
-                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)) {
+                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement) && !this.fromJsonHelper
+                        .parameterExists(RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName, jsonElement)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).notNull();
         }
         LoanRepaymentScheduleInstallment installment = null;
@@ -203,6 +206,19 @@ public class LoanRescheduleRequestDataValidator {
         }
 
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromJsonHelper
+                .extractBigDecimalWithLocaleNamed(RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName, jsonElement);
+        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
+
+        AmortizationMethod amortizationType = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod();
+        if (!amortizationType.equals(AmortizationMethod.EQUAL_PRINCIPAL) && fixedPrincipalPercentagePerInstallment != null) {
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                    .failWithCode("not.supported.principal.fixing.not.allowed.with.equal.installments",
+                            "Principal fixing cannot be done with equal installment amortization");
+        }
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }

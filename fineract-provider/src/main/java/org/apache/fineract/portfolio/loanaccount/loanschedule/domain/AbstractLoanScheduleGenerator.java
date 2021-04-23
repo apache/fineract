@@ -1154,6 +1154,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateTotalInterestAccounted(scheduleParams.getTotalCumulativeInterest());
                     loanTermVariationsData.setProcessed(true);
                 break;
+                case PRINCIPAL_PERCENTAGE_PER_INSTALLMENT:
+                    loanApplicationTerms.updateFixedPrincipalPercentagePerInstallment(loanTermVariationsData.getDecimalValue());
+                break;
                 default:
                 break;
 
@@ -1242,6 +1245,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanTermVariationsData.setProcessed(true);
                     loanApplicationTerms.updateAccountedTillPeriod(instalmentNumber - 1, totalCumulativePrincipal, totalCumulativeInterest,
                             loanTermVariationsData.getDecimalValue().intValue());
+                break;
+                case PRINCIPAL_PERCENTAGE_PER_INSTALLMENT:
+                    loanApplicationTerms.updateFixedPrincipalPercentagePerInstallment(loanTermVariationsData.getDecimalValue());
+                    variationsData.add(loanTermVariationsData);
                 break;
                 default:
                 break;

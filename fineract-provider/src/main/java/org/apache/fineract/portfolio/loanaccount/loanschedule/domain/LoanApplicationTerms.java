@@ -207,7 +207,7 @@ public final class LoanApplicationTerms {
     private int extraPeriods = 0;
     private boolean isEqualAmortization;
     private Money interestTobeApproppriated;
-    private final BigDecimal fixedPrincipalPercentagePerInstallment;
+    private BigDecimal fixedPrincipalPercentagePerInstallment;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -1806,4 +1806,7 @@ public final class LoanApplicationTerms {
         return isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
     }
 
+    public void updateFixedPrincipalPercentagePerInstallment(BigDecimal fixedPrincipalPercentagePerInstallment) {
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
+    }
 }

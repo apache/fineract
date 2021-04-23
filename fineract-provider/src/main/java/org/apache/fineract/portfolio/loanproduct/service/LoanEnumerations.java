@@ -577,6 +577,10 @@ public final class LoanEnumerations {
                 optionData = new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
                         LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
             break;
+            case PRINCIPAL_PERCENTAGE_PER_INSTALLMENT:
+                optionData = new EnumOptionData(LoanTermVariationType.PRINCIPAL_PERCENTAGE_PER_INSTALLMENT.getValue().longValue(),
+                        LoanTermVariationType.PRINCIPAL_PERCENTAGE_PER_INSTALLMENT.getCode(), "principalPercentagePerInstallment");
+            break;
             default:
                 optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(),
                         LoanTermVariationType.INVALID.getCode(), "Invalid");

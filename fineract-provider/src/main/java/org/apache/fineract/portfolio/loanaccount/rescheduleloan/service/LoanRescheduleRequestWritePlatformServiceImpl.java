@@ -215,6 +215,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Date endDate = jsonCommand.dateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
             final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
 
+            final BigDecimal fixedPrincipalPercentagePerInstallment = jsonCommand
+                    .bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.fixedPrincipalPercentagePerInstallmentParamName);
+
             // initialize set the value to null
             Date submittedOnDate = null;
 
@@ -280,7 +283,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // create term variations for flat and declining balance loans
             createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
                     adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment,
-                    decimalValue, dueDate, endDate, emi);
+                    decimalValue, dueDate, endDate, emi, fixedPrincipalPercentagePerInstallment);
 
             // create a new entry in the m_loan_reschedule_request table
             this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
@@ -304,7 +307,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Integer extraTerms, final BigDecimal interestRate, Date rescheduleFromDate, Date adjustedDueDate,
             final LoanRescheduleRequest loanRescheduleRequest,
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
-            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate, Date endDate, BigDecimal emi) {
+            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate, Date endDate, BigDecimal emi,
+            final BigDecimal fixedPrincipalPercentagePerInstallment) {
 
         if (rescheduleFromDate != null && endDate != null && emi != null) {
             LoanTermVariations parent = null;
@@ -365,6 +369,14 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
                     isSpecificToInstallment, BigDecimal.valueOf(extraTerms), parent);
         }
+
+        if (rescheduleFromDate != null && fixedPrincipalPercentagePerInstallment != null) {
+            LoanTermVariations parent = null;
+            final Integer termType = LoanTermVariationType.PRINCIPAL_PERCENTAGE_PER_INSTALLMENT.getValue();
+            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, fixedPrincipalPercentagePerInstallment, parent);
+        }
+
         loanRescheduleRequest.updateLoanRescheduleRequestToTermVariationMappings(loanRescheduleRequestToTermVariationMappings);
     }
 
