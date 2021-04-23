@@ -187,6 +187,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
+    private BigDecimal fixedPrincipalPercentagePerInstallment;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -345,6 +348,9 @@ public class LoanProduct extends AbstractPersistableCustom {
                 ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
                 : false;
 
+        BigDecimal fixedPrincipalPercentagePerInstallment = command
+                .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -359,7 +365,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates);
+                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -594,7 +600,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            final List<Rate> rates) {
+            final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -672,6 +678,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
 
         if (rates != null) {
             this.rates = rates;
@@ -1092,6 +1099,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             }
         }
 
+        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName,
+                this.fixedPrincipalPercentagePerInstallment)) {
+            BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
+            actualChanges.put(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, newValue);
+            this.fixedPrincipalPercentagePerInstallment = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1442,4 +1457,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.rates = rates;
     }
 
+    public BigDecimal getFixedPrincipalPercentagePerInstallment() {
+        return fixedPrincipalPercentagePerInstallment;
+    }
 }

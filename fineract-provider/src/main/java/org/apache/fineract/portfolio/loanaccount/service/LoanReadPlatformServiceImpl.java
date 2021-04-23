@@ -580,6 +580,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
                     + " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.is_equal_amortization as isEqualAmortization, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
+                    + " l.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
                     + " l.allow_partial_period_interest_calcualtion as allowPartialPeriodInterestCalcualtion,"
                     + " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
                     + " lps.name as transactionStrategyName, "
@@ -791,6 +792,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final int interestCalculationPeriodTypeInt = JdbcSupport.getInteger(rs, "interestCalculationPeriodType");
             final boolean isEqualAmortization = rs.getBoolean("isEqualAmortization");
             final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeInt);
+            final BigDecimal fixedPrincipalPercentagePerInstallment = rs.getBigDecimal("fixedPrincipalPercentagePerInstallment");
             final EnumOptionData interestType = LoanEnumerations.interestType(interestTypeInt);
             final EnumOptionData interestCalculationPeriodType = LoanEnumerations
                     .interestCalculationPeriodType(interestCalculationPeriodTypeInt);
@@ -966,7 +968,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing,
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
-                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization);
+                    canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
+                    fixedPrincipalPercentagePerInstallment);
         }
     }
 

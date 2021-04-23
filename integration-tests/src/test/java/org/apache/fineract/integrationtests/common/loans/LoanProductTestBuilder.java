@@ -124,6 +124,7 @@ public class LoanProductTestBuilder {
     private Integer recalculationCompoundingFrequencyDayOfWeekType = null;
     private Integer recalculationRestFrequencyDayOfWeekType = null;
     private boolean syncExpectedWithDisbursementDate = false;
+    private String fixedPrincipalPercentagePerInstallment;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -149,6 +150,7 @@ public class LoanProductTestBuilder {
         map.put("interestRatePerPeriod", this.interestRatePerPeriod);
         map.put("interestRateFrequencyType", this.interestRateFrequencyType);
         map.put("amortizationType", this.amortizationType);
+        map.put("fixedPrincipalPercentagePerInstallment", fixedPrincipalPercentagePerInstallment);
         map.put("interestType", this.interestType);
         map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
         map.put("inArrearsTolerance", this.inArrearsTolerance);
@@ -504,6 +506,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withSyncExpectedWithDisbursementDate(Boolean syncExpectedWithDisbursementDate) {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
+        return this;
+    }
+
+    public LoanProductTestBuilder withPrinciplePercentagePerInstallment(String fixedPrincipalPercentagePerInstallment) {
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         return this;
     }
 }

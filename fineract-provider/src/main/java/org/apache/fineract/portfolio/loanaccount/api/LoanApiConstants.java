@@ -132,4 +132,6 @@ public interface LoanApiConstants {
     String applicationId = "applicationId";
     String lastApplication = "lastApplication";
 
+    String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
+
 }
