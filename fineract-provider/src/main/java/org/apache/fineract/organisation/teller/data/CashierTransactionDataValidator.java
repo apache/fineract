@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.teller.domain.Cashier;
 import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.exception.CashierAlreadyAlloacated;
@@ -93,17 +94,35 @@ public class CashierTransactionDataValidator {
         /**
          * to validate cashier has not been assigned for same duration
          */
-        String sql = "select count(*) from m_cashiers c where c.staff_id = " + staffId + " AND " + "(('" + fromDate
-                + "' BETWEEN c.start_date AND c.end_date OR '" + endDate + "' BETWEEN c.start_date AND c.end_date )"
-                + " OR ( c.start_date BETWEEN '" + fromDate + "' AND '" + endDate + "' OR c.end_date BETWEEN '" + fromDate + "' AND '"
-                + endDate + "'))";
-        if (!cashier.isFullDay()) {
-            String startTime = cashier.getStartTime();
-            String endTime = cashier.getEndTime();
-            sql = sql + " AND ( Time(c.start_time) BETWEEN TIME('" + startTime + "') and TIME('" + endTime
-                    + "') or Time(c.end_time) BETWEEN TIME('" + startTime + "') and TIME('" + endTime + "')) ";
+        StringBuilder sqlBuilder = new StringBuilder("");
+        sqlBuilder.append("SELECT");
+        sqlBuilder.append(" count(*) ");
+        sqlBuilder.append("FROM m_cashiers c ");
+        sqlBuilder.append("WHERE c.staff_id = ?");
+        sqlBuilder.append("  AND (");
+        sqlBuilder.append("    (");
+        sqlBuilder.append("      ? BETWEEN c.start_date AND c.end_date");
+        sqlBuilder.append("      OR ? BETWEEN c.start_date AND c.end_date");
+        sqlBuilder.append("    )");
+        sqlBuilder.append("    OR");
+        sqlBuilder.append("    (");
+        sqlBuilder.append("      c.start_date BETWEEN ? AND ?");
+        sqlBuilder.append("      OR c.end_date BETWEEN ? AND ?");
+        sqlBuilder.append("    )");
+        sqlBuilder.append("  )");
+        boolean nonfullDay = Boolean.FALSE.equals(cashier.isFullDay());
+        String startTime = cashier.getStartTime();
+        String endTime = cashier.getEndTime();
+        if (nonfullDay) {
+            sqlBuilder.append("  AND (");
+            sqlBuilder.append("    time(c.start_time) BETWEEN time(?) AND time(?)");
+            sqlBuilder.append("    OR time(c.end_time) BETWEEN time(?) AND time(?)");
+            sqlBuilder.append("  )");
         }
-        int count = this.jdbcTemplate.queryForObject(sql, Integer.class);
+
+        int count = this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Integer.class, nonfullDay
+                ? new Object[] { staffId, fromDate, endDate, fromDate, endDate, fromDate, endDate, startTime, endTime, startTime, endTime }
+                : new Object[] { staffId, fromDate, endDate, fromDate, endDate, fromDate, endDate });
         if (count > 0) {
             throw new CashierAlreadyAlloacated();
         }
@@ -111,19 +130,31 @@ public class CashierTransactionDataValidator {
 
     public void validateOnLoanDisbursal(AppUser user, String currencyCode, BigDecimal transactionAmount) {
         LocalDateTime localDateTime = DateUtils.getLocalDateTimeOfTenant();
-        if (user.getStaff() != null) {
-            String sql = "select c.id from m_cashiers c where c.staff_id = " + user.getStaff().getId() + " AND "
-                    + " (case when c.full_day then '" + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date " + " else ('"
-                    + localDateTime.toLocalDate() + "' BETWEEN c.start_date AND c.end_date and " + " TIME('"
-                    + ZonedDateTime.of(localDateTime, DateUtils.getDateTimeZoneOfTenant())
-                    + "') BETWEEN TIME(c.start_time) AND TIME(c.end_time)  ) end)";
+        Staff staff = user.getStaff();
+        if (staff != null) {
+            StringBuilder sqlBuilder = new StringBuilder("");
+            sqlBuilder.append("SELECT");
+            sqlBuilder.append("  c.id ");
+            sqlBuilder.append("FROM m_cashiers c ");
+            sqlBuilder.append("WHERE c.staff_id = ?");
+            sqlBuilder.append("  AND (");
+            sqlBuilder.append("    CASE WHEN c.full_day THEN");
+            sqlBuilder.append("      ?  BETWEEN c.start_date AND c.end_date");
+            sqlBuilder.append("    ELSE (");
+            sqlBuilder.append("      ?  BETWEEN c.start_date AND c.end_date");
+            sqlBuilder.append("      AND time(?) BETWEEN time(c.start_time) AND time(c.end_time)");
+            sqlBuilder.append("    )");
+            sqlBuilder.append("    END");
+            sqlBuilder.append("  )");
             try {
-                Long cashierId = this.jdbcTemplate.queryForObject(sql, Long.class);
+                Long staffID = staff.getId();
+                LocalDate date = localDateTime.toLocalDate();
+                Long cashierId = this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class, staffID, date, date,
+                        ZonedDateTime.of(localDateTime, DateUtils.getDateTimeZoneOfTenant()));
                 validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
             } catch (EmptyResultDataAccessException e) {
                 LOG.error("Problem occurred in validateOnLoanDisbursal function", e);
             }
         }
-
     }
 }
