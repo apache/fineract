@@ -348,8 +348,7 @@ public final class ImportHandlerUtils {
         String sheetName = sheet.getSheetName();
         String chargeTimeType = "";
         EnumOptionData chargeTimeTypeEnum = null;
-        sheetName.equals(TemplatePopulateImportConstants.CHARGE_SHEET_NAME);
-        {
+        if (sheetName.equals(TemplatePopulateImportConstants.CHARGE_SHEET_NAME)) {
             for (Row row : sheet) {
                 for (Cell cell : row) {
                     if (name != null) {
