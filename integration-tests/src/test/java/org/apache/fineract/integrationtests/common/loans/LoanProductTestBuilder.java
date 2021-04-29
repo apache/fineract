@@ -35,6 +35,7 @@ public class LoanProductTestBuilder {
     private static final String WEEK = "1";
     private static final String MONTHS = "2";
     private static final String YEARS = "3";
+    private static final String SEMI_MONTH = "5";
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD = "1";
     private static final String EQUAL_PRINCIPAL_PAYMENTS = "0";
     private static final String EQUAL_INSTALLMENTS = "1";
@@ -125,6 +126,9 @@ public class LoanProductTestBuilder {
     private Integer recalculationRestFrequencyDayOfWeekType = null;
     private boolean syncExpectedWithDisbursementDate = false;
 
+    private String firstSemiDate = null;
+    private String secondSemiDate = null;
+
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -212,6 +216,8 @@ public class LoanProductTestBuilder {
             map.put("maximumGap", maximumGap);
         }
         map.put("syncExpectedWithDisbursementDate", this.syncExpectedWithDisbursementDate);
+        map.put("semiMonthFirstDate", this.firstSemiDate);
+        map.put("semiMonthSecondDate", this.secondSemiDate);
         return new Gson().toJson(map);
     }
 
@@ -237,6 +243,13 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withNumberOfRepayments(final String numberOfRepayment) {
         this.numberOfRepayments = numberOfRepayment;
+        return this;
+    }
+
+    public LoanProductTestBuilder withRepaymentTypeAsSemiMonth(final String firstSemiDate, final String secondSemiDate) {
+        this.repaymentFrequency = SEMI_MONTH;
+        this.firstSemiDate = firstSemiDate;
+        this.secondSemiDate = secondSemiDate;
         return this;
     }
 

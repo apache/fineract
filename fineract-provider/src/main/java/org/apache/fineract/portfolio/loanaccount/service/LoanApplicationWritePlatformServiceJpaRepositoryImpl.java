@@ -325,10 +325,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 updateProductRelatedDetails(productRelatedDetail, newLoanApplication);
             }
 
-            this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
-                    newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
-                    productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
-                    newLoanApplication);
+            // this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(),
+            // newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
+            // productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
+            // newLoanApplication);
 
             if (loanProduct.canUseForTopup() && clientId != null) {
                 final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);

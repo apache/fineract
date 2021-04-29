@@ -269,6 +269,9 @@ public class LoanScheduleAssembler {
         /*
          * If user has not passed the first repayments date then then derive the same based on loan type.
          */
+        if (calculatedRepaymentsStartingFromDate == null && loanProduct.getLoanProductRelatedDetail().isSemiMonthRepayment()) {
+            calculatedRepaymentsStartingFromDate = loanProduct.getFirstSemiDate();
+        }
         if (calculatedRepaymentsStartingFromDate == null) {
             calculatedRepaymentsStartingFromDate = deriveFirstRepaymentDate(loanType, repaymentEvery, expectedDisbursementDate,
                     repaymentPeriodFrequencyType, loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment(), calendar);
@@ -445,7 +448,9 @@ public class LoanScheduleAssembler {
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-
+        // extra details such as
+        final LocalDate firsSemiDate = loanProduct.getFirstSemiDate();
+        final LocalDate secondSemiDate = loanProduct.getSecondSemiDate();
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -457,7 +462,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, firsSemiDate, secondSemiDate);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -520,6 +525,7 @@ public class LoanScheduleAssembler {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
                     LocalDate expectedDisbursementDate = null;
                     BigDecimal principal = null;
+                    BigDecimal netDisbursalAmount = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
                         expectedDisbursementDate = this.fromApiJsonHelper
@@ -530,9 +536,16 @@ public class LoanScheduleAssembler {
                             && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
+                    if (jsonObject.has(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                            && jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank(
+                                    jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).getAsString())) {
+                        netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                                .getAsBigDecimal();
+                    }
                     BigDecimal waivedChargeAmount = null;
-                    disbursementDatas
-                            .add(new DisbursementData(null, expectedDisbursementDate, null, principal, null, null, waivedChargeAmount));
+                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, netDisbursalAmount, null,
+                            null, waivedChargeAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }
@@ -1081,7 +1094,10 @@ public class LoanScheduleAssembler {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusWeeks(repaymentEvery);
             } else if (repaymentPeriodFrequencyType.isMonthly()) {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusMonths(repaymentEvery);
-            } /** yearly loan **/
+            } else if (repaymentPeriodFrequencyType.isSemiMonthly()) {
+                dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusDays(repaymentEvery);
+            }
+            /** yearly loan **/
             else {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusYears(repaymentEvery);
             }

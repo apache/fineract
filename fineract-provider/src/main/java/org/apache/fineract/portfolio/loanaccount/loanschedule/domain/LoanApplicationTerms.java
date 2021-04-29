@@ -208,6 +208,10 @@ public final class LoanApplicationTerms {
     private boolean isEqualAmortization;
     private Money interestTobeApproppriated;
 
+    // Extra Details such as firstDate and Second Date For Semi-Month Period
+    private LocalDate firstDateForSemi;
+    private LocalDate secondDateForSemi;
+
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, Integer nthDay, DayOfWeekType weekDayType,
@@ -229,7 +233,7 @@ public final class LoanApplicationTerms {
             BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations,
             Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled, final Integer numberOfDays,
             boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
-            final boolean isEqualAmortization) {
+            final boolean isEqualAmortization, final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -244,7 +248,8 @@ public final class LoanApplicationTerms {
                 recalculationFrequencyType, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, preClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations,
                 calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays,
-                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false);
+                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false,
+                firstDateForSemi, secondDateForSemi);
 
     }
 
@@ -261,7 +266,8 @@ public final class LoanApplicationTerms {
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy,
             final LoanRescheduleStrategyMethod rescheduleStrategyMethod, BigDecimal approvedAmount, BigDecimal annualNominalInterestRate,
             List<LoanTermVariationsData> loanTermVariations, final Integer numberOfDays, final boolean isSkipRepaymentOnFirstDayOfMonth,
-            final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod) {
+            final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
+            final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
 
         return assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDay, dayOfWeek,
@@ -271,7 +277,7 @@ public final class LoanApplicationTerms {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, loanPreClosureInterestCalculationStrategy,
                 rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, false,
-                false);
+                false, firstDateForSemi, secondDateForSemi);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -289,7 +295,8 @@ public final class LoanApplicationTerms {
             BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper, final Integer numberOfDays,
             final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
-            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI) {
+            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI,
+            final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -328,7 +335,7 @@ public final class LoanApplicationTerms {
                 loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isFirstRepaymentDateAllowedOnHoliday,
-                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI);
+                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, firstDateForSemi, secondDateForSemi);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -343,7 +350,7 @@ public final class LoanApplicationTerms {
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy, final Calendar loanCalendar,
             BigDecimal approvedAmount, final BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
             Integer numberOfDays, boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO,
-            final boolean allowCompoundingOnEod) {
+            final boolean allowCompoundingOnEod, final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -387,7 +394,8 @@ public final class LoanApplicationTerms {
                 recalculationFrequencyType, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations,
                 calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays,
-                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false);
+                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false,
+                firstDateForSemi, secondDateForSemi);
 
     }
 
@@ -414,8 +422,8 @@ public final class LoanApplicationTerms {
                 applicationTerms.calendarHistoryDataWrapper, applicationTerms.isInterestChargedFromDateSameAsDisbursalDateEnabled,
                 applicationTerms.numberOfDays, applicationTerms.isSkipRepaymentOnFirstDayOfMonth, applicationTerms.holidayDetailDTO,
                 applicationTerms.allowCompoundingOnEod, applicationTerms.isEqualAmortization,
-                applicationTerms.isFirstRepaymentDateAllowedOnHoliday,
-                applicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI);
+                applicationTerms.isFirstRepaymentDateAllowedOnHoliday, applicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI,
+                applicationTerms.firstDateForSemi, applicationTerms.secondDateForSemi);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -440,7 +448,8 @@ public final class LoanApplicationTerms {
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper, Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled,
             final Integer numberOfDays, final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO,
             final boolean allowCompoundingOnEod, final boolean isEqualAmortization, final boolean isFirstRepaymentDateAllowedOnHoliday,
-            final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI) {
+            final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, final LocalDate firstDateForSemi,
+            final LocalDate secondDateForSemi) {
 
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
@@ -515,6 +524,8 @@ public final class LoanApplicationTerms {
         this.isEqualAmortization = isEqualAmortization;
         this.isFirstRepaymentDateAllowedOnHoliday = isFirstRepaymentDateAllowedOnHoliday;
         this.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI = isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+        this.firstDateForSemi = firstDateForSemi;
+        this.secondDateForSemi = secondDateForSemi;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -658,6 +669,8 @@ public final class LoanApplicationTerms {
             break;
             case YEARS:
                 dueRepaymentPeriodDate = startDate.plusYears(this.repaymentEvery);
+            break;
+            case SEMI_MONTH:
             break;
             case INVALID:
             break;
@@ -1039,6 +1052,8 @@ public final class LoanApplicationTerms {
                             numberOfDaysInPeriod = loanTermFrequencyBigDecimal.multiply(BigDecimal.valueOf(30), mc);
                         }
                         periodicInterestRate = oneDayOfYearInterestRate.multiply(numberOfDaysInPeriod, mc);
+                    break;
+                    case SEMI_MONTH:
                     break;
                     case YEARS:
                         switch (daysInYearType) {
@@ -1791,6 +1806,14 @@ public final class LoanApplicationTerms {
 
     public boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled() {
         return isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+    }
+
+    public LocalDate getFirstDateForSemi() {
+        return this.firstDateForSemi;
+    }
+
+    public LocalDate getSecondDateForSemi() {
+        return this.secondDateForSemi;
     }
 
 }

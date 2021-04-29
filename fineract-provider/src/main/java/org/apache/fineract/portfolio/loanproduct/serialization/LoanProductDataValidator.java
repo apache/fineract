@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -106,8 +107,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName, LoanProductConstants.recalculationRestFrequencyNthDayParamName,
             LoanProductConstants.recalculationRestFrequencyOnDayParamName,
             LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
-            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM,
-            LoanProductConstants.RATES_PARAM_NAME));
+            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
+            LoanProductConstants.SEMI_MONTH_START_DATE, LoanProductConstants.SEMI_MONTH_SECOND_DATE));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -249,7 +250,36 @@ public final class LoanProductDataValidator {
 
         final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed("repaymentFrequencyType", element,
                 Locale.getDefault());
-        baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+        baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 6);
+
+        // Semi-Month Details
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.SEMI_MONTH_START_DATE, element)) {
+            final LocalDate firstSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_START_DATE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_START_DATE).value(firstSemiDate).notBlank();
+
+            final LocalDate secondSemiDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanProductConstants.SEMI_MONTH_SECOND_DATE,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).value(secondSemiDate).notBlank()
+                    .validateDateAfter(firstSemiDate);
+
+            if (firstSemiDate.getMonth() != secondSemiDate.getMonth()) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "first.and.second.semi.dates.must.be.thesame.month", "First and second semi dates must be in the same month");
+            }
+
+            final int difference = Math.abs(firstSemiDate.getDayOfMonth() - secondSemiDate.getDayOfMonth());
+            if (difference < 14) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "date.difference.cannot.be.less.than.14",
+                        "days difference between first and second semi dates cannot be less than 14 days");
+            }
+            if (difference > 18) {
+                baseDataValidator.reset().parameter(LoanProductConstants.SEMI_MONTH_SECOND_DATE).failWithCode(
+                        "date.difference.cannot.be.greater.than.18",
+                        "days difference between first and second semi dates cannot be greater than 18 days");
+            }
+        }
 
         // settings
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerNamed("amortizationType", element, Locale.getDefault());
@@ -1022,7 +1052,7 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("repaymentFrequencyType", element)) {
             final Integer repaymentFrequencyType = this.fromApiJsonHelper.extractIntegerNamed("repaymentFrequencyType", element,
                     Locale.getDefault());
-            baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+            baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 6);
         }
 
         if (this.fromApiJsonHelper.parameterExists("transactionProcessingStrategyId", element)) {

@@ -33,6 +33,7 @@ public class LoanApplicationTestBuilder {
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";
     private static final String YEARS = "3";
+    private static final String SEMI_MONTH = "5";
     private static final String DECLINING_BALANCE = "0";
     private static final String FLAT_BALANCE = "1";
     private static final String EQUAL_PRINCIPAL_PAYMENTS = "0";
@@ -230,6 +231,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withRepaymentFrequencyTypeAsWeeks() {
         this.repaymentFrequencyType = WEEKS;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withRepaymentFrequencyTypeAsSemiMonthly() {
+        this.repaymentFrequencyType = SEMI_MONTH;
         return this;
     }
 

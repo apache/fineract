@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
@@ -88,7 +89,9 @@ public class ProvisioningIntegrationTest {
             LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
             LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
+            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID,
+                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             Assertions.assertNotNull(loanID);
         }

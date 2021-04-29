@@ -197,6 +197,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.recurring_moratorium_principal_periods as recurringMoratoriumOnPrincipalPeriods, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,lp.grace_on_arrears_ageing as graceOnArrearsAgeing,lp.overdue_days_for_npa as overdueDaysForNPA, "
                     + "lp.min_days_between_disbursal_and_first_repayment As minimumDaysBetweenDisbursalAndFirstRepayment, "
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
+                    + "lp.start_date_semi_month as firstSemiMonthDate, lp.close_date_semi_month as secondSemiMonthDate, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
@@ -455,6 +456,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<RateData> rateOptions = null;
             final boolean isRatesEnabled = false;
 
+            // Semi Month Dates
+            final LocalDate firstSemiMonthDate = JdbcSupport.getLocalDate(rs, "firstSemiMonthDate");
+            final LocalDate secondSemiMonthDate = JdbcSupport.getLocalDate(rs, "secondSemiMonthDate");
+
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
@@ -471,7 +476,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
-                    isRatesEnabled);
+                    isRatesEnabled, firstSemiMonthDate, secondSemiMonthDate);
         }
     }
 

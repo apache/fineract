@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -104,7 +105,9 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
+        this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 

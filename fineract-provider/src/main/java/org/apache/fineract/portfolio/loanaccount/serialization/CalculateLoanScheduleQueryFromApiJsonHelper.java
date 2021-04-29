@@ -110,9 +110,10 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         // FIXME - KW - this constraint doesnt really need to be here. should be
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
-        validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentEveryType);
-
+        if (loanTermFrequency.equals(repaymentEveryType)) {
+            validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
+                    repaymentEvery, repaymentEveryType);
+        }
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
                 element);
@@ -135,31 +136,23 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
             final Integer loanTermFrequency, final Integer loanTermFrequencyType, final Integer numberOfRepayments,
             final Integer repaymentEvery, final Integer repaymentEveryType) {
-        if (loanTermFrequencyType != null && !loanTermFrequencyType.equals(repaymentEveryType)) {
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType",
-                    "The parameters loanTermFrequencyType and repaymentFrequencyType must be the same.", "loanTermFrequencyType",
-                    loanTermFrequencyType, repaymentEveryType);
-            dataValidationErrors.add(error);
-        } else {
-            if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
-                final int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
-                if (loanTermFrequency.intValue() < suggestsedLoanTerm) {
+        if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
+            final int suggestedLoanTerm = repaymentEvery * loanTermFrequency.intValue();
+            if (numberOfRepayments < suggestedLoanTerm) {
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "validation.msg.loan.numberOfRepayments.less.than.repayment.structure.suggests",
+                        "The parameter numberOfRepayments is less than the suggested loan term as indicated by loanTermFrequency and repaymentEvery.",
+                        "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
+                dataValidationErrors.add(error);
+            } else {
+                if (numberOfRepayments > suggestedLoanTerm) {
                     final ApiParameterError error = ApiParameterError.parameterError(
-                            "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",
-                            "The parameter loanTermFrequency is less than the suggest loan term as indicated by numberOfRepayments and repaymentEvery.",
+                            "validation.msg.loan.numberOfRepayments.greater.than.repayment.structure.suggests",
+                            "The parameter numberOfRepayments is greater than the suggested loan term as indicated by loanTermFrequency and repaymentEvery.",
                             "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
                     dataValidationErrors.add(error);
-                } else {
-                    if (loanTermFrequency.intValue() > suggestsedLoanTerm) {
-                        final ApiParameterError error = ApiParameterError.parameterError(
-                                "validation.msg.loan.loanTermFrequency.greater.than.repayment.structure.suggests",
-                                "The parameter loanTermFrequency is greater than the suggested loan term as indicated by numberOfRepayments and repaymentEvery.",
-                                "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
-                        dataValidationErrors.add(error);
-                    }
-
                 }
+
             }
         }
     }
