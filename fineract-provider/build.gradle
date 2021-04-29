@@ -333,7 +333,7 @@ if( project.hasProperty("fineract.release") ) {
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
 gitProperties {
-    gitPropertiesResourceDir = "$buildDir/classes/java/main/resources"
+    gitPropertiesResourceDir = file("$buildDir/classes/java/main/resources")
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
