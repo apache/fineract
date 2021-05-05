@@ -56,12 +56,13 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         if (survey) {
             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
-            sql += " WHERE x_registered_table.category =" + DataTableApiConstant.CATEGORY_PPI;
+            sql += " WHERE x_registered_table.category = ?";
 
         }
 
         sql += "  order by c.id";
-        final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm, new Object[] {});
+        final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm,
+                survey ? new Object[] { DataTableApiConstant.CATEGORY_PPI } : new Object[] {});
 
         return new GlobalConfigurationData(globalConfiguration);
     }
