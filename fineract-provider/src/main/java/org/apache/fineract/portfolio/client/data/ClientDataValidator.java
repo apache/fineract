@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -211,6 +212,9 @@ public final class ClientDataValidator {
                     .integerGreaterThanZero();
         }
 
+        if (!this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
+            throw new PlatformDataIntegrityException("LegalForm.cannot.be.blank", "Legalform is mandatory:");
+        }
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
             final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName,
                     element);
@@ -504,6 +508,9 @@ public final class ClientDataValidator {
                     .validateDateBefore(DateUtils.getLocalDateOfTenant()).validateDateBefore(submittedDate);
         }
 
+        if (!this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
+            throw new PlatformDataIntegrityException("LegalForm.cannot.be.blank", "Legalform is mandatory:");
+        }
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName,
