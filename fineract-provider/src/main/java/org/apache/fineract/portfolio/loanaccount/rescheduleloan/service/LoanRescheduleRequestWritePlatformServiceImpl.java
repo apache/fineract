@@ -286,26 +286,28 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
                     this.platformSecurityContext.authenticatedUser(), null, null, null, null);
 
-            if (changeRepaymentSchedule) {
-                final Integer repaymentEvery = jsonCommand.integerValueOfParameterNamed("repaymentEvery");
-                if (!repaymentEvery.equals(loan.repaymentScheduleDetail().getRepayEvery())) {
-                    throw new PlatformApiDataValidationException(Collections.singletonList(
-                            ApiParameterError.parameterError("repaymentFrequency.cannot.be.different.from.default.loan.repaymentFrequency",
-                                    "Repayment frequency cannot be different from the default loan repayment frequency", "repaymentEvery",
-                                    "Repayment frequency cannot be different from the default loan repayment frequency")));
+            if (changeRepaymentSchedule != null) {
+                if (changeRepaymentSchedule) {
+                    final Integer repaymentEvery = jsonCommand.integerValueOfParameterNamed("repaymentEvery");
+                    if (!repaymentEvery.equals(loan.repaymentScheduleDetail().getRepayEvery())) {
+                        throw new PlatformApiDataValidationException(Collections.singletonList(ApiParameterError.parameterError(
+                                "repaymentFrequency.cannot.be.different.from.default.loan.repaymentFrequency",
+                                "Repayment frequency cannot be different from the default loan repayment frequency", "repaymentEvery",
+                                "Repayment frequency cannot be different from the default loan repayment frequency")));
+                    }
+                    final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
+                            .fromInt(jsonCommand.integerValueOfParameterNamed("repaymentFrequencyType"));
+                    if (!repaymentFrequencyType.equals(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType())) {
+                        throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(
+                                "repaymentFrequencyType.cannot.be.different.from.default.loan.repaymentFrequencyType",
+                                "Repayment frequency type cannot be different from the default loan repayment frequency type",
+                                "repaymentFrequencyType",
+                                "Repayment frequency type cannot be different from the default loan repayment frequency type")));
+                    }
+                    final Date firstSemiDate = jsonCommand.dateValueOfParameterNamed("semiMonthFirstDate");
+                    final Date secondSemiDate = jsonCommand.dateValueOfParameterNamed("semiMonthSecondDate");
+                    loanRescheduleRequest.changeRepaymentSchedule(repaymentEvery, repaymentFrequencyType, firstSemiDate, secondSemiDate);
                 }
-                final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
-                        .fromInt(jsonCommand.integerValueOfParameterNamed("repaymentFrequencyType"));
-                if (!repaymentFrequencyType.equals(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType())) {
-                    throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(
-                            "repaymentFrequencyType.cannot.be.different.from.default.loan.repaymentFrequencyType",
-                            "Repayment frequency type cannot be different from the default loan repayment frequency type",
-                            "repaymentFrequencyType",
-                            "Repayment frequency type cannot be different from the default loan repayment frequency type")));
-                }
-                final Date firstSemiDate = jsonCommand.dateValueOfParameterNamed("semiMonthFirstDate");
-                final Date secondSemiDate = jsonCommand.dateValueOfParameterNamed("semiMonthSecondDate");
-                loanRescheduleRequest.changeRepaymentSchedule(repaymentEvery, repaymentFrequencyType, firstSemiDate, secondSemiDate);
             }
 
             // update reschedule request to term variations mapping
