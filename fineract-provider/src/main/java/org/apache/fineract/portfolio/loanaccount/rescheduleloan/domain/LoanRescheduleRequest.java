@@ -26,6 +26,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -36,6 +38,7 @@ import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -69,6 +72,24 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
     @Column(name = "reschedule_reason_comment")
     private String rescheduleReasonComment;
+
+    @Column(name = "change_schedule", nullable = false)
+    private Boolean changeSchedule = false;
+
+    @Column(name = "repay_every")
+    private Integer repayEvery;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "repayment_period_frequency_enum")
+    private PeriodFrequencyType repaymentPeriodFrequencyType;
+
+    @Column(name = "start_date_semi_month")
+    @Temporal(TemporalType.DATE)
+    private Date firstDateForSemi;
+
+    @Column(name = "close_date_semi_month")
+    @Temporal(TemporalType.DATE)
+    private Date secondDateForSemi;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submitted_on_date")
@@ -143,6 +164,45 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      **/
     public Loan getLoan() {
         return this.loan;
+    }
+
+    /**
+     * Set new reschedule frequency and terms.
+     *
+     * @param repayEvery
+     * @param repaymentPeriodFrequencyType
+     * @param firstDateForSemi
+     * @param secondDateForSemi
+     * @return LoanRescheduleRequest
+     */
+    public LoanRescheduleRequest changeRepaymentSchedule(final Integer repayEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
+            final Date firstDateForSemi, final Date secondDateForSemi) {
+        this.changeSchedule = true;
+        this.repayEvery = repayEvery;
+        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+        this.firstDateForSemi = firstDateForSemi;
+        this.secondDateForSemi = secondDateForSemi;
+        return this;
+    }
+
+    public Boolean changeSchedule() {
+        return changeSchedule;
+    }
+
+    public Integer getRepayEvery() {
+        return repayEvery;
+    }
+
+    public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
+        return repaymentPeriodFrequencyType;
+    }
+
+    public Date getFirstDateForSemi() {
+        return firstDateForSemi;
+    }
+
+    public Date getSecondDateForSemi() {
+        return secondDateForSemi;
     }
 
     /**

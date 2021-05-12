@@ -42,6 +42,7 @@ public class LoanProductTestBuilder {
     private static final String DECLINING_BALANCE = "0";
     private static final String FLAT_BALANCE = "1";
     public static final String DEFAULT_STRATEGY = "1";
+    public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "6";
     // private static final String HEAVENS_FAMILY_STRATEGY ="2";
     // private static final String CREO_CORE_STRATEGY ="3";
     public static final String RBI_INDIA_STRATEGY = "4";

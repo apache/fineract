@@ -58,6 +58,11 @@ public final class RescheduleLoansApiConstants {
     public static final String rejectCommandParamName = "reject";
     public static final String endDateParamName = "endDate";
     public static final String emiParamName = "emi";
+    public static final String changeRepaymentSchedule = "changeSchedule";
+    public static final String repayEvery = "repaymentEvery";
+    public static final String repaymentFrequencyType = "repaymentFrequencyType";
+    public static final String semiMonthFirstDate = "semiMonthFirstDate";
+    public static final String semiMonthSecondDate = "semiMonthSecondDate";
 
     // reject action request parameters
     public static final String rejectedOnDateParam = "rejectedOnDate";

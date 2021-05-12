@@ -192,7 +192,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String loanOfficerIdParameterName = "loanOfficerId";
         if (this.fromApiJsonHelper.parameterExists(loanOfficerIdParameterName, element)) {
             final Long loanOfficerId = this.fromApiJsonHelper.extractLongNamed(loanOfficerIdParameterName, element);
-            baseDataValidator.reset().parameter(loanOfficerIdParameterName).value(loanOfficerId).ignoreIfNull().integerGreaterThanZero();
+            // Fix Case of no Loan Officer in Bulk Import Sheet
+            if (!loanOfficerId.equals(0L)) {
+                baseDataValidator.reset().parameter(loanOfficerIdParameterName).value(loanOfficerId).ignoreIfNull()
+                        .integerGreaterThanZero();
+            }
         }
 
         final String loanPurposeIdParameterName = "loanPurposeId";

@@ -156,4 +156,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT)
     Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId);
 
+    @Query("SELECT loan FROM Loan loan WHERE loan.loanProduct.id = :productId")
+    List<Loan> findByLoanProductId(@Param("productId") Long productId);
+
 }
