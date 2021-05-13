@@ -53,7 +53,7 @@ buildscript {
 
 plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'com.diffplug.spotless' version '5.12.4' apply false
+    id 'com.diffplug.spotless' version '5.12.5' apply false
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
     id 'com.github.hierynomus.license' version '0.15.0' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
