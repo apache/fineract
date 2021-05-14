@@ -46,14 +46,14 @@ buildscript {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.8.0'
         classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.0'
+        classpath 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.1'
         classpath 'gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0'
     }
 }
 
 plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'com.diffplug.spotless' version '5.12.1' apply false
+    id 'com.diffplug.spotless' version '5.12.4' apply false
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
     id 'com.github.hierynomus.license' version '0.15.0' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
@@ -114,10 +114,10 @@ allprojects  {
             dependency 'org.apache.commons:commons-email:1.5'
             dependency 'commons-io:commons-io:2.8.0'
             dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-            dependency 'com.github.librepdf:openpdf:1.3.25'
+            dependency 'com.github.librepdf:openpdf:1.3.26'
             dependency 'org.mnode.ical4j:ical4j:3.0.25'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.11.993'
+            dependency 'com.amazonaws:aws-java-sdk-s3:1.11.1011'
             dependency 'org.ehcache:ehcache:3.9.2'
             dependency 'com.github.spullara.mustache.java:compiler:0.9.7'
             dependency 'com.jayway.jsonpath:json-path:2.5.0'
@@ -128,16 +128,17 @@ allprojects  {
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
             dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
             dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
-            dependency 'org.apache.activemq:activemq-broker:5.16.1'
+            dependency 'org.apache.activemq:activemq-broker:5.16.2'
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
 
-            dependency 'io.github.classgraph:classgraph:4.8.104'
-            dependency 'org.awaitility:awaitility:4.0.3'
+            dependency 'io.github.classgraph:classgraph:4.8.105'
+            dependency 'org.awaitility:awaitility:4.1.0'
             dependency 'com.github.spotbugs:spotbugs-annotations:4.2.3'
             dependency 'javax.cache:cache-api:1.1.1'
             dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
-            dependency 'org.webjars.npm:swagger-ui-dist:3.47.1'
+            dependency 'org.webjars.npm:swagger-ui-dist:3.48.0'
             dependency 'org.webjars:webjars-locator-core:0.46'
+            dependency 'org.springframework.boot:spring-boot-starter-mail:2.3.4.RELEASE'
 
             // fineract client dependencies
             dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -475,7 +476,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:8.41.1'
+        checkstyle 'com.puppycrawl.tools:checkstyle:8.42'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.39.0'
     }
 
