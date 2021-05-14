@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 
 /**
@@ -40,10 +41,19 @@ public final class LoanRescheduleRequestData {
     private final CodeValueData rescheduleReasonCodeValue;
     private final LoanRescheduleRequestTimelineData timeline;
     private final String rescheduleReasonComment;
+
+    private Boolean changeSchedule = false;
+    private Integer repayEvery;
+    private EnumOptionData repaymentPeriodFrequencyType;
+    private LocalDate firstDateForSemi;
+    private LocalDate secondDateForSemi;
+
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> rescheduleReasons;
     @SuppressWarnings("unused")
     private final Collection<LoanTermVariationsData> loanTermVariationsData;
+    @SuppressWarnings("unused")
+    private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
 
     /**
      * LoanRescheduleRequestData constructor
@@ -54,8 +64,11 @@ public final class LoanRescheduleRequestData {
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
             Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
             String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
-            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
-            Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
+            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest, final Boolean changeSchedule,
+            final Integer repayEvery, final EnumOptionData repaymentPeriodFrequencyType, final LocalDate firstDateForSemi,
+            final LocalDate secondDateForSemi, Collection<CodeValueData> rescheduleReasons,
+            final Collection<LoanTermVariationsData> loanTermVariationsData,
+            final Collection<EnumOptionData> repaymentFrequencyTypeOptions) {
 
         this.id = id;
         this.loanId = loanId;
@@ -69,8 +82,14 @@ public final class LoanRescheduleRequestData {
         this.loanAccountNumber = loanAccountNumber;
         this.clientId = clientId;
         this.recalculateInterest = recalculateInterest;
+        this.changeSchedule = changeSchedule;
+        this.repayEvery = repayEvery;
+        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+        this.firstDateForSemi = firstDateForSemi;
+        this.secondDateForSemi = secondDateForSemi;
         this.rescheduleReasons = rescheduleReasons;
         this.loanTermVariationsData = loanTermVariationsData;
+        this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
     }
 
     /**
@@ -81,12 +100,16 @@ public final class LoanRescheduleRequestData {
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
             Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
             String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
-            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
-            Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
+            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest, final Boolean changeSchedule,
+            final Integer repayEvery, final EnumOptionData repaymentPeriodFrequencyType, final LocalDate firstDateForSemi,
+            final LocalDate secondDateForSemi, Collection<CodeValueData> rescheduleReasons,
+            final Collection<LoanTermVariationsData> loanTermVariationsData,
+            final Collection<EnumOptionData> repaymentFrequencyTypeOptions) {
 
         return new LoanRescheduleRequestData(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
                 rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
-                rescheduleReasons, loanTermVariationsData);
+                changeSchedule, repayEvery, repaymentPeriodFrequencyType, firstDateForSemi, secondDateForSemi, rescheduleReasons,
+                loanTermVariationsData, repaymentFrequencyTypeOptions);
     }
 
     /**
@@ -97,7 +120,8 @@ public final class LoanRescheduleRequestData {
      **/
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum, final String clientName,
             final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
-            final CodeValueData rescheduleReasonCodeValue) {
+            final CodeValueData rescheduleReasonCodeValue, final Boolean changeSchedule, final Integer repayEvery,
+            final EnumOptionData repaymentPeriodFrequencyType, final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
 
         this.id = id;
         this.loanId = loanId;
@@ -107,12 +131,18 @@ public final class LoanRescheduleRequestData {
         this.clientId = clientId;
         this.rescheduleFromDate = rescheduleFromDate;
         this.rescheduleReasonCodeValue = rescheduleReasonCodeValue;
+        this.changeSchedule = changeSchedule;
+        this.repayEvery = repayEvery;
+        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+        this.firstDateForSemi = firstDateForSemi;
+        this.secondDateForSemi = secondDateForSemi;
         this.rescheduleFromInstallment = null;
         this.rescheduleReasonComment = null;
         this.timeline = null;
         this.recalculateInterest = null;
         this.rescheduleReasons = null;
         this.loanTermVariationsData = null;
+        this.repaymentFrequencyTypeOptions = null;
     }
 
     /**
@@ -120,10 +150,11 @@ public final class LoanRescheduleRequestData {
      **/
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
             final String clientName, final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
-            final CodeValueData rescheduleReasonCodeValue) {
+            final CodeValueData rescheduleReasonCodeValue, final Boolean changeSchedule, final Integer repayEvery,
+            final EnumOptionData repaymentPeriodFrequencyType, final LocalDate firstDateForSemi, final LocalDate secondDateForSemi) {
 
         return new LoanRescheduleRequestData(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
-                rescheduleReasonCodeValue);
+                rescheduleReasonCodeValue, changeSchedule, repayEvery, repaymentPeriodFrequencyType, firstDateForSemi, secondDateForSemi);
     }
 
     /**

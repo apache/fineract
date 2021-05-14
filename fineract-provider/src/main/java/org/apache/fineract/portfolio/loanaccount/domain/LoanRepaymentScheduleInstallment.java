@@ -352,6 +352,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return getPrincipalOutstanding(currency).isZero();
     }
 
+    public boolean isInterestCompleted(final MonetaryCurrency currency) {
+        return getInterestOutstanding(currency).isZero();
+    }
+
     public void resetDerivedComponents() {
         this.principalCompleted = null;
         this.principalWrittenOff = null;

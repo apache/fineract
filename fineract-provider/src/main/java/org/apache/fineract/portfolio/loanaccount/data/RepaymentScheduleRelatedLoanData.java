@@ -37,14 +37,14 @@ public class RepaymentScheduleRelatedLoanData {
 
     public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
             final CurrencyData currency, final BigDecimal principal, final BigDecimal inArrearsTolerance,
-            final BigDecimal totalFeeChargesAtDisbursement) {
+            final BigDecimal totalFeeChargesAtDisbursement, final BigDecimal netDisbursalAmount) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.currency = currency;
         this.principal = principal;
         this.inArrearsTolerance = inArrearsTolerance;
         this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
-        this.netDisbursalAmount = this.principal.subtract(this.totalFeeChargesAtDisbursement);
+        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public LocalDate disbursementDate() {

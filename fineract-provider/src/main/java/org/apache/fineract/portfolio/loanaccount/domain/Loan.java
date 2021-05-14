@@ -524,13 +524,7 @@ public class Loan extends AbstractPersistableCustom {
         this.rates = rates;
 
         // Add net get net disbursal amount from charges and principal
-        this.netDisbursalAmount = this.approvedPrincipal;
-        if (loanCharges != null && !loanCharges.isEmpty()) {
-            for (LoanCharge charge : loanCharges) {
-                this.netDisbursalAmount = this.netDisbursalAmount.subtract(charge.amount());
-            }
-        }
-
+        this.netDisbursalAmount = this.approvedPrincipal.subtract(deriveSumTotalOfChargesDueAtDisbursement());
     }
 
     private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
@@ -2158,6 +2152,7 @@ public class Loan extends AbstractPersistableCustom {
         return actualChanges;
     }
 
+    @SuppressWarnings("BigDecimalEquals")
     public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
             final JsonArray disbursementDataArray, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
@@ -2203,6 +2198,15 @@ public class Loan extends AbstractPersistableCustom {
                 // amount demanded
 
                 if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 0) {
+
+                    if (!this.approvedPrincipal.equals(approvedLoanAmount)) {
+                        netDisbursalAmount = approvedLoanAmount;
+                        if (this.charges != null && !this.charges.isEmpty()) {
+                            for (LoanCharge charge : this.charges) {
+                                netDisbursalAmount = netDisbursalAmount.subtract(charge.amount());
+                            }
+                        }
+                    }
 
                     this.approvedPrincipal = approvedLoanAmount;
 
@@ -2282,6 +2286,7 @@ public class Loan extends AbstractPersistableCustom {
                         this.loanOfficer, approvedOn);
                 this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
             }
+            this.adjustNetDisbursalAmount(this.approvedPrincipal);
         }
 
         return actualChanges;
@@ -4526,7 +4531,7 @@ public class Loan extends AbstractPersistableCustom {
             break;
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from
-                                                   // startDate
+        // startDate
     }
 
     public void applyHolidayToRepaymentScheduleDates(final Holiday holiday, final LoanUtilService loanUtilService) {
@@ -6159,6 +6164,16 @@ public class Loan extends AbstractPersistableCustom {
         return reversedTransactions;
     }
 
+    public LoanRepaymentScheduleInstallment getLastCompletedInstallment() {
+        LoanRepaymentScheduleInstallment completedInstallment = null;
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (installment.isPrincipalCompleted(this.loanCurrency()) && installment.isInterestCompleted(this.loanCurrency())) {
+                completedInstallment = installment;
+            }
+        }
+        return completedInstallment;
+    }
+
     private void updateLoanToLastDisbursalState(LocalDate actualDisbursementDate) {
 
         for (final LoanCharge charge : charges()) {
@@ -6708,4 +6723,7 @@ public class Loan extends AbstractPersistableCustom {
         this.loanType = loanType;
     }
 
+    public void adjustNetDisbursalAmount(BigDecimal adjustedAmount) {
+        this.netDisbursalAmount = adjustedAmount.subtract(this.deriveSumTotalOfChargesDueAtDisbursement());
+    }
 }
