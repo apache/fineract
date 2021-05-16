@@ -215,7 +215,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     public String getReportType(final String reportName, final boolean isSelfServiceUserReport, boolean aParameterTypeFlag) {
         if (aParameterTypeFlag) {
             return "Table";
-        } 
+        }
         final String sql = "SELECT ifNull(report_type,'') AS report_type FROM `stretchy_report` WHERE report_name = ? AND self_service_user_report = ?";
 
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
