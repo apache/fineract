@@ -131,7 +131,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
         try {
             final TenantMapper rm = new TenantMapper();
-            final String sql = "select  " + rm.schema() + " where t.identifier like ?";
+            final String sql = "select " + rm.schema() + " where t.identifier = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
         } catch (final EmptyResultDataAccessException e) {

@@ -55,7 +55,7 @@ insert into c_external_service_properties (`name`, `value`, `external_service_id
 
 insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('host', 'smtp.gmail.com', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('port', '25', (select id from c_external_service where name = 'SMTP_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('port', '587', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
 insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('useTLS', 'true', (select id from c_external_service where name = 'SMTP_Email_Account'));
 

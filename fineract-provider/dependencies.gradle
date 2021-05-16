@@ -68,9 +68,6 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
-            // JAX-B dependencies for JDK 9+
-            'jakarta.xml.bind:jakarta.xml.bind-api',
-
             'org.dom4j:dom4j',
 
             'javax.cache:cache-api',
@@ -79,9 +76,13 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.2',
-            'com.squareup.retrofit2:converter-gson'
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.3',
+            'com.squareup.retrofit2:converter-gson',
+            'com.sun.activation:jakarta.activation:1.2.2'
             )
+    implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
+        exclude group: 'jakarta.activation'
+    }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
@@ -111,10 +112,11 @@ dependencies {
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.webjars.npm:swagger-ui-dist',
+            'org.glassfish.jaxb:jaxb-runtime',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-            'org.apache.httpcomponents:httpclient',
+            'org.apache.httpcomponents:httpclient'
             )
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
@@ -128,5 +130,8 @@ dependencies {
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'jakarta.activation'
+        exclude group: 'javax.activation'
     }
+
 }
