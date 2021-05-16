@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
-import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -105,8 +104,8 @@ public class RunreportsApiResource {
         // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
         queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
 
-        String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
-        ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
+        String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
+        var reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",
                     ReportingProcessServiceProvider.SERVICE_MISSING + reportType, reportType);

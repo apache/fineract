@@ -34,7 +34,18 @@ public interface ReadReportingService {
 
     ReportData retrieveReport(Long id);
 
-    String getReportType(String reportName, boolean isSelfServiceUserReport);
+    /**
+     * Gets the report type based on self service and parameter type flags.
+     *
+     * @param reportName
+     *            the report name (not null)
+     * @param isSelfServiceUserReport
+     *            true if self service user report
+     * @param aParameterTypeFlag
+     *            true if parameter type
+     * @return the report type based on self service and parameter type flags
+     */
+    String getReportType(String reportName, boolean isSelfServiceUserReport, boolean aParameterTypeFlag);
 
     Collection<ReportParameterData> getAllowedParameters();
 

@@ -219,7 +219,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
+    public String getReportType(final String reportName, final boolean isSelfServiceUserReport, boolean aParameterTypeFlag) {
+        if (aParameterTypeFlag) {
+            return "Table";
+        }
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName
                 + "' and self_service_user_report = ?";
         validateReportName(reportName);
