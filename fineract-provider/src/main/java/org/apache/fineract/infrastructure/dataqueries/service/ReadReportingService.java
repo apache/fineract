@@ -34,7 +34,7 @@ public interface ReadReportingService {
 
     ReportData retrieveReport(Long id);
 
-    String getReportType(String reportName, boolean isSelfServiceUserReport);
+    String getReportType(String reportName, boolean isSelfServiceUserReport, boolean isParameterType);
 
     Collection<ReportParameterData> getAllowedParameters();
 
