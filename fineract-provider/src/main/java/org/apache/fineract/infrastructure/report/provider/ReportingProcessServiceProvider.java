@@ -22,8 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.dataqueries.service.DatatableReportingProcessService;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
+import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +38,12 @@ public class ReportingProcessServiceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportingProcessServiceProvider.class);
 
-    private final Map<String, DatatableReportingProcessService> reportingProcessServices;
+    private final Map<String, ReportingProcessService> reportingProcessServices;
 
     @Autowired
-    public ReportingProcessServiceProvider(List<DatatableReportingProcessService> reportingProcessServices) {
-        var mapBuilder = ImmutableMap.<String, DatatableReportingProcessService>builder();
-        for (DatatableReportingProcessService s : reportingProcessServices) {
+    public ReportingProcessServiceProvider(List<ReportingProcessService> reportingProcessServices) {
+        var mapBuilder = ImmutableMap.<String, ReportingProcessService>builder();
+        for (ReportingProcessService s : reportingProcessServices) {
             String[] reportTypes = s.getClass().getAnnotation(ReportService.class).type();
             for (String type : reportTypes) {
                 mapBuilder.put(type, s);
@@ -53,7 +53,7 @@ public class ReportingProcessServiceProvider {
         this.reportingProcessServices = mapBuilder.build();
     }
 
-    public DatatableReportingProcessService findReportingProcessService(final String reportType) {
+    public ReportingProcessService findReportingProcessService(final String reportType) {
         return reportingProcessServices.getOrDefault(reportType, null);
     }
 
