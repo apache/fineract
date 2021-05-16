@@ -2878,6 +2878,8 @@ public class Loan extends AbstractPersistableCustom {
                 this.loanTopupDetails.setTopupAmount(null);
             }
 
+            this.adjustNetDisbursalAmount(this.approvedPrincipal);
+
             actualChanges.put("actualDisbursementDate", "");
 
             updateLoanSummaryDerivedFields();
