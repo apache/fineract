@@ -83,17 +83,17 @@ public class RescheduleLoansApiResource {
     }
 
     @GET
-    @Path("template")
+    @Path("{loanId}/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanRescheduleRequestData loanRescheduleReasons = null;
-        loanRescheduleReasons = this.loanRescheduleRequestReadPlatformService
-                .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.LOAN_RESCHEDULE_REASON);
+        loanRescheduleReasons = this.loanRescheduleRequestReadPlatformService.retrieveAllRescheduleReasons(loanId,
+                RescheduleLoansApiConstants.LOAN_RESCHEDULE_REASON);
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons);
     }
@@ -153,6 +153,20 @@ public class RescheduleLoansApiResource {
         else {
             throw new UnrecognizedQueryParamException("command", command, new Object[] { "approve", "reject" });
         }
+
+        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+
+        return this.loanRescheduleRequestToApiJsonSerializer.serialize(commandProcessingResult);
+    }
+
+    @POST
+    @Path("{productId}/reschedulejob")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String rescheduleAssociatedLoans(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandWrapper = new CommandWrapperBuilder().loanRescheduleRequestJob(productId).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
 

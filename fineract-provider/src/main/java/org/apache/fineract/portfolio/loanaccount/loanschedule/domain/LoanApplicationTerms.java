@@ -67,8 +67,8 @@ public final class LoanApplicationTerms {
     private final PeriodFrequencyType loanTermPeriodFrequencyType;
     private Integer numberOfRepayments;
     private Integer actualNumberOfRepayments;
-    private final Integer repaymentEvery;
-    private final PeriodFrequencyType repaymentPeriodFrequencyType;
+    private Integer repaymentEvery;
+    private PeriodFrequencyType repaymentPeriodFrequencyType;
     private final Integer nthDay;
 
     private final DayOfWeekType weekDayType;
@@ -1816,4 +1816,23 @@ public final class LoanApplicationTerms {
         return this.secondDateForSemi;
     }
 
+    /**
+     * Set new reschedule frequency and terms.
+     *
+     * @param repayEvery
+     * @param repaymentPeriodFrequencyType
+     * @param firstDateForSemi
+     * @param secondDateForSemi
+     * @return LoanRescheduleRequest
+     */
+    public LoanApplicationTerms changeRepaymentSchedule(final Integer repayEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
+            final Date firstDateForSemi, final Date secondDateForSemi) {
+        this.repaymentEvery = repayEvery;
+        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+        if (firstDateForSemi != null && secondDateForSemi != null) {
+            this.firstDateForSemi = firstDateForSemi.toInstant().atZone(DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+            this.secondDateForSemi = secondDateForSemi.toInstant().atZone(DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+        }
+        return this;
+    }
 }

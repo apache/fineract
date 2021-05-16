@@ -2510,6 +2510,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder loanRescheduleRequestJob(final Long productId) {
+        this.actionName = "BULK_RESCHEDULE";
+        this.entityName = "RESCHEDULELOAN";
+        this.entityId = productId;
+        this.href = "/loanproducts/" + productId;
+        return this;
+    }
+
     public CommandWrapperBuilder createAccountNumberFormat() {
         this.actionName = "CREATE";
         this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
