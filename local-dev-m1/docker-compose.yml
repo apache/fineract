@@ -1,0 +1,52 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# NB: Travis CI (dist: bionic) supports up to v3.7
+# (unless we'd install a more recent version in .travis.yml)
+version: '3.7'
+services:
+  # MySQL service
+  fineractmysql:
+    image: amd64/mysql:5.7
+    volumes:
+      - ../fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
+      - ./volume/mysql-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=mysql" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
+
+  # Frontend service
+  community-app:
+    image: openmf/community-app:latest
+    container_name: mifos-ui
+    restart: always
+    ports:
+      - 9090:80
+
+
+# https://issues.apache.org/jira/browse/FINERACT-762
+# To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
+# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
+# and remove ":thin:" from SUB_PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
+# bundled in the container by the Dockerfile, but just not used by default.
