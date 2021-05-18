@@ -19,7 +19,7 @@
 #
 
 echo "Setting Up Fineract service configuration..."
-kubectl create secret generic fineract-tenants-db-secret --from-literal=username=root --from-literal=password=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16)
+kubectl create secret generic fineract-tenants-db-secret --from-literal=username=root --from-literal=password=berlin7
 kubectl apply -f fineractmysql-configmap.yml
 
 echo
@@ -53,3 +53,21 @@ while [[ ${fineract_server_status} -ne 'Running' ]]; do
 done
 
 echo "Fineract server is up and running"
+
+
+echo
+echo "Starting fineract UI..."
+kubectl apply -f fineract-ui-deployment.yml
+
+fineract_ui_pod=""
+while [[ ${#fineract_ui_pod} -eq 0 ]]; do
+    fineract_ui_pod=$(kubectl get pods -l tier=frontend --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+done
+
+fineract_ui_status=$(kubectl get pods ${fineract_ui_pod} --no-headers -o custom-columns=":status.phase")
+while [[ ${fineract_ui_status} -ne 'Running' ]]; do
+    sleep 1
+    fineract_ui_status=$(kubectl get pods ${fineract_ui_pod} --no-headers -o custom-columns=":status.phase")
+done
+
+echo "Fineract ui is up and running"

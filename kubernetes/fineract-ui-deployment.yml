@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: fineract-ui
+  name: fineract-ui
+spec:
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 80
+  selector:
+    app: fineract-ui
+    tier: frontend
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fineract-ui
+  labels:
+    app: fineract-ui
+spec:
+  selector:
+    matchLabels:
+      app: fineract-ui
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: fineract-ui
+        tier: frontend
+    spec:
+      containers:
+        - name: fineract-ui
+          image: openmf/community-app:latest
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+            requests:
+              cpu: "200m"
+              memory: "0.5Gi"
+          ports:
+            - containerPort: 9090
+              name: fineract-ui
