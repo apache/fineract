@@ -348,6 +348,7 @@ allprojects  {
             // Git build info
             "**/git.properties",
             ".mailmap",
+            "**/volume/mysql-data/**",
         ]
     }
 }

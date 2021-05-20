@@ -129,6 +129,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "is_bullet_loan", nullable = false)
+    private boolean isBulletLoan = false;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -137,14 +140,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
-            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
+            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
+            final boolean isBulletLoan) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization);
+                isEqualAmortization, isBulletLoan);
     }
 
     protected LoanProductRelatedDetail() {
@@ -159,7 +163,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing, final Integer daysInMonthType,
-            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
+            final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization,
+            final boolean isBulletLoan) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -186,6 +191,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.daysInYearType = daysInYearType;
         this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
         this.isEqualAmortization = isEqualAmortization;
+        this.isBulletLoan = isBulletLoan;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -507,6 +513,12 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.isEqualAmortization = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_BULLET_LOAN_PARAM, this.isBulletLoan)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_BULLET_LOAN_PARAM);
+            actualChanges.put(LoanProductConstants.IS_BULLET_LOAN_PARAM, newValue);
+            this.isBulletLoan = newValue;
+        }
+
         validateRepaymentPeriodWithGraceSettings();
 
         return actualChanges;
@@ -674,5 +686,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public void setNominalInterestRatePerPeriod(BigDecimal nominalInterestRatePerPeriod) {
         this.nominalInterestRatePerPeriod = nominalInterestRatePerPeriod;
+    }
+
+    public boolean isBulletLoan() {
+        return isBulletLoan;
+    }
+
+    public void setBulletLoan(boolean bulletLoan) {
+        isBulletLoan = bulletLoan;
     }
 }

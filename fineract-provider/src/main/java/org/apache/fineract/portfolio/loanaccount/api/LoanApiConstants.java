@@ -129,6 +129,7 @@ public interface LoanApiConstants {
     String datatables = "datatables";
 
     String isEqualAmortizationParam = "isEqualAmortization";
+    String isBulletLoan = "isBulletLoan";
     String applicationId = "applicationId";
     String lastApplication = "lastApplication";
 

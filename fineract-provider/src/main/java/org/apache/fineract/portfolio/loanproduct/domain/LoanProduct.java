@@ -187,6 +187,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "is_bullet_loan", nullable = false)
+    private boolean isBulletLoan = false;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -345,6 +348,10 @@ public class LoanProduct extends AbstractPersistableCustom {
                 ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
                 : false;
 
+        final boolean isBulletLoan = command.parameterExists(LoanProductConstants.IS_BULLET_LOAN_PARAM)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_BULLET_LOAN_PARAM)
+                : false;
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -359,7 +366,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates);
+                isEqualAmortization, productRates, isBulletLoan);
 
     }
 
@@ -594,7 +601,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            final List<Rate> rates) {
+            final List<Rate> rates, final boolean isBulletLoan) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -627,7 +634,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
-                isInterestRecalculationEnabled, isEqualAmortization);
+                isInterestRecalculationEnabled, isEqualAmortization, isBulletLoan);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
@@ -672,6 +679,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
+        this.isBulletLoan = isBulletLoan;
 
         if (rates != null) {
             this.rates = rates;
@@ -1442,4 +1450,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.rates = rates;
     }
 
+    public boolean isBulletLoan() {
+        return isBulletLoan;
+    }
+
+    public void setBulletLoan(boolean bulletLoan) {
+        isBulletLoan = bulletLoan;
+    }
 }

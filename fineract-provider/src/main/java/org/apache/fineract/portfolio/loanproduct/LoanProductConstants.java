@@ -132,6 +132,7 @@ public interface LoanProductConstants {
     String CAN_USE_FOR_TOPUP = "canUseForTopup";
 
     String IS_EQUAL_AMORTIZATION_PARAM = "isEqualAmortization";
+    String IS_BULLET_LOAN_PARAM = "isBulletLoan";
 
     String RATES_PARAM_NAME = "rates";
 

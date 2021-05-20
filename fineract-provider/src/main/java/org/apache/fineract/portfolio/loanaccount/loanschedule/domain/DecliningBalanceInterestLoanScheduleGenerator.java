@@ -162,8 +162,14 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         } else {
             interestForPeriod = cumulatingInterestDueToGrace.minus(cumulatingInterestPaymentDueToGrace);
         }
-        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
-                periodNumber, mc, interestForPeriod);
+
+        Money principalForThisInstallment;
+        if (loanApplicationTerms.isBulletLoan()) {
+            principalForThisInstallment = loanApplicationTerms.getPrincipal().zero();
+        } else {
+            principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
+                    periodNumber, mc, interestForPeriod);
+        }
 
         // update cumulative fields for principal & interest
         final Money interestBroughtFowardDueToGrace = cumulatingInterestDueToGrace;

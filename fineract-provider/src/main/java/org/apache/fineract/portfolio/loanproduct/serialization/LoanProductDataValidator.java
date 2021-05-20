@@ -106,8 +106,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName, LoanProductConstants.recalculationRestFrequencyNthDayParamName,
             LoanProductConstants.recalculationRestFrequencyOnDayParamName,
             LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
-            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM,
-            LoanProductConstants.RATES_PARAM_NAME));
+            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
+            LoanProductConstants.IS_BULLET_LOAN_PARAM));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -153,6 +153,13 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element);
             baseDataValidator.reset().parameter(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM).value(isEqualAmortization).ignoreIfNull()
+                    .validateForBooleanValue();
+        }
+
+        boolean isBulletLoan = false;
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_BULLET_LOAN_PARAM, element)) {
+            isBulletLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_BULLET_LOAN_PARAM, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_BULLET_LOAN_PARAM).value(isBulletLoan).ignoreIfNull()
                     .validateForBooleanValue();
         }
 
@@ -1113,6 +1120,13 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element);
             baseDataValidator.reset().parameter(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM).value(isEqualAmortization).ignoreIfNull()
+                    .validateForBooleanValue();
+        }
+
+        boolean isBulletLoan = loanProduct.isBulletLoan();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_BULLET_LOAN_PARAM, element)) {
+            isBulletLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_BULLET_LOAN_PARAM, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_BULLET_LOAN_PARAM).value(isBulletLoan).ignoreIfNull()
                     .validateForBooleanValue();
         }
 

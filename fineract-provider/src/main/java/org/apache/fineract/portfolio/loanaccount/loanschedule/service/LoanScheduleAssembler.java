@@ -205,6 +205,11 @@ public class LoanScheduleAssembler {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam, element);
         }
 
+        boolean isBulletLoan = false;
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isBulletLoan, element)) {
+            isBulletLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isBulletLoan, element);
+        }
+
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
@@ -457,7 +462,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, isBulletLoan);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

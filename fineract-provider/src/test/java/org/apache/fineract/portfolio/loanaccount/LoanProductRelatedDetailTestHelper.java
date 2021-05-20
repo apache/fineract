@@ -156,11 +156,13 @@ public final class LoanProductRelatedDetailTestHelper {
         final boolean isInterestRecalculationEnabled = false;
         final boolean considerPartialPeriodInterest = false;
         final boolean isEqualAmortization = false;
+        final boolean isBulletLoan = false;
+
         return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, considerPartialPeriodInterest,
                 repayEvery, repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                isEqualAmortization);
+                isEqualAmortization, isBulletLoan);
     }
 }

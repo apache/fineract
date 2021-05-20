@@ -87,7 +87,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
-            LoanApiConstants.applicationId, // glim specific
+            LoanApiConstants.isBulletLoan, LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, LoanApiConstants.daysInYearTypeParameterName)); // glim specific
 
     private final FromJsonHelper fromApiJsonHelper;
