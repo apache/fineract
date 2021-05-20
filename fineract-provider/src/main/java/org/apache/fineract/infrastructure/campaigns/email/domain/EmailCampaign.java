@@ -75,11 +75,11 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @Column(name = "email_message", nullable = false)
     private String emailMessage;
 
-    @Column(name = "email_attachment_file_format", nullable = false)
+    @Column(name = "email_attachment_file_format")
     private String emailAttachmentFileFormat;
 
     @ManyToOne
-    @JoinColumn(name = "stretchy_report_id", nullable = false)
+    @JoinColumn(name = "stretchy_report_id")
     private Report stretchyReport;
 
     @Column(name = "stretchy_report_param_map", nullable = true)
@@ -109,18 +109,18 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @JoinColumn(name = "approvedon_userid", nullable = true)
     private AppUser approvedBy;
 
-    @Column(name = "recurrence", nullable = false)
+    @Column(name = "recurrence")
     private String recurrence;
 
-    @Column(name = "next_trigger_date", nullable = false)
+    @Column(name = "next_trigger_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextTriggerDate;
 
-    @Column(name = "last_trigger_date", nullable = false)
+    @Column(name = "last_trigger_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastTriggerDate;
 
-    @Column(name = "recurrence_start_date", nullable = false)
+    @Column(name = "recurrence_start_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date recurrenceStartDate;
 

@@ -74,9 +74,7 @@ public class AddressCommandFromApiJsonDeserializer {
         final List<FieldConfigurationData> configData = configurationData.stream().filter(FieldConfigurationData::isEnabled)
                 .collect(Collectors.toList());
 
-        final Set<String> supportedParameters = configData.stream()
-                .map(FieldConfigurationData::getField)
-                .collect(Collectors.toSet());
+        final Set<String> supportedParameters = configData.stream().map(FieldConfigurationData::getField).collect(Collectors.toSet());
 
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
@@ -85,8 +83,7 @@ public class AddressCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         configData.forEach(fieldConfiguration -> {
-            final String field =
-                    fieldConfiguration.getField().equals("addressType") ? "addressTypeId" : fieldConfiguration.getField();
+            final String field = fieldConfiguration.getField().equals("addressType") ? "addressTypeId" : fieldConfiguration.getField();
             final String fieldValue = this.fromApiJsonHelper.extractStringNamed(field, element);
 
             if (fieldConfiguration.getField().equals("addressType") && fromNewClient) {
