@@ -35,7 +35,7 @@ public class ReportsTest extends IntegrationTest {
 
     @Test
     void listReports() {
-        assertThat(ok(fineract().reports.retrieveReportList())).hasSize(117);
+        assertThat(ok(fineract().reports.retrieveReportList())).hasSize(120);
     }
 
     @Test

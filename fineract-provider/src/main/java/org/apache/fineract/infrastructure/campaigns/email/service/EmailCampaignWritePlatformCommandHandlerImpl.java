@@ -158,20 +158,24 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         final Long reportId = command.longValueOfParameterNamed(EmailCampaignValidator.stretchyReportId);
 
-        final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
+        Report report = null;
+        Map<String, String> stretchyReportParams = null;
+        if (reportId != null) {
+            report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
+            final Set<ReportParameterUsage> reportParameterUsages = report.getReportParameterUsages();
+            stretchyReportParams = new HashMap<>();
 
-        // find all report parameters and store them as json string
-        final Set<ReportParameterUsage> reportParameterUsages = report.getReportParameterUsages();
-        final Map<String, String> stretchyReportParams = new HashMap<>();
-
-        if (reportParameterUsages != null && !reportParameterUsages.isEmpty()) {
-            for (final ReportParameterUsage reportParameterUsage : reportParameterUsages) {
-                stretchyReportParams.put(reportParameterUsage.getReportParameterName(), "");
+            if (reportParameterUsages != null && !reportParameterUsages.isEmpty()) {
+                for (final ReportParameterUsage reportParameterUsage : reportParameterUsages) {
+                    stretchyReportParams.put(reportParameterUsage.getReportParameterName(), "");
+                }
             }
         }
 
         EmailCampaign emailCampaign = EmailCampaign.instance(currentUser, businessRule, report, command);
-        emailCampaign.setStretchyReportParamMap(new Gson().toJson(stretchyReportParams));
+        if (stretchyReportParams != null) {
+            emailCampaign.setStretchyReportParamMap(new Gson().toJson(stretchyReportParams));
+        }
 
         this.emailCampaignRepository.save(emailCampaign);
 
@@ -238,6 +242,32 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         return new CommandProcessingResultBuilder() //
                 .withEntityId(emailCampaign.getId()) //
                 .build();
+
+    }
+
+    @Override
+    public void insertDirectCampaignIntoEmailOutboundTable(final Loan loan, final EmailCampaign emailCampaign,
+            HashMap<String, String> campaignParams) {
+        try {
+            List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
+                    campaignParams);
+
+            if (runReportObject != null) {
+                for (HashMap<String, Object> entry : runReportObject) {
+                    String message = this.compileEmailTemplate(emailCampaign.getEmailMessage(), emailCampaign.getCampaignName(), entry);
+                    Client client = loan.getClient();
+                    String emailAddress = client.emailAddress();
+
+                    if (emailAddress != null && isValidEmail(emailAddress)) {
+                        EmailMessage emailMessage = EmailMessage.pendingEmail(null, client, null, emailCampaign,
+                                emailCampaign.getEmailSubject(), message, emailAddress, emailCampaign.getCampaignName());
+                        this.emailMessageRepository.save(emailMessage);
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            // TODO throw something here
+        }
 
     }
 
@@ -589,8 +619,11 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId())
                             .orElse(null); //
 
-                    final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat
-                            .instance(emailCampaign.getEmailAttachmentFileFormat());
+                    ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = null;
+                    if (emailCampaign.getEmailAttachmentFileFormat() != null) {
+                        emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat
+                                .instance(emailCampaign.getEmailAttachmentFileFormat());
+                    }
 
                     final List<File> attachmentList = new ArrayList<>();
 
@@ -690,29 +723,16 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
                     final EmailMessageWithAttachmentData emailMessageWithAttachmentData = EmailMessageWithAttachmentData.createNew(
                             emailMessage.getEmailAddress(), emailMessage.getMessage(), emailMessage.getEmailSubject(), attachmentList);
-
-                    if (!attachmentList.isEmpty() && attachmentList.size() > 0) { // only
-                                                                                  // send
-                                                                                  // email
-                                                                                  // message
-                                                                                  // if
-                                                                                  // there
-                                                                                  // is
-                                                                                  // an
-                                                                                  // attachment
-                                                                                  // to
-                                                                                  // it
+                    try {
 
                         this.emailMessageJobEmailService.sendEmailWithAttachment(emailMessageWithAttachmentData);
 
                         emailMessage.setStatusType(EmailMessageStatusType.SENT.getValue());
 
                         this.emailMessageRepository.save(emailMessage);
-                    } else {
-                        emailMessage.updateErrorMessage(errorLog.toString());
-
+                    } catch (Exception e) {
+                        emailMessage.updateErrorMessage(e.getMessage());
                         emailMessage.setStatusType(EmailMessageStatusType.FAILED.getValue());
-
                         this.emailMessageRepository.save(emailMessage);
                     }
                 }
@@ -734,7 +754,9 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
      */
     private File generateAttachments(final EmailCampaign emailCampaign, final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat,
             final Map<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
-
+        if (reportName == null) {
+            return null;
+        }
         try {
             final ByteArrayOutputStream byteArrayOutputStream = this.readReportingService.generatePentahoReportAsOutputStream(reportName,
                     emailAttachmentFileFormat.getValue(), reportParams, null, emailCampaign.getApprovedBy(), errorLog);

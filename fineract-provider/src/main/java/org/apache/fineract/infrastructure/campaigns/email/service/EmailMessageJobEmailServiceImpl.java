@@ -23,10 +23,9 @@ import java.util.List;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
-import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration;
-import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfigurationRepository;
+import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
+import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,30 +37,33 @@ import org.springframework.stereotype.Service;
 public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
-    private EmailConfigurationRepository emailConfigurationRepository;
+    private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
 
     @Autowired
-    private EmailMessageJobEmailServiceImpl(final EmailConfigurationRepository emailConfigurationRepository) {
-        this.emailConfigurationRepository = emailConfigurationRepository;
+    private EmailMessageJobEmailServiceImpl(ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
+        this.externalServicesReadPlatformService = externalServicesReadPlatformService;
     }
 
     @Override
     public void sendEmailWithAttachment(EmailMessageWithAttachmentData emailMessageWithAttachmentData) {
+        final SMTPCredentialsData smtpCredentialsData = this.externalServicesReadPlatformService.getSMTPCredentials();
         try {
             JavaMailSenderImpl javaMailSenderImpl = new JavaMailSenderImpl();
-            javaMailSenderImpl.setHost(this.getGmailSmtpServer());
-            javaMailSenderImpl.setPort(this.getGmailSmtpPort());
-            javaMailSenderImpl.setUsername(this.getGmailSmtpUsername());
-            javaMailSenderImpl.setPassword(this.getGmailSmtpPassword());
-            javaMailSenderImpl.setJavaMailProperties(this.getJavaMailProperties());
+            javaMailSenderImpl.setHost(smtpCredentialsData.getHost());
+            javaMailSenderImpl.setPort(Integer.parseInt(smtpCredentialsData.getPort()));
+            javaMailSenderImpl.setUsername(smtpCredentialsData.getUsername());
+            javaMailSenderImpl.setPassword(smtpCredentialsData.getPassword());
+            javaMailSenderImpl
+                    .setJavaMailProperties(this.getJavaMailProperties(smtpCredentialsData, javaMailSenderImpl.getJavaMailProperties()));
 
             MimeMessage mimeMessage = javaMailSenderImpl.createMimeMessage();
 
             // use the true flag to indicate you need a multipart message
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
+            mimeMessageHelper.setFrom(smtpCredentialsData.getFromEmail());
             mimeMessageHelper.setTo(emailMessageWithAttachmentData.getTo());
-            mimeMessageHelper.setText(emailMessageWithAttachmentData.getText());
+            mimeMessageHelper.setText(emailMessageWithAttachmentData.getText(), true);
             mimeMessageHelper.setSubject(emailMessageWithAttachmentData.getSubject());
             final List<File> attachments = emailMessageWithAttachmentData.getAttachments();
             if (attachments != null && attachments.size() > 0) {
@@ -80,32 +82,18 @@ public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEma
 
     }
 
-    private String getGmailSmtpServer() {
-        final EmailConfiguration gmailSmtpServer = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_SERVER);
-        return (gmailSmtpServer != null) ? gmailSmtpServer.getValue() : null;
-    }
-
-    private Integer getGmailSmtpPort() {
-        final EmailConfiguration gmailSmtpPort = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_PORT);
-        return (gmailSmtpPort != null) ? Integer.parseInt(gmailSmtpPort.getValue()) : null;
-    }
-
-    private String getGmailSmtpUsername() {
-        final EmailConfiguration gmailSmtpUsername = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_USERNAME);
-        return (gmailSmtpUsername != null) ? gmailSmtpUsername.getValue() : null;
-    }
-
-    private String getGmailSmtpPassword() {
-        final EmailConfiguration gmailSmtpPassword = this.emailConfigurationRepository.findByName(EmailApiConstants.SMTP_PASSWORD);
-        return (gmailSmtpPassword != null) ? gmailSmtpPassword.getValue() : null;
-    }
-
-    private Properties getJavaMailProperties() {
-        Properties properties = new Properties();
-        properties.setProperty("mail.smtp.starttls.enable", "true");
-        properties.setProperty("mail.smtp.auth", "true");
-        properties.setProperty("mail.smtp.ssl.trust", this.getGmailSmtpServer());
-
+    private Properties getJavaMailProperties(SMTPCredentialsData smtpCredentialsData, Properties properties) {
+        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.transport.protocol", "smtp");
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.ssl.trust", smtpCredentialsData.getHost());
+        if (smtpCredentialsData.isUseTLS()) {
+            // Needs to disable startTLS if the port is 465 in order to send the email successfully when using the
+            // smtp.gmail.com as the host
+            if (smtpCredentialsData.getPort().equals("465")) {
+                properties.put("mail.smtp.starttls.enable", "false");
+            }
+        }
         return properties;
     }
 }
