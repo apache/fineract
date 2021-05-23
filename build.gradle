@@ -118,7 +118,7 @@ allprojects  {
             dependency 'org.mnode.ical4j:ical4j:3.0.25'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
             dependency 'com.amazonaws:aws-java-sdk-s3:1.11.1011'
-            dependency 'org.ehcache:ehcache:3.9.3'
+            dependency 'org.ehcache:ehcache:3.9.4'
             dependency 'com.github.spullara.mustache.java:compiler:0.9.7'
             dependency 'com.jayway.jsonpath:json-path:2.5.0'
             dependency 'org.apache.tika:tika-core:1.26'
