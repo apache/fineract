@@ -262,15 +262,14 @@ public class InteropServiceImpl implements InteropService {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         // TODO: error handling
 
-        SavingsAccount savingsAccount = saveIdentifierForAccount(request.getAccountId(), request.getIdType(), request.getIdValue(),
-                request.getSubIdOrType());
+        saveIdentifierForAccount(request.getAccountId(), request.getIdType(), request.getIdValue(), request.getSubIdOrType());
 
-        return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
+        return InteropIdentifierAccountResponseData.build(request.getAccountId());
     }
 
     @Override
-    public SavingsAccount saveIdentifierForAccount(@NotNull String savingsExternalId, @NotNull InteropIdentifierType idType,
-            @NotNull String idValue, @NotNull String subIdOrType) {
+    public void saveIdentifierForAccount(@NotNull String savingsExternalId, @NotNull InteropIdentifierType idType, @NotNull String idValue,
+            @NotNull String subIdOrType) {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(savingsExternalId);
 
         AppUser createdBy = getLoginUser();
@@ -279,8 +278,6 @@ public class InteropServiceImpl implements InteropService {
                 DateUtils.getDateOfTenant());
 
         identifierRepository.save(identifier);
-
-        return savingsAccount;
     }
 
     @NotNull

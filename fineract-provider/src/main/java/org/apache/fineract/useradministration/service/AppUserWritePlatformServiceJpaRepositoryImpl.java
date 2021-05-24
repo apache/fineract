@@ -49,7 +49,6 @@ import org.apache.fineract.portfolio.accountdetails.data.SavingsAccountSummaryDa
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.useradministration.api.AppUserApiConstant;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
@@ -164,11 +163,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     // Assumes there's only a single savings account and single client associated
                     // TODO: Add support for multi client/savings account
                     if (savingsAccounts.get(0).getExternalId() != null && clients.iterator().next().mobileNo() != null) {
-                        String extId = savingsAccounts.get(0).getExternalId();
-
-                        String clientMobile = clients.iterator().next().mobileNo();
-                        SavingsAccount savingsAccount = interopService.saveIdentifierForAccount(extId, InteropIdentifierType.MSISDN,
-                                clientMobile, null);
+                        interopService.saveIdentifierForAccount(savingsAccounts.get(0).getExternalId(), InteropIdentifierType.MSISDN,
+                                clients.iterator().next().mobileNo(), null);
                     }
                 }
             }
