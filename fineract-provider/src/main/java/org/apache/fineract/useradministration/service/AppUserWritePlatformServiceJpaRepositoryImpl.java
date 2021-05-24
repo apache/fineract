@@ -156,18 +156,19 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 }
                 clients = this.clientRepositoryWrapper.findAll(clientIds);
 
-                // Get savings account and register identifier
+                // Register identifier for interoperability
                 List<SavingsAccountSummaryData> savingsAccounts = accountDetailsReadPlatformService
                         .retrieveSavingsAccountByClient(new ArrayList<>(clientIds));
 
                 if (!savingsAccounts.isEmpty() && !clients.isEmpty()) {
+                    // Assumes there's only a single savings account and single client associated
+                    // TODO: Add support for multi client/savings account
                     if (savingsAccounts.get(0).getExternalId() != null && clients.iterator().next().mobileNo() != null) {
-                        String extId = savingsAccounts.get(0).getExternalId(); // Assumes there's only 1 savings account
-                        // associated with the client
+                        String extId = savingsAccounts.get(0).getExternalId();
 
-                        String clientMobile = clients.iterator().next().mobileNo(); // Check if mobile is empty
+                        String clientMobile = clients.iterator().next().mobileNo();
                         SavingsAccount savingsAccount = interopService.saveIdentifierForAccount(extId, InteropIdentifierType.MSISDN,
-                                clientMobile, null); // Check if extId is not present
+                                clientMobile, null);
                     }
                 }
             }
