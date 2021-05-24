@@ -38,13 +38,18 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.accountdetails.data.SavingsAccountSummaryData;
+import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.useradministration.api.AppUserApiConstant;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
@@ -86,6 +91,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final TopicDomainService topicDomainService;
+    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
+    private final InteropService interopService;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
@@ -93,7 +100,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final RoleRepository roleRepository, final PlatformPasswordEncoder platformPasswordEncoder,
             final UserDataValidator fromApiJsonDeserializer, final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository,
             final StaffRepositoryWrapper staffRepositoryWrapper, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final TopicDomainService topicDomainService) {
+            final TopicDomainService topicDomainService, final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+            final InteropService interopService) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -105,6 +113,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.topicDomainService = topicDomainService;
+        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+        this.interopService = interopService;
     }
 
     @Transactional
@@ -136,15 +146,30 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             }
 
             Collection<Client> clients = null;
+            Collection<Long> clientIds = new HashSet<>();
             if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
                     && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
                     && command.hasParameter(AppUserConstants.CLIENTS)) {
                 JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
                 for (JsonElement clientElement : clientsArray) {
                     clientIds.add(clientElement.getAsLong());
                 }
                 clients = this.clientRepositoryWrapper.findAll(clientIds);
+
+                // Get savings account and register identifier
+                List<SavingsAccountSummaryData> savingsAccounts = accountDetailsReadPlatformService
+                        .retrieveSavingsAccountByClient(new ArrayList<>(clientIds));
+
+                if (!savingsAccounts.isEmpty() && !clients.isEmpty()) {
+                    if (savingsAccounts.get(0).getExternalId() != null && clients.iterator().next().mobileNo() != null) {
+                        String extId = savingsAccounts.get(0).getExternalId(); // Assumes there's only 1 savings account
+                        // associated with the client
+
+                        String clientMobile = clients.iterator().next().mobileNo(); // Check if mobile is empty
+                        SavingsAccount savingsAccount = interopService.saveIdentifierForAccount(extId, InteropIdentifierType.MSISDN,
+                                clientMobile, null); // Check if extId is not present
+                    }
+                }
             }
 
             appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);

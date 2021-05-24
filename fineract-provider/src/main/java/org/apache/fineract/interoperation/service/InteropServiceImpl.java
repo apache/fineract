@@ -261,16 +261,26 @@ public class InteropServiceImpl implements InteropService {
             String subIdOrType, @NotNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         // TODO: error handling
-        SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
+
+        SavingsAccount savingsAccount = saveIdentifierForAccount(request.getAccountId(), request.getIdType(), request.getIdValue(),
+                request.getSubIdOrType());
+
+        return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
+    }
+
+    @Override
+    public SavingsAccount saveIdentifierForAccount(@NotNull String savingsExternalId, @NotNull InteropIdentifierType idType,
+            @NotNull String idValue, @NotNull String subIdOrType) {
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(savingsExternalId);
 
         AppUser createdBy = getLoginUser();
 
-        InteropIdentifier identifier = new InteropIdentifier(savingsAccount, request.getIdType(), request.getIdValue(),
-                request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getDateOfTenant());
+        InteropIdentifier identifier = new InteropIdentifier(savingsAccount, idType, idValue, subIdOrType, createdBy.getUsername(),
+                DateUtils.getDateOfTenant());
 
         identifierRepository.save(identifier);
 
-        return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
+        return savingsAccount;
     }
 
     @NotNull

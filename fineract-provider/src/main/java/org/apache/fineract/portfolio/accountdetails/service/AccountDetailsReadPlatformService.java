@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
+import org.apache.fineract.portfolio.accountdetails.data.SavingsAccountSummaryData;
 
 public interface AccountDetailsReadPlatformService {
 
@@ -40,4 +41,6 @@ public interface AccountDetailsReadPlatformService {
     Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(Long groupId);
 
     AccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId, Long gsimId);
+
+    List<SavingsAccountSummaryData> retrieveSavingsAccountByClient(List<Long> clientId);
 }

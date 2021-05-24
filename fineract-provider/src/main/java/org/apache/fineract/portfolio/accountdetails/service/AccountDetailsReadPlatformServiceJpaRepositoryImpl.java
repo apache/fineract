@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -186,6 +187,13 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId) {
         final String loanWhereClause = " where l.group_id = ? and l.loan_status_id = 300 and l.client_id is null";
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId });
+    }
+
+    @Override
+    public List<SavingsAccountSummaryData> retrieveSavingsAccountByClient(final List<Long> clientIds) {
+        String inSql = String.join(",", Collections.nCopies(clientIds.size(), "?"));
+        String savingsWhereClause = String.format(" where sa.client_id in (%s) order by sa.status_enum ASC, sa.account_no ASC", inSql);
+        return retrieveAccountDetails(savingsWhereClause, clientIds.toArray());
     }
 
     private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {

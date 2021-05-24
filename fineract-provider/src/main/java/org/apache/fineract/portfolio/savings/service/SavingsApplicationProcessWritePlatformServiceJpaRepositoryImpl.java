@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -329,6 +330,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
             account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
+            this.savingAccountRepository.save(account);
+        }
+    }
+
+    private void generateExternalAccountId(final SavingsAccount account) {
+        if (account.getExternalId() == null) {
+            final String externalId = UUID.randomUUID().toString();
+            account.updateExternalId(externalId);
             this.savingAccountRepository.save(account);
         }
     }
@@ -747,6 +756,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingAccountRepository.save(account);
 
         generateAccountNumber(account);
+        generateExternalAccountId(account);
         // post journal entries for activation charges
         this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 

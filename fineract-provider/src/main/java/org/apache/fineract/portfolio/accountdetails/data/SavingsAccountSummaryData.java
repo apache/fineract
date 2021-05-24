@@ -74,6 +74,10 @@ public class SavingsAccountSummaryData {
         return accountNo;
     }
 
+    public String getExternalId() {
+        return externalId;
+    }
+
     public Long getId() {
         return id;
     }

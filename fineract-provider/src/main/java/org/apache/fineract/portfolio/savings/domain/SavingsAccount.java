@@ -1555,6 +1555,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
+    public void updateExternalId(final String externalId) {
+        this.externalId = externalId;
+    }
+
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }

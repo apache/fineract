@@ -30,6 +30,7 @@ import org.apache.fineract.interoperation.data.InteropTransactionRequestResponse
 import org.apache.fineract.interoperation.data.InteropTransactionsData;
 import org.apache.fineract.interoperation.data.InteropTransferResponseData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 public interface InteropService {
 
@@ -50,6 +51,9 @@ public interface InteropService {
     @NotNull
     InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType, @NotNull JsonCommand command);
+
+    SavingsAccount saveIdentifierForAccount(@NotNull String savingsExternalId, @NotNull InteropIdentifierType idType,
+            @NotNull String idValue, @NotNull String subIdOrType);
 
     @NotNull
     InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
