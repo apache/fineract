@@ -35,6 +35,7 @@ public final class TemplatePopulateImportConstants {
     public static final String CENTER_SHEET_NAME = "Centers";
     public static final String STAFF_SHEET_NAME = "Staff";
     public static final String GROUP_SHEET_NAME = "Groups";
+    public static final String CHARGE_SHEET_NAME = "Charges";
     public static final String CHART_OF_ACCOUNTS_SHEET_NAME = "ChartOfAccounts";
     public static final String CLIENT_ENTITY_SHEET_NAME = "ClientEntity";
     public static final String CLIENT_PERSON_SHEET_NAME = "ClientPerson";
