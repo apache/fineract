@@ -441,7 +441,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
         try {
             final boolean isSelfServiceUserReport = false;
-            final String reportType = this.readReportingService.getReportType(reportName, isSelfServiceUserReport);
+            final String reportType = this.readReportingService.getReportType(reportName, isSelfServiceUserReport, false);
             final ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider
                     .findReportingProcessService(reportType);
 
