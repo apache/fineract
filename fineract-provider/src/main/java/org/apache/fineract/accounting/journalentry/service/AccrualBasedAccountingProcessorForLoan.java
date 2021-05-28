@@ -211,21 +211,29 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             } else {
                 accountMap.put(account, interestAmount);
             }
+            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
+                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                        entry.getValue(), isReversal, entry.getKey());
+            }
         }
 
         // handle fees payment of writeOff (and reversals)
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+
             totalDebitAmount = totalDebitAmount.add(feesAmount);
 
             if (isIncomeFromFee) {
-                GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
-                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), paymentTypeId);
-                if (accountMap.containsKey(account)) {
-                    BigDecimal amount = accountMap.get(account).add(feesAmount);
-                    accountMap.put(account, amount);
-                } else {
-                    accountMap.put(account, feesAmount);
-                }
+                this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
+                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate,
+                        feesAmount, isReversal, loanTransactionDTO.getFeePayments());
+                // GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                // AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), paymentTypeId);
+                // if (accountMap.containsKey(account)) {
+                // BigDecimal amount = accountMap.get(account).add(feesAmount);
+                // accountMap.put(account, amount);
+                // } else {
+                // accountMap.put(account, feesAmount);
+                // }
             } else {
                 GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                         AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(), paymentTypeId);
@@ -260,6 +268,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     accountMap.put(account, penaltiesAmount);
                 }
             }
+            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
+                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                        entry.getValue(), isReversal, entry.getKey());
+            }
+
         }
 
         if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
@@ -272,11 +285,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             } else {
                 accountMap.put(account, overPaymentAmount);
             }
-        }
-
-        for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
-            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
-                    entry.getValue(), isReversal, entry.getKey());
+            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
+                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                        entry.getValue(), isReversal, entry.getKey());
+            }
         }
 
         /**
