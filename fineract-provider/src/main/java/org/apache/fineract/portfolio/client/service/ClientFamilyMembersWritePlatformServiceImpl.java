@@ -341,19 +341,19 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setRelationship(relationship);
         }
 
-        if (command.longValueOfParameterNamed("maritalStatusId") != null) {
+        if (command.longValueOfParameterNamed("maritalStatusId") != 0) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
             maritalStatus = this.codeValueRepository.getOne(maritalStatusId);
             clientFamilyMember.setMaritalStatus(maritalStatus);
         }
 
-        if (command.longValueOfParameterNamed("genderId") != null) {
+        if (command.longValueOfParameterNamed("genderId") != 0) {
             genderId = command.longValueOfParameterNamed("genderId");
             gender = this.codeValueRepository.getOne(genderId);
             clientFamilyMember.setGender(gender);
         }
 
-        if (command.longValueOfParameterNamed("professionId") != null) {
+        if (command.longValueOfParameterNamed("professionId") != 0) {
             professionId = command.longValueOfParameterNamed("professionId");
             profession = this.codeValueRepository.getOne(professionId);
             clientFamilyMember.setProfession(profession);
