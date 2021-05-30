@@ -211,10 +211,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             } else {
                 accountMap.put(account, interestAmount);
             }
-            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
-                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
-                        entry.getValue(), isReversal, entry.getKey());
-            }
         }
 
         // handle fees payment of writeOff (and reversals)
@@ -268,11 +264,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     accountMap.put(account, penaltiesAmount);
                 }
             }
-            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
-                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
-                        entry.getValue(), isReversal, entry.getKey());
-            }
-
         }
 
         if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
@@ -285,10 +276,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             } else {
                 accountMap.put(account, overPaymentAmount);
             }
-            for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
-                this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
-                        entry.getValue(), isReversal, entry.getKey());
-            }
+        }
+
+        for (Map.Entry<GLAccount, BigDecimal> entry : accountMap.entrySet()) {
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                    entry.getValue(), isReversal, entry.getKey());
         }
 
         /**
