@@ -222,14 +222,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                         AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate,
                         feesAmount, isReversal, loanTransactionDTO.getFeePayments());
-                // GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
-                // AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), paymentTypeId);
-                // if (accountMap.containsKey(account)) {
-                // BigDecimal amount = accountMap.get(account).add(feesAmount);
-                // accountMap.put(account, amount);
-                // } else {
-                // accountMap.put(account, feesAmount);
-                // }
             } else {
                 GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                         AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(), paymentTypeId);
