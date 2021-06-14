@@ -1,1 +1,0 @@
-INSERT INTO `fineract_default`.`m_field_configuration` (`entity`, `subentity`, `field`, `is_enabled`, `is_mandatory`) VALUES ('ADDRESS', 'CLIENT', 'street', '1', '0');
