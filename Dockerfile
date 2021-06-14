@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:11 AS builder
+FROM openjdk:18 AS builder
 
 RUN apt-get update -qq && apt-get install -y wget
 
