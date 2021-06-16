@@ -319,6 +319,23 @@ Governance and Policies
 [Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer)
 documents the process through which you can become a committer in this project.
 
+Github Workflow
+------------------
+![Github Workflow](./fineract-provider/src/main/resources/static/github-workflow.png)
+
+###Steps:
+1. **Create weekly pull request**
+* Create a named branch on the Muellners repo reflecting the new changes made.
+* Create a PR from your fork of the Muellners repo (consider Dev 1, Dev 2, and Dev 3 to be branches on your fork), to be merged with the newly created branch.
+* Ensure there are no conflicts and all checks have passed, then merge the PR into the named branch.
+* Create a new PR for merging the named branch into develop
+* Ensure there are no conflicts and all checks have passed, then merge the named branch into develop.
+2. **Do a monthly feature-based pull request**
+* Create a branch on the Muellners repo called Fineract-oss-release.
+* Create a new PR for merging a named branch into Fineact-oss-release (done on a selective basis).
+* For each named branch chosen, ensure there are no conflicts and all checks have passed, then merge the named branch into the Fineract-oss-release branch.
+* Do a rebase (monthly), creating a feature based PR from Fineract-oss-release to be submitted to the Apache community.
+
 
 Error Handling Guidelines
 ------------------
