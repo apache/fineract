@@ -34,6 +34,7 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -255,11 +256,31 @@ public class LoanTransactionsApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
+        CommandProcessingResult result = null;
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
+        result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
 
+    /**
+     * TODO: Add Swagger annotations.
+     *
+     * @param loanId
+     * @param transactionId
+     * @return
+     */
+    @PUT
+    @Path("{transactionId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Undo a Waive Charge Transaction", description = "Undo a Waive Charge Transaction")
+    public String undoWaiveCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().undoWaiveChargeTransaction(loanId, transactionId).build();
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -109,6 +110,8 @@ import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeUpdatedE
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LoanChargeCannotBeWaivedReason;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeWaiveCannotBeReversedException;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeWaiveCannotBeReversedException.LoanChargeWaiveCannotUndoReason;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
@@ -135,6 +138,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidByRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
@@ -156,6 +161,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
+import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursementException;
@@ -238,6 +245,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
+    private final LoanChargePaidByRepository loanChargePaidByRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -267,7 +275,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
             final CashierTransactionDataValidator cashierTransactionDataValidator, final GLIMAccountInfoRepository glimRepository,
-            final LoanRepository loanRepository) {
+            final LoanRepository loanRepository, final LoanChargePaidByRepository loanChargePaidByRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -308,6 +316,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.cashierTransactionDataValidator = cashierTransactionDataValidator;
         this.loanRepository = loanRepository;
         this.glimRepository = glimRepository;
+        this.loanChargePaidByRepository = loanChargePaidByRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -1589,6 +1598,189 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult undoWaiveLoanCharge(final JsonCommand command) {
+
+        // validateUndoWaiveCharge(command);
+
+        LoanTransaction loanTransaction = this.loanTransactionRepository.findById(command.entityId())
+                .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId()));
+
+        if (!loanTransaction.getTypeOf().getCode().equals(LoanTransactionType.WAIVE_CHARGES.getCode())) {
+            /**
+             * TODO: Add proper validation
+             */
+            throw new InvalidLoanTransactionTypeException("", "", "Transaction is not a waive charge type.");
+        }
+
+        Set<LoanChargePaidBy> loanChargePaidBySet = loanTransaction.getLoanChargesPaid();
+        Integer installmentNumber = null;
+        Long loanChargeId = null;
+        final Long loanId = loanTransaction.getLoan().getId();
+
+        for (LoanChargePaidBy loanChargePaidBy : loanChargePaidBySet) {
+            installmentNumber = loanChargePaidBy.getInstallmentNumber();
+            loanChargeId = loanChargePaidBy.getLoanCharge().getId();
+            break;
+        }
+
+        AppUser currentUser = getAppUserIfPresent();
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+        final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+
+        // Charges may be waived only when the loan associated with them are
+        // active
+        if (!loan.status().isActive()) {
+            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.LOAN_INACTIVE, loanCharge.getId());
+        }
+
+        // Validate loan charge is not already paid
+        if (loanCharge.isPaid()) {
+            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_PAID, loanCharge.getId());
+        }
+
+        final Map<String, Object> changes = new LinkedHashMap<>(3);
+
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_WAIVE_CHARGE_UNDO,
+                constructEntityMap(BusinessEntity.LOAN_CHARGE, loanCharge));
+
+        if (loanCharge.isInstalmentFee()) {
+            LoanInstallmentCharge chargePerInstallment = null;
+
+            // final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+            if (installmentNumber != null) {
+
+                // Get installment charge.
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+
+                // // Get relevant LoanChargePaidBy row
+                // final LoanChargePaidBy loanChargePaidBy =
+                // this.loanChargePaidByRepository.getLoanChargePaidByLoanCharge(loanCharge,
+                // chargePerInstallment.getInstallment().getInstallmentNumber());
+                // LoanTransaction loanTransaction = loanChargePaidBy.getLoanTransaction();
+
+                if (!loanTransaction.isNotReversed()) {
+                    throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_REVERSED,
+                            loanTransaction.getId());
+                }
+
+                // Reverse waived transaction
+                loanTransaction.setReversed();
+
+                // Set manually adjusted value to `1`
+                loanTransaction.setManuallyAdjustedOrReversed();
+
+                // Save updated data
+                this.loanTransactionRepository.saveAndFlush(loanTransaction);
+
+                // Get installment amount waived.
+                BigDecimal amountWaived = chargePerInstallment.getAmountWaived(loan.getCurrency()).getAmount();
+
+                // Get installment outstanding amount
+                BigDecimal amountOutstandingPerInstallment = chargePerInstallment.getAmountOutstanding();
+
+                // Check whether the installment charge is not waived. If so throw new error
+                if (!chargePerInstallment.isWaived() || amountWaived == null) {
+                    throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.NOT_WAIVED, loanChargeId);
+                }
+
+                // Get loan charge total amount waived
+                BigDecimal totalAmountWaved = loanCharge.getAmountWaived(loan.getCurrency()).getAmount();
+
+                // Get loan charge outstanding amount
+                BigDecimal amountOutstanding = loanCharge.getAmountOutstanding(loan.getCurrency()).getAmount();
+
+                // Add the amount waived to outstanding amount
+                loanCharge.resetOutstandingAmount(amountOutstanding.add(amountWaived));
+
+                // Subtract the amount waived from the existing amount waived.
+                loanCharge.setAmountWaived(totalAmountWaved.subtract(amountWaived));
+
+                // Add the amount waived to the outstanding amount of the installment
+                chargePerInstallment.resetOutstandingAmount(amountOutstandingPerInstallment.add(amountWaived));
+
+                // Set the amount waived value to ZERO
+                chargePerInstallment.resetAmountWaived(BigDecimal.ZERO);
+
+                // Reset waived flag
+                chargePerInstallment.undoWaiveFlag();
+
+                // Get the fee charges waived amount per installment
+                BigDecimal feeChargesWaivedAmount = chargePerInstallment.getInstallment().getFeeChargesWaived(loan.getCurrency())
+                        .getAmount();
+
+                // Subtract the amount waived from the existing fee charges waived amount.
+                chargePerInstallment.getInstallment().setFeeChargesWaived(feeChargesWaivedAmount.subtract(amountWaived));
+
+                // Set the last modification date.
+                chargePerInstallment.getInstallment().setLastModifiedDate(Instant.now());
+
+                // Update loan charge.
+                loanCharge.setInstallmentLoanCharge(chargePerInstallment, chargePerInstallment.getInstallment().getInstallmentNumber());
+
+                if (loanCharge.getAmount(loan.getCurrency()).compareTo(loanCharge.getAmountOutstanding(loan.getCurrency())) == 0
+                        && loanCharge.isWaived()) {
+                    loanCharge.undoWaived();
+                }
+
+                this.loanChargeRepository.saveAndFlush(loanCharge);
+
+                loan.updateLoanSummaryForUndoWaiveCharge(amountWaived);
+
+                changes.put("amount", amountWaived);
+
+                // final Set<LoanChargePaidBy> loanChargePaidBySet = loanCharge.getLoanChargePaidBySet();
+                // for (LoanChargePaidBy loanChargePaidBy: loanChargePaidBySet) {
+                // if (installmentNumber.equals(loanChargePaidBy.getInstallmentNumber())) {
+                // LoanTransaction transaction = loanChargePaidBy.getLoanTransaction();
+                // if (transaction.isNotReversed()) {
+                // transaction.setReversed();
+                // }
+                // }
+                // }
+
+            } else {
+                /**
+                 * TODO: Throw installment number should not be empty error.
+                 */
+                throw new InstallmentNotFoundException(command.entityId());
+            }
+        }
+
+        saveLoanWithDataIntegrityViolationChecks(loan);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_WAIVE_CHARGE_UNDO,
+                constructEntityMap(BusinessEntity.LOAN_CHARGE, loanCharge));
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.entityId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes).build();
+    }
+
+    // private void validateUndoWaiveCharge(JsonCommand command) {
+    // final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    // final DataValidatorBuilder baseDataValidator = new
+    // DataValidatorBuilder(dataValidationErrors).resource("transaction");
+    //
+    // if (!command.parameterExists("transactionId")) {
+    // baseDataValidator.reset().parameter("transactionId").failWithCode("trasactionId.not.exists");
+    // } else {
+    // final Long transactionId = command.longValueOfParameterNamed("transactionId");
+    // baseDataValidator.reset().parameter("transactionId").value(transactionId).notNull().notBlank();
+    // }
+    //
+    // if (!dataValidationErrors.isEmpty()) {
+    // throw new PlatformApiDataValidationException(dataValidationErrors);
+    // }
+    // }
 
     @Transactional
     @Override

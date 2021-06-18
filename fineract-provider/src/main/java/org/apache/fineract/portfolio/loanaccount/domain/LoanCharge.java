@@ -131,6 +131,9 @@ public class LoanCharge extends AbstractPersistableCustom {
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
+    @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<LoanChargePaidBy> loanChargePaidBySet;
+
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
         if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && dueDate == null) {
@@ -345,6 +348,34 @@ public class LoanCharge extends AbstractPersistableCustom {
             installmentCharge.resetPaidAmount(currency);
         }
     }
+
+    public void resetOutstandingAmount(final BigDecimal amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
+    }
+
+    // public Money undoWaive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
+    // if (isInstalmentFee()) {
+    // final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
+    // final Money amountWaived = chargePerInstallment.waive(currency);
+    // if (this.amountWaived != null) {
+    // this.amountWaived = this.amountWaived.add(amountWaived.getAmount());
+    // } else {
+    // }
+    //
+    // this.amountOutstanding = this.amountOutstanding.add(amountWaived.getAmount());
+    // if (determineIfFullyPaid()) {
+    // this.paid = false;
+    // this.waived = false;
+    // }
+    // return amountWaived;
+    // }
+    // this.amountWaived = BigDecimal.ZERO;
+    // // this.amountOutstanding = BigDecimal.ZERO;
+    // this.paid = false;
+    // this.waived = false;
+    // return getAmountWaived(currency);
+    //
+    // }
 
     public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
         if (isInstalmentFee()) {
@@ -869,6 +900,18 @@ public class LoanCharge extends AbstractPersistableCustom {
         return null;
     }
 
+    public void setInstallmentLoanCharge(final LoanInstallmentCharge loanInstallmentCharge, final Integer installmentNumber) {
+        LoanInstallmentCharge loanInstallmentChargeToBeRemoved = null;
+        for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) {
+                loanInstallmentChargeToBeRemoved = loanChargePerInstallment;
+                break;
+            }
+        }
+        this.loanInstallmentCharge.remove(loanInstallmentChargeToBeRemoved);
+        this.loanInstallmentCharge.add(loanInstallmentCharge);
+    }
+
     public void clearLoanInstallmentCharges() {
         this.loanInstallmentCharge.clear();
     }
@@ -1021,6 +1064,10 @@ public class LoanCharge extends AbstractPersistableCustom {
         return paidChargePerInstallment;
     }
 
+    public Set<LoanChargePaidBy> getLoanChargePaidBySet() {
+        return this.loanChargePaidBySet;
+    }
+
     public Loan getLoan() {
         return this.loan;
     }
@@ -1035,5 +1082,13 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public boolean isDueDateCharge() {
         return this.dueDate != null;
+    }
+
+    public void setAmountWaived(final BigDecimal amountWaived) {
+        this.amountWaived = amountWaived;
+    }
+
+    public void undoWaived() {
+        this.waived = false;
     }
 }

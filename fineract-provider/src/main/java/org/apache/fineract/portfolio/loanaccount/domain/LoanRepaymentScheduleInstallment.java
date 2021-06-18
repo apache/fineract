@@ -840,4 +840,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.rescheduleInterestPortion = rescheduleInterestPortion;
     }
 
+    public void setFeeChargesWaived(final BigDecimal newFeeChargesCharged) {
+        this.feeChargesCharged = newFeeChargesCharged;
+    }
+
 }

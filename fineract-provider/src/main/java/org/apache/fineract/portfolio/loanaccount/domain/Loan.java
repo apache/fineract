@@ -529,6 +529,11 @@ public class Loan extends AbstractPersistableCustom {
         return this.summary;
     }
 
+    public void updateLoanSummaryForUndoWaiveCharge(final BigDecimal amountWaived) {
+        this.summary.updateFeeChargesWaived(this.summary.getTotalFeeChargesWaived().subtract(amountWaived));
+        this.summary.updateFeeChargeOutstanding(this.summary.getTotalFeeChargesOutstanding().add(amountWaived));
+    }
+
     private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
 
         Money chargesDue = Money.of(getCurrency(), BigDecimal.ZERO);
@@ -971,6 +976,98 @@ public class Loan extends AbstractPersistableCustom {
         amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
         return amount;
     }
+
+    // public LoanTransaction undoWaiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine
+    // loanLifecycleStateMachine,
+    // final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long>
+    // existingReversedTransactionIds,
+    // final Integer loanInstallmentNumber, final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge,
+    // final AppUser currentUser) {
+    //
+    // validateLoanIsNotClosed(loanCharge);
+    //
+    // //final Money amountUndoWaived = loanCharge.undoWaive(loanCurrency(), loanInstallmentNumber);
+    //
+    // changes.put("amount", amountUndoWaived.getAmount());
+    //
+    // Money unrecognizedIncome = amountUndoWaived.zero();
+    // Money chargeComponent = amountUndoWaived;
+    // if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+    // Money receivableCharge = Money.zero(getCurrency());
+    // if (loanInstallmentNumber != null) {
+    // receivableCharge = accruedCharge
+    // .add(loanCharge.getInstallmentLoanCharge(loanInstallmentNumber).getAmountPaid(getCurrency()));
+    // } else {
+    // receivableCharge = accruedCharge.add(loanCharge.getAmountPaid(getCurrency()));
+    // }
+    //
+    // if (amountUndoWaived.isLessThan(receivableCharge)) {
+    // chargeComponent = receivableCharge;
+    // unrecognizedIncome = amountUndoWaived.add(receivableCharge);
+    // }
+    // }
+    // Money feeChargesUndoWaived = chargeComponent;
+    // Money penaltyChargesUndoWaived = Money.zero(loanCurrency());
+    // if (loanCharge.isPenaltyCharge()) {
+    // penaltyChargesUndoWaived = chargeComponent;
+    // feeChargesUndoWaived = Money.zero(loanCurrency());
+    // }
+    //
+    // LocalDate transactionDate = getDisbursementDate();
+    // if (loanCharge.isDueDateCharge()) {
+    // if (loanCharge.getDueLocalDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+    // transactionDate = DateUtils.getLocalDateOfTenant();
+    // } else {
+    // transactionDate = loanCharge.getDueLocalDate();
+    // }
+    // } else if (loanCharge.isInstalmentFee()) {
+    // transactionDate =
+    // loanCharge.getInstallmentLoanCharge(loanInstallmentNumber).getRepaymentInstallment().getDueDate();
+    // }
+    //
+    // scheduleGeneratorDTO.setRecalculateFrom(transactionDate);
+    //
+    // updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+    //
+    // // existingTransactionIds.addAll(findExistingTransactionIds());
+    // // existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+    //
+    // final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, getOffice(),
+    // amountUndoWaived,
+    // transactionDate, feeChargesUndoWaived, penaltyChargesUndoWaived, unrecognizedIncome,
+    // DateUtils.getLocalDateTimeOfTenant(),
+    // currentUser);
+    // final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(waiveLoanChargeTransaction, loanCharge,
+    // waiveLoanChargeTransaction.getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
+    // waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
+    // addLoanTransaction(waiveLoanChargeTransaction);
+    // if (this.repaymentScheduleDetail().isInterestRecalculationEnabled() && (loanCharge.getDueLocalDate() == null
+    // || LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).isAfter(loanCharge.getDueLocalDate()))) {
+    // regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
+    // }
+    // // Waive of charges whose due date falls after latest 'repayment'
+    // // transaction dont require entire loan schedule to be reprocessed.
+    // final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor =
+    // this.transactionProcessorFactory
+    // .determineProcessor(this.transactionProcessingStrategy);
+    // if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
+    // final List<LoanTransaction> allNonContraTransactionsPostDisbursement =
+    // retreiveListOfTransactionsPostDisbursement();
+    // loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
+    // allNonContraTransactionsPostDisbursement,
+    // getCurrency(), getRepaymentScheduleInstallments(), charges());
+    // } else {
+    // // reprocess loan schedule based on charge been waived.
+    // final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+    // wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), charges());
+    // }
+    //
+    // updateLoanSummaryDerivedFields();
+    //
+    // doPostLoanTransactionChecks(waiveLoanChargeTransaction.getTransactionDate(), loanLifecycleStateMachine);
+    //
+    // return waiveLoanChargeTransaction;
+    // }
 
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,

@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanaccount.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface LoanChargePaidByRepository extends JpaRepository<LoanChargePaidBy, Long>, JpaSpecificationExecutor<LoanCharge> {
+public class InstallmentNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    // no added behaviour
-    @Query("select lp from LoanChargePaidBy lp where lp.loanCharge=:loanCharge and lp.installmentNumber=:installmentNumber")
-    LoanChargePaidBy getLoanChargePaidByLoanCharge(@Param("loanCharge") final LoanCharge loanCharge,
-            @Param("installmentNumber") final Integer installmentNo);
+    public InstallmentNotFoundException(final Long id) {
+        super("error.msg.transaction.id.invalid", "Transaction with identifier " + id + " does not contain any installment");
+    }
 }
