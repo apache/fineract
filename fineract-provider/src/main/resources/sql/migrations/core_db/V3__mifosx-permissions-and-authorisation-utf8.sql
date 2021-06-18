@@ -293,6 +293,7 @@ INSERT INTO `m_permission`
 ('transaction_savings', 'ACTIVATE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'ACTIVATE', '1'),
 ('transaction_savings', 'ACTIVATE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'ACTIVATE', '0'),
 ('transaction_savings', 'CALCULATEINTEREST_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'CALCULATEINTEREST', '1'),
+{'transaction_lon', 'UNDO_WAIVECHARGE', 'WAIVECHARGE', 'UNDO', '0'},
 ('transaction_savings', 'CALCULATEINTEREST_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'CALCULATEINTEREST', '0');
 
 -- == accounting related permissions
