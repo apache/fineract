@@ -276,6 +276,9 @@ public class LoanTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Undo a Waive Charge Transaction", description = "Undo a Waive Charge Transaction")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PutChargeTransactionChangesRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PutChargeTransactionChangesResponse.class))) })
     public String undoWaiveCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
 

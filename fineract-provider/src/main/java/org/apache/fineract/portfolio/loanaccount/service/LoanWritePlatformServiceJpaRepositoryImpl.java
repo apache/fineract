@@ -1732,16 +1732,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 changes.put("amount", amountWaived);
 
-                // final Set<LoanChargePaidBy> loanChargePaidBySet = loanCharge.getLoanChargePaidBySet();
-                // for (LoanChargePaidBy loanChargePaidBy: loanChargePaidBySet) {
-                // if (installmentNumber.equals(loanChargePaidBy.getInstallmentNumber())) {
-                // LoanTransaction transaction = loanChargePaidBy.getLoanTransaction();
-                // if (transaction.isNotReversed()) {
-                // transaction.setReversed();
-                // }
-                // }
-                // }
-
             } else {
                 /**
                  * TODO: Throw installment number should not be empty error.
@@ -1758,9 +1748,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(command.entityId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .with(changes).build();
     }
