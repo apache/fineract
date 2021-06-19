@@ -286,7 +286,7 @@ INSERT INTO `m_permission`
 ('transaction_loan', 'WRITEOFF_LOAN_CHECKER', 'LOAN', 'WRITEOFF', '0'),
 ('transaction_loan', 'CLOSE_LOAN_CHECKER', 'LOAN', 'CLOSE', '0'),
 ('transaction_loan', 'CLOSEASRESCHEDULED_LOAN_CHECKER', 'LOAN', 'CLOSEASRESCHEDULED', '0'),
-{'transaction_loan', 'UNDO_WAIVECHARGE', 'WAIVECHARGE', 'UNDO', '0'},
+('transaction_loan', 'UNDO_WAIVECHARGE', 'WAIVECHARGE', 'UNDO', '0'),
 ('transaction_savings', 'DEPOSIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'DEPOSIT', '1'),
 ('transaction_savings', 'DEPOSIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'DEPOSIT', '0'),
 ('transaction_savings', 'WITHDRAWAL_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'WITHDRAWAL', '1'),
