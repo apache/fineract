@@ -262,6 +262,26 @@ simply do not run the integration tests that use the Flyway library.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
 
+## Licensing Guidelines
+Include a copy of the Apache License, typically in a file called LICENSE, in your work, and consider also including a NOTICE file that references the License.
+
+To apply the Apache License to specific files in your work, attach the following boilerplate declaration, replacing the fields enclosed by brackets "[]" with your own identifying information. (Don't include the brackets!) Enclose the text in the appropriate comment syntax for the file format. We also recommend that you include a file or class name and description of purpose on the same "printed page" as the copyright notice for easier identification within third-party archives.
+
+```
+Copyright 2021 Muellners Foundation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 Apache Fineract Platform API
 ============
@@ -323,7 +343,7 @@ Github Workflow
 ------------------
 ![Github Workflow](./fineract-provider/src/main/resources/static/github-workflow.png)
 
-###Steps:
+### Steps:
 1. **Create weekly pull request**
 * Create a named branch on the Muellners repo reflecting the new changes made.
 * Create a PR from your fork of the Muellners repo (consider Dev 1, Dev 2, and Dev 3 to be branches on your fork), to be merged with the newly created branch.
