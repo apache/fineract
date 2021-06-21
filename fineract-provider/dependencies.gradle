@@ -76,7 +76,7 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.2.3',
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.3.0',
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation:1.2.2'
             )
@@ -112,6 +112,7 @@ dependencies {
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.webjars.npm:swagger-ui-dist',
+            'org.glassfish.jaxb:jaxb-runtime',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility

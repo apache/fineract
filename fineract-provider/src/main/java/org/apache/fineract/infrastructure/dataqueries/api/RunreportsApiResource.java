@@ -105,7 +105,7 @@ public class RunreportsApiResource {
         // Pass through isSelfServiceUserReport so that ReportingProcessService implementations can use it
         queryParams.putSingle(IS_SELF_SERVICE_USER_REPORT_PARAMETER, Boolean.toString(isSelfServiceUserReport));
 
-        String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
+        String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport, parameterType);
         ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
         if (reportingProcessService == null) {
             throw new PlatformServiceUnavailableException("err.msg.report.service.implementation.missing",
