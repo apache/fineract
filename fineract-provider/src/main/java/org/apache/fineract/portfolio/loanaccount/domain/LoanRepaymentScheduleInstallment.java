@@ -223,6 +223,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return Money.of(currency, this.principalCompleted);
     }
 
+    public void updateLoanRepaymentSchedule(final BigDecimal amountWaived) {
+        this.feeChargesWaived = this.feeChargesWaived.subtract(amountWaived);
+    }
+
     public Money getPrincipalWrittenOff(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalWrittenOff);
     }
@@ -841,7 +845,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public void setFeeChargesWaived(final BigDecimal newFeeChargesCharged) {
-        this.feeChargesCharged = newFeeChargesCharged;
+        this.feeChargesWaived = newFeeChargesCharged;
     }
 
 }

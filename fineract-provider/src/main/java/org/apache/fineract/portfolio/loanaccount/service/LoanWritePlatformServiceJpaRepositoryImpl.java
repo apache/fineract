@@ -1670,14 +1670,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 // Reverse waived transaction
                 loanTransaction.setReversed();
 
+                // Get installment amount waived.
+                BigDecimal amountWaived = chargePerInstallment.getAmountWaived(loan.getCurrency()).getAmount();
+
                 // Set manually adjusted value to `1`
                 loanTransaction.setManuallyAdjustedOrReversed();
 
                 // Save updated data
                 this.loanTransactionRepository.saveAndFlush(loanTransaction);
-
-                // Get installment amount waived.
-                BigDecimal amountWaived = chargePerInstallment.getAmountWaived(loan.getCurrency()).getAmount();
 
                 // Get installment outstanding amount
                 BigDecimal amountOutstandingPerInstallment = chargePerInstallment.getAmountOutstanding();
@@ -1729,6 +1729,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.loanChargeRepository.saveAndFlush(loanCharge);
 
                 loan.updateLoanSummaryForUndoWaiveCharge(amountWaived);
+
+                // Set reschedule installment
+
+                // final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments =
+                // loan.getRepaymentScheduleInstallments();
+                // for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment :
+                // loanRepaymentScheduleInstallments) {
+                // if (loanRepaymentScheduleInstallment.getInstallmentNumber().equals(installmentNumber)) {
+                // loanRepaymentScheduleInstallment.updateLoanRepaymentSchedule(amountWaived);
+                // this.repaymentScheduleInstallmentRepository.saveAndFlush(loanRepaymentScheduleInstallment);
+                // break;
+                // }
+                // }
 
                 changes.put("amount", amountWaived);
 
