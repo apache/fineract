@@ -2,7 +2,7 @@ name: Sync Fork with apache/fineract develop branch
 
 on:
   schedule:
-    - cron: '0 0 14,28 * *' # At 00:00 on day-of-month 14 and 28.
+    - cron: '0 0 28 * *' # At 00:00 on day-of-month 28.
   workflow_dispatch: # on button click
 
 jobs:
