@@ -11,6 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     - name: Automatic Rebase
       uses: cirrus-actions/rebase@1.4
