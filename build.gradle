@@ -134,7 +134,7 @@ allprojects  {
 
             dependency 'io.github.classgraph:classgraph:4.8.108'
             dependency 'org.awaitility:awaitility:4.1.0'
-            dependency 'com.github.spotbugs:spotbugs-annotations:4.2.3'
+            dependency 'com.github.spotbugs:spotbugs-annotations:4.3.0'
             dependency 'javax.cache:cache-api:1.1.1'
             dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
             dependency 'org.webjars.npm:swagger-ui-dist:3.51.1'
