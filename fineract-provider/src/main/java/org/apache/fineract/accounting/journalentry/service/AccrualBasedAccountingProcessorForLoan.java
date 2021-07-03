@@ -215,17 +215,13 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // handle fees payment of writeOff (and reversals)
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+
             totalDebitAmount = totalDebitAmount.add(feesAmount);
 
             if (isIncomeFromFee) {
-                GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
-                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), paymentTypeId);
-                if (accountMap.containsKey(account)) {
-                    BigDecimal amount = accountMap.get(account).add(feesAmount);
-                    accountMap.put(account, amount);
-                } else {
-                    accountMap.put(account, feesAmount);
-                }
+                this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
+                        AccrualAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate,
+                        feesAmount, isReversal, loanTransactionDTO.getFeePayments());
             } else {
                 GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                         AccrualAccountsForLoan.FEES_RECEIVABLE.getValue(), paymentTypeId);
