@@ -1603,8 +1603,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult undoWaiveLoanCharge(final JsonCommand command) {
 
-        // validateUndoWaiveCharge(command);
-
         LoanTransaction loanTransaction = this.loanTransactionRepository.findById(command.entityId())
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId()));
 
@@ -1655,12 +1653,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 // Get installment charge.
                 chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
-
-                // // Get relevant LoanChargePaidBy row
-                // final LoanChargePaidBy loanChargePaidBy =
-                // this.loanChargePaidByRepository.getLoanChargePaidByLoanCharge(loanCharge,
-                // chargePerInstallment.getInstallment().getInstallmentNumber());
-                // LoanTransaction loanTransaction = loanChargePaidBy.getLoanTransaction();
 
                 if (!loanTransaction.isNotReversed()) {
                     throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_REVERSED,
@@ -1730,19 +1722,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 loan.updateLoanSummaryForUndoWaiveCharge(amountWaived);
 
-                // Set reschedule installment
-
-                // final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments =
-                // loan.getRepaymentScheduleInstallments();
-                // for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment :
-                // loanRepaymentScheduleInstallments) {
-                // if (loanRepaymentScheduleInstallment.getInstallmentNumber().equals(installmentNumber)) {
-                // loanRepaymentScheduleInstallment.updateLoanRepaymentSchedule(amountWaived);
-                // this.repaymentScheduleInstallmentRepository.saveAndFlush(loanRepaymentScheduleInstallment);
-                // break;
-                // }
-                // }
-
                 changes.put("amount", amountWaived);
 
             } else {
@@ -1773,23 +1752,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes).build();
     }
-
-    // private void validateUndoWaiveCharge(JsonCommand command) {
-    // final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-    // final DataValidatorBuilder baseDataValidator = new
-    // DataValidatorBuilder(dataValidationErrors).resource("transaction");
-    //
-    // if (!command.parameterExists("transactionId")) {
-    // baseDataValidator.reset().parameter("transactionId").failWithCode("trasactionId.not.exists");
-    // } else {
-    // final Long transactionId = command.longValueOfParameterNamed("transactionId");
-    // baseDataValidator.reset().parameter("transactionId").value(transactionId).notNull().notBlank();
-    // }
-    //
-    // if (!dataValidationErrors.isEmpty()) {
-    // throw new PlatformApiDataValidationException(dataValidationErrors);
-    // }
-    // }
 
     @Transactional
     @Override

@@ -353,30 +353,6 @@ public class LoanCharge extends AbstractPersistableCustom {
         this.amountOutstanding = amountOutstanding;
     }
 
-    // public Money undoWaive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
-    // if (isInstalmentFee()) {
-    // final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
-    // final Money amountWaived = chargePerInstallment.waive(currency);
-    // if (this.amountWaived != null) {
-    // this.amountWaived = this.amountWaived.add(amountWaived.getAmount());
-    // } else {
-    // }
-    //
-    // this.amountOutstanding = this.amountOutstanding.add(amountWaived.getAmount());
-    // if (determineIfFullyPaid()) {
-    // this.paid = false;
-    // this.waived = false;
-    // }
-    // return amountWaived;
-    // }
-    // this.amountWaived = BigDecimal.ZERO;
-    // // this.amountOutstanding = BigDecimal.ZERO;
-    // this.paid = false;
-    // this.waived = false;
-    // return getAmountWaived(currency);
-    //
-    // }
-
     public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
         if (isInstalmentFee()) {
             final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);

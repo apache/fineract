@@ -346,18 +346,6 @@ public class LoanTransaction extends AbstractPersistableCustom {
         return waiver;
     }
 
-    // public static LoanTransaction undoWaiveLoanCharge(final Loan loan, final Office office, final Money undoWaived,
-    // final LocalDate undoWaiveDate, final Money feeChargesWaived, final Money penaltyChargesWaived, final Money
-    // unrecognizedCharge,
-    // final LocalDateTime createdDate, final AppUser appUser) {
-    // final LoanTransaction undoWaiver = new LoanTransaction(loan, office, LoanTransactionType.UNDO_WAIVE_CHARGE,
-    // undoWaived.getAmount(),
-    // undoWaiveDate, null, createdDate, appUser);
-    // undoWaiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived, unrecognizedCharge);
-    //
-    // return undoWaiver;
-    // }
-
     public static LoanTransaction writeoff(final Loan loan, final Office office, final LocalDate writeOffDate, final String externalId,
             final LocalDateTime createdDate, final AppUser appUser) {
         return new LoanTransaction(loan, office, LoanTransactionType.WRITEOFF, null, writeOffDate, externalId, createdDate, appUser);
