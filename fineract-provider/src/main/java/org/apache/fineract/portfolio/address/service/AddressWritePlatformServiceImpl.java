@@ -186,6 +186,14 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         final Address addobj = this.addressRepository.getOne(addressId);
 
+        if (!command.stringValueOfParameterNamed("street").isEmpty()) {
+
+			is_address_update = true;
+			final String street = command.stringValueOfParameterNamed("street");
+			addobj.setStreet(street);
+
+		}
+        
         if (!command.stringValueOfParameterNamed("addressLine1").isEmpty()) {
 
             is_address_update = true;
