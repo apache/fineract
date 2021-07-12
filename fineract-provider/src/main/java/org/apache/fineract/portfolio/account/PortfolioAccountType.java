@@ -25,7 +25,7 @@ public enum PortfolioAccountType {
 
     INVALID(0, "accountType.invalid"), //
     LOAN(1, "accountType.loan"), //
-    SAVINGS(2, "accountType.savings");
+    SAVINGS(2, "accountType.savings"), SHARE(3, "accountType.shares");
 
     private final Integer value;
     private final String code;
@@ -65,6 +65,8 @@ public enum PortfolioAccountType {
                 case 2:
                     enumType = SAVINGS;
                 break;
+                case 3:
+                    enumType = SHARE;
             }
         }
         return enumType;
@@ -76,5 +78,9 @@ public enum PortfolioAccountType {
 
     public boolean isLoanAccount() {
         return this.value.equals(1);
+    }
+
+    public boolean isSharesAccount() {
+        return this.value.equals(3);
     }
 }

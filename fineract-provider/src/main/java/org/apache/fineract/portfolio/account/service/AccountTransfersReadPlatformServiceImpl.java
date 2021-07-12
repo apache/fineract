@@ -89,6 +89,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+        final EnumOptionData shareAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SHARE);
 
         final Integer mostRelevantFromAccountType = fromAccountType;
         final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
@@ -97,7 +98,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             // overpaid loan amt transfer to savings account
             toAccountTypeOptions = Arrays.asList(savingsAccountType);
         } else {
-            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
+            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType, shareAccountType);
         }
         final Integer mostRelevantToAccountType = toAccountType;
 
@@ -285,6 +286,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("fromsavacc.id as fromSavingsAccountId, fromsavacc.account_no as fromSavingsAccountNo,");
             sqlBuilder.append("fromloanacc.id as fromLoanAccountId, fromloanacc.account_no as fromLoanAccountNo,");
             sqlBuilder.append("tosavacc.id as toSavingsAccountId, tosavacc.account_no as toSavingsAccountNo,");
+            sqlBuilder.append("toshareacc.id as toShareAccountId. toshareacc.account_no as toShareAccountNo,");
             sqlBuilder.append("toloanacc.id as toLoanAccountId, toloanacc.account_no as toLoanAccountNo,");
             sqlBuilder.append("fromsavtran.id as fromSavingsAccountTransactionId,");
             sqlBuilder.append("fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,");
@@ -300,9 +302,11 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = atd.from_savings_account_id ");
             sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = atd.from_loan_account_id ");
             sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = atd.to_savings_account_id ");
+            sqlBuilder.append("left join m_share_account toshareacc on toshareacc.id = atd.to_share_account_id ");
             sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = atd.to_loan_account_id ");
             sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = att.from_savings_transaction_id ");
             sqlBuilder.append("left join m_savings_account_transaction tosavtran on tosavtran.id = att.to_savings_transaction_id ");
+            sqlBuilder.append("left join m_share_account_transaction tosharetran on tosharetran.id = att.to_share_transaction_id ");
             sqlBuilder.append("left join m_loan_transaction fromloantran on fromloantran.id = att.from_savings_transaction_id ");
             sqlBuilder.append("left join m_loan_transaction toloantran on toloantran.id = att.to_savings_transaction_id ");
 
@@ -368,10 +372,15 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             final String toSavingsAccountNo = rs.getString("toSavingsAccountNo");
             final Long toLoanAccountId = JdbcSupport.getLong(rs, "toLoanAccountId");
             final String toLoanAccountNo = rs.getString("toLoanAccountNo");
+            final Long toShareAccountId = JdbcSupport.getLong(rs, "toShareAccountId");
+            final String toShareAccountNo = rs.getString("toShareAccountNo");
 
             if (toSavingsAccountId != null) {
                 toAccount = PortfolioAccountData.lookup(toSavingsAccountId, toSavingsAccountNo);
                 toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+            } else if (toSavingsAccountId != null) {
+                toAccount = PortfolioAccountData.lookup(toShareAccountId, toShareAccountNo);
+                toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SHARE);
             } else if (toLoanAccountId != null) {
                 toAccount = PortfolioAccountData.lookup(toLoanAccountId, toLoanAccountNo);
                 toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
@@ -389,7 +398,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
         } else {
             sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")
-                    .append(transactionId);
+                    .append(transactionId).append(" or at.to_share_transaction_id=").append(transactionId);
         }
 
         final int count = this.jdbcTemplate.queryForObject(sql.toString(), Integer.class);

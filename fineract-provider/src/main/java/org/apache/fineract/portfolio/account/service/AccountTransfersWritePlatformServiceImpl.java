@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -44,6 +45,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.exception.AmountNotForRequestedShareException;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
@@ -60,7 +62,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountAssembler;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDomainService;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +87,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private final GSIMRepositoy gsimRepository;
+    private final ShareAccountAssembler shareAccountAssembler;
+    private final ShareAccountDomainService shareAccountDomainService;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
@@ -87,7 +97,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-            final GSIMRepositoy gsimRepository) {
+            final GSIMRepositoy gsimRepository, final ShareAccountAssembler shareAccountAssembler,
+            final ShareAccountDomainService shareAccountDomainService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -99,6 +110,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.gsimRepository = gsimRepository;
+        this.shareAccountAssembler = shareAccountAssembler;
+        this.shareAccountDomainService = shareAccountDomainService;
     }
 
     @Transactional
@@ -195,6 +208,49 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
 
+        } else if (isSavingsToShareAccountTransfer(fromAccountType, toAccountType)) {
+
+            fromSavingsAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
+            final Long toShareAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+            final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(fromSavingsAccountId);
+            final ShareAccount shareAccount = this.shareAccountAssembler.assembleFrom(toShareAccountId);
+            final Long requestedShares = command.longValueOfParameterNamed(AccountDetailConstants.requestedShares);
+
+            final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
+                    isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(), isInterestTransfer, isWithdrawBalance);
+
+            final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount, fmt,
+                    transactionDate, transactionAmount, paymentDetail, transactionBooleanValues);
+
+            final BigDecimal unitPrice = shareAccount.getShareProduct().getUnitPrice();
+
+            /**
+             * TODO: Properly handle Exceptions.
+             */
+            if (transactionAmount.divide(unitPrice).longValue() != requestedShares) {
+                throw new AmountNotForRequestedShareException();
+            }
+
+            /**
+             * Throw if the account balance is insufficient.
+             */
+            if (fromSavingsAccount.getAccountBalance().compareTo(transactionAmount) < 0) {
+                throw new InsufficientAccountBalanceException(transferAmountParamName, fromSavingsAccount.getAccountBalance(),
+                        withdrawal.getAmount(), transactionAmount);
+            }
+
+            shareAccount.setTotalSharesApproved(requestedShares);
+
+            final ShareAccountTransaction shareAccountTransaction = this.shareAccountDomainService.purchaseShares(shareAccount,
+                    transactionDate, requestedShares, unitPrice, transactionAmount, ShareAccountStatusType.ACTIVE,
+                    AccountTransferType.ACCOUNT_TRANSFER);
+
+            final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToShareTransfer(command,
+                    fromSavingsAccount, shareAccount, withdrawal, shareAccountTransaction);
+
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+
+            transferDetailId = accountTransferDetails.getId();
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(transferDetailId);
@@ -488,6 +544,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         return fromAccountType.isSavingsAccount() && toAccountType.isSavingsAccount();
     }
 
+    private boolean isSavingsToShareAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {
+        return fromAccountType.isSavingsAccount() && toAccountType.isSharesAccount();
+    }
+
     @Override
     @Transactional
     public CommandProcessingResult refundByTransfer(JsonCommand command) {
@@ -503,10 +563,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final PaymentDetail paymentDetail = null;
         Long transferTransactionId = null;
 
-        final Long fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
-        final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
+        final Long fromAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
+        final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromAccountId);
 
-        BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(fromLoanAccountId).getPaidInAdvance();
+        final Integer toAccountType = command.integerValueOfParameterNamed(toAccountTypeParamName);
+        final Integer fromAccountType = command.integerValueOfParameterNamed(fromAccountTypeParamName);
+
+        final Long toShareAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+
+        BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(fromAccountId).getPaidInAdvance();
 
         if (overpaid == null || overpaid.compareTo(BigDecimal.ZERO) == 0 ? Boolean.TRUE
                 : Boolean.FALSE || transactionAmount.floatValue() > overpaid.floatValue()) {
@@ -516,7 +581,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             throw new InvalidPaidInAdvanceAmountException(overpaid.toPlainString());
         }
 
-        final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefundForActiveLoan(fromLoanAccountId,
+        final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefundForActiveLoan(fromAccountId,
                 new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
 
         final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);

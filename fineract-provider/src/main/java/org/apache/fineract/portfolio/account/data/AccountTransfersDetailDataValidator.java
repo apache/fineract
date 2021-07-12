@@ -72,7 +72,7 @@ public class AccountTransfersDetailDataValidator {
 
         final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
         baseDataValidator.reset().parameter(toAccountTypeParamName).value(toAccountType).notNull().isOneOfTheseValues(Integer.valueOf(1),
-                Integer.valueOf(2));
+                Integer.valueOf(2), Integer.valueOf(3));
 
     }
 
