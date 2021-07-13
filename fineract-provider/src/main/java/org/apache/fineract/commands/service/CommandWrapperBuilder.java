@@ -879,6 +879,24 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder updatePostDatedCheck(final Long id, final Long loanId) {
+        this.actionName = "UPDATE";
+        this.entityName = "REPAYMENTWITHPOSTDATEDCHECKS";
+        this.entityId = id;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/repaymentwithpostdatedchecks/" + id;
+        return this;
+    }
+
+    public CommandWrapperBuilder deletePostDatedCheck(final Long id, final Long loanId) {
+        this.actionName = "DELETE";
+        this.entityName = "REPAYMENTWITHPOSTDATEDCHECKS";
+        this.entityId = id;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/repaymentwithpostdatedchecks/" + id;
+        return this;
+    }
+
     public CommandWrapperBuilder updateLoanApplication(final Long loanId) {
         this.actionName = "UPDATE";
         this.entityName = "LOAN";

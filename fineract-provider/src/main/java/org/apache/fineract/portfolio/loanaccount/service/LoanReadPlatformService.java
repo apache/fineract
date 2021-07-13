@@ -31,6 +31,7 @@ import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
@@ -140,6 +141,10 @@ public interface LoanReadPlatformService {
 
     Integer retrieveNumberOfActiveLoans();
 
+    Integer retrieveNumberOfRepayments(Long loanId);
+
     List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
+
+    List<LoanRepaymentScheduleInstallmentData> getRepaymentDataResponse(Long loanId);
 
 }

@@ -182,6 +182,9 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.RepaymentWithPostDatedChecksAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -238,6 +241,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
+    private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
+    private final PostDatedChecksRepository postDatedChecksRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -267,7 +272,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
             final CashierTransactionDataValidator cashierTransactionDataValidator, final GLIMAccountInfoRepository glimRepository,
-            final LoanRepository loanRepository) {
+            final LoanRepository loanRepository, final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler,
+            final PostDatedChecksRepository postDatedChecksRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -308,6 +314,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.cashierTransactionDataValidator = cashierTransactionDataValidator;
         this.loanRepository = loanRepository;
         this.glimRepository = glimRepository;
+        this.repaymentWithPostDatedChecksAssembler = repaymentWithPostDatedChecksAssembler;
+        this.postDatedChecksRepository = postDatedChecksRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -345,6 +353,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final AppUser currentUser = getAppUserIfPresent();
 
         this.loanEventApiJsonValidator.validateDisbursement(command.json(), isAccountTransfer);
+
+        if (command.parameterExists("postDatedChecks")) {
+            // validate with post dated checks for the disbursement
+            this.loanEventApiJsonValidator.validateDisbursementWithPostDatedChecks(command.json(), loanId);
+        }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
 
@@ -506,6 +519,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         updateRecurringCalendarDatesForInterestRecalculation(loan);
         this.loanAccountDomainService.recalculateAccruals(loan);
+
+        if (command.parameterExists("postDatedChecks")) {
+            // get repayment with post dates checks to update
+            Set<PostDatedChecks> postDatedChecks = this.repaymentWithPostDatedChecksAssembler.fromParsedJson(command.json(), loan);
+            updatePostDatedChecks(postDatedChecks);
+        }
+
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_DISBURSAL,
                 constructEntityMap(BusinessEntity.LOAN, loan));
         return new CommandProcessingResultBuilder() //
@@ -517,6 +537,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    private void updatePostDatedChecks(Set<PostDatedChecks> postDatedChecks) {
+        this.postDatedChecksRepository.saveAll(postDatedChecks);
     }
 
     private void createAndSaveLoanScheduleArchive(final Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO) {

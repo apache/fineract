@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -66,6 +67,8 @@ public class LoanTransactionData {
 
     private Collection<CodeValueData> writeOffReasonOptions = null;
 
+    private Integer numberOfRepayments = 0;
+
     // import fields
     private transient Integer rowIndex;
     private String dateFormat;
@@ -80,6 +83,7 @@ public class LoanTransactionData {
     private Integer bankNumber;
     private transient Long accountId;
     private transient String transactionType;
+    private List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {
@@ -165,6 +169,14 @@ public class LoanTransactionData {
         this.possibleNextRepaymentDate = null;
         this.paymentTypeOptions = null;
         this.writeOffReasonOptions = null;
+    }
+
+    public void setNumberOfRepayments(Integer numberOfRepayments) {
+        this.numberOfRepayments = numberOfRepayments;
+    }
+
+    public void setLoanRepaymentScheduleInstallments(final List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments) {
+        this.loanRepaymentScheduleInstallments = loanRepaymentScheduleInstallments;
     }
 
     public Long getAccountId() {

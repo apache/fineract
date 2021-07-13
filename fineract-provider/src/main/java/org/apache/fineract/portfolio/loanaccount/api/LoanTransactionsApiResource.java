@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -53,6 +54,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -131,6 +133,10 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
         } else if (is(commandParam, "disburse")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, true);
+            transactionData.setNumberOfRepayments(this.loanReadPlatformService.retrieveNumberOfRepayments(loanId));
+            final List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallmentData = this.loanReadPlatformService
+                    .getRepaymentDataResponse(loanId);
+            transactionData.setLoanRepaymentScheduleInstallments(loanRepaymentScheduleInstallmentData);
         } else if (is(commandParam, "disburseToSavings")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, false);
         } else if (is(commandParam, "recoverypayment")) {
