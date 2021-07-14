@@ -67,6 +67,7 @@ public class LoanApplicationTestBuilder {
     private List<HashMap> disbursementData = null;
     @SuppressWarnings("rawtypes")
     private List<HashMap> charges = new ArrayList<>();
+    private List<HashMap> collaterals = new ArrayList<>();
     private String repaymentsStartingFromDate = null;
     private String isParentAccount = null;
     private String totalLoan = "0";
@@ -146,12 +147,15 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        map.put("collateral", this.collaterals);
+
         if (repaymentsStartingFromDate != null) {
             map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
         }
         if (charges != null) {
             map.put("charges", charges);
         }
+
         if (savingsID != null) {
             map.put("linkAccountId", savingsID);
         }
@@ -285,6 +289,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withCharges(final List<HashMap> charges) {
         this.charges = charges;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withCollaterals(final List<HashMap> collaterals) {
+        this.collaterals = collaterals;
         return this;
     }
 

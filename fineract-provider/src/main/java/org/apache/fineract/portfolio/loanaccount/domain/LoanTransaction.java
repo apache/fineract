@@ -129,6 +129,9 @@ public class LoanTransaction extends AbstractPersistableCustom {
     @Column(name = "manually_adjusted_or_reversed", nullable = false)
     private boolean manuallyAdjustedOrReversed;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
+    private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_transaction_id", referencedColumnName = "id", nullable = false)
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
@@ -801,6 +804,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
     public boolean isPaymentTransaction() {
         return this.isNotReversed() && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement()
                 || this.isNonMonetaryTransaction() || this.isIncomePosting());
+    }
+
+    public Set<LoanCollateralManagement> getLoanCollateralManagementSet() {
+        return this.loanCollateralManagementSet;
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as

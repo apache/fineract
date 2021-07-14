@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,6 +35,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -54,6 +56,7 @@ import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerat
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -233,6 +236,9 @@ public final class Client extends AbstractPersistableCustom {
     @Column(name = "proposed_transfer_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date proposedTransferDate;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,

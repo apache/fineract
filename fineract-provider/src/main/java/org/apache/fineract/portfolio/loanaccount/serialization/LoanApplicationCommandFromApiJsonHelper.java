@@ -88,7 +88,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
-            LoanApiConstants.lastApplication, LoanApiConstants.daysInYearTypeParameterName)); // glim specific
+            LoanApiConstants.lastApplication, LoanApiConstants.daysInYearTypeParameterName)); // glim
+                                                                                              // specific
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -414,38 +415,85 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
-        // collateral
-        final String collateralParameterName = "collateral";
-        if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.get("collateral").isJsonArray()) {
+        // // collateral
+        // final String collateralParameterName = "collateral";
+        // if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
+        // final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        // final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        // if (topLevelJsonElement.get("collateral").isJsonArray()) {
+        //
+        // final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        // final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "type", "value", "description"));
+        // final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
+        // for (int i = 1; i <= array.size(); i++) {
+        // final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+        //
+        // final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+        // this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson,
+        // supportedParameters);
+        //
+        // final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
+        // baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("type",
+        // i).value(collateralTypeId).notNull()
+        // .integerGreaterThanZero();
+        //
+        // final BigDecimal collateralValue = this.fromApiJsonHelper.extractBigDecimalNamed("value",
+        // collateralItemElement,
+        // locale);
+        // baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("value", i).value(collateralValue)
+        // .ignoreIfNull().positiveAmount();
+        //
+        // final String description = this.fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
+        // baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("description",
+        // i).value(description).notBlank()
+        // .notExceedingLengthOf(500);
+        //
+        // }
+        // } else {
+        // baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
+        // }
+        // }
 
-                final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "type", "value", "description"));
-                final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
-                for (int i = 1; i <= array.size(); i++) {
-                    final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+        /**
+         * TODO: Add collaterals for group loan accounts. FOr now it's only applicable for individual accounts.
+         * (loanType.isJLG() || loanType.isGLIM())
+         */
 
-                    final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
-                    this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson, supportedParameters);
+        if (!StringUtils.isBlank(loanTypeStr)) {
+            final AccountType loanType = AccountType.fromName(loanTypeStr);
 
-                    final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("type", i).value(collateralTypeId).notNull()
-                            .integerGreaterThanZero();
+            if (loanType.isIndividualAccount()) {
+                // collateral
+                final String collateralParameterName = "collateral";
+                if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
+                    final JsonObject topLevelJsonElement = element.getAsJsonObject();
+                    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+                    if (topLevelJsonElement.get("collateral").isJsonArray()) {
 
-                    final BigDecimal collateralValue = this.fromApiJsonHelper.extractBigDecimalNamed("value", collateralItemElement,
-                            locale);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("value", i).value(collateralValue)
-                            .ignoreIfNull().positiveAmount();
+                        final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("clientCollateralId", "quantity"));
+                        final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
+                        for (int i = 1; i <= array.size(); i++) {
+                            final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
 
-                    final String description = this.fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("description", i).value(description).notBlank()
-                            .notExceedingLengthOf(500);
+                            final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+                            this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson,
+                                    supportedParameters);
 
+                            final Long clientCollateralId = this.fromApiJsonHelper.extractLongNamed("clientCollateralId",
+                                    collateralItemElement);
+                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("clientCollateralId", i)
+                                    .value(clientCollateralId).notNull().integerGreaterThanZero();
+
+                            final BigDecimal quantity = this.fromApiJsonHelper.extractBigDecimalNamed("quantity", collateralItemElement,
+                                    locale);
+                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("quantity", i).value(quantity)
+                                    .ignoreIfNull().positiveAmount();
+                        }
+                    } else {
+                        baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
+                    }
                 }
-            } else {
-                baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
             }
         }
 
@@ -847,38 +895,52 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
-        // collateral
-        final String collateralParameterName = "collateral";
-        if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.get("collateral").isJsonArray()) {
+        final String loanTypeParameterName = "loanType";
+        final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
+        baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
 
-                final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "type", "value", "description"));
-                final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
-                for (int i = 1; i <= array.size(); i++) {
-                    final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+        if (!StringUtils.isBlank(loanTypeStr)) {
+            final AccountType loanType = AccountType.fromName(loanTypeStr);
+            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 4);
 
-                    final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
-                    this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson, supportedParameters);
+            /**
+             * TODO: Allow for other loan account types.
+             */
+            if (loanType.isIndividualAccount()) {
+                // collateral
+                final String collateralParameterName = "collateral";
+                if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
+                    final JsonObject topLevelJsonElement = element.getAsJsonObject();
+                    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+                    if (topLevelJsonElement.get("collateral").isJsonArray()) {
 
-                    final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("type", i).value(collateralTypeId).notNull()
-                            .integerGreaterThanZero();
+                        final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientCollateralId", "quantity"));
+                        final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
+                        for (int i = 1; i <= array.size(); i++) {
+                            final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
 
-                    final BigDecimal collateralValue = this.fromApiJsonHelper.extractBigDecimalNamed("value", collateralItemElement,
-                            locale);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("value", i).value(collateralValue)
-                            .ignoreIfNull().positiveAmount();
+                            final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+                            this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson,
+                                    supportedParameters);
 
-                    final String description = this.fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
-                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("description", i).value(description).notBlank()
-                            .notExceedingLengthOf(500);
+                            final Long id = this.fromApiJsonHelper.extractLongNamed("id", collateralItemElement);
+                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("id", i).value(id).ignoreIfNull();
 
+                            final Long clientCollateralId = this.fromApiJsonHelper.extractLongNamed("clientCollateralId",
+                                    collateralItemElement);
+                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("clientCollateralId", i)
+                                    .value(clientCollateralId).notNull().integerGreaterThanZero();
+
+                            final BigDecimal collateralValue = this.fromApiJsonHelper.extractBigDecimalNamed("quantity",
+                                    collateralItemElement, locale);
+                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("quantity", i).value(collateralValue)
+                                    .ignoreIfNull().positiveAmount();
+                        }
+                    } else {
+                        baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
+                    }
                 }
-            } else {
-                baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
             }
         }
 
@@ -1196,6 +1258,20 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         validateLoanCharges(loan.charges(), dataValidationErrors);
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    public void validateLoanForCollaterals(final Loan loan, final BigDecimal total) {
+        String errorCode = "";
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        if (loan.getProposedPrincipal().compareTo(total) >= 0) {
+            errorCode = LoanApiConstants.LOAN_COLLATERAL_TOTAL_VALUE_SHOULD_BE_SUFFICIENT;
+            baseDataValidator.reset().parameter("collaterals").failWithCode(errorCode);
+        }
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }

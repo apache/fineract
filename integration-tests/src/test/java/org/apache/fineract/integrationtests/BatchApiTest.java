@@ -32,6 +32,8 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.integrationtests.common.BatchHelper;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -202,6 +204,15 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientID), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
@@ -211,7 +222,7 @@ public class BatchApiTest {
         final BatchRequest br2 = BatchHelper.activateClientRequest(4719L, 4718L);
 
         // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4720L, 4719L, productId);
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4720L, 4719L, productId, clientCollateralId);
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
@@ -293,6 +304,15 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientID), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
@@ -302,7 +322,7 @@ public class BatchApiTest {
         final BatchRequest br2 = BatchHelper.activateClientRequest(4723L, 4722L);
 
         // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4724L, 4723L, productId);
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4724L, 4723L, productId, clientCollateralId);
 
         // Create a Collect Charges Request
         final BatchRequest br4 = BatchHelper.collectChargesRequest(4725L, 4724L);
@@ -343,6 +363,15 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
@@ -352,7 +381,7 @@ public class BatchApiTest {
         final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
 
         // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId);
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
 
         // Create a approveLoan Request
         final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
@@ -434,6 +463,15 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientID), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
@@ -443,7 +481,7 @@ public class BatchApiTest {
         final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
 
         // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId);
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
 
         // Create a approveLoan Request
         final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
@@ -488,13 +526,22 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientID), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createActiveClientRequest(4740L, "");
 
         // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(4742L, 4740L, productId);
+        final BatchRequest br2 = BatchHelper.applyLoanRequest(4742L, 4740L, productId, clientCollateralId);
 
         // Create a approveLoan Request
         final BatchRequest br3 = BatchHelper.approveLoanRequest(4743L, 4742L);

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Random;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +52,8 @@ public class ClientTest {
     public void testClientStatus() {
 
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -85,7 +85,8 @@ public class ClientTest {
     public void testClientAsPersonStatus() {
 
         final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -117,7 +118,8 @@ public class ClientTest {
     public void testClientAsEntityStatus() {
 
         final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);

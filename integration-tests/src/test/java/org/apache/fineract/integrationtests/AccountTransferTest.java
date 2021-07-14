@@ -25,9 +25,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -474,6 +477,14 @@ public class AccountTransferTest {
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("8,000.00") //
                 .withLoanTermFrequency("4") //
@@ -487,7 +498,18 @@ public class AccountTransferTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("10 January 2013") //
                 .withSubmittedOnDate("10 January 2013") //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
     }
 }

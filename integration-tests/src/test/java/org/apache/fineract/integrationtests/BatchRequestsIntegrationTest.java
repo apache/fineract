@@ -29,6 +29,7 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -119,7 +120,14 @@ public class BatchRequestsIntegrationTest {
         // Select a few clients from created group at random
         Integer selClientsCount = (int) Math.ceil(Math.random() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
-            BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID);
+
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            Assertions.assertNotNull(collateralId);
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                    String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))]), collateralId);
+            Assertions.assertNotNull(clientCollateralId);
+
+            BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
             br.setBody(br.getBody().replace("$.clientId", String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))])));
             batchRequests.add(br);
         }

@@ -23,18 +23,24 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -115,6 +121,13 @@ public class ConcurrencyIntegrationTest {
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //
@@ -128,8 +141,19 @@ public class ConcurrencyIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
     }
 
     public static class LoanRepaymentExecutor implements Runnable {
