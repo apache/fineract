@@ -34,5 +34,5 @@ CREATE TABLE `m_client_loan_counter` (
     CONSTRAINT `FK_m_loan_product_loan_counter` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`),
     CONSTRAINT `FK_m_client_loan_counter` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;

@@ -34,6 +34,6 @@ CREATE TABLE `m_loan_topup` (
     CONSTRAINT `m_loan_topup_FK_closure_loan_id` FOREIGN KEY (`closure_loan_id`) REFERENCES `m_loan` (`id`),
     CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB
 ;

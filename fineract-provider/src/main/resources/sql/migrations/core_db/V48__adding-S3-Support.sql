@@ -25,7 +25,7 @@ CREATE TABLE `c_external_service` (
     `value` VARCHAR(250) NULL DEFAULT NULL,
     UNIQUE INDEX `name` (`name`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 INSERT INTO c_external_service (name) VALUES ('s3_bucket_name');
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `m_image`(
     `storage_type_enum` SMALLINT,
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 /*Client points to image table*/

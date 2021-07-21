@@ -39,7 +39,7 @@ CREATE TABLE `m_client_attendance` (
     CONSTRAINT `FK_m_client_m_client_attendance` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
     CONSTRAINT `FK_m_meeting_m_client_attendance` FOREIGN KEY (`meeting_id`) REFERENCES `m_meeting` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 

@@ -25,7 +25,7 @@ CREATE TABLE `m_payment_type` (
     `order_position` INT NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_general_ci';
+COLLATE='utf8mb4_unicode_ci';
 
 INSERT INTO m_payment_type (id,value,description,order_position)
 SELECT id,code_value,code_description,order_position

@@ -29,7 +29,7 @@ CREATE TABLE `m_portfolio_account_associations` (
     CONSTRAINT `linked_loan_fk` FOREIGN KEY (`linked_loan_account_id`) REFERENCES `m_loan` (`id`),
     CONSTRAINT `linked_savings_fk` FOREIGN KEY (`linked_savings_account_id`) REFERENCES `m_savings_account` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 ALTER TABLE `m_charge`

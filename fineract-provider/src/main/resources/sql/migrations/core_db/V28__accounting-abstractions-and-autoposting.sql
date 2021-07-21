@@ -34,7 +34,7 @@ CREATE TABLE `acc_accounting_rule` (
     CONSTRAINT `FK_acc_accounting_rule_acc_gl_account_debit` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
     CONSTRAINT `FK_acc_accounting_rule_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `acc_auto_posting` (
@@ -61,5 +61,5 @@ CREATE TABLE `acc_auto_posting` (
     CONSTRAINT `FK_acc_auto_posting_m_code_value` FOREIGN KEY (`event_attribute`) REFERENCES `m_code_value` (`id`),
     CONSTRAINT `FK_acc_auto_posting_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;

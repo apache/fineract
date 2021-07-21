@@ -30,7 +30,7 @@ CREATE TABLE `m_product_loan_variations_borrower_cycle` (
     INDEX `borrower_cycle_loan_product_FK` (`loan_product_id`),
     CONSTRAINT `borrower_cycle_loan_product_FK` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 

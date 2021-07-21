@@ -24,7 +24,7 @@ CREATE TABLE `m_provision_category` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX `category_name` (`category_name`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;

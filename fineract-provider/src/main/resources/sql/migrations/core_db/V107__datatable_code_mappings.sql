@@ -24,7 +24,7 @@ CREATE TABLE `x_table_cloumn_code_mappings` (
     INDEX `FK_x_code_id` (`code_id`),
     CONSTRAINT `FK_x_code_id` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 INSERT INTO `c_configuration` (`name`, `enabled`) VALUES ('constraint_approach_for_datatables', 1);

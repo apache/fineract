@@ -295,7 +295,7 @@ CREATE TABLE `m_appuser_role` (
   KEY `FK7662CE5915CEC7AB` (`role_id`),
   CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE = 'utf8mb4_unicode_ci';
 
 -- ================ end of user admin tables ===============
 

@@ -30,7 +30,7 @@ CREATE TABLE `c_external_service` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `name_UNIQUE` (`name`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB;
 
 insert into `c_external_service` ( `name`) values( 'S3');
