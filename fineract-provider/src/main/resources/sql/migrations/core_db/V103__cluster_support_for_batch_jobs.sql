@@ -27,7 +27,7 @@ CREATE TABLE `scheduler_detail` (
     `reset_scheduler_on_bootup` tinyint NOT NULL DEFAULT '1',
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 INSERT INTO `scheduler_detail` (`is_suspended`, `execute_misfired_jobs`, `reset_scheduler_on_bootup`) VALUES (FALSE,TRUE,TRUE);

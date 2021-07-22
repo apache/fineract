@@ -31,7 +31,7 @@ CREATE TABLE `m_payment_detail` (
     `routing_code` VARCHAR(100) NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 /*

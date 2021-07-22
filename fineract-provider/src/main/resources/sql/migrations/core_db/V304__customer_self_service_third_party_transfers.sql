@@ -32,7 +32,7 @@ CREATE TABLE `m_selfservice_beneficiaries_tpt` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX `name` (`name`, `app_user_id`, `is_active`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 

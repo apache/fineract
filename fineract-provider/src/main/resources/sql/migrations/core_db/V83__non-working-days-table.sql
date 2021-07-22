@@ -23,7 +23,7 @@ CREATE TABLE `m_working_days` (
     `repayment_rescheduling_enum` SMALLINT NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 

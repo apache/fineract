@@ -79,5 +79,5 @@ CREATE TABLE `m_savings_account_charge_paid_by` (
     CONSTRAINT `FK__m_savings_account_charge` FOREIGN KEY (`savings_account_charge_id`) REFERENCES `m_savings_account_charge` (`id`),
     CONSTRAINT `FK__m_savings_account_transaction` FOREIGN KEY (`savings_account_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

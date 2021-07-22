@@ -32,7 +32,7 @@ CREATE TABLE `scheduled_jobs` (
     `is_active` tinyint NOT NULL DEFAULT '1',
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `scheduled_job_runhistory` (
@@ -49,7 +49,7 @@ CREATE TABLE `scheduled_job_runhistory` (
     INDEX `scheduledjobsFK` (`job_id`),
     CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `scheduled_jobs` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 

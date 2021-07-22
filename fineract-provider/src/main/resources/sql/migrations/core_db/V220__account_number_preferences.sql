@@ -24,7 +24,7 @@ CREATE TABLE `c_account_number_format` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX `account_type_enum` (`account_type_enum`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 

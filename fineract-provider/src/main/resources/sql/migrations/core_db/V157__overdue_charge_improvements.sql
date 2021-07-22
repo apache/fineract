@@ -29,7 +29,7 @@ CREATE TABLE `m_loan_overdue_installment_charge` (
     CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
     CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 INSERT INTO `c_configuration` (`name`, `value`, `enabled`) VALUES ('grace-on-penalty-posting', 0, 1);

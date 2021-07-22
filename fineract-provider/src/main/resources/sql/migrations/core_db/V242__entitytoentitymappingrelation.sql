@@ -25,7 +25,7 @@ CREATE TABLE `m_entity_relation` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX `from_entity_type_to_entity_type_code_name` (`from_entity_type`, `to_entity_type`, `code_name`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
@@ -41,7 +41,7 @@ CREATE TABLE `m_entity_to_entity_mapping` (
     UNIQUE INDEX `rel_id_from_id_to_id` (`rel_id`, `from_id`, `to_id`),
     CONSTRAINT `FK__rel_id_m_entity_relation_id` FOREIGN KEY (`rel_id`) REFERENCES `m_entity_relation` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;

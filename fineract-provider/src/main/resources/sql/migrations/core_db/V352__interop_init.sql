@@ -34,7 +34,7 @@ CREATE TABLE `interop_identifier` (
     INDEX `fk_interop_identifier_account` (`account_id`),
     CONSTRAINT `fk_interop_identifier_account` FOREIGN KEY (`account_id`) REFERENCES `m_savings_account` (`id`)
 )
-    COLLATE = 'utf8mb4_unicode_ci'
+    COLLATE = 'utf8mb4_general_ci'
     ENGINE = InnoDB;
 
 -- user+roles

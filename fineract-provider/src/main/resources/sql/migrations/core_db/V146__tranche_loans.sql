@@ -32,7 +32,7 @@ CREATE TABLE `m_loan_disbursement_detail` (
     PRIMARY KEY (`id`),
     CONSTRAINT `FK_loan_disbursement_detail_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 ALTER TABLE `m_loan`
@@ -53,5 +53,5 @@ CREATE TABLE `m_loan_term_variations` (
     PRIMARY KEY (`id`),
     CONSTRAINT `FK_loan_id_m_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

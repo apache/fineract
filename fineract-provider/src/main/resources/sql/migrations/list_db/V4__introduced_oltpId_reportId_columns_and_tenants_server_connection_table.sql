@@ -43,7 +43,7 @@ create table tenant_server_connections(`id` BIGINT NOT NULL AUTO_INCREMENT,
     `deadlock_max_retry_interval` INT NULL DEFAULT '1',
     PRIMARY KEY (`id`)
     )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 
@@ -69,7 +69,7 @@ CREATE TABLE tenants(
     CONSTRAINT `fk_oltp_id` FOREIGN KEY (`oltp_id`) REFERENCES `tenant_server_connections` (`id`),
     CONSTRAINT `fk_report_id` FOREIGN KEY (`report_id`) REFERENCES `tenant_server_connections` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 

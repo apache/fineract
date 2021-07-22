@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `ppi_scores` (
   `score_from` INT NOT NULL,
   `score_to` INT NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8mb4_unicode_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
   `code` varchar(100) NOT NULL,
   `name` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8mb4_unicode_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB ;
 
 
@@ -110,7 +110,7 @@ ENGINE=InnoDB ;
   `ppi_name` varchar(250) NOT NULL,
   `enabled` INT NOT NULL DEFAULT '100',
   PRIMARY KEY (`id`)
-) COLLATE='utf8mb4_unicode_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 /**PPI permission**/

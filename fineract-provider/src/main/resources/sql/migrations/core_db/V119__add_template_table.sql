@@ -20,8 +20,8 @@
 DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE `m_template` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `text` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `text` longtext COLLATE utf8mb4_general_ci NOT NULL,
   `entity` INT DEFAULT NULL,
   `type` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -31,9 +31,9 @@ CREATE TABLE `m_template` (
 DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE `m_templatemappers` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `mapperkey` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mapperkey` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `mapperorder` INT DEFAULT NULL,
-  `mappervalue` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mappervalue` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 

@@ -33,6 +33,6 @@ CREATE TABLE `request_audit_table` (
     INDEX `FK1_request_audit_table_m_client` (`client_id`),
     CONSTRAINT `FK1_request_audit_table_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;

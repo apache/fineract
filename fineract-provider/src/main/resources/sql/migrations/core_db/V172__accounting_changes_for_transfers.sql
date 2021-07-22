@@ -36,5 +36,5 @@ CREATE TABLE `acc_gl_office_mapping` (
     CONSTRAINT `FK_office_mapping_acc_gl_account` FOREIGN KEY (`gl_account_id`) REFERENCES `acc_gl_account` (`id`),
     CONSTRAINT `FK_office_mapping_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

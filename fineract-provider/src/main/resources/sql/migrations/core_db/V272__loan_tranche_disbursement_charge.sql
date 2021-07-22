@@ -23,7 +23,7 @@ CREATE TABLE `m_loan_tranche_disbursement_charge` (
     `disbursement_detail_id` BIGINT NULL,
     PRIMARY KEY (`id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;

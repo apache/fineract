@@ -32,7 +32,7 @@ CREATE TABLE `oauth_client_details` (
   `autoapprove` BIT(1) NULL DEFAULT NULL,
   PRIMARY KEY (`client_id`)
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 
@@ -48,7 +48,7 @@ CREATE TABLE `oauth_access_token` (
   `authentication` blob,
   `refresh_token` varchar(256) DEFAULT NULL
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 
@@ -57,5 +57,5 @@ CREATE TABLE `oauth_refresh_token` (
   `token` blob,
   `authentication` blob
 )
-COLLATE='utf8mb4_unicode_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
