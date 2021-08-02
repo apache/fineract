@@ -28,9 +28,7 @@ public class LoanChargeWaiveCannotBeReversedException extends AbstractPlatformDo
         ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, WAIVE_NOT_ALLOWED_FOR_CHARGE, NOT_WAIVED, ALREADY_REVERSED;
 
         public String errorMessage() {
-            /**
-             * TODO: Recheck the error messages
-             */
+
             if (name().toString().equalsIgnoreCase("ALREADY_PAID")) {
                 return "This loan charge has been completely paid";
             } else if (name().toString().equalsIgnoreCase("ALREADY_WAIVED")) {

@@ -256,21 +256,13 @@ public class LoanTransactionsApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        CommandProcessingResult result = null;
-
         final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
-        result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    /**
-     * TODO: Add Swagger annotations.
-     *
-     * @param loanId
-     * @param transactionId
-     * @return
-     */
     @PUT
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
