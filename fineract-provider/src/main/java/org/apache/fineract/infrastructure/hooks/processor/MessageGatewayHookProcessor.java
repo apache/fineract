@@ -20,13 +20,10 @@ package org.apache.fineract.infrastructure.hooks.processor;
 
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.SMSProviderIdParamName;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
@@ -40,6 +37,7 @@ import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateRepository;
 import org.apache.fineract.template.service.TemplateMergeService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,20 +99,24 @@ public class MessageGatewayHookProcessor implements HookProcessor {
 
         // 2.1 : get customer details for basic template mapping
         // 2.2 : cook up scope map
-        Type type = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, Object> reqMap = new Gson().fromJson(payload, type);
+        @SuppressWarnings("unchecked")
+        final HashMap<String, Object> reqMap = new ObjectMapper().readValue(payload, HashMap.class);
+        reqMap.put("BASE_URI", System.getProperty("baseUrl"));
         if (reqMap.get("clientId") != null) {
-            Long clientId = (Long) reqMap.get("clientId");
+            final Long clientId = Long.valueOf(Integer.toString((int) reqMap.get("clientId")));
             Client client = clientRepository.findOneWithNotFoundDetection(clientId);
-            reqMap.put("clientName", client.getDisplayName());
+            if (client.mobileNo() != null && !client.mobileNo().isEmpty()) {
+                reqMap.put("clientName", client.getDisplayName());
 
-            // 3: compile template using Mustache
-            String smsText = this.templateMergeService.compile(template, reqMap);
-            // 4 : send message to the url
+                // 3: compile template using Mustache
+                this.templateMergeService.setAuthToken(authToken);
+                String smsText = this.templateMergeService.compile(template, reqMap).replace("<p>", "").replace("</p>", "");
+                // 4 : send message to the url
 
-            SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, smsText, client.mobileNo(), null, false);
-            this.smsMessageRepository.save(smsMessage);
-            smsMessageScheduledJobService.sendTriggeredMessage(Collections.singleton(smsMessage), SMSProviderId);
+                SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, smsText, client.mobileNo(), null, false);
+                this.smsMessageRepository.save(smsMessage);
+                smsMessageScheduledJobService.sendTriggeredMessage(Collections.singleton(smsMessage), SMSProviderId);
+            }
         }
     }
 
