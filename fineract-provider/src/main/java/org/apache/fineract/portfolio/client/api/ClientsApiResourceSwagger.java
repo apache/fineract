@@ -207,10 +207,24 @@ final class ClientsApiResourceSwagger {
 
         }
 
+        static final class GetClientsGroups {
+
+            private GetClientsGroups() {}
+
+            @Schema(example = "000000001")
+            public Long id;
+            @Schema(example = "000000002")
+            public String accountNo;
+            @Schema(example = "Group name")
+            public String name;
+            @Schema(example = "000000003")
+            public Long externalId;
+        }
+
         @Schema(example = "27")
         public Integer id;
         @Schema(example = "000000027")
-        public Long accountNo;
+        public String accountNo;
         public GetClientsClientIdStatus status;
         @Schema(example = "true")
         public Boolean active;
@@ -232,7 +246,7 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "account overdraft")
         public String savingsProductName;
         @Schema(example = "[]")
-        public List<String> groups;
+        public List<GetClientsGroups> groups;
     }
 
     @Schema(description = "PostClientsRequest")
@@ -385,7 +399,7 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "1")
             public Integer id;
             @Schema(example = "000000001")
-            public Long accountNo;
+            public String accountNo;
             @Schema(example = "456")
             public Integer externalId;
             @Schema(example = "1")
@@ -447,7 +461,7 @@ final class ClientsApiResourceSwagger {
             @Schema(example = "7")
             public Integer id;
             @Schema(example = "000000007")
-            public Long accountNo;
+            public String accountNo;
             @Schema(example = "2")
             public Integer productId;
             @Schema(example = "Other product")
