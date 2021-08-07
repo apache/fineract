@@ -50,17 +50,32 @@ final class DatatablesApiResourceSwagger {
     @Schema(description = "PostDataTablesRequest")
     public static final class PostDataTablesRequest {
 
-        private PostDataTablesRequest() {
+        private PostDataTablesRequest() {}
 
+        static final class PostColumnHeaderData {
+
+            private PostColumnHeaderData() {}
+
+            @Schema(required = true, example = "DOB")
+            public String name;
+            @Schema(required = true, example = "String", description = "Any of them: Boolean | Date | DateTime | Decimal | Dropdown | Number | String | Text")
+            public String type;
+            @Schema(example = "Gender", description = "Used in Code Value fields. Column name becomes: code_cd_name. Mandatory if using type Dropdown, otherwise an error is returned.")
+            public String code;
+            @Schema(example = "true", description = "Defaults to false")
+            public Boolean mandatory;
+            @Schema(example = "1653", description = "Length of the text field. Mandatory if type String is used, otherwise an error is returned.")
+            public Long length;
         }
 
-        @Schema(example = "m_client")
-        public String applicationTableName;
-        @Schema(example = "extra_client_details")
-        public String registeredTableName;
+        @Schema(required = true, example = "m_client")
+        public String apptableName;
+        @Schema(required = true, example = "extra_client_details")
+        public String datatableName;
         @Schema(required = false, description = "Allows to create multiple entries in the Data Table. Optional, defaults to false. If this property is not provided Data Table will allow only one entry.", example = "true")
         public boolean multiRow;
-        public List<ResultsetColumnHeaderData> columnHeaderData;
+        @Schema(required = true)
+        public List<PostColumnHeaderData> columns;
     }
 
     @Schema(description = "PostDataTablesResponse")
