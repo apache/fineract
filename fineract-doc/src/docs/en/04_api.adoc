@@ -1,0 +1,7 @@
+== Fineract OpenAPI Documentation
+
+include::{generated}/overview.adoc[]
+
+include::{generated}/paths.adoc[]
+
+include::{generated}/definitions.adoc[]

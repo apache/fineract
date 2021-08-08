@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.hooks.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
-import org.joda.time.LocalDate;
 
 public final class HookData implements Serializable {
 

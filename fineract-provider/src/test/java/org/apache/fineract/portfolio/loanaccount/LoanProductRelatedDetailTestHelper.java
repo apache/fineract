@@ -42,12 +42,12 @@ public final class LoanProductRelatedDetailTestHelper {
     public static LoanProductRelatedDetail createSettingsForEqualPrincipalAmortizationQuarterly() {
 
         final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.parseDouble("200000"));
 
         // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.parseDouble("2"));
         final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.parseDouble("24"));
 
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
@@ -66,12 +66,12 @@ public final class LoanProductRelatedDetailTestHelper {
 
     public static LoanProductRelatedDetail createSettingsForEqualInstallmentAmortizationQuarterly() {
         final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.parseDouble("200000"));
 
         // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.parseDouble("2"));
         final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.parseDouble("24"));
 
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
@@ -91,12 +91,12 @@ public final class LoanProductRelatedDetailTestHelper {
     public static LoanProductRelatedDetail createSettingsForFlatQuarterly(final AmortizationMethod amortizationMethod) {
 
         final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.parseDouble("200000"));
 
         // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.parseDouble("2"));
         final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.parseDouble("24"));
 
         final InterestMethod interestMethod = InterestMethod.FLAT;
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
@@ -115,12 +115,12 @@ public final class LoanProductRelatedDetailTestHelper {
     public static LoanProductRelatedDetail createSettingsForIrregularFlatEveryFourMonths() {
 
         final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("KSH").withDigitsAfterDecimal(0).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
+        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.parseDouble("15000"));
 
         // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.parseDouble("2"));
         final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.parseDouble("24"));
 
         final InterestMethod interestMethod = InterestMethod.FLAT;
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;

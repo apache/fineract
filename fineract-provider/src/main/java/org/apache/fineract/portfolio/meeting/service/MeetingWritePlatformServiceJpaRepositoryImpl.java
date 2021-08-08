@@ -29,6 +29,7 @@ import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.meetingD
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -39,6 +40,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -56,7 +58,6 @@ import org.apache.fineract.portfolio.meeting.data.MeetingDataValidator;
 import org.apache.fineract.portfolio.meeting.domain.Meeting;
 import org.apache.fineract.portfolio.meeting.domain.MeetingRepository;
 import org.apache.fineract.portfolio.meeting.domain.MeetingRepositoryWrapper;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -299,7 +300,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
     private void handleMeetingDataIntegrityIssues(final Date meetingDate, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("unique_calendar_instance_id_meeting_date")) {
-            final LocalDate meetingDateLocal = LocalDate.fromDateFields(meetingDate);
+            final LocalDate meetingDateLocal = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
             throw new PlatformDataIntegrityException("error.msg.meeting.duplicate",
                     "A meeting with date '" + meetingDateLocal + "' already exists", meetingDateParamName, meetingDateLocal);
         }

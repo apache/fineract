@@ -50,9 +50,12 @@ public class JDBCDriverConfig {
         return this.driverClassName;
     }
 
-    public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
-        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':')
-                .append(schemaServerPort).append('/').append(schemaName).toString();
-        return url;
+    public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName, String schemaConnectionParameters) {
+        StringBuilder sb = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(":")
+                .append(schemaServerPort).append('/').append(schemaName);
+        if (schemaConnectionParameters != null && !schemaConnectionParameters.isEmpty()) {
+            sb.append('?').append(schemaConnectionParameters);
+        }
+        return sb.toString();
     }
 }

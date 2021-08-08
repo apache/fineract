@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.tax.data;
 
 import java.io.Serializable;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 public class TaxGroupMappingsData implements Serializable {
 

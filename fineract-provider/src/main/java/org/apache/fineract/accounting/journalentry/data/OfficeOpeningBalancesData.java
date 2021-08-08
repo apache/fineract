@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.accounting.journalentry.data;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.joda.time.LocalDate;
 
 public final class OfficeOpeningBalancesData {
 

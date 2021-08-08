@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.savings.domain.interest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,8 +33,6 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 public final class PostingPeriod {
 
@@ -393,7 +394,7 @@ public final class PostingPeriod {
             // break;
             case MONTHLY:
                 // produce period end date on last day of current month
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
             break;
             case QUATERLY:
                 periodsInMonth = 4;
@@ -405,8 +406,8 @@ public final class PostingPeriod {
 
             break;
             case ANNUAL:
-                periodEndDate = periodStartDate.withMonthOfYear(previousMonth);
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodStartDate.withMonth(previousMonth);
+                periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
                 if (periodEndDate.isBefore(periodStartDate)) {
                     periodEndDate = periodEndDate.plusYears(1);
                 }
@@ -414,7 +415,7 @@ public final class PostingPeriod {
 
             // case NO_COMPOUNDING_SIMPLE_INTEREST:
             // periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-            // periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
+            // periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
             // break;
         }
 
@@ -422,16 +423,16 @@ public final class PostingPeriod {
     }
 
     private static LocalDate getPeriodEndDate(LocalDate periodEndDate, int previousMonth, int periodsInMonth, LocalDate periodStartDate) {
-        int year = periodStartDate.getYearOfEra();
-        int monthofYear = periodStartDate.getMonthOfYear();
+        int year = periodStartDate.get(ChronoField.YEAR_OF_ERA);
+        int monthofYear = periodStartDate.getMonthValue();
         LocalDate date = DateUtils.getLocalDateOfTenant();
         TreeSet<Integer> monthSet = new TreeSet<>();
-        date = date.withMonthOfYear(previousMonth);
-        monthSet.add(date.getMonthOfYear());
+        date = date.withMonth(previousMonth);
+        monthSet.add(date.getMonthValue());
         int count = 0;
         while (count < (periodsInMonth - 1)) {
             date = date.plusMonths((12 / periodsInMonth));
-            monthSet.add(date.getMonthOfYear());
+            monthSet.add(date.getMonthValue());
             count++;
         }
         boolean notInRange = true;
@@ -443,18 +444,14 @@ public final class PostingPeriod {
 
         for (Integer month : monthSet) {
             if (monthofYear <= month.intValue()) {
-                periodEndDate = new DateTime()
-                        .withDate(year, month,
-                                DateUtils.getLocalDateOfTenant().withMonthOfYear(month).dayOfMonth().withMaximumValue().getDayOfMonth())
-                        .toLocalDate();
+                periodEndDate = LocalDate.of(year, month, DateUtils.getLocalDateOfTenant().withMonth(month).lengthOfMonth());
                 notInRange = false;
                 break;
             }
         }
         if (notInRange) {
-            periodEndDate = new DateTime().withDate(year + 1, monthSet.first(),
-                    DateUtils.getLocalDateOfTenant().withMonthOfYear(monthSet.first()).dayOfMonth().withMaximumValue().getDayOfMonth())
-                    .toLocalDate();
+            periodEndDate = LocalDate.of(year + 1, monthSet.first(),
+                    DateUtils.getLocalDateOfTenant().withMonth(monthSet.first()).lengthOfMonth());
         }
         return periodEndDate;
     }

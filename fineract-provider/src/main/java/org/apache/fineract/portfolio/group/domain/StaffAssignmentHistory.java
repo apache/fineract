@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.domain;
 
+import java.time.LocalDate;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,8 +28,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_staff_assignment_history")
@@ -51,7 +52,8 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     private Date endDate;
 
     public static StaffAssignmentHistory createNew(final Group center, final Staff staff, final LocalDate startDate) {
-        return new StaffAssignmentHistory(center, staff, startDate.toDate(), null);
+        return new StaffAssignmentHistory(center, staff, Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                null);
     }
 
     protected StaffAssignmentHistory() {
@@ -70,11 +72,11 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public void updateStartDate(final LocalDate startDate) {
-        this.startDate = startDate.toDate();
+        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public void updateEndDate(final LocalDate endDate) {
-        this.endDate = endDate.toDate();
+        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {
@@ -82,7 +84,7 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getStartDate() {
-        return new LocalDate(this.startDate);
+        return LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public boolean isCurrentRecord() {

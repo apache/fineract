@@ -50,7 +50,7 @@ public final class DeviceRegistration extends AbstractPersistableCustom {
     private DeviceRegistration(final Client client, final String registrationId) {
         this.client = client;
         this.registrationId = registrationId;
-        this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant().toDate();
+        this.updatedOnDate = Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
     }
 
     public static DeviceRegistration instance(final Client client, final String registrationId) {

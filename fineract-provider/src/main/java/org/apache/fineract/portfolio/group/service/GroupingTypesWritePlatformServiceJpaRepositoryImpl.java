@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -41,6 +43,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -83,7 +86,6 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +187,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
-            LocalDate submittedOnDate = new LocalDate();
+            LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
             if (active && submittedOnDate.isAfter(activationDate)) {
                 submittedOnDate = activationDate;
             }
@@ -542,7 +544,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         groupForUpdate.updateStaff(staff);
 
         if (inheritStaffForClientAccounts) {
-            LocalDate loanOfficerReassignmentDate = LocalDate.now();
+            LocalDate loanOfficerReassignmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
             /*
              * update loan officer for client and update loan officer for clients loans and savings
              */
@@ -651,7 +653,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName() + " cannot be closed because of non-closed loans.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close", "loan.not.closed",
                         errorMessage);
-            } else if (loanStatus.isClosed() && loan.getClosedOnDate().after(closureDate.toDate())) {
+            } else if (loanStatus.isClosed()
+                    && loan.getClosedOnDate().after(Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()))) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName()
                         + "closureDate cannot be before the loan closedOnDate.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",

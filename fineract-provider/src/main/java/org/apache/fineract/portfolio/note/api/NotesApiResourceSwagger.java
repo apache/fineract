@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.note.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Created by Chirag Gupta on 12/29/17.
@@ -57,13 +57,13 @@ final class NotesApiResourceSwagger {
         @Schema(example = "mifos")
         public String createdByUsername;
         @Schema(example = "1342498505000")
-        public DateTime createdOn;
+        public ZonedDateTime createdOn;
         @Schema(example = "1")
         public Integer updatedById;
         @Schema(example = "mifos")
         public String updatedByUsername;
         @Schema(example = "1342498517000")
-        public DateTime updatedOn;
+        public ZonedDateTime updatedOn;
     }
 
     @Schema(description = "GetResourceTypeResourceIdNotesNoteIdResponse")
@@ -83,13 +83,13 @@ final class NotesApiResourceSwagger {
         @Schema(example = "mifos")
         public String createdByUsername;
         @Schema(example = "1359463135000")
-        public DateTime createdOn;
+        public ZonedDateTime createdOn;
         @Schema(example = "1")
         public Integer updatedById;
         @Schema(example = "mifos")
         public String updatedByUsername;
         @Schema(example = "1359463135000")
-        public DateTime updatedOn;
+        public ZonedDateTime updatedOn;
     }
 
     @Schema(description = "PostResourceTypeResourceIdNotesRequest")

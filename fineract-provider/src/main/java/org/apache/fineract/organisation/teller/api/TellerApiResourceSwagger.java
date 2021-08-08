@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -29,7 +30,6 @@ import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
-import org.joda.time.LocalDate;
 
 /**
  * Created by sanyam on 20/8/17.

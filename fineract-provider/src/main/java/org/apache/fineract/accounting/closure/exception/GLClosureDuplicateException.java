@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.accounting.closure.exception;
 
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.joda.time.LocalDate;
 
 /**
  * A {@link RuntimeException} thrown when a GL Closure for a given date and Office combination is already present

@@ -22,6 +22,7 @@ import static org.apache.fineract.organisation.holiday.api.HolidayApiConstants.o
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +44,6 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,16 +233,16 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             }
 
             // validate repaymentsRescheduledTo date
-            // 1. should be within a 7 days date range.
+            // 1. should be within a 30 days date range.
             // 2. Alternative date should not be an exist holiday.//TBD
             // 3. Holiday should not be on an repaymentsRescheduledTo date of
             // another holiday.//TBD
 
-            // restricting repaymentsRescheduledTo date to be within 7 days
+            // restricting repaymentsRescheduledTo date to be within 30 days
             // range
             // before or after from date and to date.
-            if (repaymentsRescheduledTo.isBefore(fromDate.minusDays(7)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(7))) {
-                defaultUserMessage = "Repayments Rescheduled to date must be within 7 days before or after from and to dates";
+            if (repaymentsRescheduledTo.isBefore(fromDate.minusDays(30)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(30))) {
+                defaultUserMessage = "Repayments Rescheduled to date must be within 30 days before or after from and to dates";
                 throw new HolidayDateException("repayments.rescheduled.to.must.be.within.range", defaultUserMessage, fromDate.toString(),
                         toDate.toString(), repaymentsRescheduledTo.toString());
             }

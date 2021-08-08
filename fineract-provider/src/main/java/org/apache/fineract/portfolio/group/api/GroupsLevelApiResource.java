@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 @Path("/grouplevels")
 @Component
 @Scope("singleton")
+@Tag(name = "Groups Level", description = "")
 public class GroupsLevelApiResource {
 
     private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName", "parentLevelId",

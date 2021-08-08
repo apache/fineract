@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.api;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,6 +73,7 @@ import org.springframework.stereotype.Component;
 @Path("/loans/{loanId}/guarantors")
 @Component
 @Scope("singleton")
+@Tag(name = "Guarantors", description = "")
 public class GuarantorsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(

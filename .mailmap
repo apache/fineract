@@ -1,0 +1,22 @@
+# .mailmap unifies differences in commit names and emails, and shortens committers' names.
+# .mailmap format is a bit weird, e.g. https://github.com/sympy/sympy/wiki/Using-.mailmap explains it.
+# .mailmap official doc is on https://git-scm.com/docs/git-shortlog#_mapping_authors
+#
+# Running `git log --format='%an <%ae>' | sort -u` -VS- `git log --format='%aN <%aE>' | sort -u` best illustrates what this does.
+# It's useful e.g. in `git log` or `git shortlog --numbered --email --no-merges 1.4.0..HEAD` et al.
+
+Michael <mike@vorburger.ch>
+Michael <mike@vorburger.ch> Michael Vorburger ⛑️  <vorburger@apache.org>
+Petri <petri@tuomola.org>
+Petri <petri@tuomola.org> Petri Tuomola <ptuomola@users.noreply.github.com>
+Renovate <bot@renovateapp.com>
+Aleks <aleks@apache.org>
+Aleks <aleks@apache.org> Aleksandar Vidakovic <vidakovic@users.noreply.github.com>
+Aleks <aleks@apache.org> Aleksandar Vidakovic <cheetah@monkeysintown.com>
+Manthan <manthan.surkar@gmail.com>
+Manthan <manthan.surkar@gmail.com> Manthan Surkar <42006277+thesmallstar@users.noreply.github.com>
+Chinmay <chinmaykulkarni8@gmail.com>
+Chinmay <chinmaykulkarni8@gmail.com> Grandolf49 <chinmaykulkarni8@gmail.com>
+Chinmay <chinmaykulkarni8@gmail.com> Chinmay Kulkarni <30969403+Grandolf49@users.noreply.github.com>
+Vincent Fuchs <vincent.fuchs@gefa.de>
+Vincent Fuchs <vincent.fuchs@gefa.de> Vincent Fuchs <vincent.fuchs@gmail.com>

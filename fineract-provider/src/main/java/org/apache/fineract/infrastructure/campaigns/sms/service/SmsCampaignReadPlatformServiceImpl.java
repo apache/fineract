@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.campaigns.sms.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,8 +43,6 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.calendar.service.CalendarDropdownReadPlatformService;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -250,7 +250,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             final Integer triggerType = JdbcSupport.getInteger(rs, "triggerType");
             final EnumOptionData triggerTypeEnum = SmsCampaignTriggerType.triggerType(triggerType);
 
-            final DateTime nextTriggerDate = JdbcSupport.getDateTime(rs, "nextTriggerDate");
+            final ZonedDateTime nextTriggerDate = JdbcSupport.getDateTime(rs, "nextTriggerDate");
             final LocalDate lastTriggerDate = JdbcSupport.getLocalDate(rs, "lastTriggerDate");
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
@@ -262,7 +262,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             final LocalDate activatedOnDate = JdbcSupport.getLocalDate(rs, "activatedOnDate");
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String recurrence = rs.getString("recurrence");
-            final DateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
+            final ZonedDateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
             final SmsCampaignTimeLine smsCampaignTimeLine = new SmsCampaignTimeLine(submittedOnDate, submittedByUsername, activatedOnDate,
                     activatedByUsername, closedOnDate, closedByUsername);
             final String reportName = rs.getString("reportName");

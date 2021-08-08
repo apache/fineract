@@ -1,0 +1,46 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+dependencies {
+    // project(':fineract-provider')
+    implementation(
+            'io.swagger:swagger-annotations',
+            'com.squareup.retrofit2:retrofit',
+            'com.squareup.retrofit2:adapter-java8',
+            'com.squareup.retrofit2:adapter-rxjava2', // TODO https://github.com/OpenAPITools/openapi-generator/issues/7758
+            'com.squareup.retrofit2:converter-scalars',
+            'com.squareup.retrofit2:converter-gson',
+            'io.gsonfire:gson-fire',
+            'com.google.code.findbugs:jsr305',
+            'com.squareup.okhttp3:logging-interceptor',
+            )
+    // org.apache.oltu.oauth2 is used in org.apache.fineract.client.auth.OAuthOkHttpClient (only; can be excluded by consumers not requiring OAuth)
+    implementation('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client') {
+        exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
+        exclude group: 'org.slf4j'
+    }
+
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api',
+            'com.google.truth:truth',
+            'com.google.truth.extensions:truth-java8-extension'
+            )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine'
+            )
+}

@@ -19,9 +19,9 @@
 package org.apache.fineract.infrastructure.survey.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.joda.time.DateTime;
 
 /**
  * Created by sanyam on 13/8/17.
@@ -86,9 +86,9 @@ final class SurveyApiResourceSwagger {
         @Schema(example = "201")
         public Long ppi_fryingpans_cd_q10_fryingpans;
         @Schema(example = "2014-12-02 20:30:00")
-        public DateTime Date;
+        public ZonedDateTime Date;
         @Schema(example = "Y-m-d H:i:s")
-        public DateTime dateFormat;
+        public ZonedDateTime dateFormat;
         @Schema(example = "en_GB")
         public String locale;
     }

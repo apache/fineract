@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.command;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object for updating relationship between loan officer and a loan.

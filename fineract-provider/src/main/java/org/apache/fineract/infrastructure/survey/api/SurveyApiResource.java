@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -58,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Path("/survey")
 @Component
 @Scope("singleton")
-
+@Tag(name = "Survey", description = "")
 public class SurveyApiResource {
 
     private final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer;

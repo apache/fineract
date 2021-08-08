@@ -19,9 +19,6 @@
 dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-    spotbugs 'com.github.spotbugs:spotbugs:4.1.3'
-
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
     // We also (normally should have) no need to ever use 'compileOnly'.
@@ -45,16 +42,16 @@ dependencies {
             'com.sun.jersey.contribs:jersey-spring',
             'com.sun.jersey.contribs:jersey-multipart',
 
-            'joda-time:joda-time',
             'com.google.guava:guava',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',
-            'com.squareup.retrofit:retrofit',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
             'jakarta.validation:jakarta.validation-api',
-            'com.squareup.okhttp:okhttp',
-            'com.squareup.okhttp:okhttp-urlconnection',
+
+            'com.squareup.retrofit2:retrofit',
+            'com.squareup.okhttp3:okhttp',
+            'com.squareup.okhttp3:okhttp-urlconnection',
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
@@ -71,17 +68,21 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
-            // JAX-B dependencies for JDK 9+
-            'jakarta.xml.bind:jakarta.xml.bind-api',
-
             'org.dom4j:dom4j',
 
             'javax.cache:cache-api',
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
-            'org.webjars:webjars-locator-core'
+            'org.webjars:webjars-locator-core',
+
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.3.0',
+            'com.squareup.retrofit2:converter-gson',
+            'com.sun.activation:jakarta.activation:1.2.2'
             )
+    implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
+        exclude group: 'jakarta.activation'
+    }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
@@ -111,33 +112,26 @@ dependencies {
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.webjars.npm:swagger-ui-dist',
+            'org.glassfish.jaxb:jaxb-runtime',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-            'org.apache.httpcomponents:httpclient',
+            'org.apache.httpcomponents:httpclient'
             )
 
-    // testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
+    // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
     testImplementation( 'org.mockito:mockito-core',
             'org.mockito:mockito-junit-jupiter',
             'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
-            'io.github.classgraph:classgraph',
-            'org.awaitility:awaitility'
+            'io.github.classgraph:classgraph'
             )
-    testImplementation('org.mock-server:mockserver-junit-jupiter') {
-        exclude group: 'com.sun.mail', module: 'mailapi'
-        exclude group: 'javax.servlet', module: 'javax.servlet-api'
-        exclude group: 'javax.validation'
-    }
-    testImplementation ('io.rest-assured:rest-assured') {
-        exclude group: 'commons-logging'
-        exclude group: 'org.apache.sling'
-        exclude group: 'com.sun.xml.bind'
-    }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'jakarta.activation'
+        exclude group: 'javax.activation'
     }
+
 }

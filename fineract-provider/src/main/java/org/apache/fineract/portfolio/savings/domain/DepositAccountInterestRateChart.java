@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -37,7 +38,6 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 import org.apache.fineract.portfolio.interestratechart.incentive.AttributeIncentiveCalculation;
 import org.apache.fineract.portfolio.interestratechart.incentive.AttributeIncentiveCalculationFactory;
 import org.apache.fineract.portfolio.interestratechart.incentive.IncentiveDTO;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_chart")

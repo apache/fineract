@@ -18,17 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     @CronTarget(jobName = JobName.ADD_PERIODIC_ACCRUAL_ENTRIES)
     public void addPeriodicAccruals() throws JobExecutionException {
         try {
-            addPeriodicAccruals(LocalDate.now());
+            addPeriodicAccruals(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         } catch (MultiException e) {
             throw new JobExecutionException(e);
         }

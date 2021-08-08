@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.account.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.MonthDay;
+import java.time.temporal.ChronoField;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -30,9 +33,6 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 
 /**
  * Immutable data object representing a savings account.
@@ -324,7 +324,7 @@ public final class StandingInstructionData {
     public Integer recurrenceOnDay() {
         Integer recurrenceOnDay = 0;
         if (this.recurrenceOnMonthDay != null) {
-            recurrenceOnDay = this.recurrenceOnMonthDay.get(DateTimeFieldType.dayOfMonth());
+            recurrenceOnDay = this.recurrenceOnMonthDay.get(ChronoField.DAY_OF_MONTH);
         }
         return recurrenceOnDay;
     }
@@ -332,7 +332,7 @@ public final class StandingInstructionData {
     public Integer recurrenceOnMonth() {
         Integer recurrenceOnMonth = 0;
         if (this.recurrenceOnMonthDay != null) {
-            recurrenceOnMonth = this.recurrenceOnMonthDay.get(DateTimeFieldType.monthOfYear());
+            recurrenceOnMonth = this.recurrenceOnMonthDay.get(ChronoField.MONTH_OF_YEAR);
         }
         return recurrenceOnMonth;
     }

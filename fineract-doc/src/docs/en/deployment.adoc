@@ -1,0 +1,40 @@
+== Deployment
+
+=== Plugins
+
+Apache Fineract is extensible through plugin JARs (https://issues.apache.org/jira/browse/FINERACT-1177[FINERACT-1177]; based on 
+https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-executable-jar-format.html[Spring Boot's support]). To launch Fineract with plugin JARs in `libs/*.jar`, use:
+
+----
+java -Dloader.path=libs/ -jar fineract-provider.jar
+----
+
+The Fineract "Docker" container image's `ENTRYPOINT` uses this, see our `Dockerfile`. You could therefore build your customized Fineract distribution container image with your own `Dockerfile` using e.g. `FROM apache/fineract:latest` and then drop some plugin JARs into `/app/libs/`.
+
+The WAR distribution does not directly support such plugins, but one could "explode" the WAR and drop JARs into `WEB-INF/lib`; if you know what you are doing, and feel nostalgic of the 1990s still using WARs, instead of the recommended modern Spring Boot distribution.
+
+Here is a list of known 3rd-party plugin projects which can be dropped into `libs/`:
+
+* https://github.com/vorburger/fineract-pentaho
+
+
+=== HTTPS
+
+Because Apache Fineract deals with customer sensitive personally identifiable information (PII), it very strongly encourages all developers, implementors and end-users to always only use HTTPS. This is why it does not run on HTTP even for local development and enforces use of HTTPS.
+
+For this purpose, Fineract includes a built-in default SSL certificate.  This cert is intended for development on `localhost`, only.  It is not trusted by your browser (because it's self signed).
+
+For production deployments, we recommend running Fineract behind a modern managed cloud native web proxy which includes SSL termination with automatically rotating SSL certificates, either using your favourite cloud provider's respective solution, or locally setting up the equivalent using e.g. something like NGINX combined with https://letsencrypt.org[Let’s Encrypt].
+
+Such products, when correctly configured, add the conventional `X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers, which Fineract (or rather the Spring Framework really) correctly respects since https://issues.apache.org/jira/browse/FINERACT-914[FINERACT-914 was fixed].
+
+Alternatively, you could replace the built-in default SSL certificate with one you obtained from a Certificate Authority.  We currently do not document how to do this, because we do not recommend this approach, as its cumbersome to configure and support and less secure than a managed auto rotating solution.
+
+The Fineract API client supports an insecure mode (`FineractClient.Builder#insecure()`), and API users such as mobile apps may expose Settings to let end-users accept the self signed certificate. This should always be used for testing only, never in production.
+
+
+=== Google Cloud
+
+The https://www.fineract.dev demo server runs on Google Cloud.
+
+https://docs.google.com/presentation/d/1-VP4bNkc5kZ3B0yme_vYLiY1qpswnfz8ainnX5fp3l8/[The Running Fineract.dev, SRE style presentation] given at _ApacheCon 20202_ has some related background.

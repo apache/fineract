@@ -1,0 +1,31 @@
+== Generate Apache Fineract API Client
+
+Apache Fineract supports client code generation using https://openapi-generator.tech[OpenAPI Generator]. It uses https://swagger.io/specification/[OpenAPI Specification Version 3.0.3].
+
+=== Fineract SDK Java API Client
+
+The `fineract-client.jar` will eventually be available on Maven Central (watch https://issues.apache.org/jira/browse/FINERACT-1102[FINERACT-1102]). Until it is, you can quite easily build the latest and greatest version locally from source, see below.
+
+The https://github.com/apache/fineract/search?q=FineractClient.java[`FineractClient`] is the entry point to the _Fineract SDK Java API Client_. https://github.com/apache/fineract/search?q=Calls.java[`Calls`] is a convenient and recommended utility to simplify the use of the https://square.github.io/retrofit/2.x/retrofit/retrofit2/Call.html[`retrofit2.Call`] type which all API operations return. This permits you to use the API like the https://github.com/apache/fineract/search?q=FineractClientDemo.java[`FineractClientDemo`] illustrates:
+
+[source,java]
+----
+import org.apache.fineract.client.util.FineractClient;
+import static org.apache.fineract.client.util.Calls.ok;
+
+include::{rootdir}/fineract-client/src/test/java/org/apache/fineract/client/test/FineractClientDemo.java[tags=documentation]
+----
+
+=== Generate API Client
+
+The API client is built as part of the standard overall Fineract Gradle build. The client JAR can be found in `fineract-client/build/libs` as `fineract-client.jar`.
+
+If you need to save time to incrementally work on making small changes to Swagger annotations in an IDE, you can execute e.g. the following line in root directory of the project to exclude non-require Gradle tasks:
+
+----
+./gradlew -x compileJava -x compileTest -x spotlessJava -x enhance resolve prepareInputYaml :fineract-client:buildJavaSdk
+----
+
+=== Validate OpenAPI Spec File
+
+The `resolve` task in https://github.com/apache/fineract/blob/develop/fineract-provider/build.gradle#L80[build.gradle] file will generate the OpenAPI Spec File for the project. To make sure Swagger Codegen generates a correct library, it is important for the OpenAPI Spec file to be valid. Validation is done automatically by the OpenAPI code generator Gradle plugin. If you still have problems during code generation please use https://validator.swagger.io/[Swagger OpenAPI Validator] to validate the spec file.

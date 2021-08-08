@@ -141,12 +141,12 @@ public class LoanProductMinMaxConstraints {
 
     public BigDecimal getMinNominalInterestRatePerPeriod() {
         return this.minNominalInterestRatePerPeriod == null ? null
-                : BigDecimal.valueOf(Double.valueOf(this.minNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
+                : BigDecimal.valueOf(Double.parseDouble(this.minNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
     public BigDecimal getMaxNominalInterestRatePerPeriod() {
         return this.maxNominalInterestRatePerPeriod == null ? null
-                : BigDecimal.valueOf(Double.valueOf(this.maxNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
+                : BigDecimal.valueOf(Double.parseDouble(this.maxNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
     public Integer getMinNumberOfRepayments() {

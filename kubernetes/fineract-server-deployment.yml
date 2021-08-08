@@ -54,9 +54,32 @@ spec:
         app: fineract-server
         tier: backend
     spec:
+      initContainers:
+        - name: init-mydb
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo -e "Checking for the availability of MYSQL server deployment"; while ! nc -z "fineractmysql" 3306; do sleep 1; printf "-"; done; echo -e " >> MYSQL server has started";']
       containers:
       - name: fineract-server
         image: apache/fineract:latest
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "200m"
+            memory: "0.5Gi"
+        livenessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /fineract-provider/actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 1
         env:
         - name: DRIVERCLASS_NAME
           value: org.drizzle.jdbc.DrizzleDriver
@@ -92,6 +115,8 @@ spec:
             secretKeyRef:
               name: fineract-tenants-db-secret
               key: password
+        - name: FINERACT_DEFAULT_TENANTDB_CONN_PARAMS
+          value: ''
         ports:
         - containerPort: 8443
           name: fineract-server

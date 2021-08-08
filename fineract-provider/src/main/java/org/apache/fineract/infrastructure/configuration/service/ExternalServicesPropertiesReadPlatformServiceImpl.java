@@ -72,7 +72,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             String username = null;
             String password = null;
             String host = null;
-            String port = "25";
+            String port = "587";
             boolean useTLS = false;
             String fromEmail = null;
             String fromName = null;
@@ -83,12 +83,12 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
 
                 if (ExternalServicesConstants.SMTP_USERNAME.equalsIgnoreCase(name)) {
                     username = value;
+                } else if (ExternalServicesConstants.SMTP_PORT.equalsIgnoreCase(port)) {
+                    port = value;
                 } else if (ExternalServicesConstants.SMTP_PASSWORD.equalsIgnoreCase(name)) {
                     password = value;
                 } else if (ExternalServicesConstants.SMTP_HOST.equalsIgnoreCase(name)) {
                     host = value;
-                } else if (ExternalServicesConstants.SMTP_PORT.equalsIgnoreCase(name)) {
-                    port = value;
                 } else if (ExternalServicesConstants.SMTP_USE_TLS.equalsIgnoreCase(name)) {
                     useTLS = Boolean.parseBoolean(value);
                 } else if (ExternalServicesConstants.SMTP_FROM_EMAIL.equalsIgnoreCase(name)) {

@@ -1,0 +1,19 @@
+**/README.md
+**/pom.xml
+**/build.sbt
+**/*.gradle
+**/.travis.yml
+**/.gitignore
+**/git_push.sh
+**/api/*
+**/gradle*
+**/gradle
+**/src/main/AndroidManifest.xml
+
+# https://issues.apache.org/jira/browse/FINERACT-1231
+**/client/*.java
+!**/client/CollectionFormats.java
+!**/client/StringUtil.java
+
+# https://issues.apache.org/jira/browse/FINERACT-1263
+**/services/RunReportsApi.java

@@ -22,25 +22,23 @@ RUN apt-get update -qq && apt-get install -y wget
 COPY . fineract
 WORKDIR /fineract
 
-RUN ./gradlew -PautomatedBuild=true --no-daemon -q -x rat -x test bootJar
-
-WORKDIR /fineract/target
-RUN jar -xf /fineract/build/libs/fineract-provider*.jar
+RUN ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
 # https://issues.apache.org/jira/browse/LEGAL-462
 # https://issues.apache.org/jira/browse/FINERACT-762
 # We include an alternative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
 # allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
 # The commented out lines in the docker-compose.yml illustrate how to do this.
-WORKDIR /fineract/target/BOOT-INF/lib
-RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.20/mysql-connector-java-8.0.20.jar
+WORKDIR /fineract/libs
+RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar
 
 # =========================================
 
 FROM gcr.io/distroless/java:11 as fineract
 
-COPY --from=builder /fineract/target/BOOT-INF/lib /app/lib
-COPY --from=builder /fineract/target/META-INF /app/META-INF
-COPY --from=builder /fineract/target/BOOT-INF/classes /app
+COPY --from=builder /fineract/fineract-provider/build/libs /app
+COPY --from=builder /fineract/libs /app/libs
 
-ENTRYPOINT ["java", "-cp", "app:app/lib/*", "org.apache.fineract.ServerApplication"]
+WORKDIR /app
+
+ENTRYPOINT ["java", "-Dloader.path=/app/libs/", "-jar", "/app/fineract-provider.jar"]

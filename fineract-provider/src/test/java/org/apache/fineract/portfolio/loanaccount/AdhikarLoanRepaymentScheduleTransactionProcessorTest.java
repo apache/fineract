@@ -20,12 +20,12 @@ package org.apache.fineract.portfolio.loanaccount;
 
 import java.lang.reflect.Field;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     // class under test
     private RBILoanRepaymentScheduleTransactionProcessor processor;
 
-    private final LocalDate july2nd = new LocalDate(2012, 7, 2);
+    private final LocalDate july2nd = LocalDate.of(2012, 7, 2);
     private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 

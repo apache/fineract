@@ -19,7 +19,7 @@
 package org.apache.fineract.accounting.closure.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 final class GLClosuresApiResourceSwagger {
 

@@ -1,0 +1,45 @@
+:doctype: book
+:compat-mode!:
+:optimize: printer
+:media: printer
+:compress:
+:pdf-page-size: LETTER
+:experimental:
+:pdf-version: 1.7
+:page-layout: base
+:toc-title: Table of Contents
+:toc: macro
+:icons: font
+:source-highlighter: coderay
+:experimental:
+:source-language: java
+:diagramsdir: diagrams
+:imagesdir: images
+:years: 2017-2020
+:lang: en
+:encoding: utf-8
+:linkattrs:
+:hide-uri-scheme:
+:data-uri:
+:xrefstyle: short
+:front-cover-image: {imagesdir}/apache-fineract-logo.png
+:email: dev@fineract.apache.org
+:checkedbox: pass:normal[{startsb}&#10004;{endsb}]
+:table-stripes: even
+
+// ifeval::["{draft}"=="true"]
+// :title-page-background-image: image:{commondir}/images/draft.svg[position=top]
+// endif::[]
+
+ifdef::env-vscode[]
+:source-highlighter: highlightjs
+:kroki-fetch-diagram:
+endif::[]
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]

@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.exception;
 
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.joda.time.LocalDate;
 
 /**
  * {@link AbstractPlatformDomainRuleException} thrown when actual disbursement date does not match with expected

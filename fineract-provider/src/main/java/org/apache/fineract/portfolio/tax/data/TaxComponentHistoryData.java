@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.tax.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 public class TaxComponentHistoryData implements Serializable {
 

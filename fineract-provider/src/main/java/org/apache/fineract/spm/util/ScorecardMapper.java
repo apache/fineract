@@ -19,6 +19,7 @@
 package org.apache.fineract.spm.util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -50,7 +51,8 @@ public final class ScorecardMapper {
                 ScorecardMapper.setQuestionAndResponse(scorecardValue, scorecard, survey);
                 scorecard.setAppUser(appUser);
                 scorecard.setClient(client);
-                scorecard.setCreatedOn(DateUtils.getLocalDateOfTenant().toDate());
+                scorecard.setCreatedOn(
+                        Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
                 scorecard.setValue(scorecardValue.getValue());
             }
         } else {

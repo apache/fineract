@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.self.registration.data;
 
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.joda.time.LocalDate;
 
 public class SelfServiceRegistrationData {
 

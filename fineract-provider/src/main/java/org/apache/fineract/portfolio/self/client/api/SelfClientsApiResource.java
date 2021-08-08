@@ -163,7 +163,7 @@ public class SelfClientsApiResource {
 
         validateAppuserClientsMapping(clientId);
 
-        return this.imagesApiResource.retrieveImage("clients", clientId, maxWidth, maxHeight, output);
+        return this.imagesApiResource.retrieveImage("clients", clientId, maxWidth, maxHeight, output, MediaType.TEXT_PLAIN);
     }
 
     @GET

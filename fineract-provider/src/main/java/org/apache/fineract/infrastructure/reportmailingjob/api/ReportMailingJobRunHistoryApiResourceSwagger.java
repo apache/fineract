@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.reportmailingjob.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Created by sanyam on 13/8/17.
@@ -42,9 +42,9 @@ final class ReportMailingJobRunHistoryApiResourceSwagger {
         @Schema(example = "1")
         public Long reportMailingJobId;
         @Schema(example = "1469627093050")
-        public DateTime startDateTime;
+        public ZonedDateTime startDateTime;
         @Schema(example = "1469627093050")
-        public DateTime endDateTime;
+        public ZonedDateTime endDateTime;
         @Schema(example = "success")
         public String status;
         @Schema(example = "")

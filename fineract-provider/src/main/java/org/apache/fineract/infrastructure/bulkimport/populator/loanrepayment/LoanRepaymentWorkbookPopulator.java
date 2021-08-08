@@ -53,10 +53,10 @@ import org.slf4j.LoggerFactory;
 public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentWorkbookPopulator.class);
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private ExtrasSheetPopulator extrasSheetPopulator;
-    private List<LoanAccountData> allloans;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final ExtrasSheetPopulator extrasSheetPopulator;
+    private final List<LoanAccountData> allloans;
     private Map<Long, String> clientIdToClientExternalId;
 
     public LoanRepaymentWorkbookPopulator(List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
@@ -173,7 +173,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = loanRepaymentWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
-                name.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(name, "Client_" + officeNames.get(i));
                 name.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfClients[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
@@ -181,9 +181,9 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 
         // Counting clients with active loans and starting and end addresses of
         // cells
-        HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<String, Integer[]>();
-        ArrayList<String> clientsWithActiveLoans = new ArrayList<String>();
-        ArrayList<String> clientIdsWithActiveLoans = new ArrayList<String>();
+        HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<>();
+        ArrayList<String> clientsWithActiveLoans = new ArrayList<>();
+        ArrayList<String> clientIdsWithActiveLoans = new ArrayList<>();
         int startIndex = 1;
         int endIndex = 1;
         String clientName = "";
@@ -209,7 +209,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveLoans.size(); j++) {
             Name name = loanRepaymentWorkbook.createName();
-            name.setNameName("Account_" + clientsWithActiveLoans.get(j).replace(" ", "_") + "_" + clientIdsWithActiveLoans.get(j) + "_");
+            setSanitized(name, "Account_" + clientsWithActiveLoans.get(j) + "_" + clientIdsWithActiveLoans.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME + "!$T$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[0] + ":$T$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[1]);
@@ -305,7 +305,5 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(LoanRepaymentConstants.LOOKUP_PRINCIPAL_COL, rowHeader, "Lookup Principal");
         writeString(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, rowHeader, "Lookup Total Outstanding amount");
         writeString(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, rowHeader, "Lookup Loan Disbursement Date");
-
     }
-
 }

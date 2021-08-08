@@ -26,6 +26,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 import javax.persistence.Column;
@@ -36,7 +37,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.joda.time.LocalDate;
 
 @Embeddable
 public class InterestRateChartFields {
@@ -71,8 +71,8 @@ public class InterestRateChartFields {
             boolean isPrimaryGroupingByAmount) {
         this.name = name;
         this.description = description;
-        this.fromDate = fromDate.toDate();
-        this.endDate = (toDate == null) ? null : toDate.toDate();
+        this.fromDate = Date.from(fromDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endDate = (toDate == null) ? null : Date.from(toDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
     }
 
@@ -99,7 +99,7 @@ public class InterestRateChartFields {
             actualChanges.put(fromDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
             actualChanges.put(dateFormatParamName, dateFormat);
-            this.fromDate = newValue.toDate();
+            this.fromDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
@@ -108,7 +108,7 @@ public class InterestRateChartFields {
             actualChanges.put(endDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
             actualChanges.put(dateFormatParamName, dateFormat);
-            this.endDate = newValue.toDate();
+            this.endDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         if (command.isChangeInBooleanParameterNamed(isPrimaryGroupingByAmountParamName, this.isPrimaryGroupingByAmount)) {
@@ -137,7 +137,7 @@ public class InterestRateChartFields {
     public LocalDate getFromDateAsLocalDate() {
         LocalDate fromDate = null;
         if (this.fromDate != null) {
-            fromDate = new LocalDate(this.fromDate);
+            fromDate = LocalDate.ofInstant(this.fromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return fromDate;
     }
@@ -145,7 +145,7 @@ public class InterestRateChartFields {
     public LocalDate getEndDateAsLocalDate() {
         LocalDate endDate = null;
         if (this.endDate != null) {
-            endDate = new LocalDate(this.endDate);
+            endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return endDate;
     }

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.command;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Immutable command for loan bulk repayment.

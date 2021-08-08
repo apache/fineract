@@ -3129,6 +3129,91 @@
 										external service Configuration</a></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#creditbureau_configuration">Credit Bureau Configuration</a></td>
+								<td>CreditBureauConfiguration</td>
+								<td></td>
+								<td><a href="#creditbureau_get">List
+										all Integrated Credit-Bureau</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/configuration/{creditBureauId}</td>
+								<td><a href="#creditbureauconfiguration_create">Create
+										Configuration</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/config/{organisationCreditBureauId}</td>
+								<td></td>
+								<td><a href="#creditbureauconfiguration_get">Get
+										Configuration</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/configuration/{configurationId}</td>
+								<td></td>
+								<td></td>
+								<td><a href="#creditbureauconfiguration_update">Update
+										Configuration</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/organisationCreditBureau/{organisationCreditBureauId}</td>
+								<td><a href="#organisationCreditBureau_post">Create Organisation-Credit-Bureau</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/organisationCreditBureau</td>
+								<td></td>
+								<td><a href="#organisationcreditbureau_get">Get Organisation-Credit-Bureau</a></td>
+								<td><a href="#organisationalcreditbureau_update">Update Organisation-Credit-Bureau</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/mappings/{CreditBureauId}</td>
+								<td><a href="#organisationCreditBureau_loanproduct_post">Create CreditBureau-LoanProduct Mapping</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>CreditBureauConfiguration/mappings</td>
+								<td></td>
+								<td><a href="#allcreditbureau_loanproductMapping_get">Get all Mappings</a></td>
+								<td><a href="#creditbureau_LoanProduct_mapping_update">Update
+										Mappings</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#ThitsaworksCreditBureauIntegration">ThitsaWorks CreditBureau Integration</a></td>
+								<td>creditBureauIntegration/creditReport</td>
+								<td><a href="#fetchCreditReport_post">Fetch ThitsaWorks CreditReport</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>creditBureauIntegration/creditReport/{creditBureauId}</td>
+								<td></td>
+								<td><a href="#fetchSavedCreditReportInfo_get">Get Credit-Report Information</a></td>
+								<td></td>
+								<td></td>
+							</tr>
                             <tr>
                                 <td><a href="#twofactor_config_get">Two-Factor Configuration</a></td>
                                 <td>twofactor/configure</td>
@@ -11565,7 +11650,7 @@ Request Body:
 						</tr>
 						<tr class=alt>
 							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
-								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)
+								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true), daysInYearType
 							</td>
 						</tr>
 					</table>
@@ -11600,6 +11685,7 @@ Request Body:
     "linkAccountId" : "1",
     "fixedEmiAmount":1100,
     "maxOutstandingLoanBalance":"35000",
+    "daysInYearType":1,
     "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
     					"principal":22000,"approvedPrincipal":22000}],
     "datatables": [{
@@ -20686,6 +20772,574 @@ Content-Type: application/json
 				</code>
 				</div>
 			</div>
+			
+			<!-- Credit Bureau Configuration starts here -->
+			
+			<a id="creditbureau_configuration" name="creditbureau_configuration" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Credit Bureau Configuration</h3>
+					<p>Credit Bureau Configuration maintains the configurations of respective Integrated Credit Bureau :</p>
+					
+				
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>CreditBureauId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Id assigned to the Integrated Credit Bureau.</td>
+						</tr>
+						<tr class=alt>
+							<td>organisationCreditBureauId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Id assigned to the created Alias of the Integrated Credit Bureau.</td>
+						</tr>
+						<tr class=alt>
+							<td>configurationKey</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>configurationKey is the name of the parameter which is assigned for fetching the configurations.</td>
+						</tr>
+						<tr class=alt>
+							<td>value</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>value is the name of the parameter which is assigned to the configurationKey.</td>
+						</tr>
+						<tr class=alt>
+							<td>creditBureauConfigurationId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>creditBureauConfigurationId is the Id of the configurationKey-value pair of Credit Bureau Configuration.</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Description of the specific credit bureau configuration.</td>
+						</tr>
+					</table>
+				 </div>
+			     </div>
+			     
+			     	 <a id="creditbureau_get" name="creditbureau_get" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Integrated Credit Bureau</h4>
+					<p>Get Information of the Integrated Credit Bureau.</p>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration
+					</code>
+					<code class="method-request">
+GET CreditBureauConfiguration
+					</code>
+					<code class="method-response">
+{
+  "creditBureauId": 1,
+  "creditBureauName": "THITSAWORKS",
+  "country": "Myanmar",
+  "productName": "1",
+  "creditBureauSummary": "1 - THITSAWORKS - Myanmar",
+  "implementationKey": 1
+}]
+					</code>
+				</div>
+			</div>
+			     
+			     <a id="creditbureauconfiguration_create" name="creditbureauconfiguration_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Credit Bureau Configuration</h4>
+					<p>Create a Credit Bureau Configuration.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>creditBureauId, configkey</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>value, description</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/configuration/{creditBureauId}
+					</code>
+					<code class="method-request">
+POST CreditBureauConfiguration/configuration/1
+Content-Type: application/json
+Request Body:
+{
+"configkey":"configurationkey",
+"value":"value of the key",
+"description":"description of the configuration"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 10
+}
+					</code>
+				</div>
+			</div>
+			
+			 <a id="creditbureauconfiguration_get" name="creditbureauconfiguration_get" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Credit Bureau Configuration</h4>
+					<p>Get Credit Bureau Configuration.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>organisationCreditBureauId</td>
+						</tr>
+					</table>
+					<br/>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/config/{organisationCreditBureauId}
+					</code>
+					<code class="method-request">
+GET CreditBureauConfiguration/config/1
+					</code>
+					<code class="method-response">
+[{
+  "creditBureauConfigurationId": 1,
+  "configurationKey": "Password",
+  "value": "password",
+  "organizationCreditBureauId": 1,
+  "description": "password of the CreditBureauId:1"
+}, {
+  "creditBureauConfigurationId": 2,
+  "configurationKey": "SubscriptionId",
+  "value": "subscriptionId",
+  "organizationCreditBureauId": 1,
+  "description": "subscriptionId of the CreditBureauId:1"
+}
+					</code>
+				</div>
+			</div>	
+		
+			  <a id="creditbureauconfiguration_update" name="creditbureauconfiguration_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Credit Bureau Configuration</h4>
+					<p>Update a Credit Bureau Configuration.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>configurationId, value</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/configuration/{configurationId}
+					</code>
+					<code class="method-request">
+PUT CreditBureauConfiguration/configuration/10
+Content-Type: application/json
+Request Body:
+{
+"value":"changing value of the key",
+"description":"changing the description"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 10,
+  "changes": {
+    "value": "changing value of the key",
+    "description": "changing the description"
+  }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="organisationCreditBureau_post" name="organisationCreditBureau_post" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Post Organisation Credit Bureau</h4>
+					<p>Creating the Alias of the Integrated Credit Bureau with the different names with the Active status.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>alias,creditBureauId</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/organisationCreditBureau/{organisationCreditBureauId}
+					</code>
+					<code class="method-request">
+POST CreditBureauConfiguration/organisationCreditBureau/1
+Content-Type: application/json:
+{
+"alias":"CreditBureau of Thitsaworks",
+"isActive":false,
+"creditBureauId":"1"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			 <a id="organisationcreditbureau_get" name="organisationcreditbureau_get" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Organisation Credit Bureau</h4>
+					<p>Organisation Credit Bureau is the Alias of the Integrated Credit Bureau.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/organisationCreditBureau
+					</code>
+					<code class="method-request">
+GET CreditBureauConfiguration/organisationCreditBureau
+					</code>
+					<code class="method-response">
+[{
+  "organisationCreditBureauId": 1,
+  "alias": "CreditBureau of Thitsaworks",
+  "creditBureauId": 1,
+  "creditBureauName": "THITSAWORKS",
+  "creditBureauProduct": "1",
+  "creditBureauCountry": "Myanmar",
+  "creditBureauSummary": "1 - THITSAWORKS - Myanmar",
+  "isActive": false
+}]
+					</code>
+				</div>
+			</div>
+			
+			
+			<a id="organisationalcreditbureau_update" name="organisationalcreditbureau_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Organisational Credit Bureau</h4>
+					<p>Update Organisational Credit Bureau.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>creditBureauId</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT CreditBureauConfiguration/configuration/organisationCreditBureau
+                    </code>
+					<code class="method-request">
+PUT CreditBureauConfiguration/organisationCreditBureau
+Content-Type: application/json:
+{
+"creditBureauId":"1",
+"isActive":true
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="organisationCreditBureau_loanproduct_post" name="organisationCreditBureau_post" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Post Credit Bureau-LoanProduct Mapping</h4>
+					<p>Mapping of the Credit Bureau with Loan Products.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>loanProductId, isCreditcheckMandatory, skipCreditcheckInFailure, isActive, stalePeriod, locale</td>
+						</tr>
+					</table>
+					<br/>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/mappings/{CreditBureauId}
+					</code>
+					<code class="method-request">
+POST CreditBureauConfiguration/mappings/1
+Content-Type: application/json:
+{
+"loanProductId":"1",
+"isCreditcheckMandatory":true,
+"skipCreditcheckInFailure":true,
+"isActive":true,
+"stalePeriod":"5",
+"locale":"en"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			 <a id="allcreditbureau_loanproductMapping_get" name="allcreditbureau_loanproductMapping_get" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get All Credit Bureau Mappings</h4>
+					<p>Get All Credit Bureau - Loan Product Mappings.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/mappings
+					</code>
+					<code class="method-request">
+GET CreditBureauConfiguration/mappings
+					</code>
+					<code class="method-response">
+[{
+  "creditbureauLoanProductMappingId": 1,
+  "organisationCreditBureauId": 1,
+  "alias": "CreditBureau of Thitsaworks",
+  "creditbureauSummary": "1 - THITSAWORKS - Myanmar",
+  "loanProductName": "LOAN_PRODUCT_MYANMAR",
+  "loanProductId": 1,
+  "isCreditCheckMandatory": true,
+  "skipCrediCheckInFailure": true,
+  "stalePeriod": 5,
+  "isActive": true
+}]				</code>
+				</div>
+			</div>
+			
+			
+			
+			<a id="creditbureau_LoanProduct_mapping_update" name="creditbureau_LoanProduct_mapping_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Credit Bureau-Loan Product Mapping</h4>
+					<p>Update Credit Bureau-Loan Product Mapping.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>creditbureauLoanProductMappingId, isActive</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/fineract-provider/api/v1/CreditBureauConfiguration/mappings
+					</code>
+					<code class="method-request">
+PUT CreditBureauConfiguration/mappings
+Content-Type: application/json:
+{
+"creditbureauLoanProductMappingId":1,
+"isActive":false
+}
+					</code>
+					<code class="method-response">
+{
+ "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			<!-- Credit Bureau Configuration ends here -->
+			
+			<!--  THITSAWORKS Credit Bureau starts here -->
+			
+			<a id="ThitsaworksCreditBureauIntegration" name="ThitsaworksCreditBureauIntegration" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>ThitsaWorks Credit Bureau Integration</h3>
+					<p>ThitsaWorks Credit Bureau Integration fetches the Credit Report from the ThitsaWorks :</p>
+					
+				
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>creditBureauId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Id assigned to the Integrated Credit Bureau.</td>
+							</tr>
+							<tr class=alt>
+							<td>params</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>params is the Map parameter which has specific keys,values which are required to fetch the credit Reports.<br/>
+							NRC: to fetch ThitsaWorks Credit Reports.</td>
+							</tr>
+							<tr class=alt>
+							<td>creditReportNumber</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>creditReportNumber is the general term to access the Credit Reports.</td>
+							</tr>
+							</table>
+							</div>
+							</div>
+			
+			<a id="fetchCreditReport_post" name="fetchCreditReport_post" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Fetch Credit Report</h4>
+					<p>Fetches the Credit Report.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>NRC, creditBureauID</td>
+						</tr>
+					</table>
+					<br/>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/fineract-provider/api/v1/creditBureauIntegration/creditReport
+					</code>
+					<code class="method-request">
+POST creditBureauIntegration/creditReport
+Content-Type: application/json
+{
+"NRC":"12/KaMaRa(N)253429",
+"creditBureauID":"1"
+}
+					</code>
+					<code class="method-response">
+{
+   "creditBureauReportData":{
+      "name":"Lwin Moe",
+      "gender":"",
+      "address":"",
+      "creditScore":{
+         "Score":"N/A",
+         "Class":"N/A",
+         "Note":""
+      },
+      "borrowerInfo":{
+         "MainIdentifier":"1113294790",
+         "Name":"Lwin Moe",
+         "NRC":"12/KaMaRa(N)253429",
+         "Gender":"",
+         "DOB":"1990-12-25,1990-01-20",
+         "FatherName":"",
+         "Address":"",
+         "LastUpdateDtm":"Jul 8 2020 3:57PM",
+         "PrintedDtm":"Dec 16 2020 4:46AM"
+      }
+   }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="fetchSavedCreditReportInfo_get"name="fetchSavedCreditReportInfo_get" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Saved Credit Report Information</h4>
+					<p>Gets Saved Credit Report Information to download the credit Report which are stored in database.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>creditBureauID</td>
+						</tr>
+					</table>
+					<br/>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/fineract-provider/api/v1/creditBureauIntegration/creditReport/{creditBureauId}
+					</code>
+					<code class="method-request">
+GET creditBureauIntegration/creditReport/1
+					</code>
+					<code class="method-response">
+[{
+  "id": 3,
+  "creditBureauId": 1,
+  "nrc": "12/MaGaDa(N)253426"
+}, {
+  "id": 4,
+  "creditBureauId": 1,
+  "nrc": "12/KaMaRa(N)253426"
+}]
+					</code>
+				</div>
+			</div>
+			
+			
+			<!--  THITSAWORKS Credit Bureau ends here -->
 
             <a id="twofactor_config" name="twofactor_config"
                class="old-syle-anchor">&nbsp;</a>

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.staff.domain;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,9 +35,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
@@ -132,7 +133,7 @@ public class Staff extends AbstractPersistableCustom {
         this.active = isActive == null ? true : isActive;
         deriveDisplayName(firstname);
         if (joiningDate != null) {
-            this.joiningDate = joiningDate.toDateTimeAtStartOfDay().toDate();
+            this.joiningDate = Date.from(joiningDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
     }
 
@@ -213,7 +214,7 @@ public class Staff extends AbstractPersistableCustom {
             final String valueAsInput = command.stringValueOfParameterNamed(joiningDateParamName);
             actualChanges.put(joiningDateParamName, valueAsInput);
             final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
-            this.joiningDate = newValue.toDate();
+            this.joiningDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         }
 
         return actualChanges;

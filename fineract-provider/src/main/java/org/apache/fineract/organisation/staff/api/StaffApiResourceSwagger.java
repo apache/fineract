@@ -19,7 +19,7 @@
 package org.apache.fineract.organisation.staff.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 /**
  * Created by sanyam on 19/8/17.
@@ -39,7 +39,7 @@ final class StaffApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Long id;
+        public Long officeId;
         @Schema(example = "John")
         public String firstname;
         @Schema(example = "Doe")
@@ -62,9 +62,9 @@ final class StaffApiResourceSwagger {
     }
 
     @Schema(description = "PostStaffResponse")
-    public static final class PostStaffResponse {
+    public static final class CreateStaffResponse {
 
-        private PostStaffResponse() {
+        private CreateStaffResponse() {
 
         }
 
@@ -75,9 +75,9 @@ final class StaffApiResourceSwagger {
     }
 
     @Schema(description = "GetStaffResponse")
-    public static final class GetStaffResponse {
+    public static final class RetrieveOneResponse {
 
-        private GetStaffResponse() {
+        private RetrieveOneResponse() {
 
         }
 
@@ -119,9 +119,9 @@ final class StaffApiResourceSwagger {
     }
 
     @Schema(description = "PutStaffResponse")
-    public static final class PutStaffResponse {
+    public static final class UpdateStaffResponse {
 
-        private PutStaffResponse() {
+        private UpdateStaffResponse() {
 
         }
 

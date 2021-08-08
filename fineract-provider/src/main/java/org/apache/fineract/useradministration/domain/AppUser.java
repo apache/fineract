@@ -39,6 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -398,6 +399,17 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @Override
     public String getUsername() {
         return this.username;
+    }
+
+    public String getDisplayName() {
+        if (this.staff != null && StringUtils.isNotBlank(this.staff.displayName())) {
+            return this.staff.displayName();
+        }
+        String firstName = StringUtils.isNotBlank(this.firstname) ? this.firstname : "";
+        if (StringUtils.isNotBlank(this.lastname)) {
+            return firstName + " " + this.lastname;
+        }
+        return firstName;
     }
 
     @Override

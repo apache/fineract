@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.shareaccounts.data;
 
 import java.io.Serializable;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class ShareAccountApplicationTimelineData implements Serializable {

@@ -37,7 +37,7 @@ public class MoneyBuilder {
     }
 
     public MoneyBuilder with(final String withAmount) {
-        this.newAmount = BigDecimal.valueOf(Double.valueOf(withAmount));
+        this.newAmount = BigDecimal.valueOf(Double.parseDouble(withAmount));
         return this;
     }
 }

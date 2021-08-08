@@ -30,6 +30,7 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.webT
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,7 +68,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import retrofit.RetrofitError;
 
 @Service
 public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatformService {
@@ -78,17 +78,20 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
     private final TemplateRepository ugdTemplateRepository;
     private final HookCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
+    private final ProcessorHelper processorHelper;
 
     @Autowired
     public HookWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final HookRepository hookRepository,
             final HookTemplateRepository hookTemplateRepository, final TemplateRepository ugdTemplateRepository,
-            final HookCommandFromApiJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
+            final HookCommandFromApiJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper,
+            ProcessorHelper processorHelper) {
         this.context = context;
         this.hookRepository = hookRepository;
         this.hookTemplateRepository = hookTemplateRepository;
         this.ugdTemplateRepository = ugdTemplateRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.processorHelper = processorHelper;
     }
 
     @Transactional
@@ -270,7 +273,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
         for (final HookConfiguration conf : config) {
             final String fieldValue = conf.getFieldValue();
             if (conf.getFieldName().equals(contentTypeName)) {
-                if (!(fieldValue.equalsIgnoreCase("json") || fieldValue.equalsIgnoreCase("form"))) {
+                if ((!fieldValue.equalsIgnoreCase("json") && !fieldValue.equalsIgnoreCase("form"))) {
                     final String errorMessage = "content.type.must.be.json.or.form";
                     baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
                 }
@@ -278,16 +281,11 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
 
             if (conf.getFieldName().equals(payloadURLName)) {
                 try {
-                    final WebHookService service = ProcessorHelper.createWebHookService(fieldValue);
-                    service.sendEmptyRequest();
-                } catch (RetrofitError re) {
-                    // Swallow error if it's because of method not supported or
-                    // if url throws 404 - required for integration test,
-                    // url generated on 1st POST request
-                    if (re.getResponse() == null) {
-                        String errorMessage = "url.invalid";
-                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
-                    }
+                    final WebHookService service = processorHelper.createWebHookService(fieldValue);
+                    service.sendEmptyRequest().execute();
+                } catch (IOException re) {
+                    String errorMessage = "url.invalid";
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
                 }
             }
         }

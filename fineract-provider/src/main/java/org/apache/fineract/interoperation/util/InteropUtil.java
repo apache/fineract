@@ -41,6 +41,7 @@ public final class InteropUtil {
 
     public static final String ACTION_TRANSFER_PREPARE = "PREPARE";
     public static final String ACTION_TRANSFER_COMMIT = "CREATE";
+    public static final String ACTION_TRANSFER_RELEASE = "RELEASE";
 
     public static final String PARAM_LOCALE = "locale";
     public static final String PARAM_DATE_FORMAT = "dateFormat";

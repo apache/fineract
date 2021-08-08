@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.shareproducts.service;
 
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
@@ -41,7 +42,6 @@ import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividentPa
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
 import org.apache.fineract.portfolio.shareproducts.exception.DividentProcessingException;
 import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDataSerializer;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;

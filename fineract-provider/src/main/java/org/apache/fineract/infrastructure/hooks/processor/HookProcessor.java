@@ -24,6 +24,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 public interface HookProcessor {
 
     void process(Hook hook, AppUser appUser, String payload, String entityName, String actionName, String tenantIdentifier,
-            String authToken);
+            String authToken) throws Exception;
 
 }

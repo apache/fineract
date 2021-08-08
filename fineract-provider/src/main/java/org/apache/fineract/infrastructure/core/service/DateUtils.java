@@ -20,6 +20,11 @@ package org.apache.fineract.infrastructure.core.service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +32,6 @@ import java.util.TimeZone;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 public final class DateUtils {
 
@@ -40,11 +39,11 @@ public final class DateUtils {
 
     }
 
-    public static DateTimeZone getDateTimeZoneOfTenant() {
+    public static ZoneId getDateTimeZoneOfTenant() {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        DateTimeZone zone = null;
+        ZoneId zone = ZoneId.systemDefault();
         if (tenant != null) {
-            zone = DateTimeZone.forID(tenant.getTimezoneId());
+            zone = ZoneId.of(tenant.getTimezoneId());
         }
         return zone;
     }
@@ -59,39 +58,26 @@ public final class DateUtils {
     }
 
     public static Date getDateOfTenant() {
-        return getLocalDateOfTenant().toDateTimeAtStartOfDay().toDate();
+        return Date.from(getLocalDateOfTenant().atStartOfDay(getDateTimeZoneOfTenant()).toInstant());
     }
 
     public static LocalDate getLocalDateOfTenant() {
-
-        LocalDate today = new LocalDate();
-
-        final DateTimeZone zone = getDateTimeZoneOfTenant();
-        if (zone != null) {
-            today = new LocalDate(zone);
-        }
-
+        final ZoneId zone = getDateTimeZoneOfTenant();
+        LocalDate today = LocalDate.now(zone);
         return today;
     }
 
     public static LocalDateTime getLocalDateTimeOfTenant() {
-
-        LocalDateTime today = new LocalDateTime();
-
-        final DateTimeZone zone = getDateTimeZoneOfTenant();
-        if (zone != null) {
-            today = new LocalDateTime(zone);
-        }
-
+        final ZoneId zone = getDateTimeZoneOfTenant();
+        LocalDateTime today = LocalDateTime.now(zone);
         return today;
     }
 
     public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
 
         try {
-            final DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
-            dateStringFormat.withZone(getDateTimeZoneOfTenant());
-            final DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
+            final DateTimeFormatter dateStringFormat = DateTimeFormatter.ofPattern(pattern).withZone(getDateTimeZoneOfTenant());
+            final ZonedDateTime dateTime = ZonedDateTime.parse(stringDate, dateStringFormat);
             return dateTime.toLocalDate();
         } catch (final IllegalArgumentException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

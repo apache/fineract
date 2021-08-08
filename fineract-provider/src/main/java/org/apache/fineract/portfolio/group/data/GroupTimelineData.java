@@ -19,8 +19,8 @@
 package org.apache.fineract.portfolio.group.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object represent the important time-line events of a group/center.

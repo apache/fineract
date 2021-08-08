@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.savings.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -86,9 +88,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -121,7 +120,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper;
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     // allowed column names for sorting the query result
     private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId", "officeName"));
@@ -226,7 +225,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         LocalDate today = DateUtils.getLocalDateOfTenant();
 
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.depositAccountForMaturityRowMapper,
-                new Object[] { formatter.print(today), DepositAccountType.FIXED_DEPOSIT.getValue(),
+                new Object[] { formatter.format(today), DepositAccountType.FIXED_DEPOSIT.getValue(),
                         DepositAccountType.RECURRING_DEPOSIT.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
@@ -536,7 +535,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         return this.jdbcTemplate.queryForList(sb.toString(), SavingsAccountStatusType.ACTIVE.getValue(),
                 CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue(),
-                formatter.print(DateUtils.getLocalDateOfTenant()));
+                formatter.format(DateUtils.getLocalDateOfTenant()));
     }
 
     private abstract static class DepositAccountMapper implements RowMapper<DepositAccountData> {

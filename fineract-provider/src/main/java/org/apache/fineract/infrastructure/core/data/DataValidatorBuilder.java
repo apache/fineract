@@ -22,6 +22,8 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
 
@@ -44,6 +46,20 @@ public class DataValidatorBuilder {
     private Integer arrayIndex;
     private Object value;
     private boolean ignoreNullValue = false;
+
+    /**
+     * Default constructor used to start a new "validation chain".
+     */
+    public DataValidatorBuilder() {
+        this(new ArrayList<>());
+    }
+
+    /**
+     * Constructor used to "continue" an existing "validation chain".
+     *
+     * @param dataValidationErrors
+     *            an existing list of {@link ApiParameterError} to add new validation errors to
+     */
 
     public DataValidatorBuilder(final List<ApiParameterError> dataValidationErrors) {
         this.dataValidationErrors = dataValidationErrors;
@@ -383,7 +399,7 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal number = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (number.compareTo(BigDecimal.ZERO) <= 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".not.greater.than.zero");
@@ -406,7 +422,7 @@ public class DataValidatorBuilder {
         }
 
         if (this.value != null) {
-            final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal number = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (number.compareTo(BigDecimal.ZERO) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".not.zero.or.greater");
@@ -790,7 +806,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder inMinAndMaxAmountRange(final BigDecimal minimumAmount, final BigDecimal maximumAmount) {
         if (minimumAmount != null && maximumAmount != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(minimumAmount) < 0 || amount.compareTo(maximumAmount) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".amount.is.not.within.min.max.range");
@@ -808,7 +824,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notLessThanMin(final BigDecimal min) {
         if (min != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(min) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.less.than.min");
@@ -825,7 +841,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notGreaterThanMax(final BigDecimal max) {
         if (max != null && this.value != null) {
-            final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
+            final BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(this.value.toString()));
             if (amount.compareTo(max) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.max");
@@ -1103,4 +1119,15 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    /**
+     * Throws Exception if validation errors.
+     *
+     * @throws PlatformApiDataValidationException
+     *             unchecked exception (RuntimeException) thrown if there are any validation error
+     */
+    public void throwValidationErrors() throws PlatformApiDataValidationException {
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
 }

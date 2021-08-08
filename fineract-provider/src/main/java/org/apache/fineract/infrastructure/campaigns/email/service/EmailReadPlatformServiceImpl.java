@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,6 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -130,46 +130,41 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     @Override
     public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
-                + EmailMessageStatusType.PENDING.getValue() + sqlPlusLimit;
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum =? " + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.PENDING.getValue());
     }
 
     @Override
     public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = " + EmailMessageStatusType.SENT.getValue()
-                + sqlPlusLimit;
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.SENT.getValue());
     }
 
     @Override
     public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
         final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
-        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum = "
-                + EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
+        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum =? " + sqlPlusLimit;
 
-        return this.jdbcTemplate.queryForList(sql, Long.class);
+        return this.jdbcTemplate.queryForList(sql, Long.class, EmailMessageStatusType.SENT.getValue());
     }
 
     @Override
     public Collection<EmailData> retrieveAllDelivered(final Integer limit) {
         final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
-                + EmailMessageStatusType.DELIVERED.getValue() + sqlPlusLimit;
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.DELIVERED.getValue());
     }
 
     @Override
     public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = " + EmailMessageStatusType.FAILED.getValue()
-                + sqlPlusLimit;
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = ?" + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailRowMapper, EmailMessageStatusType.FAILED.getValue());
     }
 
     @Override

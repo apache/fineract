@@ -1,0 +1,27 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/inthepocket/plantuml-styles/master/styles.plantuml!0
+
+!include <logos/flask>
+!include <logos/kafka>
+!include <logos/kotlin>
+!include <logos/cassandra>
+
+title Gil Barbara's logos example
+
+' skinparam monochrome true
+
+rectangle "<$flask>\nwebapp" as webapp
+queue "<$kafka>" as kafka
+rectangle "<$kotlin>\ndaemon" as daemon
+database "<$cassandra>" as cassandra
+
+webapp -> kafka
+kafka -> daemon
+daemon --> cassandra
+
+database "Database"
+package "Package"
+node "ParentNode" {
+component "Subcomponent"
+}
+@enduml

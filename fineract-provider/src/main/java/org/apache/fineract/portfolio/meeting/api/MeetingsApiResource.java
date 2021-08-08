@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.meeting.api;
 
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESOURCE_NAME;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -60,7 +62,6 @@ import org.apache.fineract.portfolio.meeting.attendance.service.ClientAttendance
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.exception.MeetingNotSupportedResourceException;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Component;
 @Path("/{entityType}/{entityId}/meetings")
 @Component
 @Scope("singleton")
+@Tag(name = "Meetings", description = "")
 public class MeetingsApiResource {
 
     private final PlatformSecurityContext context;

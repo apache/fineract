@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +31,6 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatfor
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.CompoundInterestHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -91,26 +92,26 @@ public final class SavingsHelper {
             Integer financialYearBeginningMonth) {
 
         LocalDate periodEndDate = interestPostingUpToDate;
-        final Integer monthOfYear = periodStartDate.getMonthOfYear();
+        final Integer monthOfYear = periodStartDate.getMonthValue();
         financialYearBeginningMonth--;
         if (financialYearBeginningMonth == 0) {
             financialYearBeginningMonth = 12;
         }
 
         final ArrayList<LocalDate> quarterlyDates = new ArrayList<>();
-        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
-        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(3).withYear(periodStartDate.getYear())
-                .dayOfMonth().withMaximumValue());
-        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
-                .dayOfMonth().withMaximumValue());
-        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(9).withYear(periodStartDate.getYear())
-                .dayOfMonth().withMaximumValue());
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(3).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
+        quarterlyDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(9).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
         Collections.sort(quarterlyDates);
 
         final ArrayList<LocalDate> biannualDates = new ArrayList<>();
-        biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
-        biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
-                .dayOfMonth().withMaximumValue());
+        biannualDates.add(periodStartDate.withMonth(financialYearBeginningMonth).with(TemporalAdjusters.lastDayOfMonth()));
+        biannualDates.add(periodStartDate.withMonth(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .with(TemporalAdjusters.lastDayOfMonth()));
         Collections.sort(biannualDates);
         boolean isEndDateSet = false;
 
@@ -119,7 +120,7 @@ public final class SavingsHelper {
             break;
             case MONTHLY:
                 // produce period end date on last day of current month
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
             break;
             case QUATERLY:
                 for (LocalDate quarterlyDate : quarterlyDates) {
@@ -131,7 +132,7 @@ public final class SavingsHelper {
                 }
 
                 if (!isEndDateSet) {
-                    periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                    periodEndDate = quarterlyDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
                 }
             break;
             case BIANNUAL:
@@ -144,17 +145,17 @@ public final class SavingsHelper {
                 }
 
                 if (!isEndDateSet) {
-                    periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                    periodEndDate = biannualDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
                 }
             break;
             case ANNUAL:
                 if (financialYearBeginningMonth < monthOfYear) {
-                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
                     periodEndDate = periodEndDate.plusYears(1);
                 } else {
-                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
                 }
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
             break;
         }
         // interest posting always occurs on next day after the period end date.

@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.calendar.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -31,8 +33,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 /**
  * Immutable data object representing a Calendar.
@@ -264,17 +264,17 @@ public final class CalendarData implements Serializable {
         final String location = null;
         final LocalDate startDate = null;
         final LocalDate endDate = null;
-        final Integer duration = Integer.valueOf(0);
+        final Integer duration = 0;
         final EnumOptionData type = CalendarEnumerations.calendarType(CalendarType.COLLECTION);
         final boolean repeating = false;
         final String recurrence = null;
         final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarFrequencyType.DAILY);
-        final Integer interval = Integer.valueOf(1);
+        final Integer interval = 1;
         final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.MO);
         final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(NthDayType.ONE);
         final EnumOptionData remindBy = CalendarEnumerations.calendarRemindBy(CalendarRemindBy.EMAIL);
-        final Integer firstReminder = Integer.valueOf(0);
-        final Integer secondReminder = Integer.valueOf(0);
+        final Integer firstReminder = 0;
+        final Integer secondReminder = 0;
         final String humanReadable = null;
         final Collection<LocalDate> recurringDates = null;
         final Collection<LocalDate> nextTenRecurringDates = null;
@@ -516,13 +516,12 @@ public final class CalendarData implements Serializable {
             return false;
         }
         CalendarData that = (CalendarData) o;
-        return Objects.equals(repeating, that.repeating) && Objects.equals(id, that.id)
-                && Objects.equals(calendarInstanceId, that.calendarInstanceId) && Objects.equals(entityId, that.entityId)
-                && Objects.equals(entityType, that.entityType) && Objects.equals(title, that.title)
-                && Objects.equals(description, that.description) && Objects.equals(location, that.location)
-                && Objects.equals(startDate, that.startDate) && Objects.equals(endDate, that.endDate)
-                && Objects.equals(meetingTime, that.meetingTime) && Objects.equals(duration, that.duration)
-                && Objects.equals(type, that.type) && Objects.equals(recurrence, that.recurrence)
+        return (repeating == that.repeating) && Objects.equals(id, that.id) && Objects.equals(calendarInstanceId, that.calendarInstanceId)
+                && Objects.equals(entityId, that.entityId) && Objects.equals(entityType, that.entityType)
+                && Objects.equals(title, that.title) && Objects.equals(description, that.description)
+                && Objects.equals(location, that.location) && Objects.equals(startDate, that.startDate)
+                && Objects.equals(endDate, that.endDate) && Objects.equals(meetingTime, that.meetingTime)
+                && Objects.equals(duration, that.duration) && Objects.equals(type, that.type) && Objects.equals(recurrence, that.recurrence)
                 && Objects.equals(frequency, that.frequency) && Objects.equals(interval, that.interval)
                 && Objects.equals(repeatsOnDay, that.repeatsOnDay) && Objects.equals(repeatsOnNthDayOfMonth, that.repeatsOnNthDayOfMonth)
                 && Objects.equals(remindBy, that.remindBy) && Objects.equals(firstReminder, that.firstReminder)

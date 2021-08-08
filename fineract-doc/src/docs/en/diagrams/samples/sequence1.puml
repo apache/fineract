@@ -1,0 +1,35 @@
+@startuml
+'!includeurl https://cdn.jsdelivr.net/gh/HSLdevcom/hsl-plantuml-theme/hsl-theme.iuml
+'!define LIGHTBLUE
+'!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+'!includeurl https://github.com/rbkmoney/plantuml-toolset/raw/master/skin.iwsd
+'!includeurl https://raw.githubusercontent.com/inthepocket/plantuml-styles/master/styles.plantuml!0
+
+!includeurl https://github.com/rbkmoney/plantuml-toolset/raw/master/super-serious-skin.iwsd
+
+skinparam BackgroundColor #ffffff
+
+title Publish(er) Jobs Workers (Successful Block Copy)
+
+hide footbox
+
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: Another authentication Response
+
+Alice -> Bob: Authentication Request
+...
+Bob --> Alice: Authentication Response
+    activate Alice
+    note left of Alice
+        Drink that potion!
+    end note
+    deactivate Alice
+    activate Bob
+... 5 minutes later ...
+Bob --> Alice: Bye!
+    deactivate Bob
+@enduml

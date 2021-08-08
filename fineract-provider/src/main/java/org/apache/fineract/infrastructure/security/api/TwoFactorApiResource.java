@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.DefaultValue;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("twofactor")
 @Scope("singleton")
+@Tag(name = "Two Factor", description = "")
 public class TwoFactorApiResource {
 
     private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;

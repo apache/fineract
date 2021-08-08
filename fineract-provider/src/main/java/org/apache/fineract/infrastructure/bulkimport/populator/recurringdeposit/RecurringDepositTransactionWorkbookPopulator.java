@@ -44,11 +44,11 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 
 public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private OfficeSheetPopulator officeSheetPopulator;
-    private ClientSheetPopulator clientSheetPopulator;
-    private ExtrasSheetPopulator extrasSheetPopulator;
+    private final OfficeSheetPopulator officeSheetPopulator;
+    private final ClientSheetPopulator clientSheetPopulator;
+    private final ExtrasSheetPopulator extrasSheetPopulator;
 
-    private List<SavingsAccountData> savingsAccounts;
+    private final List<SavingsAccountData> savingsAccounts;
 
     public RecurringDepositTransactionWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator,
             ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator,
@@ -145,7 +145,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
             Name name = savingsTransactionWorkbook.createName();
             if (officeNameToBeginEndIndexesOfClients != null) {
-                name.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
+                setSanitized(name, "Client_" + officeNames.get(i));
                 name.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfClients[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
@@ -179,8 +179,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveSavings.size(); j++) {
             Name name = savingsTransactionWorkbook.createName();
-            name.setNameName(
-                    "Account_" + clientsWithActiveSavings.get(j).replaceAll(" ", "_") + "_" + clientIdsWithActiveSavings.get(j) + "_");
+            setSanitized(name, "Account_" + clientsWithActiveSavings.get(j) + "_" + clientIdsWithActiveSavings.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME + "!$Q$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$Q$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);
@@ -212,7 +211,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
             }
             writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
                     "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
-                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthOfYear() + "/"
+                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
                             + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
                     dateCellStyle, dateFormat);
         }

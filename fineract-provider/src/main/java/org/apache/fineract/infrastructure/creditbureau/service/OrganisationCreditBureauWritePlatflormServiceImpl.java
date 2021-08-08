@@ -76,11 +76,11 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
         final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
 
-        final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
 
         final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);
 
-        orgcb.setIsActive(is_active);
+        orgcb.setIsActive(isActive);
 
         organisationCreditBureauRepository.saveAndFlush(orgcb);
 

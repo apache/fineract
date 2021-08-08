@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.organisation.holiday.data;
 
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
 
 public class HolidayData {
 

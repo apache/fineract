@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.sms.service;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,8 +55,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -312,8 +311,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             throw new InvalidParameterException("");
         }
 
-        DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("HH:mm");
-        DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("MMM:d:yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM:d:yyyy");
 
         smsParams.put("id", loanTransaction.getLoan().getClientId());
         smsParams.put("firstname", client.getFirstname());
@@ -334,8 +333,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
 
         smsParams.put("repaymentAmount", loanTransaction.getAmount(loan.getCurrency()));
-        smsParams.put("RepaymentDate", loanTransaction.getCreatedDateTime().toLocalDate().toString(dateFormatter));
-        smsParams.put("RepaymentTime", loanTransaction.getCreatedDateTime().toLocalTime().toString(timeFormatter));
+        smsParams.put("RepaymentDate", loanTransaction.getCreatedDateTime().toLocalDate().format(dateFormatter));
+        smsParams.put("RepaymentTime", loanTransaction.getCreatedDateTime().toLocalTime().format(timeFormatter));
 
         if (loanTransaction.getPaymentDetail() != null) {
             smsParams.put("receiptNumber", loanTransaction.getPaymentDetail().getReceiptNumber());
@@ -355,7 +354,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         // transactionDate
         HashMap<String, Object> smsParams = new HashMap<String, Object>();
         SavingsAccount savingsAccount = savingsAccountTransaction.getSavingsAccount();
-        DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("MMM:d:yyyy");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM:d:yyyy");
         smsParams.put("clientId", client.getId());
         smsParams.put("firstname", client.getFirstname());
         smsParams.put("middlename", client.getMiddlename());
@@ -368,7 +367,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         smsParams.put("depositAmount", savingsAccountTransaction.getAmount(savingsAccount.getCurrency()));
         smsParams.put("balance", savingsAccount.getWithdrawableBalance());
         smsParams.put("officeId", client.getOffice().getId());
-        smsParams.put("transactionDate", savingsAccountTransaction.getTransactionLocalDate().toString(dateFormatter));
+        smsParams.put("transactionDate", savingsAccountTransaction.getTransactionLocalDate().format(dateFormatter));
         smsParams.put("savingsTransactionId", savingsAccountTransaction.getId());
 
         if (client.getStaff() != null) {
