@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -240,6 +241,17 @@ final class ClientsApiResourceSwagger {
 
         private PostClientsRequest() {}
 
+        static final class PostClientsDatatable {
+
+            private PostClientsDatatable() {}
+
+            @Schema(example = "Client Beneficiary information")
+            public String registeredTableName;
+            @Schema(example = "data")
+            public HashMap<String, Object> data;
+
+        }
+
         @Schema(example = "1")
         public Integer officeId;
         @Schema(example = "Client of group")
@@ -254,6 +266,9 @@ final class ClientsApiResourceSwagger {
         public Boolean active;
         @Schema(example = "04 March 2009")
         public String activationDate;
+        @Schema(description = "List of PostClientsDatatable")
+        public List<PostClientsDatatable> datatables;
+
     }
 
     @Schema(description = "PostClientsResponse")
