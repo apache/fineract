@@ -23,6 +23,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
   - url: https://devcredits.velocitycareerlabs.io/fineract-provider/api/v1
+  - url: https://localhost:8443/fineract-provider/api/v1
 components:
   securitySchemes:
     basicAuth:
