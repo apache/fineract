@@ -471,6 +471,10 @@ final class SavingsProductsApiResourceSwagger {
             public String name;
             @Schema(example = "0")
             public Integer position;
+            @Schema(example = "Money Transfer")
+            public String description;
+            @Schema(example = "true")
+            public Boolean isCashPayment;
         }
 
         static final class GetSavingsProductsAccountingMappingOptions {
