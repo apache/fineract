@@ -723,7 +723,7 @@ final class SavingsProductsApiResourceSwagger {
         public Set<GetSavingsProductsWithdrawalFeeTypeOptions> withdrawalFeeTypeOptions;
         public Set<GetSavingsProductsPaymentTypeOptions> paymentTypeOptions;
         public Set<GetSavingsProductsTemplateAccountingRule> accountingRuleOptions;
-        public Set<GetSavingsProductsAccountingMappingOptions> accountingMappingOptions;
+        public GetSavingsProductsAccountingMappingOptions accountingMappingOptions;
         public Set<GetSavingsProductsChargeOptions> chargeOptions;
     }
 
