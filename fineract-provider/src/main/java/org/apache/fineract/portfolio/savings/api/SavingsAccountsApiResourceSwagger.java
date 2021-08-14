@@ -91,6 +91,22 @@ final class SavingsAccountsApiResourceSwagger {
 
                 @Schema(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
+                @Schema(example = "[2013, 4, 8]")
+                public LocalDate approvedOnDate;
+                @Schema(example = "[2014, 3, 1]")
+                public LocalDate activatedOnDate;
+                @Schema(example = "username")
+                public String submittedByUsername;
+                @Schema(example = "name")
+                public String submittedByFirstname;
+                @Schema(example = "lastname")
+                public String submittedByLastname;
+                @Schema(example = "mifos")
+                public String approvedByUsername;
+                @Schema(example = "name")
+                public String approvedByFirstname;
+                @Schema(example = "lastname")
+                public String approvedByLastname;
             }
 
             static final class GetSavingsCurrency {
