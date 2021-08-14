@@ -336,7 +336,9 @@ final class SavingsAccountsApiResourceSwagger {
         @Schema(example = "en")
         public String locale;
         @Schema(example = "05 September 2014")
-        public String unassignedDate;
+        public String approvedOnDate;
+        @Schema(example = "05 September 2014")
+        public String activatedOnDate;
     }
 
     @Schema(description = "PostSavingsAccountsAccountIdResponse")
