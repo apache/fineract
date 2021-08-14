@@ -69,7 +69,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
-                public String description;
+                public String value;
                 @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
                 @Schema(example = "false")
@@ -120,7 +120,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
                 public String code;
                 @Schema(example = "Daily")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestPostingPeriodType {
@@ -132,7 +132,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
                 public String code;
                 @Schema(example = "Monthly")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestCalculationType {
@@ -144,7 +144,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsInterestCalculationType.dailybalance")
                 public String code;
                 @Schema(example = "Daily Balance")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestCalculationDaysInYearType {
@@ -156,7 +156,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
                 public String code;
                 @Schema(example = "365 Days")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsSummary {
