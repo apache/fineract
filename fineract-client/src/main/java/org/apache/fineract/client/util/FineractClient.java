@@ -108,6 +108,7 @@ import org.apache.fineract.client.services.RunReportsApi;
 import org.apache.fineract.client.services.SavingsAccountApi;
 import org.apache.fineract.client.services.SavingsChargesApi;
 import org.apache.fineract.client.services.SavingsProductApi;
+import org.apache.fineract.client.services.SavingsAccountTransactionsApi;
 import org.apache.fineract.client.services.SchedulerApi;
 import org.apache.fineract.client.services.ScoreCardApi;
 import org.apache.fineract.client.services.SearchApiApi;
@@ -235,6 +236,7 @@ public final class FineractClient {
     public final SavingsAccountApi savingsAccounts;
     public final SavingsChargesApi savingsAccountCharges;
     public final SavingsProductApi savingsProducts;
+    public final SavingsAccountTransactionsApi savingsTransactions;
     public final SchedulerApi jobsScheduler;
     public final ScoreCardApi surveyScorecards;
     public final SearchApiApi search;
@@ -344,6 +346,7 @@ public final class FineractClient {
         savingsAccounts = retrofit.create(SavingsAccountApi.class);
         savingsAccountCharges = retrofit.create(SavingsChargesApi.class);
         savingsProducts = retrofit.create(SavingsProductApi.class);
+        savingsTransactions = retrofit.create(SavingsAccountTransactionsApi.class);
         jobsScheduler = retrofit.create(SchedulerApi.class);
         surveyScorecards = retrofit.create(ScoreCardApi.class);
         search = retrofit.create(SearchApiApi.class);
