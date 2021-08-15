@@ -41,10 +41,10 @@ final class DatatablesApiResourceSwagger {
         }
 
         @Schema(example = "m_client")
-        public String appTableName;
+        public String applicationTableName;
         @Schema(example = "extra_client_details")
-        public String datatableName;
-        public List<ResultsetColumnHeaderData> column;
+        public String registeredTableName;
+        public List<ResultsetColumnHeaderData> columnHeaderData;
     }
 
     @Schema(description = "PostDataTablesRequest")
