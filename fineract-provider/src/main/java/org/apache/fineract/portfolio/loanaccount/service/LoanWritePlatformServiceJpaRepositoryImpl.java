@@ -1607,10 +1607,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId()));
 
         if (!loanTransaction.getTypeOf().getCode().equals(LoanTransactionType.WAIVE_CHARGES.getCode())) {
-            /**
-             * TODO: Add proper validation
-             */
-            throw new InvalidLoanTransactionTypeException("", "", "Transaction is not a waive charge type.");
+            throw new InvalidLoanTransactionTypeException("Undo Waive Charge", "Waive an Installment Charge First",
+                    "Transaction is not a waive charge type.");
         }
 
         Set<LoanChargePaidBy> loanChargePaidBySet = loanTransaction.getLoanChargesPaid();
@@ -1725,9 +1723,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 changes.put("amount", amountWaived);
 
             } else {
-                /**
-                 * TODO: Throw installment number should not be empty error.
-                 */
                 throw new InstallmentNotFoundException(command.entityId());
             }
         }
