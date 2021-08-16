@@ -56,6 +56,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstr
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
@@ -73,6 +74,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -101,6 +104,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
+    private final PostDatedChecksRepository postDatedChecksRepository;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
@@ -114,7 +118,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
             final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService,
-            final StandingInstructionRepository standingInstructionRepository) {
+            final StandingInstructionRepository standingInstructionRepository, final PostDatedChecksRepository postDatedChecksRepository) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -132,6 +136,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.businessEventNotifierService = businessEventNotifierService;
         this.loanUtilService = loanUtilService;
         this.standingInstructionRepository = standingInstructionRepository;
+        this.postDatedChecksRepository = postDatedChecksRepository;
     }
 
     @Transactional
@@ -226,6 +231,42 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         builderResult.withEntityId(newRepaymentTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());
+
+        newRepaymentTransaction.getOverPaymentPortion(loan.getCurrency());
+
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            // Mark Post Dated Check as paid.
+            final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction
+                    .getLoanTransactionToRepaymentScheduleMappings();
+
+            if (loanTransactionToRepaymentScheduleMappings != null && loanTransactionToRepaymentScheduleMappings.size() != 0) {
+                for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
+                    final boolean isPaid = loanTransactionToRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment()
+                            .isNotFullyPaidOff();
+                    final PostDatedChecks postDatedChecks = loanTransactionToRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment()
+                            .getPostDatedCheck();
+
+                    /**
+                     * TODO: Remove this exception throwing as this post dated checks is not a mandatory field.
+                     */
+                    // if (postDatedChecks == null) {
+                    // throw new PostDatedCheckNotFoundException(
+                    // loanTransactionToRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId(),
+                    // loanTransactionToRepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getInstallmentNumber());
+                    // }
+
+                    if (postDatedChecks != null) {
+                        if (!isPaid) {
+                            postDatedChecks.setIsPaid(1);
+                        } else {
+                            postDatedChecks.setIsPaid(0);
+                        }
+                        this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        break;
+                    }
+                }
+            }
+        }
 
         return newRepaymentTransaction;
     }

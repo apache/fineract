@@ -140,6 +140,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.rate.domain.Rate;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,7 +317,7 @@ public class Loan extends AbstractPersistableCustom {
     private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;
 
     @OrderBy(value = "installmentNumber")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
     @OrderBy(value = "dateOf, id")
@@ -351,6 +352,9 @@ public class Loan extends AbstractPersistableCustom {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy(value = "expectedDisbursementDate, id")
     private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<PostDatedChecks> postDatedChecks = new ArrayList<>();
 
     @OrderBy(value = "termApplicableFrom, id")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
@@ -518,6 +522,10 @@ public class Loan extends AbstractPersistableCustom {
         // rates added here
         this.rates = rates;
 
+    }
+
+    public Integer getNumberOfRepayments() {
+        return this.loanRepaymentScheduleDetail.getNumberOfRepayments();
     }
 
     private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
@@ -2803,6 +2811,11 @@ public class Loan extends AbstractPersistableCustom {
         updateLoanOutstandingBalaces();
         charge.markAsFullyPaid();
         return chargesPayment;
+    }
+
+    public void removePostDatedChecks() {
+        List<PostDatedChecks> postDatedChecks = new ArrayList<>();
+        this.postDatedChecks = postDatedChecks;
     }
 
     public Map<String, Object> undoDisbursal(final ScheduleGeneratorDTO scheduleGeneratorDTO, final List<Long> existingTransactionIds,
@@ -6201,6 +6214,14 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return amount;
+    }
+
+    public void updatePostDatedChecks(final List<PostDatedChecks> postDatedChecks) {
+        this.postDatedChecks = postDatedChecks;
+    }
+
+    public List<PostDatedChecks> getPostDatedChecks() {
+        return this.postDatedChecks;
     }
 
     public void updateWriteOffReason(CodeValue writeOffReason) {
