@@ -881,7 +881,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder updatePostDatedCheck(final Long id, final Long loanId) {
         this.actionName = "UPDATE";
-        this.entityName = "REPAYMENTWITHPOSTDATEDCHECKS";
+        this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
         this.entityId = id;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/repaymentwithpostdatedchecks/" + id;
@@ -890,7 +890,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder bouncedCheck(final Long id, final Long loanId) {
         this.actionName = "BOUNCE";
-        this.entityName = "REPAYMENTWITHPOSTDATEDCHECKS";
+        this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
         this.entityId = id;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/repaymentwithpostdatedchecks/" + id;
@@ -899,7 +899,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder deletePostDatedCheck(final Long id, final Long loanId) {
         this.actionName = "DELETE";
-        this.entityName = "REPAYMENTWITHPOSTDATEDCHECKS";
+        this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
         this.entityId = id;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/repaymentwithpostdatedchecks/" + id;

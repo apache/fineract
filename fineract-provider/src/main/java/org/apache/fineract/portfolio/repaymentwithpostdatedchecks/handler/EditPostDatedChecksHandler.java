@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "REPAYMENTWITHPOSTDATEDCHECKS", action = "UPDATE")
+@CommandType(entity = "REPAYMENT_WITH_POSTDATEDCHECKS", action = "UPDATE")
 public class EditPostDatedChecksHandler implements NewCommandSourceHandler {
 
     private final RepaymentWithPostDatedChecksWritePlatformService repaymentWithPostDatedChecksWritePlatformService;

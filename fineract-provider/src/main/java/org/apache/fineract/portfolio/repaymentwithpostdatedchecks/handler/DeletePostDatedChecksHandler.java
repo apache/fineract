@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "REPAYMENTWITHPOSTDATEDCHECKS", action = "DELETE")
+@CommandType(entity = "REPAYMENT_WITH_POSTDATEDCHECKS", action = "DELETE")
 public class DeletePostDatedChecksHandler implements NewCommandSourceHandler {
 
     private final RepaymentWithPostDatedChecksWritePlatformService repaymentWithPostDatedChecksWritePlatformService;

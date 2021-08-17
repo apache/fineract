@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "REPAYMENTWITHPOSTDATEDCHECKS", action = "BOUNCE")
+@CommandType(entity = "REPAYMENT_WITH_POSTDATEDCHECKS", action = "BOUNCE")
 public class BouncePostDatedCheckHandler implements NewCommandSourceHandler {
 
     private final RepaymentWithPostDatedChecksWritePlatformService repaymentWithPostDatedChecksWritePlatformService;

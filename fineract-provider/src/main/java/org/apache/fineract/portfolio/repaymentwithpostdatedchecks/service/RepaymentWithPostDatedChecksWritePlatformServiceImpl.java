@@ -63,12 +63,6 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
 
     @Transactional
     @Override
-    public CommandProcessingResult addPostDatedChecks(JsonCommand command) {
-        return CommandProcessingResult.empty();
-    }
-
-    @Transactional
-    @Override
     public CommandProcessingResult updatePostDatedChecks(JsonCommand command) {
         validateForUpdate(command);
         final PostDatedChecks postDatedChecks = this.postDatedChecksRepository.findById(command.entityId())
