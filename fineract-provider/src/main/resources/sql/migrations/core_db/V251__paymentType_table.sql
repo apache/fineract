@@ -65,19 +65,3 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'UPDATE_PAYMENTTYPE', 'PAYMENTTYPE', 'UPDATE', 0);
 
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'DELETE_PAYMENTTYPE', 'PAYMENTTYPE', 'DELETE', 0);
-
--- create m_repayment_with_post_dated_checks management
-CREATE TABLE `m_repayment_with_post_dated_checks` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `check_no` bigint(20) NOT NULL UNIQUE,
-  `amount` decimal(20,5) NOT NULL,
-  `loan_id` bigint(20) DEFAULT NULL,
-  `repayment_id` bigint(20) DEFAULT NULL,
-  `account_no` bigint(20) NOT NULL,
-  `bank_name` VARCHAR(200) NOT NULL,
-  `repayment_date` DATE NOT NULL,
-  `is_paid` SMALLINT(1) DEFAULT 0,
-  PRIMARY KEY (`id`) USING BTREE,
-  CONSTRAINT `fkloan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fkrepayment` FOREIGN KEY (`repayment_id`) REFERENCES `m_loan_repayment_schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-);

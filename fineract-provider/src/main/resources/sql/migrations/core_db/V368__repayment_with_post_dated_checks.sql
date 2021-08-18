@@ -32,3 +32,9 @@ CREATE TABLE `m_repayment_with_post_dated_checks` (
   CONSTRAINT `fkloan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fkrepayment` FOREIGN KEY (`repayment_id`) REFERENCES `m_loan_repayment_schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+INSERT INTO `m_permission`
+(`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES
+('portfolio', 'UPDATE_REPAYMENT_WITH_POSTDATEDCHECKS', 'REPAYMENT_WITH_POSTDATEDCHECKS', 'UPDATE', '0'),
+('portfolio', 'DELETE_REPAYMENT_WITH_POSTDATEDCHECKS', 'REPAYMENT_WITH_POSTDATEDCHECKS', 'DELETE', '0'),
+('portfolio', 'BOUNCE_REPAYMENT_WITH_POSTDATEDCHECKS', 'REPAYMENT_WITH_POSTDATEDCHECKS', 'BOUNCE', '0');
