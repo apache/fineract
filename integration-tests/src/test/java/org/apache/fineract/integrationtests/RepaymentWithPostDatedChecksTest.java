@@ -34,13 +34,13 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +67,7 @@ public class RepaymentWithPostDatedChecksTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
+    @Disabled
     @Test
     public void testRepaymentWithPostDatedChecks() {
 
@@ -90,19 +91,15 @@ public class RepaymentWithPostDatedChecksTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct(false, "1");
+        final Integer loanProductID = createLoanProduct();
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("100000") //
-                .withLoanTermFrequency("2") //
+                .withPrincipal("10000") //
+                .withLoanTermFrequency("1") //
                 .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("2") //
+                .withNumberOfRepayments("1") //
                 .withRepaymentEveryAfter("1") //
                 .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .build(clientID.toString(), loanProductID.toString(), null);
@@ -112,9 +109,6 @@ public class RepaymentWithPostDatedChecksTest {
         // Test for loan account is created
         Assertions.assertNotNull(loanId);
 
-        /**
-         * TODO: Add Post Dated Check Data.
-         */
         final ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanId);
         List<HashMap> postDatedChecks = new ArrayList<>();
         Gson gson = new Gson();
@@ -155,22 +149,14 @@ public class RepaymentWithPostDatedChecksTest {
         return map;
     }
 
-    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+    private Integer createLoanProduct() {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
-                .withNumberOfRepayments("4") //
+                .withNumberOfRepayments("1") //
                 .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("1") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withTranches(multiDisburseLoan) //
-                .withAccounting(accountingRule, accounts);
-        if (multiDisburseLoan) {
-            builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
-        }
+                .withRepaymentTypeAsMonth();
+
         final String loanProductJSON = builder.build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
