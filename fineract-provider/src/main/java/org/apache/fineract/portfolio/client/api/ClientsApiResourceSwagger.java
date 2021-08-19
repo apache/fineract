@@ -429,7 +429,7 @@ final class ClientsApiResourceSwagger {
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
-                public String description;
+                public String value;
                 @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
                 @Schema(example = "false")
@@ -442,6 +442,26 @@ final class ClientsApiResourceSwagger {
                 public Boolean active;
                 @Schema(example = "false")
                 public Boolean closed;
+                @Schema(example = "false")
+                public Boolean prematureClosed;
+                @Schema(example = "false")
+                public Boolean transferInProgress;
+                @Schema(example = "false")
+                public Boolean transferOnHold;
+                @Schema(example = "false")
+                public Boolean matured;
+            }
+
+            static final class GetClientsSavingsAccountsDepositType {
+
+                private GetClientsSavingsAccountsDepositType() {}
+
+                @Schema(example = "100")
+                public Integer id;
+                @Schema(example = "depositAccountType.savingsDeposit")
+                public String code;
+                @Schema(example = "Savings")
+                public String value;
             }
 
             @Schema(example = "7")
@@ -452,8 +472,11 @@ final class ClientsApiResourceSwagger {
             public Integer productId;
             @Schema(example = "Other product")
             public String productName;
+            @Schema(example = "OP")
+            public String shortProductName;
             public GetClientsSavingsAccountsStatus status;
             public GetClientsSavingsAccountsCurrency currency;
+            public GetClientsSavingsAccountsDepositType depositType;
         }
 
         public Set<GetClientsLoanAccounts> loanAccounts;
