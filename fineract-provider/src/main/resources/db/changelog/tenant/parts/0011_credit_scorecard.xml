@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="xurror" id="1">
+        <createTable tableName="m_credit_scorecard_feature">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="value_type_enum" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data_type_enum" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_enum" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="is_deleted" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="2">
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_CREDIT_SCORECARD_FEATURE"/>
+            <column name="entity_name" value="CREDIT_SCORECARD_FEATURE"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_CREDIT_SCORECARD_FEATURE"/>
+            <column name="entity_name" value="CREDIT_SCORECARD_FEATURE"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_CREDIT_SCORECARD_FEATURE"/>
+            <column name="entity_name" value="CREDIT_SCORECARD_FEATURE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_CREDIT_SCORECARD_FEATURE"/>
+            <column name="entity_name" value="CREDIT_SCORECARD_FEATURE"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="xurror" id="3">
+        <createTable tableName="m_product_loan_scorecard_feature">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="product_loan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scorecard_feature_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.000000" name="weightage" type="DECIMAL(6, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="green_min" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="green_max" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amber_min" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amber_max" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="red_min" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="red_max" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="4">
+        <addForeignKeyConstraint baseColumnNames="product_loan_id" baseTableName="m_product_loan_scorecard_feature"
+                                 constraintName="m_product_loan_scorecard_feature_ibfk_1" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_product_loan" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="scorecard_feature_id" baseTableName="m_product_loan_scorecard_feature"
+                                 constraintName="m_product_loan_scorecard_feature_ibfk_2" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_credit_scorecard_feature" validate="true"/>
+    </changeSet>
+
+    <changeSet author="xurror" id="5">
+        <createTable tableName="m_scorecard_feature_criteria">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.000000" name="score" type="DECIMAL(6, 5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="product_loan_scorecard_feature_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="6">
+        <addForeignKeyConstraint baseColumnNames="product_loan_scorecard_feature_id"
+                                 baseTableName="m_scorecard_feature_criteria"
+                                 constraintName="m_scorecard_feature_criteria_ibfk_1" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_product_loan_scorecard_feature" validate="true"/>
+    </changeSet>
+
+    <changeSet author="xurror" id="7">
+        <createTable tableName="m_rule_based_scorecard">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="overall_score" type="DECIMAL(6, 5)"/>
+            <column name="overall_color" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="8">
+        <createTable tableName="m_scorecard_feature_criteria_score">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="VARCHAR(20)"/>
+            <column name="score" type="DECIMAL(6, 5)"/>
+            <column name="color" type="VARCHAR(20)"/>
+            <column defaultValueComputed="NULL" name="rule_based_scorecard_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="product_loan_scorecard_feature_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="9">
+        <addForeignKeyConstraint baseColumnNames="rule_based_scorecard_id" baseTableName="m_scorecard_feature_criteria_score"
+                                 constraintName="m_scorecard_feature_criteria_score_ibfk_1" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_rule_based_scorecard" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="product_loan_scorecard_feature_id" baseTableName="m_scorecard_feature_criteria_score"
+                                 constraintName="m_scorecard_feature_criteria_score_ibfk_2" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_product_loan_scorecard_feature" validate="true"/>
+    </changeSet>
+
+    <changeSet author="xurror" id="10">
+        <createTable tableName="m_stat_scorecard">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueComputed="NULL" name="age" type="INT"/>
+            <column defaultValueComputed="NULL" name="sex" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="job" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="housing" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="credit_amount" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="duration" type="INT"/>
+            <column defaultValueComputed="NULL" name="purpose" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="method" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="color" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="prediction" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="wilki_s_lambda" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="pillai_s_trace" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="hotelling_lawley_trace" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="roy_s_greatest_roots" type="DECIMAL(19, 6)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="11">
+        <createTable tableName="m_ml_scorecard">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueComputed="NULL" name="age" type="INT"/>
+            <column defaultValueComputed="NULL" name="sex" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="job" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="housing" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="credit_amount" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="duration" type="INT"/>
+            <column defaultValueComputed="NULL" name="purpose" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="predicted_risk" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="accuracy" type="DECIMAL(19, 6)"/>
+            <column defaultValueComputed="NULL" name="actual_risk" type="VARCHAR(50)"/>
+            <column defaultValueComputed="NULL" name="prediction_request_id" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="12">
+        <createTable tableName="m_credit_scorecard">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="scorecard_scoring_method" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scorecard_scoring_model" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="rule_based_scorecard_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="stat_scorecard_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="ml_scorecard_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="xurror" id="13">
+        <addForeignKeyConstraint baseColumnNames="rule_based_scorecard_id" baseTableName="m_credit_scorecard"
+                                 constraintName="m_credit_scorecard_ibfk_1" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_rule_based_scorecard" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="stat_scorecard_id" baseTableName="m_credit_scorecard"
+                                 constraintName="m_credit_scorecard_ibfk_2" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_stat_scorecard" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="ml_scorecard_id" baseTableName="m_credit_scorecard"
+                                 constraintName="m_credit_scorecard_ibfk_3" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_ml_scorecard" validate="true"/>
+    </changeSet>
+
+    <changeSet author="xurror" id="14">
+        <addColumn tableName="m_loan">
+            <column defaultValueComputed="NULL" name="loan_credit_scorecard_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="loan_credit_scorecard_id"
+                                 baseTableName="m_loan"
+                                 constraintName="FK_credit_scorecard_m_loan_m_credit_scorecard" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_credit_scorecard" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

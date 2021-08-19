@@ -1,3 +1,4 @@
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -43,6 +44,7 @@ import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
+import org.apache.fineract.portfolio.creditscorecard.serialization.CreditScorecardApiJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -99,14 +101,17 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
+    private final CreditScorecardApiJsonHelper scorecardApiJsonHelper;
 
     @Autowired
     public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper,
             final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper,
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper) {
+            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
+            final CreditScorecardApiJsonHelper scorecardApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.apiJsonHelper = apiJsonHelper;
         this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
+        this.scorecardApiJsonHelper = scorecardApiJsonHelper;
     }
 
     public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
@@ -438,6 +443,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
          * TODO: Add collaterals for other loan accounts if needed. For now it's only applicable for individual
          * accounts. (loanType.isJLG() || loanType.isGLIM())
          */
+
+        // Scorecard
+        final String scorecardParameterName = "scorecard";
+        if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(scorecardParameterName, element)) {
+            this.scorecardApiJsonHelper.validateScorecardJson(element);
+        }
 
         if (!StringUtils.isBlank(loanTypeStr)) {
             final AccountType loanType = AccountType.fromName(loanTypeStr);
@@ -859,6 +870,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             atLeastOneParameterPassedForUpdate = true;
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
             baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+        }
+
+        // Scorecard
+        final String scorecardParameterName = "scorecard";
+        if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(scorecardParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            this.scorecardApiJsonHelper.validateScorecardJson(element);
         }
 
         // charges

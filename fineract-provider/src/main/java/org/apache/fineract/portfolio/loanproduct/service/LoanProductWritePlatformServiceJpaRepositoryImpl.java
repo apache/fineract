@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -41,6 +42,8 @@ import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.creditscorecard.provider.ScorecardServiceProvider;
+import org.apache.fineract.portfolio.creditscorecard.service.CreditScorecardAssembler;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -53,6 +56,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculat
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductScorecardFeature;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
@@ -86,6 +90,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final FloatingRateRepositoryWrapper floatingRateRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ScorecardServiceProvider scorecardServiceProvider;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -95,7 +100,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final ChargeRepositoryWrapper chargeRepository, final RateRepositoryWrapper rateRepository,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final FloatingRateRepositoryWrapper floatingRateRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final BusinessEventNotifierService businessEventNotifierService) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, final BusinessEventNotifierService businessEventNotifierService,
+            final ScorecardServiceProvider scorecardServiceProvider) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -109,6 +115,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.floatingRateRepository = floatingRateRepository;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.scorecardServiceProvider = scorecardServiceProvider;
     }
 
     @Transactional
@@ -132,13 +139,29 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
             final List<Rate> rates = assembleListOfProductRates(command);
 
+            List<LoanProductScorecardFeature> scorecardFeatures = null;
+            if (command.parameterExists("scorecardFeatures")) {
+                final JsonArray featuresArray = command.arrayOfParameterNamed("scorecardFeatures");
+                if (!featuresArray.isEmpty()) {
+
+                    final String serviceName = "CreditScorecardAssembler";
+                    final CreditScorecardAssembler scorecardService = (CreditScorecardAssembler) this.scorecardServiceProvider
+                            .getScorecardService(serviceName);
+                    if (scorecardService == null) {
+                        throw new PlatformServiceUnavailableException("err.msg.credit.scorecard.service.implementation.missing",
+                                ScorecardServiceProvider.SERVICE_MISSING + serviceName, serviceName);
+                    }
+                    scorecardFeatures = scorecardService.assembleListOfProductScoringFeatures(command, null);
+                }
+            }
+
             FloatingRate floatingRate = null;
             if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
             final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
-                    this.aprCalculator, floatingRate, rates);
+                    this.aprCalculator, floatingRate, rates, scorecardFeatures);
             loanproduct.updateLoanProductInRelatedClasses();
 
             this.loanProductRepository.saveAndFlush(loanproduct);
@@ -248,6 +271,29 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 final boolean updated = product.updateRates(productRates);
                 if (!updated) {
                     changes.remove(LoanProductConstants.RATES_PARAM_NAME);
+                }
+            }
+
+            if (changes.containsKey("scorecardFeatures")) {
+
+                List<LoanProductScorecardFeature> scorecardFeatures = null;
+                if (command.parameterExists("scorecardFeatures")) {
+                    final JsonArray featuresArray = command.arrayOfParameterNamed("scorecardFeatures");
+                    if (!featuresArray.isEmpty()) {
+                        final String serviceName = "CreditScorecardAssembler";
+                        final CreditScorecardAssembler scorecardService = (CreditScorecardAssembler) this.scorecardServiceProvider
+                                .getScorecardService(serviceName);
+                        if (scorecardService == null) {
+                            throw new PlatformServiceUnavailableException("err.msg.credit.scorecard.service.implementation.missing",
+                                    ScorecardServiceProvider.SERVICE_MISSING + serviceName, serviceName);
+                        }
+                        scorecardFeatures = scorecardService.assembleListOfProductScoringFeatures(command, product);
+                    }
+                }
+
+                final boolean updated = product.updateScorecardFeatures(scorecardFeatures);
+                if (!updated) {
+                    changes.remove("scorecardFeatures");
                 }
             }
 

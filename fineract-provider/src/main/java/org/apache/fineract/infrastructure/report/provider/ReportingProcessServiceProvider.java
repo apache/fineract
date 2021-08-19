@@ -49,6 +49,7 @@ public class ReportingProcessServiceProvider {
                 mapBuilder.put(type, s);
             }
             LOGGER.info("Registered report service '{}' for type/s '{}'", s, reportTypes);
+            LOGGER.warn("Registered report service '{}' for type/s '{}'", s, reportTypes);
         }
         this.reportingProcessServices = mapBuilder.build();
     }

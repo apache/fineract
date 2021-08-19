@@ -50,6 +50,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
@@ -88,6 +89,8 @@ import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.B
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.creditscorecard.provider.ScorecardServiceProvider;
+import org.apache.fineract.portfolio.creditscorecard.service.CreditScorecardWritePlatformService;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -199,6 +202,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanCollateralManagementRepository loanCollateralManagementRepository;
     private final ClientCollateralManagementRepository clientCollateralManagementRepository;
 
+    private final ScorecardServiceProvider scorecardServiceProvider;
+
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
@@ -226,7 +231,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanRepository loanRepository, final GSIMReadPlatformService gsimReadPlatformService, final RateAssembler rateAssembler,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanCollateralManagementRepository loanCollateralManagementRepository,
-            final ClientCollateralManagementRepository clientCollateralManagementRepository) {
+            final ClientCollateralManagementRepository clientCollateralManagementRepository,
+            final ScorecardServiceProvider scorecardServiceProvider) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -269,6 +275,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.gsimReadPlatformService = gsimReadPlatformService;
         this.loanCollateralManagementRepository = loanCollateralManagementRepository;
         this.clientCollateralManagementRepository = clientCollateralManagementRepository;
+        this.scorecardServiceProvider = scorecardServiceProvider;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -528,6 +535,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             calendarEntityType);
                     this.calendarInstanceRepository.save(calendarInstance);
                 }
+            }
+
+            if (newLoanApplication.hasScorecard()) {
+                final String serviceName = "CreditScorecardWritePlatformService";
+                final CreditScorecardWritePlatformService scorecardService = (CreditScorecardWritePlatformService) this.scorecardServiceProvider
+                        .getScorecardService(serviceName);
+                if (scorecardService == null) {
+                    throw new PlatformServiceUnavailableException("err.msg.credit.scorecard.service.implementation.missing",
+                            ScorecardServiceProvider.SERVICE_MISSING + serviceName, serviceName);
+                }
+                scorecardService.assessCreditRisk(newLoanApplication);
             }
 
             // Save linked account information

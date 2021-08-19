@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -35,6 +36,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrappe
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
@@ -52,6 +54,9 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
+import org.apache.fineract.portfolio.creditscorecard.domain.CreditScorecard;
+import org.apache.fineract.portfolio.creditscorecard.provider.ScorecardServiceProvider;
+import org.apache.fineract.portfolio.creditscorecard.service.CreditScorecardAssembler;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
@@ -115,6 +120,7 @@ public class LoanAssembler {
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanUtilService loanUtilService;
     private final RateAssembler rateAssembler;
+    private final ScorecardServiceProvider scorecardServiceProvider;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanRepositoryWrapper loanRepository,
@@ -126,7 +132,8 @@ public class LoanAssembler {
             final LoanCollateralAssembler collateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
-            final WorkingDaysRepositoryWrapper workingDaysRepository, final LoanUtilService loanUtilService, RateAssembler rateAssembler) {
+            final WorkingDaysRepositoryWrapper workingDaysRepository, final LoanUtilService loanUtilService, RateAssembler rateAssembler,
+            final ScorecardServiceProvider scorecardServiceProvider) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanRepository = loanRepository;
         this.loanProductRepository = loanProductRepository;
@@ -146,6 +153,7 @@ public class LoanAssembler {
         this.workingDaysRepository = workingDaysRepository;
         this.loanUtilService = loanUtilService;
         this.rateAssembler = rateAssembler;
+        this.scorecardServiceProvider = scorecardServiceProvider;
     }
 
     public Loan assembleFrom(final Long accountId) {
@@ -270,6 +278,23 @@ public class LoanAssembler {
         BigDecimal fixedPrincipalPercentagePerInstallment = fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
+        final JsonObject scorecardElement = this.fromApiJsonHelper.extractJsonObjectNamed("scorecard", element);
+        CreditScorecard scorecard = null;
+
+        if (scorecardElement != null) {
+            final String scoringMethod = scorecardElement.get("scoringMethod").getAsString();
+            if (scoringMethod != null) {
+                final String serviceName = "CreditScorecardAssembler";
+                final CreditScorecardAssembler scorecardAssembler = (CreditScorecardAssembler) this.scorecardServiceProvider
+                        .getScorecardService(serviceName);
+                if (scorecardAssembler == null) {
+                    throw new PlatformServiceUnavailableException("err.msg.credit.scorecard.service.implementation.missing",
+                            ScorecardServiceProvider.SERVICE_MISSING + serviceName, serviceName);
+                }
+                scorecard = scorecardAssembler.assembleFrom(scorecardElement);
+            }
+        }
+
         Loan loanApplication = null;
         Client client = null;
         Group group = null;
@@ -308,21 +333,21 @@ public class LoanAssembler {
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, null,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    fixedPrincipalPercentagePerInstallment);
+                    fixedPrincipalPercentagePerInstallment, scorecard);
 
         } else if (group != null) {
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, null,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    fixedPrincipalPercentagePerInstallment);
+                    fixedPrincipalPercentagePerInstallment, scorecard);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
+                    isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, scorecard);
 
         }
 

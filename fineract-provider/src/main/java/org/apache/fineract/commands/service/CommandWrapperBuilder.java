@@ -3442,4 +3442,28 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createCreditScorecardFeature() {
+        this.actionName = "CREATE";
+        this.entityName = "CREDIT_SCORECARD_FEATURE";
+        this.entityId = null;
+        this.href = "/scorecard/features/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateCreditScorecardFeature(Long featureId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CREDIT_SCORECARD_FEATURE";
+        this.entityId = featureId;
+        this.href = "/scorecard/features/" + featureId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteCreditScorecardFeature(Long featureId) {
+        this.actionName = "DELETE";
+        this.entityName = "CREDIT_SCORECARD_FEATURE";
+        this.entityId = featureId;
+        this.href = "/scorecard/features/" + featureId;
+        return this;
+    }
+
 }

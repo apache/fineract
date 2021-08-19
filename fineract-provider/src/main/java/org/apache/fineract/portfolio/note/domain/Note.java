@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -40,19 +41,19 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 @Table(name = "m_note")
 public class Note extends AbstractAuditableCustom {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = true)
     private Client client;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_id", nullable = true)
     private Loan loan;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_transaction_id", nullable = true)
     private LoanTransaction loanTransaction;
 
@@ -62,15 +63,15 @@ public class Note extends AbstractAuditableCustom {
     @Column(name = "note_type_enum")
     private Integer noteTypeId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "savings_account_transaction_id", nullable = true)
     private SavingsAccountTransaction savingsTransaction;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "share_account_id", nullable = true)
     private ShareAccount shareAccount;
 

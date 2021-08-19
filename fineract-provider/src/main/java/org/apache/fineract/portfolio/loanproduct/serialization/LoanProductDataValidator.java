@@ -71,7 +71,7 @@ public final class LoanProductDataValidator {
             "graceOnInterestPayment", "graceOnInterestCharged", "charges", "accountingRule", "includeInBorrowerCycle", "startDate",
             "closeDate", "externalId", "isLinkedToFloatingInterestRates", "floatingRatesId", "interestRateDifferential",
             "minDifferentialLendingRate", "defaultDifferentialLendingRate", "maxDifferentialLendingRate",
-            "isFloatingInterestRateCalculationAllowed", "syncExpectedWithDisbursementDate",
+            "isFloatingInterestRateCalculationAllowed", "syncExpectedWithDisbursementDate", "scorecardFeatures",
             LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), LoanProductAccountingParams.FUND_SOURCE.getValue(),
             LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
             LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(),

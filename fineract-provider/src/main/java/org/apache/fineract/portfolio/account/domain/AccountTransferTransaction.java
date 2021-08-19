@@ -25,6 +25,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -40,23 +41,23 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 @Table(name = "m_account_transfer_transaction")
 public class AccountTransferTransaction extends AbstractPersistableCustom {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_transfer_details_id", nullable = true)
     private AccountTransferDetails accountTransferDetails;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_savings_transaction_id", nullable = true)
     private SavingsAccountTransaction fromSavingsTransaction;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_savings_transaction_id", nullable = true)
     private SavingsAccountTransaction toSavingsTransaction;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_loan_transaction_id", nullable = true)
     private LoanTransaction toLoanTransaction;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_loan_transaction_id", nullable = true)
     private LoanTransaction fromLoanTransaction;
 

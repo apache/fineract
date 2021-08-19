@@ -202,9 +202,13 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "over_applied_number", nullable = true)
     private Integer overAppliedNumber;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_loan_id", referencedColumnName = "id", nullable = false)
+    private List<LoanProductScorecardFeature> scorecardFeatures;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
-            final List<Rate> productRates) {
+            final List<Rate> productRates, List<LoanProductScorecardFeature> scorecardFeatures) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
@@ -392,7 +396,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
-                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber);
+                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, scorecardFeatures);
 
     }
 
@@ -629,7 +633,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
             final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber) {
+            final Integer overAppliedNumber, List<LoanProductScorecardFeature> scorecardFeatures) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -716,6 +720,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         if (rates != null) {
             this.rates = rates;
         }
+
+        if (scorecardFeatures != null) {
+            this.scorecardFeatures = scorecardFeatures;
+        }
+
         validateLoanProductPreSave();
     }
 
@@ -936,6 +945,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             final JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
             if (jsonArray != null) {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
+            }
+        }
+
+        final String scorecardFeaturesParamName = "scorecardFeatures";
+        if (command.hasParameter(scorecardFeaturesParamName)) {
+            final JsonArray jsonArray = command.arrayOfParameterNamed(scorecardFeaturesParamName);
+            if (jsonArray != null) {
+                actualChanges.put(scorecardFeaturesParamName, command.jsonFragment(scorecardFeaturesParamName));
             }
         }
 
@@ -1608,4 +1625,28 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProducTrancheDetails = loanProducTrancheDetails;
     }
 
+    public boolean updateScorecardFeatures(List<LoanProductScorecardFeature> newScorecardFeatures) {
+        if (newScorecardFeatures == null) {
+            return false;
+        }
+
+        boolean updated = false;
+        if (this.scorecardFeatures != null) {
+            final Set<LoanProductScorecardFeature> currentSetOfFeatures = new HashSet<>(this.scorecardFeatures);
+            final Set<LoanProductScorecardFeature> newSetOfFeatures = new HashSet<>(newScorecardFeatures);
+
+            if (!currentSetOfFeatures.equals(newSetOfFeatures)) {
+                updated = true;
+                this.scorecardFeatures = newScorecardFeatures;
+            }
+        } else {
+            updated = true;
+            this.scorecardFeatures = newScorecardFeatures;
+        }
+        return updated;
+    }
+
+    public List<LoanProductScorecardFeature> getScorecardFeatures() {
+        return scorecardFeatures;
+    }
 }
