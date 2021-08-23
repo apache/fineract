@@ -213,11 +213,7 @@ public class LoanImportHandlerTest {
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(LoanConstants.FAILURE_REPORT_COL).getStringCellValue());
 
-        /**
-         * TODO: For the repayment you'll need to add the post dated checks in disbursement. Change the output to
-         * `Imported` after proper validation.
-         */
-        Assertions.assertEquals("Repayment failed", row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported", row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
         outputworkbook.close();
     }
 }
