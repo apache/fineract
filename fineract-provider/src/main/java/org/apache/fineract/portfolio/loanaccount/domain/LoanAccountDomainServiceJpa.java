@@ -245,7 +245,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                             .getLoanRepaymentScheduleInstallment();
                     if (loanRepaymentScheduleInstallment != null) {
                         final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
-                        final PostDatedChecks postDatedChecks = loanRepaymentScheduleInstallment.getPostDatedCheck();
+                        PostDatedChecks postDatedChecks = loanRepaymentScheduleInstallment.getPostDatedCheck();
 
                         if (postDatedChecks != null) {
                             if (!isPaid) {
@@ -254,6 +254,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                                 postDatedChecks.setIsPaid(0);
                             }
                             this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        } else {
                             break;
                         }
                     }
