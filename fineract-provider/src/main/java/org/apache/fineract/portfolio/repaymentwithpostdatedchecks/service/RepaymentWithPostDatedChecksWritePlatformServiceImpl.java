@@ -45,9 +45,10 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
-import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckBouncedCheckInvalid;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,8 +119,17 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
         final PostDatedChecks postDatedChecks = PostDatedChecks.instanceOf(accountNo, name, amount, installmentList.get(0), loan, checkNo);
         try {
             this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
-        } catch (Exception exception) {
-            throw new PostDatedCheckBouncedCheckInvalid("checkNo: " + checkNo + " already exists.");
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("postdatedChecks");
+            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+            }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                        dataValidationErrors, e);
+            }
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Integer.toUnsignedLong(installmentId))
