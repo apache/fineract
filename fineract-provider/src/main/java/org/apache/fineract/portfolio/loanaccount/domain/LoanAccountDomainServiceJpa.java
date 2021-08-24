@@ -239,7 +239,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction
                     .getLoanTransactionToRepaymentScheduleMappings();
 
-            if (loanTransactionToRepaymentScheduleMappings != null || loanTransactionToRepaymentScheduleMappings.size() != 0) {
+            if (loanTransactionToRepaymentScheduleMappings != null) {
                 for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
                     LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
                             .getLoanRepaymentScheduleInstallment();
