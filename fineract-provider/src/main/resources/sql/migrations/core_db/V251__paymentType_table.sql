@@ -35,8 +35,6 @@ where code_id in
 from m_code mc where mc.code_name='PaymentType'
 );
 
---INSERT INTO m_payment_type (id,value,description,order_position) VALUES (4,"PDC", "Pay with Post Dated Checks",'4');
-
 ALTER TABLE `m_payment_detail`
     DROP FOREIGN KEY `FK_m_payment_detail_m_code_value`;
 

@@ -56,6 +56,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstr
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
@@ -73,6 +74,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,35 +234,33 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         newRepaymentTransaction.getOverPaymentPortion(loan.getCurrency());
 
-        // if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
-        // // Mark Post Dated Check as paid.
-        // final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings =
-        // newRepaymentTransaction
-        // .getLoanTransactionToRepaymentScheduleMappings();
-        //
-        // if (loanTransactionToRepaymentScheduleMappings != null) {
-        // for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping :
-        // loanTransactionToRepaymentScheduleMappings) {
-        // LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
-        // .getLoanRepaymentScheduleInstallment();
-        // if (loanRepaymentScheduleInstallment != null) {
-        // final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
-        // PostDatedChecks postDatedChecks = loanRepaymentScheduleInstallment.getPostDatedCheck();
-        //
-        // if (postDatedChecks != null) {
-        // if (!isPaid) {
-        // postDatedChecks.setIsPaid(1);
-        // } else {
-        // postDatedChecks.setIsPaid(0);
-        // }
-        // this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
-        // } else {
-        // break;
-        // }
-        // }
-        // }
-        // }
-        // }
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            // Mark Post Dated Check as paid.
+            final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction
+                    .getLoanTransactionToRepaymentScheduleMappings();
+
+            if (loanTransactionToRepaymentScheduleMappings != null) {
+                for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
+                    LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
+                            .getLoanRepaymentScheduleInstallment();
+                    if (loanRepaymentScheduleInstallment != null) {
+                        final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
+                        PostDatedChecks postDatedChecks = loanRepaymentScheduleInstallment.getPostDatedCheck();
+
+                        if (postDatedChecks != null) {
+                            if (!isPaid) {
+                                postDatedChecks.setIsPaid(1);
+                            } else {
+                                postDatedChecks.setIsPaid(0);
+                            }
+                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         return newRepaymentTransaction;
     }
