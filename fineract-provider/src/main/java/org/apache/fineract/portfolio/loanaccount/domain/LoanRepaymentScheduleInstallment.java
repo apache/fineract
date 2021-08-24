@@ -31,7 +31,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -138,8 +137,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
-    private PostDatedChecks postDatedChecks;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
+    private Set<PostDatedChecks> postDatedChecks;
 
     LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
@@ -220,7 +219,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.postDatedChecks = null;
     }
 
-    public PostDatedChecks getPostDatedCheck() {
+    public Set<PostDatedChecks> getPostDatedCheck() {
         return this.postDatedChecks;
     }
 

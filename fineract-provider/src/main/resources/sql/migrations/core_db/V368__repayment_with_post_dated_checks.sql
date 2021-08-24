@@ -27,7 +27,7 @@ CREATE TABLE `m_repayment_with_post_dated_checks` (
   `account_no` bigint(20) NOT NULL,
   `bank_name` VARCHAR(200) NOT NULL,
   `repayment_date` DATE NOT NULL,
-  `is_paid` SMALLINT(1) DEFAULT 0,
+  `status` SMALLINT(1) DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   CONSTRAINT `fkloan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fkrepayment` FOREIGN KEY (`repayment_id`) REFERENCES `m_loan_repayment_schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

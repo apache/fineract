@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckBouncedCheckInvalid;
 
 @Entity
 @Table(name = "m_repayment_with_post_dated_checks")
@@ -53,8 +52,8 @@ public class PostDatedChecks extends AbstractPersistableCustom {
     private BigDecimal amount;
     @Column(name = "repayment_date", nullable = false)
     private Date repaymentDate;
-    @Column(name = "is_paid", columnDefinition = "0")
-    private Integer isPaid;
+    @Column(name = "status", columnDefinition = "0")
+    private Integer status;
     @Column(name = "check_no", nullable = false, unique = true)
     private Long checkNo;
 
@@ -116,38 +115,6 @@ public class PostDatedChecks extends AbstractPersistableCustom {
         return changes;
     }
 
-    public Map<String, Object> bouncePostDatedChecks(JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<>();
-
-        if (command.isChangeInBigDecimalParameterNamed("amount", this.amount)) {
-            final BigDecimal newAmount = command.bigDecimalValueOfParameterNamed("amount");
-            this.amount = newAmount;
-            changes.put("amount", newAmount);
-        }
-
-        if (command.isChangeInStringParameterNamed("name", this.bankName)) {
-            final String newName = command.stringValueOfParameterNamed("name");
-            this.bankName = newName;
-            changes.put("bankName", newName);
-        }
-
-        if (command.isChangeInLongParameterNamed("accountNo", this.accountNo)) {
-            final Long newAccountNo = command.longValueOfParameterNamed("accountNo");
-            this.accountNo = newAccountNo;
-            changes.put("accountNo", newAccountNo);
-        }
-
-        if (command.isChangeInLongParameterNamed("checkNo", this.checkNo)) {
-            final Long newCheckNo = command.longValueOfParameterNamed("checkNo");
-            this.checkNo = newCheckNo;
-            changes.put("checkNo", newCheckNo);
-        } else {
-            throw new PostDatedCheckBouncedCheckInvalid("checkNo: " + this.checkNo + " not updated properly.");
-        }
-
-        return changes;
-    }
-
     public Loan getLoan() {
         return this.loan;
     }
@@ -156,8 +123,8 @@ public class PostDatedChecks extends AbstractPersistableCustom {
         return this.loanRepaymentScheduleInstallment;
     }
 
-    public void setIsPaid(Integer isPaid) {
-        this.isPaid = isPaid;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public String getBankName() {
@@ -176,8 +143,8 @@ public class PostDatedChecks extends AbstractPersistableCustom {
         return this.amount;
     }
 
-    public Integer getIsPaid() {
-        return this.isPaid;
+    public Integer getStatus() {
+        return this.status;
     }
 
 }

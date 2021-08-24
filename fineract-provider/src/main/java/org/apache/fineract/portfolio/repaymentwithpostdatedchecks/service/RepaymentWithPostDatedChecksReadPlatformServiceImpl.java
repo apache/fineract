@@ -26,6 +26,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksData;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckNotFoundException;
@@ -54,13 +55,14 @@ public class RepaymentWithPostDatedChecksReadPlatformServiceImpl implements Repa
         final List<PostDatedChecks> postDatedChecks = loan.getPostDatedChecks();
         List<PostDatedChecksData> postDatedChecksDataList = new ArrayList<>();
         for (PostDatedChecks postDatedCheckObject : postDatedChecks) {
-            /**
-             * Check how date type converted into local date.
-             */
-            postDatedChecksDataList.add(PostDatedChecksData.from(postDatedCheckObject.getLoanRepaymentScheduleInstallment().getDueDate(),
-                    postDatedCheckObject.getId(), postDatedCheckObject.getLoanRepaymentScheduleInstallment().getInstallmentNumber(),
-                    postDatedCheckObject.getAccountNo(), postDatedCheckObject.getAmount(), postDatedCheckObject.getBankName(),
-                    postDatedCheckObject.getCheckNo(), postDatedCheckObject.getIsPaid()));
+            // Avoid bounced checks
+            if (!PostDatedChecksStatus.POST_DATED_CHECKS_BOUNCED.equals(postDatedCheckObject.getStatus())) {
+                postDatedChecksDataList.add(PostDatedChecksData.from(
+                        postDatedCheckObject.getLoanRepaymentScheduleInstallment().getDueDate(), postDatedCheckObject.getId(),
+                        postDatedCheckObject.getLoanRepaymentScheduleInstallment().getInstallmentNumber(),
+                        postDatedCheckObject.getAccountNo(), postDatedCheckObject.getAmount(), postDatedCheckObject.getBankName(),
+                        postDatedCheckObject.getCheckNo(), postDatedCheckObject.getStatus()));
+            }
         }
         return postDatedChecksDataList;
     }
@@ -69,9 +71,10 @@ public class RepaymentWithPostDatedChecksReadPlatformServiceImpl implements Repa
     public PostDatedChecksData getPostDatedCheck(final Long id) {
         final PostDatedChecks postDatedChecks = this.postDatedChecksRepository.findById(id)
                 .orElseThrow(() -> new PostDatedCheckNotFoundException(id));
+
         return PostDatedChecksData.from(postDatedChecks.getLoanRepaymentScheduleInstallment().getDueDate(), postDatedChecks.getId(),
                 postDatedChecks.getLoanRepaymentScheduleInstallment().getInstallmentNumber(), postDatedChecks.getAccountNo(),
-                postDatedChecks.getAmount(), postDatedChecks.getBankName(), postDatedChecks.getCheckNo(), postDatedChecks.getIsPaid());
+                postDatedChecks.getAmount(), postDatedChecks.getBankName(), postDatedChecks.getCheckNo(), postDatedChecks.getStatus());
     }
 
     @Override
@@ -84,11 +87,12 @@ public class RepaymentWithPostDatedChecksReadPlatformServiceImpl implements Repa
         }
 
         final PostDatedChecks postDatedChecksData = postDatedChecks.stream()
-                .filter((postDatedCheck) -> postDatedCheck.getLoanRepaymentScheduleInstallment().getInstallmentNumber().equals(id))
+                .filter((postDatedCheck) -> postDatedCheck.getLoanRepaymentScheduleInstallment().getInstallmentNumber().equals(id)
+                        && !PostDatedChecksStatus.POST_DATED_CHECKS_BOUNCED.equals(postDatedCheck.getStatus()))
                 .collect(Collectors.toList()).get(0);
         return PostDatedChecksData.from(postDatedChecksData.getLoanRepaymentScheduleInstallment().getDueDate(), postDatedChecksData.getId(),
                 postDatedChecksData.getLoanRepaymentScheduleInstallment().getInstallmentNumber(), postDatedChecksData.getAccountNo(),
                 postDatedChecksData.getAmount(), postDatedChecksData.getBankName(), postDatedChecksData.getCheckNo(),
-                postDatedChecksData.getIsPaid());
+                postDatedChecksData.getStatus());
     }
 }

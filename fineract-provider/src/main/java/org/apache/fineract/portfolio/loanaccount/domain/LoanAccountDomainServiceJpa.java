@@ -74,6 +74,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -245,13 +246,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                             .getLoanRepaymentScheduleInstallment();
                     if (loanRepaymentScheduleInstallment != null) {
                         final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
-                        PostDatedChecks postDatedChecks = loanRepaymentScheduleInstallment.getPostDatedCheck();
+                        PostDatedChecks postDatedChecks = this.postDatedChecksRepository
+                                .getPendingPostDatedCheck(loanRepaymentScheduleInstallment);
 
                         if (postDatedChecks != null) {
                             if (!isPaid) {
-                                postDatedChecks.setIsPaid(1);
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PAID);
                             } else {
-                                postDatedChecks.setIsPaid(0);
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
                             }
                             this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
                         } else {

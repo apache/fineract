@@ -37,10 +37,10 @@ public final class PostDatedChecksData {
 
     private final Long checkNo;
 
-    private final Integer isClear;
+    private final Integer status;
 
     private PostDatedChecksData(final LocalDate installmentDate, final Long id, final Integer installmentId, final Long accountNo,
-            final BigDecimal amount, final String name, final Long checkNo, final Integer isClear) {
+            final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
         this.accountNo = accountNo;
         this.amount = amount;
         this.name = name;
@@ -48,12 +48,12 @@ public final class PostDatedChecksData {
         this.installmentDate = installmentDate;
         this.installmentId = installmentId;
         this.checkNo = checkNo;
-        this.isClear = isClear;
+        this.status = status;
     }
 
     public static PostDatedChecksData from(final LocalDate installmentDate, final Long id, final Integer installmentId,
-            final Long accountNo, final BigDecimal amount, final String name, final Long checkNo, final Integer isClear) {
-        return new PostDatedChecksData(installmentDate, id, installmentId, accountNo, amount, name, checkNo, isClear);
+            final Long accountNo, final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
+        return new PostDatedChecksData(installmentDate, id, installmentId, accountNo, amount, name, checkNo, status);
     }
 
 }
