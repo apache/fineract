@@ -233,8 +233,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         builderResult.withEntityId(newRepaymentTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());
 
-        newRepaymentTransaction.getOverPaymentPortion(loan.getCurrency());
-
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
             // Mark Post Dated Check as paid.
             final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction

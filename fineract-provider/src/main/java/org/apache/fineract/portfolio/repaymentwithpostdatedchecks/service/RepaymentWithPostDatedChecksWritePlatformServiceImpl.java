@@ -123,8 +123,8 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("postdatedChecks");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+            if (realCause.getMessage().toLowerCase().contains("transaction has been rolled back")) {
+                baseDataValidator.reset().parameter("checkNo").failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

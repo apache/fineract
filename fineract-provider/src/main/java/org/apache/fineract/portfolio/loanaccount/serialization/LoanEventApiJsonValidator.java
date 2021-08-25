@@ -148,10 +148,6 @@ public final class LoanEventApiJsonValidator {
                 final Long checkNo = this.fromApiJsonHelper.extractLongNamed("checkNo", postDatedCheck);
                 baseDataValidator.reset().parameter("checkNo").value(checkNo).notNull().positiveAmount();
 
-                /**
-                 * TODO: Validate Date parameter.
-                 */
-
                 final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed("installmentId", postDatedCheck, locale);
                 final List<LoanRepaymentScheduleInstallment> installmentList = loanRepaymentScheduleInstallment.stream().filter(
                         repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
