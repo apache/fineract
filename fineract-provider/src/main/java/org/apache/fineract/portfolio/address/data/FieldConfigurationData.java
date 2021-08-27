@@ -66,7 +66,7 @@ public final class FieldConfigurationData {
         return this.field;
     }
 
-    public boolean isisEnabled() {
+    public boolean isEnabled() {
         return this.isEnabled;
     }
 
