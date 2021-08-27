@@ -40,24 +40,14 @@ import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RepaymentWithPostDatedChecksTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private static final Logger LOG = LoggerFactory.getLogger(RepaymentWithPostDatedChecksTest.class);
-    private LoanTransactionHelper loanTransactionHelper;
-    private Integer loanID;
-    private Integer disbursementId;
-    final String approveDate = "01 March 2014";
-    final String expectedDisbursementDate = "01 March 2014";
-    final String proposedAmount = "5000";
-    final String approvalAmount = "5000";
     private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy");
+    private LoanTransactionHelper loanTransactionHelper;
 
     @BeforeEach
     public void setup() {
@@ -67,9 +57,9 @@ public class RepaymentWithPostDatedChecksTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
-    @Disabled
     @Test
     public void testRepaymentWithPostDatedChecks() {
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         Calendar meetingCalendar = Calendar.getInstance();
         meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -90,26 +80,49 @@ public class RepaymentWithPostDatedChecksTest {
         final String disbursalDate = groupMeetingDate;
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientID);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct();
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("10000") //
-                .withLoanTermFrequency("1") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("1") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withExpectedDisbursementDate("20 September 2011") //
-                .withSubmittedOnDate("20 September 2011") //
-                .build(clientID.toString(), loanProductID.toString(), null);
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        Assertions.assertNotNull(loanProductID, "Could not create Loan Product");
 
-        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "8000");
+        Assertions.assertNotNull(loanID, "Could not create Loan Account");
 
-        // Test for loan account is created
-        Assertions.assertNotNull(loanId);
+        // LoanTransactionHelper ltHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        // LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
+        // final String jsonLoanProduct = loanProductTestBuilder.build(null);
+        // final Integer loanProductID = ltHelper.getLoanProductId(jsonLoanProduct);
+        //
+        // String loanProductStr = ltHelper.getLoanProductDetails(requestSpec, responseSpec, loanProductID);
+        // Assertions.assertNotNull("Could not get created Loan Product", loanProductStr);
+        // JsonPath loanProductJson = JsonPath.from(loanProductStr);
 
-        final ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanId);
+        // final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+        // .withPrincipal("10000.00") //
+        // .withLoanTermFrequency("5") //
+        // .withLoanTermFrequencyAsMonths() //
+        // .withNumberOfRepayments("5") //
+        // .withRepaymentEveryAfter("1") //
+        // .withRepaymentFrequencyTypeAsMonths() //
+        // .withExpectedDisbursementDate("20 September 2011") //
+        // .withSubmittedOnDate("20 September 2011") //
+        // .build(clientID.toString(), loanProductID.toString(), null);
+        //
+        // final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        // Test for loan account is created, can be approved
+        this.loanTransactionHelper.approveLoan(disbursalDate, loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        // Get repayments
+        final ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanID);
+        Assertions.assertNotNull(installmentData, "Empty Installment Data");
         List<HashMap> postDatedChecks = new ArrayList<>();
         Gson gson = new Gson();
 
@@ -118,47 +131,32 @@ public class RepaymentWithPostDatedChecksTest {
             JsonObject reportObject = JsonParser.parseString(result).getAsJsonObject();
             final Integer installmentId = reportObject.get("installmentId").getAsInt();
             final BigDecimal amount = reportObject.get("amount").getAsBigDecimal();
-            final String date = reportObject.get("date").getAsString();
-            postDatedChecks.add(postDatedCheck(installmentId, amount, date));
+            postDatedChecks.add(postDatedCheck(installmentId, amount));
         }
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
-
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
         // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoanWithPostDatedChecks(disbursalDate, loanId, BigDecimal.valueOf(100000), postDatedChecks);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoanWithPostDatedChecks("04 April 2012", loanID, BigDecimal.valueOf(8000), postDatedChecks);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
     }
 
-    private HashMap<String, String> postDatedCheck(final Integer installmentId, final BigDecimal amount, final String date) {
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
+        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
+                .withSubmittedOnDate("02 April 2012").build(clientID.toString(), loanProductID.toString(), null);
+        return this.loanTransactionHelper.getLoanId(loanApplication);
+    }
+
+    private HashMap<String, String> postDatedCheck(final Integer installmentId, final BigDecimal amount) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("installmentId", installmentId.toString());
         map.put("name", "AMANA BANK");
         map.put("amount", amount.toString());
         map.put("accountNo", "900400500600");
         map.put("checkNo", "200500600700");
-        map.put("date", date);
 
         return map;
-    }
-
-    private Integer createLoanProduct() {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        LoanProductTestBuilder builder = new LoanProductTestBuilder() //
-                .withPrincipal("12,000.00") //
-                .withNumberOfRepayments("1") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth();
-
-        final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
 }

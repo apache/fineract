@@ -167,7 +167,8 @@ public class LoanTransactionHelper {
     }
 
     public ArrayList<HashMap> getRepayments(final Integer loanId) {
-        final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "?command=disburse&" + Utils.TENANT_IDENTIFIER;
+        final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=disburse&"
+                + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "loanRepaymentScheduleInstallments");
     }
 
