@@ -131,6 +131,9 @@ public class LoanCharge extends AbstractPersistableCustom {
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
+    @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<LoanChargePaidBy> loanChargePaidBySet;
+
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
         if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && dueDate == null) {
@@ -344,6 +347,10 @@ public class LoanCharge extends AbstractPersistableCustom {
         for (final LoanInstallmentCharge installmentCharge : this.loanInstallmentCharge) {
             installmentCharge.resetPaidAmount(currency);
         }
+    }
+
+    public void resetOutstandingAmount(final BigDecimal amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
     }
 
     public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
@@ -869,6 +876,18 @@ public class LoanCharge extends AbstractPersistableCustom {
         return null;
     }
 
+    public void setInstallmentLoanCharge(final LoanInstallmentCharge loanInstallmentCharge, final Integer installmentNumber) {
+        LoanInstallmentCharge loanInstallmentChargeToBeRemoved = null;
+        for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) {
+                loanInstallmentChargeToBeRemoved = loanChargePerInstallment;
+                break;
+            }
+        }
+        this.loanInstallmentCharge.remove(loanInstallmentChargeToBeRemoved);
+        this.loanInstallmentCharge.add(loanInstallmentCharge);
+    }
+
     public void clearLoanInstallmentCharges() {
         this.loanInstallmentCharge.clear();
     }
@@ -1021,6 +1040,10 @@ public class LoanCharge extends AbstractPersistableCustom {
         return paidChargePerInstallment;
     }
 
+    public Set<LoanChargePaidBy> getLoanChargePaidBySet() {
+        return this.loanChargePaidBySet;
+    }
+
     public Loan getLoan() {
         return this.loan;
     }
@@ -1035,5 +1058,13 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public boolean isDueDateCharge() {
         return this.dueDate != null;
+    }
+
+    public void setAmountWaived(final BigDecimal amountWaived) {
+        this.amountWaived = amountWaived;
+    }
+
+    public void undoWaived() {
+        this.waived = false;
     }
 }

@@ -182,6 +182,19 @@ public class Money implements Comparable<Money> {
         return this.minus(toSubtract.getAmount());
     }
 
+    public Money add(final Money moneyToAdd) {
+        final Money toAdd = checkCurrencyEqual(moneyToAdd);
+        return this.add(toAdd.getAmount());
+    }
+
+    public Money add(final BigDecimal amountToAdd) {
+        if (amountToAdd == null || amountToAdd.compareTo(BigDecimal.ZERO) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.add(amountToAdd);
+        return Money.of(monetaryCurrency(), newAmount);
+    }
+
     public Money minus(final BigDecimal amountToSubtract) {
         if (amountToSubtract == null || amountToSubtract.compareTo(BigDecimal.ZERO) == 0) {
             return this;

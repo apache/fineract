@@ -34,6 +34,7 @@ public enum LoanTransactionType {
      */
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
     WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
+    // UNDO_WAIVE_CHARGE(20, "loanTransactionType.undoWaiveCharge"),
     /**
      * Transaction represents an Accrual (For either interest, charge or a penalty
      **/
