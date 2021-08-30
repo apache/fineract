@@ -29,7 +29,6 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -61,23 +60,23 @@ public class RepaymentWithPostDatedChecksTest {
     public void testRepaymentWithPostDatedChecks() {
         this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        Calendar meetingCalendar = Calendar.getInstance();
-        meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-        meetingCalendar.setTime(new java.util.Date());
-
-        int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
-        // making sure that the meeting calendar is set for the coming monday.
-        if (today >= Calendar.MONDAY) {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
-        } else {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
-        }
-
-        meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
-
-        final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
-
-        final String disbursalDate = groupMeetingDate;
+        // Calendar meetingCalendar = Calendar.getInstance();
+        // meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+        // meetingCalendar.setTime(new java.util.Date());
+        //
+        // int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
+        // // making sure that the meeting calendar is set for the coming monday.
+        // if (today >= Calendar.MONDAY) {
+        // meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
+        // } else {
+        // meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
+        // }
+        //
+        // meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
+        //
+        // final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
+        //
+        // final String disbursalDate = groupMeetingDate;
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientID);
@@ -89,34 +88,12 @@ public class RepaymentWithPostDatedChecksTest {
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "8000");
         Assertions.assertNotNull(loanID, "Could not create Loan Account");
 
-        // LoanTransactionHelper ltHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        // LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
-        // final String jsonLoanProduct = loanProductTestBuilder.build(null);
-        // final Integer loanProductID = ltHelper.getLoanProductId(jsonLoanProduct);
-        //
-        // String loanProductStr = ltHelper.getLoanProductDetails(requestSpec, responseSpec, loanProductID);
-        // Assertions.assertNotNull("Could not get created Loan Product", loanProductStr);
-        // JsonPath loanProductJson = JsonPath.from(loanProductStr);
-
-        // final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-        // .withPrincipal("10000.00") //
-        // .withLoanTermFrequency("5") //
-        // .withLoanTermFrequencyAsMonths() //
-        // .withNumberOfRepayments("5") //
-        // .withRepaymentEveryAfter("1") //
-        // .withRepaymentFrequencyTypeAsMonths() //
-        // .withExpectedDisbursementDate("20 September 2011") //
-        // .withSubmittedOnDate("20 September 2011") //
-        // .build(clientID.toString(), loanProductID.toString(), null);
-        //
-        // final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, loanID);
+        this.loanTransactionHelper.approveLoan("02 April 2012", loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
@@ -133,6 +110,8 @@ public class RepaymentWithPostDatedChecksTest {
             final BigDecimal amount = reportObject.get("amount").getAsBigDecimal();
             postDatedChecks.add(postDatedCheck(installmentId, amount));
         }
+
+        Assertions.assertNotNull(postDatedChecks);
 
         // Test for loan account approved can be disbursed
         this.loanTransactionHelper.disburseLoanWithPostDatedChecks("04 April 2012", loanID, BigDecimal.valueOf(8000), postDatedChecks);
@@ -153,8 +132,8 @@ public class RepaymentWithPostDatedChecksTest {
         map.put("installmentId", installmentId.toString());
         map.put("name", "AMANA BANK");
         map.put("amount", amount.toString());
-        map.put("accountNo", "900400500600");
-        map.put("checkNo", "200500600700");
+        map.put("accountNo", "900400500621");
+        map.put("checkNo", "200500600711");
 
         return map;
     }
