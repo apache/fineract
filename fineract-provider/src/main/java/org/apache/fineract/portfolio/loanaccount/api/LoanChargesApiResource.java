@@ -234,6 +234,7 @@ public class LoanChargesApiResource {
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
+
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

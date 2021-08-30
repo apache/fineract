@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
+package org.apache.fineract.portfolio.account.exception;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface TemplateRepository extends JpaRepository<Template, Long> {
+public class DifferentCurrenciesException extends AbstractPlatformDomainRuleException {
 
-    List<Template> findByEntityAndType(TemplateEntity entity, TemplateType templateType);
-
-    @Query("select t from Template as t left join t.mappers as m where m.mapperkey = :mapperkey and m.mappervalue = :mappervalue")
-    List<Template> findByTemplateMapper(@Param("mapperkey") String mapperkey, @Param("mappervalue") String mappervalue);
+    public DifferentCurrenciesException(final String currency1, final String currency2) {
+        super("error.msg.accounttransfer.different.currencies", "Trying to transfer from " + currency1 + " to " + currency2);
+    }
 }

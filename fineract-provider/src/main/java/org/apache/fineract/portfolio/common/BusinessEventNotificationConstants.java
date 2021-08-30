@@ -41,6 +41,7 @@ public class BusinessEventNotificationConstants {
         LOAN_CLOSE_AS_RESCHEDULE("loan_close_as_reschedule"), //
         LOAN_ADD_CHARGE("loan_add_charge"), //
         LOAN_UPDATE_CHARGE("loan_update_charge"), //
+        LOAN_WAIVE_CHARGE_UNDO("loan_waive_charge_undo"), //
         LOAN_WAIVE_CHARGE("loan_waive_charge"), //
         LOAN_DELETE_CHARGE("loan_delete_charge"), //
         LOAN_CHARGE_PAYMENT("loan_charge_payment"), //

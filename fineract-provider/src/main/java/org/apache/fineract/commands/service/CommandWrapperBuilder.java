@@ -870,6 +870,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder undoWaiveChargeTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = "UNDO";
+        this.entityName = "WAIVECHARGE";
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=undo";
+        return this;
+    }
+
     public CommandWrapperBuilder createLoanApplication() {
         this.actionName = "CREATE";
         this.entityName = "LOAN";

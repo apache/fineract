@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
+package org.apache.fineract.portfolio.loanaccount.exception;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface TemplateRepository extends JpaRepository<Template, Long> {
+public class InstallmentNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    List<Template> findByEntityAndType(TemplateEntity entity, TemplateType templateType);
-
-    @Query("select t from Template as t left join t.mappers as m where m.mapperkey = :mapperkey and m.mappervalue = :mappervalue")
-    List<Template> findByTemplateMapper(@Param("mapperkey") String mapperkey, @Param("mappervalue") String mappervalue);
+    public InstallmentNotFoundException(final Long id) {
+        super("error.msg.transaction.id.invalid", "Transaction with identifier " + id + " does not contain any installment");
+    }
 }
