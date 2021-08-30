@@ -326,7 +326,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.repaymentWithPostDatedChecksAssembler = repaymentWithPostDatedChecksAssembler;
         this.postDatedChecksRepository = postDatedChecksRepository;
         this.loanChargePaidByRepository = loanChargePaidByRepository;
-
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
