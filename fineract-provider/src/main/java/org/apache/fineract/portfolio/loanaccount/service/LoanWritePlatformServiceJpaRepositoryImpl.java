@@ -111,6 +111,8 @@ import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeWaivedEx
 import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
+import org.apache.fineract.portfolio.collateralmanagement.exception.LoanCollateralAmountNotSufficientException;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.SingleDisbursalCommand;
@@ -136,6 +138,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
@@ -347,6 +350,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json(), isAccountTransfer);
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+        // Get disbursedAmount
+        final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+
+        // Get relevant loan collateral modules
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+
+            BigDecimal totalCollateral = BigDecimal.valueOf(0);
+
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                BigDecimal quantity = loanCollateralManagement.getQuantity();
+                BigDecimal pctToBase = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getPctToBase();
+                BigDecimal basePrice = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getBasePrice();
+                totalCollateral = totalCollateral.add(quantity.multiply(basePrice).multiply(pctToBase).divide(BigDecimal.valueOf(100)));
+            }
+
+            // Validate the loan collateral value against the disbursedAmount
+            if (disbursedAmount.compareTo(totalCollateral) > 0) {
+                throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
+            }
+        }
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
 
@@ -892,8 +917,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final HolidayDetailDTO holidayDetailDto = null;
         boolean isAccountTransfer = false;
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-        this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail,
-                noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+        LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate,
+                transactionAmount, paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto,
+                isHolidayValidationDone);
+
+        // Update loan transaction on repayment.
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                loanCollateralManagement.setLoanTransactionData(loanTransaction);
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                if (loan.status().isClosed()) {
+                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    BigDecimal quantity = loanCollateralManagement.getQuantity();
+                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                }
+            }
+            this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
+        }
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
@@ -1290,8 +1333,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
         this.loanAccountDomainService.recalculateAccruals(loan);
+
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_CLOSE,
                 constructEntityMap(BusinessEntity.LOAN, loan));
+
+        // Update loan transaction on repayment.
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                if (loan.status().isClosed()) {
+                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    BigDecimal quantity = loanCollateralManagement.getQuantity();
+                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                }
+            }
+            this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
+        }
 
         // disable all active standing instructions linked to the loan
         this.loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
@@ -1343,6 +1403,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // disable all active standing instructions linked to the loan
         this.loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
+
+        // Update loan transaction on repayment.
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                if (loan.status().isClosed()) {
+                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    BigDecimal quantity = loanCollateralManagement.getQuantity();
+                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                }
+            }
+            this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

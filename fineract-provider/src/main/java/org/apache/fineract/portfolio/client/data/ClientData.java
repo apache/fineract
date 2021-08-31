@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -32,6 +33,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.address.data.AddressData;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -81,6 +83,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
 
     private final Long savingsAccountId;
     private final EnumOptionData legalForm;
+    private final Set<ClientCollateralManagementData> clientCollateralManagements;
 
     // associations
     private final Collection<GroupGeneralData> groups;
@@ -201,6 +204,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.datatables = null;
         this.familyMemberOptions = null;
         this.emailAddress = null;
+        this.clientCollateralManagements = null;
     }
 
     public Integer getRowIndex() {
@@ -258,18 +262,19 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final EnumOptionData legalForm = null;
         final Boolean isStaff = false;
         final ClientNonPersonData clientNonPersonDetails = null;
+        final Set<ClientCollateralManagementData> clientCollateralManagements = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, joinedDate, imageId,
                 staffId, staffName, officeOptions, groups, staffOptions, narrations, genderOptions, timeline, savingProductOptions,
                 savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
                 clientNonPersonDetails, clientLegalFormOptions, familyMemberOptions, legalForm, address, isAddressEnabled, datatables,
-                isStaff);
+                isStaff, clientCollateralManagements);
 
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final ClientData templateData) {
-
+        final Set<ClientCollateralManagementData> clientCollateralManagements = null;
         return new ClientData(clientData.accountNo, clientData.status, clientData.subStatus, clientData.officeId, clientData.officeName,
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
@@ -281,13 +286,13 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 templateData.clientClassificationOptions, templateData.clientNonPersonConstitutionOptions,
                 templateData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, templateData.clientLegalFormOptions,
                 templateData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff);
+                clientData.isStaff, clientCollateralManagements);
 
     }
 
     public static ClientData templateWithSavingAccountOptions(final ClientData clientData,
             final Collection<SavingsAccountData> savingAccountOptions) {
-
+        final Set<ClientCollateralManagementData> clientCollateralManagements = null;
         return new ClientData(clientData.accountNo, clientData.status, clientData.subStatus, clientData.officeId, clientData.officeName,
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
@@ -299,11 +304,12 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff);
+                clientData.isStaff, clientCollateralManagements);
 
     }
 
-    public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
+    public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups,
+            final Set<ClientCollateralManagementData> clientCollateralManagements) {
         return new ClientData(clientData.accountNo, clientData.status, clientData.subStatus, clientData.officeId, clientData.officeName,
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
@@ -314,7 +320,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientTypeOptions, clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff);
+                clientData.isStaff, clientCollateralManagements);
 
     }
 
@@ -356,13 +362,14 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final EnumOptionData legalForm = null;
         final Boolean isStaff = false;
         final ClientNonPersonData clientNonPerson = null;
+        final Set<ClientCollateralManagementData> clientCollateralManagements = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff);
+                null, isStaff, clientCollateralManagements);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
@@ -406,13 +413,14 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final EnumOptionData legalForm = null;
         final Boolean isStaff = false;
         final ClientNonPersonData clientNonPerson = null;
+        final Set<ClientCollateralManagementData> clientCollateralManagements = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff);
+                null, isStaff, clientCollateralManagements);
 
     }
 
@@ -443,12 +451,13 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         final ClientFamilyMembersData familyMemberOptions = null;
+        final Collection<ClientCollateralManagement> clientCollateralManagements = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, null, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff);
+                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff, null);
 
     }
 
@@ -467,7 +476,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final ClientNonPersonData clientNonPerson,
             final List<EnumOptionData> clientLegalFormOptions, final ClientFamilyMembersData familyMemberOptions,
             final EnumOptionData legalForm, final Collection<AddressData> address, final Boolean isAddressEnabled,
-            final List<DatatableData> datatables, final Boolean isStaff) {
+            final List<DatatableData> datatables, final Boolean isStaff,
+            final Set<ClientCollateralManagementData> clientCollateralManagements) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -533,7 +543,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.address = address;
         this.isAddressEnabled = isAddressEnabled;
         this.datatables = datatables;
-
+        this.clientCollateralManagements = clientCollateralManagements;
     }
 
     public Long id() {

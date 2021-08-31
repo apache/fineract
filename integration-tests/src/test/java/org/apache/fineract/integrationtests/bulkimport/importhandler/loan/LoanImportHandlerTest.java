@@ -32,13 +32,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -105,6 +108,17 @@ public class LoanImportHandlerTest {
         Integer outcome_client_creation = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
+
+        List<HashMap> collaterals = new ArrayList<>();
+        HashMap<String, String> collateralHashMap = new HashMap<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(outcome_client_creation), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        collateralHashMap.put("clientCollateralId", collateralId.toString());
+        collateralHashMap.put("quantity", "1");
+        collaterals.add(collateralHashMap);
 
         // in order to populate helper sheets
         Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
@@ -184,6 +198,8 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.TOTAL_AMOUNT_REPAID_COL).setCellValue(6000);
         firstLoanRow.createCell(LoanConstants.LAST_REPAYMENT_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(paymentTypeName);
+        firstLoanRow.createCell(LoanConstants.LOAN_COLLATERAL_ID).setCellValue(collaterals.get(0).get("clientCollateralId").toString());
+        firstLoanRow.createCell(LoanConstants.LOAN_COLLATERAL_QUANTITY).setCellValue(collaterals.get(0).get("quantity").toString());
 
         String currentdirectory = new File("").getAbsolutePath();
         File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
