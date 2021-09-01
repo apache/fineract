@@ -173,7 +173,7 @@ allprojects  {
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
 
-            dependency ('org.flywaydb:flyway-core:7.0.0') {
+            dependency ('org.flywaydb:flyway-core:7.14.1') {
                 // https://issues.apache.org/jira/browse/FINERACT-1172
                 // https://github.com/apache/fineract/pull/1355
                 // https://github.com/flyway/flyway/issues/2957
