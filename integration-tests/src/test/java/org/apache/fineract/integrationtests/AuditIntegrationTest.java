@@ -31,7 +31,6 @@ import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +76,8 @@ public class AuditIntegrationTest {
 
         // When Client is created: Count should be "1"
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
         auditsRecieved = auditHelper.getAuditDetails(clientId, "CREATE", "CLIENT");
         auditHelper.verifyOneAuditOnly(auditsRecieved, clientId, "CREATE", "CLIENT");
 

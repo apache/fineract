@@ -85,8 +85,6 @@ final class CollateralsApiResourceSwagger {
 
         private PostLoansLoanIdCollateralsResponse() {}
 
-        @Schema(example = "1")
-        public Integer loanId;
         @Schema(example = "12")
         public Integer resourceId;
     }
