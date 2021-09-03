@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.account.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanChargePaidByRepository extends JpaRepository<LoanChargePaidBy, Long>, JpaSpecificationExecutor<LoanCharge> {
+public class DifferentCurrenciesException extends AbstractPlatformDomainRuleException {
 
-    @Query("select lp from LoanChargePaidBy lp where lp.loanCharge=:loanCharge and lp.installmentNumber=:installmentNumber")
-    LoanChargePaidBy getLoanChargePaidByLoanCharge(@Param("loanCharge") LoanCharge loanCharge,
-            @Param("installmentNumber") Integer installmentNo);
+    public DifferentCurrenciesException(final String currency1, final String currency2) {
+        super("error.msg.accounttransfer.different.currencies", "Trying to transfer from " + currency1 + " to " + currency2);
+    }
 }
