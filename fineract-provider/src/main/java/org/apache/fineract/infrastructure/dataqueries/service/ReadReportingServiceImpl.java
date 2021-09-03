@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -51,8 +50,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,22 +63,19 @@ import org.springframework.stereotype.Service;
 public class ReadReportingServiceImpl implements ReadReportingService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
-    private static final String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9\\s](\\([a-zA-Z]*\\))?$";
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
-    private final ColumnValidator columnValidator;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService, final ColumnValidator columnValidator) {
+            final GenericDataService genericDataService) {
         this.context = context;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.genericDataService = genericDataService;
-        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -206,13 +200,12 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private String getSql(final String name, final String type) {
-        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
-        validateReportName(name);
+        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = ?";
 
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, name);
 
         if (rs.next() && rs.getString("the_sql") != null) {
             return rs.getString("the_sql");
@@ -221,19 +214,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
+    public String getReportType(final String reportName, final boolean isSelfServiceUserReport, final boolean isParameterType) {
         String reportType = "Table";
-        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName
-                + "' and self_service_user_report = ?";
-        validateReportName(reportName);
-        // disable SQL injection check here because we have control over the report name. Also, some report names
-        // contain
-        // SQL jargon like select
-        // this.columnValidator.validateSqlInjection(sql, reportName);
+        if (isParameterType) {
+            return "Table";
+        }
+
+        final String sql = "SELECT ifNull(report_type,'') AS report_type FROM `stretchy_report` WHERE report_name = ? AND self_service_user_report = ?";
 
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, isSelfServiceUserReport);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, reportName, isSelfServiceUserReport);
 
         if (rs.next()) {
             reportType = rs.getString("report_type");
@@ -329,7 +320,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String sql = rm.schema(id);
 
-        final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm);
+        final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm,
+                id != null ? new Object[] { id } : new Object[] {});
 
         final Collection<ReportData> reportList = new ArrayList<>();
         if (rpJoins == null || rpJoins.size() == 0) {
@@ -422,7 +414,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             sql += " from stretchy_report r" + " left join stretchy_report_parameter rp on rp.report_id = r.id"
                     + " left join stretchy_parameter p on p.id = rp.parameter_id";
             if (reportId != null) {
-                sql += " where r.id = " + reportId;
+                sql += " where r.id = ?";
             } else {
                 sql += " order by r.id, rp.parameter_id";
             }
@@ -504,7 +496,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final Set<String> keys = queryParams.keySet();
         for (String key : keys) {
             final String pValue = queryParams.get(key);
-            // LOG.info("(" + key + " : " + pValue + ")");
             key = "${" + key + "}";
             sql = this.genericDataService.replace(sql, key, pValue);
         }
@@ -573,11 +564,5 @@ public class ReadReportingServiceImpl implements ReadReportingService {
          *
          */
         return null;
-    }
-
-    private void validateReportName(final String name) {
-        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
-            throw new SQLInjectionException();
-        }
     }
 }

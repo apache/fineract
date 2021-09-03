@@ -40,6 +40,8 @@ public final class HookApiConstants {
 
     public static final String elasticSearchTemplateName = "Elastic Search";
 
+    public static final String httpSMSTemplateName = "Message Gateway";
+
     public static final String smsTemplateName = "SMS Bridge";
 
     public static final String payloadURLName = "Payload URL";
@@ -67,6 +69,8 @@ public final class HookApiConstants {
     public static final String templateIdParamName = "templateId";
 
     public static final String templateNameParamName = "templateName";
+
+    public static final String SMSProviderIdParamName = "SMS Provider Id";
 
     static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(nameParamName, displayNameParamName,
             templateIdParamName, isActiveParamName, configParamName, eventsParamName, templateNameParamName));

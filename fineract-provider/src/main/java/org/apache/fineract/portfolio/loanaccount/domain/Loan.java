@@ -529,6 +529,11 @@ public class Loan extends AbstractPersistableCustom {
         return this.summary;
     }
 
+    public void updateLoanSummaryForUndoWaiveCharge(final BigDecimal amountWaived) {
+        this.summary.updateFeeChargesWaived(this.summary.getTotalFeeChargesWaived().subtract(amountWaived));
+        this.summary.updateFeeChargeOutstanding(this.summary.getTotalFeeChargesOutstanding().add(amountWaived));
+    }
+
     private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
 
         Money chargesDue = Money.of(getCurrency(), BigDecimal.ZERO);

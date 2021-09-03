@@ -31,9 +31,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -41,6 +43,7 @@ import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.AuthenticatedUserData;
 import org.apache.fineract.infrastructure.security.service.SpringSecurityPlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TwoFactorUtils;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
@@ -71,16 +74,19 @@ public class AuthenticationApiResource {
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
     private final TwoFactorUtils twoFactorUtils;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Autowired
     public AuthenticationApiResource(
             @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
             final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext, TwoFactorUtils twoFactorUtils) {
+            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext, TwoFactorUtils twoFactorUtils,
+            ClientReadPlatformService aClientReadPlatformService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
         this.twoFactorUtils = twoFactorUtils;
+        clientReadPlatformService = aClientReadPlatformService;
     }
 
     @POST
@@ -90,7 +96,8 @@ public class AuthenticationApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class))),
             @ApiResponse(responseCode = "400", description = "Unauthenticated. Please login") })
-    public String authenticate(final String apiRequestBodyAsJson) {
+    public String authenticate(final String apiRequestBodyAsJson,
+            @QueryParam("returnClientList") @DefaultValue("false") boolean returnClientList) {
         // TODO FINERACT-819: sort out Jersey so JSON conversion does not have
         // to be done explicitly via GSON here, but implicit by arg
         AuthenticateRequest request = new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
@@ -134,14 +141,16 @@ public class AuthenticationApiResource {
 
             boolean isTwoFactorRequired = twoFactorUtils.isTwoFactorAuthEnabled()
                     && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
+            Long userId = principal.getId();
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedUserData(request.username, principal.getId(),
+                authenticatedUserData = new AuthenticatedUserData(request.username, userId,
                         new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
             } else {
 
                 authenticatedUserData = new AuthenticatedUserData(request.username, officeId, officeName, staffId, staffDisplayName,
                         organisationalRole, roles, permissions, principal.getId(),
-                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
+                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired,
+                        returnClientList ? clientReadPlatformService.retrieveUserClients(userId) : null);
             }
 
         }

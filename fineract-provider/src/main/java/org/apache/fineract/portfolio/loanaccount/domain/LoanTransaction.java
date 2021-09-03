@@ -166,6 +166,18 @@ public class LoanTransaction extends AbstractPersistableCustom {
                 createdDate, appUser);
     }
 
+    public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
+        for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
+            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
+                    .getLoanRepaymentScheduleInstallment();
+            if (loanRepaymentScheduleInstallment.getInstallmentNumber().equals(installmentId)) {
+                loanRepaymentScheduleInstallment.updateLoanRepaymentSchedule(chargePerInstallment);
+                break;
+            }
+        }
+
+    }
+
     public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
         return new LoanTransaction(null, office, LoanTransactionType.RECOVERY_REPAYMENT, paymentDetail, amount.getAmount(), paymentDate,
@@ -492,6 +504,14 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public boolean isNotReversed() {
         return !isReversed();
+    }
+
+    public void setReversed() {
+        this.reversed = true;
+    }
+
+    public void setManuallyAdjustedOrReversed() {
+        this.manuallyAdjustedOrReversed = true;
     }
 
     public boolean isAnyTypeOfRepayment() {

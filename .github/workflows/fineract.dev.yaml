@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - uses: google-github-actions/setup-gcloud@master
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
@@ -33,4 +33,6 @@ jobs:
 
       - run: JOBS=$(gcloud beta builds list --ongoing --format="value[terminator=' '](id)") && [ ! -z "$JOBS" ] && echo "Cancelling $JOBS..." && gcloud builds cancel $JOBS --no-user-output-enabled || true
 
-      - run: gcloud beta builds triggers run deploy-demo --branch master --format=none
+      - run: gcloud beta builds triggers list
+
+      - run: gcloud beta builds triggers run deploy-demo

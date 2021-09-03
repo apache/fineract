@@ -141,6 +141,14 @@ public final class LoanSummary {
         return Money.of(currency, this.totalOutstanding);
     }
 
+    public void updateFeeChargeOutstanding(final BigDecimal totalFeeChargesOutstanding) {
+        this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
+    }
+
+    public void updateFeeChargesWaived(final BigDecimal totalFeeChargesWaived) {
+        this.totalFeeChargesWaived = totalFeeChargesWaived;
+    }
+
     public boolean isRepaidInFull(final MonetaryCurrency currency) {
         return getTotalOutstanding(currency).isZero();
     }

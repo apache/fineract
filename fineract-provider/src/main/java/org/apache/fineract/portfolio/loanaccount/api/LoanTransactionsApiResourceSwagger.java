@@ -186,4 +186,35 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "16")
         public Integer resourceId;
     }
+
+    @Schema(description = "PutChargeTransactionChangesResponse")
+    public static final class PutChargeTransactionChangesResponse {
+
+        private PutChargeTransactionChangesResponse() {}
+
+        static final class Changes {
+
+            private Changes() {}
+
+            @Schema(example = "amount")
+            public String amount;
+        }
+
+        @Schema(example = "1")
+        public Integer resourceId;
+        @Schema(example = "48")
+        public Integer loanId;
+        public PutChargeTransactionChangesResponse.Changes changes;
+
+    }
+
+    @Schema(description = "PutChargeTransactionChangesRequest")
+    public static final class PutChargeTransactionChangesRequest {
+
+        private PutChargeTransactionChangesRequest() {}
+
+        @Schema(example = "1")
+        public Integer transactionId;
+
+    }
 }
