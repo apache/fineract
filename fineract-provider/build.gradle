@@ -18,7 +18,7 @@
  */
 description = 'Fineract Provider'
 
-apply plugin: 'rebel'
+apply plugin: 'org.zeroturnaround.gradle.jrebel'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'openjpa'
