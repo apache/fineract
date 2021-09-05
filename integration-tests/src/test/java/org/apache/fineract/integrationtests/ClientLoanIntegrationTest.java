@@ -679,7 +679,8 @@ public class ClientLoanIntegrationTest {
             final Integer transTypeId = type.get("id").getAsInt();
             transId = reportObject.get("id").getAsInt();
             Assertions.assertNotNull(transId);
-            if (transTypeId.compareTo(Integer.valueOf(9)) == 0) {
+            Assertions.assertNotNull(transTypeId);
+            if (Integer.valueOf(9).compareTo(transTypeId) == 0) {
                 chargeId = this.loanTransactionHelper.undoWaiveChargesForLoan(loanID, transId);
                 break;
             }
