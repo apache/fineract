@@ -232,7 +232,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputChargeToIncomeAccountMap.size() == 0) {
-                this.accountMappingRepository.deleteInBatch(existingChargeToIncomeAccountMappings);
+                this.accountMappingRepository.deleteAllInBatch(existingChargeToIncomeAccountMappings);
             } /**
                * Else, <br/>
                * update existing mappings OR <br/>
@@ -315,7 +315,7 @@ public class ProductToGLAccountMappingHelper {
 
             // If input map is empty, delete all existing mappings
             if (inputPaymentChannelFundSourceMap.size() == 0) {
-                this.accountMappingRepository.deleteInBatch(existingPaymentChannelToFundSourceMappings);
+                this.accountMappingRepository.deleteAllInBatch(existingPaymentChannelToFundSourceMappings);
             } /**
                * Else, <br/>
                * update existing mappings OR <br/>
@@ -448,7 +448,7 @@ public class ProductToGLAccountMappingHelper {
         final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository
                 .findByProductIdAndProductType(loanProductId, portfolioProductType.getValue());
         if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
-            this.accountMappingRepository.deleteInBatch(productToGLAccountMappings);
+            this.accountMappingRepository.deleteAllInBatch(productToGLAccountMappings);
         }
     }
 }
