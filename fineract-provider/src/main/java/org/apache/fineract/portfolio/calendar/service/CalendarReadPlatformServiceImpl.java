@@ -267,8 +267,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         String query = "Select COUNT(*) from m_calendar_instance ci where ci.entity_id = ? and ci.calendar_id = ? and "
                 + " ci.entity_type_enum = ?";
         try {
-            int calendarInstaneId = this.jdbcTemplate.queryForObject(query, new Object[] { entityId, calendarId, entityTypeId },
-                    Integer.class);
+            int calendarInstaneId = this.jdbcTemplate.queryForObject(query, Integer.class, entityId, calendarId, entityTypeId);
             if (calendarInstaneId > 0) {
                 return true;
             }

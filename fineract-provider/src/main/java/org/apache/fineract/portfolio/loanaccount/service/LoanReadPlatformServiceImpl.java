@@ -2021,8 +2021,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Date retrieveMinimumDateOfRepaymentTransaction(Long loanId) {
         // TODO Auto-generated method stub
         Date date = this.jdbcTemplate.queryForObject(
-                "select min(transaction_date) from m_loan_transaction where loan_id=? and transaction_type_enum=2", new Object[] { loanId },
-                Date.class);
+                "select min(transaction_date) from m_loan_transaction where loan_id=? and transaction_type_enum=2", Date.class, loanId);
 
         return date;
     }
@@ -2251,8 +2250,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public Long retrieveLoanIdByAccountNumber(String loanAccountNumber) {
         try {
-            return this.jdbcTemplate.queryForObject("select l.id from m_loan l where l.account_no = ?", new Object[] { loanAccountNumber },
-                    Long.class);
+            return this.jdbcTemplate.queryForObject("select l.id from m_loan l where l.account_no = ?", Long.class, loanAccountNumber);
 
         } catch (final EmptyResultDataAccessException e) {
             return null;
@@ -2263,7 +2261,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public String retrieveAccountNumberByAccountId(Long accountId) {
         try {
             final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+            return this.jdbcTemplate.queryForObject(sql, String.class, accountId);
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(accountId, e);
         }

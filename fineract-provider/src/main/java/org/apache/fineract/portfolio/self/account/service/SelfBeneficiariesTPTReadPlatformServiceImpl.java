@@ -186,6 +186,6 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
         sqlBuilder.append(" and b.account_type = ? ");
         sqlBuilder.append(" and b.is_active = 1; ");
 
-        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), new Object[] { appUserId, accountId, accountType }, Long.class);
+        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class, appUserId, accountId, accountType);
     }
 }

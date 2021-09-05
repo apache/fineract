@@ -82,7 +82,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
-        return this.jdbcTemplate.query(sql, new Object[] { entity }, rm);
+        return this.jdbcTemplate.query(sql, rm, entity);
 
     }
 }
