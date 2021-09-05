@@ -79,22 +79,22 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         if (command.longValueOfParameterNamed("stateProvinceId") != null) {
             stateId = command.longValueOfParameterNamed("stateProvinceId");
-            stateIdobj = this.codeValueRepository.getOne(stateId);
+            stateIdobj = this.codeValueRepository.getById(stateId);
         }
 
         if (command.longValueOfParameterNamed("countryId") != null) {
             countryId = command.longValueOfParameterNamed("countryId");
-            countryIdObj = this.codeValueRepository.getOne(countryId);
+            countryIdObj = this.codeValueRepository.getById(countryId);
         }
 
-        final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
+        final CodeValue addressTypeIdObj = this.codeValueRepository.getById(addressTypeId);
 
         final Address add = Address.fromJson(command, stateIdobj, countryIdObj);
         add.setCreatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         add.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         this.addressRepository.save(add);
         final Long addressid = add.getId();
-        final Address addobj = this.addressRepository.getOne(addressid);
+        final Address addobj = this.addressRepository.getById(addressid);
 
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
@@ -126,23 +126,23 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
                 if (jsonObject.get("stateProvinceId") != null) {
                     stateId = jsonObject.get("stateProvinceId").getAsLong();
-                    stateIdobj = this.codeValueRepository.getOne(stateId);
+                    stateIdobj = this.codeValueRepository.getById(stateId);
                 }
 
                 if (jsonObject.get("countryId") != null) {
                     countryId = jsonObject.get("countryId").getAsLong();
-                    countryIdObj = this.codeValueRepository.getOne(countryId);
+                    countryIdObj = this.codeValueRepository.getById(countryId);
                 }
 
                 final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
-                final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
+                final CodeValue addressTypeIdObj = this.codeValueRepository.getById(addressTypeId);
 
                 final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
                 add.setCreatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
                 add.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
                 this.addressRepository.save(add);
                 final Long addressid = add.getId();
-                final Address addobj = this.addressRepository.getOne(addressid);
+                final Address addobj = this.addressRepository.getById(addressid);
 
                 // final boolean isActive =
                 // jsonObject.get("isActive").getAsBoolean();
@@ -184,7 +184,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             throw new AddressNotFoundException(clientId);
         }
 
-        final Address addobj = this.addressRepository.getOne(addressId);
+        final Address addobj = this.addressRepository.getById(addressId);
 
         if (!command.stringValueOfParameterNamed("addressLine1").isEmpty()) {
 
@@ -232,7 +232,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
                 is_address_update = true;
                 stateId = command.longValueOfParameterNamed("stateProvinceId");
-                stateIdobj = this.codeValueRepository.getOne(stateId);
+                stateIdobj = this.codeValueRepository.getById(stateId);
                 addobj.setStateProvince(stateIdobj);
             }
 
@@ -241,7 +241,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             if (command.longValueOfParameterNamed("countryId") != 0) {
                 is_address_update = true;
                 countryId = command.longValueOfParameterNamed("countryId");
-                countryIdObj = this.codeValueRepository.getOne(countryId);
+                countryIdObj = this.codeValueRepository.getById(countryId);
                 addobj.setCountry(countryIdObj);
             }
 

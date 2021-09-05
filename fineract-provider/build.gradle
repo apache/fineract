@@ -175,6 +175,7 @@ war {
         into "WEB-INF/" // no leading slash
     }
     enabled = true
+    classifier = ''
 }
 
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
@@ -261,7 +262,7 @@ bootRun {
 }
 
 springBoot {
-    mainClassName = 'org.apache.fineract.ServerApplication'
+    mainClass = 'org.apache.fineract.ServerApplication'
 }
 
 bootJar {
@@ -270,6 +271,7 @@ bootJar {
         attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
     }
     dependsOn resolve
+    classifier = ''
 }
 
 bootWar {

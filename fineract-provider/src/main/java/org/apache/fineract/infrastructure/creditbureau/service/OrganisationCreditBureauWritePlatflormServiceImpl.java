@@ -58,7 +58,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
         this.context.authenticatedUser();
         this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureauId);
 
-        final CreditBureau creditBureau = this.creditBureauRepository.getOne(creditBureauId);
+        final CreditBureau creditBureau = this.creditBureauRepository.getById(creditBureauId);
 
         final OrganisationCreditBureau organisationCreditBureau = OrganisationCreditBureau.fromJson(command, creditBureau);
 
@@ -78,7 +78,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
         final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
 
-        final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);
+        final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getById(creditbureauID);
 
         orgcb.setIsActive(isActive);
 

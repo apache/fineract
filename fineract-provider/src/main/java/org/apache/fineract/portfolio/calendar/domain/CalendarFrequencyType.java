@@ -62,7 +62,7 @@ public enum CalendarFrequencyType {
     public static CalendarFrequencyType fromString(final String frequencyString) {
         CalendarFrequencyType frequency = CalendarFrequencyType.INVALID;
 
-        if (StringUtils.isEmpty(frequencyString)) {
+        if (!StringUtils.hasText(frequencyString)) {
             return frequency;
         }
 

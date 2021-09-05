@@ -33,7 +33,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -51,19 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private TenantAwareJpaPlatformUserDetailsService userDetailsService;
 
     @Autowired
-    private TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter;
-
-    @Autowired
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
-
-    /**
-     * The purpose of this method is to exclude the URL's specific to Login, Swagger UI and static files. Any URL that
-     * should be excluded from the Spring security chain should be added to the ignore list in this method only
-     */
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/swagger-ui/**", "/actuator/**", "/api-docs/**");
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -86,10 +73,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement() //
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
-                .addFilterAfter(tenantAwareBasicAuthenticationFilter, SecurityContextPersistenceFilter.class) //
+                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), SecurityContextPersistenceFilter.class) //
                 .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
                 .requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
 
+    }
+
+    @Bean
+    public TenantAwareBasicAuthenticationFilter tenantAwareBasicAuthenticationFilter() throws Exception {
+        return new TenantAwareBasicAuthenticationFilter(authenticationManagerBean(), basicAuthenticationEntryPoint());
     }
 
     @Bean
@@ -125,9 +117,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> tenantAwareBasicAuthenticationFilterRegistration() {
+    public FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> tenantAwareBasicAuthenticationFilterRegistration()
+            throws Exception {
         FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> registration = new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>(
-                tenantAwareBasicAuthenticationFilter);
+                tenantAwareBasicAuthenticationFilter());
         registration.setEnabled(false);
         return registration;
     }
