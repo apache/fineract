@@ -232,7 +232,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         sb.append(" and saps.status_enum = ?");
         params.add(PurchasedSharesStatusType.APPROVED.getValue());
         Object[] whereClauseItems = params.toArray();
-        return this.jdbcTemplate.query(sb.toString(), whereClauseItems, mapper);
+        return this.jdbcTemplate.query(sb.toString(), mapper, whereClauseItems);
     }
 
     public Collection<ShareAccountChargeData> convertChargesToShareAccountCharges(Collection<ChargeData> productCharges) {
@@ -510,7 +510,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public String retrieveAccountNumberByAccountId(Long accountId) {
         try {
             final String sql = "select s.account_no from m_share_account s where s.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+            return this.jdbcTemplate.queryForObject(sql, String.class, accountId);
         } catch (final EmptyResultDataAccessException e) {
             throw new ShareAccountNotFoundException(accountId, e);
         }

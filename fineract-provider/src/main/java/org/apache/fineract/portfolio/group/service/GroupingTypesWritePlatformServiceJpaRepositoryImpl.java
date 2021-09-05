@@ -595,7 +595,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
 
             final List<Note> relatedNotes = this.noteRepository.findByGroup(groupForDelete);
-            this.noteRepository.deleteInBatch(relatedNotes);
+            this.noteRepository.deleteAllInBatch(relatedNotes);
 
             this.groupRepository.delete(groupForDelete);
             this.groupRepository.flush();

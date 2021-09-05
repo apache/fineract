@@ -550,8 +550,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         sqlBuilder.append(" and trans.transaction_date = ? ");
         sqlBuilder.append(" and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?) ");
 
-        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(),
-                new Object[] { this.formatter.format(transactionDate), accountType, accountId, accountId }, BigDecimal.class);
+        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), BigDecimal.class, this.formatter.format(transactionDate),
+                accountType, accountId, accountId);
     }
 
 }

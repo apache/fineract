@@ -1202,8 +1202,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final StringBuilder buff = new StringBuilder("select count(*) from m_savings_account sa ");
             buff.append(
                     " where sa.id = ? and sa.client_id = ? and sa.deposit_type_enum = ? and sa.currency_code = ? and sa.status_enum = 300");
-            return this.jdbcTemplate.queryForObject(buff.toString(),
-                    new Object[] { accountId, clientId, depositAccountType.getValue(), currencyCode }, Integer.class) > 0;
+            return this.jdbcTemplate.queryForObject(buff.toString(), Integer.class, accountId, clientId, depositAccountType.getValue(),
+                    currencyCode) > 0;
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(accountId, e);
         }
@@ -1235,7 +1235,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public String retrieveAccountNumberByAccountId(Long accountId) {
         try {
             final String sql = "select s.account_no from m_savings_account s where s.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+            return this.jdbcTemplate.queryForObject(sql, String.class, accountId);
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(accountId, e);
         }
