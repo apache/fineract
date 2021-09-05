@@ -69,7 +69,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsAccountStatusType.submitted.and.pending.approval")
                 public String code;
                 @Schema(example = "Submitted and pending approval")
-                public String description;
+                public String value;
                 @Schema(example = "true")
                 public Boolean submittedAndPendingApproval;
                 @Schema(example = "false")
@@ -91,6 +91,22 @@ final class SavingsAccountsApiResourceSwagger {
 
                 @Schema(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
+                @Schema(example = "[2013, 4, 8]")
+                public LocalDate approvedOnDate;
+                @Schema(example = "[2014, 3, 1]")
+                public LocalDate activatedOnDate;
+                @Schema(example = "username")
+                public String submittedByUsername;
+                @Schema(example = "name")
+                public String submittedByFirstname;
+                @Schema(example = "lastname")
+                public String submittedByLastname;
+                @Schema(example = "mifos")
+                public String approvedByUsername;
+                @Schema(example = "name")
+                public String approvedByFirstname;
+                @Schema(example = "lastname")
+                public String approvedByLastname;
             }
 
             static final class GetSavingsCurrency {
@@ -120,7 +136,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
                 public String code;
                 @Schema(example = "Daily")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestPostingPeriodType {
@@ -132,7 +148,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
                 public String code;
                 @Schema(example = "Monthly")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestCalculationType {
@@ -144,7 +160,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsInterestCalculationType.dailybalance")
                 public String code;
                 @Schema(example = "Daily Balance")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsInterestCalculationDaysInYearType {
@@ -156,7 +172,7 @@ final class SavingsAccountsApiResourceSwagger {
                 @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
                 public String code;
                 @Schema(example = "365 Days")
-                public String description;
+                public String value;
             }
 
             static final class GetSavingsSummary {

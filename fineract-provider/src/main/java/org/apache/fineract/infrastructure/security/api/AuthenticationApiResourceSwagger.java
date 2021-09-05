@@ -32,6 +32,19 @@ final class AuthenticationApiResourceSwagger {
 
     }
 
+    @Schema(description = "PostAuthenticationRequest")
+    public static final class PostAuthenticationRequest {
+
+        private PostAuthenticationRequest() {
+
+        }
+
+        @Schema(required = true, example = "mifos")
+        public String username;
+        @Schema(required = true, example = "password")
+        public String password;
+    }
+
     @Schema(description = "PostAuthenticationResponse")
     public static final class PostAuthenticationResponse {
 

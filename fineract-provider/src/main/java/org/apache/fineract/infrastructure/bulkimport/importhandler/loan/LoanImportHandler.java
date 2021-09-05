@@ -43,7 +43,9 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -270,6 +272,8 @@ public class LoanImportHandler implements ImportHandler {
         Long charge1 = ImportHandlerUtils.readAsLong(LoanConstants.CHARGE_ID_1, row);
         Long charge2 = ImportHandlerUtils.readAsLong(LoanConstants.CHARGE_ID_2, row);
 
+        Long collateralId = ImportHandlerUtils.readAsLong(LoanConstants.LOAN_COLLATERAL_ID, row);
+
         Long groupId = ImportHandlerUtils.readAsLong(LoanConstants.GROUP_ID, row);
 
         String linkAccountId = ImportHandlerUtils.readAsString(LoanConstants.LINK_ACCOUNT_ID, row);
@@ -295,6 +299,19 @@ public class LoanImportHandler implements ImportHandler {
                         ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row), null));
             }
         }
+
+        List<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
+
+        if (collateralId != null) {
+            if (ImportHandlerUtils.readAsDouble(LoanConstants.LOAN_COLLATERAL_QUANTITY, row) != null) {
+                loanCollateralManagementData.add(new LoanCollateralManagementData(collateralId,
+                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.LOAN_COLLATERAL_QUANTITY, row)), null, null,
+                        null));
+            } else {
+                throw new InvalidAmountOfCollateralQuantity(null);
+            }
+        }
+
         statuses.add(status);
         if (loanType != null) {
             if (loanType.equals("individual")) {
@@ -305,7 +322,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, null, charges, linkAccountId, locale,
-                        dateFormat);
+                        dateFormat, loanCollateralManagementData);
             } else if (loanType.equals("jlg")) {
                 Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
                         clientOrGroupName);
@@ -314,7 +331,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, groupId, charges, linkAccountId, locale,
-                        dateFormat);
+                        dateFormat, null);
             } else {
                 Long groupIdforGroupLoan = ImportHandlerUtils
                         .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME), clientOrGroupName);

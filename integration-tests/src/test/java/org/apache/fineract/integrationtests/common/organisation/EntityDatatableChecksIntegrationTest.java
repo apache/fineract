@@ -26,10 +26,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -448,6 +450,14 @@ public class EntityDatatableChecksIntegrationTest {
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment,
             final String registeredTableName) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withLoanTermFrequency("24") //
@@ -462,13 +472,20 @@ public class EntityDatatableChecksIntegrationTest {
                 .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("02 June 2014") //
                 .withSubmittedOnDate("02 June 2014") //
                 .withDatatables(getTestDatatableAsJson(registeredTableName)) //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Object applyForLoanApplicationWithError(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment,
             final String responseAttribute) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withLoanTermFrequency("24") //
@@ -482,8 +499,19 @@ public class EntityDatatableChecksIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("02 June 2014") //
                 .withSubmittedOnDate("02 June 2014") //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
         return this.validationErrorHelper.getLoanError(loanApplicationJSON, responseAttribute);
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(1);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal amount) {
+        collaterals.add(collaterals(collateralId, amount));
     }
 
     public static List<HashMap<String, Object>> getTestDatatableAsJson(final String registeredTableName) {
