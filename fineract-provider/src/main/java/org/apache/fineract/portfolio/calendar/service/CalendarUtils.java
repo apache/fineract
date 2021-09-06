@@ -78,10 +78,10 @@ public final class CalendarUtils {
 
     public static LocalDate adjustDate(final LocalDate date, final LocalDate seedDate, final PeriodFrequencyType frequencyType) {
         LocalDate adjustedVal = date;
-        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28 && date.getDayOfMonth() > 28) {
+        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28 && date.getDayOfMonth() >= 28) {
             switch (date.getMonthValue()) {
                 case 2:
-                    if (date.isLeapYear()) {
+                    if (date.isLeapYear() && date.getDayOfMonth() > 28) {
                         adjustedVal = date.withDayOfMonth(29);
                     }
                 break;
