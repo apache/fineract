@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.restassured.builder.RequestSpecBuilder;
@@ -717,36 +716,64 @@ public class ClientLoanIntegrationTest {
         for (int i = 0; i < loanDetails.size(); i++) {
             String resultObject = gson.toJson(loanDetails.get(i));
             JsonObject reportObject = JsonParser.parseString(resultObject).getAsJsonObject();
-            JsonObject type = JsonParser.parseString(resultObject).getAsJsonObject();
+            JsonObject type = reportObject.getAsJsonObject("type");
             final Integer transTypeId = type.get("id").getAsInt();
-            transId = reportObject.get("id").getAsInt();
-            Assertions.assertNotNull(transId);
             Assertions.assertNotNull(transTypeId);
             if (Integer.valueOf(9).compareTo(transTypeId) == 0) {
-                chargeId = this.loanTransactionHelper.undoWaiveChargesForLoan(loanID, transId);
+                transId = reportObject.get("id").getAsInt();
+                Assertions.assertNotNull(transId);
+                final HashMap<String, String> map = new HashMap<>();
+                map.put("id", transId.toString());
+                map.put("loanId", loanID.toString());
+                final String putBody = gson.toJson(map);
+                chargeId = this.loanTransactionHelper.undoWaiveChargesForLoan(loanID, transId, putBody);
                 break;
             }
         }
 
         Assertions.assertEquals(waivedChargeId, chargeId);
 
-        final HashMap chargeDetails = this.loanTransactionHelper.getLoanCharge(loanID, waivedChargeId);
-        String resultChargeObject = gson.toJson(chargeDetails);
-        JsonObject reportChargeObject = JsonParser.parseString(resultChargeObject).getAsJsonObject();
-        JsonArray installments = reportChargeObject.get("installmentChargeData").getAsJsonArray();
-        for (int i = 0; i < installments.size(); i++) {
-            String resultObject = gson.toJson(installments.get(i));
+        // Validate the undo process
+        ArrayList<HashMap> loanTransactionDetails = this.loanTransactionHelper.getLoanTransactionDetails(this.requestSpec,
+                this.responseSpec, loanID);
+        Assertions.assertNotNull(loanTransactionDetails, "Empty Loan Transaction Details");
+        for (int i = 0; i < loanTransactionDetails.size(); i++) {
+            String resultObject = gson.toJson(loanTransactionDetails.get(i));
             JsonObject reportObject = JsonParser.parseString(resultObject).getAsJsonObject();
-            final Integer installmentNo = reportObject.get("installmentNumber").getAsInt();
-            Assertions.assertNotNull(installmentNo);
-            if (Integer.valueOf(1).compareTo(installmentNo) == 0) {
-                final boolean isWaived = reportChargeObject.get("waived").getAsBoolean();
-                Assertions.assertEquals(false, isWaived);
+            final Boolean isReversed = reportObject.get("manuallyReversed").getAsBoolean();
+            final Integer id = reportObject.get("id").getAsInt();
+
+            if (transId.compareTo(id) == 0) {
+                final HashMap chargeDetails = this.loanTransactionHelper.getLoanCharge(loanID, waivedChargeId);
+                String resultChargeObject = gson.toJson(chargeDetails);
+                JsonObject reportChargeObject = JsonParser.parseString(resultChargeObject).getAsJsonObject();
+                BigDecimal waiveAmount = reportChargeObject.get("amountWaived").getAsBigDecimal();
+
+                Assertions.assertEquals(true, isReversed);
+                Assertions.assertEquals(Double.valueOf(0), waiveAmount.doubleValue());
                 break;
-            } else if (i == installments.size() - 1 && Integer.valueOf(1).compareTo(installmentNo) < 0) {
-                Assertions.assertEquals(Integer.valueOf(1), installmentNo);
+            } else if (transId.compareTo(id) != 0 && i == loanTransactionDetails.size() - 1) {
+                Assertions.assertEquals(transId, id);
             }
         }
+
+        // final HashMap chargeDetails = this.loanTransactionHelper.getLoanCharge(loanID, waivedChargeId);
+        // String resultChargeObject = gson.toJson(chargeDetails);
+        // JsonObject reportChargeObject = JsonParser.parseString(resultChargeObject).getAsJsonObject();
+        // JsonArray installments = reportChargeObject.get("installmentChargeData").getAsJsonArray();
+        // for (int i = 0; i < installments.size(); i++) {
+        // String resultObject = gson.toJson(installments.get(i));
+        // JsonObject reportObject = JsonParser.parseString(resultObject).getAsJsonObject();
+        // final Integer installmentNo = reportObject.get("installmentNumber").getAsInt();
+        // Assertions.assertNotNull(installmentNo);
+        // if (Integer.valueOf(1).compareTo(installmentNo) == 0) {
+        // final boolean isWaived = reportChargeObject.get("waived").getAsBoolean();
+        // Assertions.assertEquals(false, isWaived);
+        // break;
+        // } else if (i == installments.size() - 1 && Integer.valueOf(1).compareTo(installmentNo) < 0) {
+        // Assertions.assertEquals(Integer.valueOf(1), installmentNo);
+        // }
+        // }
 
         // Re-waive charge
         this.loanTransactionHelper.waiveChargesForLoan(loanID, waivedChargeId,

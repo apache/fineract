@@ -351,11 +351,11 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
-    public Integer undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId) {
+    public Integer undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId, final String body) {
         LOG.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
         final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "&"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, null, "");
+        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, body, "");
         return (Integer) response.get("resourceId");
     }
 
