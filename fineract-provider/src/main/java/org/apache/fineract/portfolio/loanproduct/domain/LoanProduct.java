@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -642,11 +643,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.useBorrowerCycle = useBorrowerCycle;
 
         if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (closeDate != null) {
-            this.closeDate = Date.from(closeDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closeDate = Date.from(closeDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         this.externalId = externalId;
@@ -878,7 +879,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
             if (newValue != null) {
-                this.startDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.startDate = null;
             }
@@ -893,7 +894,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(closeDateParamName);
             if (newValue != null) {
-                this.closeDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.closeDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.closeDate = null;
             }

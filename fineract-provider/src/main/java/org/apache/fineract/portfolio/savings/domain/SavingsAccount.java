@@ -36,6 +36,7 @@ import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -398,7 +399,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.externalId = externalId;
         this.status = status.getValue();
         this.accountType = accountType.getValue();
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.submittedBy = submittedBy;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
@@ -1267,7 +1268,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             actualChanges.put(SavingsApiConstants.submittedOnDateParamName, newValueAsString);
             actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
             actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
-            this.submittedOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.accountNoParamName, this.accountNumber)) {
@@ -1875,7 +1876,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
         final String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
 
-        this.approvedOnDate = Date.from(approvedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.approvedOnDate = Date.from(approvedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.approvedBy = currentUser;
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
@@ -1997,12 +1998,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if (transaction.isAnnualFeeAndNotReversed()) {
                 if (lastAnnualFeeTransactionDate == null) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
 
                 if (transaction.transactionLocalDate().isAfter(lastAnnualFeeTransactionDate)) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 }
             }
         }
@@ -2035,11 +2036,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
         final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
 
-        this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.rejectedBy = currentUser;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(rejectedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2103,9 +2104,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
-        this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.withdrawnBy = currentUser;
-        this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2176,7 +2177,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.withdrawnBy = null;
         this.closedOnDate = null;
         this.closedBy = null;
-        this.activatedOnDate = Date.from(activationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.activatedOnDate = Date.from(activationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
@@ -2351,7 +2352,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.closedBy = currentUser;
 
         return actualChanges;
@@ -2380,20 +2381,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
             case INVALID:
             break;
             case DAYS:
-                lockedInUntilLocalDate = Date.from(activationLocalDate.plusDays(this.lockinPeriodFrequency)
-                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                lockedInUntilLocalDate = Date
+                        .from(activationLocalDate.plusDays(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
             break;
             case WEEKS:
-                lockedInUntilLocalDate = Date.from(activationLocalDate.plusWeeks(this.lockinPeriodFrequency)
-                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                lockedInUntilLocalDate = Date
+                        .from(activationLocalDate.plusWeeks(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
             break;
             case MONTHS:
-                lockedInUntilLocalDate = Date.from(activationLocalDate.plusMonths(this.lockinPeriodFrequency)
-                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                lockedInUntilLocalDate = Date
+                        .from(activationLocalDate.plusMonths(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
             break;
             case YEARS:
-                lockedInUntilLocalDate = Date.from(activationLocalDate.plusYears(this.lockinPeriodFrequency)
-                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                lockedInUntilLocalDate = Date
+                        .from(activationLocalDate.plusYears(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");

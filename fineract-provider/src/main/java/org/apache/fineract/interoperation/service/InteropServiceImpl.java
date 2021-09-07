@@ -225,8 +225,7 @@ public class InteropServiceImpl implements InteropService {
                 return true;
             }
 
-            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
-                    .toLocalDateTime();
+            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
             return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0) && (transactionsFrom == null
                     || transactionsFrom.compareTo(transactionDate.withHour(23).withMinute(59).withSecond(59)) <= 0);
         };

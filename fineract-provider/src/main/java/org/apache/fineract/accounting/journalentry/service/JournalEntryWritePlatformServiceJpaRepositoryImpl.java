@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -69,7 +70,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -593,7 +593,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getTransactionDate();
-        final Date transactionDate = Date.from(entryLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        final Date transactionDate = Date.from(entryLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         // shouldn't be in the future
         final Date todaysDate = new Date();
         if (transactionDate.after(todaysDate)) {

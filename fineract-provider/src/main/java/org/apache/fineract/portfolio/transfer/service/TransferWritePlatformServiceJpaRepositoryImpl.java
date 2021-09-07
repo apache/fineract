@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -475,7 +476,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             case PROPOSAL:
                 client.setStatus(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
                 client.updateTransferToOffice(destinationOffice);
-                client.updateProposedTransferDate(Date.from(transferDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                client.updateProposedTransferDate(Date.from(transferDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
             break;
             case REJECTION:
                 client.setStatus(ClientStatus.TRANSFER_ON_HOLD.getValue());
@@ -489,9 +490,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
-        Date proposedTransferDate = transferDate != null
-                ? Date.from(transferDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())
-                : null;
+        Date proposedTransferDate = transferDate != null ? Date.from(transferDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
         this.clientTransferDetailsRepositoryWrapper.save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
                 destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
                 Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()),

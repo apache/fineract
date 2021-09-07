@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.MonthDay;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -417,7 +418,7 @@ public final class JsonCommand {
         if (localDate == null) {
             return null;
         }
-        return Date.from(localDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {

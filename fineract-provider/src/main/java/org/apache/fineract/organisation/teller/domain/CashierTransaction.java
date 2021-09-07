@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
         this.cashier = cashier;
         this.txnType = txnType;
         if (txnDate != null) {
-            this.txnDate = Date.from(txnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.txnDate = Date.from(txnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         this.txnAmount = txnAmount;
         this.entityType = entityType;
@@ -135,7 +136,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(txnDateParamName);
-            this.txnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.txnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String txnAmountParamName = "txnAmount";

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.address.domain;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -35,7 +36,6 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
 
 @Entity
@@ -122,12 +122,12 @@ public class Address extends AbstractPersistableCustom {
         // this.updatedOn = updatedOn;
 
         if (createdOn != null) {
-            this.createdOn = Date.from(createdOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         }
 
         if (updatedOn != null) {
-            this.updatedOn = Date.from(updatedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
     }
@@ -363,7 +363,7 @@ public class Address extends AbstractPersistableCustom {
     }
 
     public void setCreatedOn(LocalDate createdOn) {
-        this.createdOn = Date.from(createdOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public String getUpdatedBy() {
@@ -379,7 +379,7 @@ public class Address extends AbstractPersistableCustom {
     }
 
     public void setUpdatedOn(LocalDate updatedOn) {
-        this.updatedOn = Date.from(updatedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
 }
