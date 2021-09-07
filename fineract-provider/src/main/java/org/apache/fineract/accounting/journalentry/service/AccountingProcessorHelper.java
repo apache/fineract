@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -58,7 +59,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -132,8 +132,7 @@ public class AccountingProcessorHelper {
         for (final Map<String, Object> map : newTransactionsMap) {
             final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
-            final Date transactionDate = Date
-                    .from(((LocalDate) map.get("date")).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            final Date transactionDate = Date.from(((LocalDate) map.get("date")).atStartOfDay(ZoneId.systemDefault()).toInstant());
             final LoanTransactionEnumData transactionType = (LoanTransactionEnumData) map.get("type");
             final BigDecimal amount = (BigDecimal) map.get("amount");
             final BigDecimal principal = (BigDecimal) map.get("principalPortion");
@@ -200,8 +199,7 @@ public class AccountingProcessorHelper {
         for (final Map<String, Object> map : newTransactionsMap) {
             final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
-            final Date transactionDate = Date
-                    .from(((LocalDate) map.get("date")).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            final Date transactionDate = Date.from(((LocalDate) map.get("date")).atStartOfDay(ZoneId.systemDefault()).toInstant());
             final SavingsAccountTransactionEnumData transactionType = (SavingsAccountTransactionEnumData) map.get("type");
             final BigDecimal amount = (BigDecimal) map.get("amount");
             final boolean reversed = (Boolean) map.get("reversed");
@@ -270,8 +268,7 @@ public class AccountingProcessorHelper {
         for (final Map<String, Object> map : newTransactionsMap) {
             final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
-            final Date transactionDate = Date
-                    .from(((LocalDate) map.get("date")).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            final Date transactionDate = Date.from(((LocalDate) map.get("date")).atStartOfDay(ZoneId.systemDefault()).toInstant());
             final ShareAccountTransactionEnumData transactionType = (ShareAccountTransactionEnumData) map.get("type");
             final ShareAccountTransactionEnumData transactionStatus = (ShareAccountTransactionEnumData) map.get("status");
             final BigDecimal amount = (BigDecimal) map.get("amount");
@@ -308,7 +305,7 @@ public class AccountingProcessorHelper {
         final Long clientId = (Long) accountingBridgeData.get("clientId");
         final Long transactionId = (Long) accountingBridgeData.get("id");
         final Date transactionDate = Date
-                .from(((LocalDate) accountingBridgeData.get("date")).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                .from(((LocalDate) accountingBridgeData.get("date")).atStartOfDay(ZoneId.systemDefault()).toInstant());
         final EnumOptionData transactionType = (EnumOptionData) accountingBridgeData.get("type");
         final BigDecimal amount = (BigDecimal) accountingBridgeData.get("amount");
         final boolean reversed = (Boolean) accountingBridgeData.get("reversed");

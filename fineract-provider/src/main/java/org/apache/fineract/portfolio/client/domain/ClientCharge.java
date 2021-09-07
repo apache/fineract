@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -115,7 +116,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         this.charge = charge;
         this.penaltyCharge = charge.isPenalty();
         this.chargeTime = charge.getChargeTimeType();
-        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.chargeCalculation = charge.getChargeCalculation();
 
         BigDecimal chargeAmount = charge.getAmount();

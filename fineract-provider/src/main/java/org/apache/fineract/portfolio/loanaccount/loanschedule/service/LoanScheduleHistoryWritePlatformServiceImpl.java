@@ -19,10 +19,10 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -60,13 +60,11 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             Date dueDate = null;
 
             if (repaymentScheduleInstallment.getFromDate() != null) {
-                fromDate = Date
-                        .from(repaymentScheduleInstallment.getFromDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                fromDate = Date.from(repaymentScheduleInstallment.getFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
 
             if (repaymentScheduleInstallment.getDueDate() != null) {
-                dueDate = Date
-                        .from(repaymentScheduleInstallment.getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                dueDate = Date.from(repaymentScheduleInstallment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
 
             final BigDecimal principal = repaymentScheduleInstallment.getPrincipal(currency).getAmount();

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -125,7 +126,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
         this.office = office;
         this.paymentDetail = paymentDetail;
         this.typeOf = typeOf;
-        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.amount = amount.getAmount();
         this.reversed = reversed;
         this.externalId = externalId;

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -197,7 +198,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             amountPercentageAppliedTo = BigDecimal.ZERO;
             for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
                 if (!loanDisbursementDetails.expectedDisbursementDate()
-                        .after(Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()))) {
+                        .after(Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
                     amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
                 }
             }
@@ -244,7 +245,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                         chargeDefinition.getName());
             }
 
-            this.dueDate = Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.dueDate = null;
         }
@@ -391,7 +392,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     public void update(final BigDecimal amount, final LocalDate dueDate, final BigDecimal loanPrincipal, Integer numberOfRepayments,
             BigDecimal loanCharge) {
         if (dueDate != null) {
-            this.dueDate = Date.from(dueDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (amount != null) {
@@ -479,7 +480,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(dueDateParamName);
-            this.dueDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.dueDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String amountParamName = "amount";

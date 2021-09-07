@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,7 +47,7 @@ public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersista
 
     public LoanInterestRecalcualtionAdditionalDetails(final LocalDate effectiveDate, final BigDecimal amount) {
         if (effectiveDate != null) {
-            this.effectiveDate = Date.from(effectiveDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.effectiveDate = Date.from(effectiveDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         this.amount = amount;
     }

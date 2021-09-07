@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -72,7 +73,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
         this.savingsAccount = savingsAccount;
         this.amount = amount;
         this.transactionType = transactionType.getValue();
-        this.transactionDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.transactionDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.createdDate = new Date();
         this.reversed = reversed;
     }

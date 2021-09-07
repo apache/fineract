@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -491,7 +492,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         public ShareAccountDividendData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Date postedDate = Date
-                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(ZoneId.systemDefault()).toInstant());
             final BigDecimal postedAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final Long savingTransactionId = rs.getLong("savings_transaction_id");
             final Integer status = rs.getInt("status");
