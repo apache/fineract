@@ -112,10 +112,13 @@ tasks.withType(JavaCompile) {
 }
 
 configurations {
-    generatedCompile.extendsFrom implementation
-    generatedRuntime.extendsFrom runtime
+    generatedCompileClasspath.extendsFrom implementation
+    generatedRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
 test {
     useJUnitPlatform()
 }
+
+// Gradle 7.x asks for explicit dependencies between tasks
+licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileGeneratedJava, compileTestJava, rat, test

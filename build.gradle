@@ -38,7 +38,6 @@ buildscript {
         }
     }
     repositories {
-        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -53,9 +52,11 @@ buildscript {
 
 plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id "org.barfuin.gradle.taskinfo" version "1.3.0"
+    id 'com.adarshr.test-logger' version '3.0.0'
     id 'com.diffplug.spotless' version '5.15.0' apply false
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
-    id 'com.github.hierynomus.license' version '0.15.0' apply false
+    id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
     id 'org.springframework.boot' version '2.3.5.RELEASE' apply false
@@ -86,6 +87,7 @@ allprojects  {
     }
 
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'com.diffplug.spotless'
     apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'org.nosphere.apache.rat'
@@ -468,6 +470,10 @@ configure(project.fineractJavaProjects) {
 
     compileJava.dependsOn spotlessCheck
 
+    // compileJava may create more source files into generated, hence we need to run these tasks after it
+    licenseMain.dependsOn compileJava
+    processResources.dependsOn compileJava
+
     // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
     // set the classes directory to point to Eclipse's default build directory
     if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
@@ -603,12 +609,10 @@ configure(project.fineractJavaProjects) {
 
     test {
         useJUnitPlatform()
-        testLogging {
-            // FINERACT-927
-            events "skipped", "failed"
-            showStandardStreams = false
-            exceptionFormat "full"
-        }
+    }
+
+    testlogger {
+        logLevel 'quiet'
     }
 
     // Configuration for spotbugs plugin
@@ -648,7 +652,6 @@ configure(project.fineractJavaProjects) {
 }
 
 configure(project.fineractPublishProjects) {
-    apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
     publishing {
@@ -685,5 +688,20 @@ configure(project.fineractPublishProjects) {
         }
 
         // TODO FINERACT-1102: Actually use this to deploy to ASF (Apache Software Foundation) Nexus Maven Repository
+    }
+}
+
+task printSourceSetInformation() {
+    doLast{
+        sourceSets.each { srcSet ->
+            println "["+srcSet.name+"]"
+            print "-->Source directories: "+srcSet.allJava.srcDirs+"\n"
+            print "-->Output directories: "+srcSet.output.classesDirs.files+"\n"
+            print "-->Compile classpath:\n"
+            srcSet.compileClasspath.files.each {
+                print "  "+it.path+"\n"
+            }
+            println ""
+        }
     }
 }
