@@ -38,7 +38,6 @@ dependencies {
 
             'com.sun.jersey:jersey-servlet',
             'com.sun.jersey:jersey-server',
-            'com.sun.jersey:jersey-json',
             'com.sun.jersey.contribs:jersey-spring',
             'com.sun.jersey.contribs:jersey-multipart',
 
@@ -53,7 +52,6 @@ dependencies {
             'com.squareup.okhttp3:okhttp',
             'com.squareup.okhttp3:okhttp-urlconnection',
 
-            'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
             'commons-io:commons-io',
             'org.apache.poi:poi',
@@ -68,8 +66,6 @@ dependencies {
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
-            'org.dom4j:dom4j',
-
             'javax.cache:cache-api',
 
             'com.github.spotbugs:spotbugs-annotations',
@@ -80,8 +76,17 @@ dependencies {
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation:1.2.2'
             )
+    implementation('org.apache.commons:commons-email') {
+        exclude group: 'javax.activation'
+    }
+    implementation('org.dom4j:dom4j') {
+        exclude group: 'javax.xml.bind'
+    }
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
+    }
+    implementation ('com.sun.jersey:jersey-json') {
+        exclude group: 'com.sun.xml.bind'
     }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
@@ -101,6 +106,7 @@ dependencies {
     }
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
+        exclude group: 'javax.activation'
     }
 
     runtimeOnly('org.ehcache:ehcache') {

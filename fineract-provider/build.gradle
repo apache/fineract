@@ -253,6 +253,7 @@ bootJar {
     manifest {
         attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
     }
+    dependsOn resolve
 }
 
 bootWar {
@@ -266,7 +267,8 @@ tasks.withType(Tar) {
 
 distributions {
     binary {
-        baseName "apache-fineract-$releaseVersion-binary"
+        // TODO: Add the version number before enabling this
+        distributionBaseName = "apache-fineract-binary"
         contents {
             from bootJar
             from war
@@ -284,7 +286,8 @@ distributions {
         }
     }
     src {
-        baseName "apache-fineract-$releaseVersion-src"
+        // TODO: Add the version number before enabling this
+        distributionBaseName = "apache-fineract-src"
         contents {
             from "$rootDir/"
             exclude '**/build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
@@ -342,3 +345,12 @@ gitProperties {
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
+
+// Gradle 7.x asks for explicit dependencies between tasks
+processResources.dependsOn generateGitProperties
+checkstyleMain.dependsOn resolve
+checkstyleTest.dependsOn resolve
+licenseMain.dependsOn processResources, generateGitProperties
+war.dependsOn resolve
+spotbugsTest.dependsOn resolve
+test.dependsOn resolve
