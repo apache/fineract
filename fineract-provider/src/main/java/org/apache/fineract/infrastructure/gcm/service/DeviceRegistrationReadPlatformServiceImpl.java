@@ -21,10 +21,10 @@ package org.apache.fineract.infrastructure.gcm.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
 import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
@@ -75,7 +75,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             final String clientName = rs.getString("clientName");
             ClientData clientData = ClientData.instance(clientId, clientName);
             return DeviceRegistrationData.instance(id, clientData, registrationId,
-                    Date.from(updatedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                    Date.from(updatedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
     }
 

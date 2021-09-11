@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -198,7 +199,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private void checkIfInstallmentObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 

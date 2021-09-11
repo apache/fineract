@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.account.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -30,7 +31,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -111,7 +111,7 @@ public class AccountTransferTransaction extends AbstractPersistableCustom {
         this.fromSavingsTransaction = withdrawal;
         this.toSavingsTransaction = deposit;
         this.toLoanTransaction = loanRepaymentTransaction;
-        this.date = Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.date = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.currency = transactionAmount.getCurrency();
         this.amount = transactionAmount.getAmountDefaultedToNullIfZero();
         this.description = description;

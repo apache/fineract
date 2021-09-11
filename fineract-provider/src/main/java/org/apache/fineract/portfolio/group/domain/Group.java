@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -208,7 +209,7 @@ public final class Group extends AbstractPersistableCustom {
             this.groupMembers.addAll(groupMembers);
         }
 
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.submittedBy = currentUser;
         this.staffHistory = null;
 
@@ -240,7 +241,7 @@ public final class Group extends AbstractPersistableCustom {
         validateStatusNotEqualToActiveAndLogError(dataValidationErrors);
         if (dataValidationErrors.isEmpty()) {
             this.status = GroupingTypeStatus.ACTIVE.getValue();
-            setActivationDate(Date.from(activationLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), currentUser,
+            setActivationDate(Date.from(activationLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), currentUser,
                     dataValidationErrors);
         }
 
@@ -335,7 +336,7 @@ public final class Group extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
             if (newValue != null) {
-                this.activationDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.activationDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -353,7 +354,7 @@ public final class Group extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             if (newValue != null) {
-                this.submittedOnDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -539,7 +540,7 @@ public final class Group extends AbstractPersistableCustom {
         }
 
         this.closureReason = closureReason;
-        this.closureDate = Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closureDate = Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.status = GroupingTypeStatus.CLOSED.getValue();
         this.closedBy = currentUser;
     }

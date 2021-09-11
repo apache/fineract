@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -274,7 +275,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.approvedByUser = approvedByUser;
-            this.approvedOnDate = Date.from(approvedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.approvedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.statusEnum = LoanStatus.APPROVED.getValue();
         }
     }
@@ -293,7 +294,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.rejectedByUser = approvedByUser;
-            this.rejectedOnDate = Date.from(approvedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.rejectedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             this.statusEnum = LoanStatus.REJECTED.getValue();
         }
     }

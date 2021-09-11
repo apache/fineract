@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -2077,13 +2078,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService
                     .retrieveInterestRatePeriods(loanData.loanProductId());
             for (final InterestRatePeriodData rate : intRates) {
-                if (rate.getFromDate().compareTo(
-                        Date.from(loanData.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) > 0
+                if (rate.getFromDate()
+                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) > 0
                         && loanData.isFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
-                } else if (rate.getFromDate().compareTo(
-                        Date.from(loanData.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) <= 0) {
+                } else if (rate.getFromDate()
+                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) <= 0) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
                     break;
@@ -2109,9 +2110,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         rate.setEffectiveInterestRate(effectiveInterestRate);
 
-        if (rate.getFromDate()
-                .compareTo(Date.from(loan.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())) < 0) {
-            rate.setFromDate(Date.from(loan.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        if (rate.getFromDate().compareTo(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) < 0) {
+            rate.setFromDate(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
     }
 

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -97,7 +98,7 @@ public class TaxComponent extends AbstractAuditableCustom {
             this.creditAccountType = creditAccountType.getValue();
         }
         this.creditAcount = creditAcount;
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public static TaxComponent createTaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType,
@@ -138,11 +139,11 @@ public class TaxComponent extends AbstractAuditableCustom {
             if (startDateFromUI != null) {
                 startDate = startDateFromUI;
             }
-            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             changes.put(TaxApiConstants.startDateParamName, startDate);
         } else if (setAsCurrentDate) {
             changes.put(TaxApiConstants.startDateParamName, startDate);
-            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
     }

@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.domain;
 
 import com.google.common.base.Splitter;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,8 +115,8 @@ public class Cashier extends AbstractPersistableCustom {
         this.teller = teller;
         this.staff = staff;
         this.description = description;
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.isFullDay = isFullDay;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -143,7 +144,7 @@ public class Cashier extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final String endDateParamName = "endDate";
@@ -154,7 +155,7 @@ public class Cashier extends AbstractPersistableCustom {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
