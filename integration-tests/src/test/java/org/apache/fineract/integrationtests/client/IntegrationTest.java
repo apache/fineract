@@ -31,6 +31,7 @@ import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 import com.google.common.truth.Truth8;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Random;
@@ -76,6 +77,8 @@ public abstract class IntegrationTest {
         return FineractClient.DATE_FORMAT;
     }
 
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     protected String random() {
         return Long.toString(random.nextLong());
     }

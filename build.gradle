@@ -418,13 +418,14 @@ configure(project.fineractJavaProjects) {
         ]
     }
 
-    // Configuration for the spotless plugin
-    // https://github.com/diffplug/spotless/tree/main/plugin-gradle
+
     dependencies {
         spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar'
-        spotbugs 'com.github.spotbugs:spotbugs:4.2.2'
+        spotbugs 'com.github.spotbugs:spotbugs:4.4.1'
     }
 
+    // Configuration for the spotless plugin
+    // https://github.com/diffplug/spotless/tree/main/plugin-gradle
     spotless {
         java {
             targetExclude '**/build/**', '**/bin/**', '**/out/**'

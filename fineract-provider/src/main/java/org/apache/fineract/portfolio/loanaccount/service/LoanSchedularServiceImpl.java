@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,6 +56,7 @@ import org.springframework.util.CollectionUtils;
 public class LoanSchedularServiceImpl implements LoanSchedularService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
+    private static final Random random = new Random();
 
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -123,6 +125,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
     @Override
     @CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void recalculateInterest() throws JobExecutionException {
         Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
@@ -150,7 +154,6 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         // Else sleep for a random time (between 1 to 10
                         // seconds) and continue
                         try {
-                            Random random = new Random();
                             int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -45,6 +46,7 @@ public class AuditIntegrationTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private AuditHelper auditHelper;
+    private static final Random rand = new Random();
 
     /**
      * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
@@ -105,6 +107,8 @@ public class AuditIntegrationTest {
     }
 
     @Test
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void checkAuditsWithLimitParam() {
         // Create client
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -117,7 +121,6 @@ public class AuditIntegrationTest {
             this.clientHelper.reactivateClient(clientId);
         }
 
-        Random rand = new Random();
         for (int i = 0; i < 3; i++) {
             // limit contains a number between 1-8
             int limit = rand.nextInt(7) + 1;

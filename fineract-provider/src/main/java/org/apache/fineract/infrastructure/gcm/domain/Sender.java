@@ -55,6 +55,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -168,6 +169,9 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
+
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Result send(Message message, String to, int retries) throws IOException {
         int attempt = 0;
         Result result;
@@ -316,6 +320,8 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public MulticastResult send(Message message, List<String> regIds, int retries) throws IOException {
         int attempt = 0;
         MulticastResult multicastResult;
