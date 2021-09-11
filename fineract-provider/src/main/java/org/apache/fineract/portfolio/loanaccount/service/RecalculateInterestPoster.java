@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 public class RecalculateInterestPoster implements Callable<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
+    private static final Random random = new Random();
 
     private Collection<Long> loanIds;
     private LoanWritePlatformService loanWritePlatformService;
@@ -50,6 +52,8 @@ public class RecalculateInterestPoster implements Callable<Void> {
     }
 
     @Override
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Void call() throws JobExecutionException {
         Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Random;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 public class SchedulerTriggerListener implements TriggerListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
+    private static final Random random = new Random();
 
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
@@ -58,6 +60,8 @@ public class SchedulerTriggerListener implements TriggerListener {
     }
 
     @Override
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
         final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
         final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
@@ -81,7 +85,6 @@ public class SchedulerTriggerListener implements TriggerListener {
                 LOG.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
                         numberOfRetries, maxNumberOfRetries, jobKey, exception);
                 try {
-                    Random random = new Random();
                     int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;

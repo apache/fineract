@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.provisioning;
 
 import com.google.gson.Gson;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,10 +33,14 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public final class ProvisioningHelper {
 
+    private static final Random rand = new Random();
+
     private ProvisioningHelper() {
 
     }
 
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
             Account expense) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -44,7 +49,7 @@ public final class ProvisioningHelper {
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
         String formattedString = simple
                 .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
-        Random rand = new Random();
+
         String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
         map.put("criteriaName", criteriaName);
         map.put("locale", "en");

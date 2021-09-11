@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -38,6 +39,7 @@ public class ClientTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
+    private static final Random rand = new Random();
 
     @BeforeEach
     public void setup() {
@@ -149,9 +151,10 @@ public class ClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void testPendingOnlyClientRequest() {
 
-        Random rand = new Random();
         // Add a few clients to the server and activate a random amount of them
         for (int i = 0; i < 15; i++) {
             final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
