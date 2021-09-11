@@ -500,7 +500,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.6.0"
+        errorprone "com.google.errorprone:error_prone_core:2.9.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -518,6 +518,7 @@ configure(project.fineractJavaProjects) {
                     "AlmostJavadoc",
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
+                    "ReturnValueIgnored"
                     )
             error(
                     "DefaultCharset",
