@@ -23,6 +23,7 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.springframework.util.StringUtils;
 
 /**
  * Filter that returns a response with headers that allows for Cross-Origin Requests (CORs) to be performed against the
@@ -42,7 +43,7 @@ public class ResponseCorsFilter implements ContainerResponseFilter {
 
         final String reqHead = request.getHeaderValue("Access-Control-Request-Headers");
 
-        if (null != reqHead && !reqHead.equals(null)) {
+        if (null != reqHead && StringUtils.hasText(reqHead)) {
             resp.header("Access-Control-Allow-Headers", reqHead);
         }
 
