@@ -1820,7 +1820,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
+                .withEntityId(loanChargeId) //
                 .withLoanId(loanId) //
                 .with(changes).build();
     }
