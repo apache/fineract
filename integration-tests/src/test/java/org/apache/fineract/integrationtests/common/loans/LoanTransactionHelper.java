@@ -338,12 +338,33 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
+    public Integer undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId, final String body) {
+        LOG.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, body, "");
+        return (Integer) response.get("resourceId");
+    }
+
     public Integer payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         LOG.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
                 + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
         return (Integer) response.get("resourceId");
+    }
+
+    public ArrayList<HashMap> getLoanTransactionDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&exclude=guarantors,futureSchedule&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, URL, "transactions");
+    }
+
+    public HashMap getLoanCharge(final Integer loanId, final Integer chargeId) {
+        final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + chargeId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
     private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount) {
