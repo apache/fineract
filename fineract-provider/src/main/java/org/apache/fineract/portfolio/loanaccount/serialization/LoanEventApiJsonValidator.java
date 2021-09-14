@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -30,18 +32,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,12 +59,14 @@ public final class LoanEventApiJsonValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public LoanEventApiJsonValidator(final FromJsonHelper fromApiJsonHelper,
-            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer) {
+            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer, final LoanRepository loanRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.loanRepository = loanRepository;
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
@@ -79,7 +90,8 @@ public final class LoanEventApiJsonValidator {
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
                     "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate",
-                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
+                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName,
+                    LoanApiConstants.postDatedChecks));
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -108,6 +120,52 @@ public final class LoanEventApiJsonValidator {
         validatePaymentDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateDisbursementWithPostDatedChecks(final String json, final Long loanId) {
+        final JsonElement jsonElement = this.fromApiJsonHelper.parse(json);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.disbursement");
+        final Loan loan = this.loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+        final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallment = loan.getRepaymentScheduleInstallments();
+
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(jsonObject);
+        if (jsonObject.has("postDatedChecks") && jsonObject.get("postDatedChecks").isJsonArray()) {
+            JsonArray postDatedChecks = jsonObject.get("postDatedChecks").getAsJsonArray();
+            for (int i = 0; i < postDatedChecks.size(); i++) {
+                final JsonObject postDatedCheck = postDatedChecks.get(i).getAsJsonObject();
+
+                final String name = this.fromApiJsonHelper.extractStringNamed("name", postDatedCheck);
+                baseDataValidator.reset().parameter("name").value(name).notNull();
+
+                final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", postDatedCheck, locale);
+                baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+
+                final Long accountNo = this.fromApiJsonHelper.extractLongNamed("accountNo", postDatedCheck);
+                baseDataValidator.reset().parameter("accountNo").value(accountNo).notNull().positiveAmount();
+
+                final Long checkNo = this.fromApiJsonHelper.extractLongNamed("checkNo", postDatedCheck);
+                baseDataValidator.reset().parameter("checkNo").value(checkNo).notNull().positiveAmount();
+
+                final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed("installmentId", postDatedCheck, locale);
+                final List<LoanRepaymentScheduleInstallment> installmentList = loanRepaymentScheduleInstallment.stream().filter(
+                        repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
+                        .collect(Collectors.toList());
+                if (installmentList.size() > 1) {
+                    throw new PlatformDataIntegrityException("error.repayment.redundancy", "Multiple installment data found",
+                            "postDatedChecks");
+                } else if (installmentList.size() == 0) {
+                    throw new LoanRepaymentScheduleNotFoundException(installmentId);
+                }
+
+            }
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                        dataValidationErrors);
+            }
+        }
     }
 
     public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance,

@@ -433,6 +433,7 @@ public class LoanImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayments.get(rowIndex)).getAsJsonObject();
         loanRepaymentJsonob.remove("manuallyReversed");
+        loanRepaymentJsonob.remove("numberOfRepayments");
         String payload = loanRepaymentJsonob.toString();
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .loanRepaymentTransaction(result.getLoanId()) //
