@@ -1,9 +1,9 @@
-name: Dotbank Points Fineract Build
+name: velocitycareerlabs/credit-market-server Points Fineract Build
 
 on:
   push:
     branches:
-      - Dotbank-vfdClone
+      - velocitycareerlabs/credit-market-server
 
 jobs:
   build:
