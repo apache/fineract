@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
@@ -137,6 +138,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
+    private Set<PostDatedChecks> postDatedChecks;
+
     LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
@@ -210,6 +214,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         }
 
         return fromLocalDate;
+    }
+
+    public void setPostDatedChecksToNull() {
+        this.postDatedChecks = null;
+    }
+
+    public Set<PostDatedChecks> getPostDatedCheck() {
+        return this.postDatedChecks;
     }
 
     public LocalDate getDueDate() {

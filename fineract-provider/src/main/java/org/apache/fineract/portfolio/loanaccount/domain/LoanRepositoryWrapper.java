@@ -111,6 +111,16 @@ public class LoanRepositoryWrapper {
         return this.repository.getMaxClientOrJLGLoanCounter(clientId);
     }
 
+    public List<LoanRepaymentScheduleInstallment> getLoanRepaymentScheduleInstallments(final Long loanId) {
+        final Loan loan = this.repository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+        final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
+        return loanRepaymentScheduleInstallments;
+    }
+
+    public Integer getNumberOfRepayments(final Long loanId) {
+        return this.repository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId)).getNumberOfRepayments();
+    }
+
     public Integer getMaxClientOrJLGLoanProductCounter(@Param("productId") Long productId, @Param("clientId") Long clientId) {
         return this.repository.getMaxClientOrJLGLoanProductCounter(productId, clientId);
     }
