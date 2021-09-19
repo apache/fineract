@@ -2582,14 +2582,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        // Only one withdrawal fee is supported per account
-        if (savingsAccountCharge.isWithdrawalFee()) {
-            if (this.isWithDrawalFeeExists()) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.withdrawal.fee.per.account.not.supported");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
         // Only one annual fee is supported per account
         if (savingsAccountCharge.isAnnualFee()) {
             if (this.isAnnualFeeExists()) {
@@ -2616,15 +2608,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // add new charge to savings account
         this.charges.add(savingsAccountCharge);
 
-    }
-
-    private boolean isWithDrawalFeeExists() {
-        for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean isAnnualFeeExists() {
