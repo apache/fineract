@@ -1,0 +1,83 @@
+name: VFD Ghana Production deployment
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment: Production'
+        options: ['Production']
+        required: true
+        default: 'Production'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: kamiazya/setup-graphviz@v1
+
+      - name: Set up JDK 12
+        uses: actions/setup-java@v1
+        with:
+          java-version: 12
+
+      - name: Login to Github Packages Docker
+        uses: azure/docker-login@v1
+        with:
+          login-server: 'docker.pkg.github.com'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_VFD_GHANA_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_VFD_GHANA_PROD }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Build with Gradle 1/2
+        run: ./gradlew clean bootJar
+
+      - name: Build with Gradle 2/2
+        run: ./gradlew bootJar docker dockerPush -q -x rat -x compileTestJava -x test
+
+      - name: tag, and push image to Amazon ECR
+        id: push-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: fineract-vfd-ghana-prod
+          IMAGE_TAG: ${{ steps.extract_branch.outputs.branch }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker tag docker.pkg.github.com/fiter1/fineract/fineract-vfd-ghana:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      # - name: Assume Role
+      #   uses: youyo/awscredswrap@v1
+      #   with:
+      #     role_arn: ${{ secrets.AWS_EKS_IAM_ROLE }}
+      #     duration_seconds: 3600
+      #     role_session_name: EKS
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_VFD_GHANA }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_VFD_GHANA }}
+      #     AWS_DEFAULT_REGION: eu-west-1
+      - name: Setup EKS Kubectl
+        uses: zachguo/setup-eks-kubectl@v1
+        with:
+          cluster: vfd-ghana-cde
+          region: eu-west-2
+      - name: Pull latest images
+        run: |
+          kubectl delete pods --all
