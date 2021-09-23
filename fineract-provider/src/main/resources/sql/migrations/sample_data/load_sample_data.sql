@@ -848,7 +848,7 @@ CREATE TABLE IF NOT EXISTS `m_appuser_role` (
   KEY `FK7662CE5915CEC7AB` (`role_id`),
   CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE = 'utf8mb4_general_ci';
 
 -- Dumping data for table mifostenant-reference.m_appuser_role: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
@@ -5572,8 +5572,8 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
 DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE IF NOT EXISTS `m_template` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `text` longtext CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_general_ci NOT NULL,
+  `text` longtext CHARACTER SET UTF8MB4 COLLATE utf8mb4_general_ci NOT NULL,
   `entity` INT DEFAULT NULL,
   `type` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -5589,9 +5589,9 @@ CREATE TABLE IF NOT EXISTS `m_template` (
 DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_templatemappers` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `mapperkey` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mapperkey` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `mapperorder` INT DEFAULT NULL,
-  `mappervalue` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mappervalue` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 

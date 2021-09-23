@@ -18,8 +18,12 @@
 --
 
 # create databases
-CREATE DATABASE IF NOT EXISTS `fineract_tenants`;
-CREATE DATABASE IF NOT EXISTS `fineract_default`;
+CREATE DATABASE IF NOT EXISTS `fineract_tenants` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS `fineract_default` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 # create root user and grant rights
 GRANT ALL ON *.* TO 'root'@'%';
+
+SET character_set_server = 'utf8mb4';
+
+SET collation_server = 'utf8mb4_general_ci'; 

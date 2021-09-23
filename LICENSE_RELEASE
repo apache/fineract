@@ -243,9 +243,9 @@ This product bundles DOM4J, Copyright 2001-2005 (C) MetaStuff, Ltd.,
 which is available under a BSD license.
 For details, see licenses/binary/Dom4J.BSD
 
-This product bundles JDBC driver for MySQL and Drizzle v1.3, Copyright (c)
-2009-2013, Marcus Eriksson which is available under a BSD license.
-For details, see licenses/binary/Drizzle.BSD
+This product bundles JDBC driver for MariaDB v2.7.3, Copyright (c)
+which is available under a LGPL license.
+For details, see https://mariadb.com/kb/en/about-mariadb-connector-j/#license
 
 This product bundles Ical4J v1.0.4, Copyright (c) 2012, Ben Fortuna,
 which is available under a BSD license.
