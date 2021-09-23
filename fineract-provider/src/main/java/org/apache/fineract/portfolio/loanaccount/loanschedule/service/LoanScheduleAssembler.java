@@ -520,6 +520,7 @@ public class LoanScheduleAssembler {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
                     LocalDate expectedDisbursementDate = null;
                     BigDecimal principal = null;
+                    BigDecimal netDisbursalAmount = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
                         expectedDisbursementDate = this.fromApiJsonHelper
@@ -530,9 +531,16 @@ public class LoanScheduleAssembler {
                             && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
+                    if (jsonObject.has(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                            && jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank(
+                                    jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).getAsString())) {
+                        netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                                .getAsBigDecimal();
+                    }
                     BigDecimal waivedChargeAmount = null;
-                    disbursementDatas
-                            .add(new DisbursementData(null, expectedDisbursementDate, null, principal, null, null, waivedChargeAmount));
+                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, netDisbursalAmount, null,
+                            null, waivedChargeAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }

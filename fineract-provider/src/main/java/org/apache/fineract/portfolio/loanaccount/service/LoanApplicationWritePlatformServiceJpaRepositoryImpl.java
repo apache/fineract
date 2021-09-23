@@ -1457,6 +1457,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
                             "Topup loan amount should be greater than outstanding amount of loan to be closed.");
                 }
+                BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
+                loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -1537,6 +1539,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
+
+            loan.adjustNetDisbursalAmount(loan.getProposedPrincipal());
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 

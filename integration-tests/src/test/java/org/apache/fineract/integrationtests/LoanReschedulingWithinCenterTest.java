@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
@@ -142,7 +143,8 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoan(disbursalDate, loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan(disbursalDate, loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -294,7 +296,8 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A FIRST TRANCHE
-        this.loanTransactionHelper.disburseLoan(disbursementDate, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        this.loanTransactionHelper.disburseLoan(disbursementDate, loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");

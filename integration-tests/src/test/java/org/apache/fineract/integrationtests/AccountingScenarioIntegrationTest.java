@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
@@ -158,7 +159,9 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // CHECK ACCOUNT ENTRIES
@@ -594,7 +597,9 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // CHECK ACCOUNT ENTRIES
@@ -716,7 +721,9 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // CHECK ACCOUNT ENTRIES
@@ -813,7 +820,9 @@ public class AccountingScenarioIntegrationTest {
         todayDate = Calendar.getInstance();
         todayDate.add(Calendar.DATE, -2);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
@@ -919,7 +928,9 @@ public class AccountingScenarioIntegrationTest {
         todayDate = Calendar.getInstance();
         todayDate.add(Calendar.DATE, -2);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
@@ -1019,7 +1030,9 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(EXPECTED_DISBURSAL_DATE, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // CHECK ACCOUNT ENTRIES
