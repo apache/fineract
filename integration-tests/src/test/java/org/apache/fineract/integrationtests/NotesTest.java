@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
@@ -273,7 +274,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
@@ -296,7 +298,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
@@ -328,7 +331,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
