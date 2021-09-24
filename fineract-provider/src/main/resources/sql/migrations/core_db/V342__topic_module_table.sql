@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS `topic_subscriber` (
   CONSTRAINT `fk_topic_has_m_appuser_m_appuser1` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE = InnoDB;
 
-INSERT INTO topic (enabled, entity_type, entity_id, member_type, title) SELECT true, 'OFFICE', o.id as entity_id, UPPER(r.name) as member_type, CONCAT(r.name, ' of ', o.name) as title FROM m_office o, m_role r WHERE o.parent_id IS NULL AND CONCAT(r.name, ' of ', o.name) NOT IN (SELECT title FROM topic);
+INSERT INTO topic (enabled, entity_type, entity_id, member_type, title) SELECT true, 'OFFICE', o.id as entity_id, UPPER(r.name) as member_type, CONCAT(r.name, ' of ', o.name) as title FROM m_office o, m_role r WHERE o.parent_id IS NULL AND CONCAT(r.name, ' of ', o.name) COLLATE utf8mb4_general_ci  NOT IN (SELECT title FROM topic);
 
-INSERT INTO topic (enabled, entity_type, entity_id, member_type, title) SELECT true, 'BRANCH', o.id as entity_id, UPPER(r.name) as member_type, CONCAT(r.name, ' of ', o.name) as title FROM m_office o, m_role r WHERE o.parent_id IS NOT NULL AND CONCAT(r.name, ' of ', o.name) NOT IN (SELECT title FROM topic);
+INSERT INTO topic (enabled, entity_type, entity_id, member_type, title) SELECT true, 'BRANCH', o.id as entity_id, UPPER(r.name) as member_type, CONCAT(r.name, ' of ', o.name) as title FROM m_office o, m_role r WHERE o.parent_id IS NOT NULL AND CONCAT(r.name, ' of ', o.name) COLLATE utf8mb4_general_ci NOT IN (SELECT title FROM topic);
 
-INSERT INTO topic_subscriber( user_id, topic_id, subscription_date ) SELECT u.id AS user_id, t.id AS topic_id, NOW() FROM topic t, m_appuser u, m_appuser_role ur, m_role r WHERE u.office_id = t.entity_id AND u.id = ur.appuser_id AND ur.role_id = r.id AND r.name = t.member_type AND NOT EXISTS (SELECT user_id, topic_id FROM topic_subscriber WHERE user_id = u.id AND topic_id = t.id);
+INSERT INTO topic_subscriber( user_id, topic_id, subscription_date ) SELECT u.id AS user_id, t.id AS topic_id, NOW() FROM topic t, m_appuser u, m_appuser_role ur, m_role r WHERE u.office_id = t.entity_id AND u.id = ur.appuser_id AND ur.role_id = r.id AND r.name COLLATE utf8mb4_general_ci  = t.member_type AND NOT EXISTS (SELECT user_id, topic_id FROM topic_subscriber WHERE user_id = u.id AND topic_id = t.id);
