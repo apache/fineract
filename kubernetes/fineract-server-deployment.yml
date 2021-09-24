@@ -82,17 +82,17 @@ spec:
           periodSeconds: 1
         env:
         - name: DRIVERCLASS_NAME
-          value: org.drizzle.jdbc.DrizzleDriver
+          value: org.mariadb.jdbc.Driver
         - name: PROTOCOL
           value: jdbc
         - name: SUB_PROTOCOL
-          value: mysql:thin
+          value: mariadb
         - name: node_id
           value: 1
         - name: fineract_tenants_driver
-          value: org.drizzle.jdbc.DrizzleDriver
+          value: org.mariadb.jdbc.Driver
         - name: fineract_tenants_url
-          value: jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
+          value: jdbc:mariadb://fineractmysql:3306/fineract_tenants
         - name: fineract_tenants_uid
           valueFrom:
             secretKeyRef:

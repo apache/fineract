@@ -119,7 +119,6 @@ allprojects  {
             dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
             dependency 'org.apache.commons:commons-email:1.5'
             dependency 'commons-io:commons-io:2.11.0'
-            dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
             dependency 'com.github.librepdf:openpdf:1.3.26'
             dependency 'org.mnode.ical4j:ical4j:3.1.1'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
@@ -179,7 +178,7 @@ allprojects  {
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
 
-            dependency ('org.flywaydb:flyway-core:7.15.0') {
+            dependency ('org.flywaydb:flyway-core:8.1.0') {
                 // https://issues.apache.org/jira/browse/FINERACT-1172
                 // https://github.com/apache/fineract/pull/1355
                 // https://github.com/flyway/flyway/issues/2957
