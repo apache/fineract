@@ -30,7 +30,7 @@ RUN ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCh
 # allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
 # The commented out lines in the docker-compose.yml illustrate how to do this.
 WORKDIR /fineract/libs
-RUN wget -q https://dlm.mariadb.com/1658656/connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
+RUN wget -q https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar
 
 # =========================================
 
