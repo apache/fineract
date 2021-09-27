@@ -28,7 +28,8 @@ public enum PeriodFrequencyType {
     MONTHS(2, "periodFrequencyType.months"), //
     YEARS(3, "periodFrequencyType.years"), //
     WHOLE_TERM(4, "periodFrequencyType.whole_term"), //
-    INVALID(5, "periodFrequencyType.invalid");
+    SEMI_MONTH(5, "periodFrequencyType.semiMonth"), //
+    INVALID(6, "periodFrequencyType.invalid");
 
     private final Integer value;
     private final String code;
@@ -65,6 +66,9 @@ public enum PeriodFrequencyType {
                 case 4:
                     repaymentFrequencyType = PeriodFrequencyType.WHOLE_TERM;
                 break;
+                case 5:
+                    repaymentFrequencyType = PeriodFrequencyType.SEMI_MONTH;
+                break;
             }
         }
         return repaymentFrequencyType;
@@ -92,6 +96,10 @@ public enum PeriodFrequencyType {
 
     public boolean isInvalid() {
         return this.value.equals(PeriodFrequencyType.INVALID.getValue());
+    }
+
+    public boolean isSemiMonthly() {
+        return this.value.equals(PeriodFrequencyType.SEMI_MONTH.getValue());
     }
 
     public static Object[] integerValues() {

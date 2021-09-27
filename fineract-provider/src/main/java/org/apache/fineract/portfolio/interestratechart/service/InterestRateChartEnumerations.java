@@ -64,6 +64,8 @@ public final class InterestRateChartEnumerations {
                 optionData = new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
                         PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole Term");
             break;
+            case SEMI_MONTH:
+            break;
         }
 
         return optionData;

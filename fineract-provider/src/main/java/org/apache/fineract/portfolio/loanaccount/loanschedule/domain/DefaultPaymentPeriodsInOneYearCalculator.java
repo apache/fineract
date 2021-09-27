@@ -52,6 +52,9 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case WHOLE_TERM:
                 LOG.error("TODO Implement repaymentFrequencyType for WHOLE_TERM");
             break;
+            case SEMI_MONTH:
+                paymentPeriodsInOneYear = Integer.valueOf(24);
+            break;
         }
         return paymentPeriodsInOneYear;
     }
@@ -100,6 +103,8 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            break;
+            case SEMI_MONTH:
             break;
         }
         return fraction;
