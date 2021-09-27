@@ -191,6 +191,9 @@ public class LoanProductData implements Serializable {
     private LoanProductConfigurableAttributes allowAttributeOverrides;
     private final boolean syncExpectedWithDisbursementDate;
     private final boolean isEqualAmortization;
+    // Semi Month Dates
+    private final LocalDate firstDateForSemi;
+    private final LocalDate seconDateForSemi;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -284,7 +287,7 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled, null, null);
 
     }
 
@@ -380,7 +383,7 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled, null, null);
 
     }
 
@@ -484,8 +487,7 @@ public class LoanProductData implements Serializable {
                 isLinkedToFloatingInterestRates, floatingRateId, floatingRateName, interestRateDifferential, minDifferentialLendingRate,
                 defaultDifferentialLendingRate, maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, rateOptions, rates, isRatesEnabled);
-
+                isEqualAmortization, rateOptions, rates, isRatesEnabled, null, null);
     }
 
     public static LoanProductData loanProductWithFloatingRates(final Long id, final String name,
@@ -582,8 +584,7 @@ public class LoanProductData implements Serializable {
                 isLinkedToFloatingInterestRates, floatingRateId, floatingRateName, interestRateDifferential, minDifferentialLendingRate,
                 defaultDifferentialLendingRate, maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, rateOptions, rates, isRatesEnabled);
-
+                isEqualAmortization, rateOptions, rates, isRatesEnabled, null, null);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -624,7 +625,8 @@ public class LoanProductData implements Serializable {
             boolean isFloatingInterestRateCalculationAllowed, final boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled) {
+            Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled, final LocalDate firstDateForSemi,
+            final LocalDate seconDateForSemi) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -732,7 +734,8 @@ public class LoanProductData implements Serializable {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
-
+        this.firstDateForSemi = firstDateForSemi;
+        this.seconDateForSemi = seconDateForSemi;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -873,6 +876,8 @@ public class LoanProductData implements Serializable {
         this.isEqualAmortization = productData.isEqualAmortization;
         this.rates = productData.rates;
         this.isRatesEnabled = isRatesEnabled;
+        this.firstDateForSemi = productData.firstDateForSemi;
+        this.seconDateForSemi = productData.seconDateForSemi;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -1206,6 +1211,10 @@ public class LoanProductData implements Serializable {
 
     public boolean canDefineInstallmentAmount() {
         return this.canDefineInstallmentAmount;
+    }
+
+    public boolean hasSemiMonthEnabled() {
+        return this.repaymentFrequencyType.getId().equals(5L);
     }
 
     public LoanProductConfigurableAttributes getloanProductConfigurableAttributes() {

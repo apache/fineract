@@ -370,10 +370,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private void validateInputDates(final JsonCommand command) {
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
+        final LocalDate startSemiMonthDate = command.localDateValueOfParameterNamed("semiMonthFirstDate");
+        final LocalDate secondSemiMonthDate = command.localDateValueOfParameterNamed("semiMonthSecondDate");
 
         if (startDate != null && closeDate != null) {
             if (closeDate.isBefore(startDate)) {
                 throw new LoanProductDateException(startDate.toString(), closeDate.toString());
+            }
+        }
+        if (startSemiMonthDate != null && secondSemiMonthDate != null) {
+            if (secondSemiMonthDate.isBefore(startSemiMonthDate)) {
+                throw new LoanProductDateException(startSemiMonthDate.toString(), secondSemiMonthDate.toString());
             }
         }
     }
