@@ -248,6 +248,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -256,8 +257,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
         account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return savingsTransactionId;
     }
