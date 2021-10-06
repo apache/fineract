@@ -231,7 +231,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         writeString(ChartOfAcountsConstants.PARENT_COL, rowHeader, "Parent");
         writeString(ChartOfAcountsConstants.PARENT_ID_COL, rowHeader, "Parent Id");
         writeString(ChartOfAcountsConstants.ACCOUNT_NAME_COL, rowHeader, "Account Name");
-        writeString(ChartOfAcountsConstants.TAG_COL, rowHeader, "Tag *");
+        writeString(ChartOfAcountsConstants.TAG_COL, rowHeader, "Tag");
         writeString(ChartOfAcountsConstants.TAG_ID_COL, rowHeader, "Tag Id");
         writeString(ChartOfAcountsConstants.DESCRIPTION_COL, rowHeader, "Description *");
         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_TYPE_COL, rowHeader, "Lookup Account type");
