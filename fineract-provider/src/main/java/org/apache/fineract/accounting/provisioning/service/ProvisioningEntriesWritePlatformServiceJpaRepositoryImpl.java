@@ -230,7 +230,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private Collection<LoanProductProvisioningEntry> generateLoanProvisioningEntry(ProvisioningEntry parent, Date date) {
         Collection<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService
                 .retrieveLoanProductsProvisioningData(date);
-        Map<LoanProductProvisioningEntry, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
+        Map<Integer, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
             LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).get();
             Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
@@ -245,10 +245,10 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                     provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount,
                     criteraId);
             entry.setProvisioningEntry(parent);
-            if (!provisioningEntries.containsKey(entry)) {
-                provisioningEntries.put(entry, entry);
+            if (!provisioningEntries.containsKey(entry.partialHashCode())) {
+                provisioningEntries.put(entry.partialHashCode(), entry);
             } else {
-                LoanProductProvisioningEntry entry1 = provisioningEntries.get(entry);
+                LoanProductProvisioningEntry entry1 = provisioningEntries.get(entry.partialHashCode());
                 entry1.addReservedAmount(entry.getReservedAmount());
             }
         }
