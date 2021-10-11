@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -462,6 +463,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "24")
         public Integer annualInterestRate;
         public GetLoansLoanIdAmortizationType amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoansLoanIdInterestType interestType;
         public GetLoansLoanIdInterestCalculationPeriodType interestCalculationPeriodType;
         @Schema(example = "2")
@@ -507,6 +510,8 @@ final class LoansApiResourceSwagger {
         public Integer interestRatePerPeriod;
         @Schema(example = "1")
         public Integer amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "0")
         public Integer interestType;
         @Schema(example = "1")
@@ -611,6 +616,8 @@ final class LoansApiResourceSwagger {
         public Integer interestCalculationPeriodType;
         @Schema(example = "1")
         public Integer amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "04 March 2014")
         public String expectedDisbursementDate;
         @Schema(example = "1")

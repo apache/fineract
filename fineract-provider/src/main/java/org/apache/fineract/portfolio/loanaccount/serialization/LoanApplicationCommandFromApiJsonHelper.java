@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -92,8 +93,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId, // glim specific
-            LoanApiConstants.lastApplication, LoanApiConstants.daysInYearTypeParameterName)); // glim
-                                                                                              // specific
+            LoanApiConstants.lastApplication, // glim specific
+            LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -175,6 +176,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 throw new EqualAmortizationUnsupportedFeatureException("interest.recalculation", "interest recalculation");
             }
         }
+
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
 
         final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
         baseDataValidator.reset().parameter("productId").value(productId).notNull().integerGreaterThanZero();
@@ -308,6 +314,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String amortizationTypeParameterName = "amortizationType";
         final Integer amortizationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(amortizationTypeParameterName, element);
         baseDataValidator.reset().parameter(amortizationTypeParameterName).value(amortizationType).notNull().inMinMaxRange(0, 1);
+
+        if (!amortizationType.equals(AmortizationMethod.EQUAL_PRINCIPAL.getValue()) && fixedPrincipalPercentagePerInstallment != null) {
+            baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName).failWithCode(
+                    "not.supported.principal.fixing.not.allowed.with.equal.installments",
+                    "Principal fixing cannot be done with equal installment amortization");
+        }
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
@@ -574,6 +586,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
+
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
@@ -752,10 +769,18 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         final String amortizationTypeParameterName = "amortizationType";
+        Integer amortizationType = null;
         if (this.fromApiJsonHelper.parameterExists(amortizationTypeParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final Integer amortizationType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(amortizationTypeParameterName, element);
+            amortizationType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(amortizationTypeParameterName, element);
             baseDataValidator.reset().parameter(amortizationTypeParameterName).value(amortizationType).notNull().inMinMaxRange(0, 1);
+        }
+
+        if (!Integer.valueOf(AmortizationMethod.EQUAL_PRINCIPAL.getValue()).equals(amortizationType)
+                && fixedPrincipalPercentagePerInstallment != null) {
+            baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName).failWithCode(
+                    "not.supported.principal.fixing.not.allowed.with.equal.installments",
+                    "Principal fixing cannot be done with equal installment amortization");
         }
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";

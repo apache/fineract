@@ -206,6 +206,9 @@ public class LoanScheduleAssembler {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam, element);
         }
 
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
+
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
@@ -457,7 +460,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, fixedPrincipalPercentagePerInstallment);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

@@ -260,6 +260,8 @@ public class LoanAssembler {
                 }
             }
         }
+        BigDecimal fixedPrincipalPercentagePerInstallment = fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
         Loan loanApplication = null;
         Client client = null;
@@ -298,20 +300,22 @@ public class LoanAssembler {
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(), loanProduct,
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, null,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates);
+                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                    fixedPrincipalPercentagePerInstallment);
 
         } else if (group != null) {
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, null,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates);
+                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
+                    fixedPrincipalPercentagePerInstallment);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates);
+                    isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
 
         }
 
