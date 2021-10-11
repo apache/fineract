@@ -227,21 +227,19 @@ public class LoanAssembler {
             if (loanAccountType.isIndividualAccount()) {
                 collateral = this.collateralAssembler.fromParsedJson(element);
 
-                if (collateral.size() == 0) {
-                    throw new InvalidAmountOfCollaterals(BigDecimal.ZERO);
-                }
+                if (collateral.size() > 0) {
+                    BigDecimal totalValue = BigDecimal.ZERO;
+                    for (LoanCollateralManagement collateralManagement : collateral) {
+                        final CollateralManagementDomain collateralManagementDomain = collateralManagement.getClientCollateralManagement()
+                                .getCollaterals();
+                        BigDecimal totalCollateral = collateralManagement.getQuantity().multiply(collateralManagementDomain.getBasePrice())
+                                .multiply(collateralManagementDomain.getPctToBase()).divide(BigDecimal.valueOf(100));
+                        totalValue = totalValue.add(totalCollateral);
+                    }
 
-                BigDecimal totalValue = BigDecimal.ZERO;
-                for (LoanCollateralManagement collateralManagement : collateral) {
-                    final CollateralManagementDomain collateralManagementDomain = collateralManagement.getClientCollateralManagement()
-                            .getCollaterals();
-                    BigDecimal totalCollateral = collateralManagement.getQuantity().multiply(collateralManagementDomain.getBasePrice())
-                            .multiply(collateralManagementDomain.getPctToBase()).divide(BigDecimal.valueOf(100));
-                    totalValue = totalValue.add(totalCollateral);
-                }
-
-                if (amount.compareTo(totalValue) > 0) {
-                    throw new InvalidAmountOfCollaterals(totalValue);
+                    if (amount.compareTo(totalValue) > 0) {
+                        throw new InvalidAmountOfCollaterals(totalValue);
+                    }
                 }
             }
         }
