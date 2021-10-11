@@ -214,6 +214,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
                     + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, " + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
+                    + "lp.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
                     + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
                     + "lpg.minimum_guarantee_from_own_funds as minimumGuaranteeFromOwnFunds, lpg.minimum_guarantee_from_guarantor_funds as minimumGuaranteeFromGuarantor, "
@@ -448,6 +449,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             }
 
             final BigDecimal principalThresholdForLastInstallment = rs.getBigDecimal("principalThresholdForLastInstallment");
+            final BigDecimal fixedPrincipalPercentagePerInstallment = rs.getBigDecimal("fixedPrincipalPercentagePerInstallment");
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
             final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
 
@@ -471,7 +473,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
-                    isRatesEnabled);
+                    isRatesEnabled, fixedPrincipalPercentagePerInstallment);
         }
     }
 

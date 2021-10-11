@@ -191,6 +191,7 @@ public class LoanProductData implements Serializable {
     private LoanProductConfigurableAttributes allowAttributeOverrides;
     private final boolean syncExpectedWithDisbursementDate;
     private final boolean isEqualAmortization;
+    private final BigDecimal fixedPrincipalPercentagePerInstallment;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -254,6 +255,7 @@ public class LoanProductData implements Serializable {
         final LoanProductGuaranteeData productGuaranteeData = null;
         final Boolean holdGuaranteeFunds = false;
         final BigDecimal principalThresholdForLastInstallment = null;
+        final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
 
         final EnumOptionData daysInMonthType = null;
@@ -284,7 +286,8 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
+                fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -355,6 +358,7 @@ public class LoanProductData implements Serializable {
         final Boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
+        final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
         final boolean canDefineInstallmentAmount = false;
         final Integer installmentAmountInMultiplesOf = null;
@@ -380,7 +384,8 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
+                fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -458,6 +463,7 @@ public class LoanProductData implements Serializable {
         final Boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
+        final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
         final boolean canDefineInstallmentAmount = false;
         final Integer installmentAmountInMultiplesOf = null;
@@ -484,7 +490,7 @@ public class LoanProductData implements Serializable {
                 isLinkedToFloatingInterestRates, floatingRateId, floatingRateName, interestRateDifferential, minDifferentialLendingRate,
                 defaultDifferentialLendingRate, maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                isEqualAmortization, rateOptions, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -556,6 +562,7 @@ public class LoanProductData implements Serializable {
         final Boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
+        final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
         final boolean canDefineInstallmentAmount = false;
         final Integer installmentAmountInMultiplesOf = null;
@@ -582,7 +589,7 @@ public class LoanProductData implements Serializable {
                 isLinkedToFloatingInterestRates, floatingRateId, floatingRateName, interestRateDifferential, minDifferentialLendingRate,
                 defaultDifferentialLendingRate, maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, rateOptions, rates, isRatesEnabled);
+                isEqualAmortization, rateOptions, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -624,7 +631,8 @@ public class LoanProductData implements Serializable {
             boolean isFloatingInterestRateCalculationAllowed, final boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled) {
+            Collection<RateData> rateOptions, Collection<RateData> rates, final boolean isRatesEnabled,
+            final BigDecimal fixedPrincipalPercentagePerInstallment) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -715,6 +723,7 @@ public class LoanProductData implements Serializable {
         this.holdGuaranteeFunds = holdGuaranteeFunds;
         this.productGuaranteeData = loanProductGuaranteeData;
         this.principalThresholdForLastInstallment = principalThresholdForLastInstallment;
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.allowAttributeOverrides = allowAttributeOverrides;
 
@@ -851,6 +860,7 @@ public class LoanProductData implements Serializable {
         this.holdGuaranteeFunds = productData.holdGuaranteeFunds;
         this.productGuaranteeData = productData.productGuaranteeData;
         this.principalThresholdForLastInstallment = productData.principalThresholdForLastInstallment;
+        this.fixedPrincipalPercentagePerInstallment = productData.fixedPrincipalPercentagePerInstallment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = productData.accountMovesOutOfNPAOnlyOnArrearsCompletion;
 
         this.daysInMonthTypeOptions = daysInMonthTypeOptions;
@@ -1290,5 +1300,9 @@ public class LoanProductData implements Serializable {
 
     public BigDecimal getMaxInterestRatePerPeriod() {
         return maxInterestRatePerPeriod;
+    }
+
+    public BigDecimal getFixedPrincipalPercentagePerInstallment() {
+        return fixedPrincipalPercentagePerInstallment;
     }
 }

@@ -42,7 +42,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
@@ -106,8 +108,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName, LoanProductConstants.recalculationRestFrequencyNthDayParamName,
             LoanProductConstants.recalculationRestFrequencyOnDayParamName,
             LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
-            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM,
-            LoanProductConstants.RATES_PARAM_NAME));
+            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
+            LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -515,6 +517,18 @@ public final class LoanProductDataValidator {
                 .extractBigDecimalWithLocaleNamed(LoanProductConstants.principalThresholdForLastInstallmentParamName, element);
         baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstallmentParamName)
                 .value(principalThresholdForLastInstallment).notLessThanMin(BigDecimal.ZERO).notGreaterThanMax(BigDecimal.valueOf(100));
+
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
+
+        if (!amortizationType.equals(AmortizationMethod.EQUAL_PRINCIPAL.getValue()) && fixedPrincipalPercentagePerInstallment != null) {
+            baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName).failWithCode(
+                    "not.supported.principal.fixing.not.allowed.with.equal.installments",
+                    "Principal fixing cannot be done with equal installment amortization");
+        }
+
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
             final Boolean canDefineInstallmentAmount = this.fromApiJsonHelper
                     .extractBooleanNamed(LoanProductConstants.canDefineEmiAmountParamName, element);
@@ -1063,9 +1077,9 @@ public final class LoanProductDataValidator {
                     .integerZeroOrGreater();
         }
 
-        //
+        Integer amortizationType = null;
         if (this.fromApiJsonHelper.parameterExists("amortizationType", element)) {
-            final Integer amortizationType = this.fromApiJsonHelper.extractIntegerNamed("amortizationType", element, Locale.getDefault());
+            amortizationType = this.fromApiJsonHelper.extractIntegerNamed("amortizationType", element, Locale.getDefault());
             baseDataValidator.reset().parameter("amortizationType").value(amortizationType).notNull().inMinMaxRange(0, 1);
         }
 
@@ -1340,6 +1354,18 @@ public final class LoanProductDataValidator {
                     .value(principalThresholdForLastInstallment).notNull().notLessThanMin(BigDecimal.ZERO)
                     .notGreaterThanMax(BigDecimal.valueOf(100));
         }
+
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName)
+                .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
+
+        if (!AmortizationMethod.EQUAL_PRINCIPAL.getValue().equals(amortizationType) && fixedPrincipalPercentagePerInstallment != null) {
+            baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName).failWithCode(
+                    "not.supported.principal.fixing.not.allowed.with.equal.installments",
+                    "Principal fixing cannot be done with equal installment amortization");
+        }
+
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
             final Boolean canDefineInstallmentAmount = this.fromApiJsonHelper
                     .extractBooleanNamed(LoanProductConstants.canDefineEmiAmountParamName, element);

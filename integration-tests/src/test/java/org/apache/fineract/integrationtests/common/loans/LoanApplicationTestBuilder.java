@@ -76,6 +76,7 @@ public class LoanApplicationTestBuilder {
     private boolean syncDisbursementWithMeeting = false;
     private List<HashMap<String, Object>> datatables = null;
     private List<Map<String, Object>> approvalFormData = null;
+    private String fixedPrincipalPercentagePerInstallment;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -141,6 +142,7 @@ public class LoanApplicationTestBuilder {
         map.put("repaymentFrequencyType", this.repaymentFrequencyType);
         map.put("interestRatePerPeriod", this.interestRate);
         map.put("amortizationType", this.amortizationType);
+        map.put("fixedPrincipalPercentagePerInstallment", fixedPrincipalPercentagePerInstallment);
         map.put("interestType", this.interestType);
         map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
         map.put("transactionProcessingStrategyId", this.transactionProcessingID);
@@ -373,6 +375,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withDatatables(final List<HashMap<String, Object>> datatables) {
         this.datatables = datatables;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withPrinciplePercentagePerInstallment(String fixedPrincipalPercentagePerInstallment) {
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         return this;
     }
 }

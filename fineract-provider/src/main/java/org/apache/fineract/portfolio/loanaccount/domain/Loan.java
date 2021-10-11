@@ -415,6 +415,9 @@ public class Loan extends AbstractPersistableCustom {
     @JoinTable(name = "m_loan_rate", joinColumns = @JoinColumn(name = "loan_id"), inverseJoinColumns = @JoinColumn(name = "rate_id"))
     private List<Rate> rates;
 
+    @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
+    private BigDecimal fixedPrincipalPercentagePerInstallment;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -422,14 +425,14 @@ public class Loan extends AbstractPersistableCustom {
             final Set<LoanCollateralManagement> collateral, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential, final List<Rate> rates) {
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
         final LoanStatus status = null;
         final Group group = null;
         final Boolean syncDisbursementWithMeeting = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates);
+                interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
@@ -439,13 +442,13 @@ public class Loan extends AbstractPersistableCustom {
             final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential, final List<Rate> rates) {
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
         final LoanStatus status = null;
         final Client client = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates);
+                interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
@@ -455,12 +458,12 @@ public class Loan extends AbstractPersistableCustom {
             final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential, final List<Rate> rates) {
+            final BigDecimal interestRateDifferential, final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
         final LoanStatus status = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential, rates);
+                interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
     }
 
     protected Loan() {
@@ -473,7 +476,8 @@ public class Loan extends AbstractPersistableCustom {
             final Set<LoanCharge> loanCharges, final Set<LoanCollateralManagement> collateral, final Boolean syncDisbursementWithMeeting,
             final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates) {
+            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates,
+            final BigDecimal fixedPrincipalPercentagePerInstallment) {
 
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
         this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
@@ -532,6 +536,7 @@ public class Loan extends AbstractPersistableCustom {
 
         // rates added here
         this.rates = rates;
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
 
         // Add net get net disbursal amount from charges and principal
         this.netDisbursalAmount = this.approvedPrincipal.subtract(deriveSumTotalOfChargesDueAtDisbursement());
@@ -1636,6 +1641,13 @@ public class Loan extends AbstractPersistableCustom {
             }
         } else {
             this.fixedEmiAmount = null;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
+                this.fixedPrincipalPercentagePerInstallment)) {
+            this.fixedPrincipalPercentagePerInstallment = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName);
+            actualChanges.put(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, this.fixedPrincipalPercentagePerInstallment);
         }
 
         return actualChanges;
@@ -5610,7 +5622,7 @@ public class Loan extends AbstractPersistableCustom {
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
-                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI());
+                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment);
         return loanApplicationTerms;
     }
 
@@ -5892,7 +5904,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false);
+                false, this.fixedPrincipalPercentagePerInstallment);
     }
 
     /**
