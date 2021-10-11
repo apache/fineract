@@ -918,39 +918,41 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                         final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
                         final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientCollateralId", "quantity"));
                         final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
-                        BigDecimal totalAmount = BigDecimal.ZERO;
-                        for (int i = 1; i <= array.size(); i++) {
-                            final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+                        if (array.size() > 0) {
+                            BigDecimal totalAmount = BigDecimal.ZERO;
+                            for (int i = 1; i <= array.size(); i++) {
+                                final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
 
-                            final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
-                            this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson,
-                                    supportedParameters);
+                                final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+                                this.fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson,
+                                        supportedParameters);
 
-                            final Long id = this.fromApiJsonHelper.extractLongNamed("id", collateralItemElement);
-                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("id", i).value(id).ignoreIfNull();
+                                final Long id = this.fromApiJsonHelper.extractLongNamed("id", collateralItemElement);
+                                baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("id", i).value(id).ignoreIfNull();
 
-                            final Long clientCollateralId = this.fromApiJsonHelper.extractLongNamed("clientCollateralId",
-                                    collateralItemElement);
-                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("clientCollateralId", i)
-                                    .value(clientCollateralId).notNull().integerGreaterThanZero();
+                                final Long clientCollateralId = this.fromApiJsonHelper.extractLongNamed("clientCollateralId",
+                                        collateralItemElement);
+                                baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("clientCollateralId", i)
+                                        .value(clientCollateralId).notNull().integerGreaterThanZero();
 
-                            final BigDecimal quantity = this.fromApiJsonHelper.extractBigDecimalNamed("quantity", collateralItemElement,
-                                    locale);
-                            baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("quantity", i).value(quantity).notNull()
-                                    .positiveAmount();
+                                final BigDecimal quantity = this.fromApiJsonHelper.extractBigDecimalNamed("quantity", collateralItemElement,
+                                        locale);
+                                baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("quantity", i).value(quantity)
+                                        .notNull().positiveAmount();
 
-                            if (clientCollateralId != null || quantity != null) {
-                                BigDecimal baseAmount = this.clientCollateralManagementRepositoryWrapper.getCollateral(clientCollateralId)
-                                        .getCollaterals().getBasePrice();
-                                BigDecimal pctToBase = this.clientCollateralManagementRepositoryWrapper.getCollateral(clientCollateralId)
-                                        .getCollaterals().getPctToBase();
-                                BigDecimal total = baseAmount.multiply(pctToBase).multiply(quantity);
-                                totalAmount = totalAmount.add(total);
+                                if (clientCollateralId != null || quantity != null) {
+                                    BigDecimal baseAmount = this.clientCollateralManagementRepositoryWrapper
+                                            .getCollateral(clientCollateralId).getCollaterals().getBasePrice();
+                                    BigDecimal pctToBase = this.clientCollateralManagementRepositoryWrapper
+                                            .getCollateral(clientCollateralId).getCollaterals().getPctToBase();
+                                    BigDecimal total = baseAmount.multiply(pctToBase).multiply(quantity);
+                                    totalAmount = totalAmount.add(total);
+                                }
                             }
-                        }
-                        if (principal != null) {
-                            if (principal.compareTo(totalAmount) > 0 || array.size() == 0) {
-                                throw new InvalidAmountOfCollaterals(totalAmount);
+                            if (principal != null) {
+                                if (principal.compareTo(totalAmount) > 0) {
+                                    throw new InvalidAmountOfCollaterals(totalAmount);
+                                }
                             }
                         }
                     } else {
