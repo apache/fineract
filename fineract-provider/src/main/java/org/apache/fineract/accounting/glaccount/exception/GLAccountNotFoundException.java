@@ -33,4 +33,8 @@ public class GLAccountNotFoundException extends AbstractPlatformResourceNotFound
     public GLAccountNotFoundException(final Long id, EmptyResultDataAccessException e) {
         super("error.msg.glaccount.id.invalid", "General Ledger account with identifier " + id + " does not exist ", id, e);
     }
+
+    public GLAccountNotFoundException(final String glCode) {
+        super("error.msg.glaccount.code.invalid", "General Ledger account with GlCode " + glCode + " does not exist ", glCode);
+    }
 }
