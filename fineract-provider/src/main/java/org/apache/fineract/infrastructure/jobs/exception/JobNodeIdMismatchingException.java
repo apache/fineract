@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.glaccount.domain;
 
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+package org.apache.fineract.infrastructure.jobs.exception;
 
-public interface GLAccountRepository extends JpaRepository<GLAccount, Long>, JpaSpecificationExecutor<GLAccount> {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    // no added behaviour
-    // adding behaviour to fetch id by glcode for opening balance bulk import
-    Optional<GLAccount> findOneByGlCode(String glCode);
+public class JobNodeIdMismatchingException extends AbstractPlatformDomainRuleException {
+
+    public JobNodeIdMismatchingException(final String nodeId, final String nodeIdProvided) {
+        super("error.msg.job.cannot.execute.on.node." + nodeIdProvided,
+                "The node id provided `" + nodeIdProvided + "`" + "` does not match with the configured nodeId.", new Object[] { nodeId });
+    }
+
 }

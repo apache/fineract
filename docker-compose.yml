@@ -45,6 +45,7 @@ services:
     environment:
       - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
       - PROTOCOL=jdbc
+      - node_id=1
       - SUB_PROTOCOL=mysql:thin
       - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
       - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
