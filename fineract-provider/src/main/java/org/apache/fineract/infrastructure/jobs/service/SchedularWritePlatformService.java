@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 
 public interface SchedularWritePlatformService {
 
-    List<ScheduledJobDetail> retrieveAllJobs();
+    List<ScheduledJobDetail> retrieveAllJobs(String nodeId);
 
     ScheduledJobDetail findByJobKey(String triggerKey);
 

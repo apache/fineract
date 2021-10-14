@@ -87,6 +87,8 @@ spec:
           value: jdbc
         - name: SUB_PROTOCOL
           value: mysql:thin
+        - name: node_id
+          value: 1
         - name: fineract_tenants_driver
           value: org.drizzle.jdbc.DrizzleDriver
         - name: fineract_tenants_url
