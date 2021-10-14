@@ -196,7 +196,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.OFFICES.toString())) {
                 populator = populateOfficeWorkbook();
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CHART_OF_ACCOUNTS.toString())) {
-                populator = populateChartOfAccountsWorkbook();
+                populator = populateChartOfAccountsWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.STAFF.toString())) {
                 populator = populateStaffWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.SHARE_ACCOUNTS.toString())) {
@@ -503,10 +503,12 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return new OfficeWorkbookPopulator(offices);
     }
 
-    private WorkbookPopulator populateChartOfAccountsWorkbook() {
+    private WorkbookPopulator populateChartOfAccountsWorkbook(Long officeId) {
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.GL_ACCOUNT_ENTITY_TYPE);
         List<GLAccountData> glAccounts = fetchGLAccounts();
-        return new ChartOfAccountsWorkbook(glAccounts);
+        List<OfficeData> offices = fetchOffices(null);
+        return new ChartOfAccountsWorkbook(glAccounts, offices,
+                (List<CurrencyData>) this.currencyReadPlatformService.retrieveAllowedCurrencies());
     }
 
     private WorkbookPopulator populateStaffWorkbook(Long officeId) {

@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:11 AS builder
+FROM azul/zulu-openjdk-debian:17 AS builder
 
 RUN apt-get update -qq && apt-get install -y wget
 
@@ -34,11 +34,13 @@ RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mys
 
 # =========================================
 
-FROM gcr.io/distroless/java:11 as fineract
+FROM azul/zulu-openjdk-alpine:17 as fineract
 
 COPY --from=builder /fineract/fineract-provider/build/libs /app
 COPY --from=builder /fineract/libs /app/libs
 
 WORKDIR /app
+
+ENV JDK_JAVA_OPTIONS='--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED'
 
 ENTRYPOINT ["java", "-Dloader.path=/app/libs/", "-jar", "/app/fineract-provider.jar"]
