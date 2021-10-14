@@ -19,7 +19,7 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.6'
+        jacocoVersion = '0.8.7'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.1'
         oltuVersion = '1.0.1'
