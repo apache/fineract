@@ -90,7 +90,8 @@ public class JournalEntryData {
     private String routingCode;
     private String receiptNumber;
     private String bankNumber;
-    //for opening bal bulk import
+
+    // for opening bal bulk import
     public JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
             List<CreditDebit> debits, String locale, String dateFormat) {
         this.officeId = officeId;

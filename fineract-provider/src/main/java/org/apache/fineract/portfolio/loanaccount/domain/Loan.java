@@ -1647,7 +1647,8 @@ public class Loan extends AbstractPersistableCustom {
                 this.fixedPrincipalPercentagePerInstallment)) {
             this.fixedPrincipalPercentagePerInstallment = command
                     .bigDecimalValueOfParameterNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName);
-            actualChanges.put(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, this.fixedPrincipalPercentagePerInstallment);
+            actualChanges.put(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
+                    this.fixedPrincipalPercentagePerInstallment);
         }
 
         return actualChanges;

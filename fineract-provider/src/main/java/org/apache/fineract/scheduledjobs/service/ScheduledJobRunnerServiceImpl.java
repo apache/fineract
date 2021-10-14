@@ -38,8 +38,11 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
@@ -53,6 +56,7 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedular
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +78,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final JobRegisterService jobRegisterService;
+    private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
+
+    @Value("${node_id:1}")
+    private String nodeId;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -83,7 +92,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
             final ShareAccountSchedularService shareAccountSchedularService,
-            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
+            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper, final JobRegisterService jobRegisterService,
+            final ScheduledJobDetailRepository scheduledJobDetailsRepository) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -92,6 +102,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
         this.trialBalanceRepositoryWrapper = trialBalanceRepositoryWrapper;
+        this.jobRegisterService = jobRegisterService;
+        this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
     }
 
     @Transactional
@@ -480,6 +492,18 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.EXECUTE_DIRTY_JOBS)
+    public void executeMissMatchedJobs() throws JobExecutionException {
+        List<ScheduledJobDetail> jobDetails = this.scheduledJobDetailsRepository.findAllMismatchedJobs(true);
+
+        for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
+            if (scheduledJobDetail.getNodeId().toString().equals(this.nodeId)) {
+                jobRegisterService.executeJob(scheduledJobDetail.getId());
+            }
+        }
     }
 
 }
