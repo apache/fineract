@@ -34,7 +34,7 @@ public final class ChartOfAcountsConstants {
     public static final int TAG_COL = 7;// H
     public static final int TAG_ID_COL = 8;// I
     public static final int DESCRIPTION_COL = 9;// J
-    //adding for opening balance bulk import
+    // adding for opening balance bulk import
     public static final int OFFICE_COL = 10; // K
     public static final int OFFICE_COL_ID = 11; // L
     public static final int CURRENCY_CODE = 12; // M
@@ -47,7 +47,7 @@ public final class ChartOfAcountsConstants {
     public static final int LOOKUP_TAG_COL = 21; // V
     public static final int LOOKUP_TAG_ID_COL = 22; // W
 
-    //adding for opening balance bulk import
+    // adding for opening balance bulk import
     public static final int LOOKUP_OFFICE_COL = 23; // X
     public static final int LOOKUP_OFFICE_ID_COL = 24; // Y
 

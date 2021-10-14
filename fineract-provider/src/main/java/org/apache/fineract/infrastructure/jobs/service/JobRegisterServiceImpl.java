@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.jobs.domain.JobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
+import org.apache.fineract.infrastructure.jobs.exception.JobNodeIdMismatchingException;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobDataMap;
@@ -50,6 +51,7 @@ import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -118,12 +120,15 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         this.jobParameterRepository = jobParameterRepository;
     }
 
+    @Value("${node_id:1}")
+    private String nodeId;
+
     @PostConstruct
     public void loadAllJobs() {
         final List<FineractPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
         for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
-            final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
+            final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs(nodeId);
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 scheduleJob(jobDetails);
                 jobDetails.updateTriggerMisfired(false);
@@ -203,11 +208,12 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             schedulerDetail.updateSuspendedState(false);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             if (schedulerDetail.isExecuteInstructionForMisfiredJobs()) {
-                final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
+                final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs(this.nodeId);
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired()) {
                         if (jobDetail.isActiveSchedular()) {
                             executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            jobDetail.setIsMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
                         final Scheduler scheduler = this.schedulers.get(schedulerName);
@@ -236,7 +242,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Override
     public void rescheduleJob(final Long jobId) {
         final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
-        rescheduleJob(scheduledJobDetail);
+        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
+        if (nodeIdStored.equals(this.nodeId) || nodeIdStored.equals("0")) {
+            rescheduleJob(scheduledJobDetail);
+        } else {
+            scheduledJobDetail.setIsMismatchedJob(true);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            throw new JobNodeIdMismatchingException(nodeIdStored, this.nodeId);
+        }
     }
 
     @Override
@@ -245,7 +258,15 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         if (scheduledJobDetail == null) {
             throw new JobNotFoundException(String.valueOf(jobId));
         }
-        executeJob(scheduledJobDetail, null);
+        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
+
+        if (nodeIdStored.equals(this.nodeId) || nodeIdStored.equals("0")) {
+            executeJob(scheduledJobDetail, null);
+        } else {
+            scheduledJobDetail.setIsMismatchedJob(true);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            throw new JobNodeIdMismatchingException(nodeIdStored, this.nodeId);
+        }
     }
 
     @Override
