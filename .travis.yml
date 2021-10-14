@@ -71,11 +71,11 @@ cache:
 # https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
   - date
-# Adding this command because there are some issues while adding non java fineract lines features   
-  - ./gradlew :fineract-provider:spotlessApply
 # Adding the JDK Java Options for running Gradle with the JDK 17 LTS (this is required until the next Gradle release
 # @see https://docs.gradle.org/current/userguide/compatibility.html
-  - export JDK_JAVA_OPTIONS='--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
+  - export JDK_JAVA_OPTIONS='--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
+# Adding this command because there are some issues while adding non java fineract lines features   
+  - ./gradlew :fineract-provider:spotlessApply  
 # using "&&" instead of several "-" means that integrationTest does not run if test fails,
 # and Docker test does not run if integration test fails, which makes PR failure easier to understand.
 # @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
