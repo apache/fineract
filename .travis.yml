@@ -33,7 +33,11 @@ addons:
     - curl
     - graphviz
     - gv
-
+  sonarcloud:
+    organization: "apache"
+    token:
+      secure: "Q2E9ijK+9+R6nkb9o2FQrKUiAozp0325mlGfM25rGV3mCRPyWR/lU8o48r2eaBEX8SEvMvXIO3XXD9SPyUX2+svLz0MOMdfZfNveg6jmcHNRjkzzBK0bMIIGbEH/YqJ+psl4nDmlDd6IK4685/1JSRUJLqeKKK2ulixm6PXcmwZWeKD6TjyXsW50zz3yYIOuROHzys/M6H05h1dZD3j6ztnRsjbr7SmqFEVWSRgEd/aAs+HZB9Fv1xN66csRoQUQKgzoBO9egAQcel65Av0Bf+pOQuzVDVyXNohZEYia02MCGlC6OFvtL7xIXGf/vo02RdnlN4Jnma6P37TaNrmpk2e+EGJaZHmL9cb98+Zc39uPb7qEZkMfDdKrW6QVRtScSuCJzpY58WRgTS0jLCxsDBAMfsrIvWbHntFZL9q5aEkFgecj0pg9u6WHxgA8cuPUY5QzHQo9fEUxNJHGJHQ2FkafLniqJp7DVbsyQHmEggaTrGGrketeYvCbSR1oOnBgImUwzjIV9/zOdd10Wzi8x9HsmzrGBPSBaO4fBxjC1LZwdyue2a2+oKvBqpAGcLpGaCRfHTh2yPXhZW4bw11rOmQxgtOQVBXhveciWAUQuVXIak+RZnu/zRvnul9sZ6bb1hEUPkpUypk+FDeLm8T7y2A++u/jBam2vLc0iff5xtA="
+      
 # See https://issues.apache.org/jira/browse/FINERACT-937 for background re. what below is all about..
 # We basically remove the outdated OpenJDK 11.0.2 which Travis image grabbed from java.net in
 # https://github.com/travis-ci/travis-cookbooks/blob/master/cookbooks/travis_jdk/files/install-jdk.sh#L200
@@ -63,13 +67,6 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
-
-addons:
-  sonarcloud:
-    organization: "apache"
-    token:
-      secure: "Q2E9ijK+9+R6nkb9o2FQrKUiAozp0325mlGfM25rGV3mCRPyWR/lU8o48r2eaBEX8SEvMvXIO3XXD9SPyUX2+svLz0MOMdfZfNveg6jmcHNRjkzzBK0bMIIGbEH/YqJ+psl4nDmlDd6IK4685/1JSRUJLqeKKK2ulixm6PXcmwZWeKD6TjyXsW50zz3yYIOuROHzys/M6H05h1dZD3j6ztnRsjbr7SmqFEVWSRgEd/aAs+HZB9Fv1xN66csRoQUQKgzoBO9egAQcel65Av0Bf+pOQuzVDVyXNohZEYia02MCGlC6OFvtL7xIXGf/vo02RdnlN4Jnma6P37TaNrmpk2e+EGJaZHmL9cb98+Zc39uPb7qEZkMfDdKrW6QVRtScSuCJzpY58WRgTS0jLCxsDBAMfsrIvWbHntFZL9q5aEkFgecj0pg9u6WHxgA8cuPUY5QzHQo9fEUxNJHGJHQ2FkafLniqJp7DVbsyQHmEggaTrGGrketeYvCbSR1oOnBgImUwzjIV9/zOdd10Wzi8x9HsmzrGBPSBaO4fBxjC1LZwdyue2a2+oKvBqpAGcLpGaCRfHTh2yPXhZW4bw11rOmQxgtOQVBXhveciWAUQuVXIak+RZnu/zRvnul9sZ6bb1hEUPkpUypk+FDeLm8T7y2A++u/jBam2vLc0iff5xtA="
-
 
 # NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console.
