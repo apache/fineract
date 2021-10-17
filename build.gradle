@@ -69,6 +69,7 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
+    id "org.sonarqube" version "3.3"
 }
 
 description = '''\
@@ -211,6 +212,14 @@ allprojects  {
                 entry 'json-path'
                 entry 'xml-path'
             }
+        }
+    }
+
+    // Configuration for the sonarqube plugin
+    // https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-gradle/
+    sonarqube {
+        properties {
+            property "sonar.projectKey", "apache_fineract"
         }
     }
 
