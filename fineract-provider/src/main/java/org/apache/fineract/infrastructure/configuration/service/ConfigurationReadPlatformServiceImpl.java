@@ -52,7 +52,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM c_configuration c ";
+        String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description,c.string_value, c.is_trap_door FROM c_configuration c ";
 
         if (survey) {
             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
@@ -68,11 +68,11 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
     }
 
     @Override
-    public GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name) {
+    public GlobalConfigurationPropertyData retrieveGlobalConfiguration(final String name) {
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM "
+        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.string_value, c.description, c.is_trap_door FROM "
                 + "c_configuration c where c.name=? order by c.id";
         final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm, new Object[] { name });
 
@@ -84,7 +84,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM "
+        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.string_value ,c.description, c.is_trap_door FROM "
                 + "c_configuration c where c.id=? order by c.id";
         final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
                 new Object[] { configId });
@@ -102,10 +102,11 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final boolean enabled = rs.getBoolean("enabled");
             final Long value = rs.getLong("value");
             final Date dateValue = rs.getDate("date_value");
+            final String stringValue = rs.getString("string_value");
             final String description = rs.getString("description");
             final Long id = rs.getLong("id");
             final boolean isTrapDoor = rs.getBoolean("is_trap_door");
-            return new GlobalConfigurationPropertyData(name, enabled, value, dateValue, id, description, isTrapDoor);
+            return new GlobalConfigurationPropertyData(name, enabled, value, dateValue, stringValue, id, description, isTrapDoor);
         }
     }
 

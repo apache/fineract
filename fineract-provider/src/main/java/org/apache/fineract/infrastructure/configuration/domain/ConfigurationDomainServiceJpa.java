@@ -363,4 +363,34 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         }
     }
 
+    @Override
+    public String getAccountMappingForPaymentType() {
+        final String propertyName = "account-mapping-for-payment-type";
+        String defaultValue = "Asset"; // 1 Stands for Account mapped from asset only
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        if (property.isEnabled()) {
+            String value = property.getStringValue();
+            if (value == null) {
+                return defaultValue;
+            }
+            return value;
+        }
+        return defaultValue;
+    }
+
+    @Override
+    public String getAccountMappingForCharge() {
+        final String propertyName = "account-mapping-for-charge";
+        String defaultValue = "Income"; // 1 Stands for Account mapped from income only
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        if (property.isEnabled()) {
+            String value = property.getValue().toString();
+            if (value == null) {
+                return defaultValue;
+            }
+            return value;
+        }
+        return defaultValue;
+    }
+
 }
