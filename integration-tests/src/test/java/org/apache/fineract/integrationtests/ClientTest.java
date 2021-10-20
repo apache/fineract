@@ -26,9 +26,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
-import java.security.SecureRandom;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +38,8 @@ public class ClientTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;    
-    private static final SecureRandom rand  = new SecureRandom();
+    private ClientHelper clientHelper;
+    private static final SecureRandom rand = new SecureRandom();
 
     @BeforeEach
     public void setup() {

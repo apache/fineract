@@ -23,9 +23,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.security.SecureRandom;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.integrationtests.common.BatchHelper;
@@ -52,7 +52,7 @@ public class BatchRequestsIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private static final SecureRandom random  = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     public BatchRequestsIntegrationTest() {
 
@@ -130,7 +130,8 @@ public class BatchRequestsIntegrationTest {
             Assertions.assertNotNull(clientCollateralId);
 
             BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
-            br.setBody(br.getBody().replace("$.clientId", String.valueOf(clientIDs[(int) Math.floor(random.nextDouble() * (clientsCount - 1))])));
+            br.setBody(br.getBody().replace("$.clientId",
+                    String.valueOf(clientIDs[(int) Math.floor(random.nextDouble() * (clientsCount - 1))])));
             batchRequests.add(br);
         }
 

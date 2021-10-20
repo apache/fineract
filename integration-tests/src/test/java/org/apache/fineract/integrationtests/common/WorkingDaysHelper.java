@@ -22,8 +22,8 @@ import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +34,8 @@ public final class WorkingDaysHelper {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
-    private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";    
-    private static final SecureRandom random  = new SecureRandom();
+    private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
+    private static final SecureRandom random = new SecureRandom();
 
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
