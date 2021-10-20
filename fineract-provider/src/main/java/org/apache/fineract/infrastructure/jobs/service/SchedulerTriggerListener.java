@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Random;
+import java.security.SecureRandom;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class SchedulerTriggerListener implements TriggerListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
 
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
