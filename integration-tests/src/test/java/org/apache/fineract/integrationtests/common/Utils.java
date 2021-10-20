@@ -31,7 +31,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
-import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +38,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -58,7 +58,7 @@ public final class Utils {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
-    private static final SecureRandom random = new SecureRandom();
+    private static final Random random = new Random();
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
