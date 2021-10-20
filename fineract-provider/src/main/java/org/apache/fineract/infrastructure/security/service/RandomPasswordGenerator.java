@@ -23,7 +23,7 @@ import java.security.SecureRandom;
 public class RandomPasswordGenerator {
 
     private final int numberOfCharactersInPassword;
-    private static final SecureRandom random  = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     public RandomPasswordGenerator(final int numberOfCharactersInPassword) {
         this.numberOfCharactersInPassword = numberOfCharactersInPassword;

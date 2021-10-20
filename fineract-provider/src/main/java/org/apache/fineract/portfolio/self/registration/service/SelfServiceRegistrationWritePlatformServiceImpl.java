@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.security.SecureRandom;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
@@ -87,7 +87,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final AppUserReadPlatformService appUserReadPlatformService;
     private final RoleRepository roleRepository;
-    private static final SecureRandom random  = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     @Autowired
     public SelfServiceRegistrationWritePlatformServiceImpl(final SelfServiceRegistrationRepository selfServiceRegistrationRepository,

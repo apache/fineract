@@ -19,9 +19,9 @@
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.security.SecureRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -31,8 +31,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 
 public final class ContentRepositoryUtils {
-    
-    private static final SecureRandom random  = new SecureRandom();
+
+    private static final SecureRandom random = new SecureRandom();
 
     private ContentRepositoryUtils() {}
 

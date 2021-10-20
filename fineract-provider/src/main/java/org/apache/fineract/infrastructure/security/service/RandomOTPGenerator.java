@@ -24,7 +24,7 @@ public class RandomOTPGenerator {
 
     private static final String allowedCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVQXYZ";
     private final int tokenLength;
-    private static final SecureRandom random  = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     public RandomOTPGenerator(int tokenLength) {
         this.tokenLength = tokenLength;
