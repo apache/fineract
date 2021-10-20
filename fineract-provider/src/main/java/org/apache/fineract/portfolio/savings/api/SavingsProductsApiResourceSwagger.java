@@ -70,8 +70,6 @@ final class SavingsProductsApiResourceSwagger {
         @Schema(example = "1")
         public Integer accountingRule;
         public Set<PostSavingsCharges> charges;
-        @Schema(example = "accountMappingForPayment")
-        public String accountMappingForPayment;
     }
 
     @Schema(description = "PostSavingsProductsResponse")
@@ -727,8 +725,6 @@ final class SavingsProductsApiResourceSwagger {
         public Set<GetSavingsProductsTemplateAccountingRule> accountingRuleOptions;
         public GetSavingsProductsAccountingMappingOptions accountingMappingOptions;
         public Set<GetSavingsProductsChargeOptions> chargeOptions;
-        public GetSavingsProductsResponse.GetSavingsCurrency accountMapping;
-
     }
 
     @Schema(description = "DeleteSavingsProductsProductIdResponse")
