@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.security.SecureRandom;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
@@ -86,6 +87,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final AppUserReadPlatformService appUserReadPlatformService;
     private final RoleRepository roleRepository;
+    private static final SecureRandom random  = new SecureRandom();
 
     @Autowired
     public SelfServiceRegistrationWritePlatformServiceImpl(final SelfServiceRegistrationRepository selfServiceRegistrationRepository,
@@ -234,7 +236,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     }
 
     public static String randomAuthorizationTokenGeneration() {
-        Integer randomPIN = (int) (Math.random() * 9000) + 1000;
+        Integer randomPIN = (int) (random.nextDouble() * 9000) + 1000;
         return randomPIN.toString();
     }
 

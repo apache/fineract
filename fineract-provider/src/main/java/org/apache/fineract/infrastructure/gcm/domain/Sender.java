@@ -69,7 +69,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
@@ -88,8 +88,8 @@ public class Sender {
      * Maximum delay before a retry.
      */
     protected static final int MAX_BACKOFF_DELAY = 1024000;
-
-    protected final Random random = new Random();
+    
+    private final SecureRandom random  = new SecureRandom();
     protected static final Logger LOG = Logger.getLogger(Sender.class.getName());
 
     private final String key;
