@@ -31,6 +31,5 @@ public final class GlobalConfigurationApiConstant {
     public static final String CONFIGURATION_RESOURCE_NAME = "globalConfiguration";
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
-    public static final String STRING_VALUE = "stringValue";
 
 }

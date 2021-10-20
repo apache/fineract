@@ -33,7 +33,6 @@ public class GlobalConfigurationPropertyData {
     private final Long value;
     @SuppressWarnings("unused")
     private final Date dateValue;
-    private String stringValue;
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
@@ -42,24 +41,22 @@ public class GlobalConfigurationPropertyData {
     private final boolean trapDoor;
 
     public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue,
-            final String stringValue, final String description, final boolean trapDoor) {
+            final String description, final boolean trapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.dateValue = dateValue;
-        this.stringValue = stringValue;
         this.id = null;
         this.description = description;
         this.trapDoor = trapDoor;
     }
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, Date dateValue,
-            final String stringValue, final Long id, final String description, final boolean isTrapDoor) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, Date dateValue, final Long id,
+            final String description, final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.dateValue = dateValue;
-        this.stringValue = stringValue;
         this.id = id;
         this.description = description;
         this.trapDoor = isTrapDoor;
@@ -75,10 +72,6 @@ public class GlobalConfigurationPropertyData {
 
     public Long getValue() {
         return this.value;
-    }
-
-    public String getStringValue() {
-        return this.stringValue;
     }
 
     public Date getDateValue() {
