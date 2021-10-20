@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import java.security.SecureRandom;
+
 public class RandomOTPGenerator {
 
     private static final String allowedCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVQXYZ";
     private final int tokenLength;
+    private static final SecureRandom random = new SecureRandom();
 
     public RandomOTPGenerator(int tokenLength) {
         this.tokenLength = tokenLength;
@@ -30,7 +33,7 @@ public class RandomOTPGenerator {
     public String generate() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < tokenLength; i++) {
-            builder.append(allowedCharacters.charAt((int) (Math.random() * allowedCharacters.length())));
+            builder.append(allowedCharacters.charAt((int) (random.nextDouble() * allowedCharacters.length())));
         }
 
         return builder.toString();
