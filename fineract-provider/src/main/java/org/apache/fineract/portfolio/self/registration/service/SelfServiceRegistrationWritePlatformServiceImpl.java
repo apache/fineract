@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,7 +86,6 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final AppUserReadPlatformService appUserReadPlatformService;
     private final RoleRepository roleRepository;
-    private static final SecureRandom random = new SecureRandom();
 
     @Autowired
     public SelfServiceRegistrationWritePlatformServiceImpl(final SelfServiceRegistrationRepository selfServiceRegistrationRepository,
@@ -236,7 +234,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     }
 
     public static String randomAuthorizationTokenGeneration() {
-        Integer randomPIN = (int) (random.nextDouble() * 9000) + 1000;
+        Integer randomPIN = (int) (Math.random() * 9000) + 1000;
         return randomPIN.toString();
     }
 
