@@ -41,13 +41,12 @@ public class SavingsApiSetConstants extends SavingsApiConstants {
                     "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions",
                     "withdrawalFeeTypeOptions", nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
                     withHoldTaxParamName, taxGroupIdParamName, isDormancyTrackingActiveParamName, daysToInactiveParamName,
-                    daysToDormancyParamName, daysToInactiveParamName));
+                    daysToDormancyParamName, daysToInactiveParamName, accountMappingForPaymentParamName));
 
     /**
      * These parameters will match the class level parameters of {@link SavingsAccountData}. Where possible, we try to
      * get response parameters to match those of request parameters.
      */
-
     protected static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             accountNoParamName, externalIdParamName, statusParamName, activatedOnDateParamName, staffIdParamName, clientIdParamName,
             "clientName", groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency",
@@ -58,7 +57,7 @@ public class SavingsApiSetConstants extends SavingsApiConstants {
             "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions",
             "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee",
             "annualFee", onHoldFundsParamName, nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
-            datatables, savingsAmountOnHold));
+            datatables, savingsAmountOnHold, accountMappingForPaymentParamName));
 
     protected static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName,
