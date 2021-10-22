@@ -34,7 +34,7 @@ import com.google.common.truth.Truth8;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.Random;
+import java.security.SecureRandom;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
@@ -56,7 +56,7 @@ import retrofit2.Response;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class IntegrationTest {
 
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
 
     private FineractClient fineract;
 

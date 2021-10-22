@@ -22,7 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.concurrent.Callable;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 public class RecalculateInterestPoster implements Callable<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
 
     private Collection<Long> loanIds;
     private LoanWritePlatformService loanWritePlatformService;
@@ -80,8 +80,7 @@ public class RecalculateInterestPoster implements Callable<Void> {
                         }
                         // Else sleep for a random time (between 1 to 10
                         // seconds) and continue
-                        try {
-                            Random random = new Random();
+                        try {                            
                             int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;
