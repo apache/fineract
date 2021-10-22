@@ -362,8 +362,7 @@ public class ProductToGLAccountMappingHelper {
     private void savePaymentChannelToFundSourceMapping(final Long productId, final Long paymentTypeId,
             final Long paymentTypeSpecificFundAccountId, final PortfolioProductType portfolioProductType) {
         final PaymentType paymentType = this.paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
-        final GLAccount glAccount = getAccountByIdAndType(LoanProductAccountingParams.FUND_SOURCE.getValue(), GLAccountType.ASSET,
-                paymentTypeSpecificFundAccountId);
+        final GLAccount glAccount = getAccountById(LoanProductAccountingParams.FUND_SOURCE.getValue(), paymentTypeSpecificFundAccountId);
         final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping(glAccount, productId,
                 portfolioProductType.getValue(), CashAccountsForLoan.FUND_SOURCE.getValue(), paymentType);
         this.accountMappingRepository.save(accountMapping);
@@ -424,6 +423,11 @@ public class ProductToGLAccountMappingHelper {
             throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId,
                     GLAccountType.fromInt(glAccount.getType()).toString(), expectedAccountType.toString());
         }
+        return glAccount;
+    }
+
+    public GLAccount getAccountById(final String paramName, final Long accountId) {
+        final GLAccount glAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
         return glAccount;
     }
 
