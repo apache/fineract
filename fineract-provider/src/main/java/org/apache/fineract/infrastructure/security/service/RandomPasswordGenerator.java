@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import java.security.SecureRandom;
+
 public class RandomPasswordGenerator {
 
     private final int numberOfCharactersInPassword;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     public RandomPasswordGenerator(final int numberOfCharactersInPassword) {
         this.numberOfCharactersInPassword = numberOfCharactersInPassword;
@@ -30,7 +33,7 @@ public class RandomPasswordGenerator {
 
         final StringBuilder passwordBuilder = new StringBuilder(this.numberOfCharactersInPassword);
         for (int i = 0; i < this.numberOfCharactersInPassword; i++) {
-            passwordBuilder.append((char) ((int) (Math.random() * 26) + 97));
+            passwordBuilder.append((char) ((int) (secureRandom.nextDouble() * 26) + 97));
         }
         return passwordBuilder.toString();
     }

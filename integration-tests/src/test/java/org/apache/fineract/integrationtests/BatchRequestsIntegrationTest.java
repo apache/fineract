@@ -23,6 +23,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -51,6 +52,7 @@ public class BatchRequestsIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     public BatchRequestsIntegrationTest() {
 
@@ -79,7 +81,7 @@ public class BatchRequestsIntegrationTest {
     public void shouldReturnOkStatusForLoansAppliedToSelectedClients() {
 
         // Generate a random count of number of clients to be created
-        final Integer clientsCount = (int) Math.ceil(Math.random() * 7) + 3;
+        final Integer clientsCount = (int) Math.ceil(secureRandom.nextDouble() * 7) + 3;
         final Integer[] clientIDs = new Integer[clientsCount];
 
         // Create a new group and get its groupId
@@ -93,17 +95,17 @@ public class BatchRequestsIntegrationTest {
         }
 
         // Generate a random count of number of new loan products to be created
-        final Integer loansCount = (int) Math.ceil(Math.random() * 4) + 1;
+        final Integer loansCount = (int) Math.ceil(secureRandom.nextDouble() * 4) + 1;
         final Integer[] loanProducts = new Integer[loansCount];
 
         // Create new loan Products
         for (Integer i = 0; i < loansCount; i++) {
             final String loanProductJSON = new LoanProductTestBuilder() //
-                    .withPrincipal(String.valueOf(10000.00 + Math.ceil(Math.random() * 1000000.00))) //
-                    .withNumberOfRepayments(String.valueOf(2 + (int) Math.ceil(Math.random() * 36))) //
-                    .withRepaymentAfterEvery(String.valueOf(1 + (int) Math.ceil(Math.random() * 3))) //
+                    .withPrincipal(String.valueOf(10000.00 + Math.ceil(secureRandom.nextDouble() * 1000000.00))) //
+                    .withNumberOfRepayments(String.valueOf(2 + (int) Math.ceil(secureRandom.nextDouble() * 36))) //
+                    .withRepaymentAfterEvery(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 3))) //
                     .withRepaymentTypeAsMonth() //
-                    .withinterestRatePerPeriod(String.valueOf(1 + (int) Math.ceil(Math.random() * 4))) //
+                    .withinterestRatePerPeriod(String.valueOf(1 + (int) Math.ceil(secureRandom.nextDouble() * 4))) //
                     .withInterestRateFrequencyTypeAsMonths() //
                     .withAmortizationTypeAsEqualPrincipalPayment() //
                     .withInterestTypeAsDecliningBalance() //
@@ -113,22 +115,23 @@ public class BatchRequestsIntegrationTest {
         }
 
         // Select anyone of the loan products at random
-        final Integer loanProductID = loanProducts[(int) Math.floor(Math.random() * (loansCount - 1))];
+        final Integer loanProductID = loanProducts[(int) Math.floor(secureRandom.nextDouble() * (loansCount - 1))];
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
         // Select a few clients from created group at random
-        Integer selClientsCount = (int) Math.ceil(Math.random() * clientsCount) + 2;
+        Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
 
             final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
             Assertions.assertNotNull(collateralId);
             final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                    String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))]), collateralId);
+                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
             Assertions.assertNotNull(clientCollateralId);
 
             BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID, clientCollateralId);
-            br.setBody(br.getBody().replace("$.clientId", String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))])));
+            br.setBody(br.getBody().replace("$.clientId",
+                    String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))])));
             batchRequests.add(br);
         }
 

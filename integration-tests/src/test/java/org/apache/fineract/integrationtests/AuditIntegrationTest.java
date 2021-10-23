@@ -24,10 +24,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -46,7 +46,7 @@ public class AuditIntegrationTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private AuditHelper auditHelper;
-    private static final Random rand = new Random();
+    private static final SecureRandom rand = new SecureRandom();
 
     /**
      * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'

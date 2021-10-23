@@ -20,20 +20,20 @@ package org.apache.fineract.integrationtests.common.provisioning;
 
 import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public final class ProvisioningHelper {
 
-    private static final Random rand = new Random();
+    private static final SecureRandom rand = new SecureRandom();
 
     private ProvisioningHelper() {
 
