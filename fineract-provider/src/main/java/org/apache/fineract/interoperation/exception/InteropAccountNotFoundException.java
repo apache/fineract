@@ -16,32 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
+package org.apache.fineract.interoperation.exception;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
-@JsonSerialize(using = TemplateEntitySerializer.class)
-public enum TemplateEntity {
+/**
+ * A {@link RuntimeException} thrown when a code is not found.
+ */
+public class InteropAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
-    LOAN(1, "loan");
+    public InteropAccountNotFoundException(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
 
-    private final int id;
-    private final String name;
-
-    TemplateEntity(final int id, final String name) {
-        this.id = id;
-        this.name = name;
+        super("error.msg.interop.account.not.found",
+                "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
     }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
 }

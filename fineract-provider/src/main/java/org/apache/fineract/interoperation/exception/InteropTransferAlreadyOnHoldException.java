@@ -16,32 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
+package org.apache.fineract.interoperation.exception;
 
-@JsonSerialize(using = TemplateEntitySerializer.class)
-public enum TemplateEntity {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
-    LOAN(1, "loan");
+public class InteropTransferAlreadyOnHoldException extends AbstractPlatformDomainRuleException {
 
-    private final int id;
-    private final String name;
-
-    TemplateEntity(final int id, final String name) {
-        this.id = id;
-        this.name = name;
+    public InteropTransferAlreadyOnHoldException(String accountId, String transferCode) {
+        super("error.msg.interop.transfer.already.committed",
+                "Transaction with transferCode " + transferCode + " already committed for account " + accountId);
     }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
 }

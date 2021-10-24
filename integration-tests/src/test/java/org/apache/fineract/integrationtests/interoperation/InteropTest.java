@@ -68,7 +68,8 @@ public class InteropTest {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseClientErrorSpec;
-    private ResponseSpecification responseErrorSpec;
+    private ResponseSpecification responseNotFoundErrorSpec;
+    private ResponseSpecification responseForbiddenErrorSpec;
 
     private AccountHelper accountHelper;
     private SavingsAccountHelper savingsAccountHelper;
@@ -90,7 +91,8 @@ public class InteropTest {
 
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         responseClientErrorSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        responseErrorSpec = new ResponseSpecBuilder().expectStatusCode(500).build();
+        responseForbiddenErrorSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+        responseNotFoundErrorSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
 
         String savingsExternalId = UUID.randomUUID().toString();
         String transactionCode = UUID.randomUUID().toString();
@@ -178,7 +180,7 @@ public class InteropTest {
         String accountId = interopHelper.postParty(InteropIdentifierType.MSISDN, idValue);
         Assertions.assertEquals(interopHelper.getAccountExternalId(), accountId);
 
-        interopHelper.setResponseSpec(responseErrorSpec);
+        interopHelper.setResponseSpec(responseForbiddenErrorSpec);
         accountId = interopHelper.postParty(InteropIdentifierType.MSISDN, idValue);
         Assertions.assertNull(accountId);
         interopHelper.setResponseSpec(responseSpec);
@@ -189,7 +191,7 @@ public class InteropTest {
         accountId = interopHelper.deleteParty(InteropIdentifierType.MSISDN, idValue);
         Assertions.assertEquals(interopHelper.getAccountExternalId(), accountId);
 
-        interopHelper.setResponseSpec(responseErrorSpec);
+        interopHelper.setResponseSpec(responseNotFoundErrorSpec);
         accountId = interopHelper.getParty(InteropIdentifierType.MSISDN, idValue);
         Assertions.assertNull(accountId);
         interopHelper.setResponseSpec(responseSpec);

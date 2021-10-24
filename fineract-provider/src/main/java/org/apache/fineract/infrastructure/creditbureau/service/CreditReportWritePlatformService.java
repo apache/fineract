@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.File;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 public interface CreditReportWritePlatformService {
 

@@ -33,4 +33,8 @@ public class LoanNotFoundException extends AbstractPlatformResourceNotFoundExcep
     public LoanNotFoundException(Long id, EmptyResultDataAccessException e) {
         super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id, e);
     }
+
+    public LoanNotFoundException(String accountId) {
+        super("error.msg.loan.account.id.invalid", "Loan with account ID " + accountId + " does not exist", accountId);
+    }
 }
