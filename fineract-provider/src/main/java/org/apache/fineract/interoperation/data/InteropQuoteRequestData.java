@@ -35,10 +35,10 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACT
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_TYPE;
 
 import com.google.gson.JsonObject;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropAmountType;

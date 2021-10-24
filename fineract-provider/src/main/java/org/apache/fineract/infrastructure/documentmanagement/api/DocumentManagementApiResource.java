@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -57,6 +54,9 @@ import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -126,20 +126,16 @@ public class DocumentManagementApiResource {
     public String createDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
-            @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
-            @FormDataParam("file") @Parameter(description = "file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
-            @FormDataParam("name") @Parameter(description = "name") final String name,
-            @FormDataParam("description") @Parameter(description = "description") final String description) {
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
+            @FormDataParam("description") final String description) {
 
         // TODO: stop reading from stream after max size is reached to protect against malicious clients
         // TODO: need to extract the actual file type and determine if they are permissible
 
         fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
-
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
-
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
 
         return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
@@ -158,11 +154,9 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
-            @FormDataParam("file") @Parameter(description = "file") final InputStream inputStream,
-            @FormDataParam("file") @Parameter(description = "file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") @Parameter(description = "file") final FormDataBodyPart bodyPart,
-            @FormDataParam("name") @Parameter(description = "name") final String name,
-            @FormDataParam("description") @Parameter(description = "description") final String description) {
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
+            @FormDataParam("description") final String description) {
 
         final Set<String> modifiedParams = new HashSet<>();
         modifiedParams.add("name");

@@ -16,32 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
+package org.apache.fineract.infrastructure.core.boot;
 
-@JsonSerialize(using = TemplateEntitySerializer.class)
-public enum TemplateEntity {
+import javax.ws.rs.ApplicationPath;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
+import org.springframework.context.annotation.Configuration;
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
-    LOAN(1, "loan");
+@Configuration
+@ApplicationPath("/api/v1")
+public class JerseyConfig extends ResourceConfig {
 
-    private final int id;
-    private final String name;
+    JerseyConfig() {
+        register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
+        property(ServerProperties.WADL_FEATURE_DISABLE, true);
 
-    TemplateEntity(final int id, final String name) {
-        this.id = id;
-        this.name = name;
+        packages("org.apache.fineract");
     }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
 }

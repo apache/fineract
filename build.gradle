@@ -131,7 +131,6 @@ allprojects  {
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
             dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
             dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
-            dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
             dependency 'org.apache.activemq:activemq-broker:5.16.3'
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
 
@@ -191,16 +190,6 @@ allprojects  {
                 exclude 'pull-parser:pull-parser'
             }
 
-            dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
-                entry 'jersey-core'
-                entry 'jersey-servlet'
-                entry 'jersey-server'
-                entry 'jersey-json'
-            }
-            dependencySet(group: 'com.sun.jersey.contribs', version: jerseyVersion) {
-                entry 'jersey-spring'
-                entry 'jersey-multipart'
-            }
             dependencySet(group: 'org.apache.poi', version: '4.1.2') {
                 entry 'poi'
                 entry 'poi-ooxml'

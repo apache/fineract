@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.service;
 
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -63,6 +62,7 @@ import org.apache.fineract.infrastructure.reportmailingjob.validation.ReportMail
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,7 +266,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     final StringBuilder errorLog = new StringBuilder();
                     final Map<String, String> validateStretchyReportParamMap = this.reportMailingJobValidator
                             .validateStretchyReportParamMap(reportMailingJob.getStretchyReportParamMap());
-                    MultivaluedMap<String, String> reportParams = new MultivaluedMapImpl();
+                    MultivaluedMap<String, String> reportParams = new MultivaluedStringMap();
 
                     if (validateStretchyReportParamMap != null) {
                         Iterator<Map.Entry<String, String>> validateStretchyReportParamMapEntries = validateStretchyReportParamMap

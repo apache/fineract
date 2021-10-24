@@ -20,8 +20,6 @@
 package org.apache.fineract.infrastructure.creditbureau.api;
 
 import com.google.gson.Gson;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.io.File;
 import java.io.InputStream;
@@ -52,6 +50,8 @@ import org.apache.fineract.infrastructure.creditbureau.data.CreditReportData;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportReadPlatformService;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

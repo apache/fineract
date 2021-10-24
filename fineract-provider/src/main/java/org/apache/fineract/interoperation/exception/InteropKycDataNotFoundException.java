@@ -16,32 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.template.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
+package org.apache.fineract.interoperation.exception;
 
-@JsonSerialize(using = TemplateEntitySerializer.class)
-public enum TemplateEntity {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
-    LOAN(1, "loan");
+public class InteropKycDataNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    private final int id;
-    private final String name;
-
-    TemplateEntity(final int id, final String name) {
-        this.id = id;
-        this.name = name;
+    public InteropKycDataNotFoundException(Long clientId, Exception e) {
+        super("error.msg.interop.kyc.data.not.found", "No KYC data found for clientID " + clientId, e);
     }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
 }

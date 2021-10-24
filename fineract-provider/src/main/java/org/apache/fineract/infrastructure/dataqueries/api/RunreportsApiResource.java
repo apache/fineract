@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.report.service.ReportingProcessService
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -97,7 +98,9 @@ public class RunreportsApiResource {
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
 
-        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        MultivaluedMap<String, String> queryParams = new MultivaluedStringMap();
+        queryParams.putAll(uriInfo.getQueryParameters());
+
         final boolean parameterType = ApiParameterHelper.parameterType(queryParams);
 
         checkUserPermissionForReport(reportName, parameterType);

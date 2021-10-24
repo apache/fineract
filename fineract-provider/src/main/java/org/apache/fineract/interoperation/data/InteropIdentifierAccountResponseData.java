@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.util.Map;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public class InteropIdentifierAccountResponseData extends CommandProcessingResult {
@@ -39,12 +39,12 @@ public class InteropIdentifierAccountResponseData extends CommandProcessingResul
         return new InteropIdentifierAccountResponseData(resourceId, officeId, commandId, changesOnly, accountId);
     }
 
-    protected static InteropIdentifierAccountResponseData build(Long commandId, @NotNull String accountId) {
-        return build(null, null, commandId, null, accountId);
+    public static InteropIdentifierAccountResponseData build(Long resourceId, @NotNull String accountId) {
+        return build(resourceId, null, null, null, accountId);
     }
 
-    public static InteropIdentifierAccountResponseData build(@NotNull String accountId) {
-        return build(null, accountId);
+    public static InteropIdentifierAccountResponseData empty() {
+        return build(null, null);
     }
 
     @NotNull

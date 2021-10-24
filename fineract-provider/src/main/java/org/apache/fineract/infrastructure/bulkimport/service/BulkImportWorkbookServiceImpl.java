@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.service;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,6 +51,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
