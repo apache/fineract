@@ -34,7 +34,7 @@ RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mys
 
 # =========================================
 
-FROM azul/zulu-openjdk-alpine:11 AS fineract
+FROM azul/zulu-openjdk-alpine:17 AS fineract
 
 COPY --from=builder /fineract/fineract-provider/build/libs /app
 COPY --from=builder /fineract/libs /app/libs
