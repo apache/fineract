@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM azul/zulu-openjdk-debian:11 AS builder
+FROM azul/zulu-openjdk-debian:17 AS builder
 
 RUN apt-get update -qq && apt-get install -y wget
 
