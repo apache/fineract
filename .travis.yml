@@ -99,6 +99,8 @@ script:
 # We stop the mysql system service when running the Docker test to avoid port 3306 conflicts (unless we run the mysql in docker-compose on another port; req. FINERACT-773)
 # The fancy /actuator/info test makes sure that has more than 100 characters of JSON to test that the git.properties worked (see FINERACT-983)
   - ./gradlew -q --no-daemon --console=plain licenseMain licenseTest check build test --fail-fast doc &&  sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 60s  && curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health  &&  (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
+  - date
 # Using travis_wait for a proccess that could take longer than 20 minutes, in this case the SonaQube analysis
 # https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
-  - travis_wait 30 ./gradlew -q --no-daemon --console=plain sonarqube -Pcoverage=true
+  - travis_wait 30 ./gradlew -q --no-daemon --console=plain -x rat -x test sonarqube -Pcoverage=true
+  - date

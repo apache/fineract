@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public final class BatchHelper {
     private static final Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     private BatchHelper() {
 
@@ -149,7 +151,7 @@ public final class BatchHelper {
 
         final String extId;
         if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * Math.random())) + String.valueOf((10000 * Math.random()));
+            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
         } else {
             extId = externalId;
         }
@@ -179,7 +181,7 @@ public final class BatchHelper {
 
         final String extId;
         if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * Math.random())) + String.valueOf((10000 * Math.random()));
+            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
         } else {
             extId = externalId;
         }

@@ -9,3 +9,4 @@ done
 >&2 echo "DB Server is up - executing command"
 
 java -Dloader.path=/app/libs/ -jar /app/fineract-provider.jar
+

@@ -19,13 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -56,7 +56,7 @@ import org.springframework.util.CollectionUtils;
 public class LoanSchedularServiceImpl implements LoanSchedularService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
 
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
