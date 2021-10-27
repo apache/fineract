@@ -370,7 +370,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.isEnabled()) {
             String value = property.getStringValue();
-            if (value == null) {
+            if (StringUtils.isBlank(value)) {
                 return defaultValue;
             }
             return value;
@@ -384,8 +384,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         String defaultValue = "Income"; // 1 Stands for Account mapped from income only
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.isEnabled()) {
-            String value = property.getValue().toString();
-            if (value == null) {
+            String value = property.getStringValue();
+            if (StringUtils.isBlank(value)) {
                 return defaultValue;
             }
             return value;

@@ -184,7 +184,6 @@ public class ChargesApiResource {
 
     @DELETE
     @Path("{chargeId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Charge", description = "Deletes a Charge.")
     @ApiResponses({

@@ -30,6 +30,7 @@ public class ChargePaymentDTO {
         this.chargeId = chargeId;
         this.amount = amount;
         this.loanChargeId = loanChargeId;
+
     }
 
     public Long getChargeId() {

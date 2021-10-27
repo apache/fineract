@@ -162,7 +162,7 @@ public class ProductToGLAccountMappingHelper {
      * @param productId
      * @param changes
      */
-    public void saveChargesToIncomeOrLiabilityAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+    public void saveChargesToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes, final PortfolioProductType portfolioProductType, final boolean isPenalty) {
         String arrayName;
         if (isPenalty) {
@@ -332,8 +332,7 @@ public class ProductToGLAccountMappingHelper {
                     if (inputPaymentChannelFundSourceMap.containsKey(currentPaymentChannelId)) {
                         final Long newGLAccountId = inputPaymentChannelFundSourceMap.get(currentPaymentChannelId);
                         if (!newGLAccountId.equals(existingPaymentChannelToFundSourceMapping.getGlAccount().getId())) {
-                            final GLAccount glAccount = getAccountByIdAndType(LoanProductAccountingParams.FUND_SOURCE.getValue(),
-                                    GLAccountType.ASSET, newGLAccountId);
+                            final GLAccount glAccount = getAccountById(LoanProductAccountingParams.FUND_SOURCE.getValue(), newGLAccountId);
                             existingPaymentChannelToFundSourceMapping.setGlAccount(glAccount);
                             this.accountMappingRepository.save(existingPaymentChannelToFundSourceMapping);
                         }
