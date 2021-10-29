@@ -47,4 +47,6 @@ RUN chmod 775 /entrypoint.sh
 
 EXPOSE 8443
 
-ENTRYPOINT ["/entrypoint.sh"]
+# removed temporarily: ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["java", "-Dloader.path=/app/libs/", "-jar", "/app/fineract-provider.jar"]
+
