@@ -82,6 +82,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                     + "sc.fee_on_month as feeOnMonth, " + "sc.fee_on_day as feeOnDay, sc.fee_interval as feeInterval, "
                     + "sc.charge_calculation_enum as chargeCalculation, "
                     + "sc.is_active as isActive, sc.inactivated_on_date as inactivationDate, "
+                    + "c.is_free_withdrawal as isFreeWithdrawal, c.free_withdrawal_charge_frequency as freeWithdrawalChargeFrequency, c.restart_frequency as restartFrequency, c.restart_frequency_enum as restartFrequencyEnum, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -133,11 +134,17 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final Boolean isActive = rs.getBoolean("isActive");
             final LocalDate inactivationDate = JdbcSupport.getLocalDate(rs, "inactivationDate");
 
+            final Boolean isFreeWithdrawal = rs.getBoolean("isFreeWithdrawal");
+            final Integer freeWithdrawalChargeFrequency = JdbcSupport.getInteger(rs, "freeWithdrawalChargeFrequency");
+            final Integer restartFrequency = JdbcSupport.getInteger(rs, "restartFrequency");
+            final Integer restartFrequencyEnum = JdbcSupport.getInteger(rs, "restartFrequencyEnum");
+
             final Collection<ChargeData> chargeOptions = null;
 
             return SavingsAccountChargeData.instance(id, chargeId, accountId, name, currency, amount, amountPaid, amountWaived,
                     amountWrittenOff, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf,
-                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
+                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay, feeInterval, isActive, isFreeWithdrawal,
+                    freeWithdrawalChargeFrequency, restartFrequency, restartFrequencyEnum, inactivationDate);
         }
     }
 

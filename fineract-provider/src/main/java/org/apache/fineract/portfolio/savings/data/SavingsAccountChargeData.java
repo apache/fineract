@@ -74,6 +74,14 @@ public class SavingsAccountChargeData implements Serializable {
 
     private final Boolean isActive;
 
+    private final Boolean isFreeWithdrawal;
+
+    private final Integer freeWithdrawalChargeFrequency;
+
+    private final Integer restartFrequency;
+
+    private final Integer restartFrequencyEnum;
+
     private final LocalDate inactivationDate;
 
     private final Collection<ChargeData> chargeOptions;
@@ -101,6 +109,10 @@ public class SavingsAccountChargeData implements Serializable {
         this.isActive = null;
         this.inactivationDate = null;
         this.chargeOptions = null;
+        this.isFreeWithdrawal = null;
+        this.freeWithdrawalChargeFrequency = null;
+        this.restartFrequency = null;
+        this.restartFrequencyEnum = null;
     }
 
     public static SavingsAccountChargeData template(final Collection<ChargeData> chargeOptions) {
@@ -123,11 +135,17 @@ public class SavingsAccountChargeData implements Serializable {
         final MonthDay feeOnMonthDay = null;
         final Integer feeInterval = null;
         final Boolean isActive = null;
+        final Boolean isFreeWithdrawal = null;
+        final Integer freeWithdrawalChargeFrequency = null;
+        final Integer restartFrequency = null;
+        final Integer restartFrequencyEnum = null;
+
         final LocalDate inactivationDate = null;
 
         return new SavingsAccountChargeData(id, chargeId, accountId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
                 amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
-                penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
+                penalty, feeOnMonthDay, feeInterval, isActive, isFreeWithdrawal, freeWithdrawalChargeFrequency, restartFrequency,
+                restartFrequencyEnum, inactivationDate);
     }
 
     public static SavingsAccountChargeData instance(final Long id, final Long chargeId, final Long accountId, final String name,
@@ -135,11 +153,14 @@ public class SavingsAccountChargeData implements Serializable {
             final BigDecimal amountWrittenOff, final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType,
             final LocalDate dueAsOfDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
             final BigDecimal amountPercentageAppliedTo, final Collection<ChargeData> chargeOptions, final boolean penalty,
-            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final LocalDate inactivationDate) {
+            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final Boolean isFreeWithdrawal,
+            final Integer freeWithdrawalChargeFrequency, final Integer restartFrequency, final Integer restartFrequencyEnum,
+            final LocalDate inactivationDate) {
 
         return new SavingsAccountChargeData(id, chargeId, accountId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
                 amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
-                penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
+                penalty, feeOnMonthDay, feeInterval, isActive, isFreeWithdrawal, freeWithdrawalChargeFrequency, restartFrequency,
+                restartFrequencyEnum, inactivationDate);
     }
 
     private SavingsAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name,
@@ -147,7 +168,9 @@ public class SavingsAccountChargeData implements Serializable {
             final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
             final BigDecimal amountOutstanding, final Collection<ChargeData> chargeOptions, final boolean penalty,
-            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final LocalDate inactivationDate) {
+            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final Boolean isFreeWithdrawal,
+            final Integer freeWithdrawalChargeFrequency, final Integer restartFrequency, final Integer restartFrequencyEnum,
+            final LocalDate inactivationDate) {
         this.id = id;
         this.chargeId = chargeId;
         this.accountId = accountId;
@@ -170,6 +193,10 @@ public class SavingsAccountChargeData implements Serializable {
         this.feeInterval = feeInterval;
         this.isActive = isActive;
         this.inactivationDate = inactivationDate;
+        this.isFreeWithdrawal = isFreeWithdrawal;
+        this.freeWithdrawalChargeFrequency = freeWithdrawalChargeFrequency;
+        this.restartFrequency = restartFrequency;
+        this.restartFrequencyEnum = restartFrequencyEnum;
     }
 
     private BigDecimal getAmountOrPercentage() {

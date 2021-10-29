@@ -1025,6 +1025,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
 
+        if (chargeDefinition.isEnableFreeWithdrawal()) {
+            savingsAccountCharge.setFreeWithdrawalCount(0);
+        }
+
         if (savingsAccountCharge.getDueLocalDate() != null) {
             // transaction date should not be on a holiday or non working day
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()

@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.slf4j.Logger;
@@ -67,13 +68,14 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
+    private final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
-            final TaxGroupRepositoryWrapper taxGroupRepository) {
+            final TaxGroupRepositoryWrapper taxGroupRepository, final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.dataSource = dataSource;
@@ -83,6 +85,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.glAccountRepository = glAccountRepository;
         this.taxGroupRepository = taxGroupRepository;
+        this.paymentTyperepositoryWrapper = paymentTyperepositoryWrapper;
     }
 
     @Transactional
