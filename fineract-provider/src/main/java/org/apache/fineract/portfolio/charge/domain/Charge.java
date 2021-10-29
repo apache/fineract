@@ -579,7 +579,7 @@ public class Charge extends AbstractPersistableCustom {
         this.account = account;
     }
 
-    private Long getIncomeAccountId() {
+    public Long getIncomeAccountId() {
         Long incomeAccountId = null;
         if (this.account != null) {
             incomeAccountId = this.account.getId();

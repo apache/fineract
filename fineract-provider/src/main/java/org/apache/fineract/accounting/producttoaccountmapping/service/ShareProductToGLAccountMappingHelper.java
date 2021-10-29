@@ -114,8 +114,8 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
 
     public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, true);
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, false);
+        saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, true);
+        saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, false);
     }
 
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,

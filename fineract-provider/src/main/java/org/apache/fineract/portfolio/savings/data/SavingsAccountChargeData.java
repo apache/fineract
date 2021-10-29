@@ -192,4 +192,8 @@ public class SavingsAccountChargeData implements Serializable {
         return this.amountOutstanding;
     }
 
+    public long getAccountId() {
+        return this.accountId;
+    }
+
 }

@@ -29,7 +29,7 @@ public interface ProductToGLAccountMappingReadPlatformService {
 
     List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(Long loanProductId);
 
-    List<ChargeToGLAccountMapper> fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(Long loanProductId);
+    List<ChargeToGLAccountMapper> fetchFeeToGLAccountMappingsForLoanProduct(Long loanProductId);
 
     List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(Long loanProductId);
 
