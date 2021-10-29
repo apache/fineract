@@ -19,7 +19,9 @@
 description = 'Fineract Provider'
 
 apply plugin: 'org.zeroturnaround.gradle.jrebel'
+apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'openjpa'
 apply plugin: 'com.gorylenko.gradle-git-properties'
@@ -173,6 +175,20 @@ war {
         into "WEB-INF/" // no leading slash
     }
     enabled = true
+}
+
+// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+// set the classes directory to point to Eclipse's default build directory
+if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
+{
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
+}
+
+eclipse
+{
+    project {
+        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+    }
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
