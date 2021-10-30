@@ -59,7 +59,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
-    id 'org.springframework.boot' version '2.3.5.RELEASE' apply false
+    id 'org.springframework.boot' version '2.5.6' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.1.11' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.3.1' apply false
@@ -99,7 +99,7 @@ allprojects  {
     dependencyManagement {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.12'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.5.4'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.5.6'
             mavenBom 'org.junit:junit-bom:5.8.1'
         }
 
@@ -142,7 +142,7 @@ allprojects  {
             dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
             dependency 'org.webjars.npm:swagger-ui-dist:3.52.5'
             dependency 'org.webjars:webjars-locator-core:0.48'
-            dependency 'org.springframework.boot:spring-boot-starter-mail:2.5.4'
+            dependency 'org.springframework.boot:spring-boot-starter-mail:2.5.6'
 
             // fineract client dependencies
             dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
