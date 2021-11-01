@@ -38,10 +38,15 @@ services:
     build:
       context: .
       target: fineract
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
     ports:
       - 8443:8443
     depends_on:
-      - fineractmysql
+      fineractmysql:
+        condition: service_healthy
     environment:
       - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
       - PROTOCOL=jdbc
@@ -64,7 +69,9 @@ services:
     restart: always
     ports:
       - 9090:80
-
+    depends_on:
+      fineract-server:
+        condition: service_healthy
 
 # https://issues.apache.org/jira/browse/FINERACT-762
 # To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
