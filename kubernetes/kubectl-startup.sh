@@ -53,3 +53,18 @@ while [[ ${fineract_server_status} -ne 'Running' ]]; do
 done
 
 echo "Fineract server is up and running"
+
+echo "Starting Mifos Community UI..."
+kubectl apply -f fineract-mifoscommunity-deployment.yml
+
+fineract_mifoscommunity_pod=""
+while [[ ${#fineract_mifoscommunity_pod} -eq 0 ]]; do
+    fineract_mifoscommunity_pod=$(kubectl get pods -l tier=backend --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+done
+
+fineract_mifoscommunity_status=$(kubectl get pods ${fineract_mifoscommunity_pod} --no-headers -o custom-columns=":status.phase")
+while [[ ${fineract_mifoscommunity_status} -ne 'Running' ]]; do
+    sleep 1
+    fineract_mifoscommunity_status=$(kubectl get pods ${fineract_mifoscommunity_pod} --no-headers -o custom-columns=":status.phase")
+done
+echo "Mifos Community UI is up and running"
