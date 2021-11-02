@@ -376,10 +376,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Get disbursedAmount
         final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+        final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
 
         // Get relevant loan collateral modules
-        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
-            final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+        if ((loanCollateralManagements != null && loanCollateralManagements.size() != 0)
+                && AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
 
             BigDecimal totalCollateral = BigDecimal.valueOf(0);
 
