@@ -74,7 +74,8 @@ dependencies {
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.3.4',
             'com.squareup.retrofit2:converter-gson',
-            'com.sun.activation:jakarta.activation:1.2.2'
+            'com.sun.activation:jakarta.activation:1.2.2',
+            'com.trendyol:Jdempotent-spring-boot-redis-starter:1.1.1'
             )
     implementation('org.apache.commons:commons-email') {
         exclude group: 'javax.activation'

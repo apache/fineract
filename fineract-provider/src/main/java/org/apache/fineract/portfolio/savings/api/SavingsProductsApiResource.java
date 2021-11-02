@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import com.trendyol.jdempotent.core.annotation.IdempotentHeaderKey;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -139,8 +140,10 @@ public class SavingsProductsApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsResponse.class))) })
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
+    @IdempotentHeaderKey(uuid="x-idempotency-key", ttl=30, ttlTimeUnit=TimeUnit.SECONDS)
+    public String create(@HeaderParam("x-idempotency-key") String xIdempotencyKeyHeader,
+                    @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
