@@ -69,6 +69,8 @@ dependencies {
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.0',
             'com.squareup.retrofit2:converter-gson',
+            'com.sun.activation:jakarta.activation:1.2.2',
+            'com.trendyol:Jdempotent-spring-boot-redis-starter:1.0.10'
             )
 
     implementation('org.springframework.boot:spring-boot-starter-jersey') {
