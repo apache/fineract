@@ -41,7 +41,7 @@ services:
     healthcheck:
       test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
       timeout: 10s
-      retries: 10  
+      retries: 10
     ports:
       - 8443:8443
     depends_on:
@@ -70,7 +70,7 @@ services:
     ports:
       - 9090:80
     depends_on:
-      fineract-server:  
+      fineract-server:
         condition: service_healthy
 
 # https://issues.apache.org/jira/browse/FINERACT-762
