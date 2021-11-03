@@ -176,7 +176,7 @@ allprojects  {
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
             //Idempotency Library
-            dependency "com.trendyol:Jdempotent-spring-boot-redis-starter:1.0.9"
+            dependency "com.trendyol:Jdempotent-spring-boot-redis-starter:1.0.10"
 
             dependency ('org.flywaydb:flyway-core:7.15.0') {
                 // https://issues.apache.org/jira/browse/FINERACT-1172
@@ -416,8 +416,8 @@ configure(project.fineractJavaProjects) {
             "-Xlint:try",
             "-Xlint:varargs",
             "-Xlint:preview",
-            "-Xlint:static"
-            //,"-Werror"
+            "-Xlint:static",
+            "-Werror"
         ]
         // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 

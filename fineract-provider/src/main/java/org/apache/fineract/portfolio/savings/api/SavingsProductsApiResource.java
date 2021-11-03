@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import com.trendyol.jdempotent.core.annotation.IdempotentRequestPayload;
-import com.trendyol.jdempotent.core.annotation.IdempotentResource;
+import com.trendyol.jdempotent.core.annotation.JdempotentRequestPayload;
+import com.trendyol.jdempotent.core.annotation.JdempotentResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -143,8 +143,8 @@ public class SavingsProductsApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsResponse.class))) })
-    @IdempotentResource(ttl = 30, ttlTimeUnit = TimeUnit.SECONDS)
-    public String create(@IdempotentRequestPayload @HeaderParam("x-idempotency-key") String xIdempotencyKeyHeader,
+    @JdempotentResource(ttl = 30, ttlTimeUnit = TimeUnit.SECONDS)
+    public String create(@JdempotentRequestPayload @HeaderParam("x-idempotency-key") String xIdempotencyKeyHeader,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
