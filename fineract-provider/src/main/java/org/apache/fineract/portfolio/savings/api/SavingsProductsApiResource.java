@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import com.trendyol.jdempotent.core.annotation.IdempotentHeaderKey;
+import com.trendyol.jdempotent.core.annotation.IdempotentRequestPayload;
+import com.trendyol.jdempotent.core.annotation.IdempotentResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -32,9 +33,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -140,10 +143,10 @@ public class SavingsProductsApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsProductsApiResourceSwagger.PostSavingsProductsResponse.class))) })
-    @IdempotentHeaderKey(uuid="x-idempotency-key", ttl=30, ttlTimeUnit=TimeUnit.SECONDS)
-    public String create(@HeaderParam("x-idempotency-key") String xIdempotencyKeyHeader,
-                    @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-    
+    @IdempotentResource(ttl = 30, ttlTimeUnit = TimeUnit.SECONDS)
+    public String create(@IdempotentRequestPayload @HeaderParam("x-idempotency-key") String xIdempotencyKeyHeader,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
