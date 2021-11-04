@@ -102,4 +102,6 @@ public interface ConfigurationDomainService {
     String getAccountMappingForPaymentType();
 
     String getAccountMappingForCharge();
+
+    boolean isNextDayFixedDepositInterestTransferEnabledForPeriodEnd();
 }

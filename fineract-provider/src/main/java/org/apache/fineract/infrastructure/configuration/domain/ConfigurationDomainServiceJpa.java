@@ -393,4 +393,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return defaultValue;
     }
 
+    @Override
+    public boolean isNextDayFixedDepositInterestTransferEnabledForPeriodEnd() {
+        final String propertyName = "fixed-deposit-transfer-interest-next-day-for-period-end-posting";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
+
 }
