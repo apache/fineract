@@ -1,9 +1,10 @@
 name: Fineract Gradle build
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+  # We need 18.04 for this - the 20.04 image contains MySQL 8.0, and the GitHub Action to install 5.7 is not permitted in the Apache repo.
+    runs-on: ubuntu-18.04
     env:
         TZ: Asia/Kolkata
     steps:
@@ -25,11 +26,10 @@ jobs:
           distribution: 'zulu'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Set up MySQL 5.7
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql version: '5.7'
-          mysql root password: 'mysql'
+      - name: Start up MySQL 5.7
+        run: |
+          sudo /etc/init.d/mysql start
+          echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root -proot
       - name: Initialise databases
         run: |
             ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
