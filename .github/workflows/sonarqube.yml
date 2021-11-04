@@ -1,0 +1,32 @@
+name: Fineract Sonarqube
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    env:
+        TZ: Asia/Kolkata
+        SONAR_ORGANIZATION: apache
+        SONAR_HOST_URL: https://sonarcloud.io
+        SONAR_TOKEN: "Q2E9ijK+9+R6nkb9o2FQrKUiAozp0325mlGfM25rGV3mCRPyWR/lU8o48r2eaBEX8SEvMvXIO3XXD9SPyUX2+svLz0MOMdfZfNveg6jmcHNRjkzzBK0bMIIGbEH/YqJ+psl4nDmlDd6IK4685/1JSRUJLqeKKK2ulixm6PXcmwZWeKD6TjyXsW50zz3yYIOuROHzys/M6H05h1dZD3j6ztnRsjbr7SmqFEVWSRgEd/aAs+HZB9Fv1xN66csRoQUQKgzoBO9egAQcel65Av0Bf+pOQuzVDVyXNohZEYia02MCGlC6OFvtL7xIXGf/vo02RdnlN4Jnma6P37TaNrmpk2e+EGJaZHmL9cb98+Zc39uPb7qEZkMfDdKrW6QVRtScSuCJzpY58WRgTS0jLCxsDBAMfsrIvWbHntFZL9q5aEkFgecj0pg9u6WHxgA8cuPUY5QzHQo9fEUxNJHGJHQ2FkafLniqJp7DVbsyQHmEggaTrGGrketeYvCbSR1oOnBgImUwzjIV9/zOdd10Wzi8x9HsmzrGBPSBaO4fBxjC1LZwdyue2a2+oKvBqpAGcLpGaCRfHTh2yPXhZW4bw11rOmQxgtOQVBXhveciWAUQuVXIak+RZnu/zRvnul9sZ6bb1hEUPkpUypk+FDeLm8T7y2A++u/jBam2vLc0iff5xtA="
+    steps:
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Sonarqube
+        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION --info -x rat -x test -x spotbugsMain -x spotbugsTest -x spotbugsGenerated -x licenseMain -x licenseTest -x checkstyleMain -x checkstyleTest --info --stacktrace build sonarqube
