@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -80,6 +81,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private final GSIMRepositoy gsimRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
@@ -88,7 +90,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-            final GSIMRepositoy gsimRepository) {
+            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -100,6 +102,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.gsimRepository = gsimRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -371,12 +374,19 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     AccountTransferType.fromInt(accountTransferDTO.getTransferType()).isInterestTransfer(),
                     accountTransferDTO.isExceptionForBalanceCheck());
 
+            LocalDate transactionDate = accountTransferDTO.getTransactionDate();
+            if (configurationDomainService.isSavingsInterestPostingAtCurrentPeriodEnd()
+                    && configurationDomainService.isNextDayFixedDepositInterestTransferEnabledForPeriodEnd()
+                    && AccountTransferType.fromInt(accountTransferDTO.getTransferType()).isInterestTransfer()) {
+                transactionDate = transactionDate.plusDays(1);
+            }
+
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
-                    accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getFmt(), transactionDate, accountTransferDTO.getTransactionAmount(),
                     accountTransferDTO.getPaymentDetail(), transactionBooleanValues);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
-                    accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getFmt(), transactionDate, accountTransferDTO.getTransactionAmount(),
                     accountTransferDTO.getPaymentDetail(), isAccountTransfer, isRegularTransaction);
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(accountTransferDTO, fromSavingsAccount,

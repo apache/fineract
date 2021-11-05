@@ -89,8 +89,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 32 global configurations.
-        Assertions.assertEquals(32, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(32, actualGlobalConfigurations.size());
+        Assertions.assertEquals(33, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(33, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -379,6 +379,15 @@ public class GlobalConfigurationHelper {
         isAccountMappedForCharge.put("trapDoor", false);
         isAccountMappedForCharge.put("string_value", "Income");
         defaults.add(isAccountMappedForCharge);
+
+        HashMap<String, Object> isNextDayFixedDepositInterestTransferEnabledForPeriodEnd = new HashMap<>();
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("id", 37);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("name",
+                "fixed-deposit-transfer-interest-next-day-for-period-end-posting");
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("value", 0);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("enabled", false);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("trapDoor", false);
+        defaults.add(isNextDayFixedDepositInterestTransferEnabledForPeriodEnd);
 
         return defaults;
     }
