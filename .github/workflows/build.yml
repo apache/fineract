@@ -34,5 +34,9 @@ jobs:
         run: |
             ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
             ./gradlew --no-daemon -q createDB -PdbName=fineract_default
+      - name: Install additional software
+        run: |
+            sudo apt-get update
+            sudo apt-get install ghostscript -y
       - name: Build & Test
         run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc
