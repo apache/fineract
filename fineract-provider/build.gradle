@@ -100,44 +100,26 @@ configurations {
 }
 
 apply from: 'dependencies.gradle'
-/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
- // Pick up dependencies based on the environment, defaults to production
- if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
- apply from:  'dev-dependencies.gradle'
- }  else {
- apply from: 'dependencies.gradle'
- }
- */
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
+
+def activeProfile
+
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/oauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/oauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
-}  else {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/basicauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/basicauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
+    activeProfile = 'oauth'
+} else {
+    activeProfile = 'basicauth'
+}
+
+if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
+    activeProfile = activeProfile + ',twofactor'
+}
+
+copy {
+    from file('src/main/resources/application.properties.template')
+    into file('src/main/resources')
+    rename { String filename -> return 'application.properties' }
+    filter(ReplaceTokens, tokens: [ACTIVE_PROFILE: activeProfile])
 }
 
 // Configuration for the modernizer plugin

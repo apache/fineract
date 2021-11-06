@@ -18,6 +18,7 @@
 #
 
 spring.profiles.default=basicauth
+spring.profiles.active=@ACTIVE_PROFILE@
 management.health.jms.enabled=false
 
 # FINERACT 1296
