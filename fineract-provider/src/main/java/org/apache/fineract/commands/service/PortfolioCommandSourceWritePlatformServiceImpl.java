@@ -110,7 +110,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 if (numberOfRetries >= maxNumberOfRetries) {
                     LOG.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
                             command.json(), numberOfRetries);
-                    throw (exception);
+                    throw exception;
                 }
                 /***
                  * Else sleep for a random time (between 1 to 10 seconds) and continue
@@ -120,7 +120,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;
                 } catch (InterruptedException e) {
-                    throw (exception);
+                    throw exception;
                 }
             } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 numberOfRetries = maxNumberOfRetries + 1;

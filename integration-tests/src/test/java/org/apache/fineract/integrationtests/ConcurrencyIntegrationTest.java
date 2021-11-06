@@ -182,7 +182,7 @@ public class ConcurrencyIntegrationTest {
                 LOG.info("Found an exception {}", e.getMessage());
                 LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}", repaymentDate, repaymentAmount,
                         loanId);
-                throw (e);
+                throw e;
             }
             LOG.info("Details of passed concurrent transaction, details (date, amount, loanId) are {},{},{}", repaymentDate,
                     repaymentAmount, loanId);
