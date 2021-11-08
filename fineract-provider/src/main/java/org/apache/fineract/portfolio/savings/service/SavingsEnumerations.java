@@ -708,7 +708,7 @@ public final class SavingsEnumerations {
         return optionDatas;
     }
 
-    public static EnumOptionData depositType(final int id) {
+    public static EnumOptionData depositType(final Integer id) {
         return depositType(DepositAccountType.fromInt(id));
     }
 
