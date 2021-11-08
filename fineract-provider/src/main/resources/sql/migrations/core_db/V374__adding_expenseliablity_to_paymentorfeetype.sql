@@ -1,4 +1,4 @@
---
+    --
 -- Licensed to the Apache Software Foundation (ASF) under one
 -- or more contributor license agreements. See the NOTICE file
 -- distributed with this work for additional information
@@ -20,6 +20,6 @@
 ALTER TABLE `c_configuration`
     ADD COLUMN `string_value` VARCHAR(100) NULL DEFAULT NULL AFTER `date_value`;
 
-insert into c_configuration(name, string_value, enabled, description) values('account-mapping-for-payment-type', 'Asset', 0, 'Asset: default for asset, Use comma seperated values for Liability, Asset and Expense accounts');
+insert into c_configuration(name, string_value, enabled, description) values('account-mapping-for-payment-type', 'Asset', 1, 'Asset: default for asset, Use comma seperated values for Liability, Asset and Expense accounts');
 
-insert into c_configuration(name, string_value, enabled, description) values('account-mapping-for-charge', 'Income', 0, 'Income: default for Income, Use comma seperated values for Income, Liability and Expense accounts');
+insert into c_configuration(name, string_value, enabled, description) values('account-mapping-for-charge', 'Income', 1, 'Income: default for Income, Use comma seperated values for Income, Liability and Expense accounts');
