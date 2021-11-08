@@ -517,6 +517,10 @@ public class ShareAccount extends AbstractPersistableCustom {
         this.totalSharesPending = shares;
     }
 
+    public void setTotalSharesApproved(final Long shares) {
+        this.totalSharesApproved += shares;
+    }
+
     public ShareAccountTransaction getShareAccountTransaction(final ShareAccountTransaction transaction) {
         ShareAccountTransaction returnTrans = null;
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {

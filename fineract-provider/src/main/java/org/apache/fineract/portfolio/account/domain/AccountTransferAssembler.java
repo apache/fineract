@@ -31,6 +31,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -92,6 +95,24 @@ public class AccountTransferAssembler {
 
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
                 deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
+    public AccountTransferDetails assembleSavingsToShareTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
+            final ShareAccount toShareAccount, final SavingsAccountTransaction deposit,
+            final ShareAccountTransaction shareAccountTransaction) {
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
+        final Money transactionMonetaryAmount = Money.of(toShareAccount.getCurrency(), transactionAmount);
+        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
+
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToShareTransfer(command,
+                fromSavingsAccount, toShareAccount);
+        shareAccountTransaction.setStatus(PurchasedSharesStatusType.APPROVED.getValue());
+        shareAccountTransaction.setType(PurchasedSharesStatusType.PURCHASED.getValue());
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToShare(accountTransferDetails, deposit,
+                shareAccountTransaction, transactionDate, transactionMonetaryAmount, description);
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
