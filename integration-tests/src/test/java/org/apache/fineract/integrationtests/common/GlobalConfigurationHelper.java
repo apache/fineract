@@ -366,7 +366,7 @@ public class GlobalConfigurationHelper {
         isAccountMappedForPayment.put("id", 35);
         isAccountMappedForPayment.put("name", "account-mapping-for-payment-type");
         isAccountMappedForPayment.put("value", 0);
-        isAccountMappedForPayment.put("enabled", false);
+        isAccountMappedForPayment.put("enabled", true);
         isAccountMappedForPayment.put("trapDoor", false);
         isAccountMappedForPayment.put("string_value", "Asset");
         defaults.add(isAccountMappedForPayment);
@@ -375,7 +375,7 @@ public class GlobalConfigurationHelper {
         isAccountMappedForCharge.put("id", 36);
         isAccountMappedForCharge.put("name", "account-mapping-for-charge");
         isAccountMappedForCharge.put("value", 0);
-        isAccountMappedForCharge.put("enabled", false);
+        isAccountMappedForCharge.put("enabled", true);
         isAccountMappedForCharge.put("trapDoor", false);
         isAccountMappedForCharge.put("string_value", "Income");
         defaults.add(isAccountMappedForCharge);
