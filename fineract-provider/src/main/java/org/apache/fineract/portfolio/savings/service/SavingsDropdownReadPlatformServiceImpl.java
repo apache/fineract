@@ -56,10 +56,6 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
     public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
         final List<EnumOptionData> allowedOptions = Arrays.asList(
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY),
-                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY),
-                // //
-                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY),
-                // //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY),
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY),
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL),
@@ -75,10 +71,12 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
     @Override
     public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
         final List<EnumOptionData> allowedOptions = Arrays.asList(
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY),
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY),
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.BIANNUAL),
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL));
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.DAILY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.BIANNUAL), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL) //
+        );
 
         return allowedOptions;
     }
