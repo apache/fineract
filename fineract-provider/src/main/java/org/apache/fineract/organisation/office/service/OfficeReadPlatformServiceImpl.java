@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -34,6 +35,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.data.OfficeTransactionData;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,16 +53,18 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     private final PlatformSecurityContext context;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ColumnValidator columnValidator;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private static final String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
     @Autowired
     public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
             final CurrencyReadPlatformService currencyReadPlatformService, final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator, final OfficeRepositoryWrapper officeRepositoryWrapper) {
         this.context = context;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.columnValidator = columnValidator;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
     }
 
     private static final class OfficeMapper implements RowMapper<OfficeData> {
@@ -185,6 +190,12 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final String sql = "select " + rm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
+    }
+
+    @Override
+    public List<Office> retrieveAllOfficesForInterestPostingOnNode(final Long parentId) {
+        this.context.authenticatedUser();
+        return this.officeRepositoryWrapper.findAllOfficesWithParentId(parentId);
     }
 
     @Override

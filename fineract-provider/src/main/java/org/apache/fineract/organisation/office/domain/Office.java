@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
+import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "m_office", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_org"),
@@ -68,6 +69,9 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     @Column(name = "external_id", length = 100)
     private String externalId;
+
+    @OneToMany(mappedBy = "office", fetch = FetchType.LAZY)
+    private List<Client> clients;
 
     public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
         return new Office(null, name, openingDate, externalId);
@@ -105,6 +109,10 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         } else {
             this.externalId = null;
         }
+    }
+
+    public List<Client> getClients() {
+        return this.clients;
     }
 
     private void addChild(final Office office) {
@@ -191,6 +199,11 @@ public class Office extends AbstractPersistableCustom implements Serializable {
         return getId().equals(id);
     }
 
+    public List<Office> getChildren() {
+        this.children.size();
+        return this.children;
+    }
+
     public void generateHierarchy() {
 
         if (this.parent != null) {
@@ -252,5 +265,9 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     public void loadLazyCollections() {
         this.children.size();
+    }
+
+    public void loadClients() {
+        this.clients.size();
     }
 }

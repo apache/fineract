@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.office.domain;
 
+import java.util.List;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,5 +61,10 @@ public class OfficeRepositoryWrapper {
 
     public void delete(final Office entity) {
         this.repository.delete(entity);
+    }
+
+    public List<Office> findAllOfficesWithParentId(final Long parentId) {
+        final Office office = findOfficeHierarchy(parentId);
+        return office.getChildren();
     }
 }

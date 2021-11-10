@@ -47,4 +47,5 @@ public interface SchedularWritePlatformService {
 
     boolean processJobDetailForExecution(String jobKey, String triggerType);
 
+    ScheduledJobDetail retrieveJobByNameAndNodeId(String nodeId, String jobName);
 }

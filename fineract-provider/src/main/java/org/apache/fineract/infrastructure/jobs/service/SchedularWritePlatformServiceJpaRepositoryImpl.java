@@ -63,6 +63,11 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
+    public ScheduledJobDetail retrieveJobByNameAndNodeId(final String nodeId, final String jobName) {
+        return this.scheduledJobDetailsRepository.findByJobNameAndNodeId(jobName, Integer.parseInt(nodeId));
+    }
+
+    @Override
     public ScheduledJobDetail findByJobKey(final String jobKey) {
         return this.scheduledJobDetailsRepository.findByJobKey(jobKey);
     }

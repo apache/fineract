@@ -89,8 +89,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 32 global configurations.
-        Assertions.assertEquals(33, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(33, actualGlobalConfigurations.size());
+        Assertions.assertEquals(34, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(34, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -388,6 +388,14 @@ public class GlobalConfigurationHelper {
         isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("enabled", false);
         isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("trapDoor", false);
         defaults.add(isNextDayFixedDepositInterestTransferEnabledForPeriodEnd);
+
+        HashMap<String, Object> isInterestPostingJobSplitting = new HashMap<>();
+        isInterestPostingJobSplitting.put("id", 38);
+        isInterestPostingJobSplitting.put("name", "allow-split-interest-posting-on-savings");
+        isInterestPostingJobSplitting.put("value", 0);
+        isInterestPostingJobSplitting.put("enabled", false);
+        isInterestPostingJobSplitting.put("trapDoor", false);
+        defaults.add(isInterestPostingJobSplitting);
 
         return defaults;
     }

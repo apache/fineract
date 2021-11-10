@@ -28,4 +28,7 @@ public interface JobParameterRepository extends JpaRepository<JobParameter, Long
 
     @Query("select jobParameter from JobParameter jobParameter where jobParameter.jobId=:jobId")
     List<JobParameter> findJobParametersByJobId(@Param("jobId") Long jobId);
+
+    @Query("select jobParameter from JobParameter jobParameter where jobParameter.jobId=:jobId and jobParameter.parameterName=:paramName")
+    JobParameter findByJobParameterByJobIdAndParameterName(@Param("jobId") Long jobId, @Param("paramName") String paramName);
 }

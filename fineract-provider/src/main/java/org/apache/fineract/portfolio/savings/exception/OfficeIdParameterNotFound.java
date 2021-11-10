@@ -16,30 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.scheduledjobs.service;
+package org.apache.fineract.portfolio.savings.exception;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ScheduledJobRunnerService {
+public class OfficeIdParameterNotFound extends AbstractPlatformDomainRuleException {
 
-    void updateLoanSummaryDetails();
-
-    void updateLoanPaidInAdvance();
-
-    void applyAnnualFeeForSavings();
-
-    void applyDueChargesForSavings() throws JobExecutionException;
-
-    void updateNPA();
-
-    void updateMaturityDetailsOfDepositAccounts();
-
-    void generateRDSchedule();
-
-    void postDividends() throws JobExecutionException;
-
-    void updateTrialBalanceDetails() throws JobExecutionException;
-
-    void executeMissMatchedJobs() throws JobExecutionException;
-
+    public OfficeIdParameterNotFound(final Long jobId) {
+        super("error.msg.jobParameter.officeId.not.found", "OfficeId for job `" + jobId + "`" + "` is not found.", new Object[] { jobId });
+    }
 }
