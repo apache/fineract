@@ -364,6 +364,10 @@ public final class SavingsEnumerations {
         switch (type) {
             case INVALID:
             break;
+            case DAILY:
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.DAILY.getValue().longValue(),
+                        codePrefix + SavingsPostingInterestPeriodType.DAILY.getCode(), "Daily");
+            break;
             case MONTHLY:
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.MONTHLY.getValue().longValue(),
                         codePrefix + SavingsPostingInterestPeriodType.MONTHLY.getCode(), "Monthly");

@@ -118,6 +118,10 @@ public final class SavingsHelper {
         switch (interestPostingPeriodType) {
             case INVALID:
             break;
+            case DAILY:
+                // produce period end date on current day
+                periodEndDate = periodStartDate;
+            break;
             case MONTHLY:
                 // produce period end date on last day of current month
                 periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());

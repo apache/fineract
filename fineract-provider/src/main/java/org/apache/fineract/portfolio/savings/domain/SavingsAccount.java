@@ -2813,6 +2813,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void validateInterestPostingAndCompoundingPeriodTypes(final DataValidatorBuilder baseDataValidator) {
         Map<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>> postingtoCompoundMap = new HashMap<>();
+
+        postingtoCompoundMap.put(SavingsPostingInterestPeriodType.DAILY,
+                Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY }));
+
         postingtoCompoundMap.put(SavingsPostingInterestPeriodType.MONTHLY, Arrays.asList(new SavingsCompoundingInterestPeriodType[] {
                 SavingsCompoundingInterestPeriodType.DAILY, SavingsCompoundingInterestPeriodType.MONTHLY }));
 
