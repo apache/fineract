@@ -70,6 +70,8 @@ final class SavingsProductsApiResourceSwagger {
         @Schema(example = "1")
         public Integer accountingRule;
         public Set<PostSavingsCharges> charges;
+        @Schema(example = "accountMappingForPayment")
+        public String accountMappingForPayment;
     }
 
     @Schema(description = "PostSavingsProductsResponse")
@@ -148,7 +150,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savings.interest.period.savingsCompoundingInterestPeriodType.daily")
             public String code;
             @Schema(example = "Daily")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsInterestPostingPeriodType {
@@ -160,7 +162,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly")
             public String code;
             @Schema(example = "Monthly")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsInterestCalculationType {
@@ -172,7 +174,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savingsInterestCalculationType.dailybalance")
             public String code;
             @Schema(example = "Daily Balance")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsInterestCalculationDaysInYearType {
@@ -184,7 +186,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savingsInterestCalculationDaysInYearType.days365")
             public String code;
             @Schema(example = "365 Days")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsAccountingRule {
@@ -196,7 +198,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "accountingRuleType.cash")
             public String code;
             @Schema(example = "CASH BASED")
-            public String description;
+            public String value;
         }
 
         @Schema(example = "1")
@@ -434,7 +436,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "accountingRuleType.none")
             public String code;
             @Schema(example = "NONE")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsLockinPeriodFrequencyTypeOptions {
@@ -446,7 +448,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savings.lockin.savingsPeriodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsWithdrawalFeeTypeOptions {
@@ -458,7 +460,7 @@ final class SavingsProductsApiResourceSwagger {
             @Schema(example = "savingsWithdrawalFeesType.flat")
             public String code;
             @Schema(example = "Flat")
-            public String description;
+            public String value;
         }
 
         static final class GetSavingsProductsPaymentTypeOptions {
@@ -471,6 +473,10 @@ final class SavingsProductsApiResourceSwagger {
             public String name;
             @Schema(example = "0")
             public Integer position;
+            @Schema(example = "Money Transfer")
+            public String description;
+            @Schema(example = "true")
+            public Boolean isCashPayment;
         }
 
         static final class GetSavingsProductsAccountingMappingOptions {
@@ -719,8 +725,10 @@ final class SavingsProductsApiResourceSwagger {
         public Set<GetSavingsProductsWithdrawalFeeTypeOptions> withdrawalFeeTypeOptions;
         public Set<GetSavingsProductsPaymentTypeOptions> paymentTypeOptions;
         public Set<GetSavingsProductsTemplateAccountingRule> accountingRuleOptions;
-        public Set<GetSavingsProductsAccountingMappingOptions> accountingMappingOptions;
+        public GetSavingsProductsAccountingMappingOptions accountingMappingOptions;
         public Set<GetSavingsProductsChargeOptions> chargeOptions;
+        public GetSavingsProductsResponse.GetSavingsCurrency accountMapping;
+
     }
 
     @Schema(description = "DeleteSavingsProductsProductIdResponse")

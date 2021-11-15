@@ -42,6 +42,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     skipValidateSpec = true
     inputSpec = "$swaggerFile"
     outputDir = "$buildDir/generated/java".toString()
+    templateDir = "$rootDir/fineract-client/src/main/resources/java/template/"
     groupId = 'org.apache.fineract'
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'
@@ -60,6 +61,11 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
         ':fineract-provider:compileJava'
     ]
     finalizedBy = [licenseFormat]
+    // uncomment below block to automatically copy the custom files in generated SDK
+    /*copy {
+     from file('src/main/java')
+     into file("$buildDir/generated/java/src/main/java")
+     }*/
 }
 
 task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -112,10 +118,13 @@ tasks.withType(JavaCompile) {
 }
 
 configurations {
-    generatedCompile.extendsFrom implementation
-    generatedRuntime.extendsFrom runtime
+    generatedCompileClasspath.extendsFrom implementation
+    generatedRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
 test {
     useJUnitPlatform()
 }
+
+// Gradle 7.x asks for explicit dependencies between tasks
+licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileGeneratedJava, compileTestJava, rat, test

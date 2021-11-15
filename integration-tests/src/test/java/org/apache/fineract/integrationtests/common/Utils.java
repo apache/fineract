@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -30,6 +31,7 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,7 +39,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Random;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -57,6 +58,7 @@ public final class Utils {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+    private static final SecureRandom random = new SecureRandom();
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -196,12 +198,13 @@ public final class Utils {
         return reformattedStr;
     }
 
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
         final int lengthOfSource = sourceSetString.length();
-        final Random rnd = new Random();
         final StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            sb.append(sourceSetString.charAt(rnd.nextInt(lengthOfSource)));
+            sb.append(sourceSetString.charAt(random.nextInt(lengthOfSource)));
         }
         return prefix + sb.toString();
     }
@@ -214,10 +217,12 @@ public final class Utils {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static Long randomNumberGenerator(final int expectedLength) {
         final String source = "1234567890";
         final int lengthofSource = source.length();
-        final Random random = new Random();
+
         StringBuilder stringBuilder = new StringBuilder(expectedLength);
         for (int i = 0; i < expectedLength; i++) {
             stringBuilder.append(source.charAt(random.nextInt(lengthofSource)));

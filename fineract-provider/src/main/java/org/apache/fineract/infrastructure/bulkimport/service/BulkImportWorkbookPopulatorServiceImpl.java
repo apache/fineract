@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformSer
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.populator.CenterSheetPopulator;
+import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ExtrasSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.FixedDepositProductSheetPopulator;
@@ -195,7 +196,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.OFFICES.toString())) {
                 populator = populateOfficeWorkbook();
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CHART_OF_ACCOUNTS.toString())) {
-                populator = populateChartOfAccountsWorkbook();
+                populator = populateChartOfAccountsWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.STAFF.toString())) {
                 populator = populateStaffWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.SHARE_ACCOUNTS.toString())) {
@@ -275,6 +276,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             offices.add(this.officeReadPlatformService.retrieveOffice(officeId));
         }
         return offices;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ChargeData> fetchCharges() {
+        return (List) this.chargeReadPlatformService.retrieveAllCharges();
     }
 
     @SuppressWarnings("unchecked")
@@ -376,13 +382,15 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<StaffData> staff = fetchStaff(staffId);
         List<ClientData> clients = fetchClients(officeId);
         List<GroupGeneralData> groups = fetchGroups(officeId);
+        List<ChargeData> charges = fetchCharges();
         List<LoanProductData> loanproducts = fetchLoanProducts();
         List<FundData> funds = fetchFunds();
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
         return new LoanWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
                 new GroupSheetPopulator(groups, offices), new PersonnelSheetPopulator(staff, offices),
-                new LoanProductSheetPopulator(loanproducts), new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+                new LoanProductSheetPopulator(loanproducts), new ChargeSheetPopulator(charges),
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
     }
 
     private List<CurrencyData> fetchCurrencies() {
@@ -495,10 +503,12 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return new OfficeWorkbookPopulator(offices);
     }
 
-    private WorkbookPopulator populateChartOfAccountsWorkbook() {
+    private WorkbookPopulator populateChartOfAccountsWorkbook(Long officeId) {
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.GL_ACCOUNT_ENTITY_TYPE);
         List<GLAccountData> glAccounts = fetchGLAccounts();
-        return new ChartOfAccountsWorkbook(glAccounts);
+        List<OfficeData> offices = fetchOffices(null);
+        return new ChartOfAccountsWorkbook(glAccounts, offices,
+                (List<CurrencyData>) this.currencyReadPlatformService.retrieveAllowedCurrencies());
     }
 
     private WorkbookPopulator populateStaffWorkbook(Long officeId) {

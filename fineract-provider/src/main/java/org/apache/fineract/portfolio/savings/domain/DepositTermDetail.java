@@ -219,7 +219,7 @@ public class DepositTermDetail {
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
             break;
             case YEARS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodStartDate));
+                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
             break;
             case INVALID:
                 actualDepositPeriod = 0;// default value

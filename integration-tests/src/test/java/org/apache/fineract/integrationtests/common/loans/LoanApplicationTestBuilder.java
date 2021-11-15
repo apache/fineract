@@ -67,6 +67,7 @@ public class LoanApplicationTestBuilder {
     private List<HashMap> disbursementData = null;
     @SuppressWarnings("rawtypes")
     private List<HashMap> charges = new ArrayList<>();
+    private List<HashMap> collaterals = new ArrayList<>();
     private String repaymentsStartingFromDate = null;
     private String isParentAccount = null;
     private String totalLoan = "0";
@@ -75,6 +76,7 @@ public class LoanApplicationTestBuilder {
     private boolean syncDisbursementWithMeeting = false;
     private List<HashMap<String, Object>> datatables = null;
     private List<Map<String, Object>> approvalFormData = null;
+    private String fixedPrincipalPercentagePerInstallment;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -140,18 +142,22 @@ public class LoanApplicationTestBuilder {
         map.put("repaymentFrequencyType", this.repaymentFrequencyType);
         map.put("interestRatePerPeriod", this.interestRate);
         map.put("amortizationType", this.amortizationType);
+        map.put("fixedPrincipalPercentagePerInstallment", fixedPrincipalPercentagePerInstallment);
         map.put("interestType", this.interestType);
         map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
         map.put("transactionProcessingStrategyId", this.transactionProcessingID);
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        map.put("collateral", this.collaterals);
+
         if (repaymentsStartingFromDate != null) {
             map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
         }
         if (charges != null) {
             map.put("charges", charges);
         }
+
         if (savingsID != null) {
             map.put("linkAccountId", savingsID);
         }
@@ -288,6 +294,11 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
+    public LoanApplicationTestBuilder withCollaterals(final List<HashMap> collaterals) {
+        this.collaterals = collaterals;
+        return this;
+    }
+
     public LoanApplicationTestBuilder withLoanType(final String loanType) {
         this.loanType = loanType;
         return this;
@@ -364,6 +375,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withDatatables(final List<HashMap<String, Object>> datatables) {
         this.datatables = datatables;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withPrinciplePercentagePerInstallment(String fixedPrincipalPercentagePerInstallment) {
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         return this;
     }
 }

@@ -41,6 +41,12 @@ public class ScheduledJobDetail extends AbstractPersistableCustom {
     @Column(name = "display_name")
     private String jobDisplayName;
 
+    @Column(name = "node_id")
+    private Integer nodeId;
+
+    @Column(name = "is_mismatched_job")
+    private boolean isMismatchedJob;
+
     @Column(name = "cron_expression")
     private String cronExpression;
 
@@ -135,6 +141,14 @@ public class ScheduledJobDetail extends AbstractPersistableCustom {
         this.jobKey = jobKey;
     }
 
+    public boolean getIsMismatchedJob() {
+        return this.isMismatchedJob;
+    }
+
+    public void setIsMismatchedJob(final boolean isMismatchedJob) {
+        this.isMismatchedJob = isMismatchedJob;
+    }
+
     public void updateErrorLog(final String errorLog) {
         this.errorLog = errorLog;
     }
@@ -145,6 +159,10 @@ public class ScheduledJobDetail extends AbstractPersistableCustom {
 
     public void updateCurrentlyRunningStatus(final boolean currentlyRunning) {
         this.currentlyRunning = currentlyRunning;
+    }
+
+    public Integer getNodeId() {
+        return this.nodeId;
     }
 
     public Map<String, Object> update(final JsonCommand command) {

@@ -1,0 +1,42 @@
+name: Fineract Gradle build
+on: [push, pull_request]
+
+jobs:
+  build:
+  # We need 18.04 for this - the 20.04 image contains MySQL 8.0, and the GitHub Action to install 5.7 is not permitted in the Apache repo.
+    runs-on: ubuntu-18.04
+    env:
+        TZ: Asia/Kolkata
+    steps:
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Start up MySQL 5.7
+        run: |
+          sudo /etc/init.d/mysql start
+          echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root -proot
+      - name: Initialise databases
+        run: |
+            ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
+            ./gradlew --no-daemon -q createDB -PdbName=fineract_default
+      - name: Install additional software
+        run: |
+            sudo apt-get update
+            sudo apt-get install ghostscript -y
+      - name: Build & Test
+        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc

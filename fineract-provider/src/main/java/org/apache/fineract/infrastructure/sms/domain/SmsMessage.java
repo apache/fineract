@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.sms.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class SmsMessage extends AbstractPersistableCustom {
         this.message = message;
         this.smsCampaign = smsCampaign;
         this.submittedOnDate = Date
-                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.isNotification = isNotification;
     }
 

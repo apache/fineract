@@ -20,17 +20,17 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +39,7 @@ public class ClientTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
+    private static final SecureRandom rand = new SecureRandom();
 
     @BeforeEach
     public void setup() {
@@ -53,7 +54,8 @@ public class ClientTest {
     public void testClientStatus() {
 
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -85,7 +87,8 @@ public class ClientTest {
     public void testClientAsPersonStatus() {
 
         final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -117,7 +120,8 @@ public class ClientTest {
     public void testClientAsEntityStatus() {
 
         final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        // Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -147,9 +151,10 @@ public class ClientTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void testPendingOnlyClientRequest() {
 
-        Random rand = new Random();
         // Add a few clients to the server and activate a random amount of them
         for (int i = 0; i < 15; i++) {
             final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);

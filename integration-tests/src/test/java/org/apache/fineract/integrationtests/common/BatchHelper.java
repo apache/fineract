@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public final class BatchHelper {
     private static final Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     private BatchHelper() {
 
@@ -62,7 +64,7 @@ public final class BatchHelper {
     /**
      * Returns a Map from Json String
      *
-     * @param jsonBody
+     * @param
      * @return Map
      */
     public static Map generateMapFromJsonString(final String jsonString) {
@@ -112,7 +114,7 @@ public final class BatchHelper {
     /**
      * Returns a BatchResponse based on the given BatchRequest, by posting the request to the server.
      *
-     * @param BatchRequest
+     * @param
      * @return {@code List<BatchResponse>}
      */
     public static List<BatchResponse> postWithSingleRequest(final RequestSpecification requestSpec,
@@ -136,7 +138,7 @@ public final class BatchHelper {
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy} Request as
      * one of the request in Batch.
      *
-     * @param reqId
+     * @param
      * @param externalId
      * @return BatchRequest
      */
@@ -149,7 +151,7 @@ public final class BatchHelper {
 
         final String extId;
         if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * Math.random())) + String.valueOf((10000 * Math.random()));
+            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
         } else {
             extId = externalId;
         }
@@ -166,7 +168,7 @@ public final class BatchHelper {
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy} Request as
      * one of the request in Batch.
      *
-     * @param reqId
+     * @param
      * @param externalId
      * @return BatchRequest
      */
@@ -179,7 +181,7 @@ public final class BatchHelper {
 
         final String extId;
         if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * Math.random())) + String.valueOf((10000 * Math.random()));
+            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
         } else {
             extId = externalId;
         }
@@ -197,8 +199,8 @@ public final class BatchHelper {
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy} Request with
      * given requestId and reference.
      *
-     * @param reqId
-     * @param clientId
+     * @param
+     * @param
      * @return BatchRequest
      */
     public static BatchRequest updateClientRequest(final Long requestId, final Long reference) {
@@ -223,7 +225,8 @@ public final class BatchHelper {
      * @param productId
      * @return BatchRequest
      */
-    public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId) {
+    public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId,
+            final Integer clientCollateralId) {
 
         final BatchRequest br = new BatchRequest();
 
@@ -238,6 +241,7 @@ public final class BatchHelper {
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
                 + "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"10 Jun 2013\","
+                + "\"collateral\": [{\"clientCollateralId\": \"" + clientCollateralId.toString() + "\", \"quantity\": \"1\"}],"
                 + "\"submittedOnDate\": \"10 Jun 2013\"}";
         br.setBody(body);
 

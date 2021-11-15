@@ -88,9 +88,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 30 global configurations.
-        Assertions.assertEquals(30, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(30, actualGlobalConfigurations.size());
+        // There are currently 32 global configurations.
+        Assertions.assertEquals(33, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(33, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -361,6 +361,33 @@ public class GlobalConfigurationHelper {
         isInterestAppropriationEnabled.put("enabled", false);
         isInterestAppropriationEnabled.put("trapDoor", false);
         defaults.add(isInterestAppropriationEnabled);
+
+        HashMap<String, Object> isAccountMappedForPayment = new HashMap<>();
+        isAccountMappedForPayment.put("id", 35);
+        isAccountMappedForPayment.put("name", "account-mapping-for-payment-type");
+        isAccountMappedForPayment.put("value", 0);
+        isAccountMappedForPayment.put("enabled", true);
+        isAccountMappedForPayment.put("trapDoor", false);
+        isAccountMappedForPayment.put("string_value", "Asset");
+        defaults.add(isAccountMappedForPayment);
+
+        HashMap<String, Object> isAccountMappedForCharge = new HashMap<>();
+        isAccountMappedForCharge.put("id", 36);
+        isAccountMappedForCharge.put("name", "account-mapping-for-charge");
+        isAccountMappedForCharge.put("value", 0);
+        isAccountMappedForCharge.put("enabled", true);
+        isAccountMappedForCharge.put("trapDoor", false);
+        isAccountMappedForCharge.put("string_value", "Income");
+        defaults.add(isAccountMappedForCharge);
+
+        HashMap<String, Object> isNextDayFixedDepositInterestTransferEnabledForPeriodEnd = new HashMap<>();
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("id", 37);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("name",
+                "fixed-deposit-transfer-interest-next-day-for-period-end-posting");
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("value", 0);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("enabled", false);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("trapDoor", false);
+        defaults.add(isNextDayFixedDepositInterestTransferEnabledForPeriodEnd);
 
         return defaults;
     }

@@ -91,11 +91,59 @@ public class JournalEntryData {
     private String receiptNumber;
     private String bankNumber;
 
+    // for opening bal bulk import
+    public JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
+            List<CreditDebit> debits, String locale, String dateFormat) {
+        this.officeId = officeId;
+        this.dateFormat = dateFormat;
+        this.locale = locale;
+        this.transactionDate = transactionDate;
+        this.currencyCode = currencyCode;
+        this.credits = credits;
+        this.debits = debits;
+        this.rowIndex = null;
+        this.paymentTypeId = null;
+        this.accountNumber = null;
+        this.checkNumber = null;
+        this.routingCode = null;
+        this.receiptNumber = null;
+        this.bankNumber = null;
+        this.comments = null;
+        this.id = null;
+        this.officeName = null;
+        this.glAccountName = null;
+        this.glAccountId = null;
+        this.glAccountCode = null;
+        this.glAccountType = null;
+        this.entryType = null;
+        this.amount = null;
+        this.currency = null;
+        this.transactionId = null;
+        this.manualEntry = null;
+        this.entityType = null;
+        this.entityId = null;
+        this.createdByUserId = null;
+        this.createdDate = null;
+        this.createdByUserName = null;
+        this.reversed = null;
+        this.referenceNumber = null;
+        this.officeRunningBalance = null;
+        this.organizationRunningBalance = null;
+        this.runningBalanceComputed = null;
+        this.transactionDetails = null;
+
+    }
+
     public static JournalEntryData importInstance(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId,
             Integer rowIndex, List<CreditDebit> credits, List<CreditDebit> debits, String accountNumber, String checkNumber,
             String routingCode, String receiptNumber, String bankNumber, String comments, String locale, String dateFormat) {
         return new JournalEntryData(officeId, transactionDate, currencyCode, paymentTypeId, rowIndex, credits, debits, accountNumber,
                 checkNumber, routingCode, receiptNumber, bankNumber, comments, locale, dateFormat);
+    }
+
+    public static JournalEntryData importInstance1(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
+            List<CreditDebit> debits, String locale, String dateFormat) {
+        return new JournalEntryData(officeId, transactionDate, currencyCode, credits, debits, locale, dateFormat);
     }
 
     private JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId, Integer rowIndex,

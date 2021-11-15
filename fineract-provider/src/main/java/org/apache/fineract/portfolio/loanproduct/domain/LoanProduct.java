@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -187,6 +188,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
+    @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
+    private BigDecimal fixedPrincipalPercentagePerInstallment;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -345,6 +349,9 @@ public class LoanProduct extends AbstractPersistableCustom {
                 ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
                 : false;
 
+        BigDecimal fixedPrincipalPercentagePerInstallment = command
+                .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -359,7 +366,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates);
+                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment);
 
     }
 
@@ -594,7 +601,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            final List<Rate> rates) {
+            final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -642,11 +649,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.useBorrowerCycle = useBorrowerCycle;
 
         if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (closeDate != null) {
-            this.closeDate = Date.from(closeDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.closeDate = Date.from(closeDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         this.externalId = externalId;
@@ -672,6 +679,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
+        this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
 
         if (rates != null) {
             this.rates = rates;
@@ -878,7 +886,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
             if (newValue != null) {
-                this.startDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.startDate = null;
             }
@@ -893,7 +901,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(closeDateParamName);
             if (newValue != null) {
-                this.closeDate = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.closeDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             } else {
                 this.closeDate = null;
             }
@@ -1090,6 +1098,14 @@ public class LoanProduct extends AbstractPersistableCustom {
             if (jsonArray != null) {
                 actualChanges.put(LoanProductConstants.RATES_PARAM_NAME, command.jsonFragment(LoanProductConstants.RATES_PARAM_NAME));
             }
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName,
+                this.fixedPrincipalPercentagePerInstallment)) {
+            BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
+            actualChanges.put(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, newValue);
+            this.fixedPrincipalPercentagePerInstallment = newValue;
         }
 
         return actualChanges;
@@ -1442,4 +1458,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.rates = rates;
     }
 
+    public BigDecimal getFixedPrincipalPercentagePerInstallment() {
+        return fixedPrincipalPercentagePerInstallment;
+    }
 }

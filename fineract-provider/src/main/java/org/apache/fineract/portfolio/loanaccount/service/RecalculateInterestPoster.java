@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 public class RecalculateInterestPoster implements Callable<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecalculateInterestPoster.class);
+    private static final SecureRandom random = new SecureRandom();
 
     private Collection<Long> loanIds;
     private LoanWritePlatformService loanWritePlatformService;
@@ -50,6 +52,8 @@ public class RecalculateInterestPoster implements Callable<Void> {
     }
 
     @Override
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Void call() throws JobExecutionException {
         Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
@@ -77,7 +81,6 @@ public class RecalculateInterestPoster implements Callable<Void> {
                         // Else sleep for a random time (between 1 to 10
                         // seconds) and continue
                         try {
-                            Random random = new Random();
                             int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;

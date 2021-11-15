@@ -81,8 +81,9 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.collateral.domain.LoanCollateral;
-import org.apache.fineract.portfolio.collateral.service.CollateralAssembler;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepository;
+import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -100,6 +101,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -165,7 +168,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final ClientRepositoryWrapper clientRepository;
     private final LoanProductRepository loanProductRepository;
     private final LoanChargeAssembler loanChargeAssembler;
-    private final CollateralAssembler loanCollateralAssembler;
+    private final LoanCollateralAssembler loanCollateralAssembler;
     private final AprCalculator aprCalculator;
     private final AccountNumberGenerator accountNumberGenerator;
     private final LoanSummaryWrapper loanSummaryWrapper;
@@ -194,6 +197,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
+    private final LoanCollateralManagementRepository loanCollateralManagementRepository;
+    private final ClientCollateralManagementRepository clientCollateralManagementRepository;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -201,7 +206,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
             final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer, final AprCalculator aprCalculator,
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final CollateralAssembler loanCollateralAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
+            final LoanCollateralAssembler loanCollateralAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
             final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
             final ClientRepositoryWrapper clientRepository, final LoanProductRepository loanProductRepository,
             final AccountNumberGenerator accountNumberGenerator, final LoanSummaryWrapper loanSummaryWrapper,
@@ -220,7 +225,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService, final GLIMAccountInfoRepository glimRepository,
             final LoanRepository loanRepository, final GSIMReadPlatformService gsimReadPlatformService, final RateAssembler rateAssembler,
-            final LoanProductReadPlatformService loanProductReadPlatformService) {
+            final LoanProductReadPlatformService loanProductReadPlatformService,
+            final LoanCollateralManagementRepository loanCollateralManagementRepository,
+            final ClientCollateralManagementRepository clientCollateralManagementRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -261,6 +268,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.glimRepository = glimRepository;
         this.loanRepository = loanRepository;
         this.gsimReadPlatformService = gsimReadPlatformService;
+        this.loanCollateralManagementRepository = loanCollateralManagementRepository;
+        this.clientCollateralManagementRepository = clientCollateralManagementRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -813,8 +822,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
             }
 
-            final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
-                    .fromParsedJson(command.parsedJson());
+            Set<LoanCollateralManagement> possiblyModifedLoanCollateralItems = null;
+
+            if (command.parameterExists("loanType")) {
+                final String loanTypeStr = command.stringValueOfParameterNamed("loanType");
+                final AccountType loanType = AccountType.fromName(loanTypeStr);
+
+                if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
+                    possiblyModifedLoanCollateralItems = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
+                }
+            }
 
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
                     possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified, loanProductForValidations);
@@ -991,10 +1008,19 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateTransactionProcessingStrategy(strategy);
             }
 
-            final String collateralParamName = "collateral";
-            if (changes.containsKey(collateralParamName)) {
-                final Set<LoanCollateral> loanCollateral = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
-                existingLoanApplication.updateLoanCollateral(loanCollateral);
+            /**
+             * TODO: Allow other loan types if needed.
+             */
+            if (command.parameterExists("loanType")) {
+                final String loanTypeStr = command.stringValueOfParameterNamed("loanType");
+                final AccountType loanType = AccountType.fromName(loanTypeStr);
+
+                if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
+                    final String collateralParamName = "collateral";
+                    if (changes.containsKey(collateralParamName)) {
+                        existingLoanApplication.updateLoanCollateral(possiblyModifedLoanCollateralItems);
+                    }
+                }
             }
 
             final String chargesParamName = "charges";
@@ -1268,6 +1294,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.accountAssociationsRepository.delete(accountAssociations);
         }
 
+        Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+        for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+            BigDecimal quantity = loanCollateralManagement.getQuantity();
+            ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+            clientCollateralManagement.updateQuantityAfterLoanClosed(quantity);
+            loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+            loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+        }
+
         this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
@@ -1422,6 +1457,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
                             "Topup loan amount should be greater than outstanding amount of loan to be closed.");
                 }
+                BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
+                loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -1502,6 +1539,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
+
+            loan.adjustNetDisbursalAmount(loan.getProposedPrincipal());
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
@@ -1610,6 +1649,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
                 defaultLoanLifecycleStateMachine());
+
+        // Release attached collaterals
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+                clientCollateralManagement
+                        .updateQuantity(clientCollateralManagement.getQuantity().add(loanCollateralManagement.getQuantity()));
+                loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+            }
+            loan.updateLoanCollateral(loanCollateralManagements);
+        }
+
         if (!changes.isEmpty()) {
             this.loanRepositoryWrapper.save(loan);
 

@@ -34,6 +34,7 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.MonthDay;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,12 +136,12 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         this.status = status;
         this.amount = amount;
         if (validFrom != null) {
-            this.validFrom = Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.validFrom = Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         if (validTill == null) {
             this.validTill = null;
         } else {
-            this.validTill = Date.from(validTill.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.validTill = Date.from(validTill.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
         this.recurrenceType = recurrenceType;
         this.recurrenceFrequency = recurrenceFrequency;
@@ -171,13 +172,13 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(validFromParamName);
             actualChanges.put(validFromParamName, newValue);
-            this.validFrom = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.validFrom = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(validTillParamName);
             actualChanges.put(validTillParamName, newValue);
-            this.validTill = Date.from(newValue.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.validTill = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
 
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {

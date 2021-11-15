@@ -58,8 +58,8 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
-    public List<ScheduledJobDetail> retrieveAllJobs() {
-        return this.scheduledJobDetailsRepository.findAll();
+    public List<ScheduledJobDetail> retrieveAllJobs(final String nodeId) {
+        return this.scheduledJobDetailsRepository.findAllJobs(Integer.parseInt(nodeId));
     }
 
     @Override

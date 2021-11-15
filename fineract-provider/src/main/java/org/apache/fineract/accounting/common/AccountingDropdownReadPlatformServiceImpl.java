@@ -95,6 +95,16 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
                 includeEquityAccounts);
     }
 
+    @Override
+    public List<GLAccountData> retrieveExpenseAccountOptions() {
+        return accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
+    }
+
+    @Override
+    public List<GLAccountData> retrieveAssetAccountOptions() {
+        return accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
+    }
+
     private Map<String, List<GLAccountData>> retrieveAccountMappingOptions(boolean includeAssetAccounts, boolean includeIncomeAccounts,
             boolean includeExpenseAccounts, boolean includeLiabilityAccounts, boolean includeEquityAccounts) {
         final Map<String, List<GLAccountData>> accountOptions = new HashMap<>();

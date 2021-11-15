@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transfe
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
@@ -247,6 +248,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -255,8 +257,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
         account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return savingsTransactionId;
     }
@@ -308,8 +308,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 account.updateOnAccountClosureStatus(onClosureType);
             }
             changes.put("reinvestedDepositId", reinvestedDeposit.getId());
-            reinvestedDeposit.approveAndActivateApplication(
-                    Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), user);
+            reinvestedDeposit.approveAndActivateApplication(Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), user);
             this.savingsAccountRepository.save(reinvestedDeposit);
 
         } else if (onClosureType.isTransferToSavings()) {

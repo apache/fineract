@@ -176,13 +176,6 @@ public class SavingsAccountChargeAssembler {
                         .failWithCodeNoParameterAddedToErrorCode("currency.and.charge.currency.not.same");
             }
 
-            if (charge.isWithdrawalFee()) {
-                if (isOneWithdrawalPresent) {
-                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.withdrawal.fee.per.account.not.supported");
-                }
-                isOneWithdrawalPresent = true;
-            }
-
             if (charge.isAnnualFee()) {
                 if (isOneAnnualPresent) {
                     baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.annual.fee.per.account.not.supported");

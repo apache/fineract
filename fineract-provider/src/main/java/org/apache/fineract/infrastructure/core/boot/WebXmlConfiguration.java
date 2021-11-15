@@ -18,12 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
-import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -40,23 +37,6 @@ public class WebXmlConfiguration {
 
     @Autowired
     private TenantAwareBasicAuthenticationFilter basicAuthenticationProcessingFilter;
-
-    @Bean
-    public ServletRegistrationBean jersey() {
-        ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
-        jerseyServletRegistration.setServlet(new SpringServlet());
-        jerseyServletRegistration.addUrlMappings("/api/v1/*");
-        jerseyServletRegistration.setName("jersey-servlet");
-        jerseyServletRegistration.setLoadOnStartup(1);
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
-                ResponseCorsFilter.class.getName());
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
-        // debugging for development:
-        // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
-        // LoggingFilter.class.getName());
-        return jerseyServletRegistration;
-    }
 
     @Bean
     public FilterRegistrationBean filterRegistrationBean() {

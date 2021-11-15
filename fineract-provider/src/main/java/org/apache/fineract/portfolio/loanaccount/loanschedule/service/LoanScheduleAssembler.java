@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -204,6 +205,9 @@ public class LoanScheduleAssembler {
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam, element);
         }
+
+        BigDecimal fixedPrincipalPercentagePerInstallment = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, element);
 
         // interest terms
         final Integer interestType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
@@ -441,8 +445,7 @@ public class LoanScheduleAssembler {
         }
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
@@ -457,7 +460,7 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization);
+                allowCompoundingOnEod, isEqualAmortization, fixedPrincipalPercentagePerInstallment);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -520,6 +523,7 @@ public class LoanScheduleAssembler {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
                     LocalDate expectedDisbursementDate = null;
                     BigDecimal principal = null;
+                    BigDecimal netDisbursalAmount = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
                         expectedDisbursementDate = this.fromApiJsonHelper
@@ -530,9 +534,16 @@ public class LoanScheduleAssembler {
                             && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
+                    if (jsonObject.has(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                            && jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank(
+                                    jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).getAsString())) {
+                        netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                                .getAsBigDecimal();
+                    }
                     BigDecimal waivedChargeAmount = null;
-                    disbursementDatas
-                            .add(new DisbursementData(null, expectedDisbursementDate, null, principal, null, null, waivedChargeAmount));
+                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, netDisbursalAmount, null,
+                            null, waivedChargeAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }
@@ -609,8 +620,7 @@ public class LoanScheduleAssembler {
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);
@@ -658,7 +668,7 @@ public class LoanScheduleAssembler {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
 
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
@@ -677,7 +687,7 @@ public class LoanScheduleAssembler {
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
@@ -859,8 +869,8 @@ public class LoanScheduleAssembler {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         if (loan.getExpectedFirstRepaymentOnDate() == null) {
-            loan.setExpectedFirstRepaymentOnDate(Date.from(
-                    loan.fetchRepaymentScheduleInstallment(1).getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            loan.setExpectedFirstRepaymentOnDate(
+                    Date.from(loan.fetchRepaymentScheduleInstallment(1).getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
@@ -997,13 +1007,13 @@ public class LoanScheduleAssembler {
 
             LocalDate duedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.dueDateParamName, arrayElement,
                     dateFormat, locale);
-            Date dueDate = Date.from(duedateLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            Date dueDate = Date.from(duedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
             LocalDate modifiedDuedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.modifiedDueDateParamName,
                     arrayElement, dateFormat, locale);
             Date modifiedDuedate = null;
             if (modifiedDuedateLocalDate != null) {
-                modifiedDuedate = Date.from(modifiedDuedateLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                modifiedDuedate = Date.from(modifiedDuedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
             boolean isSpecificToInstallment = true;
             if (isInsertInstallment) {

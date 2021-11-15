@@ -86,7 +86,12 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
             } else {
                 writeInt(MAX_PRINCIPAL_COL, row, 999999999);
             }
-            writeInt(NO_OF_REPAYMENTS_COL, row, product.getNumberOfRepayments());
+            int numberOfRepayments = product.getNumberOfRepayments();
+            if (product.getRepaymentFrequencyType().getValue().equalsIgnoreCase("Semi Month")) {
+                numberOfRepayments = numberOfRepayments * product.getRepaymentEvery();
+            }
+
+            writeInt(NO_OF_REPAYMENTS_COL, row, numberOfRepayments);
             if (product.getMinNumberOfRepayments() != null) {
                 writeInt(MIN_REPAYMENTS_COL, row, product.getMinNumberOfRepayments());
             } else {

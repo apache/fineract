@@ -55,6 +55,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -64,11 +65,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
@@ -88,7 +89,7 @@ public class Sender {
      */
     protected static final int MAX_BACKOFF_DELAY = 1024000;
 
-    protected final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
     protected static final Logger LOG = Logger.getLogger(Sender.class.getName());
 
     private final String key;
@@ -168,6 +169,9 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
+
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Result send(Message message, String to, int retries) throws IOException {
         int attempt = 0;
         Result result;
@@ -316,6 +320,8 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public MulticastResult send(Message message, List<String> regIds, int retries) throws IOException {
         int attempt = 0;
         MulticastResult multicastResult;

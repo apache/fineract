@@ -98,4 +98,10 @@ public interface ConfigurationDomainService {
     boolean isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
 
     boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI();
+
+    String getAccountMappingForPaymentType();
+
+    String getAccountMappingForCharge();
+
+    boolean isNextDayFixedDepositInterestTransferEnabledForPeriodEnd();
 }

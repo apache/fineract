@@ -73,15 +73,15 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         props.put("mail.smtp.auth", "true");
         props.put("mail.debug", "true");
 
-        try {
-            if (smtpCredentialsData.isUseTLS()) {
-                // Needs to disable startTLS if the port is 465 in order to send the email successfully when using the
-                // smtp.gmail.com as the host
-                if (smtpCredentialsData.getPort().equals("465")) {
-                    props.put("mail.smtp.starttls.enable", "false");
-                }
-            }
+        // these are the added lines
+        props.put("mail.smtp.starttls.enable", "true");
+        // props.put("mail.smtp.ssl.enable", "true");
 
+        props.put("mail.smtp.socketFactory.port", Integer.parseInt(smtpCredentialsData.getPort()));
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.fallback", "true");
+
+        try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
             message.setTo(emailDetails.getAddress());

@@ -18,20 +18,20 @@
  */
 package org.apache.fineract.integrationtests;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +46,7 @@ public class AuditIntegrationTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private AuditHelper auditHelper;
+    private static final SecureRandom rand = new SecureRandom();
 
     /**
      * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
@@ -77,7 +78,8 @@ public class AuditIntegrationTest {
 
         // When Client is created: Count should be "1"
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
         auditsRecieved = auditHelper.getAuditDetails(clientId, "CREATE", "CLIENT");
         auditHelper.verifyOneAuditOnly(auditsRecieved, clientId, "CREATE", "CLIENT");
 
@@ -105,6 +107,8 @@ public class AuditIntegrationTest {
     }
 
     @Test
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public void checkAuditsWithLimitParam() {
         // Create client
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -117,7 +121,6 @@ public class AuditIntegrationTest {
             this.clientHelper.reactivateClient(clientId);
         }
 
-        Random rand = new Random();
         for (int i = 0; i < 3; i++) {
             // limit contains a number between 1-8
             int limit = rand.nextInt(7) + 1;

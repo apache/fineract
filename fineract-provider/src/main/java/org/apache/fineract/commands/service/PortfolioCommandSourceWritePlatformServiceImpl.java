@@ -19,8 +19,9 @@
 package org.apache.fineract.commands.service;
 
 import com.google.gson.JsonElement;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.time.ZonedDateTime;
-import java.util.Random;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -52,6 +53,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final CommandProcessingService processAndLogCommandService;
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
     private static final Logger LOG = LoggerFactory.getLogger(PortfolioCommandSourceWritePlatformServiceImpl.class);
+    private static final SecureRandom random = new SecureRandom();
 
     @Autowired
     public PortfolioCommandSourceWritePlatformServiceImpl(final PlatformSecurityContext context,
@@ -66,6 +68,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
     @Override
     @SuppressWarnings("AvoidHidingCauseException")
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
 
         boolean isApprovedByChecker = false;
@@ -106,18 +110,17 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 if (numberOfRetries >= maxNumberOfRetries) {
                     LOG.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
                             command.json(), numberOfRetries);
-                    throw (exception);
+                    throw exception;
                 }
                 /***
                  * Else sleep for a random time (between 1 to 10 seconds) and continue
                  **/
                 try {
-                    Random random = new Random();
                     int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;
                 } catch (InterruptedException e) {
-                    throw (exception);
+                    throw exception;
                 }
             } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 numberOfRetries = maxNumberOfRetries + 1;

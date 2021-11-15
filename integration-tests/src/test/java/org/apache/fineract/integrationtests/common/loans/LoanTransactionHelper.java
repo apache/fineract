@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -165,6 +166,12 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
+    public ArrayList<HashMap> getRepayments(final Integer loanId) {
+        final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=disburse&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "loanRepaymentScheduleInstallments");
+    }
+
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
         String loanApprovalCommand = createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID);
         String loanApprovalRequest = getApproveLoanAsJSON(approvalDate);
@@ -199,8 +206,31 @@ public class LoanTransactionHelper {
         return performLoanTransaction(createLoanOperationURL(UNDO_APPROVAL_LOAN_COMMAND, loanID), undoBodyJson);
     }
 
-    public HashMap disburseLoan(final String date, final Integer loanID) {
-        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
+    public HashMap disburseLoan(final String date, final Integer loanID, final String netDisbursalAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, null, netDisbursalAmount));
+    }
+
+    public HashMap disburseLoanWithPostDatedChecks(final String date, final Integer loanId, final BigDecimal transactionAmount,
+            final List<HashMap> postDatedChecks) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanId),
+                getDisburseLoanWithPostDatedChecksAsJSON(date, transactionAmount.toString(), postDatedChecks));
+    }
+
+    private String getDisburseLoanWithPostDatedChecksAsJSON(final String actualDisbursementDate, final String transactionAmount,
+            final List<HashMap> postDatedChecks) {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("actualDisbursementDate", actualDisbursementDate);
+        map.put("note", "DISBURSE NOTE");
+        if (transactionAmount != null) {
+            map.put("transactionAmount", transactionAmount);
+        }
+
+        map.put("postDatedChecks", postDatedChecks);
+        LOG.info("Loan Application disburse request : {} ", map);
+        return new Gson().toJson(map);
     }
 
     public HashMap disburseLoanWithRepaymentReschedule(final String date, final Integer loanID, String adjustRepaymentDate) {
@@ -208,17 +238,20 @@ public class LoanTransactionHelper {
                 getDisburseLoanWithRepaymentRescheduleAsJSON(date, null, adjustRepaymentDate));
     }
 
-    public HashMap disburseLoan(final String date, final Integer loanID, final String disburseAmt) {
-        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, disburseAmt));
+    public HashMap disburseLoan(final String date, final Integer loanID, final String disburseAmt, final String netDisbursalAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, disburseAmt, netDisbursalAmount));
     }
 
-    public Object disburseLoan(final String date, final Integer loanID, ResponseSpecification responseValidationError) {
-        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null),
-                responseValidationError);
+    public Object disburseLoan(final String date, final Integer loanID, ResponseSpecification responseValidationError,
+            final String netDisbursalAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, null, netDisbursalAmount), responseValidationError);
     }
 
-    public HashMap disburseLoanToSavings(final String date, final Integer loanID) {
-        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_TO_SAVINGS_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
+    public HashMap disburseLoanToSavings(final String date, final Integer loanID, final String netDisbursalAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_TO_SAVINGS_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, null, netDisbursalAmount));
     }
 
     public HashMap undoDisbursal(final Integer loanID) {
@@ -291,6 +324,11 @@ public class LoanTransactionHelper {
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
     }
 
+    public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
+        return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
+                getRepaymentWithPDCBodyAsJSON(date, amountToBePaid, paymentType), "");
+    }
+
     public HashMap forecloseLoan(final String transactionDate, final Integer loanID) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(FORECLOSURE_COMMAND, loanID),
                 getForeclosureBodyAsJSON(transactionDate, loanID), "");
@@ -338,6 +376,14 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
+    public Integer undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId, final String body) {
+        LOG.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, body, "");
+        return (Integer) response.get("resourceId");
+    }
+
     public Integer payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         LOG.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
@@ -346,11 +392,32 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
-    private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount) {
+    public ArrayList<HashMap> getLoanTransactionDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&exclude=guarantors,futureSchedule&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, URL, "transactions");
+    }
+
+    public HashMap getLoanCharge(final Integer loanId, final Integer chargeId) {
+        final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + chargeId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+    }
+
+    public HashMap getPostDatedCheck(final Integer loanId, final Integer installmentId) {
+        final String GET_POST_DATED_TRANS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/postdatedchecks/" + installmentId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_POST_DATED_TRANS_URL, "");
+    }
+
+    private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount,
+            final String netDisbursalAmount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("actualDisbursementDate", actualDisbursementDate);
+        map.put("netDisbursalAmount", netDisbursalAmount);
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
@@ -416,6 +483,17 @@ public class LoanTransactionHelper {
     private String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", transactionAmount.toString());
+        map.put("note", "Repayment Made!!!");
+        return new Gson().toJson(map);
+    }
+
+    private String getRepaymentWithPDCBodyAsJSON(final String transactionDate, final Float transactionAmount, final Integer paymentTypeId) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("paymentTypeId", paymentTypeId.toString());
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());

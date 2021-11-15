@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +31,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -190,7 +190,7 @@ public class LoanUtilService {
     private HolidayDetailDTO constructHolidayDTO(final Loan loan) {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                Date.from(loan.getDisbursementDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                 HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
@@ -318,12 +318,13 @@ public class LoanUtilService {
                     Date expectedDisbursementDate = null;
                     Date actualDisbursementDate = null;
                     BigDecimal principal = null;
+                    BigDecimal netDisbursalAmount = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
                         LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
                                 jsonObject, dateFormat, locale);
                         if (date != null) {
-                            expectedDisbursementDate = Date.from(date.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                            expectedDisbursementDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
                         }
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
@@ -331,8 +332,16 @@ public class LoanUtilService {
                             && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
+                    if (jsonObject.has(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                            && jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank(
+                                    jsonObject.get(LoanApiConstants.disbursementNetDisbursalAmountParameterName).getAsString())) {
+                        netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
+                                .getAsBigDecimal();
+                    }
 
-                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal));
+                    disbursementDatas.add(
+                            new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal, netDisbursalAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }

@@ -54,6 +54,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
             "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
+            "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType",
             ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -90,6 +91,28 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         final Integer feeFrequency = this.fromApiJsonHelper.extractIntegerNamed("feeFrequency", element, Locale.getDefault());
         baseDataValidator.reset().parameter("feeFrequency").value(feeFrequency).inMinMaxRange(0, 3);
+
+        if (this.fromApiJsonHelper.parameterExists("enableFreeWithdrawalCharge", element)) {
+
+            final Boolean enableFreeWithdrawalCharge = this.fromApiJsonHelper.extractBooleanNamed("enableFreeWithdrawalCharge", element);
+            baseDataValidator.reset().parameter("enableFreeWithdrawalCharge").value(enableFreeWithdrawalCharge).notNull();
+
+            if (enableFreeWithdrawalCharge) {
+
+                final Integer freeWithdrawalFrequency = this.fromApiJsonHelper.extractIntegerNamed("freeWithdrawalFrequency", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("freeWithdrawalFrequency").value(freeWithdrawalFrequency).integerGreaterThanZero();
+
+                final Integer restartCountFrequency = this.fromApiJsonHelper.extractIntegerNamed("restartCountFrequency", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("restartCountFrequency").value(restartCountFrequency).integerGreaterThanZero();
+
+                final Integer countFrequencyType = this.fromApiJsonHelper.extractIntegerNamed("countFrequencyType", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("countFrequencyType").value(countFrequencyType);
+
+            }
+        }
 
         if (feeFrequency != null) {
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).notNull();
@@ -155,6 +178,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
             }
+
         } else if (appliesTo.isClientCharge()) {
             // client applicable validation
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -269,6 +293,39 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("maxCap", element)) {
             final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
             baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
+            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
+            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
+                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
+        }
+
+        Boolean enableFreeWithdrawalCharge = false;
+        if (this.fromApiJsonHelper.parameterExists("enableFreeWithdrawalCharge", element)) {
+            enableFreeWithdrawalCharge = this.fromApiJsonHelper.extractBooleanNamed("enableFreeWithdrawalCharge", element);
+            baseDataValidator.reset().parameter("enableFreeWithdrawalCharge").value(enableFreeWithdrawalCharge).notNull();
+
+            if (enableFreeWithdrawalCharge) {
+
+                final Integer freeWithdrawalFrequency = this.fromApiJsonHelper.extractIntegerNamed("freeWithdrawalFrequency", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("freeWithdrawalFrequency").value(freeWithdrawalFrequency).integerGreaterThanZero();
+
+                final Integer restartCountFrequency = this.fromApiJsonHelper.extractIntegerNamed("restartCountFrequency", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("restartCountFrequency").value(restartCountFrequency).integerGreaterThanZero();
+
+                final Integer countFrequencyType = this.fromApiJsonHelper.extractIntegerNamed("countFrequencyType", element,
+                        Locale.getDefault());
+                baseDataValidator.reset().parameter("countFrequencyType").value(countFrequencyType);
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
+            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
+            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
+                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
