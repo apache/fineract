@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 /**
  * Used in securityContext.xml as implementation of spring security's {@link UserDetailsService}.
  */
-@Service(value = "userDetailsService")
+@Service("userDetailsService")
 public class TenantAwareJpaPlatformUserDetailsService implements PlatformUserDetailsService {
 
     @Autowired

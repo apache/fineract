@@ -26,7 +26,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
 
 /**
  * Fineract main() application which launches Fineract in an embedded Tomcat HTTP (using Spring Boot).
@@ -39,13 +38,11 @@ import org.springframework.context.annotation.ImportResource;
  *
  * It's the old/classic Mifos (non-X) Workspace 2.0 reborn for Fineract! ;-)
  *
- * @see ServerWithMariaDB4jApplication for an alternative with an embedded DB
  */
 
 public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ EmbeddedTomcatWithSSLConfiguration.class })
-    @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
     private static class Configuration extends AbstractApplicationConfiguration {}
 
     @Override

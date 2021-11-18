@@ -22,18 +22,14 @@ import org.apache.fineract.infrastructure.cache.service.RuntimeDelegatingCacheMa
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.interceptor.CacheErrorHandler;
-import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableCaching
-public class PlatformCacheConfiguration implements CachingConfigurer {
+public class PlatformCacheConfiguration extends CachingConfigurerSupport implements CachingConfigurer {
 
     @Autowired
     private RuntimeDelegatingCacheManager delegatingCacheManager;
@@ -42,22 +38,5 @@ public class PlatformCacheConfiguration implements CachingConfigurer {
     @Override
     public CacheManager cacheManager() {
         return this.delegatingCacheManager;
-    }
-
-    @Override
-    public CacheResolver cacheResolver() {
-        // TODO https://issues.apache.org/jira/browse/FINERACT-705
-        return null;
-    }
-
-    @Override
-    public KeyGenerator keyGenerator() {
-        return new SimpleKeyGenerator();
-    }
-
-    @Override
-    public CacheErrorHandler errorHandler() {
-        // TODO https://issues.apache.org/jira/browse/FINERACT-705
-        return null;
     }
 }

@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  *
  * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated platform user.
  */
-@Service(value = "twoFactorAuthFilter")
+@Service
 @Profile("!twofactor")
 public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticationFilter {
 
