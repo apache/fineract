@@ -47,13 +47,13 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(RuntimeDelegatingCacheManager.class);
 
-    private final JCacheCacheManager jcacheCacheManager;
+    private final CacheManager cacheManager;
     private final CacheManager noOpCacheManager = new NoOpCacheManager();
     private CacheManager currentCacheManager;
 
     @Autowired
-    public RuntimeDelegatingCacheManager(final JCacheCacheManager jcacheCacheManager) {
-        this.jcacheCacheManager = jcacheCacheManager;
+    public RuntimeDelegatingCacheManager(final JCacheCacheManager cacheManager) {
+        this.cacheManager = cacheManager;
         this.currentCacheManager = this.noOpCacheManager;
     }
 
@@ -109,7 +109,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
                     changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
                     clearEhCache();
                 }
-                this.currentCacheManager = this.jcacheCacheManager;
+                this.currentCacheManager = this.cacheManager;
 
                 if (this.currentCacheManager.getCacheNames().size() == 0) {
                     LOG.error("No caches configured for activated CacheManager {}", this.currentCacheManager);
@@ -126,7 +126,6 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     }
 
     private void clearEhCache() {
-        javax.cache.CacheManager cacheManager = this.jcacheCacheManager.getCacheManager();
         Iterable<String> cacheNames = cacheManager.getCacheNames();
         for (String cacheName : cacheNames) {
             cacheManager.getCache(cacheName).clear();

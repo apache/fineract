@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@SuppressWarnings("deprecation")
 @Service(value = "applicationPasswordEncoder")
 @Scope("singleton")
 public class DefaultPlatformPasswordEncoder implements PlatformPasswordEncoder {

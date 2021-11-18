@@ -59,7 +59,7 @@ import org.springframework.stereotype.Service;
  *
  * If multi-tenant and basic auth credentials are invalid, a http error response is returned.
  */
-@Service(value = "basicAuthenticationProcessingFilter")
+@Service
 @Profile("basicauth")
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
