@@ -2708,8 +2708,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return false;
     }
 
-    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final BigDecimal amountPaid, final LocalDate transactionDate,
-            final DateTimeFormatter formatter, final AppUser user) {
+    public SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final BigDecimal amountPaid,
+            final LocalDate transactionDate, final DateTimeFormatter formatter, final AppUser user) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -2797,16 +2797,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
         }
 
-        this.payCharge(savingsAccountCharge, chargePaid, transactionDate, user);
+        return this.payCharge(savingsAccountCharge, chargePaid, transactionDate, user);
     }
 
-    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate,
-            final AppUser user) {
+    public SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid,
+            final LocalDate transactionDate, final AppUser user) {
         savingsAccountCharge.pay(getCurrency(), amountPaid);
-        handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, user);
+        return handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, user);
     }
 
-    private void handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
+    private SavingsAccountTransaction handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
             final LocalDate transactionDate, final AppUser user) {
         SavingsAccountTransaction chargeTransaction = null;
 
@@ -2819,6 +2819,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
+        return chargeTransaction;
     }
 
     private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount, AppUser user) {
