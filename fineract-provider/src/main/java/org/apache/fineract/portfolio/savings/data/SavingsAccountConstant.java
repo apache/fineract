@@ -67,6 +67,6 @@ public class SavingsAccountConstant extends SavingsApiConstants {
                     feeOnMonthDayParamName, monthDayFormatParamName, feeIntervalParamName));
 
     protected static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
+            Arrays.asList(amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, noteParamName));
 
 }

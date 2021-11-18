@@ -1232,7 +1232,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
         }
 
-        this.payCharge(savingsAccountCharge, transactionDate, amountPaid, fmt, user);
+        SavingsAccountTransaction chargeTransaction = this.payCharge(savingsAccountCharge, transactionDate, amountPaid, fmt, user);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingsTransactionNote(savingsAccountCharge.savingsAccount(), chargeTransaction, noteText);
+            this.noteRepository.save(note);
+        }
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountCharge.getId()) //
                 .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //
@@ -1261,8 +1268,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Transactional
-    private void payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate, final BigDecimal amountPaid,
-            final DateTimeFormatter formatter, final AppUser user) {
+    private SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate,
+            final BigDecimal amountPaid, final DateTimeFormatter formatter, final AppUser user) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -1274,7 +1281,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user);
+        SavingsAccountTransaction chargeTransaction = account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user);
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
@@ -1296,9 +1303,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.validateAccountBalanceDoesNotBecomeNegative("." + SavingsAccountTransactionType.PAY_CHARGE.getCode(),
                 depositAccountOnHoldTransactions);
 
+        saveTransactionToGenerateTransactionId(chargeTransaction);
+
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+
+        return chargeTransaction;
     }
 
     private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
