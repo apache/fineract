@@ -23,6 +23,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -176,4 +177,9 @@ public final class SavingsHelper {
     public Collection<Long> fetchPostInterestTransactionIds(Long accountId) {
         return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIds(accountId);
     }
+
+    public Collection<Long> fetchPostInterestTransactionIds(Long accountId, Date pivotDate) {
+        return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIdsWithPivotDate(accountId, pivotDate);
+    }
+
 }

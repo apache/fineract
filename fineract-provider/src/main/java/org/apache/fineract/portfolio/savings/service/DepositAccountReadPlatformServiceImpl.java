@@ -587,6 +587,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             selectFieldsSqlBuilder.append("sa.total_deposits_derived as totalDeposits, ");
             selectFieldsSqlBuilder.append("sa.total_withdrawals_derived as totalWithdrawals, ");
+            selectFieldsSqlBuilder.append("sa.interest_posted_till_date as interestPostedTillDate, ");
             selectFieldsSqlBuilder.append("sa.total_withdrawal_fees_derived as totalWithdrawalFees, ");
             selectFieldsSqlBuilder.append("sa.total_annual_fees_derived as totalAnnualFees, ");
             selectFieldsSqlBuilder.append("sa.total_interest_earned_derived as totalInterestEarned, ");
@@ -739,6 +740,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
             final BigDecimal totalWithholdTax = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithholdTax");
             final BigDecimal totalOverdraftInterestDerived = null;
+            final LocalDate interestPostedTillDate = JdbcSupport.getLocalDate(rs, "interestPostedTillDate");
 
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
@@ -751,7 +753,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal availableBalance = null;
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
-                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null, availableBalance);
+                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null, availableBalance,
+                    interestPostedTillDate);
 
             return DepositAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,

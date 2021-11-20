@@ -76,6 +76,7 @@ public class GlobalConfigurationHelper {
             // the future, it needs to be reset here.
             final Integer configDefaultId = (Integer) configDefault.get("id");
             final Integer configDefaultValue = (Integer) configDefault.get("value");
+
             updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
             updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
                     (Boolean) configDefault.get("enabled"));
@@ -88,9 +89,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 32 global configurations.
-        Assertions.assertEquals(33, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(33, actualGlobalConfigurations.size());
+        // There are currently 35 global configurations.
+        Assertions.assertEquals(35, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(35, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -388,6 +389,23 @@ public class GlobalConfigurationHelper {
         isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("enabled", false);
         isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("trapDoor", false);
         defaults.add(isNextDayFixedDepositInterestTransferEnabledForPeriodEnd);
+
+        HashMap<String, Object> isAllowedBackDatedTransactionsBeforeInterestPostingDate = new HashMap<>();
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("id", 38);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("name", "allow-backdated-transaction-before-interest-posting");
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("value", 0);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("enabled", true);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("trapDoor", false);
+        defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDate);
+
+        HashMap<String, Object> isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays = new HashMap<>();
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("id", 39);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("name",
+                "allow-backdated-transaction-before-interest-posting-date-for-days");
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("value", 0);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("enabled", false);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("trapDoor", false);
+        defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays);
 
         return defaults;
     }
