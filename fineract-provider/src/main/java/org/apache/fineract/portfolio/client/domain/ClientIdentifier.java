@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 @Entity
 @Table(name = "m_client_identifier", uniqueConstraints = {
@@ -48,6 +49,9 @@ public class ClientIdentifier extends AbstractAuditableCustom {
     @Column(name = "document_key", length = 1000)
     private String documentKey;
 
+    @Column(name = "document_type_value", length = 1000)
+    private String documentTypeValue;
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
@@ -58,20 +62,29 @@ public class ClientIdentifier extends AbstractAuditableCustom {
     private Integer active;
 
     public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
+
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
         final String status = command.stringValueOfParameterNamed("status");
-        return new ClientIdentifier(client, documentType, documentKey, status, description);
+        String documentTypeValue = null;
+        if (documentType.label().equals("Passport")) {
+            documentTypeValue = command.stringValueOfParameterNamed("documentTypeValue");
+            if ("".equals(documentTypeValue)) {
+                throw new PlatformDataIntegrityException("Selection of Country is Mandatory", "error.msg.selection.of.country.mandatory");
+            }
+        }
+        return new ClientIdentifier(client, documentType, documentTypeValue, documentKey, status, description);
     }
 
     protected ClientIdentifier() {
         //
     }
 
-    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
-            String description) {
+    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentTypeValue, final String documentKey,
+            final String statusName, String description) {
         this.client = client;
         this.documentType = documentType;
+        this.documentTypeValue = documentTypeValue;
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
@@ -101,6 +114,13 @@ public class ClientIdentifier extends AbstractAuditableCustom {
             final String newValue = command.stringValueOfParameterNamed(documentKeyParamName);
             actualChanges.put(documentKeyParamName, newValue);
             this.documentKey = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String documentTypeValueParamName = "documentTypeValue";
+        if (command.isChangeInStringParameterNamed(documentTypeValueParamName, this.documentTypeValue)) {
+            final String newValue = command.stringValueOfParameterNamed(documentTypeValueParamName);
+            actualChanges.put(documentTypeValueParamName, newValue);
+            this.documentTypeValue = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         final String descriptionParamName = "description";

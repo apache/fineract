@@ -30,15 +30,17 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 public class ClientIdentifierCommand {
 
     private final Long documentTypeId;
+    private final String documentTypeValue;
     private final String documentKey;
     private final String description;
     private final String status;
 
-    public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String statusString,
+    public ClientIdentifierCommand(final Long documentTypeId, final String documentTypeValue, final String documentKey, final String status,
             final String description) {
         this.documentTypeId = documentTypeId;
+        this.documentTypeValue = documentTypeValue;
         this.documentKey = documentKey;
-        this.status = statusString;
+        this.status = status;
         this.description = description;
     }
 

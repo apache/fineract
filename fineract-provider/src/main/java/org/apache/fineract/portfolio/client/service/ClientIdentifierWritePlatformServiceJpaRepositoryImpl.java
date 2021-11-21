@@ -88,6 +88,13 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.label();
 
+            if (documentTypeLabel.equals("Passport")) {
+                String documentTypeValue = command.stringValueOfParameterNamed("documentTypeValue");
+                if (documentTypeValue == null) {
+
+                }
+            }
+
             final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
 
             this.clientIdentifierRepository.save(clientIdentifier);

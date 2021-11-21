@@ -43,7 +43,8 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("documentTypeId", "documentKey", "status", "description"));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("documentTypeId", "documentTypeValue", "documentKey", "status", "description"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -64,9 +65,10 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Long documentTypeId = this.fromApiJsonHelper.extractLongNamed("documentTypeId", element);
+        final String documentTypeValue = this.fromApiJsonHelper.extractStringNamed("documentTypeValue", element);
         final String documentKey = this.fromApiJsonHelper.extractStringNamed("documentKey", element);
         final String documentDescription = this.fromApiJsonHelper.extractStringNamed("documentDescription", element);
         final String statusString = this.fromApiJsonHelper.extractStringNamed("status", element);
-        return new ClientIdentifierCommand(documentTypeId, documentKey, statusString, documentDescription);
+        return new ClientIdentifierCommand(documentTypeId, documentTypeValue, documentKey, statusString, documentDescription);
     }
 }
