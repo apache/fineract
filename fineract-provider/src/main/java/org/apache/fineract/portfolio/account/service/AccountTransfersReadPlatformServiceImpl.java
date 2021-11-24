@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -263,6 +264,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 AccountTransferType.INTEREST_TRANSFER.getValue());
 
         return transactionId;
+    }
+
+    @Override
+    public Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(final Long accountId, final Date pivotDate) {
+        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = 0 and atd.transfer_type = ? and att.transaction_date >= ?";
+
+        final List<Long> transactionIds = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
+                AccountTransferType.INTEREST_TRANSFER.getValue(), pivotDate);
+
+        return transactionIds;
     }
 
     private static final class AccountTransfersMapper implements RowMapper<AccountTransferData> {

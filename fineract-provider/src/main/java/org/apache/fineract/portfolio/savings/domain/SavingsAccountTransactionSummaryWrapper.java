@@ -61,6 +61,17 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
+    public BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency, final BigDecimal currentInterestPosted,
+            final List<SavingsAccountTransaction> savingsAccountTransactions) {
+        Money total = Money.of(currency, currentInterestPosted);
+        for (final SavingsAccountTransaction transaction : savingsAccountTransactions) {
+            if (transaction.isInterestPostingAndNotReversed() && transaction.isNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
+
     public BigDecimal calculateTotalWithdrawalFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
@@ -116,6 +127,17 @@ public final class SavingsAccountTransactionSummaryWrapper {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWaivePenaltyChargeAndNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
+
+    public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, BigDecimal overdraftPosted,
+            List<SavingsAccountTransaction> transactions) {
+        Money total = Money.of(currency, overdraftPosted);
+        for (final SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isOverdraftInterestAndNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }

@@ -533,6 +533,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             // Save linked account information
             SavingsAccount savingsAccount;
+            final boolean backdatedTxnsAllowedTill = false;
             AccountAssociations accountAssociations;
             final Long savingsAccountId = command.longValueOfParameterNamed("linkAccountId");
             if (savingsAccountId != null) {
@@ -551,8 +552,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     }
 
                     if (gsimClientMembers.contains(BigDecimal.valueOf(newLoanApplication.getClientId()))) {
-                        savingsAccount = this.savingsAccountAssembler
-                                .assembleFrom(clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId())).longValue());
+                        savingsAccount = this.savingsAccountAssembler.assembleFrom(
+                                clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId())).longValue(),
+                                backdatedTxnsAllowedTill);
 
                         this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
                         boolean isActive = true;
@@ -565,7 +567,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     }
                 } else {
 
-                    savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
+                    savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId, backdatedTxnsAllowedTill);
                     this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
                     boolean isActive = true;
                     accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication, savingsAccount,
@@ -1156,6 +1158,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             // Save linked account information
             final String linkAccountIdParamName = "linkAccountId";
+            final boolean backdatedTxnsAllowedTill = false;
             final Long savingsAccountId = command.longValueOfParameterNamed(linkAccountIdParamName);
             AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
                     AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
@@ -1181,7 +1184,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     }
                 }
                 if (isModified) {
-                    final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
+                    final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId,
+                            backdatedTxnsAllowedTill);
                     this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, existingLoanApplication);
                     if (accountAssociations == null) {
                         boolean isActive = true;

@@ -313,6 +313,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.withhold_tax as withHoldTax, ");
             sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax, ");
             sqlBuilder.append("sa.last_interest_calculation_date as lastInterestCalculationDate, ");
+            sqlBuilder.append("sa.interest_posted_till_date as interestPostedTillDate, ");
             sqlBuilder.append("sa.total_savings_amount_on_hold as onHoldAmount, ");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName, ");
             sqlBuilder.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
@@ -508,6 +509,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal totalOverdraftInterestDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
                     "totalOverdraftInterestDerived");
             final BigDecimal totalWithholdTax = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithholdTax");
+            final LocalDate interestPostedTillDate = JdbcSupport.getLocalDate(rs, "interestPostedTillDate");
 
             final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
                     "minBalanceForInterestCalculation");
@@ -536,7 +538,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, interestNotPosted, lastInterestCalculationDate,
-                    availableBalance);
+                    availableBalance, interestPostedTillDate);
 
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");

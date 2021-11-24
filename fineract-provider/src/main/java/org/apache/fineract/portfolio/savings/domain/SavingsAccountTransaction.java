@@ -445,6 +445,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return LocalDate.ofInstant(this.dateOf.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
+    public Date getLastTransactionDate() {
+        return this.dateOf;
+    }
+
     public LocalDate getEndOfBalanceLocalDate() {
         return balanceEndDate == null ? null : LocalDate.ofInstant(balanceEndDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }

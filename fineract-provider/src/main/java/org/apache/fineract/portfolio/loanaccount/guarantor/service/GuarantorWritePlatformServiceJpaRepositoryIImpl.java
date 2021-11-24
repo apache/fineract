@@ -111,12 +111,14 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             guarantorCommand.validateForCreate();
             validateLoanStatus(loan);
             final List<GuarantorFundingDetails> guarantorFundingDetails = new ArrayList<>();
+            final boolean backdatedTxnsAllowedTill = false;
             AccountAssociations accountAssociations = null;
             if (guarantorCommand.getSavingsId() != null) {
-                final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId());
+                final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId(),
+                        backdatedTxnsAllowedTill);
                 validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan, savingsAccount);
                 accountAssociations = AccountAssociations.associateSavingsAccount(loan, savingsAccount,
-                        AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), true);
+                        AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), backdatedTxnsAllowedTill);
 
                 GuarantorFundingDetails fundingDetails = new GuarantorFundingDetails(accountAssociations,
                         GuarantorFundStatusType.ACTIVE.getValue(), guarantorCommand.getAmount());

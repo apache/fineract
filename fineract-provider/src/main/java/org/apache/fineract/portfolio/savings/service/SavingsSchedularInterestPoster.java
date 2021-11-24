@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -54,6 +55,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     private SavingsAccountRepositoryWrapper savingsAccountRepository;
     private SavingsAccountAssembler savingAccountAssembler;
     private FineractPlatformTenant tenant;
+    private ConfigurationDomainService configurationDomainService;
 
     public void setSavingsIds(Collection<Long> savingsIds) {
         this.savingsIds = savingsIds;
@@ -82,7 +84,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         ThreadLocalContextUtil.setTenant(tenant);
         Integer maxNumberOfRetries = tenant.getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = tenant.getConnection().getMaxIntervalBetweenRetries();
-
+        final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
         int i = 0;
         if (!savingsIds.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
@@ -95,7 +97,8 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                         this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
                         boolean postInterestAsOn = false;
                         LocalDate transactionDate = null;
-                        this.savingsAccountWritePlatformService.postInterest(savingsAccount, postInterestAsOn, transactionDate);
+                        this.savingsAccountWritePlatformService.postInterest(savingsAccount, postInterestAsOn, transactionDate,
+                                backdatedTxnsAllowedTill);
 
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
