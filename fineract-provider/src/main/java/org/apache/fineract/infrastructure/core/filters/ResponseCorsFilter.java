@@ -22,6 +22,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,6 +32,8 @@ import org.springframework.util.StringUtils;
  */
 
 @Provider
+@Component
+@Scope("singleton")
 public class ResponseCorsFilter implements ContainerResponseFilter {
 
     @Override
