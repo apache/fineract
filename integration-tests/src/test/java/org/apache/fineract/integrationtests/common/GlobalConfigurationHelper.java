@@ -89,9 +89,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 35 global configurations.
-        Assertions.assertEquals(35, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(35, actualGlobalConfigurations.size());
+        // There are currently 36 global configurations.
+        Assertions.assertEquals(36, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(36, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -406,6 +406,14 @@ public class GlobalConfigurationHelper {
         isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("enabled", false);
         isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("trapDoor", false);
         defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays);
+
+        HashMap<String, Object> isClientAccountNumberLengthModify = new HashMap<>();
+        isClientAccountNumberLengthModify.put("id", 40);
+        isClientAccountNumberLengthModify.put("name", "custom-account-number-length");
+        isClientAccountNumberLengthModify.put("value", 0);
+        isClientAccountNumberLengthModify.put("enabled", false);
+        isClientAccountNumberLengthModify.put("trapDoor", false);
+        defaults.add(isClientAccountNumberLengthModify);
 
         return defaults;
     }
