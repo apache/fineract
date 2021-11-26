@@ -57,8 +57,8 @@ install:
   - curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
   - sudo apt-get -yq install ./zulu-repo_1.0.0-3_all.deb
   - sudo apt-get -q update
-  - sudo apt-get -yq install zulu11-jdk
-  - export JAVA_HOME=/usr/lib/jvm/zulu11
+  - sudo apt-get -yq install zulu17-jdk
+  - export JAVA_HOME=/usr/lib/jvm/zulu17
   - echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_tenants`;'
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_default`;'
