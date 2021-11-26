@@ -108,6 +108,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                         loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
                 dueRepaymentPeriodDate = CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
                         loanApplicationTerms.getRepaymentPeriodFrequencyType());
+                // Adjust the second repayment date to 30 if first repayment date lies in February
+                if (loanApplicationTerms.getSeedDate().getMonthValue() == 2 && loanApplicationTerms.getSeedDate()
+                        .plusMonths(loanApplicationTerms.getRepaymentEvery()).getMonthValue() == dueRepaymentPeriodDate.getMonthValue()) {
+                    dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfMonth(30);
+                }
             }
 
             if (currentCalendar != null) {
