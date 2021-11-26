@@ -49,6 +49,8 @@ import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyExcepti
 import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 
@@ -116,6 +118,13 @@ public class Charge extends AbstractPersistableCustom {
     @Column(name = "restart_frequency_enum", nullable = true)
     private Integer restartFrequencyEnum;
 
+    @Column(name = "is_payment_type", nullable = false)
+    private boolean enablePaymentType;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_type_id", nullable = false)
+    private PaymentType paymentType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "income_or_liability_account_id")
     private GLAccount account;
@@ -124,7 +133,8 @@ public class Charge extends AbstractPersistableCustom {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
-    public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup) {
+    public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
+            final PaymentType paymentType) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
@@ -149,6 +159,9 @@ public class Charge extends AbstractPersistableCustom {
         boolean enableFreeWithdrawalCharge = false;
         enableFreeWithdrawalCharge = command.booleanPrimitiveValueOfParameterNamed("enableFreeWithdrawalCharge");
 
+        boolean enablePaymentType = false;
+        enablePaymentType = command.booleanPrimitiveValueOfParameterNamed("enablePaymentType");
+
         Integer freeWithdrawalFrequency = null;
         Integer restartCountFrequency = null;
         PeriodFrequencyType countFrequencyType = null;
@@ -162,7 +175,7 @@ public class Charge extends AbstractPersistableCustom {
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
                 feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
-                restartCountFrequency, countFrequencyType, account, taxGroup);
+                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
     }
 
     protected Charge() {}
@@ -172,7 +185,7 @@ public class Charge extends AbstractPersistableCustom {
             final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
             final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
             final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
-            final GLAccount account, final TaxGroup taxGroup) {
+            final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -222,6 +235,14 @@ public class Charge extends AbstractPersistableCustom {
                 this.freeWithdrawalFrequency = freeWithdrawalFrequency;
                 this.restartFrequency = restartFrequency;
                 this.restartFrequencyEnum = restartFrequencyEnum.getValue();
+            }
+
+            if (enablePaymentType) {
+                if (paymentType != null) {
+
+                    this.enablePaymentType = enablePaymentType;
+                    this.paymentType = paymentType;
+                }
             }
 
         } else if (isLoanCharge()) {
@@ -334,6 +355,10 @@ public class Charge extends AbstractPersistableCustom {
         return this.enableFreeWithdrawal;
     }
 
+    public boolean isEnablePaymentType() {
+        return this.enablePaymentType;
+    }
+
     public Integer getFrequencyFreeWithdrawalCharge() {
         return this.freeWithdrawalFrequency;
     }
@@ -344,6 +369,22 @@ public class Charge extends AbstractPersistableCustom {
 
     public Integer getRestartFrequencyEnum() {
         return this.restartFrequencyEnum;
+    }
+
+    public PaymentType getPaymentType() {
+        return this.paymentType;
+    }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    private Long getPaymentTypeId() {
+        Long paymentTypeId = null;
+        if (this.paymentType != null) {
+            paymentTypeId = this.paymentType.getId();
+        }
+        return paymentTypeId;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -437,6 +478,19 @@ public class Charge extends AbstractPersistableCustom {
             actualChanges.put(enableFreeWithdrawalChargeParamName, newValue);
             this.enableFreeWithdrawal = newValue;
 
+        }
+
+        final String enablePaymentTypeParamName = "enablePaymentType";
+        if (command.isChangeInBooleanParameterNamed(enablePaymentTypeParamName, this.enablePaymentType)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enablePaymentTypeParamName);
+            actualChanges.put(enablePaymentTypeParamName, newValue);
+            this.enablePaymentType = newValue;
+        }
+
+        final String paymentTypeParamName = "paymentTypeId";
+        if (command.isChangeInLongParameterNamed(paymentTypeParamName, getPaymentTypeId())) {
+            final Long newValue = command.longValueOfParameterNamed(paymentTypeParamName);
+            actualChanges.put(paymentTypeParamName, newValue);
         }
 
         final String chargeAppliesToParamName = "chargeAppliesTo";
@@ -613,11 +667,16 @@ public class Charge extends AbstractPersistableCustom {
             taxGroupData = TaxGroupData.lookup(taxGroup.getId(), taxGroup.getName());
         }
 
+        PaymentTypeData paymentTypeData = null;
+        if (this.paymentType != null) {
+            paymentTypeData = PaymentTypeData.instance(paymentType.getId(), paymentType.getPaymentName());
+        }
+
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
-                this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.minCap, this.maxCap, feeFrequencyType,
-                accountData, taxGroupData);
+                this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.enablePaymentType, paymentTypeData,
+                this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData);
     }
 
     public Integer getChargePaymentMode() {

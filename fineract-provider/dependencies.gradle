@@ -106,7 +106,7 @@ dependencies {
         exclude group: 'javax.activation'
     }
 
-    runtimeOnly('org.ehcache:ehcache') {
+    implementation ('org.ehcache:ehcache') {
         exclude group: 'com.sun.activation'
     }
 

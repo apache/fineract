@@ -21,13 +21,10 @@ package org.apache.fineract.infrastructure.jobs.service;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Global job Listener class to Stop the temporary scheduler once job execution completes
  */
-@Component
 public class SchedulerStopListener implements JobListener {
 
     private static final String name = "Singlr Trigger Global Listener";
@@ -40,8 +37,7 @@ public class SchedulerStopListener implements JobListener {
 
     private JobRegisterService jobRegisterService;
 
-    @Autowired
-    public void setJobRegisterService(JobRegisterService jobRegisterService) {
+    public SchedulerStopListener(JobRegisterService jobRegisterService) {
         this.jobRegisterService = jobRegisterService;
     }
 

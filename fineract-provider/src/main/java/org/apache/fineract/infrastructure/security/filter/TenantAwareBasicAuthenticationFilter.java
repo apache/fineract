@@ -45,7 +45,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.stereotype.Service;
 
 /**
  * A customised version of spring security's {@link BasicAuthenticationFilter}.
@@ -59,33 +58,34 @@ import org.springframework.stereotype.Service;
  *
  * If multi-tenant and basic auth credentials are invalid, a http error response is returned.
  */
-@Service(value = "basicAuthenticationProcessingFilter")
+
 @Profile("basicauth")
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
     private static boolean firstRequestProcessed = false;
     private static final Logger LOG = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
 
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
-    private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
-    private final ConfigurationDomainService configurationDomainService;
-    private final CacheWritePlatformService cacheWritePlatformService;
-    private final NotificationReadPlatformService notificationReadPlatformService;
+    @Autowired
+    private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
+
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
+
+    @Autowired
+    private CacheWritePlatformService cacheWritePlatformService;
+
+    @Autowired
+    private NotificationReadPlatformService notificationReadPlatformService;
+
+    @Autowired
+    private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
 
-    @Autowired
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-            final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
-            final CacheWritePlatformService cacheWritePlatformService,
-            final NotificationReadPlatformService notificationReadPlatformService) {
+            final AuthenticationEntryPoint authenticationEntryPoint) {
         super(authenticationManager, authenticationEntryPoint);
-        this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.configurationDomainService = configurationDomainService;
-        this.cacheWritePlatformService = cacheWritePlatformService;
-        this.notificationReadPlatformService = notificationReadPlatformService;
     }
 
     @Override

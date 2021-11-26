@@ -147,8 +147,8 @@ public class SchedulerJobHelper {
      * @author Michael Vorburger.ch
      */
     public void executeAndAwaitJob(String jobName) {
-        final Duration timeout = Duration.ofMinutes(3);
-        final Duration pause = Duration.ofSeconds(1);
+        final Duration timeout = Duration.ofMinutes(4);
+        final Duration pause = Duration.ofSeconds(2);
         DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
 

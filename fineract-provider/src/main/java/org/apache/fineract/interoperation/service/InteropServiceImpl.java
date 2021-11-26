@@ -427,6 +427,7 @@ public class InteropServiceImpl implements InteropService {
         LocalDate transactionDate = transactionDateTime.toLocalDate();
         DateTimeFormatter fmt = getDateTimeFormatter(command);
         SavingsAccountTransaction transaction;
+        final boolean backdatedTxnsAllowedTill = false;
 
         if (isDebit) {
             SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, transferCode, AMOUNT_HOLD.getValue());
@@ -457,10 +458,11 @@ public class InteropServiceImpl implements InteropService {
             SavingsTransactionBooleanValues transactionValues = new SavingsTransactionBooleanValues(false, true, true, false, false);
             transaction = savingsAccountService.handleWithdrawal(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
                     instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null),
-                    transactionValues);
+                    transactionValues, backdatedTxnsAllowedTill);
         } else {
             transaction = savingsAccountService.handleDeposit(savingsAccount, fmt, transactionDate, request.getAmount().getAmount(),
-                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true);
+                    instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null), false, true,
+                    backdatedTxnsAllowedTill);
         }
 
         String note = request.getNote();

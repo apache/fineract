@@ -69,56 +69,28 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private static final Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
-    // MIFOSX-1184: This class cannot use constructor injection, because one of
-    // its dependencies (SchedulerStopListener) has a circular dependency to
-    // itself. So, slightly differently from how it's done elsewhere in this
-    // code base, the following fields are not final, and there is no
-    // constructor, but setters.
-
+    @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
     private SchedularWritePlatformService schedularWritePlatformService;
+
+    @Autowired
     private TenantDetailsService tenantDetailsService;
+
+    @Autowired
     private SchedulerJobListener schedulerJobListener;
-    private SchedulerStopListener schedulerStopListener;
+
+    @Autowired
     private SchedulerTriggerListener globalSchedulerTriggerListener;
+
+    @Autowired
     private JobParameterRepository jobParameterRepository;
 
     private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
-    @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
-    @Autowired
-    public void setSchedularWritePlatformService(SchedularWritePlatformService schedularWritePlatformService) {
-        this.schedularWritePlatformService = schedularWritePlatformService;
-    }
-
-    @Autowired
-    public void setTenantDetailsService(TenantDetailsService tenantDetailsService) {
-        this.tenantDetailsService = tenantDetailsService;
-    }
-
-    @Autowired
-    public void setSchedulerJobListener(SchedulerJobListener schedulerJobListener) {
-        this.schedulerJobListener = schedulerJobListener;
-    }
-
-    @Autowired
-    public void setSchedulerStopListener(SchedulerStopListener schedulerStopListener) {
-        this.schedulerStopListener = schedulerStopListener;
-    }
-
-    @Autowired
-    public void setGlobalTriggerListener(SchedulerTriggerListener globalTriggerListener) {
-        this.globalSchedulerTriggerListener = globalTriggerListener;
-    }
-
-    @Autowired
-    public void setJobParameterRepository(JobParameterRepository jobParameterRepository) {
-        this.jobParameterRepository = jobParameterRepository;
-    }
+    // This cannot be injected as Autowired due to circular dependency
+    private SchedulerStopListener schedulerStopListener = new SchedulerStopListener(this);
 
     @Value("${node_id:1}")
     private String nodeId;
@@ -381,6 +353,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         jobDetailFactoryBean.setTargetMethod(jobDetails.methodName);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
+        Map<String, String> jobParameterMap = getJobParameter(scheduledJobDetail);
+        if (!jobParameterMap.isEmpty()) {
+            jobDetailFactoryBean.setArguments(jobParameterMap);
+        }
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }

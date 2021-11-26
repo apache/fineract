@@ -195,7 +195,7 @@ public final class SavingsProductData implements Serializable {
                 existingProduct.minBalanceForInterestCalculation, existingProduct.nominalAnnualInterestRateOverdraft,
                 existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions,
                 existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, existingProduct.daysToDormancy,
-                existingProduct.daysToEscheat, existingProduct.accountMappingForPayment);
+                existingProduct.daysToEscheat, accountMappingForPayment);
     }
 
     public static SavingsProductData withAccountingDetails(final SavingsProductData existingProduct,

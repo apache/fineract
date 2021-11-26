@@ -16,21 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.boot;
 
-import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package org.apache.fineract.portfolio.savings.exception;
 
-@Configuration
-public class WebTwoFactorXmlConfiguration {
+import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    @Bean
-    public FilterRegistrationBean twoFactorFilterBean(TwoFactorAuthenticationFilter filter) {
-        FilterRegistrationBean<TwoFactorAuthenticationFilter> registrationBean = new FilterRegistrationBean<TwoFactorAuthenticationFilter>(
-                filter);
-        registrationBean.setEnabled(false);
-        return registrationBean;
+public class TransactionBeforePivotDateNotAllowed extends AbstractPlatformDomainRuleException {
+
+    public TransactionBeforePivotDateNotAllowed(final LocalDate date, final LocalDate interestPostingDate) {
+        super("error.msg.savings.transaction.is.not.allowed",
+                "Savings Account transaction date " + date + " should be after the last interest posting date " + interestPostingDate);
     }
 }

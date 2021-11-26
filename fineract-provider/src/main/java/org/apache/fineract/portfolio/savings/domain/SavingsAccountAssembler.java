@@ -47,11 +47,15 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -74,6 +78,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -89,6 +94,8 @@ public class SavingsAccountAssembler {
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
+    private final JdbcTemplate jdbcTemplate;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -96,7 +103,8 @@ public class SavingsAccountAssembler {
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final RoutingDataSource dataSource,
+            final ConfigurationDomainService configurationDomainService) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -106,6 +114,8 @@ public class SavingsAccountAssembler {
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fromApiJsonHelper = fromApiJsonHelper;
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.configurationDomainService = configurationDomainService;
     }
 
     /**
@@ -307,10 +317,56 @@ public class SavingsAccountAssembler {
         return account;
     }
 
-    public SavingsAccount assembleFrom(final Long savingsId) {
-        final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
+    public SavingsAccount assembleFrom(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
+        SavingsAccount account = this.savingsAccountRepository.findSavingsWithNotFoundDetection(savingsId, backdatedTxnsAllowedTill);
+        return loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
+    }
+
+    public SavingsAccount loadTransactionsToSavingsAccount(final SavingsAccount account, final boolean backdatedTxnsAllowedTill) {
+        List<SavingsAccountTransaction> savingsAccountTransactions = null;
+        if (backdatedTxnsAllowedTill) {
+            Date pivotDate = account.getSummary().getInterestPostedTillDate();
+            boolean isNotPresent = pivotDate == null ? true : false;
+            if (!isNotPresent) {
+                // Get savings account transactions
+                if (isRelaxingDaysConfigForPivotDateEnabled()) {
+                    final Long relaxingDaysForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
+                    LocalDate interestPostedTillDate = LocalDate.ofInstant(account.getSummary().getInterestPostedTillDate().toInstant(),
+                            DateUtils.getDateTimeZoneOfTenant());
+                    savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
+                            Date.from(interestPostedTillDate.minusDays(relaxingDaysForPivotDate)
+                                    .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                } else {
+                    savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
+                            account.getSummary().getInterestPostedTillDate());
+                }
+
+                if (savingsAccountTransactions != null && savingsAccountTransactions.size() > 0) {
+                    // Update transient variable
+                    account.setSavingsAccountTransactions(savingsAccountTransactions);
+                }
+            } else {
+                savingsAccountTransactions = this.savingsAccountRepository.findAllTransactions(account);
+                account.setSavingsAccountTransactions(savingsAccountTransactions);
+            }
+        }
+
+        // Update last running balance on account level
+        if (savingsAccountTransactions != null) {
+            account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size() - 1)
+                    .getRunningBalance(account.getCurrency()).getAmount());
+        }
+
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
+    }
+
+    public boolean getPivotConfigStatus() {
+        return this.configurationDomainService.retrievePivotDateConfig();
+    }
+
+    public boolean isRelaxingDaysConfigForPivotDateEnabled() {
+        return this.configurationDomainService.isRelaxingDaysConfigForPivotDateEnabled();
     }
 
     public void setHelpers(final SavingsAccount account) {

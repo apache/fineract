@@ -62,4 +62,5 @@ public interface SavingsAccountReadPlatformService {
 
     String retrieveAccountNumberByAccountId(Long accountId);
 
+    List<Long> getAccountsIdsByStatusPaged(Integer status, int pageSize, Long maxSavingsIdInList);
 }

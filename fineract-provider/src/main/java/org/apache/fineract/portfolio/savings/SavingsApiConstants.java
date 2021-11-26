@@ -86,6 +86,7 @@ public class SavingsApiConstants {
     public static final String transactionLowerLimitParamName = "transactionLowerLimit";
     public static final String retailEntriesParamName = "retailEntries";
     public static final String childAccountIdParamName = "childAccountId";
+    public static final String interestPostedTillDate = "interestPostedTillDate";
 
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
