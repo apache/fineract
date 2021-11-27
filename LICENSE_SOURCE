@@ -217,70 +217,11 @@ and resource files are also released under the ASF license above.
 *The exceptions for source release are as follows:
 ==================================================
 
-For API & System Architecture Documentation Apache Fineract includes
-following css and js packages.
-
-This product bundles normalize v1.1.1 and v2.1.0, copyright Nicolas
-Gallagher and Jonathan Neal, which is available under a MIT license.
-For details, see licenses/source/normalize.MIT
-
-This product bundles Modernizr v2.6.2, which is available under a MIT license.
-For details, see licenses/source/modernizr.MIT
-
-This product bundles filesaver, copyright Eli Grey, which is available under
-a MIT license.
-For details, see licenses/source/filesaver.MIT
-
-This product bundles Glyphicons Halflings Regular, copyright Jan Kovarik, 
-which is available under a MIT license.
-For details, see licenses/source/glyphicons.MIT
-
-This product bundles jszip, copyright Stuart Knightley, 
-David Duponchel, Franz Buchinger and António Afonso, which is available
-under a MIT license.
-For details, see licenses/source/jszip.MIT
+For API Documentation for Apache Fineract includes
+following css and js packages:
 
 This product bundles jQuery v1.7, v1.7.1, Copyright (c) 2011 John Resig,
 which is available under a MIT license.
-For details, see licenses/source/jQuery1.MIT
-
-This product bundles jQuery v1.9.1, v1.10.2, copyright jQuery Foundation,
-Inc. which is available under a MIT license.
-For details, see licenses/source/jQuery.MIT
-
-This product bundles Respond v1.1.0, copyright Scott Jehl,
-which is available under a MIT license.
-For details, see licenses/source/respond.MIT
-
-This product bundles matchMedia polyfill, copyright Scott Jehl,
-which is available under a MIT license.
-For details, see licenses/polyfill.MIT
-
-This product bundles HTML5Shiv v3.6.2, copyright Alexander Farkas,
-which is available under a MIT license.
-For details, see licenses/source/html5shiv.MIT
-
-This product bundles UglifyJS copyright Mihai Bazon,
-which available under a BSD license.
-For details, see licenses/source/uglify.BSD
-
-This product bundles sizzle copyright jQuery Foundation and other
-contributors, which is available under a MIT license.
-For details, see licenses/source/sizzle.MIT
-
-This product bundles some parts of es5-shim, copyright Kristopher Michael
-Kowal and contributors, which is available under a MIT license.
-For details, see licenses/source/es5shim.MIT
-
-This product bundles toc v0.1.2, copyright Greg Allen,
-which is available under a MIT license.
-For details, see licenses/source/toc.MIT
-
-This product bundles livejs Version 4, copyright Martin Kool and Q42,
-which is available under a MIT license.
-For details, see licenses/source/livejs.MIT
-
-This product bundles HTML5 Boilerplate, which is under a MIT license.
-For details, see licenses/source/h5bp.MIT.
+For details, see https://jquery.org/license/
 
 ******************************************

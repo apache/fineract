@@ -57,6 +57,7 @@ plugins {
     id 'com.diffplug.spotless' version '5.17.1' apply false
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
+    id 'com.github.jk1.dependency-license-report' version '2.0' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
     id 'org.springframework.boot' version '2.6.0' apply false
@@ -93,6 +94,7 @@ allprojects  {
     apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'org.nosphere.apache.rat'
     apply plugin: 'project-report'
+    apply plugin: 'com.github.jk1.dependency-license-report'
 
     // Configuration for the dependency management plugin
     // https://github.com/spring-gradle-plugins/dependency-management-plugin
@@ -217,7 +219,7 @@ allprojects  {
     spotless {
         format 'misc', {
             target '**/*.md', '**/*.properties', '**/.gitignore', '**/.openapi-generator-ignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat'
+            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**'
             indentWithSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
@@ -261,7 +263,12 @@ allprojects  {
             '**/gradlew*'
         ])
     }
+
     licenseFormat.dependsOn licenseFormatBuildScripts
+
+    licenseReport {
+        outputDir = "$projectDir/licenses"
+    }
 
     // Configuration for Apache Release Audit Tool task
     // https://github.com/eskatos/creadur-rat-gradle
