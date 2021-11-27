@@ -155,9 +155,9 @@ compileJava {
 }
 
 war {
-    from("$rootDir/licenses/binary/") {
+    from("$rootDir/licenses/") {
         // notice the parens
-        into "WEB-INF/licenses/binary/" // no leading slash
+        into "WEB-INF/licenses/" // no leading slash
     }
     from("$rootDir/LICENSE_RELEASE") {
         // notice the parens
@@ -285,14 +285,17 @@ tasks.withType(Tar) {
 
 distributions {
     binary {
-        // TODO: Add the version number before enabling this
-        distributionBaseName = "apache-fineract-binary"
+        if(project.hasProperty("distVersion")) {
+            distributionBaseName = "apache-fineract-$distVersion-binary"
+        } else {
+            distributionBaseName = "apache-fineract-binary"
+        }
         contents {
             from bootJar
             from war
             // TODO: @vidakovic add client library
-            from("$rootDir/licenses/binary/") {
-                into "licenses/binary/"
+            from("$rootDir/licenses/") {
+                into "licenses/"
             }
             from "$rootDir/LICENSE_RELEASE"
             from "$rootDir/NOTICE_RELEASE"
@@ -304,11 +307,15 @@ distributions {
         }
     }
     src {
-        // TODO: Add the version number before enabling this
-        distributionBaseName = "apache-fineract-src"
+        if(project.hasProperty("distVersion")) {
+            distributionBaseName = "apache-fineract-$distVersion-src"
+        } else {
+            distributionBaseName = "apache-fineract-src"
+        }
+
         contents {
             from "$rootDir/"
-            exclude '**/build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
+            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
@@ -317,6 +324,7 @@ distributions {
 
 tasks.binaryDistZip.enabled false
 tasks.srcDistZip.enabled false
+tasks.binaryDistTar.dependsOn bootJar
 
 // create signatures and checksums only if project parameter "fineract.release" is provided on the command line
 if( project.hasProperty("fineract.release") ) {
