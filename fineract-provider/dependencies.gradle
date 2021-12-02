@@ -111,7 +111,7 @@ dependencies {
     }
 
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
-        exclude group: 'com.sun.activation'
+        //exclude group: 'com.sun.activation'
     }
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
