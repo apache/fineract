@@ -69,15 +69,14 @@ dependencies {
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.0',
             'com.squareup.retrofit2:converter-gson',
+            'org.apache.commons:commons-email'
             )
 
     implementation('org.springframework.boot:spring-boot-starter-jersey') {
         exclude group: 'org.glassfish.hk2.external', module: 'aopalliance-repackaged'
         exclude group: 'org.glassfish.hk2', module: 'hk2-runlevel'
         exclude group: 'org.hibernate.validator', module: 'hibernate-validator'
-    }
-    implementation('org.apache.commons:commons-email') {
-        exclude group: 'javax.activation'
+        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
     }
     implementation('org.dom4j:dom4j') {
         exclude group: 'javax.xml.bind'
