@@ -111,6 +111,8 @@ dependencies {
     }
 
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
+        exclude group: 'jakarta.activation'
+        exclude group: 'javax.activation'
         //exclude group: 'com.sun.activation'
     }
 
