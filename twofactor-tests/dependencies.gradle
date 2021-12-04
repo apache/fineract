@@ -16,9 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name='fineract'
-include ':fineract-provider'
-include ':integration-tests'
-include ':twofactor-tests'
-include ':fineract-client'
-include ':fineract-doc'
+dependencies {
+    // testCompile dependencies are ONLY used in src/test, not src/main.
+    // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
+    //
+    tomcat 'org.apache.tomcat:tomcat:9.0.54@zip'
+    testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
+            project(path: ':fineract-provider', configuration: 'runtimeElements'),
+            'org.junit.jupiter:junit-jupiter-api',
+            'com.icegreen:greenmail-junit5'
+            )
+    testImplementation ('io.rest-assured:rest-assured') {
+        exclude group: 'commons-logging'
+        exclude group: 'org.apache.sling'
+        exclude group: 'com.sun.xml.bind'
+    }
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine'
+            )
+}

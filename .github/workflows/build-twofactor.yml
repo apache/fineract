@@ -1,4 +1,4 @@
-name: Fineract Gradle build - basicauth
+name: Fineract Gradle build - twofactor
 on: [push, pull_request]
 
 jobs:
@@ -39,4 +39,4 @@ jobs:
             sudo apt-get update
             sudo apt-get install ghostscript -y
       - name: Build & Test
-        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test
+        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :integration-tests:test -Ptwofactor=enabled

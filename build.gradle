@@ -28,6 +28,7 @@ buildscript {
                 'fineract-api',
                 'fineract-provider',
                 'integration-tests',
+                'twofactor-tests',
                 'fineract-client'
             ].contains(it.name)
         }
@@ -142,6 +143,7 @@ allprojects  {
             dependency 'org.webjars.npm:swagger-ui-dist:4.0.1'
             dependency 'org.webjars:webjars-locator-core:0.48'
             dependency 'org.springframework.boot:spring-boot-starter-mail:2.6.0'
+            dependency 'com.icegreen:greenmail-junit5:1.6.5'
 
             // fineract client dependencies
             dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
