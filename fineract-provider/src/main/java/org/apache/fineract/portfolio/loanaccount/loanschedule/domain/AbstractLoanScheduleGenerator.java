@@ -2237,7 +2237,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     do {
                         actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate,
                                 loanApplicationTerms, isFirstRepayment);
-                        if (actualRepaymentDate.isAfter(rescheduleFrom)) {
+                        if (actualRepaymentDate.isAfter(rescheduleFrom) || actualRepaymentDate.isEqual(rescheduleFrom)) {
                             actualRepaymentDate = lastInstallmentDate;
                         }
                         isFirstRepayment = false;
