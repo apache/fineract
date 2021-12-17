@@ -2397,23 +2397,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             periods.clear();
         }
 
-        BigDecimal rescheuleInterestPortionTobeRetained = BigDecimal.ZERO;
-        for (LoanRepaymentScheduleInstallment retainedInstallment : retainedInstallments) {
-            if (retainedInstallment.getRescheduleInterestPortion() != null) {
-                rescheuleInterestPortionTobeRetained = rescheuleInterestPortionTobeRetained
-                        .add(retainedInstallment.getRescheduleInterestPortion());
-            }
-        }
-
-        BigDecimal rescheuleInterestPortionTotal = BigDecimal.ZERO;
-        for (LoanRepaymentScheduleInstallment inst : loan.getRepaymentScheduleInstallments()) {
-            if (inst.getRescheduleInterestPortion() != null) {
-                rescheuleInterestPortionTotal = rescheuleInterestPortionTotal.add(inst.getRescheduleInterestPortion());
-            }
-        }
-
-        BigDecimal rescheuleInterestPortionTobeAppropriated = rescheuleInterestPortionTotal.subtract(rescheuleInterestPortionTobeRetained);
-        loanApplicationTerms.setInterestTobeApproppriated(Money.of(loan.getCurrency(), rescheuleInterestPortionTobeAppropriated));
         LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.charges(), holidayDetailDTO, loanScheduleParams);
 
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : loanScheduleModel.getPeriods()) {
