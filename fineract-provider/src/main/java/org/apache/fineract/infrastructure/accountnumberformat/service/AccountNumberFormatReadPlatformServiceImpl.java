@@ -64,7 +64,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
         AccountNumberFormatMapper() {
             final StringBuilder builder = new StringBuilder(400);
 
-            builder.append(" anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum");
+            builder.append(
+                    " anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum, anf.prefix_character as prefixCharacter");
             builder.append(" from c_account_number_format anf ");
 
             this.schema = builder.toString();
@@ -80,13 +81,14 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             final Long id = rs.getLong("id");
             final Integer accountTypeEnum = rs.getInt("accountTypeEnum");
             final Integer prefixTypeEnum = JdbcSupport.getInteger(rs, "prefixTypeEnum");
+            final String prefixCharacter = rs.getString("prefixCharacter");
 
             final EnumOptionData accountNumberType = AccountNumberFormatEnumerations.entityAccountType(accountTypeEnum);
             EnumOptionData prefixType = null;
             if (prefixTypeEnum != null) {
                 prefixType = AccountNumberFormatEnumerations.accountNumberPrefixType(prefixTypeEnum);
             }
-            return new AccountNumberFormatData(id, accountNumberType, prefixType);
+            return new AccountNumberFormatData(id, accountNumberType, prefixType, prefixCharacter);
         }
     }
 
