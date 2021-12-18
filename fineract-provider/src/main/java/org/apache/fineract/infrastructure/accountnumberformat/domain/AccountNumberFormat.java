@@ -37,19 +37,27 @@ public class AccountNumberFormat extends AbstractPersistableCustom {
     @Column(name = AccountNumberFormatConstants.PREFIX_TYPE_ENUM_COLUMN_NAME, nullable = true)
     private Integer prefixEnum;
 
+    @Column(name = AccountNumberFormatConstants.PREFIX_CHARACTER_COLUMN_NAME, nullable = true)
+    private String prefixCharacter;
+
     protected AccountNumberFormat() {
         //
     }
 
-    public AccountNumberFormat(EntityAccountType entityAccountType, AccountNumberPrefixType prefixType) {
+    public AccountNumberFormat(EntityAccountType entityAccountType, AccountNumberPrefixType prefixType, String prefixCharacter) {
         this.accountTypeEnum = entityAccountType.getValue();
         if (prefixType != null) {
             this.prefixEnum = prefixType.getValue();
         }
+        this.prefixCharacter = prefixCharacter;
     }
 
     public Integer getAccountTypeEnum() {
         return this.accountTypeEnum;
+    }
+
+    public String getPrefixCharacter() {
+        return this.prefixCharacter;
     }
 
     public EntityAccountType getAccountType() {
@@ -74,5 +82,9 @@ public class AccountNumberFormat extends AbstractPersistableCustom {
 
     public void setPrefix(AccountNumberPrefixType accountNumberPrefixType) {
         setPrefixEnum(accountNumberPrefixType.getValue());
+    }
+
+    public void setPrefixCharacter(String prefixCharacter) {
+        this.prefixCharacter = prefixCharacter;
     }
 }
