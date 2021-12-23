@@ -31,7 +31,7 @@ openApiMeta {
 }
 
 openApiValidate {
-    inputSpec = "$swaggerFile"
+    inputSpec = "file://$swaggerFile"
     recommend = true
 }
 
@@ -40,7 +40,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     verbose = false
     validateSpec = false
     skipValidateSpec = true
-    inputSpec = "$swaggerFile"
+    inputSpec = "file://$swaggerFile"
     outputDir = "$buildDir/generated/java".toString()
     templateDir = "$rootDir/fineract-client/src/main/resources/java/template/"
     groupId = 'org.apache.fineract'
@@ -58,7 +58,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
     // trick to make sure fineract.yaml is generated first
     dependsOn = [
-        ':fineract-provider:compileJava'
+        ':fineract-provider:resolve'
     ]
     finalizedBy = [licenseFormat]
     // uncomment below block to automatically copy the custom files in generated SDK
@@ -73,7 +73,7 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     verbose = false
     validateSpec = false
     skipValidateSpec = true
-    inputSpec = "$swaggerFile"
+    inputSpec = "file://$swaggerFile"
     outputDir = "$buildDir/generated/typescript".toString()
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'
@@ -83,6 +83,9 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
         configurationPrefix: 'fineract',
         ngVersion: '10.0.0',
         npmName: 'apache-fineract-client'
+    ]
+    dependsOn = [
+        ':fineract-provider:resolve'
     ]
     finalizedBy = [licenseFormat]
 }

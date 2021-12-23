@@ -24,10 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,6 +48,12 @@ public class AccountNumberGenerator {
     private static final String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private static final String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
     private static final String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
+
+    @Autowired
+    public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService) {
+        this.configurationReadPlatformService = configurationReadPlatformService;
+    }
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
@@ -81,7 +90,21 @@ public class AccountNumberGenerator {
     }
 
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
-        String accountNumber = StringUtils.leftPad(propertyMap.get(ID), AccountNumberGenerator.maxLength, '0');
+        int accountMaxLength = AccountNumberGenerator.maxLength;
+
+        // find if the custom length is defined
+        final GlobalConfigurationPropertyData customLength = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("custom-account-number-length");
+
+        if (customLength.isEnabled()) {
+            // if it is enabled, and has the value, get it from the repository.
+            if (customLength.getValue() != null) {
+                accountMaxLength = customLength.getValue().intValue();
+            }
+
+        }
+
+        String accountNumber = StringUtils.leftPad(propertyMap.get(ID), accountMaxLength, '0');
         if (accountNumberFormat != null && accountNumberFormat.getPrefixEnum() != null) {
             AccountNumberPrefixType accountNumberPrefixType = AccountNumberPrefixType.fromInt(accountNumberFormat.getPrefixEnum());
             String prefix = null;

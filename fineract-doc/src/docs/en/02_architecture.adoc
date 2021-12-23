@@ -10,7 +10,7 @@ The target audience for this report is both system integrators (who will use the
 
 ==== The Idea
 
-Mifos was an idea born out of a wish to create and deploy technology that allows the microfinance industry to scale. The goal is to:
+Fineract was an idea born out of a wish to create and deploy technology that allows the microfinance industry to scale. The goal is to:
 
 - Produce a gold standard management information system suitable for microfinance operations
 - Acts as the basis of a platform for microfinance
@@ -23,12 +23,13 @@ Mifos was an idea born out of a wish to create and deploy technology that allows
 - Late 2011: Grameen Foundation handed over full responsibility to open source community.
 - 2012: Mifos X platform started. Previous members of project come together under the name of Community for Open Source Microfinance (COSM / OpenMF)
 - 2013: COSM / OpenMF officially rebranded to Mifos Initiative and receive US 501c3 status.
+- 2016: Fineract 1.x began incubation at Apache
 
 ==== Project Related
 
-- Project url is https://github.com/openMF/mifosx
-- Download from https://sourceforge.net/projects/mifos/
-- Download stats
+- Project url is https://github.com/apache/fineract
+- Issue tracker is https://issues.apache.org/jira/projects/FINERACT/summary
+- Download from http://fineract.apache.org/
 
 === System Overview
 
@@ -91,8 +92,8 @@ At a higher level though we see the capabilities fall into the following categor
 
 === Technology
 
-* Java 11: http://www.oracle.com/technetwork/java/javase/downloads/index.html
-* JAX-RS 1.0: using Jersey (1.17.x)
+* Java: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+* JAX-RS using Jersey 
 * JSON using Google GSON
 * Spring I/O Platform: http://spring.io/platform
 ** Spring Framework
@@ -116,7 +117,7 @@ See online API Documentation for more detail.
 
 ==== Multi-tenanted
 
-The mifos platform has been developed with support for multi-tenancy at the core of its design. This means that it is just as easy to use the platform for Software-as-a-Service (SaaS) type offerings as it is for local installations.
+The Fineract platform has been developed with support for multi-tenancy at the core of its design. This means that it is just as easy to use the platform for Software-as-a-Service (SaaS) type offerings as it is for local installations.
 
 The platform uses an approach that isolates an FIs data per database/schema (See Separate Databases and Shared Database, Separate Schemas).
 

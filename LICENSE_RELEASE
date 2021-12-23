@@ -216,92 +216,9 @@ and resource files are also released under the ASF license above.
 ==================================================
 *The exceptions for binary release are as follows:
 ==================================================
-This product bundles AOP Alliance v1.0, which is available under a 
-Public Domain license. For details, see licenses/binary/Aopa.PL
 
-This product bundles ASM Core v3.1, which is available under a BSD license.
-For details, see licenses/binary/Asm.BSD
-
-This product bundles JavaMail API(compat) v1.5.0-b01, 
-which is available under a CDDL v1.0 license.
-For details, see licenses/binary/Javamail.CDDL
-
-This product bundles AspectJ Runtime v1.8.2, Copyright (c) 1999-2001 
-Xerox Corporation, 2002 Palo Alto Research Center, Incorporated (PARC),
-which is available under a EPL v1.0 license. 
-For details, see licenses/binary/Aspectrt.EPL
-
-This product bundles AspectJ Weaver v1.8.2, Copyright (c) 2002 Palo Alto
-Research Center, Incorporated (PARC), which is available under a EPL v1.0
-license. For details, see licenses/binary/Aspectweaver.EPL
-
-This product bundles IText(A Free Java PDF Library) v2.1.7, Copyright 2007
-Bruno Lowagie, which is available under a MPL v1.1 license.
-For details, see licenses/binary/IText.MPL
-
-This product bundles DOM4J, Copyright 2001-2005 (C) MetaStuff, Ltd., 
-which is available under a BSD license.
-For details, see licenses/binary/Dom4J.BSD
-
-This product bundles JDBC driver for MySQL and Drizzle v1.3, Copyright (c)
-2009-2013, Marcus Eriksson which is available under a BSD license.
-For details, see licenses/binary/Drizzle.BSD
-
-This product bundles Ical4J v1.0.4, Copyright (c) 2012, Ben Fortuna,
-which is available under a BSD license.
-For details, see licenses/binary/Ical4J.BSD
-
-This product bundles Jersey Core v1.17, Copyright (c) 2010-2012 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Json v1.17, Copyright (c) 2010-2012 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Multipart v1.17, Copyright (c) 2010-2011 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Server v1.17, Copyright (c) 2010-2011 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Servlet v1.17, Copyright (c) 2010-2011 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Spring v1.17, Copyright (c) 2010-2011 Oracle
-and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Logback Classic Module v1.1.2, Copyright (C) 1999-2012,
-QOS.ch. All rights reserved, which is available under a EPL v1.0 license.
-For details, see licenses/binary/Logback.EPL
-
-This product bundles Logback Core Module v1.1.2, Copyright (C) 1999-2012,
-QOS.ch. All rights reserved, which is available under a EPL v1.0 license.
-For details, see licenses/binary/Logback.EPL
-
-This product bundles MIME Streaming Extension v1.6, Copyright (c) 1997-2010
-Oracle and/or its affiliates. All rights reserved., which is available under
-a CDDL v1.1 license.
-For details, see licenses/binary/Mimepull.CDDL
-
-This product bundles JUnit v3.8.1 created by Erich Gamma and Kent Beck which
-is available under a CPL v1.0 license. 
-For details, see licenses/binary/Junit.CPL
-
-This product bundles SLF4J API Module v1.7.7 opyright (c) 2004-2013 QOS.ch
-All rights reserved., which is available under a MIT license. 
-For details, see licenses/binary/Slf4j.MIT
-	
-This product bundles Backport Util Concurrent v3.1 written by Dawid Kurzyniec,
-which is avilable under Public Domain license. 
-For details see licenses/binary/Backport.PL
-
-This product bundles JarAnalyzer v1.2 written by Kirk Knoernschild,
-which is available under BSD license.
-For details see licences/binary/JarAnalyzer.BSD
+This product bundles third party jars and resource files that are 
+released under other licenses than the ASF license. You can find
+details of all third party licenses in the directory "licenses". 
 
 ******************************************

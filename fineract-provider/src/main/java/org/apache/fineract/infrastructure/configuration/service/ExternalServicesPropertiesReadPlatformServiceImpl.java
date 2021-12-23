@@ -83,7 +83,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
 
                 if (ExternalServicesConstants.SMTP_USERNAME.equalsIgnoreCase(name)) {
                     username = value;
-                } else if (ExternalServicesConstants.SMTP_PORT.equalsIgnoreCase(port)) {
+                } else if (ExternalServicesConstants.SMTP_PORT.equalsIgnoreCase(name)) {
                     port = value;
                 } else if (ExternalServicesConstants.SMTP_PASSWORD.equalsIgnoreCase(name)) {
                     password = value;
