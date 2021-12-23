@@ -46,7 +46,8 @@ public enum JobName {
                                                                                                                                                                                             "Generate AdhocClient Schedule"), UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE(
                                                                                                                                                                                                     "Update Email Outbound with campaign message"), EXECUTE_EMAIL(
                                                                                                                                                                                                             "Execute Email"), UPDATE_TRAIL_BALANCE_DETAILS(
-                                                                                                                                                                                                                    "Update Trial Balance Details");
+                                                                                                                                                                                                                    "Update Trial Balance Details"), EXECUTE_DIRTY_JOBS(
+                                                                                                                                                                                                                            "Execute All Dirty Jobs");
 
     private final String name;
 

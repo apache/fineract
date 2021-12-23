@@ -21,12 +21,15 @@ package org.apache.fineract.integrationtests;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -104,7 +107,8 @@ public class LoanApplicationUndoLastTrancheTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A LOAN
-        this.loanTransactionHelper.disburseLoan(disbursalDate, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN IS ACTIVE STATUS
@@ -117,7 +121,7 @@ public class LoanApplicationUndoLastTrancheTest {
         LOG.info("-------------Make repayment 3-----------");
         this.loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
         // DISBURSE A SECOND TRANCHE
-        this.loanTransactionHelper.disburseLoan("23 June 2014", loanID);
+        this.loanTransactionHelper.disburseLoan("23 June 2014", loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         // UNDO LAST TRANCHE
         Float disbursedAmount = this.loanTransactionHelper.undoLastDisbursal(loanID);
         validateDisbursedAmount(disbursedAmount);
@@ -128,9 +132,27 @@ public class LoanApplicationUndoLastTrancheTest {
 
     }
 
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
+    }
+
     public Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, String principal,
             List<HashMap> tranches) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
                 //
                 .withPrincipal(principal)
@@ -145,7 +167,7 @@ public class LoanApplicationUndoLastTrancheTest {
                 .withTranches(tranches) //
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate("01 March 2014") //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
 
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

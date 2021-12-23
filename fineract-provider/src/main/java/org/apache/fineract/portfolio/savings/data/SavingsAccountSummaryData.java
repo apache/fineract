@@ -44,12 +44,14 @@ public class SavingsAccountSummaryData implements Serializable {
     private final BigDecimal interestNotPosted;
     private final LocalDate lastInterestCalculationDate;
     private final BigDecimal availableBalance;
+    private final LocalDate interestPostedTillDate;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
             final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
             final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived, final BigDecimal totalWithholdTax,
-            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate, final BigDecimal availableBalance) {
+            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate, final BigDecimal availableBalance,
+            final LocalDate interestPostedTillDate) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -65,5 +67,6 @@ public class SavingsAccountSummaryData implements Serializable {
         this.interestNotPosted = interestNotPosted;
         this.lastInterestCalculationDate = lastInterestCalculationDate;
         this.availableBalance = availableBalance;
+        this.interestPostedTillDate = interestPostedTillDate;
     }
 }

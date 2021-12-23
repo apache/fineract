@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -254,6 +255,17 @@ final class ClientsApiResourceSwagger {
 
         private PostClientsRequest() {}
 
+        static final class PostClientsDatatable {
+
+            private PostClientsDatatable() {}
+
+            @Schema(example = "Client Beneficiary information")
+            public String registeredTableName;
+            @Schema(example = "data")
+            public HashMap<String, Object> data;
+
+        }
+
         @Schema(example = "1")
         public Integer officeId;
         @Schema(example = "Client of group")
@@ -268,6 +280,9 @@ final class ClientsApiResourceSwagger {
         public Boolean active;
         @Schema(example = "04 March 2009")
         public String activationDate;
+        @Schema(description = "List of PostClientsDatatable")
+        public List<PostClientsDatatable> datatables;
+
     }
 
     @Schema(description = "PostClientsResponse")
@@ -332,8 +347,12 @@ final class ClientsApiResourceSwagger {
 
         private PostClientsClientIdRequest() {}
 
-        @Schema(example = "We cannot accept transfers of clients having loans with less than 1 repayment left")
-        public String note;
+        @Schema(example = "03 August 2021")
+        public String activationDate;
+        @Schema(example = "dd MMM yyyy")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
     }
 
     @Schema(description = "PostClientsClientIdResponse")
@@ -341,6 +360,8 @@ final class ClientsApiResourceSwagger {
 
         private PostClientsClientIdResponse() {}
 
+        @Schema(example = "2")
+        public Integer officeId;
         @Schema(example = "2")
         public Integer clientId;
         @Schema(example = "2")

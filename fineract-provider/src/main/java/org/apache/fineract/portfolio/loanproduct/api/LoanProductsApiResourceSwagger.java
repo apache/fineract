@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer interestRateFrequencyType;
         @Schema(example = "1")
         public Integer amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "0")
         public Integer interestType;
         @Schema(example = "1")
@@ -330,6 +333,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "15.000000")
         public Float annualInterestRate;
         public GetLoanProductsAmortizationType amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoanProductsInterestType interestType;
         public GetLoansProductsInterestCalculationPeriodType interestCalculationPeriodType;
         @Schema(example = "1")
@@ -1044,6 +1049,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "60.000000")
         public Float annualInterestRate;
         public GetLoanProductsResponse.GetLoanProductsAmortizationType amortizationType;
+        @Schema(example = "5.5")
+        public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoanProductsTemplateResponse.GetLoanProductsInterestTemplateType interestType;
         public GetLoanProductsResponse.GetLoansProductsInterestCalculationPeriodType interestCalculationPeriodType;
         @Schema(example = "1")

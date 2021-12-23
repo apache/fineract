@@ -190,6 +190,11 @@ public class SavingsProductHelper {
         return this;
     }
 
+    public SavingsProductHelper withInterestPostingPeriodTypeAsDaily() {
+        this.interestPostingPeriodType = DAILY;
+        return this;
+    }
+
     public SavingsProductHelper withInterestCalculationPeriodTypeAsDailyBalance() {
         this.interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
         return this;

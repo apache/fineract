@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -358,7 +359,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final Map<String, Object> changes = new LinkedHashMap<>(20);
 
-            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -450,7 +451,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Override
     public CommandProcessingResult deleteApplication(final Long savingsId) {
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
 
         if (account.isNotSubmittedAndPendingApproval()) {
@@ -467,7 +468,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         final List<Note> relatedNotes = this.noteRepository.findBySavingsAccount(account);
-        this.noteRepository.deleteInBatch(relatedNotes);
+        this.noteRepository.deleteAllInBatch(relatedNotes);
 
         this.savingAccountRepository.delete(account);
 
@@ -514,7 +515,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         this.savingsAccountApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
-        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
@@ -580,7 +581,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         this.savingsAccountApplicationTransitionApiJsonValidator.validateForUndo(command.json());
 
-        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.undoApplicationApproval();
@@ -638,7 +639,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         this.savingsAccountApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
-        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
@@ -676,7 +677,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         this.savingsAccountApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
-        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
@@ -735,7 +736,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 savingsAccountDataDTO.getGroup(), savingsAccountDataDTO.getSavingsProduct(), savingsAccountDataDTO.getApplicationDate(),
                 savingsAccountDataDTO.getAppliedBy());
         account.approveAndActivateApplication(
-                Date.from(savingsAccountDataDTO.getApplicationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                Date.from(savingsAccountDataDTO.getApplicationDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                 savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
 
@@ -751,7 +752,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         generateAccountNumber(account);
         // post journal entries for activation charges
-        this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
 
         return new CommandProcessingResultBuilder() //
                 .withSavingsId(account.getId()) //

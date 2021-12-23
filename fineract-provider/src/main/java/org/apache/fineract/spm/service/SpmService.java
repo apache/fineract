@@ -19,6 +19,7 @@
 package org.apache.fineract.spm.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -84,9 +85,9 @@ public class SpmService {
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         // set valid to for 100 years
         Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         survey.setValidTo(cal.getTime());
         try {
             this.surveyRepository.saveAndFlush(survey);
@@ -134,9 +135,9 @@ public class SpmService {
         final Survey survey = findById(id);
         LocalDate validFrom = DateUtils.getLocalDateOfTenant();
         Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         survey.setValidTo(cal.getTime());
 
         this.surveyRepository.save(survey);

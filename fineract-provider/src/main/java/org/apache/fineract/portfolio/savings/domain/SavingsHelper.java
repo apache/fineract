@@ -23,6 +23,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -118,6 +119,10 @@ public final class SavingsHelper {
         switch (interestPostingPeriodType) {
             case INVALID:
             break;
+            case DAILY:
+                // produce period end date on current day
+                periodEndDate = periodStartDate;
+            break;
             case MONTHLY:
                 // produce period end date on last day of current month
                 periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
@@ -172,4 +177,9 @@ public final class SavingsHelper {
     public Collection<Long> fetchPostInterestTransactionIds(Long accountId) {
         return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIds(accountId);
     }
+
+    public Collection<Long> fetchPostInterestTransactionIds(Long accountId, Date pivotDate) {
+        return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIdsWithPivotDate(accountId, pivotDate);
+    }
+
 }

@@ -1487,6 +1487,8 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         LOG.info("principal = {}", principal);
 
+        Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
+
         this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId, CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(

@@ -63,8 +63,4 @@ cargoStartLocal.mustRunAfter 'testClasses'
 test {
     dependsOn cargoStartLocal
     finalizedBy cargoStopLocal
-
-    beforeTest { descriptor ->
-        logger.lifecycle("Now running $descriptor.className#$descriptor.displayName...")
-    }
 }

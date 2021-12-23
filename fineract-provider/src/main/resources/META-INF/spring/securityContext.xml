@@ -31,60 +31,6 @@
    http://www.springframework.org/schema/security
    https://www.springframework.org/schema/security/spring-security.xsd">
 
-    <beans:beans profile="basicauth">
-        <http create-session="stateless" use-expressions="true" pattern="/api/**"
-            entry-point-ref="basicAuthenticationEntryPoint">
-            <csrf disabled="true"/>
-            <intercept-url pattern="/api/*/echo" access="permitAll" />
-            <intercept-url pattern="/api/*/authentication" access="permitAll"
-                method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/*/self/authentication" access="permitAll"
-                method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/*/self/registration" access="permitAll"
-                method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/*/self/registration/user" access="permitAll"
-                method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
-                           method="GET" requires-channel="https" />
-            <intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
-                           method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/*/twofactor/validate" access="isFullyAuthenticated()"
-                           method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
-                method="GET" requires-channel="https" />
-            <intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
-                method="POST" requires-channel="https" />
-            <intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
-                method="PUT" requires-channel="https" />
-            <intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
-                method="DELETE" requires-channel="https" />
-            <intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
-                method="HEAD" requires-channel="https" />
-
-            <custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />
-            <custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
-        </http>
-
-        <beans:bean id="basicAuthenticationEntryPoint"
-            class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-            <beans:property name="realmName" value="Fineract Platform API" />
-        </beans:bean>
-
-        <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories"
-                    factory-method="createDelegatingPasswordEncoder">
-        </beans:bean>
-
-        <beans:bean id="customAuthenticationProvider"
-            class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-            <beans:property name="userDetailsService" ref="userDetailsService" />
-            <beans:property name="passwordEncoder" ref="passwordEncoder" />
-        </beans:bean>
-
-        <authentication-manager alias="authenticationManager"
-            erase-credentials="false">
-            <authentication-provider ref="customAuthenticationProvider" />
-        </authentication-manager>
-    </beans:beans>
     <beans:beans profile="oauth">
         <http create-session="stateless" use-expressions="true" pattern="/api/v1/**"
             entry-point-ref="oauthAuthenticationEntryPoint"
@@ -133,10 +79,6 @@
             <access-denied-handler ref="oauthAccessDeniedHandler" />
         </http>
 
-        <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories"
-                    factory-method="createDelegatingPasswordEncoder">
-        </beans:bean>
-
         <beans:bean id="oauthAuthenticationEntryPoint"
             class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
             <beans:property name="realmName" value="Fineract Platform API" />
@@ -176,12 +118,6 @@
         <beans:bean id="clientDetailsUserService"
             class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
             <beans:constructor-arg ref="clientDetailsService" />
-        </beans:bean>
-
-        <beans:bean id="customAuthenticationProvider"
-            class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-            <beans:property name="userDetailsService" ref="userDetailsService" />
-            <beans:property name="passwordEncoder" ref="passwordEncoder" />
         </beans:bean>
 
         <beans:bean id="clientDetailsService"

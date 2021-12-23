@@ -63,7 +63,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         final String role = SelfServiceApiConstants.SELF_SERVICE_USER_ROLE;
         final String sql = "select " + this.roleRowMapper.schema() + " where r.name = ? order by r.id";
 
-        return this.jdbcTemplate.query(sql, new Object[] { role }, this.roleRowMapper);
+        return this.jdbcTemplate.query(sql, this.roleRowMapper, role);
     }
 
     @Override

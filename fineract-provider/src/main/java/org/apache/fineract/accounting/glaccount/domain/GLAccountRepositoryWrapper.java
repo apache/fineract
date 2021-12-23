@@ -41,4 +41,9 @@ public class GLAccountRepositoryWrapper {
         return this.repository.findById(id).orElseThrow(() -> new GLAccountNotFoundException(id));
     }
 
+    // finding account id by glcode for opening balance bulk import
+    public GLAccount findOneByGlCodeWithNotFoundDetection(final String glCode) {
+        return this.repository.findOneByGlCode(glCode).orElseThrow(() -> new GLAccountNotFoundException(glCode));
+    }
+
 }

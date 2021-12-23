@@ -143,4 +143,11 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
         return Objects.hash(entry.getId(), criteriaId, office.getId(), currencyCode, loanProduct.getId(), provisioningCategory.getId(),
                 overdueInDays, reservedAmount, liabilityAccount.getId(), expenseAccount.getId());
     }
+
+    public int partialHashCode() {
+        // this is used to group together all the entries that have similar parameters (excluding the amount reserved)
+        // rather than a check for if the objects are the same based on their values, this tells if they are similar
+        return Objects.hash(entry.getId(), criteriaId, office.getId(), currencyCode, loanProduct.getId(), provisioningCategory.getId(),
+                overdueInDays, liabilityAccount.getId(), expenseAccount.getId());
+    }
 }

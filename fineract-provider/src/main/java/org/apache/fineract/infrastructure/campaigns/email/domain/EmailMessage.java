@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class EmailMessage extends AbstractPersistableCustom {
         this.message = message;
         this.campaignName = campaignName;
         this.submittedOnDate = Date
-                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                .from(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public Map<String, Object> update(final JsonCommand command) {

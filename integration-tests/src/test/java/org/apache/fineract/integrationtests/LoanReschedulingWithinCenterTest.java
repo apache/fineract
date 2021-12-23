@@ -24,8 +24,10 @@ import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -38,6 +40,7 @@ import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -109,6 +112,15 @@ public class LoanReschedulingWithinCenterTest {
         final String recalculationRestFrequencyDate = "01 January 2012";
         final boolean isMultiTrancheLoan = false;
 
+        List<HashMap> collaterals = new ArrayList<>();
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientId), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         // CREATE LOAN MULTIDISBURSAL PRODUCT WITH INTEREST RECALCULATION
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
@@ -118,7 +130,8 @@ public class LoanReschedulingWithinCenterTest {
 
         // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
         final Integer loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID, disbursalDate,
-                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0), null);
+                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0), null,
+                collaterals);
 
         // Test for loan account is created
         Assertions.assertNotNull(loanId);
@@ -130,7 +143,8 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoan(disbursalDate, loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan(disbursalDate, loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -151,6 +165,17 @@ public class LoanReschedulingWithinCenterTest {
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
         assertEquals("90.82", String.valueOf(interestDue));
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal amount) {
+        collaterals.add(collaterals(collateralId, amount));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal amount) {
+        HashMap<String, String> collateral = new HashMap<String, String>(1);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("amount", amount.toString());
+        return collateral;
     }
 
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
@@ -244,10 +269,19 @@ public class LoanReschedulingWithinCenterTest {
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(secondDisbursement, "5000"));
 
+        List<HashMap> collaterals = new ArrayList<>();
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientId), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID,
                 disbursementDate, recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0),
-                createTranches);
+                createTranches, collaterals);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
@@ -262,7 +296,8 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A FIRST TRANCHE
-        this.loanTransactionHelper.disburseLoan(disbursementDate, loanID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        this.loanTransactionHelper.disburseLoan(disbursementDate, loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
@@ -340,19 +375,20 @@ public class LoanReschedulingWithinCenterTest {
     @SuppressWarnings("rawtypes")
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Integer calendarId,
             final Integer loanProductID, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
-            final List<HashMap> charges, List<HashMap> tranches) {
+            final List<HashMap> charges, List<HashMap> tranches, List<HashMap> collaterals) {
         final String graceOnInterestPayment = null;
         final String compoundingStartDate = null;
         final String graceOnPrincipalPayment = null;
         return applyForLoanApplicationForInterestRecalculation(clientID, groupId, calendarId, loanProductID, disbursementDate,
-                restStartDate, compoundingStartDate, repaymentStrategy, charges, graceOnInterestPayment, graceOnPrincipalPayment, tranches);
+                restStartDate, compoundingStartDate, repaymentStrategy, charges, graceOnInterestPayment, graceOnPrincipalPayment, tranches,
+                collaterals);
     }
 
     @SuppressWarnings({ "rawtypes", "unused" })
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Integer calendarId,
             final Integer loanProductID, final String disbursementDate, final String restStartDate, final String compoundingStartDate,
             final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
-            final String graceOnPrincipalPayment, List<HashMap> tranches) {
+            final String graceOnPrincipalPayment, List<HashMap> tranches, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000.00") //
@@ -370,7 +406,7 @@ public class LoanReschedulingWithinCenterTest {
                 .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(disbursementDate) //
                 .withwithRepaymentStrategy(repaymentStrategy) //
-                .withCharges(charges)//
+                .withCollaterals(collaterals).withCharges(charges)//
                 .build(clientID.toString(), groupId.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

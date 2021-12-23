@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 
 /**
  *
@@ -53,6 +52,7 @@ public class ApiGlobalErrorResponse {
      * A list of zero or more of the actual reasons for the HTTP error should they be needed. Typically used to express
      * data validation errors with parameters passed to API.
      */
+
     private List<ApiParameterError> errors = new ArrayList<>();
 
     public static ApiGlobalErrorResponse unAuthenticated() {
@@ -194,8 +194,7 @@ public class ApiGlobalErrorResponse {
         this.errors = errors;
     }
 
-    @XmlElementWrapper(name = "errors")
-    @XmlElement(name = "errorResponse")
+    @JsonProperty("errors")
     public List<ApiParameterError> getErrors() {
         return this.errors;
     }

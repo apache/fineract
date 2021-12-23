@@ -79,7 +79,7 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     public boolean validatePocketAndAccountMapping(Long pocketId, Long accountId, Integer accountType) {
         final String sql = "select count(id) from m_pocket_accounts_mapping mapping where pocket_id = ? and account_id = ? and account_type = ?";
         try {
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { pocketId, accountId, accountType }, Boolean.class);
+            return this.jdbcTemplate.queryForObject(sql, Boolean.class, pocketId, accountId, accountType);
         } catch (EmptyResultDataAccessException e) {
             return false;
         }

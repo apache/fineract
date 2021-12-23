@@ -22,8 +22,10 @@ import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -77,18 +79,28 @@ public class ProvisioningIntegrationTest {
         ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
         for (int i = 0; i < LOANPRODUCTS_SIZE; i++) {
             final Integer loanProductID = createLoanProduct(false, NONE);
             loanProducts.add(loanProductID);
             Assertions.assertNotNull(loanProductID);
-            final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00");
+            List<HashMap> collaterals = new ArrayList<>();
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            Assertions.assertNotNull(collateralId);
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                    String.valueOf(clientID), collateralId);
+            Assertions.assertNotNull(clientCollateralId);
+            addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+            final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00", collaterals);
             HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
             LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
             loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
             LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
             LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
+            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID,
+                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             Assertions.assertNotNull(loanID);
         }
@@ -136,6 +148,17 @@ public class ProvisioningIntegrationTest {
         Assertions.assertTrue((Boolean) entry.get("journalEntry"));
         Map provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId);
         Assertions.assertTrue(((ArrayList) provisioningEntry.get("pageItems")).size() > 0);
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
     }
 
     private void validateProvisioningCriteria(Map requestCriteria, Map newCriteria) {
@@ -206,7 +229,7 @@ public class ProvisioningIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal) {
+            final String savingsId, String principal, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -221,7 +244,7 @@ public class ProvisioningIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
+                .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 

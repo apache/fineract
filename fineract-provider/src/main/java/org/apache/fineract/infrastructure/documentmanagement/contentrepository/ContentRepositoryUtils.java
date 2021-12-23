@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -31,7 +32,7 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.ContentMa
 
 public final class ContentRepositoryUtils {
 
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
 
     private ContentRepositoryUtils() {}
 
@@ -187,6 +188,9 @@ public final class ContentRepositoryUtils {
     /**
      * Generate a random String.
      */
+
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String generateRandomString() {
         final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
         // length is a random number between 5 to 16

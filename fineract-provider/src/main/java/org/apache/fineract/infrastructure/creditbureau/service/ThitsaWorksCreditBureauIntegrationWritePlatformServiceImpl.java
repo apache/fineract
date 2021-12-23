@@ -24,7 +24,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -56,6 +55,7 @@ import org.apache.fineract.infrastructure.creditbureau.domain.CreditReportReposi
 import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWrapper;
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

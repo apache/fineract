@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -42,6 +43,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,13 +69,14 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final TaxReadPlatformService taxReadPlatformService;
+    private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
             final DropdownReadPlatformService dropdownReadPlatformService, final FineractEntityAccessUtil fineractEntityAccessUtil,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final TaxReadPlatformService taxReadPlatformService) {
+            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -82,6 +85,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.taxReadPlatformService = taxReadPlatformService;
+        this.configurationDomainServiceJpa = configurationDomainServiceJpa;
     }
 
     @Override
@@ -152,11 +156,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 .retrieveSharesCalculationTypes();
         final List<EnumOptionData> shareChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveSharesCollectionTimeTypes();
         final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
+        final String accountMappingForChargeConfig = this.configurationDomainServiceJpa.getAccountMappingForCharge();
+        final List<GLAccountData> expenseAccountOptions = this.accountingDropdownReadPlatformService.retrieveExpenseAccountOptions();
+        final List<GLAccountData> assetAccountOptions = this.accountingDropdownReadPlatformService.retrieveAssetAccountOptions();
+
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
                 clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions,
-                shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions);
+                shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions, accountMappingForChargeConfig, expenseAccountOptions,
+                assetAccountOptions);
     }
 
     @Override
@@ -279,15 +288,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
                     + "c.charge_payment_mode_enum as chargePaymentMode, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, "
-                    + "c.is_active as active, oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
+                    + "c.is_active as active, c.is_free_withdrawal as isFreeWithdrawal, c.free_withdrawal_charge_frequency as freeWithdrawalChargeFrequency, c.restart_frequency as restartFrequency, c.restart_frequency_enum as restartFrequencyEnum,"
+                    + "oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
                     + "oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
                     + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
                     + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode, "
-                    + "tg.id as taxGroupId, tg.name as taxGroupName " + "from m_charge c "
-                    + "join m_organisation_currency oc on c.currency_code = oc.code "
+                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName "
+                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
                     + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id "
-                    + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id ";
+                    + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id " + " LEFT JOIN m_payment_type pt on pt.id = c.payment_type_id ";
         }
 
         public String loanProductChargeSchema() {
@@ -364,8 +374,23 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
 
+            final boolean isFreeWithdrawal = rs.getBoolean("isFreeWithdrawal");
+            final int freeWithdrawalChargeFrequency = rs.getInt("freeWithdrawalChargeFrequency");
+            final int restartFrequency = rs.getInt("restartFrequency");
+            final int restartFrequencyEnum = rs.getInt("restartFrequencyEnum");
+
+            final boolean isPaymentType = rs.getBoolean("isPaymentType");
+            final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
+
+            final String paymentTypeName = rs.getString("paymentTypeName");
+            PaymentTypeData paymentTypeData = null;
+            if (paymentTypeId != null) {
+                paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeName);
+            }
+
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType, glAccountData,
+                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
+                    restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
                     taxGroupData);
         }
     }

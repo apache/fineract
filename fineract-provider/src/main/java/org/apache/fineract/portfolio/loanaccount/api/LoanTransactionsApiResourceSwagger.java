@@ -214,7 +214,8 @@ final class LoanTransactionsApiResourceSwagger {
         private PutChargeTransactionChangesRequest() {}
 
         @Schema(example = "1")
-        public Integer transactionId;
-
+        public Integer id;
+        @Schema(example = "2")
+        public Integer loanId;
     }
 }

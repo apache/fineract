@@ -1,0 +1,32 @@
+name: Fineract Sonarqube
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    env:
+        TZ: Asia/Kolkata
+        SONAR_ORGANIZATION: apache
+        SONAR_HOST_URL: https://sonarcloud.io
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Sonarqube
+        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION --info -x rat -x test -x spotbugsMain -x spotbugsTest -x spotbugsGenerated -x licenseMain -x licenseTest -x checkstyleMain -x checkstyleTest --info --stacktrace build sonarqube

@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,7 +70,7 @@ public final class DateUtils {
 
     public static LocalDateTime getLocalDateTimeOfTenant() {
         final ZoneId zone = getDateTimeZoneOfTenant();
-        LocalDateTime today = LocalDateTime.now(zone);
+        LocalDateTime today = LocalDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
         return today;
     }
 

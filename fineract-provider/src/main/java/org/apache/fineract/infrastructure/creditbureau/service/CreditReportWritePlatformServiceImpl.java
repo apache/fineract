@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import org.apache.fineract.infrastructure.creditbureau.domain.CreditReportReposi
 import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWrapper;
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;

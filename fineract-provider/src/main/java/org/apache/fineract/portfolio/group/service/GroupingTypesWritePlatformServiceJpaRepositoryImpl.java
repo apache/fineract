@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -594,7 +595,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
 
             final List<Note> relatedNotes = this.noteRepository.findByGroup(groupForDelete);
-            this.noteRepository.deleteInBatch(relatedNotes);
+            this.noteRepository.deleteAllInBatch(relatedNotes);
 
             this.groupRepository.delete(groupForDelete);
             this.groupRepository.flush();
@@ -654,7 +655,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close", "loan.not.closed",
                         errorMessage);
             } else if (loanStatus.isClosed()
-                    && loan.getClosedOnDate().after(Date.from(closureDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()))) {
+                    && loan.getClosedOnDate().after(Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName()
                         + "closureDate cannot be before the loan closedOnDate.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",

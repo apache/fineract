@@ -98,4 +98,16 @@ public interface ConfigurationDomainService {
     boolean isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
 
     boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI();
+
+    String getAccountMappingForPaymentType();
+
+    String getAccountMappingForCharge();
+
+    boolean isNextDayFixedDepositInterestTransferEnabledForPeriodEnd();
+
+    boolean retrievePivotDateConfig();
+
+    boolean isRelaxingDaysConfigForPivotDateEnabled();
+
+    Long retrieveRelaxingDaysConfigForPivotDate();
 }

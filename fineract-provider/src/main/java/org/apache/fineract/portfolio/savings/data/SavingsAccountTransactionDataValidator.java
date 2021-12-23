@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -56,6 +57,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.exception.TransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,10 +69,31 @@ public class SavingsAccountTransactionDataValidator {
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
                     transactionAmountParamName));
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
+            final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.configurationDomainService = configurationDomainService;
+    }
+
+    public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
+
+        final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
+        final boolean isRelaxingDaysConfigOn = this.configurationDomainService.isRelaxingDaysConfigForPivotDateEnabled();
+
+        final Date lastInterestPostingDate = savingsAccount.getSummary().getInterestPostedTillDate();
+
+        if (backdatedTxnsAllowedTill && lastInterestPostingDate != null) {
+            LocalDate pivotDate = LocalDate.ofInstant(lastInterestPostingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            if (isRelaxingDaysConfigOn) {
+                pivotDate = pivotDate.minusDays(this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate());
+            }
+            if (pivotDate.isAfter(transactionDate)) {
+                throw new TransactionBeforePivotDateNotAllowed(transactionDate, pivotDate);
+            }
+        }
     }
 
     public void validate(final JsonCommand command) {
@@ -181,8 +204,8 @@ public class SavingsAccountTransactionDataValidator {
 
     }
 
-    public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account,
-            final AppUser createdUser) {
+    public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account, final AppUser createdUser,
+            final boolean backdatedTxnsAllowedTill) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -210,7 +233,15 @@ public class SavingsAccountTransactionDataValidator {
         if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
         }
-        LocalDate lastTransactionDate = account.retrieveLastTransactionDate();
+
+        LocalDate lastTransactionDate = null;
+
+        if (!backdatedTxnsAllowedTill) {
+            lastTransactionDate = account.retrieveLastTransactionDate();
+        } else {
+            lastTransactionDate = account.retrieveLastTransactionDateWithPivotConfig();
+        }
+
         // compare two dates now
         if (lastTransactionDate != null && transactionDate.isBefore(lastTransactionDate)) {
             baseDataValidator.parameter(SavingsApiConstants.dateParamName).value(lastTransactionDate).failWithCode(

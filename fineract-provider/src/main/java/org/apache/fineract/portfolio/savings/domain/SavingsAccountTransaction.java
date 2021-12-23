@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -291,7 +292,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
-        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.amount = amount;
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
@@ -430,9 +431,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     public void updateCumulativeBalanceAndDates(final MonetaryCurrency currency, final LocalDate endOfBalanceDate) {
         // balance end date should not be before transaction date
         if (endOfBalanceDate != null && endOfBalanceDate.isBefore(this.transactionLocalDate())) {
-            this.balanceEndDate = Date.from(this.transactionLocalDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.balanceEndDate = Date.from(this.transactionLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else if (endOfBalanceDate != null) {
-            this.balanceEndDate = Date.from(endOfBalanceDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.balanceEndDate = Date.from(endOfBalanceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         } else {
             this.balanceEndDate = null;
         }
@@ -442,6 +443,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public LocalDate getTransactionLocalDate() {
         return LocalDate.ofInstant(this.dateOf.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+    }
+
+    public Date getLastTransactionDate() {
+        return this.dateOf;
     }
 
     public LocalDate getEndOfBalanceLocalDate() {
@@ -566,7 +571,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
 
-            if (openingBalance.isGreaterThanZero()) {
+            if (openingBalance.isGreaterThanZero() || this.savingsAccount.allowOverdraft()) {
                 endOfDayBalance = openingBalance.minus(getAmount(currency));
             } else {
                 endOfDayBalance = Money.of(currency, this.runningBalance);
@@ -598,7 +603,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
                 // }
             } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
                 // endOfDayBalance = openingBalance.minus(getAmount(currency));
-                if (endOfDayBalance.isGreaterThanZero()) {
+                if (endOfDayBalance.isGreaterThanZero() || this.savingsAccount.allowOverdraft()) {
                     endOfDayBalance = endOfDayBalance.minus(getAmount(currency));
                 } else {
                     endOfDayBalance = Money.of(currency, this.runningBalance);

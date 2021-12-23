@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,8 +54,8 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     private Date endDate;
 
     public static LoanOfficerAssignmentHistory createNew(final Loan loan, final Staff loanOfficer, final LocalDate startDate) {
-        return new LoanOfficerAssignmentHistory(loan, loanOfficer,
-                Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), null);
+        return new LoanOfficerAssignmentHistory(loan, loanOfficer, Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                null);
     }
 
     protected LoanOfficerAssignmentHistory() {
@@ -73,11 +74,11 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public void updateStartDate(final LocalDate startDate) {
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void updateEndDate(final LocalDate endDate) {
-        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {

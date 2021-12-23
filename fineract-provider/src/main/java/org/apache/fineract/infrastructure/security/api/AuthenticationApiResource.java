@@ -19,15 +19,17 @@
 package org.apache.fineract.infrastructure.security.api;
 
 import com.google.gson.Gson;
-import com.sun.jersey.core.util.Base64;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Set;
 import javax.ws.rs.Consumes;
@@ -93,10 +95,11 @@ public class AuthenticationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Verify authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class))),
             @ApiResponse(responseCode = "400", description = "Unauthenticated. Please login") })
-    public String authenticate(final String apiRequestBodyAsJson,
+    public String authenticate(@Parameter(hidden = true) final String apiRequestBodyAsJson,
             @QueryParam("returnClientList") @DefaultValue("false") boolean returnClientList) {
         // TODO FINERACT-819: sort out Jersey so JSON conversion does not have
         // to be done explicitly via GSON here, but implicit by arg
@@ -122,7 +125,8 @@ public class AuthenticationApiResource {
                 permissions.add(grantedAuthority.getAuthority());
             }
 
-            final byte[] base64EncodedAuthenticationKey = Base64.encode(request.username + ":" + request.password);
+            final byte[] base64EncodedAuthenticationKey = Base64.getEncoder()
+                    .encode((request.username + ":" + request.password).getBytes(StandardCharsets.UTF_8));
 
             final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
             final Collection<RoleData> roles = new ArrayList<>();

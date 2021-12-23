@@ -23,36 +23,33 @@ dist: bionic
 
 language: generic
 
-services:
-  - mysql
-  - docker
-
 addons:
-  apt:
-    packages:
-    - curl
-    - graphviz
-    - gv
+  sonarcloud:
+    organization: "apache"
+    token:
+      secure: "Q2E9ijK+9+R6nkb9o2FQrKUiAozp0325mlGfM25rGV3mCRPyWR/lU8o48r2eaBEX8SEvMvXIO3XXD9SPyUX2+svLz0MOMdfZfNveg6jmcHNRjkzzBK0bMIIGbEH/YqJ+psl4nDmlDd6IK4685/1JSRUJLqeKKK2ulixm6PXcmwZWeKD6TjyXsW50zz3yYIOuROHzys/M6H05h1dZD3j6ztnRsjbr7SmqFEVWSRgEd/aAs+HZB9Fv1xN66csRoQUQKgzoBO9egAQcel65Av0Bf+pOQuzVDVyXNohZEYia02MCGlC6OFvtL7xIXGf/vo02RdnlN4Jnma6P37TaNrmpk2e+EGJaZHmL9cb98+Zc39uPb7qEZkMfDdKrW6QVRtScSuCJzpY58WRgTS0jLCxsDBAMfsrIvWbHntFZL9q5aEkFgecj0pg9u6WHxgA8cuPUY5QzHQo9fEUxNJHGJHQ2FkafLniqJp7DVbsyQHmEggaTrGGrketeYvCbSR1oOnBgImUwzjIV9/zOdd10Wzi8x9HsmzrGBPSBaO4fBxjC1LZwdyue2a2+oKvBqpAGcLpGaCRfHTh2yPXhZW4bw11rOmQxgtOQVBXhveciWAUQuVXIak+RZnu/zRvnul9sZ6bb1hEUPkpUypk+FDeLm8T7y2A++u/jBam2vLc0iff5xtA="
 
 # See https://issues.apache.org/jira/browse/FINERACT-937 for background re. what below is all about..
 # We basically remove the outdated OpenJDK 11.0.2 which Travis image grabbed from java.net in
 # https://github.com/travis-ci/travis-cookbooks/blob/master/cookbooks/travis_jdk/files/install-jdk.sh#L200
-# (which has 11.0.2 hard-coded!), and instead replace it with the latest openjdk-11-jdk-headless Ubuntu package.
+# (which has 11.0.2 hard-coded!), and instead replace it with the latest Azul Zulu Debian package.
 # NB /usr/local/lib/jvm/openjdk11/bin is also on the PATH, but there's no need to change it (because we rm -rf anyway)
+# Installing Azul Zulu as per official instructions https://docs.azul.com/core/zulu-openjdk/install/debian
 before_install:
   - echo $JAVA_HOME
   - which java
   - sudo rm -rf /usr/local/lib/jvm/
-  - sudo apt-get install -y openjdk-11-jdk-headless
-  - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
-  - which java
-  - java -version
-  - $JAVA_HOME/bin/java -version
-  - echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root
-  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_tenants`;'
-  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_default`;'
-# Hardcoding the time zone is a temporary fix for https://issues.apache.org/jira/browse/FINERACT-723
-  - export TZ=Asia/Kolkata
+
+install:
+  - unset _JAVA_OPTIONS
+  - sudo apt-get -q update
+  - sudo apt-get -yq install gnupg curl dirmngr
+  - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
+  - curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+  - sudo apt-get -yq install ./zulu-repo_1.0.0-3_all.deb
+  - sudo apt-get -q update
+  - sudo apt-get -yq install zulu11-jdk
+  - export JAVA_HOME=/usr/lib/jvm/zulu11
 
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
@@ -64,16 +61,20 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
-# NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
-# where you do not have access to any files like build/reports/tests/index.html, only the Console.
-# @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
-# @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
-# https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
+# Check Java environment variables
+before_script:
+  - echo $JDK_JAVA_OPTIONS
+  - echo $JAVA_OPTIONS
+  - echo $JAVA_HOME
+  - which java
+  - java -version
+  - which javac
+  - javac -version
+  - $JAVA_HOME/bin/java -version
+
 script:
   - date
-# using "&&" instead of several "-" means that integrationTest does not run if test fails,
-# and Docker test does not run if integration test fails, which makes PR failure easier to understand.
-# @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
-  - ./gradlew --no-daemon --console=plain licenseMain licenseTest check build test --fail-fast doc  &&  sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 60s  && curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health  &&  (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
-# We stop the mysql system service when running the Docker test to avoid port 3306 conflicts (unless we run the mysql in docker-compose on another port; req. FINERACT-773)
-# The fancy /actuator/info test makes sure that has more than 100 characters of JSON to test that the git.properties worked (see FINERACT-983)
+# Using travis_wait for a proccess that could take longer than 20 minutes, in this case the SonaQube analysis
+# https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
+  - travis_wait 30 ./gradlew -q --no-daemon --console=plain -x rat -x test sonarqube -Pcoverage=true
+  - date

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -231,7 +232,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         sb.append(" and saps.status_enum = ?");
         params.add(PurchasedSharesStatusType.APPROVED.getValue());
         Object[] whereClauseItems = params.toArray();
-        return this.jdbcTemplate.query(sb.toString(), whereClauseItems, mapper);
+        return this.jdbcTemplate.query(sb.toString(), mapper, whereClauseItems);
     }
 
     public Collection<ShareAccountChargeData> convertChargesToShareAccountCharges(Collection<ChargeData> productCharges) {
@@ -491,7 +492,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         public ShareAccountDividendData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Date postedDate = Date
-                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(ZoneId.systemDefault()).toInstant());
             final BigDecimal postedAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final Long savingTransactionId = rs.getLong("savings_transaction_id");
             final Integer status = rs.getInt("status");
@@ -509,7 +510,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public String retrieveAccountNumberByAccountId(Long accountId) {
         try {
             final String sql = "select s.account_no from m_share_account s where s.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+            return this.jdbcTemplate.queryForObject(sql, String.class, accountId);
         } catch (final EmptyResultDataAccessException e) {
             throw new ShareAccountNotFoundException(accountId, e);
         }

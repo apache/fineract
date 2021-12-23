@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,8 +51,8 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
 
     private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
         this.percentage = percentage;
-        this.startDate = Date.from(startDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-        this.endDate = Date.from(endDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,

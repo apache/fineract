@@ -28,6 +28,7 @@ import java.util.List;
 public enum SavingsPostingInterestPeriodType {
 
     INVALID(0, "savingsPostingInterestPeriodType.invalid"), //
+    DAILY(1, "savingsPostingInterestPeriodType.daily"), //
     MONTHLY(4, "savingsPostingInterestPeriodType.monthly"), //
     QUATERLY(5, "savingsPostingInterestPeriodType.quarterly"), //
     BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"), ANNUAL(7, "savingsPostingInterestPeriodType.annual");
@@ -63,6 +64,9 @@ public enum SavingsPostingInterestPeriodType {
         SavingsPostingInterestPeriodType repaymentFrequencyType = SavingsPostingInterestPeriodType.INVALID;
         if (type != null) {
             switch (type) {
+                case 1:
+                    repaymentFrequencyType = SavingsPostingInterestPeriodType.DAILY;
+                break;
                 case 4:
                     repaymentFrequencyType = SavingsPostingInterestPeriodType.MONTHLY;
                 break;

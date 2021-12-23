@@ -18,13 +18,16 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import java.util.Date;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,10 +46,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class SavingsAccountRepositoryWrapper {
 
     private final SavingsAccountRepository repository;
+    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository) {
+    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository,
+            final SavingsAccountTransactionRepository savingsAccountTransactionRepository, final RoutingDataSource dataSource) {
         this.repository = repository;
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +62,21 @@ public class SavingsAccountRepositoryWrapper {
         final SavingsAccount account = this.repository.findById(savingsId)
                 .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));
         account.loadLazyCollections();
+        return account;
+    }
+
+    @Transactional
+    public SavingsAccount findSavingsWithNotFoundDetection(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
+        SavingsAccount account = null;
+        if (!backdatedTxnsAllowedTill) {
+            account = findOneWithNotFoundDetection(savingsId);
+        } else {
+            account = this.repository.findOneLocked(savingsId);
+            if (account == null) {
+                throw new SavingsAccountNotFoundException(savingsId);
+            }
+        }
+
         return account;
     }
 
@@ -104,6 +127,17 @@ public class SavingsAccountRepositoryWrapper {
 
     public List<SavingsAccount> findByGsimId(@Param("gsimId") Long gsimId) {
         return this.repository.findSavingAccountByGsimId(gsimId);
+    }
+
+    @Transactional
+    public List<SavingsAccountTransaction> findTransactionsAfterPivotDate(@Param("savingsAccount") SavingsAccount savingsAccount,
+            @Param("date") Date date) {
+        return this.savingsAccountTransactionRepository.findTransactionsAfterPivotDate(savingsAccount, date);
+    }
+
+    @Transactional
+    public List<SavingsAccountTransaction> findAllTransactions(@Param("savingsAccount") SavingsAccount savingsAccount) {
+        return this.savingsAccountTransactionRepository.findBySavingsAccount(savingsAccount);
     }
 
     // Root Entity is enough

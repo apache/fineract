@@ -25,6 +25,7 @@ public interface LoanApiConstants {
     String disbursementDataParameterName = "disbursementData";
     String disbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";
+    String disbursementNetDisbursalAmountParameterName = "netDisbursalAmount";
     String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
     String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
     String disbursementIdParameterName = "id";
@@ -32,6 +33,7 @@ public interface LoanApiConstants {
     String principalDisbursedParameterName = "transactionAmount";
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
+    String postDatedChecks = "postDatedChecks";
 
     String approvedLoanAmountParameterName = "approvedLoanAmount";
     String approvedOnDateParameterName = "approvedOnDate";
@@ -99,6 +101,7 @@ public interface LoanApiConstants {
     String APPROVED_AMOUNT_IS_LESS_THAN_SUM_OF_TRANCHES = "sum.of.multi.disburse.amounts.must.be.equal.to.or.lesser.than.approved.principal";
     String DISBURSEMENT_DATES_NOT_IN_ORDER = "disbursements.should.be.ordered.based.on.their.disbursement.dates";
     String DISBURSEMENT_DATE_BEFORE_ERROR = "disbursement.date.of.tranche.cannot.be.before.expected.disbursement.date";
+    String LOAN_COLLATERAL_TOTAL_VALUE_SHOULD_BE_SUFFICIENT = "sum.of.multi.collateral.values.must.equal.or.greater.than.principal.amount";
 
     String isFloatingInterestRate = "isFloatingInterestRate";
     String interestRateDifferential = "interestRateDifferential";
@@ -131,5 +134,7 @@ public interface LoanApiConstants {
     String isEqualAmortizationParam = "isEqualAmortization";
     String applicationId = "applicationId";
     String lastApplication = "lastApplication";
+
+    String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
 
 }

@@ -34,10 +34,22 @@ public final class ChartOfAcountsConstants {
     public static final int TAG_COL = 7;// H
     public static final int TAG_ID_COL = 8;// I
     public static final int DESCRIPTION_COL = 9;// J
-    public static final int LOOKUP_ACCOUNT_TYPE_COL = 15;// P
-    public static final int LOOKUP_ACCOUNT_NAME_COL = 16; // Q
-    public static final int LOOKUP_ACCOUNT_ID_COL = 17;// R
-    public static final int LOOKUP_TAG_COL = 18; // S
-    public static final int LOOKUP_TAG_ID_COL = 19; // T
-    public static final int STATUS_COL = 20;
+    // adding for opening balance bulk import
+    public static final int OFFICE_COL = 10; // K
+    public static final int OFFICE_COL_ID = 11; // L
+    public static final int CURRENCY_CODE = 12; // M
+    public static final int DEBIT_AMOUNT = 13; // N
+    public static final int CREDIT_AMOUNT = 14; // O
+
+    public static final int LOOKUP_ACCOUNT_TYPE_COL = 18;// S
+    public static final int LOOKUP_ACCOUNT_NAME_COL = 19; // T
+    public static final int LOOKUP_ACCOUNT_ID_COL = 20;// U
+    public static final int LOOKUP_TAG_COL = 21; // V
+    public static final int LOOKUP_TAG_ID_COL = 22; // W
+
+    // adding for opening balance bulk import
+    public static final int LOOKUP_OFFICE_COL = 23; // X
+    public static final int LOOKUP_OFFICE_ID_COL = 24; // Y
+
+    public static final int STATUS_COL = 25;
 }

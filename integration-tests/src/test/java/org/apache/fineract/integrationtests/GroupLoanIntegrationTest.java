@@ -25,12 +25,14 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -225,6 +227,16 @@ public class GroupLoanIntegrationTest {
 
     private HashMap<String, Integer> applyForGlimApplication(final Integer clientID, final Integer groupID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+
+        List<HashMap> collaterals = new ArrayList<>();
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         final String GlimApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withLoanTermFrequency("4") //
@@ -238,9 +250,20 @@ public class GroupLoanIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011").withLoanType("glim").withtotalLoan("10000").withParentAccount("1")
-                .build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
         LOG.info(GlimApplicationJSON);
         return this.loanTransactionHelper.getGlimId(GlimApplicationJSON);
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal amount) {
+        collaterals.add(collaterals(collateralId, amount));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal amount) {
+        HashMap<String, String> collateral = new HashMap<String, String>(1);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("amount", amount.toString());
+        return collateral;
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {

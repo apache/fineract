@@ -76,6 +76,7 @@ public class GlobalConfigurationHelper {
             // the future, it needs to be reset here.
             final Integer configDefaultId = (Integer) configDefault.get("id");
             final Integer configDefaultValue = (Integer) configDefault.get("value");
+
             updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
             updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
                     (Boolean) configDefault.get("enabled"));
@@ -88,9 +89,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 30 global configurations.
-        Assertions.assertEquals(30, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(30, actualGlobalConfigurations.size());
+        // There are currently 36 global configurations.
+        Assertions.assertEquals(36, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(36, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -361,6 +362,58 @@ public class GlobalConfigurationHelper {
         isInterestAppropriationEnabled.put("enabled", false);
         isInterestAppropriationEnabled.put("trapDoor", false);
         defaults.add(isInterestAppropriationEnabled);
+
+        HashMap<String, Object> isAccountMappedForPayment = new HashMap<>();
+        isAccountMappedForPayment.put("id", 35);
+        isAccountMappedForPayment.put("name", "account-mapping-for-payment-type");
+        isAccountMappedForPayment.put("value", 0);
+        isAccountMappedForPayment.put("enabled", true);
+        isAccountMappedForPayment.put("trapDoor", false);
+        isAccountMappedForPayment.put("string_value", "Asset");
+        defaults.add(isAccountMappedForPayment);
+
+        HashMap<String, Object> isAccountMappedForCharge = new HashMap<>();
+        isAccountMappedForCharge.put("id", 36);
+        isAccountMappedForCharge.put("name", "account-mapping-for-charge");
+        isAccountMappedForCharge.put("value", 0);
+        isAccountMappedForCharge.put("enabled", true);
+        isAccountMappedForCharge.put("trapDoor", false);
+        isAccountMappedForCharge.put("string_value", "Income");
+        defaults.add(isAccountMappedForCharge);
+
+        HashMap<String, Object> isNextDayFixedDepositInterestTransferEnabledForPeriodEnd = new HashMap<>();
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("id", 37);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("name",
+                "fixed-deposit-transfer-interest-next-day-for-period-end-posting");
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("value", 0);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("enabled", false);
+        isNextDayFixedDepositInterestTransferEnabledForPeriodEnd.put("trapDoor", false);
+        defaults.add(isNextDayFixedDepositInterestTransferEnabledForPeriodEnd);
+
+        HashMap<String, Object> isAllowedBackDatedTransactionsBeforeInterestPostingDate = new HashMap<>();
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("id", 38);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("name", "allow-backdated-transaction-before-interest-posting");
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("value", 0);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("enabled", true);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("trapDoor", false);
+        defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDate);
+
+        HashMap<String, Object> isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays = new HashMap<>();
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("id", 39);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("name",
+                "allow-backdated-transaction-before-interest-posting-date-for-days");
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("value", 0);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("enabled", false);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("trapDoor", false);
+        defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays);
+
+        HashMap<String, Object> isClientAccountNumberLengthModify = new HashMap<>();
+        isClientAccountNumberLengthModify.put("id", 40);
+        isClientAccountNumberLengthModify.put("name", "custom-account-number-length");
+        isClientAccountNumberLengthModify.put("value", 0);
+        isClientAccountNumberLengthModify.put("enabled", false);
+        isClientAccountNumberLengthModify.put("trapDoor", false);
+        defaults.add(isClientAccountNumberLengthModify);
 
         return defaults;
     }

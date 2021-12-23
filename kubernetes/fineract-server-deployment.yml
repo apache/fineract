@@ -72,13 +72,13 @@ spec:
           httpGet:
             path: /fineract-provider/actuator/health/liveness
             port: 8080
-          initialDelaySeconds: 90
+          initialDelaySeconds: 180
           periodSeconds: 1
         readinessProbe:
           httpGet:
             path: /fineract-provider/actuator/health/readiness
             port: 8080
-          initialDelaySeconds: 90
+          initialDelaySeconds: 180
           periodSeconds: 1
         env:
         - name: DRIVERCLASS_NAME
@@ -87,6 +87,8 @@ spec:
           value: jdbc
         - name: SUB_PROTOCOL
           value: mysql:thin
+        - name: node_id
+          value: 1
         - name: fineract_tenants_driver
           value: org.drizzle.jdbc.DrizzleDriver
         - name: fineract_tenants_url

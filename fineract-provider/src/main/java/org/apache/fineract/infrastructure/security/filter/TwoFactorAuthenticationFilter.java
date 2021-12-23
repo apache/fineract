@@ -54,7 +54,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * An authenticated platform user with permission 'BYPASS_TWOFACTOR' will always be granted 'TWOFACTOR_AUTHENTICATED'
  * authority regardless of the value of the 'Fineract-Platform-TFA-Token' header.
  */
-@Service(value = "twoFactorAuthFilter")
+@Service
 @Profile("twofactor")
 public class TwoFactorAuthenticationFilter extends GenericFilterBean {
 

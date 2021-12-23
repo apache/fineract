@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,6 +57,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstr
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
@@ -73,6 +75,9 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
+import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -101,6 +106,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
+    private final PostDatedChecksRepository postDatedChecksRepository;
+    private final LoanCollateralManagementRepository loanCollateralManagementRepository;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
@@ -114,9 +121,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
             final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService,
-            final StandingInstructionRepository standingInstructionRepository) {
+            final StandingInstructionRepository standingInstructionRepository, final PostDatedChecksRepository postDatedChecksRepository,
+            final LoanCollateralManagementRepository loanCollateralManagementRepository) {
         this.loanAccountAssembler = loanAccountAssembler;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.loanTransactionRepository = loanTransactionRepository;
         this.noteRepository = noteRepository;
         this.configurationDomainService = configurationDomainService;
@@ -132,6 +139,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.businessEventNotifierService = businessEventNotifierService;
         this.loanUtilService = loanUtilService;
         this.standingInstructionRepository = standingInstructionRepository;
+        this.postDatedChecksRepository = postDatedChecksRepository;
+        this.loanCollateralManagementRepository = loanCollateralManagementRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
     @Transactional
@@ -142,6 +152,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             Boolean isHolidayValidationDone) {
         return makeRepayment(loan, builderResult, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
                 isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
+    }
+
+    @Transactional
+    @Override
+    public void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementSet) {
+        this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
+    }
+
+    @Transactional
+    @Override
+    public void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, Integer isReleased) {
+        for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagementSet) {
+            loanCollateralManagement.setIsReleased(isReleased);
+        }
+        this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
     }
 
     @Transactional
@@ -227,12 +252,42 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         builderResult.withEntityId(newRepaymentTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());
 
+        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+            // Mark Post Dated Check as paid.
+            final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = newRepaymentTransaction
+                    .getLoanTransactionToRepaymentScheduleMappings();
+
+            if (loanTransactionToRepaymentScheduleMappings != null) {
+                for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
+                    LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
+                            .getLoanRepaymentScheduleInstallment();
+                    if (loanRepaymentScheduleInstallment != null) {
+                        final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
+                        PostDatedChecks postDatedChecks = this.postDatedChecksRepository
+                                .getPendingPostDatedCheck(loanRepaymentScheduleInstallment);
+
+                        if (postDatedChecks != null) {
+                            if (!isPaid) {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PAID);
+                            } else {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
+                            }
+                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         return newRepaymentTransaction;
     }
 
     private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
-            this.loanTransactionRepository.save(newRepaymentTransaction);
+            LoanTransaction loanTransaction = this.loanTransactionRepository.save(newRepaymentTransaction);
+
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -319,8 +374,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         } else {
             final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
             final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                    Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                    HolidayStatusType.ACTIVE.getValue());
+                    Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
             final WorkingDays workingDays = this.workingDaysRepository.findOne();
             final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
             final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
@@ -400,8 +454,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
@@ -445,6 +498,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Money amount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amount, paymentDetail, transactionDate,
                 txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+
+        // Subtract Previous loan outstanding balance from netDisbursalAmount
+        loan.deductFromNetDisbursalAmount(transactionAmount);
+
         disbursementTransaction.updateLoan(loan);
         loan.addLoanTransaction(disbursementTransaction);
         saveLoanTransactionWithDataIntegrityViolationChecks(disbursementTransaction);
@@ -524,6 +581,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);
             }
         }
+
     }
 
     private void generateLoanScheduleAccrualData(final LocalDate accruedTill,
@@ -594,8 +652,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 transactionDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                Date.from(transactionDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 

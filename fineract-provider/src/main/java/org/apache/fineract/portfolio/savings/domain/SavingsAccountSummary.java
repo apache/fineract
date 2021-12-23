@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -30,6 +32,7 @@ import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 
 /**
@@ -82,6 +85,14 @@ public final class SavingsAccountSummary {
     @Column(name = "last_interest_calculation_date")
     private Date lastInterestCalculationDate;
 
+    // Currently this represents the last interest posting date
+    @Temporal(TemporalType.DATE)
+    @Column(name = "interest_posted_till_date")
+    private Date interestPostedTillDate;
+
+    @Transient
+    private BigDecimal runningBalanceOnInterestPostingTillDate = BigDecimal.ZERO;
+
     SavingsAccountSummary() {
         //
     }
@@ -101,9 +112,128 @@ public final class SavingsAccountSummary {
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
 
+        // boolean isUpdated = false;
+        updateRunningBalanceAndPivotDate(false, transactions, null, null, currency);
+
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)
                 .minus(totalOverdraftInterestDerived).minus(totalWithholdTax).getAmount();
+    }
+
+    public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
+            final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
+
+        if (transaction != null) {
+            Money transactionAmount = Money.of(currency, transaction.getAmount());
+            switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
+                case DEPOSIT:
+                    if (transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed()) {
+                        this.totalDeposits = Money.of(currency, this.totalDeposits).plus(transactionAmount).getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).plus(transactionAmount).getAmount();
+                    }
+                break;
+                case WITHDRAWAL:
+                    if (transaction.isWithdrawal() && transaction.isNotReversed()) {
+                        this.totalWithdrawals = Money.of(currency, this.totalWithdrawals).plus(transactionAmount).getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                case WITHDRAWAL_FEE:
+                    if (transaction.isWithdrawalFeeAndNotReversed() && transaction.isNotReversed()) {
+                        this.totalWithdrawalFees = Money.of(currency, this.totalWithdrawalFees).plus(transactionAmount).getAmount();
+                        this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                case ANNUAL_FEE:
+                    if (transaction.isAnnualFeeAndNotReversed() && transaction.isNotReversed()) {
+                        this.totalAnnualFees = Money.of(currency, this.totalAnnualFees).plus(transactionAmount).getAmount();
+                        this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                case WAIVE_CHARGES:
+                    if (transaction.isWaiveFeeChargeAndNotReversed()) {
+                        this.totalFeeChargesWaived = Money.of(currency, this.totalFeeChargesWaived).plus(transactionAmount.getAmount())
+                                .getAmount();
+                    } else if (transaction.isWaivePenaltyChargeAndNotReversed()) {
+                        this.totalPenaltyChargesWaived = Money.of(currency, this.totalPenaltyChargesWaived)
+                                .plus(transactionAmount.getAmount()).getAmount();
+                    }
+                break;
+                case PAY_CHARGE:
+                    if (transaction.isFeeChargeAndNotReversed()) {
+                        this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
+                    } else if (transaction.isPenaltyChargeAndNotReversed()) {
+                        this.totalPenaltyCharge = Money.of(currency, this.totalPenaltyCharge).plus(transactionAmount).getAmount();
+                    }
+                    if (transaction.isFeeChargeAndNotReversed() || transaction.isPenaltyChargeAndNotReversed()) {
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                case OVERDRAFT_INTEREST:
+                    if (transaction.isOverdraftInterestAndNotReversed()) {
+                        this.totalOverdraftInterestDerived = Money.of(currency, this.totalOverdraftInterestDerived).plus(transactionAmount)
+                                .getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                case WITHHOLD_TAX:
+                    if (transaction.isWithHoldTaxAndNotReversed()) {
+                        this.totalWithholdTax = Money.of(currency, this.totalWithholdTax).plus(transactionAmount).getAmount();
+                        this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
+                    }
+                break;
+                default:
+                break;
+            }
+        } else {
+            // boolean isUpdated = false;
+            Money interestTotal = Money.of(currency, this.totalInterestPosted);
+            Money withHoldTaxTotal = Money.of(currency, this.totalWithholdTax);
+
+            final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
+                    withHoldTaxTotal, currency);
+            interestTotal = map.get("interestTotal");
+            withHoldTaxTotal = map.get("withHoldTax");
+            this.totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
+            this.totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
+            this.accountBalance = Money.of(currency, this.accountBalance).plus(this.totalInterestPosted).minus(this.totalWithholdTax)
+                    .getAmount();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private HashMap<String, Money> updateRunningBalanceAndPivotDate(final boolean backdatedTxnsAllowedTill,
+            final List<SavingsAccountTransaction> savingsAccountTransactions, Money interestTotal, Money withHoldTaxTotal,
+            MonetaryCurrency currency) {
+        boolean isUpdated = false;
+        HashMap<String, Money> map = new HashMap<>();
+        for (int i = savingsAccountTransactions.size() - 1; i >= 0; i--) {
+            final SavingsAccountTransaction savingsAccountTransaction = savingsAccountTransactions.get(i);
+            if (savingsAccountTransaction.isInterestPostingAndNotReversed() && savingsAccountTransaction.isNotReversed() && !isUpdated) {
+                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
+                setInterestPostedTillDate(savingsAccountTransaction.getLastTransactionDate());
+                isUpdated = true;
+                if (!backdatedTxnsAllowedTill) {
+                    break;
+                }
+            }
+            if (backdatedTxnsAllowedTill) {
+                if (savingsAccountTransaction.isInterestPostingAndNotReversed() && savingsAccountTransaction.isNotReversed()) {
+                    interestTotal = interestTotal.plus(savingsAccountTransaction.getAmount(currency));
+                }
+
+                if (savingsAccountTransaction.isWithHoldTaxAndNotReversed()) {
+                    withHoldTaxTotal = withHoldTaxTotal.plus(savingsAccountTransaction.getAmount(currency));
+                }
+            }
+        }
+        if (backdatedTxnsAllowedTill) {
+            map.put("interestTotal", interestTotal);
+            map.put("withHoldTax", withHoldTaxTotal);
+        }
+        return map;
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
@@ -115,7 +245,7 @@ public final class SavingsAccountSummary {
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.totalInterestEarned = totalEarned.getAmount();
     }
 
@@ -134,6 +264,26 @@ public final class SavingsAccountSummary {
 
     public BigDecimal getTotalInterestPosted() {
         return this.totalInterestPosted;
+    }
+
+    public Date getLastInterestCalculationDate() {
+        return this.lastInterestCalculationDate;
+    }
+
+    public void setInterestPostedTillDate(final Date date) {
+        this.interestPostedTillDate = date;
+    }
+
+    public Date getInterestPostedTillDate() {
+        return this.interestPostedTillDate;
+    }
+
+    public void setRunningBalanceOnPivotDate(final BigDecimal runningBalanceOnPivotDate) {
+        this.runningBalanceOnInterestPostingTillDate = runningBalanceOnPivotDate;
+    }
+
+    public BigDecimal getRunningBalanceOnPivotDate() {
+        return this.runningBalanceOnInterestPostingTillDate;
     }
 
 }

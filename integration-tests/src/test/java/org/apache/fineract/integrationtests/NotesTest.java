@@ -21,10 +21,15 @@ package org.apache.fineract.integrationtests;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.NotesHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -186,11 +191,31 @@ public class NotesTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
         final String loanApplication = new LoanApplicationTestBuilder().withPrincipal("5000").withLoanTermFrequency("5")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
-                .withSubmittedOnDate("02 April 2012").build(clientID.toString(), loanProductID.toString(), null);
+                .withCollaterals(collaterals).withSubmittedOnDate("02 April 2012")
+                .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplication);
+    }
+
+    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
+        collaterals.add(collaterals(collateralId, quantity));
+    }
+
+    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
+        HashMap<String, String> collateral = new HashMap<String, String>(2);
+        collateral.put("clientCollateralId", collateralId.toString());
+        collateral.put("quantity", quantity.toString());
+        return collateral;
     }
 
     @Test
@@ -249,7 +274,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
@@ -272,7 +298,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
@@ -304,7 +331,8 @@ public class NotesTest {
         Assertions.assertNotNull(loanId);
 
         this.loanTransactionHelper.approveLoan("02 April 2012", loanId);
-        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
+        this.loanTransactionHelper.disburseLoan("02 April 2012", loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         HashMap repayment = this.loanTransactionHelper.makeRepayment("02 April 2012", 100.0f, loanId);
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);

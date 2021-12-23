@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.jobs.domain.JobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
+import org.apache.fineract.infrastructure.jobs.exception.JobNodeIdMismatchingException;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobDataMap;
@@ -50,6 +51,7 @@ import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -67,63 +69,38 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private static final Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
-    // MIFOSX-1184: This class cannot use constructor injection, because one of
-    // its dependencies (SchedulerStopListener) has a circular dependency to
-    // itself. So, slightly differently from how it's done elsewhere in this
-    // code base, the following fields are not final, and there is no
-    // constructor, but setters.
-
+    @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
     private SchedularWritePlatformService schedularWritePlatformService;
+
+    @Autowired
     private TenantDetailsService tenantDetailsService;
+
+    @Autowired
     private SchedulerJobListener schedulerJobListener;
-    private SchedulerStopListener schedulerStopListener;
+
+    @Autowired
     private SchedulerTriggerListener globalSchedulerTriggerListener;
+
+    @Autowired
     private JobParameterRepository jobParameterRepository;
 
     private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
-    @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
+    // This cannot be injected as Autowired due to circular dependency
+    private SchedulerStopListener schedulerStopListener = new SchedulerStopListener(this);
 
-    @Autowired
-    public void setSchedularWritePlatformService(SchedularWritePlatformService schedularWritePlatformService) {
-        this.schedularWritePlatformService = schedularWritePlatformService;
-    }
-
-    @Autowired
-    public void setTenantDetailsService(TenantDetailsService tenantDetailsService) {
-        this.tenantDetailsService = tenantDetailsService;
-    }
-
-    @Autowired
-    public void setSchedulerJobListener(SchedulerJobListener schedulerJobListener) {
-        this.schedulerJobListener = schedulerJobListener;
-    }
-
-    @Autowired
-    public void setSchedulerStopListener(SchedulerStopListener schedulerStopListener) {
-        this.schedulerStopListener = schedulerStopListener;
-    }
-
-    @Autowired
-    public void setGlobalTriggerListener(SchedulerTriggerListener globalTriggerListener) {
-        this.globalSchedulerTriggerListener = globalTriggerListener;
-    }
-
-    @Autowired
-    public void setJobParameterRepository(JobParameterRepository jobParameterRepository) {
-        this.jobParameterRepository = jobParameterRepository;
-    }
+    @Value("${node_id:1}")
+    private String nodeId;
 
     @PostConstruct
     public void loadAllJobs() {
         final List<FineractPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
         for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
-            final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
+            final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs(nodeId);
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 scheduleJob(jobDetails);
                 jobDetails.updateTriggerMisfired(false);
@@ -203,11 +180,12 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             schedulerDetail.updateSuspendedState(false);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             if (schedulerDetail.isExecuteInstructionForMisfiredJobs()) {
-                final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
+                final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs(this.nodeId);
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired()) {
                         if (jobDetail.isActiveSchedular()) {
                             executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            jobDetail.setIsMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
                         final Scheduler scheduler = this.schedulers.get(schedulerName);
@@ -236,7 +214,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Override
     public void rescheduleJob(final Long jobId) {
         final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
-        rescheduleJob(scheduledJobDetail);
+        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
+        if (nodeIdStored.equals(this.nodeId) || nodeIdStored.equals("0")) {
+            rescheduleJob(scheduledJobDetail);
+        } else {
+            scheduledJobDetail.setIsMismatchedJob(true);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            throw new JobNodeIdMismatchingException(nodeIdStored, this.nodeId);
+        }
     }
 
     @Override
@@ -245,7 +230,15 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         if (scheduledJobDetail == null) {
             throw new JobNotFoundException(String.valueOf(jobId));
         }
-        executeJob(scheduledJobDetail, null);
+        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
+
+        if (nodeIdStored.equals(this.nodeId) || nodeIdStored.equals("0")) {
+            executeJob(scheduledJobDetail, null);
+        } else {
+            scheduledJobDetail.setIsMismatchedJob(true);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            throw new JobNodeIdMismatchingException(nodeIdStored, this.nodeId);
+        }
     }
 
     @Override
@@ -360,6 +353,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         jobDetailFactoryBean.setTargetMethod(jobDetails.methodName);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
+        Map<String, String> jobParameterMap = getJobParameter(scheduledJobDetail);
+        if (!jobParameterMap.isEmpty()) {
+            jobDetailFactoryBean.setArguments(jobParameterMap);
+        }
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }

@@ -38,8 +38,11 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
@@ -53,6 +56,8 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedular
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +79,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final JobRegisterService jobRegisterService;
+    private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
+
+    @Value("${node_id:1}")
+    private String nodeId;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -83,7 +93,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
             final ShareAccountSchedularService shareAccountSchedularService,
-            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
+            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper, @Lazy final JobRegisterService jobRegisterService,
+            final ScheduledJobDetailRepository scheduledJobDetailsRepository) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -92,6 +103,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
         this.trialBalanceRepositoryWrapper = trialBalanceRepositoryWrapper;
+        this.jobRegisterService = jobRegisterService;
+        this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
     }
 
     @Transactional
@@ -449,16 +462,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         // Updating closing balance
         String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
-        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[] {}, Long.class);
+        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, Long.class);
 
         for (Long officeId : officeIds) {
             String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
-            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] { officeId }, Long.class);
+            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, Long.class, officeId);
             for (Long accountId : accountIds) {
                 final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance "
                         + "is not null order by created_date desc, entry_date desc limit 1";
-                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] { officeId, accountId },
-                        BigDecimal.class);
+                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, BigDecimal.class, officeId, accountId);
                 List<TrialBalance> tbRows = this.trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
                 BigDecimal closingBalance = null;
                 if (!CollectionUtils.isEmpty(closingBalanceData)) {
@@ -480,6 +492,18 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.EXECUTE_DIRTY_JOBS)
+    public void executeMissMatchedJobs() throws JobExecutionException {
+        List<ScheduledJobDetail> jobDetails = this.scheduledJobDetailsRepository.findAllMismatchedJobs(true);
+
+        for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
+            if (scheduledJobDetail.getNodeId().toString().equals(this.nodeId)) {
+                jobRegisterService.executeJob(scheduledJobDetail.getId());
+            }
+        }
     }
 
 }

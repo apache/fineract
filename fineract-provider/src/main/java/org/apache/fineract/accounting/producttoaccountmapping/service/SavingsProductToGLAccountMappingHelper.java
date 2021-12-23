@@ -121,8 +121,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
         // save both fee and penalty charges
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
+        saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
+        saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
     }
 
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,

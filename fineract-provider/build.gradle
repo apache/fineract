@@ -18,8 +18,10 @@
  */
 description = 'Fineract Provider'
 
-apply plugin: 'rebel'
+apply plugin: 'org.zeroturnaround.gradle.jrebel'
+apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'openjpa'
 apply plugin: 'com.gorylenko.gradle-git-properties'
@@ -162,9 +164,9 @@ compileJava {
 }
 
 war {
-    from("$rootDir/licenses/binary/") {
+    from("$rootDir/licenses/") {
         // notice the parens
-        into "WEB-INF/licenses/binary/" // no leading slash
+        into "WEB-INF/licenses/" // no leading slash
     }
     from("$rootDir/LICENSE_RELEASE") {
         // notice the parens
@@ -182,6 +184,21 @@ war {
         into "WEB-INF/" // no leading slash
     }
     enabled = true
+    classifier = ''
+}
+
+// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+// set the classes directory to point to Eclipse's default build directory
+if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
+{
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
+}
+
+eclipse
+{
+    project {
+        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+    }
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
@@ -254,11 +271,16 @@ bootRun {
 }
 
 springBoot {
-    mainClassName = 'org.apache.fineract.ServerApplication'
+    mainClass = 'org.apache.fineract.ServerApplication'
 }
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+    }
+    dependsOn resolve
+    classifier = ''
 }
 
 bootWar {
@@ -272,13 +294,17 @@ tasks.withType(Tar) {
 
 distributions {
     binary {
-        baseName "apache-fineract-$releaseVersion-binary"
+        if(project.hasProperty("distVersion")) {
+            distributionBaseName = "apache-fineract-$distVersion-binary"
+        } else {
+            distributionBaseName = "apache-fineract-binary"
+        }
         contents {
             from bootJar
             from war
             // TODO: @vidakovic add client library
-            from("$rootDir/licenses/binary/") {
-                into "licenses/binary/"
+            from("$rootDir/licenses/") {
+                into "licenses/"
             }
             from "$rootDir/LICENSE_RELEASE"
             from "$rootDir/NOTICE_RELEASE"
@@ -290,10 +316,15 @@ distributions {
         }
     }
     src {
-        baseName "apache-fineract-$releaseVersion-src"
+        if(project.hasProperty("distVersion")) {
+            distributionBaseName = "apache-fineract-$distVersion-src"
+        } else {
+            distributionBaseName = "apache-fineract-src"
+        }
+
         contents {
             from "$rootDir/"
-            exclude '**/build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
+            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
@@ -302,6 +333,7 @@ distributions {
 
 tasks.binaryDistZip.enabled false
 tasks.srcDistZip.enabled false
+tasks.binaryDistTar.dependsOn bootJar
 
 // create signatures and checksums only if project parameter "fineract.release" is provided on the command line
 if( project.hasProperty("fineract.release") ) {
@@ -339,7 +371,7 @@ if( project.hasProperty("fineract.release") ) {
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
 gitProperties {
-    gitPropertiesResourceDir = "$buildDir/classes/java/main/resources"
+    gitPropertiesResourceDir = file("$buildDir/classes/java/main")
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
@@ -348,3 +380,12 @@ gitProperties {
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
+
+// Gradle 7.x asks for explicit dependencies between tasks
+processResources.dependsOn generateGitProperties
+checkstyleMain.dependsOn resolve
+checkstyleTest.dependsOn resolve
+licenseMain.dependsOn processResources, generateGitProperties
+war.dependsOn resolve
+spotbugsTest.dependsOn resolve
+test.dependsOn resolve

@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -74,11 +75,11 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @Column(name = "email_message", nullable = false)
     private String emailMessage;
 
-    @Column(name = "email_attachment_file_format", nullable = false)
+    @Column(name = "email_attachment_file_format")
     private String emailAttachmentFileFormat;
 
     @ManyToOne
-    @JoinColumn(name = "stretchy_report_id", nullable = false)
+    @JoinColumn(name = "stretchy_report_id")
     private Report stretchyReport;
 
     @Column(name = "stretchy_report_param_map", nullable = true)
@@ -108,18 +109,18 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @JoinColumn(name = "approvedon_userid", nullable = true)
     private AppUser approvedBy;
 
-    @Column(name = "recurrence", nullable = false)
+    @Column(name = "recurrence")
     private String recurrence;
 
-    @Column(name = "next_trigger_date", nullable = false)
+    @Column(name = "next_trigger_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextTriggerDate;
 
-    @Column(name = "last_trigger_date", nullable = false)
+    @Column(name = "last_trigger_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastTriggerDate;
 
-    @Column(name = "recurrence_start_date", nullable = false)
+    @Column(name = "recurrence_start_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date recurrenceStartDate;
 
@@ -152,7 +153,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.emailAttachmentFileFormat = emailAttachmentFileFormat.getValue();
         this.stretchyReport = stretchyReport;
         this.stretchyReportParamMap = stretchyReportParamMap;
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.submittedBy = submittedBy;
         this.recurrence = recurrence;
         LocalDateTime recurrenceStartDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
@@ -274,7 +275,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-        this.approvedOnDate = Date.from(activationLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.approvedOnDate = Date.from(activationLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.approvedBy = currentUser;
         this.status = EmailCampaignStatus.ACTIVE.getValue();
 
@@ -298,7 +299,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
             this.lastTriggerDate = null;
         }
         this.closedBy = currentUser;
-        this.closureDate = Date.from(closureLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.closureDate = Date.from(closureLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.status = EmailCampaignStatus.CLOSED.getValue();
         validateClosureDate();
     }
@@ -317,7 +318,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        this.approvedOnDate = Date.from(reactivateLocalDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.approvedOnDate = Date.from(reactivateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.status = EmailCampaignStatus.ACTIVE.getValue();
         this.approvedBy = currentUser;
         this.closureDate = null;

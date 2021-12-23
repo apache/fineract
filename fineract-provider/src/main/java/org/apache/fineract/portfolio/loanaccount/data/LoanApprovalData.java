@@ -28,6 +28,7 @@ public class LoanApprovalData {
 
     private final LocalDate approvalDate;
     private final BigDecimal approvalAmount;
+    private final BigDecimal netDisbursalAmount;
 
     // import fields
     private LocalDate approvedOnDate;
@@ -48,11 +49,13 @@ public class LoanApprovalData {
         this.note = "";
         this.approvalAmount = null;
         this.approvalDate = null;
+        this.netDisbursalAmount = null;
     }
 
-    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate) {
+    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount) {
         this.approvalDate = approvalDate;
         this.approvalAmount = approvalAmount;
+        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public LocalDate getApprovalDate() {
@@ -61,6 +64,10 @@ public class LoanApprovalData {
 
     public BigDecimal getApprovalAmount() {
         return this.approvalAmount;
+    }
+
+    public BigDecimal getNetDisbursalAmount() {
+        return this.netDisbursalAmount;
     }
 
 }

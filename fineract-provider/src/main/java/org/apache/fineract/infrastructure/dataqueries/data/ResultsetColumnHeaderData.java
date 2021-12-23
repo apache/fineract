@@ -33,7 +33,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
     private final Long columnLength;
     private final String columnDisplayType;
     private final boolean isColumnNullable;
-    @SuppressWarnings("unused")
     private final boolean isColumnPrimaryKey;
 
     private final List<ResultsetColumnValueData> columnValues;
@@ -225,6 +224,14 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     public Long getColumnLength() {
         return this.columnLength;
+    }
+
+    public boolean getIsColumnNullable() {
+        return isColumnNullable;
+    }
+
+    public boolean getIsColumnPrimaryKey() {
+        return isColumnPrimaryKey;
     }
 
     public String getColumnDisplayType() {

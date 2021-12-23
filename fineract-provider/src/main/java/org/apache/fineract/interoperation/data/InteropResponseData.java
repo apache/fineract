@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import jakarta.validation.constraints.NotNull;
 import java.beans.Transient;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.interoperation.domain.InteropActionState;

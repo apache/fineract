@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transfe
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
@@ -114,11 +115,11 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isAccountTransfer = false;
         boolean isInterestTransfer = false;
         boolean isWithdrawBalance = false;
-
+        final boolean backdatedTxnsAllowedTill = false;
         SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                 isRegularTransaction, applyWithdrawFee, isInterestTransfer, isWithdrawBalance);
         return this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate, transactionAmount, paymentDetail,
-                transactionBooleanValues);
+                transactionBooleanValues, backdatedTxnsAllowedTill);
     }
 
     @Transactional
@@ -127,8 +128,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail) {
         boolean isAccountTransfer = false;
         boolean isRegularTransaction = false;
+        final boolean backdatedTxnsAllowedTill = false;
         return this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate, transactionAmount, paymentDetail,
-                isAccountTransfer, isRegularTransaction);
+                isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
     }
 
     @Transactional
@@ -145,8 +147,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final boolean isPreMatureClosure = false;
         final MathContext mc = MathContext.DECIMAL64;
         account.updateDepositAmount(transactionAmount);
+        final boolean backdatedTxnsAllowedTill = false;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         final boolean isAnyActivationChargesDue = isAnyActivationChargesDue(account);
@@ -171,8 +174,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isRegularTransaction) {
         boolean isAccountTransfer = false;
+        final boolean backdatedTxnsAllowedTill = false;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -247,6 +251,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -255,8 +260,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
         account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return savingsTransactionId;
     }
@@ -308,8 +311,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 account.updateOnAccountClosureStatus(onClosureType);
             }
             changes.put("reinvestedDepositId", reinvestedDeposit.getId());
-            reinvestedDeposit.approveAndActivateApplication(
-                    Date.from(closedDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), user);
+            reinvestedDeposit.approveAndActivateApplication(Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), user);
             this.savingsAccountRepository.save(reinvestedDeposit);
 
         } else if (onClosureType.isTransferToSavings()) {
@@ -576,10 +578,11 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer) {
 
         final MonetaryCurrency currency = savingsAccount.getCurrency();
+        final boolean backdatedTxnsAllowedTill = false;
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
 
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
 

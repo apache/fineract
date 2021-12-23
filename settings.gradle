@@ -19,5 +19,6 @@
 rootProject.name='fineract'
 include ':fineract-provider'
 include ':integration-tests'
+include ':twofactor-tests'
 include ':fineract-client'
 include ':fineract-doc'

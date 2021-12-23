@@ -35,4 +35,4 @@ jobs:
 
       - run: gcloud beta builds triggers list
 
-      - run: gcloud beta builds triggers run deploy-demo
+      - run: gcloud beta builds triggers run deploy-demo --branch=master

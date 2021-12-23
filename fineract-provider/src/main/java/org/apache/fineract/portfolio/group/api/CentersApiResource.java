@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.group.api;
 
 import com.google.gson.JsonElement;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -88,6 +86,8 @@ import org.apache.fineract.portfolio.group.data.StaffCenterData;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

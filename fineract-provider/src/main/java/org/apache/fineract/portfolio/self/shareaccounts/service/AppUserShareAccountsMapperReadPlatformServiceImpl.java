@@ -39,7 +39,7 @@ public class AppUserShareAccountsMapperReadPlatformServiceImpl implements AppUse
         return this.jdbcTemplate.queryForObject("select case when (count(*) > 0) then true else false end "
                 + " from m_selfservice_user_client_mapping as m "
                 + " left join m_share_account as shares on shares.client_id = m.client_id  " + " where shares.id = ? and m.appuser_id = ? ",
-                new Object[] { accountId, appUserId }, Boolean.class);
+                Boolean.class, accountId, appUserId);
     }
 
 }

@@ -52,14 +52,19 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
 
+    @Column(name = "net_disbursal_amount", scale = 6, precision = 19)
+    private BigDecimal netDisbursalAmount;
+
     protected LoanDisbursementDetails() {
 
     }
 
-    public LoanDisbursementDetails(final Date expectedDisbursementDate, final Date actualDisbursementDate, final BigDecimal principal) {
+    public LoanDisbursementDetails(final Date expectedDisbursementDate, final Date actualDisbursementDate, final BigDecimal principal,
+            final BigDecimal netDisbursalAmount) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principal;
+        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public void updateLoan(final Loan loan) {
@@ -130,11 +135,20 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
             actualDisburseDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         BigDecimal waivedChargeAmount = null;
-        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, null, null, waivedChargeAmount);
+        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, this.netDisbursalAmount, null, null,
+                waivedChargeAmount);
     }
 
     public void updateActualDisbursementDate(Date actualDisbursementDate) {
         this.actualDisbursementDate = actualDisbursementDate;
+    }
+
+    public BigDecimal getNetDisbursalAmount() {
+        return this.netDisbursalAmount;
+    }
+
+    public void setNetDisbursalAmount(BigDecimal netDisbursalAmount) {
+        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public void updateExpectedDisbursementDateAndAmount(Date expectedDisbursementDate, BigDecimal principal) {
