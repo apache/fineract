@@ -83,7 +83,7 @@ public class StorageTest {
                 now);
 
         AppUser appUser = new AppUser(null, new User("J.J.", "", true, true, true, true, Collections.emptyList()), null, "user@com", "John",
-                "", null, false, false, null);
+                "", null, false, false, null, null);
 
         NotificationMapper notificationMapper = new NotificationMapper(notification, appUser, false, now);
 
