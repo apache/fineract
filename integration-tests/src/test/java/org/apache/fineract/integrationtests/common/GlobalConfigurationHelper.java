@@ -89,9 +89,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 36 global configurations.
-        Assertions.assertEquals(36, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(36, actualGlobalConfigurations.size());
+        // There are currently 37 global configurations.
+        Assertions.assertEquals(37, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(37, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -414,6 +414,14 @@ public class GlobalConfigurationHelper {
         isClientAccountNumberLengthModify.put("enabled", false);
         isClientAccountNumberLengthModify.put("trapDoor", false);
         defaults.add(isClientAccountNumberLengthModify);
+
+        HashMap<String, Object> isAccountNumberRandomGenerated = new HashMap<>();
+        isAccountNumberRandomGenerated.put("id", 41);
+        isAccountNumberRandomGenerated.put("name", "random-account-number");
+        isAccountNumberRandomGenerated.put("value", 0);
+        isAccountNumberRandomGenerated.put("enabled", false);
+        isAccountNumberRandomGenerated.put("trapDoor", false);
+        defaults.add(isAccountNumberRandomGenerated);
 
         return defaults;
     }

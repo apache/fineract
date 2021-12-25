@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
@@ -29,7 +31,9 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,6 +48,7 @@ public class AccountNumberGenerator {
     private static final int maxLength = 9;
 
     private static final String ID = "id";
+    private static final String ENTITY_TYPE = "entityType";
     private static final String CLIENT_TYPE = "clientType";
     private static final String OFFICE_NAME = "officeName";
     private static final String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
@@ -52,18 +57,26 @@ public class AccountNumberGenerator {
     private static final String PREFIX_SHORT_NAME = "prefixShortName";
     private final AccountNumberFormatRepository accountNumberFormatRepository;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final ClientRepository clientRepository;
+    private final LoanRepository loanRepository;
+    private final SavingsAccountRepository savingsAccountRepository;
 
     @Autowired
     public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService,
-            final AccountNumberFormatRepository accountNumberFormatRepository) {
+            final AccountNumberFormatRepository accountNumberFormatRepository, final ClientRepository clientRepository,
+            final LoanRepository loanRepository, final SavingsAccountRepository savingsAccountRepository) {
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
+        this.clientRepository = clientRepository;
+        this.loanRepository = loanRepository;
+        this.savingsAccountRepository = savingsAccountRepository;
     }
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, client.getId().toString());
         propertyMap.put(OFFICE_NAME, client.getOffice().getName());
+        propertyMap.put(ENTITY_TYPE, "client");
         CodeValue clientType = client.clientType();
         if (clientType != null) {
             propertyMap.put(CLIENT_TYPE, clientType.label());
@@ -76,6 +89,7 @@ public class AccountNumberGenerator {
         propertyMap.put(ID, loan.getId().toString());
         propertyMap.put(OFFICE_NAME, loan.getOffice().getName());
         propertyMap.put(LOAN_PRODUCT_SHORT_NAME, loan.loanProduct().getShortName());
+        propertyMap.put(ENTITY_TYPE, "loan");
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
@@ -84,6 +98,7 @@ public class AccountNumberGenerator {
         propertyMap.put(ID, savingsAccount.getId().toString());
         propertyMap.put(OFFICE_NAME, savingsAccount.office().getName());
         propertyMap.put(SAVINGS_PRODUCT_SHORT_NAME, savingsAccount.savingsProduct().getShortName());
+        propertyMap.put(ENTITY_TYPE, "savingsAccount");
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
@@ -96,6 +111,7 @@ public class AccountNumberGenerator {
 
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
         int accountMaxLength = AccountNumberGenerator.maxLength;
+        String accountNumber = StringUtils.leftPad(propertyMap.get(ID), accountMaxLength, '0');
 
         // find if the custom length is defined
         final GlobalConfigurationPropertyData customLength = this.configurationReadPlatformService
@@ -108,7 +124,14 @@ public class AccountNumberGenerator {
             }
         }
 
-        String accountNumber = StringUtils.leftPad(propertyMap.get(ID), accountMaxLength, '0');
+        final GlobalConfigurationPropertyData randomAccountNumber = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("random-account-number");
+
+        if (randomAccountNumber.isEnabled()) {
+            accountNumber = randomNumberGenerator(accountMaxLength, propertyMap);
+        }
+
+        accountNumber = StringUtils.leftPad(accountNumber, accountMaxLength, '0');
         if (accountNumberFormat != null && accountNumberFormat.getPrefixEnum() != null) {
             AccountNumberPrefixType accountNumberPrefixType = AccountNumberPrefixType.fromInt(accountNumberFormat.getPrefixEnum());
             String prefix = null;
@@ -143,15 +166,64 @@ public class AccountNumberGenerator {
             }
             if (accountNumberPrefixType.getValue().equals(AccountNumberPrefixType.PREFIX_SHORT_NAME.getValue())) {
                 Integer prefixLength = prefix.length();
-                Integer numberLength = accountMaxLength - prefixLength;
-                accountNumber = StringUtils.leftPad(propertyMap.get(ID), numberLength, '0');
+
+                if (randomAccountNumber.isEnabled()) {
+                    accountNumber = accountNumber.substring(prefixLength);
+                } else {
+                    Integer numberLength = accountMaxLength - prefixLength;
+                    accountNumber = StringUtils.leftPad(propertyMap.get(ID), numberLength, '0');
+                }
             } else {
                 accountNumber = StringUtils.leftPad(accountNumber, Integer.valueOf(propertyMap.get(ID).length()), '0');
             }
 
             accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0);
         }
+
+        if (randomAccountNumber.isEnabled()) { // calling the main function itself until new randomNo.
+            Boolean randomNumberConflict = checkAccountNumberConflict(propertyMap, accountNumberFormat, accountNumber);
+            if (randomNumberConflict) {
+                accountNumber = generateAccountNumber(propertyMap, accountNumberFormat);
+            }
+        }
         return accountNumber;
+    }
+
+    private String randomNumberGenerator(int accountMaxLength, Map<String, String> propertyMap) {
+        String randomNumber = RandomStringUtils.random(accountMaxLength, false, true);
+
+        BigInteger accNumber = new BigInteger(randomNumber);
+        if (accNumber.equals(BigInteger.ZERO)) { // to avoid account no. 00 in randomisation
+            randomNumber = randomNumberGenerator(accountMaxLength, propertyMap);
+        }
+
+        String accountNumber = randomNumber.substring(0, accountMaxLength);
+        return accountNumber;
+    }
+
+    private Boolean checkAccountNumberConflict(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat,
+            String accountNumber) {
+
+        String entityType = propertyMap.get(ENTITY_TYPE);
+        Boolean randomNumberConflict = false;
+        if (entityType.equals("client")) { // avoid duplication it will loop until it finds new random account no.
+
+            Client client = this.clientRepository.getClientByAccountNumber(accountNumber);
+            if (client != null) {
+                randomNumberConflict = true;
+            }
+        } else if (entityType.equals("loan")) {
+            Loan loan = this.loanRepository.findLoanAccountByAccountNumber(accountNumber);
+            if (loan != null) {
+                randomNumberConflict = true;
+            }
+        } else if (entityType.equals("savingsAccount")) {
+            SavingsAccount savingsAccount = this.savingsAccountRepository.findSavingsAccountByAccountNumber(accountNumber);
+            if (savingsAccount != null) {
+                randomNumberConflict = true;
+            }
+        }
+        return randomNumberConflict;
     }
 
     private Map<String, String> generatePrefix(Map<String, String> propertyMap, String accountNumber, Integer accountMaxLength,
