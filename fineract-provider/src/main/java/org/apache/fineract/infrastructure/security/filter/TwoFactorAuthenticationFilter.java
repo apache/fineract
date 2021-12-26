@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.security.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -28,6 +29,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
+import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -39,7 +41,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -106,25 +108,28 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
 
             List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
             updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
-            final Authentication updatedAuthentication = createUpdatedAuthentication(authentication, updatedAuthorities);
-            context.setAuthentication(updatedAuthentication);
+            context.setAuthentication(createUpdatedAuthentication(authentication, updatedAuthorities));
         }
 
         chain.doFilter(req, res);
     }
 
-    @SuppressWarnings("deprecation") // TODO FINERACT-1012
     private Authentication createUpdatedAuthentication(final Authentication currentAuthentication,
-            final List<GrantedAuthority> updatedAuthorities) {
+            final List<GrantedAuthority> updatedAuthorities) throws ServletException {
 
-        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
-
-        if (currentAuthentication instanceof OAuth2Authentication) {
-            final OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) currentAuthentication;
-            return new OAuth2Authentication(oAuth2Authentication.getOAuth2Request(), authentication);
+        if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
+            UsernamePasswordAuthenticationToken updatedAuthentication = new UsernamePasswordAuthenticationToken(
+                    currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
+            return updatedAuthentication;
+        } else if (currentAuthentication instanceof FineractJwtAuthenticationToken) {
+            FineractJwtAuthenticationToken fineractJwtAuthenticationToken = (FineractJwtAuthenticationToken) currentAuthentication;
+            FineractJwtAuthenticationToken updatedAuthentication = new FineractJwtAuthenticationToken(
+                    fineractJwtAuthenticationToken.getToken(), (Collection<GrantedAuthority>) updatedAuthorities,
+                    (UserDetails) currentAuthentication.getPrincipal());
+            return updatedAuthentication;
+        } else {
+            throw new ServletException("Unknown authentication type: " + currentAuthentication.getClass().getName());
         }
 
-        return authentication;
     }
 }

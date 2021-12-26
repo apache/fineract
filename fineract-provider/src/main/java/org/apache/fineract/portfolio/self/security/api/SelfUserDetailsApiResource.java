@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.self.security.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +27,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.security.api.UserDetailsApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +55,7 @@ public class SelfUserDetailsApiResource {
             + "For more info visit this link - https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#selfoauth")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class))) })
-    public String fetchAuthenticatedUserData(
-            @QueryParam("access_token") @Parameter(description = "äccess_token") final String accessToken) {
-        return this.userDetailsApiResource.fetchAuthenticatedUserData(accessToken);
+    public String fetchAuthenticatedUserData() {
+        return this.userDetailsApiResource.fetchAuthenticatedUserData();
     }
 }

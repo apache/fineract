@@ -2769,22 +2769,6 @@
 							</tr>
 							<tr>
 								<td><a href="#authenticationoauth">Authentication Oauth2</a></td>
-								<td>oauth/token</td>
-								<td><a href="#oauth">OAuth2 Access and refresh Token Request</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td></td>
-								<td><a href="#oauth_access_token_req">OAuth2 Access Token Request from refresh token</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
 								<td>authenticated user</td>
 								<td></td>
 								<td><a href="#userdetails_request">Fetch Authenticated user details</a></td>
@@ -4499,7 +4483,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 function getOauthToken(username, password) {
 
 	var jqxhr = $.ajax({
-		url : "/fineract-provider/api/oauth/token",
+		url : "URL of the authentication server",
 		type : 'POST',
 		dataType : 'json',
 		data : {
@@ -39103,174 +39087,6 @@ No Request Body
 				<div class="method-description">
 					<h3>Authentication Oauth2</h3>
 					<p>An API capability that allows client applications to fetch current user details details using Oauth2.</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="fineractHeading2">Field Descriptions</div></td>
-						</tr>
-						<tr class=alt>
-							<td>accessToken</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>HTTP Auth bearer key. See <a
-								href="#authentication_overview">Authentication Overview</a> for
-								an example of its use.
-							</td>
-						</tr>
-						</tr>
-					</table>
-				</div>
-			</div>
-
-			<a id="oauth" name="oauth" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h3>Authentication via OAuth2</h3>
-					<p>API for requesting OAuth2 access token and refresh token.</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="fineractHeading2">Field Descriptions</div></td>
-						</tr>
-						<tr class=alt>
-							<td>grant_type</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Indicates the requested grant type. Supported values:
-							<span>password</span>.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>client_id</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Indicates the client application identity.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>client_secret</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Optional field.
-							Indicates the client application password.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>username</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Application User(resource) login name.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>password</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Application User(resource) password.
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-
-			<a id="oauth_request" name="oauth_request" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>OAuth2 Refresh and Access Token Request</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/api/oauth/token?username={username}&password={password}&client_id={clientId}&grant_type={grant_type}&client_secret={client_secret}
-					</code>
-					<code class="method-request">
-POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
-Content-Type: application/json
-No Request Body
-					</code>
-					<code class="method-response">
-{
-	""access_token": "b771987f-82fc-45ba-b521-bfe280c4e603",
-	"token_type": "bearer",
-	"refresh_token":"a2a89b23-8d22-4d90-8585-8f464db433b0",
-	"expires_in": 3599,
-	"scope": "all"
-}
-					</code>
-				</div>
-			</div>
-
-
-			<a id="oauth_access_token_req" name="oauth_access_token_req" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h3>Authentication via OAuth2</h3>
-					<p>API for requesting OAuth2 access tokens through oAuth2 refresh tokens.</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="fineractHeading2">Field Descriptions</div></td>
-						</tr>
-						<tr class=alt>
-							<td>grant_type</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Indicates the requested grant type. Supported values:
-							<span>refresh_token</span>.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>client_id</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Indicates the client application identity.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>client_secret</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Optional field.
-							Indicates the client application password.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>refresh_token</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Mandatory field.
-							Application refresh token to generate access token.
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-
-			<a id="oauth_request_with_refresh" name="oauth_request_with_refresh" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>OAuth2 Token Request through Refresh Token</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/api/oauth/token?refresh_token={refresh_token}&client_id={clientId}&grant_type={grant_type}&client_secret={client_secret}
-					</code>
-					<code class="method-request">
-POST api/oauth/token?client_id=community-app&grant_type=refresh_token&client_secret=123&refresh_token=a2a89b23-8d22-4d90-8585-8f464db433b0
-Content-Type: application/json
-No Request Body
-					</code>
-					<code class="method-response">
-{
-	""access_token": "b771987f-82fc-45ba-b521-bfe280c4e643",
-	"token_type": "bearer",
-	"refresh_token":"a2a89b23-8d22-4d90-8585-8f464db433b0",
-	"expires_in": 3599,
-	"scope": "all"
-}
-					</code>
 				</div>
 			</div>
 
@@ -39282,10 +39098,10 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/userdetails?access_token={access_token}
+GET https://DomainName/api/v1/userdetails
 					</code>
 					<code class="method-request">
-POST userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
+GET userdetails
 Content-Type: application/json
 No Request Body
 					</code>
@@ -39342,22 +39158,6 @@ No Request Body
 
 
 
-
-					<code class="method-request">
-POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
-Content-Type: application/json
-No Request Body
-					</code>
-					<code class="method-response">
-{
-    "developerMessage": "Invalid authentication details were passed in api request.",
-    "developerDocLink": "https://github.com/openMF/mifosx/wiki/HTTP-API-Error-codes",
-    "httpStatusCode": "401",
-    "defaultUserMessage": "Unauthenticated. Please login.",
-    "userMessageGlobalisationCode": "error.msg.not.authenticated",
-    "errors": []
-}
-					</code>
 				</div>
 			</div>
 
@@ -47220,10 +47020,10 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/self/userdetails?access_token={access_token}
+POST https://DomainName/api/v1/self/userdetails
 					</code>
 					<code class="method-request">
-POST self/userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
+POST self/userdetails
 Content-Type: application/json
 No Request Body
 					</code>
@@ -47258,21 +47058,6 @@ No Request Body
 }
 </code>
 
-					<code class="method-request">
-POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
-Content-Type: application/json
-No Request Body
-					</code>
-					<code class="method-response">
-{
-    "developerMessage": "Invalid authentication details were passed in api request.",
-    "developerDocLink": "https://github.com/openMF/mifosx/wiki/HTTP-API-Error-codes",
-    "httpStatusCode": "401",
-    "defaultUserMessage": "Unauthenticated. Please login.",
-    "userMessageGlobalisationCode": "error.msg.not.authenticated",
-    "errors": []
-}
-					</code>
 				</div>
 			</div>
 
