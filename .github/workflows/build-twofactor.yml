@@ -23,9 +23,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-twofactor-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-twofactor-
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -49,4 +49,4 @@ jobs:
             sudo apt-get update
             sudo apt-get install ghostscript -y
       - name: Build & Test
-        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast -x :integration-tests:test -Ptwofactor=enabled
+        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast -x :integration-tests:test -x :oauth2-tests:test -Ptwofactor=enabled

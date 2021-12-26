@@ -29,6 +29,7 @@ buildscript {
                 'fineract-provider',
                 'integration-tests',
                 'twofactor-tests',
+                'oauth2-tests',
                 'fineract-client'
             ].contains(it.name)
         }
@@ -111,7 +112,6 @@ allprojects  {
             // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
             // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-            dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE'
             dependency 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated above in buildscript!
             dependency 'com.google.guava:guava:31.0.1-jre'
             dependency 'com.google.code.gson:gson:2.8.9'

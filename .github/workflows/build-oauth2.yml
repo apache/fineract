@@ -1,4 +1,4 @@
-name: Fineract Gradle build - basicauth
+name: Fineract Gradle build - oauth2
 on: [push, pull_request]
 
 jobs:
@@ -13,6 +13,15 @@ jobs:
             env:
                 MARIADB_ROOT_PASSWORD: mysql
             options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+        mock-oauth2-server:
+            image: ghcr.io/navikt/mock-oauth2-server:0.4.0
+            ports:
+                - 9000:9000
+            env:
+                SERVER_PORT: 9000
+                JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
+
     env:
         TZ: Asia/Kolkata
     steps:
@@ -22,9 +31,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-basicauth-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-oauth2-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-basicauth-
+            ${{ runner.os }}-gradle-oauth2-
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -48,4 +57,4 @@ jobs:
             sudo apt-get update
             sudo apt-get install ghostscript -y
       - name: Build & Test
-        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test
+        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast -x :integration-tests:test -x :twofactor-tests:test -Psecurity=oauth
