@@ -34,12 +34,15 @@ public class AccountNumberFormatData implements Serializable {
     private List<EnumOptionData> accountTypeOptions;
     private Map<String, List<EnumOptionData>> prefixTypeOptions;
 
-    public AccountNumberFormatData(final Long id, final EnumOptionData accountType, final EnumOptionData prefixType) {
-        this(id, accountType, prefixType, null, null);
+    private String prefixCharacter;
+
+    public AccountNumberFormatData(final Long id, final EnumOptionData accountType, final EnumOptionData prefixType,
+            final String prefixCharacter) {
+        this(id, accountType, prefixType, null, null, prefixCharacter);
     }
 
     public AccountNumberFormatData(final List<EnumOptionData> accountTypeOptions, Map<String, List<EnumOptionData>> prefixTypeOptions) {
-        this(null, null, null, accountTypeOptions, prefixTypeOptions);
+        this(null, null, null, accountTypeOptions, prefixTypeOptions, null);
     }
 
     public void templateOnTop(List<EnumOptionData> accountTypeOptions, Map<String, List<EnumOptionData>> prefixTypeOptions) {
@@ -48,12 +51,14 @@ public class AccountNumberFormatData implements Serializable {
     }
 
     private AccountNumberFormatData(final Long id, final EnumOptionData accountType, final EnumOptionData prefixType,
-            final List<EnumOptionData> accountTypeOptions, Map<String, List<EnumOptionData>> prefixTypeOptions) {
+            final List<EnumOptionData> accountTypeOptions, Map<String, List<EnumOptionData>> prefixTypeOptions,
+            final String prefixCharacter) {
         this.id = id;
         this.accountType = accountType;
         this.prefixType = prefixType;
         this.accountTypeOptions = accountTypeOptions;
         this.prefixTypeOptions = prefixTypeOptions;
+        this.prefixCharacter = prefixCharacter;
     }
 
     public Long getId() {
