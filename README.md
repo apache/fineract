@@ -1,7 +1,5 @@
-Apache Fineract: A Platform for Microfinance
+Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract) [![Swagger Validation](https://validator.swagger.io/validator?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml)](https://validator.swagger.io/validator/debug?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml) [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds)
 ============
-[![Swagger Validation](https://validator.swagger.io/validator?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml)](https://validator.swagger.io/validator/debug?url=https://demo.fineract.dev/fineract-provider/swagger-ui/fineract.yaml) [![build](https://github.com/apache/fineract/actions/workflows/build.yml/badge.svg)](https://github.com/apache/fineract/actions/workflows/build.yml) [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract/builds) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=apache_fineract&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=apache_fineract)
-
 
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 3 billion underbanked and unbanked.
 
@@ -85,12 +83,9 @@ Instructions to run and debug in Eclipse IDE
 It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities.
 To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
 
-1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
-2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
-3. Do a clean build of the project in Eclipse (Project->Clean...)
+1. Import the fineract-provider project into your Eclipse workspace (File->Import->Gradle->Existing Gradle Project into Workspace, choose root directory fineract/fineract-provider)
+2. Do a clean build of the project in Eclipse (Project->Clean...)
 3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
-
-If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
 
 You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
 
@@ -115,8 +110,10 @@ Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 
 Now to run a new Fineract instance you can simply:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. `git clone https://github.com/FITER1/fineract.git ;`  ; cd fineract`
 1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
+1. Clone the community-ui at same folder level as fineract and run the following command  
+1. `git clone https://github.com/FITER1/community-app.git`
 1. `docker-compose build`
 1. `docker-compose up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
@@ -124,6 +121,11 @@ Now to run a new Fineract instance you can simply:
 1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
 1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
 1. login using default _username_ `mifos` and _password_ `password`
+
+If you don't need to build the docker image for the community-app(ui) and use the one in open-source run the following commands:
+
+1. `docker-compose build -f docker-compose-prebuilt.yml`
+1. `docker-compose up -d -f docker-compose-prebuilt.yml`
 
 The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).  You could change that to use the pre-built container image instead of having to re-build it.
 
@@ -164,7 +166,7 @@ As Prerequisites, you must have `minikube` and `kubectl` installed on your machi
 
 Now to run a new Fineract instance on Minikube you can simply:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+1. `git clone https://github.com/FITER1/fineract.git ; cd fineract/kubernetes`
 1. `minikube start`
 1. `./kubectl-startup.sh`
 1. `minikube service fineract-server --url --https`

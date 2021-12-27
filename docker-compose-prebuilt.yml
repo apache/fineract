@@ -18,10 +18,15 @@ services:
     build:
       context: .
       target: fineract
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
     ports:
-      - 8080:8080
+      - 8443:8443
     depends_on:
-      - fineractmysql
+      fineractmysql:
+        condition: service_healthy
     environment:
       - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
       - PROTOCOL=jdbc
@@ -39,10 +44,11 @@ services:
 
   # Frontend service
   community-app:
-    build:
-      context: ../community-app/
-      dockerfile: Dockerfile
+    image: openmf/community-app:latest
     container_name: mifos-ui
     restart: always
     ports:
       - 9090:80
+    depends_on:
+      fineract-server:
+        condition: service_healthy
