@@ -22,8 +22,9 @@ version: '3.7'
 services:
   # Backend service
   fineractmysql:
-    image: mysql:5.7
+    image: mariadb:10.6
     volumes:
+      - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     environment:
@@ -38,17 +39,22 @@ services:
     build:
       context: .
       target: fineract
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
     ports:
       - 8443:8443
     depends_on:
-      - fineractmysql
+      fineractmysql:
+        condition: service_healthy
     environment:
-      - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
+      - DRIVERCLASS_NAME=org.mariadb.jdbc.Driver
       - PROTOCOL=jdbc
       - node_id=1
-      - SUB_PROTOCOL=mysql:thin
-      - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
-      - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
+      - SUB_PROTOCOL=mariadb
+      - fineract_tenants_driver=org.mariadb.jdbc.Driver
+      - fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
       - fineract_tenants_uid=root
       - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
@@ -64,10 +70,6 @@ services:
     restart: always
     ports:
       - 9090:80
-
-
-# https://issues.apache.org/jira/browse/FINERACT-762
-# To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
-# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
-# and remove ":thin:" from SUB_PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
-# bundled in the container by the Dockerfile, but just not used by default.
+    depends_on:
+      fineract-server:
+        condition: service_healthy

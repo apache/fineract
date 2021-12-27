@@ -3,8 +3,17 @@ on: [push, pull_request]
 
 jobs:
   build:
-  # We need 18.04 for this - the 20.04 image contains MySQL 8.0, and the GitHub Action to install 5.7 is not permitted in the Apache repo.
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+
+    services:
+        mariad:
+            image: mariadb:10.6
+            ports:
+                - 3306:3306
+            env:
+                MARIADB_ROOT_PASSWORD: mysql
+            options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
     env:
         TZ: Asia/Kolkata
     steps:
@@ -26,10 +35,11 @@ jobs:
           distribution: 'zulu'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Start up MySQL 5.7
+      - name: Verify MariaDB connection
         run: |
-          sudo /etc/init.d/mysql start
-          echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root -proot
+            while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
+                sleep 1
+            done
       - name: Initialise databases
         run: |
             ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
@@ -39,4 +49,4 @@ jobs:
             sudo apt-get update
             sudo apt-get install ghostscript -y
       - name: Build & Test
-        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :integration-tests:test -Ptwofactor=enabled
+        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast -x :integration-tests:test -Ptwofactor=enabled

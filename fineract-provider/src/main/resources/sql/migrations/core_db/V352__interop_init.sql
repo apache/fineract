@@ -44,7 +44,7 @@ INSERT INTO `m_appuser`
 VALUES (NULL, 0, 1, NULL, @interop_username, 'Interop', 'User', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a',
                             'email@email.com', b'0', b'1', b'1', b'1', b'1', CURDATE(), 0, b'0');
 
-INSERT INTO `m_appuser_role` VALUES ((SELECT id FROM m_appuser WHERE username = @interop_username), 1);
+INSERT INTO `m_appuser_role` VALUES ((SELECT id FROM m_appuser WHERE username COLLATE utf8mb4_general_ci = @interop_username), 1);
 
 -- Interoperation permissions
 

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
+import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
@@ -48,11 +49,15 @@ public class AccountNumberGenerator {
     private static final String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private static final String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
     private static final String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
+    private static final String PREFIX_SHORT_NAME = "prefixShortName";
+    private final AccountNumberFormatRepository accountNumberFormatRepository;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Autowired
-    public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService) {
+    public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService,
+            final AccountNumberFormatRepository accountNumberFormatRepository) {
         this.configurationReadPlatformService = configurationReadPlatformService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
     }
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
@@ -101,7 +106,6 @@ public class AccountNumberGenerator {
             if (customLength.getValue() != null) {
                 accountMaxLength = customLength.getValue().intValue();
             }
-
         }
 
         String accountNumber = StringUtils.leftPad(propertyMap.get(ID), accountMaxLength, '0');
@@ -125,6 +129,10 @@ public class AccountNumberGenerator {
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
                 break;
 
+                case PREFIX_SHORT_NAME:
+                    generatePrefix(propertyMap, propertyMap.get(ID), accountMaxLength, accountNumberFormat);
+                    prefix = propertyMap.get(PREFIX_SHORT_NAME);
+                break;
             }
 
             // FINERACT-590
@@ -133,10 +141,36 @@ public class AccountNumberGenerator {
             if (prefix != null) {
                 prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             }
+            if (accountNumberPrefixType.getValue().equals(AccountNumberPrefixType.PREFIX_SHORT_NAME.getValue())) {
+                Integer prefixLength = prefix.length();
+                Integer numberLength = accountMaxLength - prefixLength;
+                accountNumber = StringUtils.leftPad(propertyMap.get(ID), numberLength, '0');
+            } else {
+                accountNumber = StringUtils.leftPad(accountNumber, Integer.valueOf(propertyMap.get(ID).length()), '0');
+            }
 
             accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0);
         }
         return accountNumber;
+    }
+
+    private Map<String, String> generatePrefix(Map<String, String> propertyMap, String accountNumber, Integer accountMaxLength,
+            AccountNumberFormat accountNumberFormat) {
+
+        String prefix = accountNumberFormat.getPrefixCharacter();
+        Integer prefixLength = prefix.length();
+
+        Integer totalLength = prefixLength + Integer.valueOf(propertyMap.get(ID).length());
+
+        prefixLength = totalLength - accountMaxLength;
+
+        if (prefixLength > 0) {
+            prefix = prefix.substring(0, prefix.length() - prefixLength);
+        }
+
+        propertyMap.put(PREFIX_SHORT_NAME, prefix);
+
+        return propertyMap;
     }
 
     public String generateGroupAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {

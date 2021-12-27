@@ -40,6 +40,7 @@ public final class AccountNumberFormatConstants {
     public static final String idParamName = "id";
     public static final String accountTypeParamName = "accountType";
     public static final String prefixTypeParamName = "prefixType";
+    public static final String prefixCharacterParamName = "prefixCharacter";
 
     // response parameters
 
@@ -62,5 +63,6 @@ public final class AccountNumberFormatConstants {
     public static final String ACCOUNT_TYPE_ENUM_COLUMN_NAME = "account_type_enum";
     public static final String PREFIX_TYPE_ENUM_COLUMN_NAME = "prefix_type_enum";
     public static final String ACCOUNT_TYPE_UNIQUE_CONSTRAINT_NAME = "account_type_enum";
+    public static final String PREFIX_CHARACTER_COLUMN_NAME = "prefix_character";
 
 }

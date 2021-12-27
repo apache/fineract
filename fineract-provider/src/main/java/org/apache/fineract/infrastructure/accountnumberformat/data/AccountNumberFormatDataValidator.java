@@ -51,10 +51,11 @@ public class AccountNumberFormatDataValidator {
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberFormatDataValidator.class);
 
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
+            Arrays.asList(AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName,
+                    AccountNumberFormatConstants.prefixCharacterParamName));
 
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
+            Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.prefixCharacterParamName));
 
     @Autowired
     public AccountNumberFormatDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -83,6 +84,13 @@ public class AccountNumberFormatDataValidator {
                     .extractIntegerSansLocaleNamed(AccountNumberFormatConstants.prefixTypeParamName, element);
             DataValidatorBuilder dataValidatorForValidatingPrefixType = baseDataValidator.reset()
                     .parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixType).notNull().integerGreaterThanZero();
+
+            if (prefixType.equals(AccountNumberPrefixType.PREFIX_SHORT_NAME.getValue())) {
+                final String prefixCharacter = this.fromApiJsonHelper
+                        .extractStringNamed(AccountNumberFormatConstants.prefixCharacterParamName, element);
+
+                baseDataValidator.reset().parameter(AccountNumberFormatConstants.prefixTypeParamName).value(prefixCharacter).notBlank();
+            }
 
             /**
              * Permitted values for prefix type vary based on the actual selected accountType, carry out this validation

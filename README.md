@@ -21,17 +21,17 @@ If you are interested in contributing to this project, but perhaps don't quite k
 Requirements
 ============
 * Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
-* MySQL 5.7
+* MariaDB 10.6
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7
+    docker run --name mariadb-10.6 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.6
 
 and stop and destroy it like this:
 
-    docker rm -f mysql-5.7
+    docker rm -f mariadb-10.6
 
-Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
+Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.
 
 Tomcat v9 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required.)
 
@@ -48,8 +48,9 @@ Run the following commands:
 Instructions to build the JAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
-3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
+2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
+3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar`
+4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 
@@ -263,7 +264,7 @@ is used in development when running integration tests that use the Flyway librar
 driver is however not included in and distributed with the Fineract product and is not
 required to use the product.
 If you are developer and object to using the LGPL licensed Connector/J JDBC driver,
-simply do not run the integration tests that use the Flyway library.
+simply do not run the integration tests that use the Flyway library and/or use another JDBC driver.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
 

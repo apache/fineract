@@ -1,5 +1,3 @@
-#!/bin/bash
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
 # distributed with this work for additional information
@@ -18,8 +16,13 @@
 # under the License.
 #
 
-kubectl delete secret fineract-tenants-db-secret
-kubectl delete -f fineractmysql-configmap.yml
-kubectl delete -f fineractmysql-deployment.yml
-kubectl delete -f fineract-server-deployment.yml
-kubectl delete -f fineract-mifoscommunity-deployment.yml
+[client]
+default-character-set=utf8mb4
+
+[mysql]
+default-character-set=utf8mb4
+
+[mysqld]
+collation-server=utf8mb4_unicode_ci
+init-connect='SET NAMES utf8mb4'
+character-set-server=utf8mb4
