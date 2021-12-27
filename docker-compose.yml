@@ -43,11 +43,12 @@ services:
     depends_on:
       - fineractmysql
     environment:
-      - DRIVERCLASS_NAME=com.mysql.cj.jdbc.Driver
+      - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
       - PROTOCOL=jdbc
-      - SUB_PROTOCOL=mysql
-      - fineract_tenants_driver=com.mysql.jdbc.Driver
-      - fineract_tenants_url=jdbc:mysql://fineractmysql:3306/fineract_tenants
+      - node_id=1
+      - SUB_PROTOCOL=mysql:thin
+      - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
+      - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
       - fineract_tenants_uid=root
       - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
