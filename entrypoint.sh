@@ -18,14 +18,16 @@
 # under the License.
 #
 
+# NOTE that we are limited to busybox's sh, and cannot use bash here, because
+# this is used in a container image based on azul/zulu-openjdk-alpine:17.
 
-set -e
+# see e.g. https://explainshell.com/explain?cmd=set+-eux
+set -ex
 
-while ! nc -zvw3 fineractmysql 3306 ; do
+while ! nc -zvw3 "${FINERACT_DEFAULT_TENANTDB_HOSTNAME:-fineractmysql}" "${FINERACT_DEFAULT_TENANTDB_PORT:-3306}" ; do
     >&2 echo "DB Server is unavailable - sleeping"
     sleep 5
 done
 >&2 echo "DB Server is up - executing command"
 
 java -cp "app:app/lib/*" org.apache.fineract.ServerApplication
-
