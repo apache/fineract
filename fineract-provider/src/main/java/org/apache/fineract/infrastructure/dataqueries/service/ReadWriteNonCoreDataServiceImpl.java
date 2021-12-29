@@ -149,8 +149,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         // PERMITTED datatables
-        final String sql = "select application_table_name, registered_table_name" + " from x_registered_table " + " where exists"
-                + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
+        final String sql = "select application_table_name, registered_table_name, entity_subtype " + " from x_registered_table "
+                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
                 + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
                 + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
@@ -162,10 +162,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         while (rs.next()) {
             final String appTableName = rs.getString("application_table_name");
             final String registeredDatatableName = rs.getString("registered_table_name");
+            final String entitySubType = rs.getString("entity_subtype");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
 
-            datatables.add(DatatableData.create(appTableName, registeredDatatableName, columnHeaderData));
+            datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
         }
 
         return datatables;
@@ -176,8 +177,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         // PERMITTED datatables
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "select application_table_name, registered_table_name" + " from x_registered_table " + " where exists"
-                + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
+        final String sql = "select application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
+                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
                 + " where ur.appuser_id = " + this.context.authenticatedUser().getId() + " and registered_table_name='" + datatable + "'"
                 + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
@@ -189,10 +190,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         while (rs.next()) {
             final String appTableName = rs.getString("application_table_name");
             final String registeredDatatableName = rs.getString("registered_table_name");
+            final String entitySubType = rs.getString("entity_subtype");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
 
-            datatableData = DatatableData.create(appTableName, registeredDatatableName, columnHeaderData);
+            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
         }
 
         return datatableData;
@@ -204,12 +206,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public void registerDatatable(final String dataTableName, final String applicationTableName) {
+    public void registerDatatable(final String dataTableName, final String applicationTableName, final String entitySubType) {
 
         Integer category = DataTableApiConstant.CATEGORY_DEFAULT;
 
         final String permissionSql = this.getPermissionSql(dataTableName);
-        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        this.registerDataTable(applicationTableName, dataTableName, entitySubType, category, permissionSql);
 
     }
 
@@ -219,12 +221,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final String applicationTableName = this.getTableName(command.getUrl());
         final String dataTableName = this.getDataTableName(command.getUrl());
+        final String entitySubType = command.stringValueOfParameterNamed("entitySubType");
 
         Integer category = this.getCategory(command);
 
         this.dataTableValidator.validateDataTableRegistration(command.json());
         final String permissionSql = this.getPermissionSql(dataTableName);
-        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        this.registerDataTable(applicationTableName, dataTableName, entitySubType, category, permissionSql);
 
     }
 
@@ -233,27 +236,29 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public void registerDatatable(final JsonCommand command, final String permissionSql) {
         final String applicationTableName = this.getTableName(command.getUrl());
         final String dataTableName = this.getDataTableName(command.getUrl());
+        final String entitySubType = command.stringValueOfParameterNamed("entitySubType");
 
         Integer category = this.getCategory(command);
 
         this.dataTableValidator.validateDataTableRegistration(command.json());
 
-        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        this.registerDataTable(applicationTableName, dataTableName, entitySubType, category, permissionSql);
 
     }
 
     @Transactional
-    private void registerDataTable(final String applicationTableName, final String dataTableName, final Integer category,
-            final String permissionsSql) {
+    private void registerDataTable(final String applicationTableName, final String dataTableName, final String entitySubType,
+            final Integer category, final String permissionsSql) {
 
         validateAppTable(applicationTableName);
         validateDatatableName(dataTableName);
         assertDataTableExists(dataTableName);
 
         Map<String, Object> paramMap = new HashMap<>(3);
-        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name,category) values ( :dataTableName, :applicationTableName, :category)";
+        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name, entity_subtype, category) values ( :dataTableName, :applicationTableName, :entitySubType ,:category)";
         paramMap.put("dataTableName", dataTableName);
         paramMap.put("applicationTableName", applicationTableName);
+        paramMap.put("entitySubType", entitySubType);
         paramMap.put("category", category);
 
         try {
@@ -568,6 +573,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final JsonElement element = this.fromJsonHelper.parse(command.json());
             final JsonArray columns = this.fromJsonHelper.extractJsonArrayNamed("columns", element);
             datatableName = this.fromJsonHelper.extractStringNamed("datatableName", element);
+            String entitySubType = this.fromJsonHelper.extractStringNamed("entitySubType", element);
             final String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
             Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
 
@@ -623,7 +629,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;");
             this.jdbcTemplate.execute(sqlBuilder.toString());
 
-            registerDatatable(datatableName, apptableName);
+            registerDatatable(datatableName, apptableName, entitySubType);
             registerColumnCodeMapping(codeMappings);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
@@ -888,6 +894,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final JsonArray addColumns = this.fromJsonHelper.extractJsonArrayNamed("addColumns", element);
             final JsonArray dropColumns = this.fromJsonHelper.extractJsonArrayNamed("dropColumns", element);
             final String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
+            final String entitySubType = this.fromJsonHelper.extractStringNamed("entitySubType", element);
 
             validateDatatableName(datatableName);
             int rowCount = getRowCount(datatableName);
@@ -898,6 +905,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             final boolean isConstraintApproach = this.configurationDomainService.isConstraintApproachEnabledForDatatables();
+
+            if (!StringUtils.isBlank(entitySubType)) {
+                String updateLegalFormSQL = "update `x_registered_table` SET `entity_subtype`='" + entitySubType
+                        + "' WHERE registered_table_name = '" + datatableName + "'";
+                this.jdbcTemplate.execute(updateLegalFormSQL);
+            }
 
             if (!StringUtils.isBlank(apptableName)) {
                 validateAppTable(apptableName);
@@ -929,7 +942,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     this.jdbcTemplate.execute(sqlBuilder.toString());
 
                     deregisterDatatable(datatableName);
-                    registerDatatable(datatableName, apptableName);
+                    registerDatatable(datatableName, apptableName, entitySubType);
                 }
             }
 
