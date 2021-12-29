@@ -89,8 +89,9 @@ public class SavingsImportHandlerTest {
         String lastName = Utils.randomNameGenerator("Client_LastName_", 4);
         String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-        final HashMap<String, String> clientMap = new HashMap<>();
+        final HashMap<String, Object> clientMap = new HashMap<>();
         clientMap.put("officeId", outcome_office_creation.toString());
+        clientMap.put("legalFormId", 1);
         clientMap.put("firstname", firstName);
         clientMap.put("lastname", lastName);
         clientMap.put("externalId", externalId);

@@ -268,6 +268,8 @@ final class ClientsApiResourceSwagger {
 
         @Schema(example = "1")
         public Integer officeId;
+        @Schema(example = "1")
+        public Integer legalFormId;
         @Schema(example = "Client of group")
         public String fullname;
         @Schema(example = "1")
