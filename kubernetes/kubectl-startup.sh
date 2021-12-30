@@ -19,7 +19,7 @@
 #
 
 echo "Setting Up Fineract service configuration..."
-kubectl create secret generic fineract-tenants-db-secret --from-literal=username=root --from-literal=password=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16)
+kubectl create secret generic fineract-tenants-db-secret --from-literal=username=root --from-literal=password=$(head /dev/urandom | LC_CTYPE=C tr -dc A-Za-z0-9 | head -c 16)
 kubectl apply -f fineractmysql-configmap.yml
 
 echo
