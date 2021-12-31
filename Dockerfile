@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM azul/zulu-openjdk-debian:17 AS builder
+FROM azul/zulu-openjdk-debian:11 AS builder
 
 RUN apt-get update -qq && apt-get install -y wget
 
@@ -33,7 +33,7 @@ RUN wget -q https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/m
 
 # =========================================
 
-FROM azul/zulu-openjdk-alpine:17 AS fineract
+FROM azul/zulu-openjdk-alpine:11 AS fineract
 
 COPY --from=builder /fineract/target/BOOT-INF/lib /app/lib
 COPY --from=builder /fineract/target/META-INF /app/META-INF
