@@ -38,6 +38,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -162,7 +163,7 @@ public class SavingsImportHandlerTest {
         firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
 
-        String currentdirectory = new File("").getAbsolutePath();
+        String currentdirectory = new File(FileSystemContentRepository.FINERACT_BASE_DIR).getAbsolutePath();
         File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
                 + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "savings");
         if (!directory.exists()) {

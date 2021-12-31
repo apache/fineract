@@ -18,49 +18,9 @@
  */
 description = 'Fineract Integration Tests'
 
-apply plugin: 'com.bmuschko.cargo'
-
-// Configuration for the Gradle Cargo plugin
-// https://github.com/bmuschko/gradle-cargo-plugin
-configurations {
-    tomcat
-}
-
 apply from: 'dependencies.gradle'
 
-cargo {
-    containerId "tomcat9x"
-
-    // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
-    deployable {
-        file = file("$rootDir/fineract-provider/build/libs/fineract-provider.war")
-        context = 'fineract-provider'
-    }
-
-    local {
-        installer {
-            installConfiguration = configurations.tomcat
-            downloadDir = file("$buildDir/download")
-            extractDir = file("$buildDir/tomcat")
-        }
-        startStopTimeout = 240000
-        containerProperties {
-            property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
-            property 'cargo.tomcat.connector.keystorePass', 'openmf'
-            property 'cargo.tomcat.httpSecure', true
-            property 'cargo.tomcat.connector.sslProtocol', 'TLS'
-            property 'cargo.tomcat.connector.clientAuth', false
-            property 'cargo.protocol', 'https'
-            property 'cargo.servlet.port', 8443
-        }
-    }
-}
-
-cargoRunLocal.dependsOn ':fineract-provider:war'
-cargoStartLocal.dependsOn ':fineract-provider:war'
-cargoStartLocal.mustRunAfter 'testClasses'
-
 test {
-    dependsOn cargoStartLocal
-    finalizedBy cargoStopLocal
+    systemProperty "user.home", "/tmp"
+    systemProperty "user.timezone", "Asia/Kolkata"
 }

@@ -22,6 +22,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.MonthDay;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.core.api.DateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaLocalDateAdapter;
+import org.apache.fineract.infrastructure.core.api.JodaLocalTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
 import org.apache.fineract.infrastructure.core.api.ParameterListExclusionStrategy;
 import org.apache.fineract.infrastructure.core.api.ParameterListInclusionStrategy;
@@ -102,6 +104,8 @@ public final class GoogleGsonSerializerHelper {
     public static void registerTypeAdapters(final GsonBuilder builder) {
         builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
         builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+        // NOTE: was missing, necessary for GSON serialization with JDK 17's restrictive module access
+        builder.registerTypeAdapter(LocalTime.class, new JodaLocalTimeAdapter());
         builder.registerTypeAdapter(ZonedDateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
     }

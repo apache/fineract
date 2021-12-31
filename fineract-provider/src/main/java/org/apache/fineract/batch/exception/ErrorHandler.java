@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRul
 import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformInternalServerExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformResourceNotFoundExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -49,7 +50,13 @@ import org.springframework.transaction.TransactionException;
  */
 public class ErrorHandler extends RuntimeException {
 
-    private static Gson jsonHelper = new GsonBuilder().setPrettyPrinting().create();
+    private static Gson jsonHelper;
+
+    static {
+        GsonBuilder builder = new GsonBuilder().setPrettyPrinting();
+        GoogleGsonSerializerHelper.registerTypeAdapters(builder);
+        jsonHelper = builder.create();
+    }
 
     /**
      * Sole Constructor

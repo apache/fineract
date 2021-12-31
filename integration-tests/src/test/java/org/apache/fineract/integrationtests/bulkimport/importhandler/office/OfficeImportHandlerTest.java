@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -76,7 +77,7 @@ public class OfficeImportHandlerTest {
         Date date = simpleDateFormat.parse("14 May 2001");
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 
-        String currentdirectory = new File("").getAbsolutePath();
+        String currentdirectory = new File(FileSystemContentRepository.FINERACT_BASE_DIR).getAbsolutePath();
         File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
                 + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "office");
         if (!directory.exists()) {

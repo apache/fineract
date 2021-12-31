@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -114,6 +115,7 @@ public class UserImportHandler implements ImportHandler {
         int errorCount = 0;
         String errorMessage = "";
         GsonBuilder gsonBuilder = new GsonBuilder();
+        GoogleGsonSerializerHelper.registerTypeAdapters(gsonBuilder);
         for (AppUserData user : users) {
             try {
                 JsonObject userJsonob = gsonBuilder.create().toJsonTree(user).getAsJsonObject();

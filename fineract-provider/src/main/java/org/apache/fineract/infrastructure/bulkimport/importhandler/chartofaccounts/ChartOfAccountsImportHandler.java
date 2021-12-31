@@ -46,6 +46,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOp
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -149,6 +150,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
+        GoogleGsonSerializerHelper.registerTypeAdapters(gsonBuilder);
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
         gsonBuilder.registerTypeAdapter(CodeValueData.class, new CodeValueDataIdSerializer());
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));

@@ -20,15 +20,29 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:9.0.54@zip'
-    testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
-            project(path: ':fineract-provider', configuration: 'runtimeElements'),
-            project(path: ':fineract-client', configuration: 'runtimeElements'),
+    testImplementation( project(':fineract-provider'),
+            project(':fineract-client'),
             'org.junit.jupiter:junit-jupiter-api',
+            'com.google.guava:guava',
+            'com.google.code.gson:gson',
             'com.google.truth:truth',
             'com.google.truth.extensions:truth-java8-extension',
             'org.awaitility:awaitility',
             // 'com.google.code.gson:gson',
+            'ch.qos.logback:logback-core',
+            'org.testcontainers:junit-jupiter',
+            'org.testcontainers:testcontainers',
+            'jakarta.ws.rs:jakarta.ws.rs-api',
+            'org.apache.poi:poi',
+            'org.apache.poi:poi-ooxml',
+            'org.apache.poi:poi-ooxml-schemas',
+            'com.squareup.retrofit2:retrofit',
+            'com.squareup.retrofit2:converter-gson',
+            'com.github.spotbugs:spotbugs-annotations',
+            'com.squareup.okhttp3:okhttp',
+            'com.squareup.okhttp3:logging-interceptor',
+            'org.springframework:spring-core',
+            'org.junit.platform:junit-platform-suite-engine',
             )
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
@@ -41,6 +55,10 @@ dependencies {
         exclude group: 'com.sun.xml.bind'
     }
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine'
+            'org.junit.jupiter:junit-jupiter-engine',
             )
+
+    test {
+        maxParallelForks = Runtime.runtime.availableProcessors()/2
+    }
 }

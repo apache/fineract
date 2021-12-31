@@ -29,9 +29,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * This integration test ensure that the "production" Spring XML configuration files (appContext.xml & Co.) are valid.
  * It does not need any database for that.
  *
- * Note: For a simple test like this, contrary to AbstractSpringBootWithMariaDB4jIntegrationTest, there is no need to
- * use Boot's SpringApplicationConfiguration here, instead the simpler classic Sring core ContextConfiguration is
- * sufficient (as long as the TestsWithoutDatabaseAndNoJobsConfiguration used extends AbstractApplicationConfiguration).
+ * Note: For a simple test like this there is no need to use Boot's SpringApplicationConfiguration here, instead the
+ * simpler classic Sring core ContextConfiguration is sufficient (as long as the
+ * TestsWithoutDatabaseAndNoJobsConfiguration used extends AbstractApplicationConfiguration).
  */
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration

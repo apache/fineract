@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -126,6 +127,7 @@ public class GuarantorImportHandler implements ImportHandler {
         int errorCount = 0;
         String errorMessage = "";
         GsonBuilder gsonBuilder = new GsonBuilder();
+        GoogleGsonSerializerHelper.registerTypeAdapters(gsonBuilder);
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         for (GuarantorData guarantor : guarantors) {
             try {

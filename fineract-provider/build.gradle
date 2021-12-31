@@ -20,7 +20,6 @@ description = 'Fineract Provider'
 
 apply plugin: 'org.zeroturnaround.gradle.jrebel'
 apply plugin: 'java'
-apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'openjpa'
@@ -28,6 +27,7 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
+apply plugin: "com.google.cloud.tools.jib"
 
 // Configuration for the OpenJPA enhance task
 // https://github.com/radcortez/openjpa-gradle-plugin
@@ -145,37 +145,15 @@ if (project.hasProperty('security') && project.getProperty('security') == 'oauth
 modernizer {
     ignoreClassNamePatterns = [
         '.*AbstractPersistableCustom',
-        '.*EntityTables'
+        '.*EntityTables',
+        '.*ImportHandlerUtils',
+        '.*TransferWritePlatformServiceJpaRepositoryImpl'
     ]
 }
 
 compileJava {
     dependsOn rat
     finalizedBy resolve
-}
-
-war {
-    from("$rootDir/licenses/") {
-        // notice the parens
-        into "WEB-INF/licenses/" // no leading slash
-    }
-    from("$rootDir/LICENSE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    from("$rootDir/NOTICE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    rename ('LICENSE_RELEASE', 'LICENSE')
-    rename ('NOTICE_RELEASE', 'NOTICE')
-
-    from("$rootDir/DISCLAIMER") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    enabled = true
-    classifier = ''
 }
 
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
@@ -196,8 +174,15 @@ eclipse
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
+/* Exclude maria db related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
+        main {
+            java {
+                exclude '**/ServerWithMariaDB*'
+                exclude '**/MariaDB4j*'
+            }
+        }
         test {
             java {
                 exclude '**/core/boot/tests/**'
@@ -252,10 +237,6 @@ bootRun {
     jvmArgs = [
         "-Dspring.output.ansi.enabled=ALWAYS"
     ]
-
-    dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
-    }
 }
 
 springBoot {
@@ -271,9 +252,49 @@ bootJar {
     classifier = ''
 }
 
-bootWar {
-    enabled = false
+jib {
+    from {
+        // image = 'azul/zulu-openjdk-alpine:17-jre' // once we get rid of OpenJPA we could reduce space significantly
+        image = 'azul/zulu-openjdk-alpine:17'
+    }
+
+    to {
+        image = 'fineract'
+        tags = [
+            "${releaseVersion}",
+            'latest'
+        ]
+    }
+
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        jvmFlags = [
+            '-Xmx1G',
+            '-Xms1G',
+            '-XshowSettings:vm',
+            '-XX:+UseContainerSupport',
+            '-XX:+UseStringDeduplication',
+            '-XX:MinRAMPercentage=25',
+            '-XX:MaxRAMPercentage=80'
+        ]
+        args = [
+            '-Duser.home=/data',
+            '-Dspring.profiles.active=basicauth',
+            '-Dfile.encoding=UTF-8',
+            '-Duser.timezone=UTC',
+            '-Djava.security.egd=file:/dev/./urandom'
+        ]
+        ports = ['8080/tcp', '8443/tcp']
+        labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
+        user = 'nobody:nogroup'
+    }
+
+    allowInsecureRegistries = true
 }
+
+// TODO: later when we have a proper Docker repository we can change this to "jib" which publishes the image
+tasks.jar.dependsOn = ["jibDockerBuild"]
+tasks.jibDockerBuild.dependsOn = ["bootJar"]
 
 tasks.withType(Tar) {
     compression Compression.GZIP
@@ -282,17 +303,13 @@ tasks.withType(Tar) {
 
 distributions {
     binary {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-binary"
-        } else {
-            distributionBaseName = "apache-fineract-binary"
-        }
+        // TODO: Add the version number before enabling this
+        distributionBaseName = "apache-fineract-binary"
         contents {
             from bootJar
-            from war
             // TODO: @vidakovic add client library
-            from("$rootDir/licenses/") {
-                into "licenses/"
+            from("$rootDir/licenses/binary/") {
+                into "licenses/binary/"
             }
             from "$rootDir/LICENSE_RELEASE"
             from "$rootDir/NOTICE_RELEASE"
@@ -304,15 +321,11 @@ distributions {
         }
     }
     src {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-src"
-        } else {
-            distributionBaseName = "apache-fineract-src"
-        }
-
+        // TODO: Add the version number before enabling this
+        distributionBaseName = "apache-fineract-src"
         contents {
             from "$rootDir/"
-            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
+            exclude '**/build' , '.git', '.gradle', '.github', '.settings', '.project', '.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses/binary'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
@@ -321,7 +334,6 @@ distributions {
 
 tasks.binaryDistZip.enabled false
 tasks.srcDistZip.enabled false
-tasks.binaryDistTar.dependsOn bootJar
 
 // create signatures and checksums only if project parameter "fineract.release" is provided on the command line
 if( project.hasProperty("fineract.release") ) {
@@ -374,6 +386,5 @@ processResources.dependsOn generateGitProperties
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
 licenseMain.dependsOn processResources, generateGitProperties
-war.dependsOn resolve
 spotbugsTest.dependsOn resolve
 test.dependsOn resolve

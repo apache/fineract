@@ -16,11 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name='fineract'
-include ':fineract-provider'
-include ':fineract-war'
-include ':integration-tests'
-include ':twofactor-tests'
-include ':oauth2-tests'
-include ':fineract-client'
-include ':fineract-doc'
+description = 'Fineract WAR'
+
+apply plugin: 'war'
+
+war {
+    archiveFileName = 'fineract-provider.war'
+    from("$rootDir/licenses/binary/") {
+        // notice the parens
+        into "WEB-INF/licenses/binary/" // no leading slash
+    }
+    from("$rootDir/LICENSE_RELEASE") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    from("$rootDir/NOTICE_RELEASE") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    rename ('LICENSE_RELEASE', 'LICENSE')
+    rename ('NOTICE_RELEASE', 'NOTICE')
+
+    from("$rootDir/DISCLAIMER") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    enabled = true
+    classifier = ''
+}
+
+dependencies {
+    implementation project(':fineract-provider')
+}

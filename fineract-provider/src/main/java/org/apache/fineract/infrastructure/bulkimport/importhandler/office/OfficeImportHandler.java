@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -89,6 +90,7 @@ public class OfficeImportHandler implements ImportHandler {
     public Count importEntity(String dateFormat) {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         GsonBuilder gsonBuilder = new GsonBuilder();
+        GoogleGsonSerializerHelper.registerTypeAdapters(gsonBuilder);
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 
         int successCount = 0;
