@@ -677,6 +677,10 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return charge.isEnableFreeWithdrawal();
     }
 
+    public boolean isEnablePaymentType() {
+        return charge.isEnablePaymentType();
+    }
+
     public Integer getFrequencyFreeWithdrawalCharge() { // number of times free withdrawal allowed
         return charge.getFrequencyFreeWithdrawalCharge();
     }

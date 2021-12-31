@@ -42,6 +42,8 @@ import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
@@ -110,7 +112,16 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 taxGroup = this.taxGroupRepository.findOneWithNotFoundDetection(taxGroupId);
             }
 
-            final Charge charge = Charge.fromJson(command, glAccount, taxGroup);
+            final boolean enablePaymentType = command.booleanPrimitiveValueOfParameterNamed("enablePaymentType");
+            PaymentType paymentType = null;
+            if (enablePaymentType) {
+                final Long paymentTypeId = command.longValueOfParameterNamed(PaymentDetailConstants.paymentTypeParamName);
+                if (paymentTypeId != null) {
+                    paymentType = this.paymentTyperepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
+                }
+            }
+
+            final Charge charge = Charge.fromJson(command, glAccount, taxGroup, paymentType);
             this.chargeRepository.save(charge);
 
             // check if the office specific products are enabled. If yes, then
@@ -177,6 +188,21 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     newIncomeAccount = this.glAccountRepository.findOneWithNotFoundDetection(newValue);
                 }
                 chargeForUpdate.setAccount(newIncomeAccount);
+            }
+
+            final String paymentTypeIdParamName = "paymentTypeId";
+            if (changes.containsKey(paymentTypeIdParamName)) {
+
+                final Integer paymentTypeIdNewValue = command.integerValueOfParameterNamed(paymentTypeIdParamName);
+
+                PaymentType paymentType = null;
+                if (paymentTypeIdNewValue != null) {
+                    final Long paymentTypeId = paymentTypeIdNewValue.longValue();
+
+                    paymentType = this.paymentTyperepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
+                    chargeForUpdate.setPaymentType(paymentType);
+                }
+
             }
 
             if (changes.containsKey(ChargesApiConstants.taxGroupIdParamName)) {

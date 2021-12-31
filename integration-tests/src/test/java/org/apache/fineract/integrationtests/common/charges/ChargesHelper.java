@@ -188,6 +188,27 @@ public final class ChargesHelper {
         return chargesCreateJson;
     }
 
+    public static String paymentTypeCharge(Integer amount, final boolean enablePaymentType, final Integer paymentTypeId) {
+        return paymentTypeChargeJSON(amount, enablePaymentType, paymentTypeId);
+    }
+
+    public static String paymentTypeChargeJSON(Integer amount, final boolean enablePaymentType, final Integer paymentTypeId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", amount);
+        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SAVINGS);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
+        map.put("name", Utils.randomNameGenerator("Charge_Savings_", 6));
+        map.put("chargeTimeType", CHARGE_WITHDRAWAL_FEE);
+        map.put("enablePaymentType", enablePaymentType);
+        map.put("paymentTypeId", paymentTypeId);
+        String paymentTypeJson = new Gson().toJson(map);
+        return paymentTypeJson;
+    }
+
     public static String getLoanSpecifiedDueDateJSON() {
         return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT, ChargesHelper.PENALTY);
     }
