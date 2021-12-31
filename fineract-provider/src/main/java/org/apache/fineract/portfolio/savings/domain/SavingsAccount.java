@@ -1076,14 +1076,27 @@ public class SavingsAccount extends AbstractPersistableCustom {
         for (SavingsAccountCharge charge : this.charges()) {
 
             if (charge.isWithdrawalFee() && charge.isActive()) {
+
                 if (charge.getFreeWithdrawalCount() == null) {
                     charge.setFreeWithdrawalCount(0);
                 }
 
-                if (charge.isEnableFreeWithdrawal()) {
+                if (charge.isEnablePaymentType() && charge.isEnableFreeWithdrawal()) { // discount transaction to
+                                                                                       // specific paymentType
+                    if (paymentDetail.getPaymentType().getPaymentName().equals(charge.getCharge().getPaymentType().getPaymentName())) {
+                        resetFreeChargeDaysCount(charge, transactionAmount, transactionDate, user);
+                    }
+                } else if (charge.isEnablePaymentType()) { // normal charge-transaction to specific paymentType
+                    if (paymentDetail.getPaymentType().getPaymentName().equals(charge.getCharge().getPaymentType().getPaymentName())) {
+                        charge.updateWithdralFeeAmount(transactionAmount);
+                        this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, user);
+                    }
+                } else if (!charge.isEnablePaymentType() && charge.isEnableFreeWithdrawal()) { // discount transaction
+                                                                                               // irrespective of
+                                                                                               // PaymentTypes.
                     resetFreeChargeDaysCount(charge, transactionAmount, transactionDate, user);
 
-                } else {
+                } else { // normal-withdraw
                     charge.updateWithdralFeeAmount(transactionAmount);
                     this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, user);
                 }

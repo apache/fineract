@@ -97,4 +97,8 @@ public class PaymentType extends AbstractPersistableCustom {
         return isCashPayment;
     }
 
+    public String getPaymentName() {
+        return name;
+    }
+
 }

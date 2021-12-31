@@ -54,8 +54,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
             "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
-            "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType",
-            ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+            "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId",
+            "enablePaymentType", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -111,6 +111,17 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         Locale.getDefault());
                 baseDataValidator.reset().parameter("countFrequencyType").value(countFrequencyType);
 
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("enablePaymentType", element)) {
+
+            final boolean enablePaymentType = this.fromApiJsonHelper.extractBooleanNamed("enablePaymentType", element);
+            baseDataValidator.reset().parameter("enablePaymentType").value(enablePaymentType).notNull();
+
+            if (enablePaymentType) {
+                final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerNamed("paymentTypeId", element, Locale.getDefault());
+                baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).integerGreaterThanZero();
             }
         }
 
@@ -319,6 +330,17 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 final Integer countFrequencyType = this.fromApiJsonHelper.extractIntegerNamed("countFrequencyType", element,
                         Locale.getDefault());
                 baseDataValidator.reset().parameter("countFrequencyType").value(countFrequencyType);
+            }
+
+            Boolean enablePaymentType = false;
+            if (this.fromApiJsonHelper.parameterExists("enablePaymentType", element)) {
+                enablePaymentType = this.fromApiJsonHelper.extractBooleanNamed("enablePaymentType", element);
+                baseDataValidator.reset().parameter("enablePaymentType").value(enablePaymentType).notNull();
+
+                if (enablePaymentType) {
+                    final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerNamed("paymentTypeId", element, Locale.getDefault());
+                    baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).integerGreaterThanZero();
+                }
             }
         }
 
