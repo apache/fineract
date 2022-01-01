@@ -33,7 +33,7 @@ cargo {
 
     // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
     deployable {
-        file = file("$rootDir/fineract-provider/build/libs/fineract-provider.war")
+        file = file("$rootDir/fineract-war/build/libs/fineract-provider.war")
         context = 'fineract-provider'
     }
 
@@ -56,8 +56,8 @@ cargo {
     }
 }
 
-cargoRunLocal.dependsOn ':fineract-provider:war'
-cargoStartLocal.dependsOn ':fineract-provider:war'
+cargoRunLocal.dependsOn ':fineract-war:war'
+cargoStartLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.mustRunAfter 'testClasses'
 
 test {
