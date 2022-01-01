@@ -20,7 +20,6 @@ description = 'Fineract Provider'
 
 apply plugin: 'org.zeroturnaround.gradle.jrebel'
 apply plugin: 'java'
-apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'openjpa'
@@ -154,30 +153,6 @@ compileJava {
     finalizedBy resolve
 }
 
-war {
-    from("$rootDir/licenses/") {
-        // notice the parens
-        into "WEB-INF/licenses/" // no leading slash
-    }
-    from("$rootDir/LICENSE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    from("$rootDir/NOTICE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    rename ('LICENSE_RELEASE', 'LICENSE')
-    rename ('NOTICE_RELEASE', 'NOTICE')
-
-    from("$rootDir/DISCLAIMER") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    enabled = true
-    classifier = ''
-}
-
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
 // set the classes directory to point to Eclipse's default build directory
 if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
@@ -271,10 +246,6 @@ bootJar {
     classifier = ''
 }
 
-bootWar {
-    enabled = false
-}
-
 tasks.withType(Tar) {
     compression Compression.GZIP
     extension 'tar.gz'
@@ -289,7 +260,7 @@ distributions {
         }
         contents {
             from bootJar
-            from war
+            // TODO: @vidakovic add war
             // TODO: @vidakovic add client library
             from("$rootDir/licenses/") {
                 into "licenses/"
@@ -374,6 +345,5 @@ processResources.dependsOn generateGitProperties
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
 licenseMain.dependsOn processResources, generateGitProperties
-war.dependsOn resolve
 spotbugsTest.dependsOn resolve
 test.dependsOn resolve
