@@ -43,6 +43,10 @@ war {
     }
     enabled = true
     classifier = ''
+
+    from('$rootDir/fineract-provider/build/generated/swagger-ui') {
+        into 'BOOT-INF/classes/static/swagger-ui'
+    }
 }
 
 dependencies {

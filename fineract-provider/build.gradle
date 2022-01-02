@@ -22,24 +22,75 @@ apply plugin: 'org.zeroturnaround.gradle.jrebel'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'openjpa'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 
-// Configuration for the OpenJPA enhance task
-// https://github.com/radcortez/openjpa-gradle-plugin
-System.setProperty("openjpa.Log", "commons")
-
-openjpa {
-    includes = [
+// Custom OpenJPA enhancement
+compileJava.doLast {
+    def enhanceIncludes = [
         '**/AbstractPersistableCustom.class',
         '**/domain/*.class'
     ]
-    enhance {
-        enforcePropertyRestrictions true
+
+    def classesToEnhance = project.sourceSets.main.output.classesDirs.collectMany { classesDir ->
+        project.fileTree(classesDir).matching {
+            enhanceIncludes.forEach { include it }
+        }.files
     }
+
+    String persistenceXml = "META-INF/persistence.xml"
+    def persistenceXmlFile
+
+    // Check if persistence.xml is in the resource dirs.
+    project.sourceSets.main.resources.srcDirs.collect { resourceDir ->
+        def persistenceXmlFileCandidate = project.fileTree(resourceDir).matching {
+            include persistenceXml
+        }
+
+        if (!persistenceXmlFileCandidate.isEmpty()) {
+            if (persistenceXmlFile == null) {
+                persistenceXmlFile = persistenceXmlFileCandidate.singleFile
+            } else {
+                throw new InvalidUserDataException("Multiple persistence.xml files found in path: " +
+                persistenceXmlFile + ", " + persistenceXmlFileCandidate)
+            }
+        }
+
+        // Nothing found. Fallback to plain file.
+        if (persistenceXmlFile == null) {
+            persistenceXmlFile = project.file(persistenceXml)
+            if (!persistenceXmlFile.exists()) {
+                throw new InvalidUserDataException(
+                "Could not find valid persistence.xml in path " + this.persistenceXml)
+            }
+        }
+    }
+
+    org.apache.openjpa.lib.util.Options options = new org.apache.openjpa.lib.util.Options([
+        "addDefaultConstructor"      : true,
+        "enforcePropertyRestrictions": true,
+        "tmpClassLoader"             : false,
+        "propertiesFile"             : persistenceXmlFile
+    ])
+
+    def classes = project.sourceSets.main.output.classesDirs.collect { it.toURI().toURL() }
+
+    def compileJars = project.configurations.compileClasspath.files.collect { jar ->
+        jar.toURI().toURL()
+    }
+
+    def resources = project.sourceSets.main.resources.srcDirs.collect { resource ->
+        resource.toURI().toURL()
+    }
+
+    def urls = (classes + compileJars + resources)
+
+    ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+    Thread.currentThread().setContextClassLoader(new URLClassLoader((URL[])urls, currentClassLoader));
+    org.apache.openjpa.enhance.PCEnhancer.run((String []) classesToEnhance, options);
+    Thread.currentThread().setContextClassLoader(currentClassLoader);
 }
 
 // Configuration for Swagger documentation generation task
@@ -47,6 +98,8 @@ openjpa {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareInputYaml(dependsOn: 'generateGitProperties') {
+    outputs.file('config/swagger/fineract-input.yaml')
+
     doLast {
         def versionForSwagger
 
@@ -64,6 +117,7 @@ task prepareInputYaml(dependsOn: 'generateGitProperties') {
     }
 }
 
+rat.dependsOn prepareInputYaml
 
 resolve {
     logging.captureStandardOutput LogLevel.INFO
@@ -71,7 +125,7 @@ resolve {
     outputFormat = 'YAML'
     prettyPrint = 'TRUE'
     classpath = sourceSets.main.runtimeClasspath
-    outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
+    outputDir = file("${buildDir}/generated/swagger-ui")
     openApiFile = file("config/swagger/fineract-input.yaml")
 }
 
@@ -99,14 +153,6 @@ configurations {
 }
 
 apply from: 'dependencies.gradle'
-/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
- // Pick up dependencies based on the environment, defaults to production
- if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
- apply from:  'dev-dependencies.gradle'
- }  else {
- apply from: 'dependencies.gradle'
- }
- */
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
@@ -244,6 +290,10 @@ bootJar {
     }
     dependsOn resolve
     classifier = ''
+
+    from('build/generated/swagger-ui') {
+        into 'BOOT-INF/classes/static/swagger-ui'
+    }
 }
 
 tasks.withType(Tar) {
@@ -293,6 +343,7 @@ distributions {
 tasks.binaryDistZip.enabled false
 tasks.srcDistZip.enabled false
 tasks.binaryDistTar.dependsOn bootJar
+tasks.srcDistTar.dependsOn prepareInputYaml
 
 // create signatures and checksums only if project parameter "fineract.release" is provided on the command line
 if( project.hasProperty("fineract.release") ) {
@@ -337,11 +388,12 @@ gitProperties {
     extProperty = 'gitProps'
 }
 
+processResources.dependsOn generateGitProperties
+
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
 
 // Gradle 7.x asks for explicit dependencies between tasks
-processResources.dependsOn generateGitProperties
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
 licenseMain.dependsOn processResources, generateGitProperties
