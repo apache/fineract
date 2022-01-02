@@ -45,13 +45,16 @@ public class PersistenceConfig {
 
     @Bean
     @DependsOn("tenantDatabaseUpgradeService")
-    public EntityManagerFactory entityManagerFactory() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(routingDataSource);
+        // NOTE: very important to set this explicitly when building Docker images with Jib; otherwise complains about
+        // duplicate resources
+        em.setPersistenceXmlLocation("classpath:META-INF/persistence.xml");
         em.setJpaVendorAdapter(new OpenJpaVendorAdapter());
         em.setPersistenceUnitName("jpa-pu");
         em.afterPropertiesSet();
-        return em.getObject();
+        return em;
     }
 
     @Bean

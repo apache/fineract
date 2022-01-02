@@ -36,9 +36,9 @@ services:
     ports:
       - "3306:3306"
   fineract-server:
-    build:
-      context: .
-      target: fineract
+    image: fineract:latest
+    volumes:
+      - ./fineract-provider/build/data:/data
     healthcheck:
       test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
       timeout: 10s

@@ -27,6 +27,7 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
 apply plugin: 'signing'
+apply plugin: 'com.google.cloud.tools.jib'
 
 // Configuration for the OpenJPA enhance task
 // https://github.com/radcortez/openjpa-gradle-plugin
@@ -245,6 +246,52 @@ bootJar {
     dependsOn resolve
     classifier = ''
 }
+
+jib {
+    from {
+        image = 'azul/zulu-openjdk-alpine:11'
+    }
+
+    to {
+        image = 'fineract'
+        tags = [
+            "${releaseVersion}",
+            'latest'
+        ]
+    }
+
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        mainClass = 'org.apache.fineract.ServerApplication'
+        jvmFlags = [
+            '-Xmx1G',
+            '-Xms1G',
+            '-XshowSettings:vm',
+            '-XX:+UseContainerSupport',
+            '-XX:+UseStringDeduplication',
+            '-XX:MinRAMPercentage=25',
+            '-XX:MaxRAMPercentage=80'
+        ]
+        args = [
+            '-Duser.home=/tmp',
+            '-Dspring.profiles.active=basicauth',
+            '-Dfile.encoding=UTF-8',
+            '-Duser.timezone=UTC',
+            '-Djava.security.egd=file:/dev/./urandom'
+        ]
+        ports = ['8080/tcp', '8443/tcp']
+        labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
+        user = 'nobody:nogroup'
+    }
+
+    allowInsecureRegistries = true
+
+    dependencies {
+        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
+    }
+}
+
+tasks.jibDockerBuild.dependsOn = ["bootJar"]
 
 tasks.withType(Tar) {
     compression Compression.GZIP

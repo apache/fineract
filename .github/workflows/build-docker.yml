@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the image
-        run: docker-compose build
+        run: ./gradlew :fineract-provider:jibDockerBuild -x test
       - name: Start the stack
         run: docker-compose up -d
       - name: Wait for stack to come up
