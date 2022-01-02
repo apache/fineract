@@ -20,7 +20,7 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 Requirements
 ============
-* Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
+* Java >= 17 (OpenJDK JVM is tested by our CI on Travis)
 * MariaDB 10.6
 
 You can run the required version of the database server in a container, instead of having to install it, like this:

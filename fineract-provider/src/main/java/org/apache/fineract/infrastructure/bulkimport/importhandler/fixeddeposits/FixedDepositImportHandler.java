@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSe
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataIdSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.ClosingOfSavingsAccounts;
 import org.apache.fineract.portfolio.savings.data.FixedDepositAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
@@ -344,7 +345,7 @@ public class FixedDepositImportHandler implements ImportHandler {
 
     private int importSavingsClosing(Long savingsId, int i, String dateFormat) {
         if (closedOnDate.get(i) != null) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
+            GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(closedOnDate.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -357,7 +358,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private CommandProcessingResult importSavings(int i, String dateFormat) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
         JsonObject savingsJsonob = gsonBuilder.create().toJsonTree(savings.get(i)).getAsJsonObject();
@@ -382,7 +383,7 @@ public class FixedDepositImportHandler implements ImportHandler {
 
     private int importSavingsApproval(Long savingsId, int i, String dateFormat) {
         if (approvalDates.get(i) != null) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
+            GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(approvalDates.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -396,7 +397,7 @@ public class FixedDepositImportHandler implements ImportHandler {
 
     private int importSavingsActivation(Long savingsId, int i, String dateFormat) {
         if (activationDates.get(i) != null) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
+            GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(activationDates.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //

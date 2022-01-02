@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -183,7 +184,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         int successCount = 0;
         int errorCount = 0;
         String errorMessage = "";
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         for (ClientData client : clients) {
             try {
