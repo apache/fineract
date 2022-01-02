@@ -51,7 +51,7 @@ asciidoctorj {
         imagesdir: 'images',
         diagrams: 'diagrams',
         years: '2015-2020',
-        revnumber: "$releaseVersion".toString(),
+        revnumber: "$version".toString(),
         rootdir: "$rootDir".toString(),
         baseurl: 'fineract.apache.org'
     ]

@@ -73,6 +73,7 @@ plugins {
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id "com.google.cloud.tools.jib" version "3.1.4" apply false
+    id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
     id "org.sonarqube" version "3.3"
 }
 
@@ -87,8 +88,13 @@ ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/
 allprojects  {
     group = 'org.apache.fineract'
 
+    jgitver {
+        strategy 'PATTERN'
+        versionPattern '${M}.${m}.${p}-${meta.GIT_SHA1_8}'
+    }
+
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     apply plugin: 'io.spring.dependency-management'
