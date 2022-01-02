@@ -305,7 +305,7 @@ jib {
     to {
         image = 'fineract'
         tags = [
-            "${releaseVersion}",
+            "${version}",
             'latest'
         ]
     }
