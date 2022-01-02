@@ -20,8 +20,8 @@ package org.apache.fineract.infrastructure.configuration.spring;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -34,8 +34,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * sufficient (as long as the TestsWithoutDatabaseAndNoJobsConfiguration used extends AbstractApplicationConfiguration).
  */
 @ExtendWith(SpringExtension.class)
+@TestPropertySource("classpath:application-test.properties")
 @WebAppConfiguration
-@ActiveProfiles("basicauth")
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
 public class SpringConfigurationTest {
 

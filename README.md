@@ -59,6 +59,50 @@ The tenants database connection details are configured [via environment variable
     java -jar fineract-provider.jar
 
 
+Security
+============
+NOTE: The HTTP Basic and OAuth2 authentication schemes are mutually exclusive. You can't enable them both at the same time. Fineract checks these settings on startup and will fail if more than one authentication scheme is enabled.
+
+HTTP Basic Authentication
+------------
+By default Fineract is configured with a HTTP Basic Authentication scheme, so you actually don't have to do anything if you want to use it. But if you would like to explicitly choose this authentication scheme then there are two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=true
+FINERACT_SECURITY_OAUTH_ENABLED=false
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -jar fineract-provider.jar
+```
+
+OAuth2 Authentication
+------------
+There is also an OAuth2 authentication scheme available. Again, two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=false
+FINERACT_SECURITY_OAUTH_ENABLED=true
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth.enabled=true -jar fineract-provider.jar
+```
+
+Two Factor Authentication
+------------
+You can also enable 2FA authentication. Depending on how you start Fineract add the following:
+
+1. Use environment variable (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_2FA_ENABLED=true
+```
+2. Use JVM parameter (best choice if you run the Spring Boot JAR):
+```
+-Dfineract.security.2fa.enabled=true
+```
+
+
 Instructions to build a WAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.

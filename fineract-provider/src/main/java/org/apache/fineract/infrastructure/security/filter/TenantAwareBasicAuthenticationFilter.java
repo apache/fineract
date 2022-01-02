@@ -38,7 +38,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -59,7 +59,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  * If multi-tenant and basic auth credentials are invalid, a http error response is returned.
  */
 
-@Profile("basicauth")
+@ConditionalOnProperty("fineract.security.basicauth.enabled")
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
     private static boolean firstRequestProcessed = false;

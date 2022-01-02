@@ -29,10 +29,10 @@ import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticatio
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.apache.fineract.infrastructure.security.vote.SelfServiceUserAccessVote;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDecisionManager;
@@ -59,7 +59,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 @Configuration
-@Profile("oauth")
+@ConditionalOnProperty("fineract.security.oauth.enabled")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
 

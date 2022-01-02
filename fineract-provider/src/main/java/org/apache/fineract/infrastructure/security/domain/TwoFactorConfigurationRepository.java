@@ -19,11 +19,11 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.util.List;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-@Profile("twofactor")
+@ConditionalOnProperty("fineract.security.2fa.enabled")
 public interface TwoFactorConfigurationRepository
         extends JpaRepository<TwoFactorConfiguration, Long>, JpaSpecificationExecutor<TwoFactorConfiguration> {
 

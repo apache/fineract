@@ -27,7 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
  * This filter adds 'TWOFACTOR_AUTHENTICATED' authority to every authenticated platform user.
  */
 @Service
-@Profile("!twofactor")
+@ConditionalOnProperty(name = "fineract.security.2fa.enabled", havingValue = "false")
 public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticationFilter {
 
     public InsecureTwoFactorAuthenticationFilter() {
