@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.transfer.service;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
@@ -381,7 +380,6 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     private void handleClientTransferLifecycleEvent(final Client client, final Office destinationOffice,
             final TransferEventType transferEventType, final JsonCommand jsonCommand) {
-        final Date todaysDate = DateUtils.getDateOfTenant();
         /** Get destination loan officer if exists **/
         Staff staff = null;
         Group destinationGroup = null;
@@ -459,7 +457,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     } else if (!destinationGroup.isActive()) {
                         throw new GroupNotActiveException(destinationGroup.getId());
                     }
-                    transferClientBetweenGroups(Iterables.get(client.getGroups(), 0), client, destinationGroup, true, staff);
+                    transferClientBetweenGroups(client.getGroups().stream().findFirst().get(), client, destinationGroup, true, staff);
                 } else if (client.getGroups().size() == 0 && destinationGroup != null) {
                     client.getGroups().add(destinationGroup);
                     client.updateStaff(destinationGroup.getStaff());
