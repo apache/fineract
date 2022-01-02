@@ -30,13 +30,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.security.api.UserDetailsApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/self/userdetails")
 @Component
-@Profile("oauth")
+@ConditionalOnProperty("fineract.security.oauth.enabled")
 @Scope("singleton")
 
 @Tag(name = "Self User Details", description = "")

@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,7 +57,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * authority regardless of the value of the 'Fineract-Platform-TFA-Token' header.
  */
 @Service
-@Profile("twofactor")
+@ConditionalOnProperty("fineract.security.2fa.enabled")
 public class TwoFactorAuthenticationFilter extends GenericFilterBean {
 
     private final TwoFactorService twoFactorService;

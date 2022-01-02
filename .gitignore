@@ -17,7 +17,6 @@ build
 catalina.base_IS_UNDEFINED/
 keystore.jks
 bin/
-fineract-provider/src/main/resources/application.properties
 .lock
 fineract-provider/out/
 fineract-provider/config/swagger/config.json
