@@ -48,8 +48,8 @@ install:
   - curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
   - sudo apt-get -yq install ./zulu-repo_1.0.0-3_all.deb
   - sudo apt-get -q update
-  - sudo apt-get -yq install zulu11-jdk
-  - export JAVA_HOME=/usr/lib/jvm/zulu11
+  - sudo apt-get -yq install zulu17-jdk
+  - export JAVA_HOME=/usr/lib/jvm/zulu17
 
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:

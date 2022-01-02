@@ -45,7 +45,7 @@ cargo {
         }
         startStopTimeout = 240000
         containerProperties {
-            property 'cargo.start.jvmargs', '-Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -Dfineract.security.2fa.enabled=true'
+            property 'cargo.start.jvmargs', '-Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -Dfineract.security.2fa.enabled=true --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED'
             property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
             property 'cargo.tomcat.connector.keystorePass', 'openmf'
             property 'cargo.tomcat.httpSecure', true
