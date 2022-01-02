@@ -72,6 +72,7 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
+    id "com.google.cloud.tools.jib" version "3.1.4" apply false
     id "org.sonarqube" version "3.3"
 }
 
