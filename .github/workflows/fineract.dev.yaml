@@ -22,12 +22,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/setup-gcloud@master
+      - uses: actions/checkout@v2
+
+      - id: 'auth'
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}'
+
+      - uses: google-github-actions/setup-gcloud@v0
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
-
-      - uses: actions/checkout@v2
 
       - run: gcloud components install beta
 
