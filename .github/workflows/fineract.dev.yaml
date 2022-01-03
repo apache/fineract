@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+
       - id: 'auth'
         uses: 'google-github-actions/auth@v0'
         with:
@@ -30,8 +32,6 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v0
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
-
-      - uses: actions/checkout@v2
 
       - run: gcloud components install beta
 
