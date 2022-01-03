@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -40,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class VariableInstallmentsIntegrationTest {
+public class VariableInstallmentsIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(VariableInstallmentsIntegrationTest.class);
     private static final String NONE = "1";

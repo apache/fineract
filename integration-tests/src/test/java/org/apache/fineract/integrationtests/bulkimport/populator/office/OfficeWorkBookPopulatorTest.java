@@ -25,6 +25,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.io.IOException;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,7 +35,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class OfficeWorkBookPopulatorTest {
+public class OfficeWorkBookPopulatorTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

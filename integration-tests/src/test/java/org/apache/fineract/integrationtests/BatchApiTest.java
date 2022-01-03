@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
  * @see org.apache.fineract.integrationtests.common.BatchHelper
  * @see org.apache.fineract.batch.domain.BatchRequest
  */
-public class BatchApiTest {
+public class BatchApiTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoanRescheduleOnDecliningBalanceLoanTest {
+public class LoanRescheduleOnDecliningBalanceLoanTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleOnDecliningBalanceLoanTest.class);
     private ResponseSpecification responseSpec;

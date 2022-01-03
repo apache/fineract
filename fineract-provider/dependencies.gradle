@@ -18,7 +18,7 @@
  */
 
 dependencies {
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    compileOnly("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.

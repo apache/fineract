@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
  * @author Manthan Surkar
  *
  */
-public class AuditIntegrationTest {
+public class AuditIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

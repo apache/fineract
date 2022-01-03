@@ -46,12 +46,12 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterJoinDa
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -65,6 +65,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
+
+    @Value("${fineract.home}")
+    private String fineractHome;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
@@ -229,7 +232,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
             final boolean isSelfServiceUserReport) {
 
-        final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+        final String fileLocation = fineractHome + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
             new File(fileLocation).mkdirs();
         }

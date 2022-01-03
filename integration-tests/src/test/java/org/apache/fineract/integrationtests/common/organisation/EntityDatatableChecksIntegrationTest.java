@@ -30,6 +30,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -50,7 +52,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Entity Datatable Checks Integration Test for checking Creation, Deletion and Retrieval of Entity-Datatable Check
  */
-public class EntityDatatableChecksIntegrationTest {
+public class EntityDatatableChecksIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksIntegrationTest.class);
     private RequestSpecification requestSpec;

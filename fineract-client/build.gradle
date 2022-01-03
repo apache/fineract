@@ -64,11 +64,6 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
         ':fineract-provider:resolve'
     ]
     finalizedBy = [licenseFormat]
-    // uncomment below block to automatically copy the custom files in generated SDK
-    /*copy {
-     from file('src/main/java')
-     into file("$buildDir/generated/java/src/main/java")
-     }*/
 }
 
 task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -94,12 +89,29 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
 }
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
+// compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
+
+sourceSets {
+    openapi {
+        java {
+            srcDir "$buildDir/generated/openapi/src/main/java"
+        }
+    }
+}
+
+compileJava {
+    source += sourceSets.main.java
+    source += sourceSets.openapi.java
+}
+
+// TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
 compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    // NOTE: enable Java 8 only for Github builds; need 17 to be able to run the debugger in IntelliJ
+    sourceCompatibility = project.hasProperty("fineract.release") ? JavaVersion.VERSION_1_8 : JavaVersion.VERSION_17
+    targetCompatibility = project.hasProperty("fineract.release") ? JavaVersion.VERSION_1_8 : JavaVersion.VERSION_17
 }
 
 tasks.withType(JavaCompile) {
@@ -112,8 +124,8 @@ tasks.withType(JavaCompile) {
 }
 
 configurations {
-    generatedCompileClasspath.extendsFrom implementation
-    generatedRuntimeClasspath.extendsFrom runtimeClasspath
+    openapiCompileClasspath.extendsFrom implementation
+    openapiRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
 test {

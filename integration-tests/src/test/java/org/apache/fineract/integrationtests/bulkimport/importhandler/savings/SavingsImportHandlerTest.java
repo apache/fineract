@@ -25,7 +25,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,6 +37,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SavingsImportHandlerTest {
+public class SavingsImportHandlerTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
 
@@ -163,9 +163,7 @@ public class SavingsImportHandlerTest {
         firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
-                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "savings");
+        File directory = Utils.getTempDir("bulkimport" + File.separator + "importhandler" + File.separator + "savings");
         if (!directory.exists()) {
             directory.mkdirs();
         }
@@ -183,15 +181,14 @@ public class SavingsImportHandlerTest {
 
         // check status column of output excel
         String location = savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook Outputworkbook = new HSSFWorkbook(fileInputStream);
-        Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
+        Workbook outputWorkbook = IntegrationTestSuite.fineract.copyFileFromContainer(location, (is) -> new HSSFWorkbook(is));
+        Sheet OutputSavingsSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         Row row = OutputSavingsSheet.getRow(1);
 
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
 
         Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
-        Outputworkbook.close();
+        outputWorkbook.close();
     }
 }

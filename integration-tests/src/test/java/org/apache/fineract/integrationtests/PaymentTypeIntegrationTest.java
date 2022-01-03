@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class PaymentTypeIntegrationTest {
+public class PaymentTypeIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

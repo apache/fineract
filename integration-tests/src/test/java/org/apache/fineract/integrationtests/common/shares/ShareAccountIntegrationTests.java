@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -43,7 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShareAccountIntegrationTests {
+public class ShareAccountIntegrationTests extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShareAccountIntegrationTests.class);
     private RequestSpecification requestSpec;

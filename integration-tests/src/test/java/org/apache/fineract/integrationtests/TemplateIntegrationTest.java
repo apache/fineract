@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class TemplateIntegrationTest {
+public class TemplateIntegrationTest extends IntegrationTestSuite {
 
     private static final String GET_TEMPLATES_URL = "/fineract-provider/api/v1/templates?tenantIdentifier=default";
 

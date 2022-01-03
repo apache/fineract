@@ -35,7 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class WorkingDaysTest {
+public class WorkingDaysTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
  * Client Loan Integration Test for checking Loan Application Repayment Schedule.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class SurveyIntegrationTest {
+public class SurveyIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

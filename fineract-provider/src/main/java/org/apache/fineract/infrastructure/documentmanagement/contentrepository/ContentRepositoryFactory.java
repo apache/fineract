@@ -23,6 +23,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,9 @@ public class ContentRepositoryFactory {
 
     private final ApplicationContext applicationContext;
     private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
+
+    @Value("${fineract.home}")
+    private String fineractHome;
 
     @Autowired
     public ContentRepositoryFactory(final ApplicationContext applicationContext,
@@ -45,12 +49,12 @@ public class ContentRepositoryFactory {
         if (configurationDomainServiceJpa.isAmazonS3Enabled()) {
             return createS3DocumentStore();
         }
-        return new FileSystemContentRepository();
+        return new FileSystemContentRepository(fineractHome);
     }
 
     public ContentRepository getRepository(final StorageType documentStoreType) {
         if (documentStoreType == StorageType.FILE_SYSTEM) {
-            return new FileSystemContentRepository();
+            return new FileSystemContentRepository(fineractHome);
         }
         return createS3DocumentStore();
     }

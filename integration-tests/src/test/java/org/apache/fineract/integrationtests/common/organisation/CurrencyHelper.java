@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests.common.organisation;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -33,7 +35,6 @@ import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 public class CurrencyHelper {
 
@@ -65,12 +66,12 @@ public class CurrencyHelper {
         LOG.info("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getUrl).andReturn().asString();
         final Gson gson = new Gson();
-        Assert.notNull(json, "json");
+        assertNotNull(json, "json");
         final ArrayList<Currency> currencyList = new ArrayList<Currency>();
         final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {}.getType();
         final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
         for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
-            Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
+            assertTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
             for (Currency currency : entry.getValue()) {
                 currencyList.add(currency);
             }
@@ -83,7 +84,7 @@ public class CurrencyHelper {
         final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log().ifError().when()
                 .put(CURRENCY_URL).andReturn().asString();
         final Gson gson = new Gson();
-        Assert.notNull(json, "json");
+        assertNotNull(json, "json");
         final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {}.getType();
         final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
         return responseMap.get("changes").get("currencies");

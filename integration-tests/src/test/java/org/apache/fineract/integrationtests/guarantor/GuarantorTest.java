@@ -36,6 +36,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -51,7 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GuarantorTest {
+public class GuarantorTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuarantorTest.class);
     private ResponseSpecification responseSpec;

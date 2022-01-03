@@ -39,7 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("rawtypes")
-public class LoanWithdrawnByApplicantIntegrationTest {
+public class LoanWithdrawnByApplicantIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

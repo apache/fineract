@@ -26,6 +26,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +42,7 @@ import org.junit.jupiter.api.Test;
  * @author lenovo
  *
  */
-public class ClientChargesTest {
+public class ClientChargesTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

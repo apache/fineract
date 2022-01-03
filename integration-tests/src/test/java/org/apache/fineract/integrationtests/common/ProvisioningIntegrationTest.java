@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -51,7 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ProvisioningIntegrationTest {
+public class ProvisioningIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";

@@ -24,7 +24,7 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ClientStatusChecker {
+public final class ClientStatusChecker extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientStatusChecker.class);
 

@@ -25,11 +25,19 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Map;
+
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ActuatorIntegrationTest {
+public class ActuatorIntegrationTest extends IntegrationTestSuite {
 
     private static final String INFO_URL = "/fineract-provider/actuator/info";
+
+    @BeforeEach
+    public void setup() {
+        Utils.initializeRESTAssured();
+    }
 
     @Test
     public void testActuatorGitBuildInfo() {

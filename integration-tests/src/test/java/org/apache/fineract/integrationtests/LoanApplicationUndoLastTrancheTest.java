@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
-public class LoanApplicationUndoLastTrancheTest {
+public class LoanApplicationUndoLastTrancheTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
     private ResponseSpecification responseSpec;

@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 @Order(1)
-public class SchedulerJobsTest {
+public class SchedulerJobsTest extends IntegrationTestSuite {
 
     private RequestSpecification requestSpec;
     private SchedulerJobHelper schedulerJobHelper;

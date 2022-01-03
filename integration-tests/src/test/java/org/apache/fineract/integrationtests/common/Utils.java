@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ public final class Utils {
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
+        RestAssured.port = IntegrationTestSuite.fineract.getFirstMappedPort();
         RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
         RestAssured.useRelaxedHTTPSValidation();
     }
@@ -263,5 +264,9 @@ public final class Utils {
         final String templateLocation = given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect()
                 .spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return templateLocation.substring(1, templateLocation.length() - 1);
+    }
+
+    public static File getTempDir(String path) {
+        return new File(new File("").getAbsolutePath() + File.separator + "build" + File.separator + "data" + File.separator + path);
     }
 }

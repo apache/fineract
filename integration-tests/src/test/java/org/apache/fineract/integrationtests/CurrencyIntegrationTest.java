@@ -27,7 +27,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.jupiter.api.BeforeEach;
 
-public class CurrencyIntegrationTest {
+public class CurrencyIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

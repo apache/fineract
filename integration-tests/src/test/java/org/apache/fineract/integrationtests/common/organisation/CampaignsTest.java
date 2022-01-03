@@ -30,6 +30,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +44,7 @@ import org.mockserver.model.MediaType;
 
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 9191 })
-
-public class CampaignsTest {
+public class CampaignsTest extends IntegrationTestSuite {
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

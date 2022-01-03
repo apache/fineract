@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CenterIntegrationTest {
+public class CenterIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
     private RequestSpecification requestSpec;

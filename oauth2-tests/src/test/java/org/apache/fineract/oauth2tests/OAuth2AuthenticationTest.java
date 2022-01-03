@@ -49,6 +49,8 @@ public class OAuth2AuthenticationTest {
     public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
 
+    private static Integer oauthServerPort = OAuth2TestSuite.oauthServer.getFirstMappedPort();
+
     @BeforeEach
     public void setup() throws InterruptedException {
         initializeRestAssured();
@@ -85,11 +87,13 @@ public class OAuth2AuthenticationTest {
 
         performServerGet(requestSpec, responseSpec401, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, "");
 
-        String accessToken = performServerPost(requestFormSpec, responseSpec, "http://localhost:9000/auth/realms/fineract/token",
+        String accessToken = performServerPost(requestFormSpec, responseSpec,
+                "http://localhost:" + oauthServerPort + "/auth/realms/fineract/token",
                 "grant_type=client_credentials&client_id=community-app&client_secret=123123", "access_token");
         assertNotNull(accessToken);
 
-        String bearerToken = performServerPost(requestFormSpec, responseSpec, "http://localhost:9000/auth/realms/fineract/token",
+        String bearerToken = performServerPost(requestFormSpec, responseSpec,
+                "http://localhost:" + oauthServerPort + "/auth/realms/fineract/token",
                 "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + accessToken
                         + "&client_id=community-app&scope=fineract",
                 "access_token");
@@ -107,11 +111,13 @@ public class OAuth2AuthenticationTest {
     public void testGetOAuth2UserDetails() {
         performServerGet(requestSpec, responseSpec401, "/fineract-provider/api/v1/offices/1?" + TENANT_IDENTIFIER, "");
 
-        String accessToken = performServerPost(requestFormSpec, responseSpec, "http://localhost:9000/auth/realms/fineract/token",
+        String accessToken = performServerPost(requestFormSpec, responseSpec,
+                "http://localhost:" + oauthServerPort + "/auth/realms/fineract/token",
                 "grant_type=client_credentials&client_id=community-app&client_secret=123123", "access_token");
         assertNotNull(accessToken);
 
-        String bearerToken = performServerPost(requestFormSpec, responseSpec, "http://localhost:9000/auth/realms/fineract/token",
+        String bearerToken = performServerPost(requestFormSpec, responseSpec,
+                "http://localhost:" + oauthServerPort + "/auth/realms/fineract/token",
                 "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + accessToken
                         + "&client_id=community-app&scope=fineract",
                 "access_token");
@@ -129,7 +135,7 @@ public class OAuth2AuthenticationTest {
 
     private static void initializeRestAssured() {
         RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
+        RestAssured.port = OAuth2TestSuite.fineract.getFirstMappedPort();
         RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
         RestAssured.useRelaxedHTTPSValidation();
     }

@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserAdministrationTest {
+public class UserAdministrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private ResponseSpecification responseSpec;

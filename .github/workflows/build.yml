@@ -4,24 +4,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-20.04
-
-    services:
-        mariad:
-            image: mariadb:10.8
-            ports:
-                - 3306:3306
-            env:
-                MARIADB_ROOT_PASSWORD: mysql
-            options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-
-        mock-oauth2-server:
-          image: ghcr.io/navikt/mock-oauth2-server:0.4.0
-          ports:
-            - 9000:9000
-          env:
-            SERVER_PORT: 9000
-            JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
-
     env:
         TZ: Asia/Kolkata
     steps:
@@ -43,25 +25,15 @@ jobs:
           distribution: 'zulu'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@859c33240bd026ce8d5f711f5adcc65c2f8eafc1
-      - name: Verify MariaDB connection
-        run: |
-            while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
-                sleep 1
-            done
-      - name: Initialise databases
-        run: |
-            ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
-            ./gradlew --no-daemon -q createDB -PdbName=fineract_default
       - name: Install additional software
         run: |
             sudo apt-get update
             sudo apt-get install ghostscript -y
-
       - name: Basic Auth Build & Test
-        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test
-
+        # TODO: enable this before merging back to develop
+        # run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test
+        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test doc -x :twofactor-tests:test -x :oauth2-test:test
       - name: 2FA Build & Test
         run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast
-
       - name: OAuth2 Build & Test
         run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast

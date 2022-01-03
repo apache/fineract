@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcurrencyIntegrationTest {
+public class ConcurrencyIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
     private ResponseSpecification responseSpec;

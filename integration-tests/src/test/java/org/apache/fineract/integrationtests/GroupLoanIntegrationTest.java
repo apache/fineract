@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Group Loan Integration Test for checking Loan Application Repayment Schedule.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class GroupLoanIntegrationTest {
+public class GroupLoanIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

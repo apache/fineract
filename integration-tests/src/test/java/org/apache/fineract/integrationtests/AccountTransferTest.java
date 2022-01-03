@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * JUnit Test Cases for Account Transfer for.
  */
 @SuppressWarnings({ "rawtypes", "unused" })
-public class AccountTransferTest {
+public class AccountTransferTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);
     public static final String MINIMUM_OPENING_BALANCE = "30000.0";

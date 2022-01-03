@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepositoryWrapper;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -66,6 +65,7 @@ import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -86,6 +86,9 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
     private final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository;
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    @Value("${fineract.home}")
+    private String fineractHome;
 
     @Autowired
     public ReportMailingJobWritePlatformServiceImpl(final ReportRepositoryWrapper reportRepositoryWrapper,
@@ -451,7 +454,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
                 if (reponseObject != null && reponseObject.getClass().equals(ByteArrayOutputStream.class)) {
                     final ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream.class.cast(reponseObject);
-                    final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+                    final String fileLocation = fineractHome + File.separator;
                     final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
 
                     // check if file directory exists, if not create directory

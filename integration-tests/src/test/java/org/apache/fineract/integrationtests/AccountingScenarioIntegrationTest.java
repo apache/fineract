@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
 @Order(2)
-public class AccountingScenarioIntegrationTest {
+public class AccountingScenarioIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
     private static RequestSpecification requestSpec;

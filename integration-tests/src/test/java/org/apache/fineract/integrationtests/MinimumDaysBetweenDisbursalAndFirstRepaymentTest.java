@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
  * Test the creation, approval and rejection of a loan reschedule request
  **/
 @SuppressWarnings({ "rawtypes" })
-public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
+public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForStatusCode403;

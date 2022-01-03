@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
  */
-public class GroupTest {
+public class GroupTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;

@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * repayments and verifying accounting transactions
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ClientLoanIntegrationTest {
+public class ClientLoanIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationTest.class);
 

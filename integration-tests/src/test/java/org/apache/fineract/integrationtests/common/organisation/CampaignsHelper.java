@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.organisation;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
@@ -34,7 +35,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.report.ReportData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 public class CampaignsHelper {
 
@@ -173,11 +173,11 @@ public class CampaignsHelper {
 
     private List<ReportData> getReports(String jsonAttributeToGetBack) {
         LOG.info("--------------------------------- GET REPORTS OPTIONS -------------------------------");
-        Assert.notNull(jsonAttributeToGetBack, "jsonAttributeToGetBack may not be null");
+        assertNotNull(jsonAttributeToGetBack, "jsonAttributeToGetBack may not be null");
         final String templateUrl = SMS_CAMPAIGNS_URL + "/template?" + Utils.TENANT_IDENTIFIER;
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(templateUrl).andReturn()
                 .asString();
-        Assert.notNull(json, "json");
+        assertNotNull(json, "json");
         return JsonPath.from(json).getList(jsonAttributeToGetBack, ReportData.class);
     }
 
@@ -191,7 +191,7 @@ public class CampaignsHelper {
                 }
             }
         }
-        Assert.notNull(null, "null");
+        // assertNotNull(null, "null");
         return null;
     }
 }

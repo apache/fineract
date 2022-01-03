@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Manthan Surkar
  */
-public class SwaggeruiTest {
+public class SwaggeruiTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

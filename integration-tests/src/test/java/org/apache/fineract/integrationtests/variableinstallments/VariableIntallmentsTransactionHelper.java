@@ -22,12 +22,14 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class VariableIntallmentsTransactionHelper {
 
-    private static final String URL = "https://localhost:8443/fineract-provider/api/v1/loans/";
+    private static final String URL = "https://localhost:" + IntegrationTestSuite.fineract.getFirstMappedPort()
+            + "/fineract-provider/api/v1/loans/";
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;

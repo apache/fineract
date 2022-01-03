@@ -76,7 +76,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @Order(1)
 @TestMethodOrder(MethodName.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class SchedulerJobsTestResults {
+public class SchedulerJobsTestResults extends IntegrationTestSuite {
 
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
     private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";

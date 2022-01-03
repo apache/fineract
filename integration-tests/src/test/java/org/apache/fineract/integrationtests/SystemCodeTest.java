@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class SystemCodeTest {
+public class SystemCodeTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification generalResponseSpec;

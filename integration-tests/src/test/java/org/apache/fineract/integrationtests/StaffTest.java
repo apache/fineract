@@ -34,7 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Deprecated // TODO move this into new org.apache.fineract.integrationtests.client.StaffTest
-public class StaffTest {
+public class StaffTest extends IntegrationTestSuite {
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

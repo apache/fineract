@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientCollateralIntegrationTest {
+public class ClientCollateralIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientCollateralIntegrationTest.class);
     private ResponseSpecification responseSpec;

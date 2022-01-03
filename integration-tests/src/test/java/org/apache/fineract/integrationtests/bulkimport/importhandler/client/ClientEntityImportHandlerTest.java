@@ -24,7 +24,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.ClientEntityConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientEntityImportHandlerTest {
+public class ClientEntityImportHandlerTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
 
@@ -125,8 +125,7 @@ public class ClientEntityImportHandlerTest {
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
 
-        File directory = new File(System.getProperty("user.home") + File.separator + "Fineract" + File.separator + "bulkimport"
-                + File.separator + "integration_tests" + File.separator + "importhandler" + File.separator + "client");
+        File directory = Utils.getTempDir("bulkimport" + File.separator + "importhandler" + File.separator + "client");
         if (!directory.exists()) {
             directory.mkdirs();
         }
@@ -144,8 +143,7 @@ public class ClientEntityImportHandlerTest {
 
         // check status column of output excel
         String location = clientHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputWorkbook = new HSSFWorkbook(fileInputStream);
+        Workbook outputWorkbook = IntegrationTestSuite.fineract.copyFileFromContainer(location, (is) -> new HSSFWorkbook(is));
         Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
         Row row = outputClientEntitySheet.getRow(1);
 

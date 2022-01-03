@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AccountNumberPreferencesTest {
+public class AccountNumberPreferencesTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
     private RequestSpecification requestSpec;

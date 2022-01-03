@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Funds Integration Test for checking Funds Application.
  */
-public class FundsIntegrationTest {
+public class FundsIntegrationTest extends IntegrationTestSuite {
 
     private ResponseSpecification statusOkResponseSpec;
     private RequestSpecification requestSpec;

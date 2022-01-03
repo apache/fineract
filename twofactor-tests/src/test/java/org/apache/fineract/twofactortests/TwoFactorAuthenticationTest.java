@@ -19,9 +19,6 @@
 package org.apache.fineract.twofactortests;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
@@ -43,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -62,10 +60,12 @@ public class TwoFactorAuthenticationTest {
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
 
+    // TODO: we could Dockerize this too? not sure if it would be simpler though...
+
     @RegisterExtension
-    static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+    private static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("support@cloudmicrofinance.com", "support81"))
-            .withPerMethodLifecycle(true);
+            .withPerMethodLifecycle(false);
 
     @BeforeEach
     public void setup() throws InterruptedException {
@@ -77,10 +77,10 @@ public class TwoFactorAuthenticationTest {
         awaitSpringBootActuatorHealthyUp();
         String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}").expect()
                 .log().ifError().when().post(LOGIN_URL).asString();
-        assertFalse(StringUtils.isBlank(json));
+        Assertions.assertFalse(StringUtils.isBlank(json));
 
         this.basicAuthenticationKey = JsonPath.with(json).get("base64EncodedAuthenticationKey");
-        assertFalse(StringUtils.isBlank(this.basicAuthenticationKey));
+        Assertions.assertFalse(StringUtils.isBlank(this.basicAuthenticationKey));
 
         this.requestSpec.header("Authorization", "Basic " + basicAuthenticationKey);
 
@@ -109,27 +109,27 @@ public class TwoFactorAuthenticationTest {
     public void testCheckTwofactorEnabled() {
         String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}").expect()
                 .log().ifError().when().post("/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER).asString();
-        assertFalse(StringUtils.isBlank(json));
+        Assertions.assertFalse(StringUtils.isBlank(json));
         Boolean key = JsonPath.with(json).get("isTwoFactorAuthenticationRequired");
-        assertEquals(true, key);
+        Assertions.assertEquals(true, key);
     }
 
     @Test
     public void testGetTwofactorMethods() {
         String json = RestAssured.given().spec(requestSpec).expect().log().ifError().when()
                 .get("/fineract-provider/api/v1/twofactor?" + TENANT_IDENTIFIER).asString();
-        assertFalse(StringUtils.isBlank(json));
+        Assertions.assertFalse(StringUtils.isBlank(json));
         List<HashMap<String, Object>> twoFactorMethods = JsonPath.with(json).getList("$");
-        assertEquals("email", twoFactorMethods.get(0).get("name"));
-        assertEquals("demomfi@mifos.org", twoFactorMethods.get(0).get("target"));
+        Assertions.assertEquals("email", twoFactorMethods.get(0).get("name"));
+        Assertions.assertEquals("demomfi@mifos.org", twoFactorMethods.get(0).get("target"));
     }
 
     @Test
     public void testTwofactorLogin() throws IOException, MessagingException {
-        assertEquals(greenMail.getReceivedMessages().length, 0);
+        Assertions.assertEquals(greenMail.getReceivedMessages().length, 0);
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 1);
+        Assertions.assertEquals(greenMail.getReceivedMessages().length, 1);
 
         Pattern p = Pattern.compile("token is (.+).");
         Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
@@ -140,10 +140,10 @@ public class TwoFactorAuthenticationTest {
             token = m.group(1);
         }
 
-        assertNotNull(token);
+        Assertions.assertNotNull(token);
         String tfaToken = performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor/validate?token=" + token + "&" + TENANT_IDENTIFIER, "", "token");
-        assertNotNull(tfaToken);
+        Assertions.assertNotNull(tfaToken);
 
         RequestSpecification requestSpecWithTFA = new RequestSpecBuilder() //
                 .setContentType(ContentType.JSON) //
@@ -161,10 +161,10 @@ public class TwoFactorAuthenticationTest {
 
     @Test
     public void testTfaConfigSettings() throws IOException, MessagingException {
-        assertEquals(greenMail.getReceivedMessages().length, 0);
+        Assertions.assertEquals(greenMail.getReceivedMessages().length, 0);
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 1);
+        Assertions.assertEquals(greenMail.getReceivedMessages().length, 1);
 
         Pattern p = Pattern.compile("token is (.+).");
         Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
@@ -175,10 +175,10 @@ public class TwoFactorAuthenticationTest {
             token = m.group(1);
         }
 
-        assertNotNull(token);
+        Assertions.assertNotNull(token);
         String tfaToken = performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor/validate?token=" + token + "&" + TENANT_IDENTIFIER, "", "token");
-        assertNotNull(tfaToken);
+        Assertions.assertNotNull(tfaToken);
 
         RequestSpecification requestSpecWithTFA = new RequestSpecBuilder() //
                 .setContentType(ContentType.JSON) //
@@ -189,7 +189,7 @@ public class TwoFactorAuthenticationTest {
         // Get the configuration and check one of the values (OTP token length)
         LinkedHashMap<String, Object> json = performServerGet(requestSpecWithTFA, responseSpec,
                 "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER, "");
-        assertEquals(json.get("otp-token-length"), token.length());
+        Assertions.assertEquals(json.get("otp-token-length"), token.length());
 
         // Update OTP token length
         performServerPut(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
@@ -202,7 +202,7 @@ public class TwoFactorAuthenticationTest {
         // Login again
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 2);
+        Assertions.assertEquals(greenMail.getReceivedMessages().length, 2);
 
         Matcher m2 = p.matcher((CharSequence) greenMail.getReceivedMessages()[1].getContent());
 
@@ -212,14 +212,14 @@ public class TwoFactorAuthenticationTest {
             token2 = m2.group(1);
         }
 
-        assertNotNull(token2);
+        Assertions.assertNotNull(token2);
 
         // Check that the configuration has worked and length is now 10
-        assertEquals(10, token2.length());
+        Assertions.assertEquals(10, token2.length());
 
         tfaToken = performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor/validate?token=" + token2 + "&" + TENANT_IDENTIFIER, "", "token");
-        assertNotNull(tfaToken);
+        Assertions.assertNotNull(tfaToken);
 
         requestSpecWithTFA = new RequestSpecBuilder() //
                 .setContentType(ContentType.JSON) //
@@ -229,7 +229,7 @@ public class TwoFactorAuthenticationTest {
 
         // Get the configuration and check one of the values (OTP token length)
         json = performServerGet(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER, "");
-        assertEquals(json.get("otp-token-length"), token2.length());
+        Assertions.assertEquals(json.get("otp-token-length"), token2.length());
 
         // Update OTP token length back to original value
         performServerPut(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER,
@@ -237,7 +237,7 @@ public class TwoFactorAuthenticationTest {
 
         // Check that configuration has been reset
         json = performServerGet(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/configure?" + TENANT_IDENTIFIER, "");
-        assertEquals(json.get("otp-token-length"), token.length());
+        Assertions.assertEquals(json.get("otp-token-length"), token.length());
 
         // Invalidate token for re-login
         performServerPost(requestSpecWithTFA, responseSpec, "/fineract-provider/api/v1/twofactor/invalidate?" + TENANT_IDENTIFIER,
@@ -246,7 +246,7 @@ public class TwoFactorAuthenticationTest {
 
     private static void initializeRestAssured() {
         RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
+        RestAssured.port = TwoFactorTestSuite.fineract.getFirstMappedPort();
         RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
         RestAssured.useRelaxedHTTPSValidation();
     }

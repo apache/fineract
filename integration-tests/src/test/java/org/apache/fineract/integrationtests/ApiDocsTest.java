@@ -27,7 +27,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ApiDocsTest {
+public class ApiDocsTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

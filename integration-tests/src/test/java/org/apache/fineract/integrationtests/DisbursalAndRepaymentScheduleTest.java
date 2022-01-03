@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
  **/
 @SuppressWarnings({ "rawtypes" })
 @Disabled
-public class DisbursalAndRepaymentScheduleTest {
+public class DisbursalAndRepaymentScheduleTest extends IntegrationTestSuite {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForStatusCode403;

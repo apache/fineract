@@ -75,8 +75,6 @@ resolve {
 resolve.dependsOn prepareInputYaml
 
 configurations {
-    providedRuntime // needed for Spring Boot executable WAR
-    providedCompile
     compile() {
         exclude module: 'hibernate-entitymanager'
         exclude module: 'hibernate-validator'
@@ -92,7 +90,6 @@ configurations {
         exclude module: 'itext-rtf'
         exclude module: 'classworlds'
     }
-    runtime
 }
 
 apply from: 'dependencies.gradle'
@@ -116,7 +113,7 @@ compileJava {
 // set the classes directory to point to Eclipse's default build directory
 if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
 {
-    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-provider/bin/main")
+    sourceSets.main.java.classesDirectory = new File(rootProject.projectDir, "fineract-provider/bin/main")
 }
 
 eclipse
@@ -127,18 +124,8 @@ eclipse
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
-sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
-
-if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
-    sourceSets {
-        test {
-            java {
-                exclude '**/core/boot/tests/**'
-            }
-        }
-    }
-}
+// sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+// sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
 // Configuration for SQL tasks
 // https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html
@@ -282,7 +269,6 @@ jib {
         ]
         ports = ['8080/tcp', '8443/tcp']
         labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
-        user = 'nobody:nogroup'
     }
 
     allowInsecureRegistries = true

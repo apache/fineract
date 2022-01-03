@@ -40,7 +40,11 @@ public class FileSystemContentRepository implements ContentRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
-    public static final String FINERACT_BASE_DIR = System.getProperty("user.home") + File.separator + ".fineract";
+    private final String fineractHome;
+
+    public FileSystemContentRepository(String fineractHome) {
+        this.fineractHome = fineractHome;
+    }
 
     @Override
     public String saveFile(final InputStream uploadedInputStream, final DocumentCommand documentCommand) {
@@ -117,25 +121,25 @@ public class FileSystemContentRepository implements ContentRepository {
      * Generate the directory path for storing the new document
      */
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
-        return FileSystemContentRepository.FINERACT_BASE_DIR + File.separator
-                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "documents" + File.separator
-                + entityType + File.separator + entityId + File.separator + ContentRepositoryUtils.generateRandomString();
+        return fineractHome + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator
+                + "documents" + File.separator + entityType + File.separator + entityId + File.separator
+                + ContentRepositoryUtils.generateRandomString();
     }
 
     /**
      * Generate directory path for storing new Image
      */
     private String generateClientImageParentDirectory(final Long resourceId) {
-        return FileSystemContentRepository.FINERACT_BASE_DIR + File.separator
-                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images" + File.separator
-                + "clients" + File.separator + resourceId;
+        return fineractHome + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator
+                + "images" + File.separator + "clients" + File.separator + resourceId;
     }
 
     /**
      * Recursively create the directory if it does not exist.
      */
     private void makeDirectories(final String uploadDocumentLocation) throws IOException {
-        Files.createParentDirs(new File(uploadDocumentLocation));
+        File f = new File(uploadDocumentLocation);
+        f.getParentFile().mkdirs();
     }
 
     private void writeFileToFileSystem(final String fileName, final InputStream uploadedInputStream, final String fileLocation) {

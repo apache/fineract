@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rishabh Shukla
  */
-public class BatchRequestsIntegrationTest {
+public class BatchRequestsIntegrationTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
     private ResponseSpecification responseSpec;

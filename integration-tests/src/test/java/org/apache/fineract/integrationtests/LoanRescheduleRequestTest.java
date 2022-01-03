@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * Test the creation, approval and rejection of a loan reschedule request
  **/
 @SuppressWarnings({ "rawtypes" })
-public class LoanRescheduleRequestTest {
+public class LoanRescheduleRequestTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;

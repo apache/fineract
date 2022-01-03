@@ -26,7 +26,6 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -41,6 +40,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.IntegrationTestSuite;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
@@ -65,7 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Order(3)
-public class LoanImportHandlerTest {
+public class LoanImportHandlerTest extends IntegrationTestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandlerTest.class);
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
@@ -218,9 +218,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.CHARGE_AMOUNT_TYPE_1)
                 .setCellValue(disbursementChargeJSON.getString("chargeCalculationType.value"));
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
-                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "loan");
+        File directory = Utils.getTempDir("bulkimport" + File.separator + "importhandler" + File.separator + "loan");
         if (!directory.exists()) {
             directory.mkdirs();
         }
@@ -238,8 +236,8 @@ public class LoanImportHandlerTest {
 
         // check status column of output excel
         String location = loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
-        FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputworkbook = new HSSFWorkbook(fileInputStream);
+        LOG.warn("LOAN TEMPLATE LOCATION: {}", location);
+        Workbook outputworkbook = IntegrationTestSuite.fineract.copyFileFromContainer(location, (is) -> new HSSFWorkbook(is));
         Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         Row row = outputLoanSheet.getRow(1);
 
