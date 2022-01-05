@@ -247,6 +247,8 @@ bootRun {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
     }
+
+    classpath += files("build/generated/swagger-ui")
 }
 
 springBoot {
@@ -265,6 +267,14 @@ bootJar {
         into 'BOOT-INF/classes/static/swagger-ui'
     }
 }
+
+jar {
+    from('build/generated/swagger-ui') {
+        include '*'
+    }
+}
+
+jar.dependsOn resolve
 
 jib {
     from {
