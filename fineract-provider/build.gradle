@@ -98,22 +98,15 @@ compileJava.doLast {
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task prepareInputYaml(dependsOn: 'generateGitProperties') {
+task prepareInputYaml {
     outputs.file('config/swagger/fineract-input.yaml')
 
     doLast {
-        def versionForSwagger
-
-        if(project.ext.properties.containsKey("gitProps"))
-            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
-        else
-            versionForSwagger = "unknown"
-
         copy {
             from file('config/swagger/fineract-input.yaml.template')
             into file('config/swagger')
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
+            filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
         }
     }
 }
@@ -258,7 +251,7 @@ springBoot {
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title':   'Apache Fineract', 'Implementation-Version': archiveVersion
     }
     dependsOn resolve
     classifier = ''
@@ -427,10 +420,7 @@ gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
-    extProperty = 'gitProps'
 }
-
-processResources.dependsOn generateGitProperties
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
