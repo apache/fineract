@@ -325,6 +325,15 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
     }
+
+    extraDirectories {
+        paths {
+            path {
+                from = file('build/generated/swagger-ui')
+                into = "/app/classes"
+            }
+        }
+    }
 }
 
 tasks.jibDockerBuild.dependsOn = ["bootJar"]
