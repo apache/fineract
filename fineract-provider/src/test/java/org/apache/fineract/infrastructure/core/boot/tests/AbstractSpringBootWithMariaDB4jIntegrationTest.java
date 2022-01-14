@@ -21,14 +21,14 @@ package org.apache.fineract.infrastructure.core.boot.tests;
 import org.apache.fineract.ServerWithMariaDB4jApplication;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = ServerWithMariaDB4jApplication.Configuration.class)
+@TestPropertySource("classpath:application-test.properties")
 @WebAppConfiguration
-@ActiveProfiles("basicauth")
 public abstract class AbstractSpringBootWithMariaDB4jIntegrationTest {
 
     // do NOT put any helper methods here!

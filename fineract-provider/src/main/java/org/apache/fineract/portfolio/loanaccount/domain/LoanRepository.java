@@ -67,9 +67,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String DOES_PRODUCT_HAVE_NON_CLOSED_LOANS = "select case when (count (loan) > 0) then 'true' else 'false' end from Loan loan where loan.loanProduct.id = :productId and loan.loanStatus in (100,200,300,303,304,700)";
 
-    String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber and loan.loanStatus in (100,200,300,303,304)";
+    String FIND_NON_CLOSED_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber and loan.loanStatus in (100,200,300,303,304)";
 
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
+
+    String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
@@ -150,10 +152,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(DOES_PRODUCT_HAVE_NON_CLOSED_LOANS)
     boolean doNonClosedLoanAccountsExistForProduct(@Param("productId") Long productId);
 
-    @Query(FIND_BY_ACCOUNT_NUMBER)
+    @Query(FIND_NON_CLOSED_BY_ACCOUNT_NUMBER)
     Loan findNonClosedLoanByAccountNumber(@Param("accountNumber") String accountNumber);
 
     @Query(FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT)
     Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId);
+
+    @Query(FIND_BY_ACCOUNT_NUMBER)
+    Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
 }

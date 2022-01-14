@@ -55,6 +55,7 @@ public class ClientHelper {
     private static final String WITHDRAW_CLIENT_COMMAND = "withdraw";
     private static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
     private static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
+    private static final Integer LEGALFORM_ID_PERSON = 1;
 
     public static final String CREATED_DATE = "27 November 2014";
     public static final String CREATED_DATE_PLUS_ONE = "28 November 2014";
@@ -181,8 +182,9 @@ public class ClientHelper {
     }
 
     public static String getTestClientAsJSON(final String dateOfJoining, final String officeId) {
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
+        map.put("legalFormId", LEGALFORM_ID_PERSON);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -195,8 +197,9 @@ public class ClientHelper {
     }
 
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
+        map.put("legalFormId", LEGALFORM_ID_PERSON);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -211,6 +214,7 @@ public class ClientHelper {
     public static String getTestPendingClientWithDatatableAsJson(final String registeredTableName) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", "1");
+        map.put("legalFormId", LEGALFORM_ID_PERSON);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -276,8 +280,9 @@ public class ClientHelper {
     }
 
     public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId, final String clientType) {
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
+        map.put("legalFormId", LEGALFORM_ID_PERSON);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));

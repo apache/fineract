@@ -20,7 +20,7 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 Requirements
 ============
-* Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
+* Java >= 17 (OpenJDK JVM is tested by our CI on Travis)
 * MariaDB 10.6
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
@@ -59,10 +59,54 @@ The tenants database connection details are configured [via environment variable
     java -jar fineract-provider.jar
 
 
+Security
+============
+NOTE: The HTTP Basic and OAuth2 authentication schemes are mutually exclusive. You can't enable them both at the same time. Fineract checks these settings on startup and will fail if more than one authentication scheme is enabled.
+
+HTTP Basic Authentication
+------------
+By default Fineract is configured with a HTTP Basic Authentication scheme, so you actually don't have to do anything if you want to use it. But if you would like to explicitly choose this authentication scheme then there are two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=true
+FINERACT_SECURITY_OAUTH_ENABLED=false
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -jar fineract-provider.jar
+```
+
+OAuth2 Authentication
+------------
+There is also an OAuth2 authentication scheme available. Again, two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=false
+FINERACT_SECURITY_OAUTH_ENABLED=true
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth.enabled=true -jar fineract-provider.jar
+```
+
+Two Factor Authentication
+------------
+You can also enable 2FA authentication. Depending on how you start Fineract add the following:
+
+1. Use environment variable (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_2FA_ENABLED=true
+```
+2. Use JVM parameter (best choice if you run the Spring Boot JAR):
+```
+-Dfineract.security.2fa.enabled=true
+```
+
+
 Instructions to build a WAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean war` to build a traditional WAR file which will be created at `build/libs` directory.
+2. Run `./gradlew :fineract-war:clean :fineract-war:war` to build a traditional WAR file which will be created at `fineract-war/build/libs` directory.
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
@@ -116,22 +160,16 @@ Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 
 Now to run a new Fineract instance you can simply:
 
-git clone https://github.com/FITER1/fineract.git ; ; cd fineract`
-for windows, use git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract
-Clone the community-ui at same folder level as fineract and run the following command
-git clone https://github.com/FITER1/community-app.git
-docker-compose build -f docker-compose-local.yml
-docker-compose up -d -f docker-compose-local.yml
-fineract (back-end) is running at https://localhost:8443/fineract-provider/
-wait for https://localhost:8443/fineract-provider/actuator/health to return {"status":"UP"}
-you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise you get a message that is rather misleading from the UI.
-community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
-login using default username mifos and password password
-If you don't need to build the docker image for the community-app(ui) and use the one in open-source run the following commands:
+1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
+1. `./gradlew :fineract-provider:jibDockerBuild -x test`
+1. `docker-compose up -d`
+1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
+1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
+1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
+1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
+1. login using default _username_ `mifos` and _password_ `password`
 
-docker-compose build
-docker-compose up -d 
-The docker-compose.yml will build the fineract container from the source based on the Dockerfile. You could change that to use the pre-built container image instead of having to re-build it.
 https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
 
 You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment

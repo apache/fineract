@@ -16,30 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+package org.apache.fineract.infrastructure.security.data;
 
-@Component
-public class TwoFactorUtils {
+import java.util.Collection;
+import java.util.Objects;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-    private static final String TWO_FACTOR_PROFILE_NAME = "twofactor";
+public class FineractJwtAuthenticationToken extends JwtAuthenticationToken {
 
-    private final Environment environment;
+    private final UserDetails user;
 
-    @Autowired
-    public TwoFactorUtils(Environment environment) {
-        this.environment = environment;
+    public FineractJwtAuthenticationToken(Jwt jwt, Collection<GrantedAuthority> authorities, UserDetails user) {
+        super(jwt, authorities, user.getUsername());
+        this.user = Objects.requireNonNull(user, "user");
     }
 
-    public boolean isTwoFactorAuthEnabled() {
-        for (final String profile : this.environment.getActiveProfiles()) {
-            if (TWO_FACTOR_PROFILE_NAME.equals(profile)) {
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public UserDetails getPrincipal() {
+        return user;
     }
 }

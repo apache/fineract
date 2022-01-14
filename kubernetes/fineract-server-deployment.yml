@@ -88,7 +88,7 @@ spec:
         - name: SUB_PROTOCOL
           value: mariadb
         - name: node_id
-          value: 1
+          value: '1'
         - name: fineract_tenants_driver
           value: org.mariadb.jdbc.Driver
         - name: fineract_tenants_url

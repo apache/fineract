@@ -76,7 +76,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         String withoutInstallmentAmount = "";
         String proposedAmount = "10000";
         createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 June 2015", "5000"));
-        createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 Sep 2015", "5000"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 September 2015", "5000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
         LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------{}", clientID);

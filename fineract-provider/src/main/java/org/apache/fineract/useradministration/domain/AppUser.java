@@ -123,6 +123,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @JoinColumn(name = "appuser_id", referencedColumnName = "id", nullable = false)
     private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
+    @Column(name = "cannot_change_password", nullable = true)
+    private Boolean cannotChangePassword;
+
     public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
             final Collection<Client> clients, final JsonCommand command) {
 
@@ -144,6 +147,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final boolean userAccountNonExpired = true;
         final boolean userCredentialsNonExpired = true;
         final boolean userAccountNonLocked = true;
+        final boolean cannotChangePassword = false;
 
         final Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
@@ -158,7 +162,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
         return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
-                clients);
+                clients, cannotChangePassword);
     }
 
     protected AppUser() {
@@ -169,7 +173,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
             final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
-            final Collection<Client> clients) {
+            final Collection<Client> clients, final Boolean cannotChangePassword) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
@@ -187,6 +191,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         this.passwordNeverExpires = passwordNeverExpire;
         this.isSelfServiceUser = isSelfServiceUser;
         this.appUserClientMappings = createAppUserClientMappings(clients);
+        this.cannotChangePassword = cannotChangePassword;
     }
 
     public EnumOptionData organisationalRoleData() {
@@ -198,6 +203,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public void updatePassword(final String encodePassword) {
+        if (cannotChangePassword != null && cannotChangePassword == true) {
+            throw new NoAuthorizationException("Password of this user may not be modified");
+        }
+
         this.password = encodePassword;
         this.firstTimeLoginRemaining = false;
         this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();

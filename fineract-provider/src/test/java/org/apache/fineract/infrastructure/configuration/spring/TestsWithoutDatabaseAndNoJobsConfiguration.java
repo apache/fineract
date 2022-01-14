@@ -24,6 +24,9 @@ import org.apache.fineract.infrastructure.core.service.TenantDatabaseUpgradeServ
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Spring @Configuration which does not require a running database. It also does not load any job configuration (as they
@@ -64,5 +67,11 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
     public DataSource hikariTenantDataSource() {
         DataSource mockDataSource = Mockito.mock(DataSource.class, Mockito.RETURNS_MOCKS);
         return mockDataSource;
+    }
+
+    @Bean
+    @Primary
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
