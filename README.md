@@ -116,18 +116,22 @@ Alternatively, you can also use [Podman](https://github.com/containers/libpod)
 
 Now to run a new Fineract instance you can simply:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract`
-1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
-1. `docker-compose build`
-1. `docker-compose up -d`
-1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
-1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
-1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
-1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
-1. login using default _username_ `mifos` and _password_ `password`
+git clone https://github.com/FITER1/fineract.git ; ; cd fineract`
+for windows, use git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract
+Clone the community-ui at same folder level as fineract and run the following command
+git clone https://github.com/FITER1/community-app.git
+docker-compose build -f docker-compose-local.yml
+docker-compose up -d -f docker-compose-local.yml
+fineract (back-end) is running at https://localhost:8443/fineract-provider/
+wait for https://localhost:8443/fineract-provider/actuator/health to return {"status":"UP"}
+you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise you get a message that is rather misleading from the UI.
+community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
+login using default username mifos and password password
+If you don't need to build the docker image for the community-app(ui) and use the one in open-source run the following commands:
 
-The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).  You could change that to use the pre-built container image instead of having to re-build it.
-
+docker-compose build
+docker-compose up -d 
+The docker-compose.yml will build the fineract container from the source based on the Dockerfile. You could change that to use the pre-built container image instead of having to re-build it.
 https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
 
 You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment

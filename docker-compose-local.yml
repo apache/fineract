@@ -1,0 +1,49 @@
+
+version: '3.7'
+services:
+  # Backend service
+  fineractmysql:
+    image: mysql:5.7
+    volumes:
+      - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=skdcnwauicn2ucnaecasdsajdnizucawencascdca" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
+  fineract-server:
+    build:
+      context: .
+      target: fineract
+    ports:
+      - 8080:8080
+    depends_on:
+      - fineractmysql
+    environment:
+      - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
+      - PROTOCOL=jdbc
+      - node_id=1
+      - SUB_PROTOCOL=mysql:thin
+      - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
+      - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
+      - fineract_tenants_uid=root
+      - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
+      - FINERACT_DEFAULT_TENANTDB_PORT=3306
+      - FINERACT_DEFAULT_TENANTDB_UID=root
+      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
+
+  # Frontend service
+  community-app:
+    build:
+      context: ../community-app/
+      dockerfile: Dockerfile
+    container_name: mifos-ui
+    restart: always
+    ports:
+      - 9090:80
