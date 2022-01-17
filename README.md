@@ -54,7 +54,7 @@ Instructions to build the JAR file
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 
-    export fineract_tenants_pwd=verysecret
+    export FINERACT_HIKARI_PASSWORD=verysecret
     ...
     java -jar fineract-provider.jar
 
@@ -178,6 +178,13 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 `docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
 and the `mysqlserver` environment variable is now no longer supported.)_
 
+
+Connection pool configuration
+=============================
+
+Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings (Hikari) at https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+
+NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
 
 Instructions to run on Kubernetes
 =================================

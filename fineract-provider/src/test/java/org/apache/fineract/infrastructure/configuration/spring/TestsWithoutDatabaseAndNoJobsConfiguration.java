@@ -20,9 +20,11 @@ package org.apache.fineract.infrastructure.configuration.spring;
 
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.mockito.Mockito;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * are in the DB), thus nor starts any background jobs. For some integration tests, this may be perfectly sufficient
  * (and faster to run such tests).
  */
+@EnableConfigurationProperties({ FineractProperties.class })
 public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicationConfiguration {
 
     /**
@@ -41,7 +44,7 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      */
     @Bean
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
-        return new TenantDatabaseUpgradeService(null, null) {
+        return new TenantDatabaseUpgradeService(null, null, null, null) {
 
             @Override
             public void upgradeAllTenants() {

@@ -201,7 +201,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
+    driver 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -238,7 +238,7 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
     }
 
     classpath += files("build/generated/swagger-ui")
@@ -316,7 +316,7 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
     }
 
     extraDirectories {

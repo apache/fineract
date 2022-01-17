@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final DataSource tenantDataSource;
 
     @Autowired
-    private JDBCDriverConfig driverConfig;
+    private HikariConfig hikariConfig;
 
     @Autowired
     public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
@@ -77,21 +79,21 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     // creates the tenant data source for the oltp and report database
     private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
-        String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(),
-                tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName(),
-                tenantConnectionObj.getSchemaConnectionParameters());
+        String protocol = toProtocol(this.tenantDataSource);
+        String jdbcUrl = toJdbcUrl(protocol, tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(),
+                tenantConnectionObj.getSchemaName(), tenantConnectionObj.getSchemaConnectionParameters());
 
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName(this.driverConfig.getDriverClassName());
+        config.setDriverClassName(hikariConfig.getDriverClassName());
         config.setPoolName(tenantConnectionObj.getSchemaName() + "_pool");
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(tenantConnectionObj.getSchemaUsername());
         config.setPassword(tenantConnectionObj.getSchemaPassword());
         config.setMinimumIdle(tenantConnectionObj.getInitialSize());
         config.setMaximumPoolSize(tenantConnectionObj.getMaxActive());
-        config.setConnectionTestQuery("SELECT 1");
+        config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
         config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
-        config.setAutoCommit(true);
+        config.setAutoCommit(hikariConfig.isAutoCommit());
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
         config.setRegisterMbeans(true);
@@ -100,22 +102,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // These are the properties for each Tenant DB; the same configuration
         // is also in src/main/resources/META-INF/spring/hikariDataSource.xml
         // for the all Tenants DB -->
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.addDataSourceProperty("useServerPrepStmts", "true");
-        config.addDataSourceProperty("useLocalSessionState", "true");
-        config.addDataSourceProperty("rewriteBatchedStatements", "true");
-        config.addDataSourceProperty("cacheResultSetMetadata", "true");
-        config.addDataSourceProperty("cacheServerConfiguration", "true");
-        config.addDataSourceProperty("elideSetAutoCommits", "true");
-        config.addDataSourceProperty("maintainTimeStats", "false");
-
-        // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
-        // TODO FINERACT-890: config.addDataSourceProperty("logger",
-        // "com.mysql.cj.log.Slf4JLogger");
-        config.addDataSourceProperty("logSlowQueries", "true");
-        config.addDataSourceProperty("dumpQueriesOnException", "true");
+        config.setDataSourceProperties(hikariConfig.getDataSourceProperties());
 
         return new HikariDataSource(config);
     }
