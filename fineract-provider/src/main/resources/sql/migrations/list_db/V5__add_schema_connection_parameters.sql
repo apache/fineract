@@ -20,5 +20,5 @@
 ALTER TABLE `tenant_server_connections`
   ADD COLUMN `schema_connection_parameters` TEXT NULL DEFAULT NULL;
 UPDATE `tenant_server_connections`
-  SET `schema_connection_parameters`='${fineract_default_tenantdb_conn_params}'
+  SET `schema_connection_parameters`='${fineract.tenant.parameters}'
   WHERE `id`=1;
