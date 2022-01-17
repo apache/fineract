@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatfor
 import org.apache.fineract.infrastructure.security.vote.SelfServiceUserAccessVote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,6 +73,9 @@ public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TenantAwareJpaPlatformUserDetailsService userDetailsService;
 
+    @Autowired
+    private ServerProperties serverProperties;
+
     private static final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Override
@@ -97,8 +101,13 @@ public class OAuth2SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
                 .addFilterAfter(tenantAwareTenantIdentifierFilter, SecurityContextPersistenceFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
-                .requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
+
+        if (serverProperties.getSsl().isEnabled()) {
+            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+        } else {
+            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresInsecure());
+        }
     }
 
     @Bean

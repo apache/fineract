@@ -24,6 +24,7 @@ import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticatio
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +53,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
 
+    @Autowired
+    private ServerProperties serverProperties;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -74,9 +78,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
                 .addFilterAfter(tenantAwareBasicAuthenticationFilter(), SecurityContextPersistenceFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
-                .requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
 
+        if (serverProperties.getSsl().isEnabled()) {
+            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+        } else {
+            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresInsecure());
+        }
     }
 
     @Bean
