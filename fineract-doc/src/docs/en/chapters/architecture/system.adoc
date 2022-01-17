@@ -1,0 +1,18 @@
+= System Overview
+
+.Platform System Overview
+image::{imagesdir}/platform-systemview.png[]
+
+Financial institutions deliver their services to customers through a variety of means today.
+
+* Customers can call direct into branches (teller model)
+* Customers can organise into groups (or centers) and agree to meetup at a location and time with FI staff (traditional microfinance).
+* An FI might have a public facing information portal that customers can use for variety of reasons including account management (online banking).
+* An FI might be integrated into a ATM/POS/Card services network that the customer can use.
+* An FI might be integrated with a mobile money operator and support mobile money services for customer (present/future microfinance).
+* An FI might use third party agents to sell on products/services from other banks/FIs.
+
+As illustrated in the above diagram, the various stakeholders leverage business apps to perform specific customer or FI related actions. The functionality contained in these business apps can be bundled up and packaged in any way. In the diagram, several of the apps may be combined into one app or any one of the blocks representing an app could be further broken up as needed.
+
+The platform is the core engine of the MIS. It hides alot of the complexity that exists in the business and technical domains needed for an MIS in FIs behind a relatively simple API. It is this API that frees up app developers to innovate and produce apps that can be as general or as bespoke as FIs need them to be.
+

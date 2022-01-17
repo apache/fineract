@@ -64,7 +64,7 @@ dependencies {
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.5.0',
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8',
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation',
             'com.sun.mail:jakarta.mail',
@@ -74,7 +74,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-security',
             )
 
-    implementation ('org.apache.commons:commons-email:1.5') {
+    implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
         exclude group: 'javax.activation', module: 'activation'
     }

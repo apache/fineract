@@ -1,0 +1,20 @@
+= Step 15: Announcement Email
+
+== Description
+
+Send an email to announce@apache.org (sender address must be @apache.org):
+
+[source,text]
+----
+include::{rootdir}/buildSrc/src/main/resources/email/release.step15.announce.subject.ftl[]
+
+include::{rootdir}/buildSrc/src/main/resources/email/release.step15.announce.message.ftl[]
+----
+
+== Gradle Task
+
+.Command
+[source,bash,subs="attributes"]
+----
+% ./gradlew fineractReleaseStep15 -Pfineract.release.version={revnumber}
+----

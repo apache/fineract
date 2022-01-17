@@ -20,7 +20,6 @@ description = 'Fineract WAR'
 
 apply plugin: 'war'
 apply plugin: 'distribution'
-apply plugin: 'signing'
 
 war {
     archiveFileName = 'fineract-provider.war'
@@ -82,6 +81,9 @@ distributions {
 
             from "$rootDir/DISCLAIMER"
             from "$rootDir/README.md"
+
+            from "$rootDir/fineract-doc/build/docs/pdf/en/index.pdf"
+            rename ('index.pdf', 'fineract-documentation.pdf')
         }
     }
     src {
@@ -102,38 +104,5 @@ distributions {
 
 tasks.binaryDistZip.enabled false
 tasks.srcDistZip.enabled false
-tasks.binaryDistTar.dependsOn war
+tasks.binaryDistTar.dependsOn = [war, ':fineract-doc:doc']
 // tasks.srcDistTar.dependsOn prepareInputYaml
-
-// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
-if( project.hasProperty("fineract.release") ) {
-    signing {
-        useGpgCmd()
-        sign (binaryDistTar, srcDistTar)
-    }
-    tasks.withType(Tar) { task ->
-        task.doLast {
-            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
-        }
-    }
-    tasks.withType(Sign) { task ->
-        task.doLast {
-            task.getFilesToSign().each { f ->
-                new ByteArrayOutputStream().withStream { os ->
-                    def result = exec {
-                        workingDir "$buildDir/distributions"
-                        executable 'sh'
-                        args '-c', "gpg --verify ${f}.asc"
-                        standardOutput = os
-                    }
-                    if(result.exitValue==0) {
-                        println '+++ GPG signature correct!'
-                    } else {
-                        println '--- GPG signature incorrect!'
-                        throw new RuntimeException('--- GPG signature incorrect!')
-                    }
-                }
-            }
-        }
-    }
-}

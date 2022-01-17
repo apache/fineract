@@ -1,0 +1,9 @@
+= IntelliJ IDEA
+
+== Asciidoc
+
+See: https://plugins.jetbrains.com/plugin/7391-asciidoc
+
+== PlantUML
+
+See: https://plugins.jetbrains.com/plugin/7017-plantuml-integration

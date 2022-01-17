@@ -26,14 +26,14 @@ asciidoctorj {
     version = '2.5.3'
 
     attributes = [
-        version: "$project.version",
+        version: "${project.version}",
         generated: "${buildDir}/generated/asciidoc",
-        imagesdir: 'images',
-        diagrams: 'diagrams',
+        imagesdir: "${projectDir}/src/docs/en/images",
+        diagramsdir: "${projectDir}/src/docs/en/diagrams",
         years: '2015-2022',
-        revnumber: "$project.version".toString(),
-        rootdir: "$rootDir".toString(),
-        baseurl: 'fineract.apache.org'
+        revnumber: "${project.version}".toString(),
+        rootdir: "${rootDir}".toString(),
+        baseurl: 'fineract.apache.org',
     ]
 
     modules {
@@ -56,6 +56,8 @@ asciidoctor {
         include('index.adoc')
     }
     outputDir 'build/docs/html'
+
+    dependsOn ':fineract-client:buildAsciidoc'
 }
 
 // asciidoctorEpub {
@@ -68,6 +70,8 @@ asciidoctor {
 //     }
 //     outputDir 'build/docs/epub'
 //     ebookFormats 'epub3'
+//
+//     dependsOn ':fineract-client:buildAsciidoc'
 // }
 
 asciidoctorPdf {
@@ -88,21 +92,26 @@ asciidoctorPdf {
     //     }
     // }
     // fontsDir "$projectDir/src/resources/fonts"
+    dependsOn ':fineract-client:buildAsciidoc'
 }
 
 task doc(type: Zip) {
     dependsOn asciidoctor, asciidoctorPdf
 
-    into("$project.name-$project.version") {
+    into("fineract-${project.version}/html") {
         from("$buildDir/docs/html") {
             include "**/*"
+            exclude "**/.asciidoctor"
         }
     }
-    from ("$buildDir/docs/pdf") {
-        include "index.pdf"
-        rename {
-            "$project.name-$project.version\\.pdf"
+    into("fineract-${project.version}/pdf") {
+        from("$buildDir/docs/pdf") {
+            include "**/index.pdf"
+            exclude "**/.asciidoctor"
+            rename {
+                "fineract-${project.version}.pdf"
+            }
         }
     }
-    archiveName "$project.name-$project.version\\.zip"
+    archiveName "${project.name}-${project.version}.zip"
 }

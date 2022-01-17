@@ -231,8 +231,6 @@ bootJar {
     classifier = ''
 }
 
-jar.dependsOn bootJar
-
 jib {
     from {
         image = 'azul/zulu-openjdk-alpine:17'
@@ -241,7 +239,7 @@ jib {
     to {
         image = 'fineract'
         tags = [
-            "${version}",
+            "${project.version}",
             'latest'
         ]
     }

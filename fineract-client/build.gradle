@@ -87,12 +87,27 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     ]
 }
 
-licenseFormatMain.dependsOn buildJavaSdk
-licenseFormatMain.dependsOn buildTypescriptAngularSdk
-compileJava.dependsOn licenseFormatMain
+task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = 'asciidoc'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "file:///$swaggerFile"
+    outputDir = "$buildDir/generated/asciidoc".toString()
+    apiPackage = 'org.apache.fineract.client.services'
+    invokerPackage = 'org.apache.fineract.client'
+    modelPackage = 'org.apache.fineract.client.models'
+    dependsOn = [
+        ':fineract-provider:resolve'
+    ]
+}
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn buildJavaSdk, buildTypescriptAngularSdk, spotlessMiscApply
+licenseMain.dependsOn(buildJavaSdk, licenseFormatMain, spotlessMiscApply)
+licenseMain.dependsOn(buildTypescriptAngularSdk, licenseFormatMain, spotlessMiscApply)
+licenseMain.dependsOn(buildAsciidoc, licenseFormatMain, spotlessMiscApply)
+
+compileJava.dependsOn(licenseFormatMain, spotlessMiscApply)
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214

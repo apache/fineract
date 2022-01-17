@@ -1,0 +1,19 @@
+= File and Folder Layout
+
+TBD
+
+== Book
+
+TBD
+
+== Chapter
+
+TBD
+
+== Diagrams
+
+TBD
+
+== Images
+
+TBD

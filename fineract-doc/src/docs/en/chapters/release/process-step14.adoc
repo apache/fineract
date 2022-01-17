@@ -1,0 +1,18 @@
+= Step 14: Update website
+
+== Description
+
+Finally update the https://fineract.apache.org website with the latest release details. The website's HTML source code is available at https://github.com/apache/fineract-site.
+
+CAUTION: This step is not yet updated. We are working on a static site generator setup.
+
+== Gradle Task
+
+.Command
+[source,bash]
+----
+% ./gradlew fineractReleaseStep14 <1>
+----
+<1> Currently doing nothing. Will trigger in the future the static site generator and publish on Github.
+
+CAUTION: This task is not yet automated!

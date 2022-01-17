@@ -56,10 +56,9 @@ buildscript {
 }
 
 plugins {
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.5.0' apply false
+    id 'com.diffplug.spotless' version '6.5.1' apply false
     id 'org.nosphere.apache.rat' version '0.7.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
@@ -68,7 +67,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.7' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.0' apply false
-    id 'com.gorylenko.gradle-git-properties' version '2.4.0' apply false
+    id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
@@ -83,6 +82,8 @@ plugins {
     id 'se.thinkcode.cucumber-runner' version '0.0.10' apply false
 }
 
+apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
+
 description = '''\
 Run as:
 gradle clean bootRun'''
@@ -91,6 +92,8 @@ ext['groovy.version'] = '3.0.10'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.yaml".toString()
 
 allprojects  {
+    apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
+
     group = 'org.apache.fineract'
 
     jgitver {
@@ -103,165 +106,12 @@ allprojects  {
         mavenCentral()
     }
 
-    apply plugin: 'io.spring.dependency-management'
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'com.diffplug.spotless'
     apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'org.nosphere.apache.rat'
     apply plugin: 'project-report'
     apply plugin: 'com.github.jk1.dependency-license-report'
-
-    // Configuration for the dependency management plugin
-    // https://github.com/spring-gradle-plugins/dependency-management-plugin
-    dependencyManagement {
-        imports {
-            mavenBom 'org.springframework:spring-framework-bom:5.3.19'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.7'
-            mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.21'
-            mavenBom 'org.junit:junit-bom:5.8.2'
-            mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2.1'
-            mavenBom 'io.cucumber:cucumber-bom:7.3.2'
-            mavenBom 'io.netty:netty-bom:4.1.76.Final'
-            mavenBom 'org.mockito:mockito-bom:4.5.1'
-            mavenBom 'io.github.swagger2markup:swagger2markup-bom:1.3.4'
-        }
-
-        dependencies {
-            // We use fixed versions, instead of inheriting them from the Spring BOM, to be able to be on more recent ones.
-            // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
-            // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
-
-            dependency 'org.slf4j:slf4j-api:1.7.36'
-            dependency 'org.slf4j:slf4j-simple:1.7.36'
-            dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
-            dependency 'org.slf4j:jul-to-slf4j:1.7.36'
-            dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
-            dependency 'ch.qos.logback:logback-core:1.2.11'
-            dependency 'ch.qos.logback:logback-classic:1.2.11'
-
-            dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
-            dependency 'com.google.guava:guava:31.1-jre'
-            dependency 'com.google.code.gson:gson:2.9.0'
-            dependency 'com.google.truth:truth:1.1.3'
-            dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
-            dependency 'com.google.googlejavaformat:google-java-format:1.15.0'
-            dependency ('org.apache.commons:commons-email:1.5') {
-                exclude 'com.sun.mail:javax.mail'
-                exclude 'javax.activation:activation'
-            }
-            dependency 'commons-io:commons-io:2.11.0'
-            dependency 'com.github.librepdf:openpdf:1.3.27'
-            dependency ('org.mnode.ical4j:ical4j:3.2.2') {
-                exclude 'com.sun.mail:javax.mail'
-            }
-            dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.205'
-            dependency 'org.ehcache:ehcache:3.10.0'
-            dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
-            dependency 'com.jayway.jsonpath:json-path:2.7.0'
-            dependency 'org.apache.tika:tika-core:2.3.0'
-            dependency 'org.apache.httpcomponents:httpclient:4.5.13'
-            dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
-            dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-            dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
-            dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
-            dependency 'joda-time:joda-time:2.10.14'
-
-            dependency 'io.github.classgraph:classgraph:4.8.146'
-            dependency 'org.awaitility:awaitility:4.2.0'
-            dependency 'com.github.spotbugs:spotbugs-annotations:4.6.0'
-            dependency 'javax.cache:cache-api:1.1.1'
-            dependency 'org.mock-server:mockserver-junit-jupiter:5.13.2'
-            dependency 'org.webjars:webjars-locator-core:0.50'
-            dependency 'com.icegreen:greenmail-junit5:1.6.8'
-            dependency 'com.intuit.karate:karate-junit5:1.2.0.RC6'
-
-            // fineract client dependencies
-            dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
-            dependency "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-java8:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-rxjava3:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-wire:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-simplexml:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-jaxb:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-java8:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-protobuf:$retrofitVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:$oltuVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:$oltuVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:$oltuVersion"
-            dependency "com.squareup.okhttp3:okhttp:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okcurl:$okhttpVersion"
-            dependency "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-apache:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-android-support:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-urlconnection:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-sse:$okhttpVersion"
-            dependency "io.gsonfire:gson-fire:1.8.5"
-            dependency "com.google.code.findbugs:jsr305:3.0.2"
-            dependency "commons-codec:commons-codec:1.15"
-            dependency "org.bouncycastle:bcpkix-jdk15to18:1.70"
-            dependency "org.bouncycastle:bcprov-jdk15to18:1.70"
-            dependency "org.projectlombok:lombok:1.18.24"
-
-            dependency 'org.springdoc:springdoc-openapi-ui:1.6.8'
-            dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.8'
-            dependency 'org.springdoc:springdoc-openapi-common:1.6.8'
-            dependency 'org.springdoc:springdoc-openapi-security:1.6.8'
-            dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.8'
-
-            dependency ('org.apache.activemq:activemq-broker:5.17.0') {
-                exclude 'javax.annotation:javax.annotation-api'
-            }
-
-            dependency 'io.swagger:swagger-annotations:1.6.6'
-            dependency 'io.swagger.core.v3:swagger-annotations:2.2.0'
-            dependency ('io.swagger.core.v3:swagger-jaxrs2:2.2.0') {
-                exclude 'jakarta.activation:jakarta.activation-api'
-            }
-            dependency ('io.swagger.core.v3:swagger-core:2.2.0') {
-                exclude 'jakarta.activation:jakarta.activation-api'
-            }
-
-            dependency "jakarta.annotation:jakarta.annotation-api:1.3.5"
-            dependency 'jakarta.activation:jakarta.activation-api:1.2.2'
-            dependency ('com.sun.mail:jakarta.mail:1.6.7') {
-                exclude 'com.sun.activation:jakarta.activation'
-            }
-            dependency ('jakarta.xml.bind:jakarta.xml.bind-api:2.3.3') {
-                exclude 'jakarta.activation:jakarta.activation-api'
-            }
-
-            dependency ('org.liquibase:liquibase-core:4.9.1') {
-                exclude 'javax.xml.bind:jaxb-api'
-            }
-
-            dependency ('org.dom4j:dom4j:2.1.3') {
-                exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
-                // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
-                exclude 'xpp3:xpp3'
-                exclude 'pull-parser:pull-parser'
-            }
-
-            dependency 'org.owasp.esapi:esapi:2.3.0.0'
-
-            dependencySet(group: 'org.apache.poi', version: '5.2.2') {
-                entry 'poi'
-                entry 'poi-ooxml'
-                entry 'poi-ooxml-schemas'
-            }
-
-            dependencySet(group: 'io.rest-assured', version: '4.5.1') {
-                entry 'rest-assured'
-                entry 'json-path'
-                entry 'xml-path'
-            }
-        }
-    }
 
     // Configuration for the sonarqube plugin is now in GitHub Actions
 
@@ -415,6 +265,7 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'com.github.andygoossens.modernizer'
     apply plugin: 'se.thinkcode.cucumber-runner'
 
+
     /* define the valid syntax level for source files */
     sourceCompatibility = JavaVersion.VERSION_17
     /* define binary compatibility version */
@@ -528,8 +379,8 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.1'
-        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.41.0'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.2'
+        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.42.0'
     }
 
     // Configuration for JaCoCo code coverage task

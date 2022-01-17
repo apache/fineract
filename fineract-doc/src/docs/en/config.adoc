@@ -9,13 +9,12 @@
 :page-layout: base
 :toc-title: Table of Contents
 :toc: macro
+:toclevels: 4
 :icons: font
 :source-highlighter: coderay
 :experimental:
 :source-language: java
-:diagramsdir: diagrams
-:imagesdir: images
-:years: 2017-2022
+:years: 2015-2022
 :lang: en
 :encoding: utf-8
 :linkattrs:
@@ -30,6 +29,8 @@
 // ifeval::["{draft}"=="true"]
 // :title-page-background-image: image:{commondir}/images/draft.svg[position=top]
 // endif::[]
+
+ifdef::env-idea[:plantuml-opts: inline]
 
 ifdef::env-vscode[]
 :source-highlighter: highlightjs

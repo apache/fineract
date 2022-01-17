@@ -1,0 +1,24 @@
+@startuml
+title Fineract Release Process
+
+(*) ---> "Step 0: Select release manager"
+--> "Step 1: Send heads-up email to dev mailing list"
+--> "Step 2: Clean up JIRA"
+--> "Step 3: Create a release branch"
+--> "Step 4: Freeze JIRA version"
+--> "Continue with development on 'develop' branch"
+--> [1-2 weeks] "Step 5: Create release tag"
+--> "Step 6: Create a distribution"
+--> "Step 7: Sign the distribution artifacts"
+--> "Step 8: Upload distribution artifacts to staging environment"
+--> "Step 9: Verify distribution in staging environment"
+--> "Step 10: Start voting on the dev mailing list"
+if "72 hours or 3 yes votes?" then
+  -->[yes] "Step 11: Conclude the vote and announce results"
+endif
+--> "Step 12: Upload distribution artifacts to release environment"
+--> "Step 13: Close release branch and merge to 'develop'"
+--> "Step 14: Update website (not yet automated)"
+--> "Step 15: Send email to announcement mailing list"
+--->(*)
+@enduml

@@ -1,6 +1,6 @@
-== Introduction
+= Introduction
 
-=== Platform for Digital Financial Services
+== Platform for Digital Financial Services
 
 Apache Fineract (\’fīn-,ә-,rakt\) is open source software for financial services.
 
@@ -8,7 +8,7 @@ Fineract provides a reliable, robust, and affordable solution for entrepreneurs,
 
 Fineract 1.x is a mature platform with open APIs, while Fineract CN is a cloud native, microservice architecture also supporting open banking APIs.
 
-=== About
+== About
 
 Apache Fineract can be deployed in any environment: cloud or on-premise. It can support front end interfaces on or offline, mobile or PC. It’s extensible enough to support any organizational type or delivery channel, and flexible enough to support any product, service, or lending methodology. For any organization, big or small, it provides the client data management, loan and savings portfolio management, integrated real time accounting, and social and financial reporting needed to bring digital financial services to a modern connected world.
 
@@ -18,13 +18,13 @@ Fineract CN operates on the principle that financial services are an innovative 
 
 Fineract 1.x began incubation at Apache in December 2015 and is used by an active community of companies who build solutions for both financial inclusion and fintech innovation.
 
-=== Contribute
+== Contribute
 
 The Apache Fineract community welcomes contributors who want to support the Fineract technology. Our community builds everything from this website, to the Fineract code to documentation and best practices information.
 
 We especially welcome additions and corrections to the documentation, wiki, and website to improve the user experience. Bug reports and fixes and additions to the Apache Fineract code are welcome. Helping users learn best practices also earns good karma in our community.
 
-=== Mailing Lists
+== Mailing Lists
 
 Users & Developers
 
