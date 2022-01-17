@@ -186,6 +186,19 @@ Please check `application.properties` to see which connection pool settings can 
 
 NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
 
+SSL configuration
+=================
+
+By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
+You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
+
+
+Tomcat configuration
+====================
+
+Please refer to the `application.properties` and the official Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) on how to do performance tuning for Tomcat. Note: you can set now the acceptable form POST size (default is 2MB) via environment variable `FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE`.
+
+
 Instructions to run on Kubernetes
 =================================
 
