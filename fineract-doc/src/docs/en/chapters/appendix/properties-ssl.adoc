@@ -1,0 +1,36 @@
+= SSL Properties
+
+.SSL Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|server.ssl.enabled
+|FINERACT_SERVER_SSL_ENABLED
+|true
+|TBD
+
+|server.ssl.protocol
+|FINERACT_SERVER_SSL_PROTOCOL
+|TLS
+|TBD
+
+|server.ssl.ciphers
+|FINERACT_SERVER_SSL_CIPHERS
+|TLS_RSA_WITH_AES_128_CBC_SHA256
+|TBD
+
+|server.ssl.enabled-protocols
+|FINERACT_SERVER_SSL_PROTOCOLS
+|TLSv1.2
+|TBD
+
+|server.ssl.key-store
+|FINERACT_SERVER_SSL_KEY_STORE
+|classpath:keystore.jks
+|TBD
+
+|server.ssl.key-store-password
+|FINERACT_SERVER_SSL_KEY_STORE_PASSWORD
+|openmf
+|TBD
+|===

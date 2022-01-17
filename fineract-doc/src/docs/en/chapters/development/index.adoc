@@ -1,0 +1,17 @@
+= Fineract Development Environment
+
+TBD
+
+include::git.adoc[leveloffset=+1]
+
+include::gpg.adoc[leveloffset=+1]
+
+include::docker.adoc[leveloffset=+1]
+
+include::gradle.adoc[leveloffset=+1]
+
+include::ide.adoc[leveloffset=+1]
+
+include::kubernetes.adoc[leveloffset=+1]
+
+include::tools.adoc[leveloffset=+1]

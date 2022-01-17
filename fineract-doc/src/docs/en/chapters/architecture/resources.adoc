@@ -1,0 +1,5 @@
+= Resources
+
+* Project URL is https://github.com/apache/fineract
+* Issue tracker is https://issues.apache.org/jira/projects/FINERACT/summary
+* Download from http://fineract.apache.org/

@@ -44,6 +44,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
+          cache: gradle
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@859c33240bd026ce8d5f711f5adcc65c2f8eafc1
       - name: Verify MariaDB connection

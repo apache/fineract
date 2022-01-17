@@ -16,6 +16,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
+          cache: gradle
       - name: Build the image
         run: ./gradlew :fineract-provider:clean :fineract-provider:jibDockerBuild -x test
       - name: Start the stack

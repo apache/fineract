@@ -1,38 +1,39 @@
-:doctitle: Fineract Documentation
+:doctitle: Fineract Platform Documentation
 
 include::config.adoc[]
 
 = Fineract Documentation
 
-include::license.adoc[]
+include::license.adoc[leveloffset=+1]
 
-include::preface.adoc[]
+include::preface.adoc[leveloffset=+1]
 
-include::colophon.adoc[]
+include::colophon.adoc[leveloffset=+1]
 
-include::introduction.adoc[]
+include::introduction.adoc[leveloffset=+1]
 
-include::deployment.adoc[]
+include::chapters/deployment/index.adoc[leveloffset=+1]
 
-include::architecture.adoc[]
+include::chapters/architecture/index.adoc[leveloffset=+1]
 
-include::modules.adoc[]
+include::chapters/development/index.adoc[leveloffset=+1]
 
-include::oauth.adoc[]
+include::chapters/security/index.adoc[leveloffset=+1]
 
-// include::api.adoc[]
+include::{rootdir}/fineract-client/build/generated/asciidoc/index.adoc[leveloffset=+1]
 
-include::client.adoc[]
+include::chapters/sdk/index.adoc[leveloffset=+1]
 
-include::validation.adoc[]
+include::chapters/testing/index.adoc[leveloffset=+1]
 
-include::testing.adoc[]
+include::chapters/documentation/index.adoc[leveloffset=+1]
 
-include::deployment.adoc[]
+include::chapters/release/index.adoc[leveloffset=+1]
 
-include::glossary.adoc[]
+include::faq.adoc[leveloffset=+1]
 
-include::indices.adoc[]
+include::glossary.adoc[leveloffset=+1]
 
-include::appendix.adoc[]
+include::indices.adoc[leveloffset=+1]
 
+include::chapters/appendix/index.adoc[]

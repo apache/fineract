@@ -1,0 +1,14 @@
+= Technology
+
+* Java: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+* JAX-RS using Jersey
+* JSON using Google GSON
+* Spring I/O Platform: http://spring.io/platform
+** Spring Framework
+** Spring Boot
+** Spring Security
+** Spring Data (JPA) backed by EclipseLink
+* MySQL: http://www.oracle.com/us/products/mysql/overview/index.html
+* PostgreSQL
+
+TBD
