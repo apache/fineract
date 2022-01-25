@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -93,8 +94,10 @@ import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeDataValidator;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransaction;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransactionRepository;
@@ -123,6 +126,7 @@ import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -156,6 +160,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final StandingInstructionRepository standingInstructionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final GSIMRepositoy gsimRepository;
+    private final JdbcTemplate jdbcTemplate;
+    private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -177,7 +183,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
-            final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository) {
+            final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
+            final RoutingDataSource dataSource, final SavingsAccountInterestPostingService savingsAccountInterestPostingService) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -204,6 +211,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.standingInstructionRepository = standingInstructionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.gsimRepository = gsimRepository;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -582,6 +591,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
         if (account.getNominalAnnualInterestRate().compareTo(BigDecimal.ZERO) > 0
                 || (account.allowOverdraft() && account.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
             final Set<Long> existingTransactionIds = new HashSet<>();
@@ -623,6 +633,52 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
     }
 
+    @Transactional
+    @Override
+    public SavingsAccountData postInterest(SavingsAccountData savingsAccountData, final boolean postInterestAs,
+            final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill) {
+
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        if (savingsAccountData.getNominalAnnualInterestRate().compareTo(BigDecimal.ZERO) > 0 || (savingsAccountData.isAllowOverdraft()
+                && savingsAccountData.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
+            final Set<Long> existingTransactionIds = new HashSet<>();
+            final Set<Long> existingReversedTransactionIds = new HashSet<>();
+            updateExistingTransactionsDetails(savingsAccountData, existingTransactionIds, existingReversedTransactionIds);
+
+            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
+            boolean isInterestTransfer = false;
+            LocalDate postInterestOnDate = null;
+            if (postInterestAs) {
+                postInterestOnDate = transactionDate;
+            }
+
+            long startPosting = System.currentTimeMillis();
+            LOG.info("Interest Posting Start Here at {}", startPosting);
+
+            savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                    savingsAccountData);
+            long endPosting = System.currentTimeMillis();
+            LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
+
+            if (!backdatedTxnsAllowedTill) {
+                List<SavingsAccountTransactionData> transactions = savingsAccountData.getTransactions();
+                for (SavingsAccountTransactionData accountTransaction : transactions) {
+                    if (accountTransaction.getId() == null) {
+                        savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+                    }
+                }
+            }
+            savingsAccountData.setExistingTransactionIds(existingTransactionIds);
+            savingsAccountData.setExistingReversedTransactionIds(existingReversedTransactionIds);
+        }
+        return savingsAccountData;
+    }
+
     @Override
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
             final boolean allowAccountTransferModification) {
@@ -630,7 +686,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -1394,7 +1449,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
     }
 
+    private void updateExistingTransactionsDetails(SavingsAccountData account, Set<Long> existingTransactionIds,
+            Set<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
+        existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
+    }
+
     private void updateSavingsTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
+            Set<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
+        existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
+    }
+
+    @SuppressWarnings("unused")
+    private void updateSavingsTransactionsDetails(SavingsAccountData account, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
         existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());

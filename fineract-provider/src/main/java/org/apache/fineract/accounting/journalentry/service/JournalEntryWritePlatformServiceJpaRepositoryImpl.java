@@ -530,7 +530,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     .determineProcessor(savingsDTO);
             accountingProcessorForSavings.createJournalEntriesForSavings(savingsDTO);
         }
-
     }
 
     @Transactional

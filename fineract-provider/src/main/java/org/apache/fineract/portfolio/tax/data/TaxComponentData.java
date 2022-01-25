@@ -109,4 +109,60 @@ public final class TaxComponentData implements Serializable {
         this.glAccountTypeOptions = glAccountTypeOptions;
     }
 
+    private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAcount,
+            final GLAccountData creditAcount) {
+        this.id = id;
+        this.percentage = percentage;
+        this.name = null;
+        this.debitAccountType = null;
+        this.debitAccount = debitAcount;
+        this.creditAccountType = null;
+        this.creditAccount = creditAcount;
+        this.startDate = null;
+        this.taxComponentHistories = null;
+        this.glAccountOptions = null;
+        this.glAccountTypeOptions = null;
+    }
+
+    public static TaxComponentData createTaxComponent(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
+            final GLAccountData creditAccount) {
+        return new TaxComponentData(id, percentage, debitAccount, creditAccount);
+    }
+
+    public BigDecimal getApplicablePercentage(final LocalDate date) {
+        BigDecimal percentage = null;
+        if (occursOnDayFrom(date)) {
+            percentage = getPercentage();
+        } else {
+            for (TaxComponentHistoryData componentHistory : this.taxComponentHistories) {
+                if (componentHistory.occursOnDayFromAndUpToAndIncluding(date)) {
+                    percentage = componentHistory.getPercentage();
+                    break;
+                }
+            }
+        }
+        return percentage;
+    }
+
+    public BigDecimal getPercentage() {
+        return this.percentage;
+    }
+
+    private boolean occursOnDayFrom(final LocalDate target) {
+        return target != null && target.isAfter(startDate());
+    }
+
+    public LocalDate startDate() {
+        LocalDate startDate = null;
+        if (this.startDate != null) {
+            startDate = this.startDate;
+            // startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        }
+        return startDate;
+    }
+
+    public GLAccountData getCreditAcount() {
+        return this.creditAccount;
+    }
+
 }

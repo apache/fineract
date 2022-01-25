@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.journalentry.service;
+package org.apache.fineract.portfolio.savings.service;
 
-import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
+import java.math.MathContext;
+import java.time.LocalDate;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 
-public interface AccountingProcessorForSavings {
+public interface SavingsAccountInterestPostingService {
 
-    void createJournalEntriesForSavings(SavingsDTO savingsDTO);
+    SavingsAccountData postInterest(MathContext mc, LocalDate interestPostingUpToDate, boolean isInterestTransfer,
+            boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth, LocalDate postInterestOnDate,
+            boolean backdatedTxnsAllowedTill, SavingsAccountData savingsAccountData);
+
 }

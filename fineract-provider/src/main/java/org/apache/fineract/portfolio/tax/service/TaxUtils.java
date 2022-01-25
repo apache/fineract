@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.tax.data.TaxComponentData;
+import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 
@@ -55,6 +57,27 @@ public final class TaxUtils {
         return map;
     }
 
+    public static Map<TaxComponentData, BigDecimal> splitTaxData(final BigDecimal amount, final LocalDate date,
+            final Set<TaxGroupMappingsData> taxGroupMappings, final int scale) {
+        Map<TaxComponentData, BigDecimal> map = new HashMap<>(3);
+        if (amount != null) {
+            final double amountVal = amount.doubleValue();
+            double cent_percentage = Double.parseDouble("100.0");
+            for (TaxGroupMappingsData groupMappings : taxGroupMappings) {
+                if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
+                    TaxComponentData component = groupMappings.getTaxComponent();
+                    BigDecimal percentage = component.getApplicablePercentage(date);
+                    if (percentage != null) {
+                        double percentageVal = percentage.doubleValue();
+                        double tax = amountVal * percentageVal / cent_percentage;
+                        map.put(component, BigDecimal.valueOf(tax).setScale(scale, MoneyHelper.getRoundingMode()));
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
     public static BigDecimal incomeAmount(final BigDecimal amount, final LocalDate date, final Set<TaxGroupMappings> taxGroupMappings,
             final int scale) {
         Map<TaxComponent, BigDecimal> map = splitTax(amount, date, taxGroupMappings, scale);
@@ -67,6 +90,14 @@ public final class TaxUtils {
     }
 
     public static BigDecimal totalTaxAmount(final Map<TaxComponent, BigDecimal> map) {
+        BigDecimal totalTax = BigDecimal.ZERO;
+        for (BigDecimal tax : map.values()) {
+            totalTax = totalTax.add(tax);
+        }
+        return totalTax;
+    }
+
+    public static BigDecimal totalTaxDataAmount(final Map<TaxComponentData, BigDecimal> map) {
         BigDecimal totalTax = BigDecimal.ZERO;
         for (BigDecimal tax : map.values()) {
             totalTax = totalTax.add(tax);

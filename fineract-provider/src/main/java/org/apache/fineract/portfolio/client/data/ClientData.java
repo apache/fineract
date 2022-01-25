@@ -129,6 +129,71 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 locale, dateFormat);
     }
 
+    public static ClientData createClientForInterestPosting(final Long id, final Long officeId) {
+        return new ClientData(id, officeId);
+    }
+
+    private ClientData(final Long clientId, final Long officeId) {
+        this.rowIndex = null;
+        this.dateFormat = null;
+        this.locale = null;
+        this.firstname = null;
+        this.lastname = null;
+        this.middlename = null;
+        this.fullname = null;
+        this.activationDate = null;
+        this.submittedOnDate = null;
+        this.active = null;
+        this.externalId = null;
+        this.officeId = officeId;
+        this.staffId = null;
+        this.legalFormId = null;
+        this.mobileNo = null;
+        this.dateOfBirth = null;
+        this.clientTypeId = null;
+        this.genderId = null;
+        this.clientClassificationId = null;
+        this.isStaff = false;
+        this.address = null;
+        this.accountNo = null;
+        this.status = null;
+        this.subStatus = null;
+        this.displayName = null;
+        this.gender = null;
+        this.clientType = null;
+        this.clientClassification = null;
+        this.officeName = null;
+        this.transferToOfficeId = null;
+        this.transferToOfficeName = null;
+        this.imageId = null;
+        this.imagePresent = null;
+        this.staffName = null;
+        this.timeline = null;
+        this.savingsProductId = null;
+        this.savingsProductName = null;
+        this.savingsAccountId = null;
+        this.legalForm = null;
+        this.groups = null;
+        this.officeOptions = null;
+        this.staffOptions = null;
+        this.narrations = null;
+        this.savingProductOptions = null;
+        this.savingAccountOptions = null;
+        this.genderOptions = null;
+        this.clientTypeOptions = null;
+        this.clientClassificationOptions = null;
+        this.clientNonPersonConstitutionOptions = null;
+        this.clientNonPersonMainBusinessLineOptions = null;
+        this.clientLegalFormOptions = null;
+        this.clientNonPersonDetails = null;
+        this.isAddressEnabled = null;
+        this.datatables = null;
+        this.familyMemberOptions = null;
+        this.emailAddress = null;
+        this.clientCollateralManagements = null;
+        this.id = clientId;
+    }
+
     public static ClientData importClientPersonInstance(Long legalFormId, Integer rowIndex, String firstname, String lastname,
             String middlename, LocalDate submittedOn, LocalDate activationDate, Boolean active, String externalId, Long officeId,
             Long staffId, String mobileNo, LocalDate dob, Long clientTypeId, Long genderId, Long clientClassificationId, Boolean isStaff,
@@ -638,4 +703,5 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     public Boolean getIsAddressEnabled() {
         return this.isAddressEnabled;
     }
+
 }

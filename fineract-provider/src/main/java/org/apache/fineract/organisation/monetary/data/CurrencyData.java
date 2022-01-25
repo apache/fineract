@@ -61,6 +61,16 @@ public class CurrencyData implements Serializable {
         this.displayLabel = generateDisplayLabel();
     }
 
+    public CurrencyData(final String code, final int decimalPlaces, final Integer inMultiplesOf) {
+        this.code = code;
+        this.name = null;
+        this.decimalPlaces = decimalPlaces;
+        this.inMultiplesOf = inMultiplesOf;
+        this.displaySymbol = null;
+        this.nameCode = null;
+        this.displayLabel = null;
+    }
+
     public String code() {
         return this.code;
     }
@@ -107,5 +117,17 @@ public class CurrencyData implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(code, name, decimalPlaces, inMultiplesOf, displaySymbol, nameCode, displayLabel);
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public int getDecimalPlaces() {
+        return this.decimalPlaces;
+    }
+
+    public Integer getInMultiplesOf() {
+        return this.inMultiplesOf;
     }
 }
