@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 
-public class SavingsAccountChargesPaidByData {
+public class SavingsAccountChargesPaidByData implements Serializable {
 
     private final Long chargeId;
     private final BigDecimal amount;
