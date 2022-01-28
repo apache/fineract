@@ -113,7 +113,7 @@ public final class SavingsAccountData implements Serializable {
     private final SavingsAccountChargeData annualFee;
     private final BigDecimal nominalAnnualInterestRateOverdraft;
     private final BigDecimal minOverdraftForInterestCalculation;
-    private List<SavingsAccountTransactionData> savingsAccountTransactionData = new ArrayList<>();
+    private transient List<SavingsAccountTransactionData> savingsAccountTransactionData = new ArrayList<>();
 
     private List<DatatableData> datatables = null;
 
