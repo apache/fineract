@@ -5610,6 +5610,31 @@ public class ClientLoanIntegrationTest {
 
     }
 
+    @Test
+    public void testCollateralDataIsAvailableWhenRequested() {
+        // given
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        List<HashMap> collaterals = new ArrayList<>();
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientId), collateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
+        Integer loanProductId = createLoanProduct(false, NONE);
+
+        // when
+        Integer loanId = applyForLoanApplication(clientId, loanProductId, null, null, "12,000.00", collaterals);
+
+        // then
+        List<Integer> clientCollateralIds = (List<Integer>) loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
+                "collateral.clientCollateralId");
+        Integer clientCollateralIdResult = clientCollateralIds.get(0);
+        assertEquals(clientCollateralId, clientCollateralIdResult);
+    }
+
     private void validateIfValuesAreNotOverridden(Integer loanID, Integer loanProductID) {
         String loanProductDetails = this.loanTransactionHelper.getLoanProductDetails(this.requestSpec, this.responseSpec, loanProductID);
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
