@@ -31,7 +31,7 @@ openApiMeta {
 }
 
 openApiValidate {
-    inputSpec = "file://$swaggerFile"
+    inputSpec = "file:///$swaggerFile"
     recommend = true
 }
 
@@ -40,7 +40,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     verbose = false
     validateSpec = false
     skipValidateSpec = true
-    inputSpec = "file://$swaggerFile"
+    inputSpec = "file:///$swaggerFile"
     outputDir = "$buildDir/generated/java".toString()
     templateDir = "$rootDir/fineract-client/src/main/resources/java/template/"
     groupId = 'org.apache.fineract'
@@ -73,7 +73,7 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     verbose = false
     validateSpec = false
     skipValidateSpec = true
-    inputSpec = "file://$swaggerFile"
+    inputSpec = "file:///$swaggerFile"
     outputDir = "$buildDir/generated/typescript".toString()
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'
