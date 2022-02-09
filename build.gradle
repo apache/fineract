@@ -46,6 +46,7 @@ buildscript {
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.8.0'
         classpath 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
+        classpath('com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0')
     }
 }
 
@@ -182,12 +183,8 @@ allprojects  {
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
 
-            dependency ('org.flywaydb:flyway-core:8.1.0') {
-                // https://issues.apache.org/jira/browse/FINERACT-1172
-                // https://github.com/apache/fineract/pull/1355
-                // https://github.com/flyway/flyway/issues/2957
-                // exclude conflicting non-<optional> dependencies from https://github.com/flyway/flyway/blob/master/flyway-core/pom.xml
-                exclude 'software.amazon.awssdk:s3'
+            dependency ('org.liquibase:liquibase-core:4.5.0') {
+                exclude 'javax.xml.bind:jaxb-api'
             }
 
             dependency ('org.dom4j:dom4j:2.1.3') {

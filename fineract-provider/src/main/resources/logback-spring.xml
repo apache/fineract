@@ -36,7 +36,8 @@
         <appender-ref ref="CONSOLE" />
     </root>
 
-    <!-- But these two INFO are still handy ;-) just to see when it's up and running -->
+    <!-- But these three INFO are still handy ;-) just to see when it's up and running -->
     <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info" />
     <logger name="org.apache.fineract.ServerApplication" level="info" />
+    <logger name="liquibase" level="info" />
 </configuration>
