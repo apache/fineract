@@ -54,7 +54,7 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
-            'org.flywaydb:flyway-core',
+            'org.liquibase:liquibase-core',
 
             'com.github.librepdf:openpdf',
             'com.github.spullara.mustache.java:compiler',

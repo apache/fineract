@@ -326,6 +326,19 @@ jib {
             }
         }
     }
+
+    pluginExtensions {
+        pluginExtension {
+            implementation = 'com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension'
+            configuration {
+                filters {
+                    filter {
+                        glob = '/app/resources/**'
+                    }
+                }
+            }
+        }
+    }
 }
 
 tasks.jibDockerBuild.dependsOn = ["bootJar"]
