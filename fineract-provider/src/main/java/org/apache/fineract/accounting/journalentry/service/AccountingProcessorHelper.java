@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
@@ -59,6 +60,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -75,7 +77,11 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumD
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -97,6 +103,9 @@ public class AccountingProcessorHelper {
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
+    private static final Logger LOG = LoggerFactory.getLogger(AccountingProcessorHelper.class);
 
     @Autowired
     public AccountingProcessorHelper(final JournalEntryRepository glJournalEntryRepository,
@@ -107,8 +116,9 @@ public class AccountingProcessorHelper {
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final GLAccountRepositoryWrapper accountRepositoryWrapper,
             final ClientTransactionRepositoryWrapper clientTransactionRepositoryWrapper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper) {
+            final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoutingDataSource dataSource) {
         this.glJournalEntryRepository = glJournalEntryRepository;
+        this.dataSource = dataSource;
         this.accountMappingRepository = accountMappingRepository;
         this.closureRepository = closureRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
@@ -119,6 +129,7 @@ public class AccountingProcessorHelper {
         this.accountRepositoryWrapper = accountRepositoryWrapper;
         this.clientTransactionRepository = clientTransactionRepositoryWrapper;
         this.chargeRepositoryWrapper = chargeRepositoryWrapper;
+        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
     }
 
     public LoanDTO populateLoanDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -842,7 +853,8 @@ public class AccountingProcessorHelper {
     }
 
     private void createCreditJournalEntryForSavings(final Office office, final String currencyCode, final GLAccount account,
-            final Long savingsId, final String transactionId, final Date transactionDate, final BigDecimal amount) {
+            final Long savingsId, final String transactionId, final Date transactionDate, final BigDecimal amount)
+            throws DataAccessException {
         final boolean manualEntry = false;
         LoanTransaction loanTransaction = null;
         SavingsAccountTransaction savingsAccountTransaction = null;
@@ -858,6 +870,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.SAVING.getValue(), savingsId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
+
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
@@ -948,6 +961,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.SAVING.getValue(), savingsId, null,
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
+
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 

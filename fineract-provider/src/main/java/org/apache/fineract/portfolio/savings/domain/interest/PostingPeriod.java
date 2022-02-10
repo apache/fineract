@@ -32,6 +32,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public final class PostingPeriod {
@@ -96,7 +97,81 @@ public final class PostingPeriod {
         boolean interestTransfered = false;
         Money openingDayBalance = periodStartingBalance;
         Money closeOfDayBalance = openingDayBalance;
+
         for (final SavingsAccountTransaction transaction : orderedListOfTransactions) {
+
+            if (transaction.fallsWithin(periodInterval)) {
+                // the balance of the transaction falls entirely within this
+                // period so no need to do any cropping/bounding
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance);
+                accountEndOfDayBalances.add(endOfDayBalance);
+
+                openingDayBalance = endOfDayBalance.closingBalance();
+
+            } else if (transaction.spansAnyPortionOf(periodInterval)) {
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval);
+                accountEndOfDayBalances.add(endOfDayBalance);
+
+                closeOfDayBalance = endOfDayBalance.closingBalance();
+                openingDayBalance = closeOfDayBalance;
+            }
+
+            // this check is to make sure to add interest if withdrawal is
+            // happened for already
+            if (transaction.occursOn(periodInterval.endDate().plusDays(1))) {
+                if (transaction.getId() == null) {
+                    interestTransfered = isInterestTransfer;
+                } else if (interestPostTransactions.contains(transaction.getId())) {
+                    interestTransfered = true;
+                }
+            }
+
+        }
+
+        if (accountEndOfDayBalances.isEmpty()) {
+            LocalDate balanceStartDate = periodInterval.startDate();
+            LocalDate balanceEndDate = periodInterval.endDate();
+            Integer numberOfDaysOfBalance = periodInterval.daysInPeriodInclusiveOfEndDate();
+
+            if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+                balanceEndDate = upToInterestCalculationDate;
+                final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+                numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
+            }
+
+            final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(balanceStartDate, openingDayBalance, closeOfDayBalance,
+                    numberOfDaysOfBalance);
+
+            accountEndOfDayBalances.add(endOfDayBalance);
+
+            closeOfDayBalance = endOfDayBalance.closingBalance();
+            openingDayBalance = closeOfDayBalance;
+        }
+
+        final List<CompoundingPeriod> compoundingPeriods = compoundingPeriodsInPostingPeriod(periodInterval, interestCompoundingPeriodType,
+                accountEndOfDayBalances, upToInterestCalculationDate, financialYearBeginningMonth);
+
+        return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
+                interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
+                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
+                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
+    }
+
+    public static PostingPeriod createFromDTO(final LocalDateInterval periodInterval, final Money periodStartingBalance,
+            final List<SavingsAccountTransactionData> orderedListOfTransactions, final MonetaryCurrency currency,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
+            int financialYearBeginningMonth) {
+
+        final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
+        boolean interestTransfered = false;
+        Money openingDayBalance = periodStartingBalance;
+        Money closeOfDayBalance = openingDayBalance;
+
+        for (final SavingsAccountTransactionData transaction : orderedListOfTransactions) {
 
             if (transaction.fallsWithin(periodInterval)) {
                 // the balance of the transaction falls entirely within this

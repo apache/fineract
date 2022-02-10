@@ -339,6 +339,67 @@ public final class SavingsProductData implements Serializable {
                 daysToDormancy, daysToEscheat, accountMappingForPayment);
     }
 
+    public static SavingsProductData createForInterestPosting(final Long id, final EnumOptionData accountingRule) {
+        return new SavingsProductData(id, accountingRule);
+    }
+
+    private SavingsProductData(final Long id, final EnumOptionData accountingRule) {
+        this.id = id;
+        this.name = null;
+        this.shortName = null;
+        this.description = null;
+        this.currency = null;
+        this.nominalAnnualInterestRate = null;
+        this.interestCompoundingPeriodType = null;
+        this.interestPostingPeriodType = null;
+        this.interestCalculationType = null;
+        this.interestCalculationDaysInYearType = null;
+        this.accountingRule = accountingRule;
+        this.minRequiredOpeningBalance = null;
+        this.lockinPeriodFrequency = null;
+        this.lockinPeriodFrequencyType = null;
+        this.withdrawalFeeForTransfers = false;
+
+        this.currencyOptions = null;
+        this.interestCompoundingPeriodTypeOptions = null;
+        this.interestPostingPeriodTypeOptions = null;
+        this.interestCalculationTypeOptions = null;
+        this.interestCalculationDaysInYearTypeOptions = null;
+        this.lockinPeriodFrequencyTypeOptions = null;
+        this.withdrawalFeeTypeOptions = null;
+
+        this.paymentTypeOptions = null;
+        this.accountingMappingOptions = null;
+        this.accountingRuleOptions = null;
+        this.accountingMappings = null;
+
+        this.paymentChannelToFundSourceMappings = null;
+
+        this.charges = null;// charges associated with Savings product
+        this.chargeOptions = null;// charges available for adding to
+        // Savings product
+        this.penaltyOptions = null;// penalties available for adding
+        // to Savings product
+
+        this.feeToIncomeAccountMappings = null;
+        this.penaltyToIncomeAccountMappings = null;
+        this.allowOverdraft = false;
+        this.overdraftLimit = null;
+        this.minRequiredBalance = null;
+        this.enforceMinRequiredBalance = false;
+        this.minBalanceForInterestCalculation = null;
+        this.nominalAnnualInterestRateOverdraft = null;
+        this.minOverdraftForInterestCalculation = null;
+        this.taxGroup = null;
+        this.withHoldTax = false;
+        this.taxGroupOptions = null;
+        this.isDormancyTrackingActive = null;
+        this.daysToInactive = null;
+        this.daysToDormancy = null;
+        this.daysToEscheat = null;
+        this.accountMappingForPayment = null;
+    }
+
     private SavingsProductData(final Long id, final String name, final String shortName, final String description,
             final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
@@ -509,4 +570,21 @@ public final class SavingsProductData implements Serializable {
     public boolean isWithdrawalFeeForTransfers() {
         return withdrawalFeeForTransfers;
     }
+
+    public boolean isCashBasedAccountingEnabled() {
+        return AccountingRuleType.CASH_BASED.getValue().toString().equals(this.accountingRule.getValue());
+    }
+
+    public boolean isAccrualBasedAccountingEnabled() {
+        return isUpfrontAccrualAccounting() || isPeriodicAccrualAccounting();
+    }
+
+    public boolean isUpfrontAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().toString().equals(this.accountingRule.getValue());
+    }
+
+    public boolean isPeriodicAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().toString().equals(this.accountingRule.getValue());
+    }
+
 }

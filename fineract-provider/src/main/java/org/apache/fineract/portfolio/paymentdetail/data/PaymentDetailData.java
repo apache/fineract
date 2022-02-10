@@ -72,4 +72,8 @@ public class PaymentDetailData implements Serializable {
     public int hashCode() {
         return Objects.hash(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
     }
+
+    public PaymentTypeData getPaymentType() {
+        return this.paymentType;
+    }
 }

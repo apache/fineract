@@ -73,6 +73,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -361,6 +362,18 @@ public class SavingsAccountAssembler {
         return account;
     }
 
+    public SavingsAccountData assembleSavings(final SavingsAccountData account) {
+
+        // Update last running balance on account level
+        if (account.getTransactions() != null && account.getTransactions().size() != 0) {
+            account.getSummary().setRunningBalanceOnPivotDate(account.getTransactions().get(account.getTransactions().size() - 1)
+                    .getRunningBalance(account.getCurrency()).getAmount());
+        }
+
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        return account;
+    }
+
     public boolean getPivotConfigStatus() {
         return this.configurationDomainService.retrievePivotDateConfig();
     }
@@ -424,5 +437,9 @@ public class SavingsAccountAssembler {
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
         savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+    }
+
+    public void assignSavingAccountHelpers(final SavingsAccountData savingsAccountData) {
+        savingsAccountData.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
     }
 }

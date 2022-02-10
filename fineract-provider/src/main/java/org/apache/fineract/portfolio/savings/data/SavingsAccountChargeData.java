@@ -86,6 +86,8 @@ public class SavingsAccountChargeData implements Serializable {
 
     private final Collection<ChargeData> chargeOptions;
 
+    private ChargeData chargeData;
+
     public SavingsAccountChargeData(Long chargeId, BigDecimal amount, LocalDate dueDate) {
         this.chargeId = chargeId;
         this.amount = amount;
@@ -106,6 +108,35 @@ public class SavingsAccountChargeData implements Serializable {
         this.amountOutstanding = null;
         this.amountOrPercentage = null;
         this.penalty = false;
+        this.isActive = null;
+        this.inactivationDate = null;
+        this.chargeOptions = null;
+        this.isFreeWithdrawal = null;
+        this.freeWithdrawalChargeFrequency = null;
+        this.restartFrequency = null;
+        this.restartFrequencyEnum = null;
+    }
+
+    public SavingsAccountChargeData(Long chargeId, BigDecimal amount, EnumOptionData chargeTimeType, boolean isPenalty) {
+        this.chargeId = chargeId;
+        this.amount = amount;
+        this.dueDate = null;
+        this.id = null;
+        this.accountId = null;
+        this.name = null;
+        this.chargeTimeType = chargeTimeType;
+        this.feeOnMonthDay = null;
+        this.feeInterval = null;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.currency = null;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.amountOrPercentage = null;
+        this.penalty = isPenalty;
         this.isActive = null;
         this.inactivationDate = null;
         this.chargeOptions = null;
@@ -161,6 +192,10 @@ public class SavingsAccountChargeData implements Serializable {
                 amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
                 penalty, feeOnMonthDay, feeInterval, isActive, isFreeWithdrawal, freeWithdrawalChargeFrequency, restartFrequency,
                 restartFrequencyEnum, inactivationDate);
+    }
+
+    public boolean isFeeCharge() {
+        return !this.penalty;
     }
 
     private SavingsAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name,
@@ -221,6 +256,22 @@ public class SavingsAccountChargeData implements Serializable {
 
     public long getAccountId() {
         return this.accountId;
+    }
+
+    public boolean isPenaltyCharge() {
+        return this.penalty;
+    }
+
+    public ChargeData getCharge() {
+        return this.chargeData;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public boolean isPenalty() {
+        return this.penalty;
     }
 
 }

@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.monetary.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Embeddable
 public class MonetaryCurrency {
@@ -54,6 +55,10 @@ public class MonetaryCurrency {
                 applicationCurrency.getCurrencyInMultiplesOf());
     }
 
+    public static MonetaryCurrency fromCurrencyData(final CurrencyData currencyData) {
+        return new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces(), currencyData.getInMultiplesOf());
+    }
+
     public String getCode() {
         return this.code;
     }
@@ -65,4 +70,5 @@ public class MonetaryCurrency {
     public Integer getCurrencyInMultiplesOf() {
         return this.inMultiplesOf;
     }
+
 }

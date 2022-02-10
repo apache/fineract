@@ -46,4 +46,5 @@ public interface JournalEntryWritePlatformService {
     void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
 
     void revertShareAccountJournalEntries(ArrayList<Long> transactionId, Date transactionDate);
+
 }
