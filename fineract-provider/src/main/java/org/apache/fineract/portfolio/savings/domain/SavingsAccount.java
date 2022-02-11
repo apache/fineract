@@ -1922,6 +1922,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return this.savingsOfficer;
     }
 
+    public Boolean getEnforceMinRequiredBalance() {
+        return this.enforceMinRequiredBalance;
+    }
+
     public void unassignSavingsOfficer() {
         this.savingsOfficer = null;
     }
@@ -3320,6 +3324,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public BigDecimal getWithdrawableBalance() {
         return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds())
                 .subtract(this.getSavingsHoldAmount());
+    }
+
+    public BigDecimal getWithdrawableBalanceWithoutMinimumBalance() {
+        return getAccountBalance().subtract(this.getOnHoldFunds()).subtract(this.getSavingsHoldAmount());
     }
 
     public TaxGroup getTaxGroup() {
