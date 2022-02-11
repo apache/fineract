@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.activate
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.bankNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.checkNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.closedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.paymentTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.receiptNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.routingCodeParamName;
@@ -68,7 +69,7 @@ public class SavingsAccountTransactionDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
-                    transactionAmountParamName));
+                    transactionAmountParamName, lienParamName));
     private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
@@ -206,6 +207,7 @@ public class SavingsAccountTransactionDataValidator {
 
     public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account, final AppUser createdUser,
             final boolean backdatedTxnsAllowedTill) {
+
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -222,6 +224,7 @@ public class SavingsAccountTransactionDataValidator {
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
         baseDataValidator.reset().parameter(transactionAmountParamName).value(amount).notNull().positiveAmount();
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
         boolean isActive = account.isActive();
 
@@ -230,8 +233,22 @@ public class SavingsAccountTransactionDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
         account.holdAmount(amount);
-        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+
+        if (account.getEnforceMinRequiredBalance()) {
+            if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+            }
+        }
+
+        Boolean lien = false;
+
+        if (this.fromApiJsonHelper.parameterExists(lienParamName, element)) {
+            lien = this.fromApiJsonHelper.extractBooleanNamed(lienParamName, element);
+            if (!lien) {
+                if (account.getWithdrawableBalanceWithoutMinimumBalance().compareTo(BigDecimal.ZERO) < 0) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                }
+            }
         }
 
         LocalDate lastTransactionDate = null;

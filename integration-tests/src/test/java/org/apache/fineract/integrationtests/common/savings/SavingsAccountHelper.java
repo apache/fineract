@@ -369,10 +369,11 @@ public class SavingsAccountHelper {
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
-    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, String date, String jsonAttributeToGetback) {
+    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, final Boolean lienStatus, String date,
+            String jsonAttributeToGetback) {
         LOG.info("--------------------------------- SAVINGS TRANSACTION HOLD AMOUNT--------------------------------");
         return performSavingActions(createSavingsTransactionURL(HOLD_AMOUNT_SAVINGS_COMMAND, savingsID),
-                getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+                getLienSavingsTransactionJSON(amount, date, lienStatus), jsonAttributeToGetback);
     }
 
     public Integer releaseAmount(final Integer savingsId, final Integer transactionId) {
@@ -434,6 +435,18 @@ public class SavingsAccountHelper {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
+        String savingsAccountWithdrawalJson = new Gson().toJson(map);
+        LOG.info(savingsAccountWithdrawalJson);
+        return savingsAccountWithdrawalJson;
+    }
+
+    private String getLienSavingsTransactionJSON(final String amount, final String transactionDate, final Boolean lien) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", amount);
+        map.put("lien", lien);
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
         LOG.info(savingsAccountWithdrawalJson);
         return savingsAccountWithdrawalJson;
