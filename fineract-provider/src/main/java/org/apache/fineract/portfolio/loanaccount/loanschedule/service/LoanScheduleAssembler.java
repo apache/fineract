@@ -448,7 +448,10 @@ public class LoanScheduleAssembler {
                 Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-
+        final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI = this.configurationDomainService
+                .isInterestToBeRecoveredFirstWhenGreaterThanEMI();
+        final boolean isPrincipalCompoundingDisabledForOverdueLoans = this.configurationDomainService
+                .isPrincipalCompoundingDisabledForOverdueLoans();
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -460,7 +463,8 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization, fixedPrincipalPercentagePerInstallment);
+                allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

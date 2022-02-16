@@ -90,8 +90,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 37 global configurations.
-        Assertions.assertEquals(37, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(37, actualGlobalConfigurations.size());
+        Assertions.assertEquals(38, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(38, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -355,14 +355,6 @@ public class GlobalConfigurationHelper {
         isFirstPaydayAllowedOnHoliday.put("trapDoor", false);
         defaults.add(isFirstPaydayAllowedOnHoliday);
 
-        HashMap<String, Object> isInterestAppropriationEnabled = new HashMap<>();
-        isInterestAppropriationEnabled.put("id", 34);
-        isInterestAppropriationEnabled.put("name", "is-interest-to-be-appropriated-equally-when-greater-than-emi");
-        isInterestAppropriationEnabled.put("value", 0);
-        isInterestAppropriationEnabled.put("enabled", false);
-        isInterestAppropriationEnabled.put("trapDoor", false);
-        defaults.add(isInterestAppropriationEnabled);
-
         HashMap<String, Object> isAccountMappedForPayment = new HashMap<>();
         isAccountMappedForPayment.put("id", 35);
         isAccountMappedForPayment.put("name", "account-mapping-for-payment-type");
@@ -422,6 +414,22 @@ public class GlobalConfigurationHelper {
         isAccountNumberRandomGenerated.put("enabled", false);
         isAccountNumberRandomGenerated.put("trapDoor", false);
         defaults.add(isAccountNumberRandomGenerated);
+
+        HashMap<String, Object> isInterestAppropriationEnabled = new HashMap<>();
+        isInterestAppropriationEnabled.put("id", 42);
+        isInterestAppropriationEnabled.put("name", "is-interest-to-be-recovered-first-when-greater-than-emi");
+        isInterestAppropriationEnabled.put("value", 0);
+        isInterestAppropriationEnabled.put("enabled", false);
+        isInterestAppropriationEnabled.put("trapDoor", false);
+        defaults.add(isInterestAppropriationEnabled);
+
+        HashMap<String, Object> isPrincipalCompoundingDisabled = new HashMap<>();
+        isPrincipalCompoundingDisabled.put("id", 43);
+        isPrincipalCompoundingDisabled.put("name", "is-principal-compounding-disabled-for-overdue-loans");
+        isPrincipalCompoundingDisabled.put("value", 0);
+        isPrincipalCompoundingDisabled.put("enabled", false);
+        isPrincipalCompoundingDisabled.put("trapDoor", false);
+        defaults.add(isPrincipalCompoundingDisabled);
 
         return defaults;
     }

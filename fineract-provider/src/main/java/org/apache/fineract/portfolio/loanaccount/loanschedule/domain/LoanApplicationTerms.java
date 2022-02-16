@@ -188,7 +188,9 @@ public final class LoanApplicationTerms {
 
     private final boolean isFirstRepaymentDateAllowedOnHoliday;
 
-    private final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+    private final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI;
+
+    private boolean isPrincipalCompoundingDisabledForOverdueLoans;
 
     private final HolidayDetailDTO holidayDetailDTO;
 
@@ -208,6 +210,8 @@ public final class LoanApplicationTerms {
     private boolean isEqualAmortization;
     private Money interestTobeApproppriated;
     private final BigDecimal fixedPrincipalPercentagePerInstallment;
+
+    private LocalDate newScheduledDueDateStart;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -230,7 +234,8 @@ public final class LoanApplicationTerms {
             BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations,
             Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled, final Integer numberOfDays,
             boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
-            final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment) {
+            final boolean isEqualAmortization, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+            final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -245,8 +250,9 @@ public final class LoanApplicationTerms {
                 recalculationFrequencyType, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, preClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations,
                 calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays,
-                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false,
-                fixedPrincipalPercentagePerInstallment);
+                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false,
+                isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
+                isPrincipalCompoundingDisabledForOverdueLoans);
 
     }
 
@@ -273,7 +279,7 @@ public final class LoanApplicationTerms {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, loanPreClosureInterestCalculationStrategy,
                 rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, null);
+                false, null, false);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -291,8 +297,8 @@ public final class LoanApplicationTerms {
             BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper, final Integer numberOfDays,
             final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
-            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI,
-            final BigDecimal fixedPrincipalPercentagePerInstallment) {
+            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+            final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -331,7 +337,8 @@ public final class LoanApplicationTerms {
                 loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,
                 isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO,
                 allowCompoundingOnEod, isEqualAmortization, isFirstRepaymentDateAllowedOnHoliday,
-                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment);
+                isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
+                isPrincipalCompoundingDisabledForOverdueLoans);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -390,7 +397,7 @@ public final class LoanApplicationTerms {
                 recalculationFrequencyType, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations,
                 calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays,
-                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false, null);
+                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization, false, false, null, false);
 
     }
 
@@ -417,8 +424,8 @@ public final class LoanApplicationTerms {
                 applicationTerms.calendarHistoryDataWrapper, applicationTerms.isInterestChargedFromDateSameAsDisbursalDateEnabled,
                 applicationTerms.numberOfDays, applicationTerms.isSkipRepaymentOnFirstDayOfMonth, applicationTerms.holidayDetailDTO,
                 applicationTerms.allowCompoundingOnEod, applicationTerms.isEqualAmortization,
-                applicationTerms.isFirstRepaymentDateAllowedOnHoliday, applicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI,
-                applicationTerms.fixedPrincipalPercentagePerInstallment);
+                applicationTerms.isFirstRepaymentDateAllowedOnHoliday, applicationTerms.isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+                applicationTerms.fixedPrincipalPercentagePerInstallment, applicationTerms.isPrincipalCompoundingDisabledForOverdueLoans);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -443,7 +450,8 @@ public final class LoanApplicationTerms {
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper, Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled,
             final Integer numberOfDays, final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO,
             final boolean allowCompoundingOnEod, final boolean isEqualAmortization, final boolean isFirstRepaymentDateAllowedOnHoliday,
-            final boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI, final BigDecimal fixedPrincipalPercentagePerInstallment) {
+            final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI, final BigDecimal fixedPrincipalPercentagePerInstallment,
+            final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
 
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
@@ -517,8 +525,9 @@ public final class LoanApplicationTerms {
         this.totalPrincipalAccounted = principal.zero();
         this.isEqualAmortization = isEqualAmortization;
         this.isFirstRepaymentDateAllowedOnHoliday = isFirstRepaymentDateAllowedOnHoliday;
-        this.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI = isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+        this.isInterestToBeRecoveredFirstWhenGreaterThanEMI = isInterestToBeRecoveredFirstWhenGreaterThanEMI;
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
+        this.isPrincipalCompoundingDisabledForOverdueLoans = isPrincipalCompoundingDisabledForOverdueLoans;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -741,6 +750,10 @@ public final class LoanApplicationTerms {
 
     private boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {
         return periodNumber == numberOfRepayments;
+    }
+
+    public boolean isLastRepaymentPeriod(final int periodNumber) {
+        return periodNumber == this.actualNumberOfRepayments;
     }
 
     /**
@@ -1248,7 +1261,7 @@ public final class LoanApplicationTerms {
         Money interestDue = Money.zero(outstandingBalance.getCurrency());
 
         final BigDecimal periodicInterestRate = periodicInterestRate(calculator, mc, this.daysInMonthType, this.daysInYearType,
-                periodStartDate, periodEndDate);
+                periodStartDate, periodEndDate);// 0.021232877 ob:14911.64
         interestDue = outstandingBalance.multiplyRetainScale(periodicInterestRate, mc.getRoundingMode());
 
         return interestDue;
@@ -1334,7 +1347,6 @@ public final class LoanApplicationTerms {
 
     private Money calculatePrincipalDueForInstallment(final int periodNumber, final Money totalDuePerInstallment,
             final Money periodInterest) {
-
         Money principal = totalDuePerInstallment.minus(periodInterest);
         if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
             principal = principal.zero();
@@ -1795,15 +1807,30 @@ public final class LoanApplicationTerms {
     }
 
     public Money getInterestTobeApproppriated() {
-        return interestTobeApproppriated;
+        return interestTobeApproppriated == null ? this.principal.zero() : interestTobeApproppriated;
     }
 
     public void setInterestTobeApproppriated(Money interestTobeApproppriated) {
         this.interestTobeApproppriated = interestTobeApproppriated;
     }
 
-    public boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled() {
-        return isInterestToBeAppropriatedEquallyWhenGreaterThanEMI;
+    public Boolean isInterestTobeApproppriated() {
+        return interestTobeApproppriated != null && interestTobeApproppriated.isGreaterThanZero();
     }
 
+    public boolean isInterestToBeRecoveredFirstWhenGreaterThanEMIEnabled() {
+        return isInterestToBeRecoveredFirstWhenGreaterThanEMI;
+    }
+
+    public boolean isPrincipalCompoundingDisabledForOverdueLoans() {
+        return isPrincipalCompoundingDisabledForOverdueLoans;
+    }
+
+    public LocalDate getNewScheduledDueDateStart() {
+        return newScheduledDueDateStart;
+    }
+
+    public void setNewScheduledDueDateStart(LocalDate newScheduledDueDateStart) {
+        this.newScheduledDueDateStart = newScheduledDueDateStart;
+    }
 }

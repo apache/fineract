@@ -286,8 +286,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // will check for EMI amount greater than interest calculated
             if (loanApplicationTerms.getFixedEmiAmount() != null
-                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0
-                    && !loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled()) {
+                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0) {
                 String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
                         loanApplicationTerms.getFixedEmiAmount());
@@ -333,7 +332,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduleParams.getOutstandingBalance(), currentPeriodParams.getInterestForThisPeriod(),
                     currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(),
                     totalInstallmentDue, !isCompletePeriod);
-
+            if (principalInterestForThisPeriod.getRescheduleInterestPortion() != null) {
+                installment.setRescheduleInterestPortion(principalInterestForThisPeriod.getRescheduleInterestPortion().getAmount());
+            }
             addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
             // apply loan transactions on installments to identify early/late
             // payments for interest recalculation
@@ -377,44 +378,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             scheduleParams.addTotalRepaymentExpected(scheduleParams.getTotalOutstandingInterestPaymentDueToGrace());
             scheduleParams.addTotalCumulativeInterest(scheduleParams.getTotalOutstandingInterestPaymentDueToGrace());
             scheduleParams.setTotalOutstandingInterestPaymentDueToGrace(Money.zero(currency));
-        }
-
-        if (loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled()
-                && loanApplicationTerms.getInterestTobeApproppriated() != null
-                && loanApplicationTerms.getInterestTobeApproppriated().isGreaterThanZero()) {
-            int emisTobeChanged = 1;
-            for (LoanScheduleModelPeriod installment : (List<LoanScheduleModelPeriod>) periods) {
-                if (!installment.isEMIFixedSpecificToInstallment()) {
-                    emisTobeChanged++;
-                }
-            }
-            if (emisTobeChanged > 1) {
-                emisTobeChanged--;
-            }
-            Money interestTobeApproppriated = loanApplicationTerms.getInterestTobeApproppriated();
-            Money interestFraction = interestTobeApproppriated.dividedBy(emisTobeChanged, mc.getRoundingMode());
-            BigDecimal roundFraction = interestFraction.getAmount().remainder(BigDecimal.ONE);
-            interestFraction = interestFraction.minus(roundFraction);
-            for (LoanScheduleModelPeriod installment : (List<LoanScheduleModelPeriod>) periods) {
-                if (!installment.isEMIFixedSpecificToInstallment()) {
-                    installment.addInterestAmount(interestFraction);
-                    installment.setRescheduleInterestPortion(interestFraction.getAmount());
-                    interestTobeApproppriated = interestTobeApproppriated.minus(interestFraction);
-                }
-            }
-            LoanScheduleModelPeriod lastInstallment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
-
-            if (interestTobeApproppriated.isGreaterThanZero()) {
-                lastInstallment.addInterestAmount(interestTobeApproppriated);
-                BigDecimal rescheduleInterestPortion = BigDecimal.ZERO;
-                if (lastInstallment.rescheduleInterestPortion() != null) {
-                    rescheduleInterestPortion = lastInstallment.rescheduleInterestPortion();
-                }
-                lastInstallment.setRescheduleInterestPortion(rescheduleInterestPortion.add(interestTobeApproppriated.getAmount()));
-            }
-            scheduleParams.addTotalRepaymentExpected(loanApplicationTerms.getInterestTobeApproppriated());
-            scheduleParams.addTotalCumulativeInterest(loanApplicationTerms.getInterestTobeApproppriated());
-            loanApplicationTerms.setInterestTobeApproppriated(Money.zero(currency));
         }
 
         // determine fees and penalties for charges which depends on total
@@ -1054,6 +1017,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
                 if (!loanTermVariationsData.isSpecificToInstallment()) {
                     scheduleParams.setActualRepaymentDate(modifiedScheduledDueDate);
+                    loanApplicationTerms.setNewScheduledDueDateStart(modifiedScheduledDueDate);
                 }
                 loanTermVariationsData.setProcessed(true);
             }
@@ -2397,23 +2361,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             periods.clear();
         }
 
-        BigDecimal rescheuleInterestPortionTobeRetained = BigDecimal.ZERO;
-        for (LoanRepaymentScheduleInstallment retainedInstallment : retainedInstallments) {
-            if (retainedInstallment.getRescheduleInterestPortion() != null) {
-                rescheuleInterestPortionTobeRetained = rescheuleInterestPortionTobeRetained
-                        .add(retainedInstallment.getRescheduleInterestPortion());
-            }
+        if (retainedInstallments.size() > 0
+                && retainedInstallments.get(retainedInstallments.size() - 1).getRescheduleInterestPortion() != null) {
+            loanApplicationTerms.setInterestTobeApproppriated(
+                    Money.of(loan.getCurrency(), retainedInstallments.get(retainedInstallments.size() - 1).getRescheduleInterestPortion()));
         }
-
-        BigDecimal rescheuleInterestPortionTotal = BigDecimal.ZERO;
-        for (LoanRepaymentScheduleInstallment inst : loan.getRepaymentScheduleInstallments()) {
-            if (inst.getRescheduleInterestPortion() != null) {
-                rescheuleInterestPortionTotal = rescheuleInterestPortionTotal.add(inst.getRescheduleInterestPortion());
-            }
-        }
-
-        BigDecimal rescheuleInterestPortionTobeAppropriated = rescheuleInterestPortionTotal.subtract(rescheuleInterestPortionTobeRetained);
-        loanApplicationTerms.setInterestTobeApproppriated(Money.of(loan.getCurrency(), rescheuleInterestPortionTobeAppropriated));
         LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.charges(), holidayDetailDTO, loanScheduleParams);
 
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : loanScheduleModel.getPeriods()) {
@@ -2640,8 +2592,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final HolidayDetailDTO holidayDetailDTO) {
         LocalDate nextScheduleDate = null;
         if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
-            nextScheduleDate = this.scheduledDateGenerator.generateNextScheduleDateStartingFromDisburseDate(startDate, loanApplicationTerms,
-                    holidayDetailDTO);
+            nextScheduleDate = this.scheduledDateGenerator.generateNextScheduleDateStartingFromDisburseDateOrRescheduleDate(startDate,
+                    loanApplicationTerms, holidayDetailDTO);
         } else {
             CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
             nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), startDate);

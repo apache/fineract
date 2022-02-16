@@ -144,15 +144,17 @@ public class LoanUtilService {
         boolean isFirstRepaymentDateAllowedOnHoliday = this.configurationDomainService
                 .isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
 
-        boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI = this.configurationDomainService
-                .isInterestToBeAppropriatedEquallyWhenGreaterThanEMI();
+        boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI = this.configurationDomainService
+                .isInterestToBeRecoveredFirstWhenGreaterThanEMI();
+        boolean isPrincipalCompoundingDisabledForOverdueLoans = this.configurationDomainService
+                .isPrincipalCompoundingDisabledForOverdueLoans();
 
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
                 overdurPenaltyWaitPeriod, floatingRateDTO, calendar, calendarHistoryDataWrapper,
                 isInterestChargedFromDateAsDisbursementDateEnabled, numberOfDays, isSkipRepaymentOnFirstMonth,
                 isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled, isFirstRepaymentDateAllowedOnHoliday,
-                isInterestToBeAppropriatedEquallyWhenGreaterThanEMI);
+                isInterestToBeRecoveredFirstWhenGreaterThanEMI, isPrincipalCompoundingDisabledForOverdueLoans);
 
         return scheduleGeneratorDTO;
     }

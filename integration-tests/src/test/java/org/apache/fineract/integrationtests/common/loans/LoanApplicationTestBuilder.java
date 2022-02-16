@@ -77,6 +77,7 @@ public class LoanApplicationTestBuilder {
     private List<HashMap<String, Object>> datatables = null;
     private List<Map<String, Object>> approvalFormData = null;
     private String fixedPrincipalPercentagePerInstallment;
+    private String interestChargedFromDate;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -150,6 +151,7 @@ public class LoanApplicationTestBuilder {
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
         map.put("collateral", this.collaterals);
+        map.put("interestChargedFromDate", this.interestChargedFromDate);
 
         if (repaymentsStartingFromDate != null) {
             map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
@@ -380,6 +382,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withPrinciplePercentagePerInstallment(String fixedPrincipalPercentagePerInstallment) {
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withinterestChargedFromDate(String interestChargedFromDate) {
+        this.interestChargedFromDate = interestChargedFromDate;
         return this;
     }
 }

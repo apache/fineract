@@ -75,6 +75,10 @@ public interface ConfigurationDomainService {
 
     boolean isSkippingMeetingOnFirstDayOfMonthEnabled();
 
+    boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI();
+
+    boolean isPrincipalCompoundingDisabledForOverdueLoans();
+
     Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
 
     boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
@@ -96,8 +100,6 @@ public interface ConfigurationDomainService {
     boolean isSubRatesEnabled();
 
     boolean isFirstRepaymentDateAfterRescheduleAllowedOnHoliday();
-
-    boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI();
 
     String getAccountMappingForPaymentType();
 
