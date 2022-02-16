@@ -236,7 +236,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         extraCriteria.addNonNullCriteria(" s.office_id = ", officeId);
 
         if (loanOfficersOnly) {
-            extraCriteria.addCriteria(" s.is_loan_officer is ", " true ");
+            extraCriteria.addCriteria(" s.is_loan_officer = ", true);
         }
         // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
         // (Both active and Inactive) employees
