@@ -259,8 +259,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public boolean isInterestToBeAppropriatedEquallyWhenGreaterThanEMI() {
-        return getGlobalConfigurationPropertyData("is-interest-to-be-appropriated-equally-when-greater-than-emi").isEnabled();
+    public boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI() {
+        return getGlobalConfigurationPropertyData("is-interest-to-be-recovered-first-when-greater-than-emi").isEnabled();
+    }
+
+    @Override
+    public boolean isPrincipalCompoundingDisabledForOverdueLoans() {
+        return getGlobalConfigurationPropertyData("is-principal-compounding-disabled-for-overdue-loans").isEnabled();
     }
 
     @Override
