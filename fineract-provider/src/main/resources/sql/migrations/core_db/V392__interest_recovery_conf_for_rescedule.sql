@@ -21,9 +21,9 @@ delete from c_configuration where name = 'is-interest-to-be-appropriated-equally
 
 INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`)
 VALUES
-    ('is-interest-to-be-recovered-first-when-greater-than-emi', 0, NULL, 0, 0, 'If enabled, when interest amount is greater than EMI, the additional interest is recovered first before princupal');
+    ('is-interest-to-be-recovered-first-when-greater-than-emi', 0, NULL, 0, 0, 'If enabled, when interest amount is greater than EMI, the additional interest is recovered first before principal');
 
 
 INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`)
 VALUES
-    ('is-principal-compounding-disabled-for-overdue-loans', 0, NULL, 0, 0, 'If enabled, it donot consider principal of an upaid installment for calculating interest of next installment. this is for testing back-dated loan sshedule');
+    ('is-principal-compounding-disabled-for-overdue-loans', 0, NULL, 0, 0, 'If enabled, it donot consider principal of an unpaid installment for calculating interest of next installment. this is for testing back-dated loan schedule');
