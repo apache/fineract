@@ -24,8 +24,6 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
-apply plugin: 'distribution'
-apply plugin: 'signing'
 apply plugin: 'com.google.cloud.tools.jib'
 
 // Custom OpenJPA enhancement
@@ -268,6 +266,7 @@ jar {
 }
 
 jar.dependsOn resolve
+jar.dependsOn bootJar
 
 jib {
     from {
@@ -330,88 +329,6 @@ jib {
 }
 
 tasks.jibDockerBuild.dependsOn = ["bootJar"]
-
-tasks.withType(Tar) {
-    compression Compression.GZIP
-    extension 'tar.gz'
-}
-
-distributions {
-    binary {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-binary"
-        } else {
-            distributionBaseName = "apache-fineract-binary"
-        }
-        contents {
-            from bootJar
-            // TODO: @vidakovic add war
-            // TODO: @vidakovic add client library
-            from("$rootDir/licenses/") {
-                into "licenses/"
-            }
-            from "$rootDir/LICENSE_RELEASE"
-            from "$rootDir/NOTICE_RELEASE"
-            rename ('LICENSE_RELEASE', 'LICENSE')
-            rename ('NOTICE_RELEASE', 'NOTICE')
-
-            from "$rootDir/DISCLAIMER"
-            from "$rootDir/README.md"
-        }
-    }
-    src {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-src"
-        } else {
-            distributionBaseName = "apache-fineract-src"
-        }
-
-        contents {
-            from "$rootDir/"
-            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
-            rename ('LICENSE_SOURCE', 'LICENSE')
-            rename ('NOTICE_SOURCE', 'NOTICE')
-        }
-    }
-}
-
-tasks.binaryDistZip.enabled false
-tasks.srcDistZip.enabled false
-tasks.binaryDistTar.dependsOn bootJar
-tasks.srcDistTar.dependsOn prepareInputYaml
-
-// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
-if( project.hasProperty("fineract.release") ) {
-    signing {
-        useGpgCmd()
-        sign (binaryDistTar, srcDistTar)
-    }
-    tasks.withType(Tar) { task ->
-        task.doLast {
-            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
-        }
-    }
-    tasks.withType(Sign) { task ->
-        task.doLast {
-            task.getFilesToSign().each { f ->
-                new ByteArrayOutputStream().withStream { os ->
-                    def result = exec {
-                        workingDir "$buildDir/distributions"
-                        executable 'sh'
-                        args '-c', "gpg --verify ${f}.asc"
-                        standardOutput = os
-                    }
-                    if(result.exitValue==0) {
-                        println '+++ GPG signature correct!'
-                    } else {
-                        println '--- GPG signature incorrect!'
-                        throw new RuntimeException('--- GPG signature incorrect!')
-                    }
-                }
-            }
-        }
-    }
-}
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
