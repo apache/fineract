@@ -447,7 +447,7 @@ Releasing
 
 Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
 
-1. Provide the parameters via ~/gradle/gradle.properties in your home folder:
+1. Provide the parameters via ~/.gradle/gradle.properties in your home folder:
 ```
 signing.gnupg.keyName=7890ABCD
 signing.gnupg.passphrase=secret
@@ -469,23 +469,23 @@ NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789
 
 Above tasks will create the following files in folder build/distributions:
 
-- binary distribution file: apache-fineract-1.4.0-binary.tar.gz
-- ASCII armored signature for binary distribution: apache-fineract-1.4.0-binary.tar.gz.asc
-- SHA512 checksum for binary distribution: apache-fineract-1.4.0-binary.tar.gz.sha512
-- source distribution file: apache-fineract-1.4.0-src.tar.gz
-- ASCII armored signature for source distribution: apache-fineract-1.4.0-src.tar.gz.asc
-- SHA512 checksum for source distribution: apache-fineract-1.4.0-src.tar.gz.sha512
+- binary distribution file: apache-fineract-1.6.0-binary.tar.gz
+- ASCII armored signature for binary distribution: apache-fineract-1.6.0-binary.tar.gz.asc
+- SHA512 checksum for binary distribution: apache-fineract-1.6.0-binary.tar.gz.sha512
+- source distribution file: apache-fineract-1.6.0-src.tar.gz
+- ASCII armored signature for source distribution: apache-fineract-1.6.0-src.tar.gz.asc
+- SHA512 checksum for source distribution: apache-fineract-1.6.0-src.tar.gz.sha512
 
 The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
 
 Additionally, you can verify the validity of the release distribution files e. g. with:
 ```
-gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
+gpg --verify build/distributions/apache-fineract-1.6.0-binary.tar.gz.asc
 ```
 
 The output should look somewhat like this:
 ```
-gpg: assuming signed data in 'build/distributions/apache-fineract-1.4.0-binary.tgz'
+gpg: assuming signed data in 'build/distributions/apache-fineract-1.6.0-binary.tgz'
 gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
 gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
