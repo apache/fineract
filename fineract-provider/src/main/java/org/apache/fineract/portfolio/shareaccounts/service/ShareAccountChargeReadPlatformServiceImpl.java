@@ -50,9 +50,9 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ").append(rm.schema()).append(" where sc.account_id=? ");
         if (status.equalsIgnoreCase("active")) {
-            sqlBuilder.append(" and sc.is_active = 1 ");
+            sqlBuilder.append(" and sc.is_active = true ");
         } else if (status.equalsIgnoreCase("inactive")) {
-            sqlBuilder.append(" and sc.is_active = 0 ");
+            sqlBuilder.append(" and sc.is_active = false ");
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC");
 

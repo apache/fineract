@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.shareaccounts.service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -232,7 +233,14 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         sb.append(" and saps.status_enum = ?");
         params.add(PurchasedSharesStatusType.APPROVED.getValue());
         Object[] whereClauseItems = params.toArray();
-        return this.jdbcTemplate.query(sb.toString(), mapper, whereClauseItems);
+        return this.jdbcTemplate.query(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            for (int i = 0; i < whereClauseItems.length; i++) {
+                preparedStatement.setObject(i + 1, whereClauseItems[i]);
+            }
+            return preparedStatement;
+        }, mapper);
     }
 
     public Collection<ShareAccountChargeData> convertChargesToShareAccountCharges(Collection<ChargeData> productCharges) {
