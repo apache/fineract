@@ -53,7 +53,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
     @Override
     public Collection<RoleData> retrieveAllActiveRoles() {
-        final String sql = "select " + this.roleRowMapper.schema() + " where r.is_disabled = 0 order by r.id";
+        final String sql = "select " + this.roleRowMapper.schema() + " where r.is_disabled = false order by r.id";
 
         return this.jdbcTemplate.query(sql, this.roleRowMapper);
     }
