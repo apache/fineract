@@ -268,7 +268,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? limit ?) b on b.id = sa.id ";
         if (backdatedTxnsAllowedTill) {
             sql = sql
-                    + "where if (sa.interest_posted_till_date is not null, tr.transaction_date >= sa.interest_posted_till_date, tr.transaction_date >= sa.activatedon_date) ";
+                    + "where (CASE WHEN sa.interest_posted_till_date is not null THEN tr.transaction_date >= sa.interest_posted_till_date ELSE tr.transaction_date >= sa.activatedon_date END) ";
         }
 
         sql = sql + "and apm.product_type=2 and sa.interest_posted_till_date<" + java.sql.Date.valueOf(currentDate);
@@ -295,20 +295,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.status_enum as statusEnum, ");
             sqlBuilder.append("sa.sub_status_enum as subStatusEnum, ");
             sqlBuilder.append("sa.submittedon_date as submittedOnDate,");
-
             sqlBuilder.append("sa.rejectedon_date as rejectedOnDate,");
-
             sqlBuilder.append("sa.withdrawnon_date as withdrawnOnDate,");
-
             sqlBuilder.append("sa.approvedon_date as approvedOnDate,");
-
             sqlBuilder.append("sa.activatedon_date as activatedOnDate,");
-
             sqlBuilder.append("sa.closedon_date as closedOnDate,");
-
             sqlBuilder.append(
                     "sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
-
             sqlBuilder.append("sa.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
             sqlBuilder.append("sa.interest_compounding_period_enum as interestCompoundingPeriodType, ");
             sqlBuilder.append("sa.interest_posting_period_enum as interestPostingPeriodType, ");
@@ -342,9 +335,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.total_savings_amount_on_hold as onHoldAmount, ");
             sqlBuilder.append("sa.interest_posted_till_date as interestPostedTillDate, ");
             sqlBuilder.append("tg.id as taxGroupId, ");
-            sqlBuilder.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            sqlBuilder.append("(select COALESCE(max(sat.transaction_date),sa.activatedon_date) ");
             sqlBuilder.append("from m_savings_account_transaction as sat ");
-            sqlBuilder.append("where sat.is_reversed = 0 ");
+            sqlBuilder.append("where sat.is_reversed = false ");
             sqlBuilder.append("and sat.transaction_type_enum in (1,2) ");
             sqlBuilder.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
             sqlBuilder.append("sp.id as productId, ");
@@ -821,9 +814,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.total_savings_amount_on_hold as onHoldAmount, ");
             sqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName, ");
-            sqlBuilder.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            sqlBuilder.append("(select COALESCE(max(sat.transaction_date),sa.activatedon_date) ");
             sqlBuilder.append("from m_savings_account_transaction as sat ");
-            sqlBuilder.append("where sat.is_reversed = 0 ");
+            sqlBuilder.append("where sat.is_reversed = false ");
             sqlBuilder.append("and sat.transaction_type_enum in (1,2) ");
             sqlBuilder.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
             sqlBuilder.append("sp.is_dormancy_tracking_active as isDormancyTrackingActive, ");
@@ -1663,9 +1656,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
         sql.append(" where sa.status_enum = 300 ");
         sql.append(" and sa.sub_status_enum = 0 ");
-        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" and DATEDIFF(?,(select COALESCE(max(sat.transaction_date), sa.activatedon_date) ");
         sql.append(" from m_savings_account_transaction as sat ");
-        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" where sat.is_reversed = false ");
         sql.append(" and sat.transaction_type_enum in (1,2) ");
         sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_inactive ");
 
@@ -1688,9 +1681,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
         sql.append(" where sa.status_enum = 300 ");
         sql.append(" and sa.sub_status_enum = 100 ");
-        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" and DATEDIFF(?,(select COALESCE(max(sat.transaction_date),sa.activatedon_date) ");
         sql.append(" from m_savings_account_transaction as sat ");
-        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" where sat.is_reversed = false ");
         sql.append(" and sat.transaction_type_enum in (1,2) ");
         sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_dormancy ");
 
@@ -1710,12 +1703,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         List<Long> ret = null;
         StringBuilder sql = new StringBuilder("select sa.id ");
         sql.append(" from m_savings_account as sa ");
-        sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+        sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = true) ");
         sql.append(" where sa.status_enum = 300 ");
         sql.append(" and sa.sub_status_enum = 200 ");
-        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" and DATEDIFF(?,(select COALESCE(max(sat.transaction_date),sa.activatedon_date) ");
         sql.append(" from m_savings_account_transaction as sat ");
-        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" where sat.is_reversed = false ");
         sql.append(" and sat.transaction_type_enum in (1,2) ");
         sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_escheat ");
 
