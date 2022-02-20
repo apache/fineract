@@ -45,7 +45,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
     @Override
     public Collection<ShareAccountTransactionData> retrievePurchasedShares(Long accountId) {
         PurchasedSharesDataRowMapper mapper = new PurchasedSharesDataRowMapper();
-        final String sql = "select " + mapper.schema() + " where saps.account_id=? and saps.is_active = 1";
+        final String sql = "select " + mapper.schema() + " where saps.account_id=? and saps.is_active = true";
         return this.jdbcTemplate.query(sql, mapper, new Object[] { accountId });
     }
 

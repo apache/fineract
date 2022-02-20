@@ -206,9 +206,9 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ").append(rm.schema()).append(" where sc.savings_account_id=? ");
         if (status.equalsIgnoreCase("active")) {
-            sqlBuilder.append(" and sc.is_active = 1 ");
+            sqlBuilder.append(" and sc.is_active = true ");
         } else if (status.equalsIgnoreCase("inactive")) {
-            sqlBuilder.append(" and sc.is_active = 0 ");
+            sqlBuilder.append(" and sc.is_active = false ");
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC");
 
@@ -259,7 +259,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
         final String sql = "select " + this.chargeDueMapper.schema()
-                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = ? "
+                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
         return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() });
