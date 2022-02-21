@@ -81,7 +81,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         // currently handles loans of exisiting types.
         final String savingswhereClause = " where sa.client_id = ? order by sa.status_enum ASC, sa.account_no ASC";
 
-        final String guarantorWhereClause = " where g.entity_id = ? and g.is_active = 1 order by l.account_no ASC";
+        final String guarantorWhereClause = " where g.entity_id = ? and g.is_active = true order by l.account_no ASC";
 
         final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(glimLoanClause, new Object[] { clientId });
         final List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[] { clientId });
@@ -102,8 +102,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String savingswhereClauseForGroup = " where sa.group_id = ? and sa.client_id is null order by sa.status_enum ASC, sa.account_no ASC";
         final String savingswhereClauseForMembers = " where sa.group_id = ? and sa.client_id is not null order by sa.status_enum ASC, sa.account_no ASC";
 
-        final String guarantorWhereClauseForGroup = " where l.group_id = ? and l.client_id is null and g.is_active = 1 order by l.account_no ASC";
-        final String guarantorWhereClauseForMembers = " where l.group_id = ? and l.client_id is not null and g.is_active = 1 order by l.account_no ASC";
+        final String guarantorWhereClauseForGroup = " where l.group_id = ? and l.client_id is null and g.is_active = true order by l.account_no ASC";
+        final String guarantorWhereClauseForMembers = " where l.group_id = ? and l.client_id is not null and g.is_active = true order by l.account_no ASC";
         final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroupAndLoanType,
                 new Object[] { groupId });
 
@@ -345,9 +345,9 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname,");
 
             accountsSummary.append("sa.sub_status_enum as subStatusEnum, ");
-            accountsSummary.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            accountsSummary.append("(select coalesce(max(sat.transaction_date),sa.activatedon_date) ");
             accountsSummary.append("from m_savings_account_transaction as sat ");
-            accountsSummary.append("where sat.is_reversed = 0 ");
+            accountsSummary.append("where sat.is_reversed = false ");
             accountsSummary.append("and sat.transaction_type_enum in (1,2) ");
             accountsSummary.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
 

@@ -154,6 +154,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
         sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date DESC, cc.is_penalty ASC ");
 
         // apply limit and offsets
+
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
             if (searchParameters.isOffset()) {

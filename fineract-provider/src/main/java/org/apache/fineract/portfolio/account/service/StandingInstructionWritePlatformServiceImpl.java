@@ -261,7 +261,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         boolean transferCompleted = true;
         StringBuilder errorLog = new StringBuilder();
         StringBuilder updateQuery = new StringBuilder(
-                "INSERT INTO `m_account_transfer_standing_instructions_history` (`standing_instruction_id`, `status`, `amount`,`execution_time`, `error_log`) VALUES (");
+                "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, `status`, amount,execution_time, error_log) VALUES (");
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
