@@ -90,6 +90,7 @@ allprojects  {
     jgitver {
         strategy 'PATTERN'
         versionPattern '${M}.${m}.${p}-${meta.GIT_SHA1_8}'
+        // versionPattern '${v}'
     }
 
     repositories {
