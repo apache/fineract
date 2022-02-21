@@ -169,7 +169,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
 
         if (clientCollateralManagement.getLoanCollateralManagementSet().size() > 0) {
             for (LoanCollateralManagement loanCollateralManagement : clientCollateralManagement.getLoanCollateralManagementSet()) {
-                if (loanCollateralManagement.getIsReleased() == 0) {
+                if (!loanCollateralManagement.isReleased()) {
                     throw new ClientCollateralCannotBeDeletedException(
                             ClientCollateralCannotBeDeletedException.ClientCollateralCannotBeDeletedReason.CLIENT_COLLATERAL_IS_ALREADY_ATTACHED,
                             clientCollateralId);

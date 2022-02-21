@@ -51,7 +51,7 @@ public interface LoanAccountDomainService {
 
     void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementList);
 
-    void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, Integer isReleased);
+    void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased);
 
     /**
      * This method is to recalculate and accrue the income till the last accrued date. this method is used when the

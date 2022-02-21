@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -75,9 +76,15 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public List<GuarantorData> retrieveGuarantorsForLoan(final Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id";
-        final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm,
-                new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), loanId });
+        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id, sa.id, oht.id, cv.id";
+        String finalSql = sql;
+        final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(finalSql, ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            preparedStatement.setInt(1, AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue());
+            preparedStatement.setLong(2, loanId);
+            return preparedStatement;
+        }, rm);
 
         final List<GuarantorData> mergedGuarantorDatas = new ArrayList<>();
 
@@ -91,9 +98,16 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public GuarantorData retrieveGuarantor(final Long loanId, final Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id";
-        final GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm,
-                new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), loanId, guarantorId });
+        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id, sa.id, oht.id, cv.id";
+        String finalSql = sql;
+        final GuarantorData guarantorData = this.jdbcTemplate.query(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(finalSql, ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            preparedStatement.setInt(1, AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue());
+            preparedStatement.setLong(2, loanId);
+            preparedStatement.setLong(3, guarantorId);
+            return preparedStatement;
+        }, rm).get(0);
 
         return mergeDetailsForClientOrStaffGuarantor(guarantorData);
     }
@@ -114,7 +128,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                         .append(" FROM m_guarantor g") //
                         .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id")//
                         .append(" left JOIN m_guarantor_funding_details gfd on g.id = gfd.guarantor_id")//
-                        .append(" left JOIN m_portfolio_account_associations aa on gfd.account_associations_id = aa.id and aa.is_active = 1 and aa.association_type_enum = ?")//
+                        .append(" left JOIN m_portfolio_account_associations aa on gfd.account_associations_id = aa.id and aa.is_active = true and aa.association_type_enum = ?")//
                         .append(" left JOIN m_savings_account sa on sa.id = aa.linked_savings_account_id ")//
                         .append(" left join m_guarantor_transaction gt on gt.guarantor_fund_detail_id = gfd.id") //
                         .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id");

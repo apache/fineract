@@ -987,7 +987,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
                 if (loan.status().isClosed()) {
-                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
                     loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
@@ -1402,7 +1402,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
                 if (loan.status().isClosed()) {
-                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
                     loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
@@ -1469,7 +1469,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
                 if (loan.status().isClosed()) {
-                    loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                    loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
                     loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);

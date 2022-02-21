@@ -162,7 +162,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Transactional
     @Override
-    public void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, Integer isReleased) {
+    public void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased) {
         for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagementSet) {
             loanCollateralManagement.setIsReleased(isReleased);
         }

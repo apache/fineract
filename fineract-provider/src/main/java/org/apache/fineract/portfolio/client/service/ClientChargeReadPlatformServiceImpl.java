@@ -139,16 +139,16 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
         // filter for active charges
         if (status.equalsIgnoreCase(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)) {
-            sqlBuilder.append(" and cc.is_active = 1 ");
+            sqlBuilder.append(" and cc.is_active = true ");
         } else if (status.equalsIgnoreCase(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE)) {
-            sqlBuilder.append(" and cc.is_active = 0 ");
+            sqlBuilder.append(" and cc.is_active = false ");
         }
 
         // filter for paid charges
         if (pendingPayment != null && pendingPayment) {
-            sqlBuilder.append(" and ( cc.is_paid_derived = 0 and cc.waived = 0) ");
+            sqlBuilder.append(" and ( cc.is_paid_derived = false and cc.waived = false) ");
         } else if (pendingPayment != null && !pendingPayment) {
-            sqlBuilder.append(" and (cc.is_paid_derived = 1 or cc.waived = 1) ");
+            sqlBuilder.append(" and (cc.is_paid_derived = true or cc.waived = true) ");
         }
 
         sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date DESC, cc.is_penalty ASC ");

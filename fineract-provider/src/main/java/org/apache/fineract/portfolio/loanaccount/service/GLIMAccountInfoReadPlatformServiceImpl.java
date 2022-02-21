@@ -104,7 +104,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and ln.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) });
     }
 
     @Override
@@ -115,7 +115,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) });
     }
 
     @Override
