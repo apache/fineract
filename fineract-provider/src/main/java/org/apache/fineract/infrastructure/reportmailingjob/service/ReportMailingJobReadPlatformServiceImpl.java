@@ -65,7 +65,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
 
         sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlStringBuilder.append(mapper.reportMailingJobSchema());
-        sqlStringBuilder.append(" where rmj.is_deleted = 0");
+        sqlStringBuilder.append(" where rmj.is_deleted = false");
 
         if (searchParameters.isOrderByRequested()) {
             sqlStringBuilder.append(" order by ").append(searchParameters.getOrderBy());
@@ -93,7 +93,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     @Override
     public Collection<ReportMailingJobData> retrieveAllActiveReportMailingJobs() {
         final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-        final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.is_deleted = 0 and is_active = 1"
+        final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.is_deleted = false and is_active = true"
                 + " order by rmj.name";
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
@@ -103,7 +103,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     public ReportMailingJobData retrieveReportMailingJob(final Long reportMailingJobId) {
         try {
             final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-            final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = 0";
+            final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = false";
 
             return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId });
         }

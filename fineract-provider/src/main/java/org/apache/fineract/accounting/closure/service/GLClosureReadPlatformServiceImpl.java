@@ -80,7 +80,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     public List<GLClosureData> retrieveAllGLClosures(final Long officeId) {
         final GLClosureMapper rm = new GLClosureMapper();
 
-        String sql = "select " + rm.schema() + " and glClosure.is_deleted = 0";
+        String sql = "select " + rm.schema() + " and glClosure.is_deleted = false";
         final Object[] objectArray = new Object[1];
         int arrayPos = 0;
         if (officeId != null && officeId != 0) {

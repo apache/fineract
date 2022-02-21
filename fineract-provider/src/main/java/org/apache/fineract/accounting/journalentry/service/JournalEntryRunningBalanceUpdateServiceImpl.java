@@ -103,7 +103,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     @CronTarget(jobName = JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE)
     public void updateRunningBalance() {
         String dateFinder = "select MIN(je.entry_date) as entityDate from acc_gl_journal_entry  je "
-                + "where je.is_running_balance_calculated=0 ";
+                + "where je.is_running_balance_calculated=false ";
         try {
             Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class);
             updateOrganizationRunningBalance(entityDate);
@@ -124,7 +124,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         } else {
             this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             String dateFinder = "select MIN(je.entry_date) as entityDate " + "from acc_gl_journal_entry  je "
-                    + "where je.is_running_balance_calculated=0  and je.office_id=?";
+                    + "where je.is_running_balance_calculated=false  and je.office_id=?";
             try {
                 Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class, officeId);
                 updateRunningBalance(officeId, entityDate);
@@ -191,8 +191,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 }
                 BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-                String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_calculated=1, je.organization_running_balance="
-                        + runningBalance + ",je.office_running_balance=" + officeRunningBalance + " WHERE  je.id=" + entryData.getId();
+                String sql = "UPDATE acc_gl_journal_entry SET is_running_balance_calculated=true, organization_running_balance="
+                        + runningBalance + ",office_running_balance=" + officeRunningBalance + " WHERE  id=" + entryData.getId();
                 updateSql.add(sql);
                 batchIndex++;
                 if (batchIndex == batchUpdateSize || index == entryDatas.size() - 1) {
@@ -225,8 +225,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         int i = 0;
         for (JournalEntryData entryData : entryDatas) {
             BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-            String sql = "UPDATE acc_gl_journal_entry je SET je.office_running_balance=" + runningBalance + " WHERE  je.id="
-                    + entryData.getId();
+            String sql = "UPDATE acc_gl_journal_entry SET office_running_balance=" + runningBalance + " WHERE id=" + entryData.getId();
             updateSql[i++] = sql;
         }
         this.jdbcTemplate.batchUpdate(updateSql);

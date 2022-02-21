@@ -68,7 +68,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         private LoanProductProvisioningEntryMapper() {
             sqlQuery = new StringBuilder().append(
-                    "select if(loan.loan_type_enum=1, mclient.office_id, mgroup.office_id) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
+                    "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
                     .append("GREATEST(datediff(?")
                     .append(",sch.duedate),0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
                     .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
@@ -110,7 +110,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) {
         ProvisioningEntryDataMapperWithSumReserved mapper1 = new ProvisioningEntryDataMapperWithSumReserved();
-        final String sql1 = "select" + mapper1.getSchema() + " where entry.id = ?";
+        final String sql1 = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
         ProvisioningEntryData data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { entryId });
         return data;
     }

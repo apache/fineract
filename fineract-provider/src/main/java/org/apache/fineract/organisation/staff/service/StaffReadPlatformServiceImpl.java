@@ -99,7 +99,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             sqlBuilder.append("s.mobile_no as mobileNo, s.is_active as isActive, s.joining_date as joiningDate ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
-            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_active=1 ");
+            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_active=true ");
 
             if (loanOfficersOnly) {
                 sqlBuilder.append("and s.is_loan_officer is true ");
@@ -175,7 +175,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
-        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=1 and o.hierarchy like ? ";
+        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=true and o.hierarchy like ? ";
 
         return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId, hierarchy });
     }
@@ -242,9 +242,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         // (Both active and Inactive) employees
         if (status != null) {
             if (status.equalsIgnoreCase("active")) {
-                extraCriteria.addCriteria(" s.is_active =", 1);
+                extraCriteria.addCriteria(" s.is_active =", true);
             } else if (status.equalsIgnoreCase("inActive")) {
-                extraCriteria.addCriteria(" s.is_active =", 0);
+                extraCriteria.addCriteria(" s.is_active =", false);
             } else {
                 if (!status.equalsIgnoreCase("all")) {
                     throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
