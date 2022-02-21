@@ -77,7 +77,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waied, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, " + "lc.charge_amount_or_percentage as amountOrPercentage, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
-                    + "date(ifnull(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
+                    + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code " + "join m_loan_charge lc on lc.charge_id = c.id "
@@ -188,8 +188,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         final LoanChargeMapper rm = new LoanChargeMapper();
 
-        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1"
-                + " order by ifnull(lc.due_for_collection_as_of_date,date(ifnull(dd.disbursedon_date,dd.expected_disburse_date))),lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = true"
+                + " order by coalesce(lc.due_for_collection_as_of_date,date(coalesce(dd.disbursedon_date,dd.expected_disburse_date))),lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
     }
@@ -198,7 +198,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     public Collection<LoanChargeData> retrieveLoanChargesForFeePayment(final Integer paymentMode, final Integer loanStatus) {
         final LoanChargeMapperWithLoanId rm = new LoanChargeMapperWithLoanId();
         final String sql = "select " + rm.schema()
-                + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived =0 and lc.is_paid_derived=0 and lc.is_active = 1";
+                + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived = false and lc.is_paid_derived=false and lc.is_active = true";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanStatus, paymentMode });
     }
 
@@ -229,7 +229,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         final LoanInstallmentChargeMapper rm = new LoanInstallmentChargeMapper();
         String sql = "select " + rm.schema() + "where lic.loan_charge_id= ? ";
         if (onlyPaymentPendingCharges) {
-            sql = sql + "and lic.waived =0 and lic.is_paid_derived=0";
+            sql = sql + "and lic.waived = false and lic.is_paid_derived=false";
         }
         sql = sql + " order by lsi.installment";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanChargeId });
@@ -262,7 +262,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long loanId, final Long chargeId,
             final Integer periodNumber) {
         String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id inner join m_loan_repayment_schedule rs on rs.id = oic.loan_schedule_id inner join m_loan loan on loan.id=rs.loan_id "
-                + "where lc.is_active = 1 and loan.id = ? and rs.installment=?";
+                + "where lc.is_active = true and loan.id = ? and rs.installment=?";
         Object[] params = { loanId, periodNumber };
         if (chargeId != null) {
             sql += " and lc.charge_id = ? ";
@@ -276,7 +276,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         final LoanChargeAccrualMapper rm = new LoanChargeAccrualMapper();
 
-        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1 group by  lc.id "
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = true group by  lc.id "
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         Collection<LoanChargeData> charges = this.jdbcTemplate.query(sql, rm,
@@ -320,7 +320,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("select lcp.loan_charge_id, lcp.amount");
             sb.append(" from m_loan_charge_paid_by lcp ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ? and lt.loan_id = ?");
+                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = false and lt.transaction_type_enum = ? and lt.loan_id = ?");
             sb.append(") cp on  cp.loan_charge_id= lc.id  ");
 
             schemaSql = sb.toString();
@@ -354,7 +354,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         final LoanChargeUnRecognizedIncomeMapper rm = new LoanChargeUnRecognizedIncomeMapper(loanChargeDatas);
 
-        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1 group by  lc.id "
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = true group by  lc.id "
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { LoanTransactionType.WAIVE_CHARGES.getValue(), loanId, loanId });
@@ -380,7 +380,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("select cpb.loan_charge_id, lt.unrecognized_income_portion");
             sb.append(" from m_loan_charge_paid_by cpb ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?  and lt.loan_id = ? ");
+                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = false and lt.transaction_type_enum = ?  and lt.loan_id = ? ");
             sb.append(") wt on  wt.loan_charge_id= lc.id  ");
 
             schemaSql = sb.toString();
@@ -438,7 +438,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("select lcp.loan_charge_id, lcp.amount as amount, lcp.installment_number ");
             sb.append(" from m_loan_charge_paid_by lcp ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = false and lt.transaction_type_enum = ?");
             sb.append(") cp on  cp.loan_charge_id= lic.loan_charge_id and  cp.installment_number = lsi.installment ");
             schemaSql = sb.toString();
         }
@@ -482,7 +482,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("  sum(lt.unrecognized_income_portion) as amountUnrecognized ");
             sb.append(" from m_loan_charge_paid_by cpb ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = false and lt.transaction_type_enum = ?");
             schemaSql = sb.toString();
         }
 
@@ -533,7 +533,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("lcp.loan_transaction_id as transactionId, ");
             sb.append("lcp.installment_number as installmentNumber ");
             sb.append(" from m_loan_charge_paid_by lcp ");
-            sb.append(" join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed=0");
+            sb.append(" join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed=false");
 
             schemaSql = sb.toString();
         }

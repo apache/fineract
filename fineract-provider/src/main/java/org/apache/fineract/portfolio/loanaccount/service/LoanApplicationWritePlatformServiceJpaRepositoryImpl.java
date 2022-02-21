@@ -1303,7 +1303,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             BigDecimal quantity = loanCollateralManagement.getQuantity();
             ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
             clientCollateralManagement.updateQuantityAfterLoanClosed(quantity);
-            loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+            loanCollateralManagement.setIsReleased(true);
             loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
         }
 
@@ -1662,7 +1662,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 clientCollateralManagement
                         .updateQuantity(clientCollateralManagement.getQuantity().add(loanCollateralManagement.getQuantity()));
                 loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
-                loanCollateralManagement.setIsReleased(Integer.valueOf(1));
+                loanCollateralManagement.setIsReleased(true);
             }
             loan.updateLoanCollateral(loanCollateralManagements);
         }
