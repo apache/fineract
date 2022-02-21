@@ -93,7 +93,7 @@ distributions {
 
         contents {
             from "$rootDir/"
-            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
+            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/.gitkeep'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
