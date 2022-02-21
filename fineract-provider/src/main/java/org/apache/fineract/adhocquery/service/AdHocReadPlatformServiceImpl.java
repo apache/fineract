@@ -53,7 +53,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     @Override
     public Collection<AdHocData> retrieveAllActiveAdHocQuery() {
-        final String sql = "select " + this.adHocRowMapper.schema() + " where r.IsActive = 1 order by r.id";
+        final String sql = "select " + this.adHocRowMapper.schema() + " where r.IsActive = true order by r.id";
 
         return this.jdbcTemplate.query(sql, this.adHocRowMapper);
     }

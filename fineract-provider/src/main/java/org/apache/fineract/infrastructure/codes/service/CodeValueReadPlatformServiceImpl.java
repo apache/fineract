@@ -71,7 +71,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         this.context.authenticatedUser();
 
         final CodeValueDataMapper rm = new CodeValueDataMapper();
-        final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = 1 order by position";
+        final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = true order by position";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { code });
     }

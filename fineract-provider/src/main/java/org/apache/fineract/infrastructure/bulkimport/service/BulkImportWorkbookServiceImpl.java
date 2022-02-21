@@ -248,7 +248,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
 
-        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId });
+        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) });
     }
 
     @Override

@@ -253,7 +253,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     @Override
     public EmailCampaignData retrieveOne(Long resourceId) {
-        final Integer isVisible = 1;
+        final boolean isVisible = true;
         try {
             final String sql = "select " + this.emailCampaignMapper.schema + " where ec.id = ? and ec.is_visible = ?";
             return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, resourceId, isVisible);
@@ -264,7 +264,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     @Override
     public Collection<EmailCampaignData> retrieveAllCampaign() {
-        final Integer visible = 1;
+        final boolean visible = true;
         final String sql = "select " + this.emailCampaignMapper.schema() + " where ec.is_visible = ?";
         return this.jdbcTemplate.query(sql, this.emailCampaignMapper, visible);
     }
@@ -273,7 +273,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
     public Collection<EmailCampaignData> retrieveAllScheduleActiveCampaign() {
         final Integer scheduleCampaignType = EmailCampaignType.SCHEDULE.getValue();
         final Integer statusEnum = EmailCampaignStatus.ACTIVE.getValue();
-        final Integer visible = 1;
+        final boolean visible = true;
         final String sql = "select " + this.emailCampaignMapper.schema()
                 + " where ec.status_enum = ? and ec.campaign_type = ? and ec.is_visible = ?";
         return this.jdbcTemplate.query(sql, this.emailCampaignMapper, statusEnum, scheduleCampaignType, visible);

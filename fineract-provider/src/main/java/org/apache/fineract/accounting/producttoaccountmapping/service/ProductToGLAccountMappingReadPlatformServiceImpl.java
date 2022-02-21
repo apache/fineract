@@ -303,9 +303,9 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         String sql = "select " + rm.schema() + " and product_id = ? and mapping.charge_id is not null and charge.is_penalty=";
         if (penalty) {
-            sql = sql + " 1";
+            sql = sql + " true";
         } else {
-            sql = sql + " 0";
+            sql = sql + " false";
         }
 
         final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm,

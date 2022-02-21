@@ -268,7 +268,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // add the registered table to the config if it is a ppi
             if (this.isSurveyCategory(category)) {
                 this.namedParameterJdbcTemplate
-                        .update("insert into c_configuration (name, value, enabled ) values( :dataTableName , '0','0')", paramMap);
+                        .update("insert into c_configuration (name, value, enabled ) values( :dataTableName , '0',false)", paramMap);
             }
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -481,13 +481,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private boolean isRegisteredDataTable(final String name) {
         // PERMITTED datatables
-        final String sql = "select if((exists (select 1 from x_registered_table where registered_table_name = ?)) = 1, 'true', 'false')";
+        final String sql = "select (CASE WHEN exists (select 1 from x_registered_table where registered_table_name = ?) THEN 'true' ELSE 'false' END)";
         final String isRegisteredDataTable = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { name });
         return Boolean.valueOf(isRegisteredDataTable);
     }
 
     private void assertDataTableExists(final String datatableName) {
-        final String sql = "select if((exists (select 1 from information_schema.tables where table_schema = schema() and table_name = ?)) = 1, 'true', 'false')";
+        final String sql = "select (CASE WHEN exists (select 1 from information_schema.tables where table_schema = schema()"
+                + " and table_name = ?) THEN 'true' ELSE 'false' END)";
         final String dataTableExistsString = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { datatableName });
         final boolean dataTableExists = Boolean.valueOf(dataTableExistsString);
         if (!dataTableExists) {

@@ -63,7 +63,7 @@ public class MixTaxonomyReadPlatformServiceImpl implements MixTaxonomyReadPlatfo
 
     @Override
     public List<MixTaxonomyData> retrieveAll() {
-        final String sql = "select " + this.mixTaxonomyMapper.schema();
+        final String sql = "select " + this.mixTaxonomyMapper.schema() + " order by id";
         return this.jdbcTemplate.query(sql, this.mixTaxonomyMapper);
     }
 

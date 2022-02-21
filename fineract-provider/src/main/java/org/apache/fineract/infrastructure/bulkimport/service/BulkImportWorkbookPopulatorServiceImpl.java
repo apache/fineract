@@ -270,7 +270,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<OfficeData> offices = null;
         if (officeId == null) {
             Boolean includeAllOffices = Boolean.TRUE;
-            offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices, null);
+            offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices, new SearchParameters(null, null, null,
+                    null, null, null, null, null, null, "id", "asc", null, null, null, null, null, null));
         } else {
             offices = new ArrayList<>();
             offices.add(this.officeReadPlatformService.retrieveOffice(officeId));

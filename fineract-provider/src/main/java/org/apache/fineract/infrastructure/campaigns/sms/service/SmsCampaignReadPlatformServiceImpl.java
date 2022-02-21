@@ -74,7 +74,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
 
     @Override
     public SmsCampaignData retrieveOne(Long campaignId) {
-        final Integer isVisible = 1;
+        final boolean isVisible = true;
         try {
             final String sql = "select " + this.smsCampaignMapper.schema + " where sc.id = ? and sc.is_visible = ?";
             return this.jdbcTemplate.queryForObject(sql, this.smsCampaignMapper, new Object[] { campaignId, isVisible });

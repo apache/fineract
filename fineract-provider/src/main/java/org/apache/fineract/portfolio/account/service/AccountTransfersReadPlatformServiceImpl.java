@@ -258,7 +258,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
     @Override
     public Collection<Long> fetchPostInterestTransactionIds(final Long accountId) {
-        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed =0 and atd.transfer_type = ?";
+        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = false and atd.transfer_type = ?";
 
         final List<Long> transactionId = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
                 AccountTransferType.INTEREST_TRANSFER.getValue());
@@ -268,7 +268,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
     @Override
     public Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(final Long accountId, final Date pivotDate) {
-        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = 0 and atd.transfer_type = ? and att.transaction_date >= ?";
+        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = false and atd.transfer_type = ? and att.transaction_date >= ?";
 
         final List<Long> transactionIds = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
                 AccountTransferType.INTEREST_TRANSFER.getValue(), pivotDate);
@@ -557,7 +557,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         sqlBuilder.append(" from m_account_transfer_details as det ");
         sqlBuilder.append(" inner join m_account_transfer_transaction as trans ");
         sqlBuilder.append(" on det.id = trans.account_transfer_details_id ");
-        sqlBuilder.append(" where trans.is_reversed = 0 ");
+        sqlBuilder.append(" where trans.is_reversed = false ");
         sqlBuilder.append(" and trans.transaction_date = ? ");
         sqlBuilder.append(" and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?) ");
 

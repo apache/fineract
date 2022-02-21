@@ -333,7 +333,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         if (onlyManualEntries != null) {
             if (onlyManualEntries) {
-                sqlBuilder.append(whereClose + " journalEntry.manual_entry = 1");
+                sqlBuilder.append(whereClose + " journalEntry.manual_entry = true");
 
                 whereClose = " and ";
             }
