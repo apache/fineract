@@ -38,6 +38,7 @@ cargo {
     }
 
     local {
+        logLevel = 'medium'
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")
