@@ -194,6 +194,8 @@ import groovy.sql.Sql
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
+project.ext.pgUser='root'
+project.ext.pgPassword='postgres'
 
 configurations {
     driver
@@ -209,7 +211,7 @@ configurations.driver.each {File file ->
 }
 
 task createDB {
-    description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'create database '+"`$dbName`" )
@@ -217,12 +219,29 @@ task createDB {
 }
 
 task dropDB {
-    description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
+    description= "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }
+
+task createPGDB {
+    description= "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
+        sql.execute( 'create database '+"$dbName" )
+    }
+}
+
+task dropPGDB {
+    description= "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
+        sql.execute( 'DROP DATABASE '+ "$dbName")
+    }
+}
+
 task setBlankPassword {
     doLast {
         def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
