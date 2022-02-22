@@ -1,0 +1,68 @@
+name: Fineract Gradle build - basicauth - PostgreSQL
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    services:
+        postgresql:
+            image: postgres:13.4
+            ports:
+                - 5432:5432
+            env:
+              POSTGRES_USER: root
+              POSTGRES_PASSWORD: postgres
+            options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=3
+
+        mock-oauth2-server:
+          image: ghcr.io/navikt/mock-oauth2-server:0.4.0
+          ports:
+            - 9000:9000
+          env:
+            SERVER_PORT: 9000
+            JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
+
+    env:
+        TZ: Asia/Kolkata
+    steps:
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Verify MariaDB connection
+        run: |
+            while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do
+                sleep 1
+            done
+      - name: Initialise databases
+        run: |
+            ./gradlew --no-daemon -q createPGDB -PdbName=fineract_tenants
+            ./gradlew --no-daemon -q createPGDB -PdbName=fineract_default
+      - name: Install additional software
+        run: |
+            sudo apt-get update
+            sudo apt-get install ghostscript -y
+
+      - name: Basic Auth Build & Test
+        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql -PexcludeTests=org.apache.fineract.integrationtests.guarantor.GuarantorTest.testGuarantor_UNDO_DISBURSAL
+
+      - name: 2FA Build & Test
+        run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast -PdbType=postgresql
+
+      - name: OAuth2 Build & Test
+        run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast -PdbType=postgresql
