@@ -61,13 +61,6 @@ jobs:
       - name: Basic Auth Build & Test
         run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
 
-      - name: Archive integration test report
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: integration-test-report
-          path: /home/runner/work/fineract/fineract/integration-tests/build/reports/tests/test/index.html
-
       - name: 2FA Build & Test
         run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast -PdbType=postgresql
 
