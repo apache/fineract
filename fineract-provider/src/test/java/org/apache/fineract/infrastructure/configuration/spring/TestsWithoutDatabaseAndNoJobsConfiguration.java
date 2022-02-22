@@ -19,7 +19,9 @@
 package org.apache.fineract.infrastructure.configuration.spring;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.zaxxer.hikari.HikariConfig;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -41,6 +43,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @EnableConfigurationProperties({ FineractProperties.class })
 public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicationConfiguration {
+
+    @Bean
+    public HikariConfig hikariConfig() {
+        HikariConfig mock = mock(HikariConfig.class);
+        when(mock.getDriverClassName()).thenReturn("org.mariadb.jdbc.Driver");
+        return mock;
+    }
 
     @Bean
     public TenantDataSourceFactory tenantDataSourceFactory() {

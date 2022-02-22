@@ -46,7 +46,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         public String schema() {
             return "ocb.id as orgCbId,ocb.alias as orgCbAlias,cb.name as creditbureauName,cb.product as creditbureauProduct,cb.country as creditbureauCountry,"
                     + "concat(cb.product,' - ',cb.name,' - ',cb.country) as CreditBureauSummary,"
-                    + "ocb.creditbureau_id as cbid,ocb.isActive  as isActive"
+                    + "ocb.creditbureau_id as cbid,ocb.is_active  as isActive"
                     + " from m_organisation_creditbureau ocb,m_creditbureau cb where ocb.creditbureau_id=cb.id";
 
         }

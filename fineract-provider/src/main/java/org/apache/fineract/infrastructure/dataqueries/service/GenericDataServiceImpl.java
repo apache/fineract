@@ -26,6 +26,9 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
@@ -45,11 +48,18 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final DatabaseTypeResolver databaseTypeResolver;
+    private final DatabaseIndependentQueryService databaseIndependentQueryService;
     private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
-    public GenericDataServiceImpl(final RoutingDataSource dataSource) {
+    public GenericDataServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator,
+            DatabaseTypeResolver databaseTypeResolver, DatabaseIndependentQueryService databaseIndependentQueryService) {
         this.dataSource = dataSource;
+        this.sqlGenerator = sqlGenerator;
+        this.databaseTypeResolver = databaseTypeResolver;
+        this.databaseIndependentQueryService = databaseIndependentQueryService;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
 
     }
@@ -205,14 +215,14 @@ public class GenericDataServiceImpl implements GenericDataService {
 
         columnDefinitions.beforeFirst();
         while (columnDefinitions.next()) {
-            final String columnName = columnDefinitions.getString("COLUMN_NAME");
-            final String isNullable = columnDefinitions.getString("IS_NULLABLE");
-            final String isPrimaryKey = columnDefinitions.getString("COLUMN_KEY");
-            final String columnType = columnDefinitions.getString("DATA_TYPE");
-            final Long columnLength = columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH");
+            final String columnName = columnDefinitions.getString(1);
+            final String isNullable = columnDefinitions.getString(2);
+            final String isPrimaryKey = columnDefinitions.getString(5);
+            final String columnType = columnDefinitions.getString(3);
+            final Long columnLength = columnDefinitions.getLong(4);
 
-            final boolean columnNullable = "YES".equalsIgnoreCase(isNullable);
-            final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey);
+            final boolean columnNullable = "YES".equalsIgnoreCase(isNullable) || "TRUE".equalsIgnoreCase(isNullable);
+            final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey) || "TRUE".equalsIgnoreCase(isPrimaryKey);
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
@@ -295,18 +305,13 @@ public class GenericDataServiceImpl implements GenericDataService {
         return columnValues;
     }
 
+    @SuppressWarnings("AvoidHidingCauseException")
     private SqlRowSet getDatatableMetaData(final String datatable) {
-
-        final String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
-                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = '" + datatable
-                + "'order by ORDINAL_POSITION";
-
-        final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql);
-        if (columnDefinitions.next()) {
-            return columnDefinitions;
+        try {
+            return databaseIndependentQueryService.getTableColumns(dataSource, datatable);
+        } catch (IllegalArgumentException e) {
+            throw new DatatableNotFoundException(datatable);
         }
-
-        throw new DatatableNotFoundException(datatable);
     }
 
     private SqlRowSet getDatatableCodeData(final String datatable, final String columnName) {

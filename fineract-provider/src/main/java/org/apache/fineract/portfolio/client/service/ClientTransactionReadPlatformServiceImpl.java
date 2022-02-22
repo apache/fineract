@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
@@ -46,14 +47,17 @@ import org.springframework.stereotype.Service;
 public class ClientTransactionReadPlatformServiceImpl implements ClientTransactionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ClientTransactionMapper clientTransactionMapper;
-    private final PaginationHelper<ClientTransactionData> paginationHelper;
+    private final PaginationHelper paginationHelper;
 
     @Autowired
-    public ClientTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public ClientTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.sqlGenerator = sqlGenerator;
         this.clientTransactionMapper = new ClientTransactionMapper();
-        this.paginationHelper = new PaginationHelper<>();
+        this.paginationHelper = paginationHelper;
     }
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
@@ -137,21 +141,23 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters searchParameters) {
         Object[] parameters = new Object[1];
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ").append(this.clientTransactionMapper.schema()).append(" where c.id = ? ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ").append(this.clientTransactionMapper.schema())
+                .append(" where c.id = ? ");
         parameters[0] = clientId;
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
         sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
 
         // apply limit and offsets
+
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), parameters,
-                this.clientTransactionMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), parameters, this.clientTransactionMapper);
     }
 
     @Override

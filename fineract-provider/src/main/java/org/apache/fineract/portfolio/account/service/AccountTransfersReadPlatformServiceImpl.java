@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -62,25 +63,28 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final ColumnValidator columnValidator;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     // mapper
     private final AccountTransfersMapper accountTransfersMapper;
 
     // pagination
-    private final PaginationHelper<AccountTransferData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     public AccountTransfersReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, final ColumnValidator columnValidator) {
+            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
         this.columnValidator = columnValidator;
-
+        this.sqlGenerator = sqlGenerator;
         this.accountTransfersMapper = new AccountTransfersMapper();
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -215,7 +219,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters, final Long accountDetailId) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.accountTransfersMapper.schema());
         Object[] finalObjectArray = {};
         if (accountDetailId != null) {
@@ -239,9 +243,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             }
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
-                this.accountTransfersMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.accountTransfersMapper);
     }
 
     @Override
@@ -411,7 +413,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     public Page<AccountTransferData> retrieveByStandingInstruction(final Long id, final SearchParameters searchParameters) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.accountTransfersMapper.schema()).append(
                 " join m_account_transfer_standing_instructions atsi on atsi.account_transfer_details_id = att.account_transfer_details_id ");
         sqlBuilder.append(" where atsi.id = ?");
@@ -427,17 +429,17 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             }
 
             if (searchParameters.isLimited()) {
-                sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+                sqlBuilder.append(" ");
                 if (searchParameters.isOffset()) {
-                    sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+                } else {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
                 }
             }
         }
 
         final Object[] finalObjectArray = { id };
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
-                this.accountTransfersMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.accountTransfersMapper);
     }
 
     @Override

@@ -182,7 +182,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
 
@@ -323,7 +323,7 @@ public class Loan extends AbstractPersistableCustom {
     private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;
 
     @OrderBy(value = "installmentNumber")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
     @OrderBy(value = "dateOf, id")
@@ -362,7 +362,7 @@ public class Loan extends AbstractPersistableCustom {
     @OrderBy(value = "expectedDisbursementDate, id")
     private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostDatedChecks> postDatedChecks = new ArrayList<>();
 
     @OrderBy(value = "termApplicableFrom, id")
@@ -372,7 +372,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "total_recovered_derived", scale = 6, precision = 19)
     private BigDecimal totalRecovered;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanInterestRecalculationDetails loanInterestRecalculationDetails;
 
     @Column(name = "is_npa", nullable = false)
@@ -408,7 +408,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "is_topup", nullable = false)
     private boolean isTopup = false;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanTopupDetails loanTopupDetails;
 
     @OneToMany(fetch = FetchType.LAZY)

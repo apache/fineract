@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -62,41 +63,19 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private final JournalEntryDataValidator dataValidator;
 
     private final FromJsonHelper fromApiJsonHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
-
-    // if a limit is not added to the running balance select statements below
-    // and the resultset is more than 400,000,
-    // the script will eat up all of the server memory
-    private final String selectRunningBalanceSqlLimit = "limit 0, 10000";
-
-    private final String officeRunningBalanceSql = "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
-            + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 "
-            + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 "
-            + "where je2.id = je.id and je.entry_date = je3.date group by je.id order by je.entry_date DESC "
-            + selectRunningBalanceSqlLimit;
-
-    private final String organizationRunningBalanceSql = "select je.organization_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
-            + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by account_id,entry_date) je2 "
-            + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by account_id) je3 "
-            + "where je2.id = je.id and je.entry_date = je3.date group by je.id order by je.entry_date DESC "
-            + selectRunningBalanceSqlLimit;
-
-    private final String officesRunningBalanceSql = "select je.office_running_balance as runningBalance,je.account_id as accountId,je.office_id as officeId "
-            + "from acc_gl_journal_entry je "
-            + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by office_id,account_id,entry_date) je2 "
-            + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by office_id,account_id) je3 "
-            + "where je2.id = je.id and je.entry_date = je3.date group by je.id order by je.entry_date DESC "
-            + selectRunningBalanceSqlLimit;
 
     @Autowired
     public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final JournalEntryDataValidator dataValidator,
-            final FromJsonHelper fromApiJsonHelper) {
+            final FromJsonHelper fromApiJsonHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.dataValidator = dataValidator;
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -140,7 +119,12 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
         Map<Long, Map<Long, BigDecimal>> officesRunningBalance = new HashMap<>();
 
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceSql, entityDate, entityDate);
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(
+                "select je.organization_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
+                        + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
+                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
+                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0),
+                entityDate, entityDate);
         for (Map<String, Object> entries : list) {
             Long accountId = Long.parseLong(entries.get("accountId").toString()); // Drizzle
                                                                                   // is
@@ -157,7 +141,12 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             }
         }
 
-        List<Map<String, Object>> officesRunningBalanceList = jdbcTemplate.queryForList(officesRunningBalanceSql, entityDate, entityDate);
+        List<Map<String, Object>> officesRunningBalanceList = jdbcTemplate
+                .queryForList("select je.office_running_balance as runningBalance,je.account_id as accountId,je.office_id as officeId "
+                        + "from acc_gl_journal_entry je "
+                        + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by office_id,account_id,entry_date) je2 ON je2.id = je.id "
+                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by office_id,account_id) je3 ON je.entry_date = je3.date "
+                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0), entityDate, entityDate);
         for (Map<String, Object> entries : officesRunningBalanceList) {
             Long accountId = Long.parseLong(entries.get("accountId").toString());
             Long officeId = Long.parseLong(entries.get("officeId").toString());
@@ -212,7 +201,12 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private void updateRunningBalance(Long officeId, Date entityDate) {
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
 
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(officeRunningBalanceSql, officeId, entityDate, officeId, entityDate);
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(
+                "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
+                        + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
+                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
+                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0),
+                officeId, entityDate, officeId, entityDate);
         for (Map<String, Object> entries : list) {
             Long accountId = (Long) entries.get("accountId");
             if (!runningBalanceMap.containsKey(accountId)) {

@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl;
+import org.apache.fineract.infrastructure.openjpa.OpenJpaTransactionManager;
 import org.apache.fineract.infrastructure.openjpa.OpenJpaVendorAdapter;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,8 @@ public class PersistenceConfig {
     }
 
     @Bean
-    public JpaTransactionManager transactionManager(EntityManagerFactory emf) {
-        JpaTransactionManager jtm = new JpaTransactionManager();
+    public OpenJpaTransactionManager transactionManager(EntityManagerFactory emf) {
+        OpenJpaTransactionManager jtm = new OpenJpaTransactionManager();
         jtm.setEntityManagerFactory(emf);
         return jtm;
     }

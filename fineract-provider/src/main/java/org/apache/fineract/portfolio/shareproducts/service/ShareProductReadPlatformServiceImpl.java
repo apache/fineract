@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -62,20 +63,24 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
     private final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
-    private final PaginationHelper<ProductData> shareProductDataPaginationHelper = new PaginationHelper<>();
+    private final PaginationHelper shareProductDataPaginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
     public ShareProductReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final CurrencyReadPlatformService currencyReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
             final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
+            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.shareProductDropdownReadPlatformService = shareProductDropdownReadPlatformService;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
+        this.shareProductDataPaginationHelper = paginationHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -84,7 +89,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
         final Collection<ChargeData> charges = null;
         ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(mapper.schema());
         if (limit != null) {
             sqlBuilder.append(" limit ").append(limit);
@@ -93,10 +98,8 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
             sqlBuilder.append(" offset ").append(offSet);
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] whereClauseItemsitems = new Object[] {};
-        return this.shareProductDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                whereClauseItemsitems, mapper);
+        return this.shareProductDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems, mapper);
     }
 
     @Override

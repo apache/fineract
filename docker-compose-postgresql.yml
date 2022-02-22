@@ -21,20 +21,24 @@
 version: '3.7'
 services:
   # Backend service
-  fineractmysql:
-    image: mariadb:10.6
+  fineractpostgresql:
+    image: postgres:13.4
     volumes:
-      - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
-      - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
+      - ./fineract-db/docker/postgresql:/docker-entrypoint-initdb.d/:Z,ro
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_DB_USER: postgres
+      FINERACT_DB_PASS: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_TENANTS_DB_NAME: fineract_tenants
+      FINERACT_TENANT_DEFAULT_DB_NAME: fineract_default
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=skdcnwauicn2ucnaecasdsajdnizucawencascdca" ]
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
       timeout: 10s
       retries: 10
     ports:
-      - "3306:3306"
+      - "5432:5432"
   fineract-server:
     image: fineract:latest
     volumes:
@@ -46,20 +50,20 @@ services:
     ports:
       - 8443:8443
     depends_on:
-      fineractmysql:
+      fineractpostgresql:
         condition: service_healthy
     environment:
       # TODO: env vars prefixed with "fineract_tenants_*" will be removed with one of the next releases
-      #- fineract_tenants_driver=org.mariadb.jdbc.Driver
-      #- fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
-      #- fineract_tenants_uid=root
+      #- fineract_tenants_driver=org.postgresql.Driver
+      #- fineract_tenants_url=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      #- fineract_tenants_uid=postgres
       #- fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       # NOTE: node aware scheduler
       - FINERACT_NODE_ID=1
       # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
-      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.mariadb.jdbc.Driver
-      - FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://fineractmysql:3306/fineract_tenants
-      - FINERACT_HIKARI_USERNAME=root
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
+      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      - FINERACT_HIKARI_USERNAME=postgres
       - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
       - FINERACT_HIKARI_MINIMUM_IDLE=3
@@ -81,9 +85,9 @@ services:
       - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
       - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
       # NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
-      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
-      - FINERACT_DEFAULT_TENANTDB_PORT=3306
-      - FINERACT_DEFAULT_TENANTDB_UID=root
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
+      - FINERACT_DEFAULT_TENANTDB_PORT=5432
+      - FINERACT_DEFAULT_TENANTDB_UID=postgres
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
       - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata

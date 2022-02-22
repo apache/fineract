@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -58,17 +59,20 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final JdbcTemplate jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final RateReadService rateReadService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeReadPlatformService chargeReadPlatformService, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService,
+            DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.rateReadService = rateReadService;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -121,7 +125,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "select " + rm.schema();
 
@@ -143,7 +147,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup(final boolean activeOnly) {
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "select ";
         if (activeOnly) {
@@ -479,12 +483,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class LoanProductLookupMapper implements RowMapper<LoanProductData> {
 
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanProductLookupMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
         public String schema() {
             return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
         public String activeOnlySchema() {
-            return schema() + " where (close_date is null or close_date >= CURDATE())";
+            return schema() + " where (close_date is null or close_date >= " + sqlGenerator.currentDate() + ")";
         }
 
         public String productMixSchema() {
@@ -563,7 +573,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.productMixSchema();
 
@@ -583,7 +593,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? ";
         // Check if branch specific products are enabled. If yes, fetch only
@@ -612,7 +622,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.schema() + " where ";
 

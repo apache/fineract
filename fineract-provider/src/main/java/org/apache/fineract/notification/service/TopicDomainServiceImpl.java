@@ -35,9 +35,11 @@ import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Service
+@Transactional
 public class TopicDomainServiceImpl implements TopicDomainService {
 
     private final RoleRepository roleRepository;

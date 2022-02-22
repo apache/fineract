@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -56,20 +57,24 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
 
     private final BusinessRuleMapper businessRuleMapper;
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final SmsCampaignMapper smsCampaignMapper;
     private final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService;
-    private final PaginationHelper<SmsCampaignData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
 
     @Autowired
     public SmsCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource,
             SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService,
-            final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService) {
+            final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        businessRuleMapper = new BusinessRuleMapper();
+        this.sqlGenerator = sqlGenerator;
+        this.businessRuleMapper = new BusinessRuleMapper(sqlGenerator);
         this.smsCampaignDropdownReadPlatformService = smsCampaignDropdownReadPlatformService;
-        smsCampaignMapper = new SmsCampaignMapper();
+        this.smsCampaignMapper = new SmsCampaignMapper();
         this.calendarDropdownReadPlatformService = calendarDropdownReadPlatformService;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -87,17 +92,18 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
     public Page<SmsCampaignData> retrieveAll(final SearchParameters searchParameters) {
         final Integer visible = 1;
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.smsCampaignMapper.schema() + " where sc.is_visible = ? ");
+
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] { visible },
-                this.smsCampaignMapper);
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlBuilder.toString(), new Object[] { visible }, this.smsCampaignMapper);
     }
 
     @Override
@@ -133,7 +139,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
 
         final String schema;
 
-        private BusinessRuleMapper() {
+        private BusinessRuleMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder sql = new StringBuilder(300);
             sql.append("sr.id as id, ");
             sql.append("sr.report_name as reportName, ");
@@ -141,7 +147,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             sql.append("sr.report_subtype as reportSubType, ");
             sql.append("sr.description as description, ");
             sql.append("sp.parameter_variable as params, ");
-            sql.append("sp.parameter_FormatType as paramType, ");
+            sql.append("sp." + sqlGenerator.escape("parameter_FormatType") + " as paramType, ");
             sql.append("sp.parameter_label as paramLabel, ");
             sql.append("sp.parameter_name as paramName ");
             sql.append("from stretchy_report sr ");

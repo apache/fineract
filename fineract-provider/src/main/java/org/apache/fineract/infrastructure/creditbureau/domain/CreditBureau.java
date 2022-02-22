@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -34,6 +35,7 @@ public class CreditBureau extends AbstractPersistableCustom {
 
     private String country;
 
+    @Column(name = "implementation_key")
     private String implementationKey;
 
     public CreditBureau(String name, String product, String country, String implementationKey,

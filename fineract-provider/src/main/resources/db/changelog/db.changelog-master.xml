@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <property name="current_date" value="CURDATE()" context="mysql"/>
+    <property name="current_date" value="CURRENT_DATE" context="postgresql"/>
     <property name="current_datetime" value="NOW()"/>
     <include file="tenant-store/initial-switch-changelog-tenant-store.xml" relativeToChangelogFile="true" context="tenant_store_db AND initial_switch"/>
     <include file="tenant-store/changelog-tenant-store.xml" relativeToChangelogFile="true" context="tenant_store_db AND !initial_switch"/>

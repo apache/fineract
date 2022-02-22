@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,7 +41,7 @@ public class DatabaseIndependentQueryService implements DatabaseQueryService {
         try {
             DatabaseQueryService result = null;
             if (isNotEmpty(queryServices)) {
-                result = queryServices.stream().filter(qs -> qs.isSupported(dataSource)).findAny().orElse(null);
+                result = queryServices.stream().filter(DatabaseQueryService::isSupported).findAny().orElse(null);
             }
             if (result == null) {
                 throw new IllegalStateException("DataSource not supported: " + dataSource.getConnection().getMetaData().getURL());
@@ -52,12 +53,17 @@ public class DatabaseIndependentQueryService implements DatabaseQueryService {
     }
 
     @Override
-    public boolean isSupported(DataSource dataSource) {
+    public boolean isSupported() {
         return true;
     }
 
     @Override
     public boolean isTablePresent(DataSource dataSource, String tableName) {
         return choose(dataSource).isTablePresent(dataSource, tableName);
+    }
+
+    @Override
+    public SqlRowSet getTableColumns(DataSource dataSource, String tableName) {
+        return choose(dataSource).getTableColumns(dataSource, tableName);
     }
 }

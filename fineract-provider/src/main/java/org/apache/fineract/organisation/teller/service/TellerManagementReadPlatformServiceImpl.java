@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -70,19 +71,23 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
-    private final PaginationHelper<CashierTransactionData> paginationHelper = new PaginationHelper<>();
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PaginationHelper paginationHelper;
     private final ColumnValidator columnValidator;
 
     @Autowired
     public TellerManagementReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator) {
+            final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.columnValidator = columnValidator;
+        this.sqlGenerator = sqlGenerator;
+        this.paginationHelper = paginationHelper;
     }
 
     private static final class TellerMapper implements RowMapper<TellerData> {
@@ -545,12 +550,13 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                 + " and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ) " + " order by created_date ";
 
         if (searchParameters.isLimited()) {
-            sql = sql + " limit " + searchParameters.getLimit();
+            sql += " ";
             if (searchParameters.isOffset()) {
-                sql = sql + " offset " + searchParameters.getOffset();
+                sql += sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset());
+            } else {
+                sql += sqlGenerator.limit(searchParameters.getLimit());
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
         // return this.jdbcTemplate.query(sql, ctm, new Object[] { cashierId,
         // currencyCode, hierarchySearchString, cashierId, currencyCode,
         // hierarchySearchString, cashierId, currencyCode,
@@ -558,7 +564,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         // });
         Object[] params = new Object[] { cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString,
                 cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString };
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sql, params, ctm);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, params, ctm);
     }
 
     private static final class CashierMapper implements RowMapper<CashierData> {
