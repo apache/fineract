@@ -2378,6 +2378,29 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
     }
 
+    public void undoTransaction(final SavingsAccountTransaction transactionToUndo) {
+
+        if (transactionToUndo.isReversed()) {
+            throw new SavingsAccountTransactionNotFoundException(this.getId(), transactionToUndo.getId());
+        }
+
+        validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
+        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.transactionLocalDate());
+        transactionToUndo.reverse();
+        if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
+            // undo charge
+            final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
+            for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
+                final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
+                if (transactionToUndo.isChargeTransaction()) {
+                    chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                } else if (transactionToUndo.isWaiveCharge()) {
+                    chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                }
+            }
+        }
+    }
+
     private Date findLatestAnnualFeeTransactionDueDate() {
 
         Date nextDueDate = null;
@@ -2398,6 +2421,30 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         return nextDueDate;
+    }
+
+    public void validateAccountBalanceDoesNotBecomeNegativeMinimal(final BigDecimal transactionAmount, final boolean isException) {
+        // final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
+        Money runningBalance = this.summary.getAccountBalance(getCurrency());
+        Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+        org.joda.time.LocalDate lastSavingsDate = null;
+        final BigDecimal withdrawalFee = null;
+
+        // check last txn date
+
+        // In overdraft cases, minRequiredBalance can be in violation after interest posting
+        // and should be checked after processing all transactions
+        if (!isOverdraft()) {
+            if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
+                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        }
+
+        if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
+            if (runningBalance.minus(this.getSavingsHoldAmount()).minus(minRequiredBalance).isLessThanZero()) {
+                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        }
     }
 
     public Map<String, Object> rejectApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {

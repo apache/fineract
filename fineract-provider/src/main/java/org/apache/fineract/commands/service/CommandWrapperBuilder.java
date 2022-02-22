@@ -1466,6 +1466,17 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder reverseSavingsAccountTransaction(final Long accountId, final Long transactionId) {
+        this.actionName = "REVERSETRANSACTION";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.subentityId = transactionId;
+        this.transactionId = transactionId.toString();
+        this.href = "/savingsaccounts/" + accountId + "/transactions/" + transactionId + "?command=reverse";
+        return this;
+    }
+
     public CommandWrapperBuilder adjustSavingsAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "ADJUSTTRANSACTION";
         this.entityName = "SAVINGSACCOUNT";

@@ -188,6 +188,9 @@ public class SavingsAccountTransactionsApiResource {
         if (is(commandParam, SavingsApiConstants.COMMAND_UNDO_TRANSACTION)) {
             final CommandWrapper commandRequest = builder.undoSavingsAccountTransaction(savingsId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION)) {
+            final CommandWrapper commandRequest = builder.reverseSavingsAccountTransaction(savingsId, transactionId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
             final CommandWrapper commandRequest = builder.adjustSavingsAccountTransaction(savingsId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -198,8 +201,9 @@ public class SavingsAccountTransactionsApiResource {
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION,
-                    SavingsApiConstants.COMMAND_ADJUST_TRANSACTION, SavingsApiConstants.COMMAND_RELEASE_AMOUNT });
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION,
+                            SavingsApiConstants.COMMAND_RELEASE_AMOUNT, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION });
         }
 
         return this.toApiJsonSerializer.serialize(result);

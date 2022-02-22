@@ -2392,4 +2392,59 @@ public class ClientSavingsIntegrationTest {
         HashMap summaryTwo = this.savingsAccountHelper.getSavingsSummary(savingsId);
         assertEquals(balanceAfterChargeTwo, summaryTwo.get("accountBalance"), "Verifying Balance after withdrawal charge two ");
     }
+
+    /**
+     * Test Transaction reversal feature, here a new reversal transaction is posted when a savings transaction is
+     * reversed
+     */
+
+    @Test
+    public void testAccountBalanceAfterSavingsTransactionReversalPosting() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        // Assertions.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+        final String MINIMUM_OPENING_BALANCE = "0";
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, depositTransactionId);
+
+        HashMap reversedDepositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+
+        Assertions.assertTrue((Boolean) reversedDepositTransaction.get("reversed"));
+
+        List<HashMap> transactions = this.savingsAccountHelper.getSavingsTransactions(savingsId);
+
+        HashMap reversalDepositTransaction = transactions.get(0);
+
+        Assertions.assertTrue((Boolean) reversalDepositTransaction.get("isReversal"));
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        Float balance = Float.parseFloat("0.0");
+
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance is 500");
+
+    }
 }

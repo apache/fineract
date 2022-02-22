@@ -24,4 +24,5 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <include file="parts/0003_postgresql_specific_initial_data.xml" relativeToChangelogFile="true"/>
     <include file="parts/0004_camelcase_column_renaming.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0005_savings_transaction_reversal.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -40,4 +40,7 @@ public interface SavingsAccountDomainService {
 
     SavingsAccountTransaction handleDividendPayout(SavingsAccount account, LocalDate transactionDate, BigDecimal transactionAmount,
             boolean backdatedTxnsAllowedTill);
+
+    SavingsAccountTransaction handleReversal(SavingsAccount account, SavingsAccountTransaction savingsAccountTransaction,
+            boolean backdatedTxnsAllowedTill);
 }

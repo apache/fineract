@@ -680,6 +680,49 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
+    public CommandProcessingResult reverseTransaction(final Long savingsId, final Long transactionId,
+            final boolean allowAccountTransferModification) {
+
+        final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+
+        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(transactionId, savingsId);
+        if (savingsAccountTransaction == null) {
+            throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId);
+        }
+
+        if (!allowAccountTransferModification
+                && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) {
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed",
+                    "Savings account transaction:" + transactionId + " update not allowed as it involves in account transfer",
+                    transactionId);
+        }
+
+        if (!account.allowModify()) {
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.update.not.allowed",
+                    "Savings account transaction:" + transactionId + " update not allowed for this savings type", transactionId);
+        }
+
+        if (account.isNotActive()) {
+            throwValidationForActiveStatus(SavingsApiConstants.undoTransactionAction);
+        }
+
+        checkClientOrGroupActive(account);
+
+        final SavingsAccountTransaction reversal = this.savingsAccountDomainService.handleReversal(account, savingsAccountTransaction,
+                backdatedTxnsAllowedTill);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(reversal.getId()) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
+
+    @Override
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
             final boolean allowAccountTransferModification) {
 
