@@ -62,6 +62,7 @@ jobs:
         run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
 
       - name: Archive integration test report
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: integration-test-report
