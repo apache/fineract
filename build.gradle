@@ -612,6 +612,12 @@ configure(project.fineractJavaProjects) {
 
     test {
         useJUnitPlatform()
+
+        if (project.hasProperty('excludeTests')) {
+            filter {
+                excludeTestsMatching project.property('excludeTests')
+            }
+        }
     }
 
     testlogger {

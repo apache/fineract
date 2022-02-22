@@ -1,0 +1,25 @@
+name: Fineract Docker build for PostgreSQL
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+      - name: Build the image
+        run: ./gradlew :fineract-provider:clean :fineract-provider:jibDockerBuild -x test
+      - name: Start the stack
+        run: docker-compose -f docker-compose-postgresql.yml up -d
+      - name: Wait for stack to come up
+        run: sleep 60
+      - name: Check health
+        run: curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+      - name: Check info
+        run: (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
