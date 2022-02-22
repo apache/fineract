@@ -48,7 +48,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
             return "cblp.id as mappingId, cblp.organisation_creditbureau_id as orgcbId,"
                     + "orgcb.alias as alias,concat( cb.product,' - ' ,cb.name,' - ',cb.country) as creditbureau,"
                     + "cblp.loan_product_id as lpId,lp.name as loan_product_name,cblp.is_creditcheck_mandatory as crCheck,cblp.skip_creditcheck_in_failure as skipcheck,"
-                    + "cblp.stale_period as staleperiod,cblp.isActive as isActive from"
+                    + "cblp.stale_period as staleperiod,cblp.is_active as isActive from"
                     + " m_creditbureau_loanproduct_mapping cblp, m_organisation_creditbureau orgcb,m_product_loan lp,m_creditbureau cb"
                     + " where cblp.organisation_creditbureau_id=orgcb.id and cblp.loan_product_id=lp.id and orgcb.creditbureau_id=cb.id";
         }

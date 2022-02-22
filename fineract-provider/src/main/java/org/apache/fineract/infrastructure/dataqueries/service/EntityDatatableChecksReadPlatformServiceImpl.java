@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -52,35 +53,39 @@ import org.springframework.stereotype.Service;
 public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatatableChecksReadService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final RegisterDataTableMapper registerDataTableMapper;
     private final EntityDataTableChecksMapper entityDataTableChecksMapper;
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
-    private final PaginationHelper<EntityDataTableChecksData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
 
     @Autowired
     public EntityDatatableChecksReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
             final EntityDatatableChecksRepository entityDatatableChecksRepository,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
+            final ReadWriteNonCoreDataService readWriteNonCoreDataService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
 
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.sqlGenerator = sqlGenerator;
         this.registerDataTableMapper = new RegisterDataTableMapper();
         this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
         this.entityDatatableChecksRepository = entityDatatableChecksRepository;
         this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
     public Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, final Long status, final String entity,
             final Long productId) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.entityDataTableChecksMapper.schema());
 
         if (status != null || entity != null || productId != null) {
@@ -101,15 +106,16 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             sqlBuilder.append(" and t.product_id = ? ");
             paramList.add(productId);
         }
+
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
-                entityDataTableChecksMapper);
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlBuilder.toString(), paramList.toArray(), entityDataTableChecksMapper);
 
     }
 

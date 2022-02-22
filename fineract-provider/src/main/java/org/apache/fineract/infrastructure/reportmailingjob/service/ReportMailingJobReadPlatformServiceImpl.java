@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
@@ -49,11 +50,16 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
 
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PaginationHelper paginationHelper;
 
     @Autowired
-    public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
+    public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
+        this.sqlGenerator = sqlGenerator;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -61,9 +67,8 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         final StringBuilder sqlStringBuilder = new StringBuilder(200);
         final List<Object> queryParameters = new ArrayList<>();
         final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-        final PaginationHelper<ReportMailingJobData> paginationHelper = new PaginationHelper<>();
 
-        sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlStringBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlStringBuilder.append(mapper.reportMailingJobSchema());
         sqlStringBuilder.append(" where rmj.is_deleted = false");
 
@@ -79,15 +84,15 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         }
 
         if (searchParameters.isLimited()) {
-            sqlStringBuilder.append(" limit ").append(searchParameters.getLimit());
-
+            sqlStringBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlStringBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlStringBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlStringBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
-        return paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()", sqlStringBuilder.toString(), queryParameters.toArray(),
-                mapper);
+        return paginationHelper.fetchPage(this.jdbcTemplate, sqlStringBuilder.toString(), queryParameters.toArray(), mapper);
     }
 
     @Override

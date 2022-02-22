@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -107,7 +108,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final DepositAccountLookupMapper depositAccountLookupsRowMapper = new DepositAccountLookupMapper();
     private final DepositAccountForMaturityMapper depositAccountForMaturityRowMapper = new DepositAccountForMaturityMapper();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
-    private final PaginationHelper<DepositAccountData> paginationHelper = new PaginationHelper<>();
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PaginationHelper paginationHelper;
     private final SavingsAccountTransactionsMapper transactionsMapper;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
@@ -137,11 +139,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final InterestRateChartReadPlatformService productChartReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            PaymentTypeReadPlatformService paymentTypeReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.accountChartReadPlatformService = chartReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
+        this.sqlGenerator = sqlGenerator;
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
         this.clientReadPlatformService = clientReadPlatformService;
         this.groupReadPlatformService = groupReadPlatformService;
@@ -156,6 +160,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -191,15 +196,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(depositAccountMapper.schema());
         sqlBuilder.append(" where sa.deposit_type_enum = ? ");
         sqlBuilder.append(paginationParameters.paginationSql());
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                new Object[] { depositAccountType.getValue() }, depositAccountMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), new Object[] { depositAccountType.getValue() },
+                depositAccountMapper);
     }
 
     @Override
@@ -222,11 +225,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         sqlBuilder.append(this.depositAccountForMaturityRowMapper.schema());
         sqlBuilder.append(" WHERE da.deposit_type_enum in (?, ?) and da.status_enum = ?");
 
-        LocalDate today = DateUtils.getLocalDateOfTenant();
-
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.depositAccountForMaturityRowMapper,
-                new Object[] { formatter.format(today), DepositAccountType.FIXED_DEPOSIT.getValue(),
-                        DepositAccountType.RECURRING_DEPOSIT.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
+                new Object[] { DepositAccountType.FIXED_DEPOSIT.getValue(), DepositAccountType.RECURRING_DEPOSIT.getValue(),
+                        SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
     @Override
@@ -519,6 +520,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
     @Override
     public Collection<Map<String, Object>> retriveDataForRDScheduleCreation() {
+        String today = formatter.format(DateUtils.getLocalDateOfTenant());
         final StringBuilder sb = new StringBuilder(300);
         sb.append(" select rd.savings_account_id savingsId, rd.mandatory_recommended_deposit_amount as amount,");
         sb.append(" mc.recurrence as recurrence ,");
@@ -529,13 +531,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         sb.append(" inner join m_deposit_account_recurring_detail rd on rd.savings_account_id = dat.savings_account_id ");
         sb.append(" inner join m_calendar_instance mci on mci.entity_type_enum = ? and mci.entity_id = dat.savings_account_id  ");
         sb.append(" inner join m_calendar mc  on mc.id = mci.calendar_id and mc.calendar_type_enum = ?");
-        sb.append(" inner join m_mandatory_savings_schedule ms on ms.savings_account_id = dat.savings_account_id and ms.duedate > ?");
+        sb.append(" inner join m_mandatory_savings_schedule ms on ms.savings_account_id = dat.savings_account_id and ms.duedate > '" + today
+                + "'");
         sb.append(" where dat.deposit_period is null");
         sb.append(" group by ms.savings_account_id, rd.mandatory_recommended_deposit_amount, mc.recurrence, rd.savings_account_id");
 
         return this.jdbcTemplate.queryForList(sb.toString(), SavingsAccountStatusType.ACTIVE.getValue(),
-                CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue(),
-                formatter.format(DateUtils.getLocalDateOfTenant()));
+                CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
     }
 
     private abstract static class DepositAccountMapper implements RowMapper<DepositAccountData> {
@@ -1383,22 +1385,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
     private static final class DepositAccountForMaturityMapper implements RowMapper<DepositAccountData> {
 
-        private final String schemaSql;
+        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        DepositAccountForMaturityMapper() {
+        public String schema() {
+            LocalDate today = DateUtils.getLocalDateOfTenant();
+            String formattedToday = formatter.format(today);
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("da.id as id, ");
             sqlBuilder.append("da.account_no as accountNumber, ");
             sqlBuilder.append("da.deposit_type_enum as depositTypeId ");
             sqlBuilder.append("FROM m_savings_account da ");
             sqlBuilder.append("inner join m_deposit_account_term_and_preclosure dat on dat.savings_account_id = da.id ");
-            sqlBuilder.append("and dat.maturity_date is not null and dat.maturity_date <= ? ");
+            sqlBuilder.append("and dat.maturity_date is not null and dat.maturity_date <= '" + formattedToday + "' ");
 
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
+            return sqlBuilder.toString();
         }
 
         @Override

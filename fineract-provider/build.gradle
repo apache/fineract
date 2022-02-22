@@ -200,6 +200,7 @@ configurations {
 }
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+    driver 'org.postgresql:postgresql:42.1.4'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -237,6 +238,7 @@ bootRun {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+        implementation 'org.postgresql:postgresql:42.1.4'
     }
 
     classpath += files("build/generated/swagger-ui")
@@ -316,6 +318,7 @@ jib {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+        implementation 'org.postgresql:postgresql:42.1.4'
     }
 
     extraDirectories {

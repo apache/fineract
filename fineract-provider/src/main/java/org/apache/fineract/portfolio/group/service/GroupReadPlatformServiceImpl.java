@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -67,7 +68,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
-    private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final ColumnValidator columnValidator;
 
@@ -77,7 +79,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final CenterReadPlatformService centerReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.centerReadPlatformService = centerReadPlatformService;
@@ -86,6 +89,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.columnValidator = columnValidator;
+        this.paginationHelper = paginationHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -144,7 +149,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final String hierarchySearchString = hierarchy + "%";
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
 
         final SQLBuilder extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), searchParameters);
@@ -163,8 +168,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             }
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(),
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), extraCriteria.getArguments(),
                 this.allGroupTypesDataMapper);
     }
 

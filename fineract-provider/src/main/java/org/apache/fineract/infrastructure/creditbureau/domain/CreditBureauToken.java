@@ -43,16 +43,16 @@ public class CreditBureauToken extends AbstractPersistableCustom {
     @Column(name = "token")
     private String accessToken;
 
-    @Column(name = "tokenType")
+    @Column(name = "token_type")
     private String tokenType;
 
-    @Column(name = "expiresIn")
+    @Column(name = "expires_in")
     private String expiresIn;
 
     @Column(name = "issued")
     private String issued;
 
-    @Column(name = "expiryDate")
+    @Column(name = "expiry_date")
     private Date expires;
 
     public static CreditBureauToken fromJson(final JsonCommand command) {

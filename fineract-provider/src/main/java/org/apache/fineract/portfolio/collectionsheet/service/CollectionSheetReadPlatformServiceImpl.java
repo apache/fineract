@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -90,12 +91,13 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer;
     private final CalendarRepositoryWrapper calendarRepositoryWrapper;
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
-    private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
+    private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final CalendarInstanceRepository calendarInstanceRepository;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -106,7 +108,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             final CalendarReadPlatformService calendarReadPlatformService, final ConfigurationDomainService configurationDomainService,
-            final CalendarInstanceRepository calendarInstanceRepository) {
+            final CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -119,6 +121,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.configurationDomainService = configurationDomainService;
         this.calendarInstanceRepository = calendarInstanceRepository;
+        this.sqlGenerator = sqlGenerator;
+        mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor(sqlGenerator);
     }
 
     /*
@@ -215,6 +219,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     private static final class JLGCollectionSheetFaltDataMapper implements RowMapper<JLGCollectionSheetFlatData> {
 
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        JLGCollectionSheetFaltDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
         public String collectionSheetSchema(final boolean isCenterCollection) {
             StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue from ")
@@ -223,7 +233,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("gl.level_name As levelName, ").append("cl.id As clientId, ").append("ln.id As loanId, ")
                     .append("ln.account_no As accountId, ").append("ln.loan_status_id As accountStatusId, ")
                     .append("pl.short_name As productShortName, ").append("ln.product_id As productId, ")
-                    .append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ")
+                    .append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc."
+                            + sqlGenerator.escape("name")
+                            + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ")
                     .append("(CASE WHEN ln.loan_status_id = 200  THEN  ln.principal_amount  ELSE  null END) As disbursementAmount, ")
                     .append("sum(COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.principal_amount ELSE  0.0 END), 0.0) - COALESCE((CASE WHEN ln.loan_status_id = 300 THEN  ls.principal_completed_derived ELSE  0.0 END), 0.0)) As principalDue, ")
                     .append("ln.principal_repaid_derived As principalPaid, ")
@@ -237,7 +249,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("JOIN m_group_client gc ON gc.group_id = gp.id ").append("JOIN m_client cl ON cl.id = gc.client_id ")
                     .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id  and ln.group_id=gp.id AND ln.group_id is not null AND ( ln.loan_status_id = 300 ) ")
                     .append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ")
-                    .append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ")
+                    .append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = ln.currency_code ")
                     .append("LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ")
                     .append("left join m_calendar_instance ci on gp.parent_id = ci.entity_id and ci.entity_type_enum =:entityTypeId ")
                     .append("left join m_meeting mt on ci.id = mt.calendar_instance_id and mt.meeting_date =:dueDate ")
@@ -354,7 +366,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
-        final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
+        final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper(sqlGenerator);
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
                 .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)
@@ -457,7 +469,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String dueDateStr = df.format(Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
-        final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
+        final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper(sqlGenerator);
 
         StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema(true));
 
@@ -487,6 +499,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private static final class MandatorySavingsCollectionsheetExtractor implements ResultSetExtractor<Collection<JLGGroupData>> {
 
         private final GroupSavingsDataMapper groupSavingsDataMapper = new GroupSavingsDataMapper();
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        MandatorySavingsCollectionsheetExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
 
@@ -497,7 +514,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("sa.account_no As accountId, ").append("sa.status_enum As accountStatusId, ")
                     .append("sp.short_name As productShortName, ").append("sp.id As productId, ")
                     .append("sa.currency_code as currencyCode, ").append("sa.currency_digits as currencyDigits, ")
-                    .append("sa.currency_multiplesof as inMultiplesOf, ").append("rc.`name` as currencyName, ")
+                    .append("sa.currency_multiplesof as inMultiplesOf, ").append("rc." + sqlGenerator.escape("name") + " as currencyName, ")
                     .append("rc.display_symbol as currencyDisplaySymbol, ")
                     .append("(CASE WHEN sa.deposit_type_enum=100 THEN 'Saving Deposit' ELSE (CASE WHEN sa.deposit_type_enum=300 THEN 'Recurring Deposit' ELSE 'Current Deposit' END) END) as depositAccountType, ")
                     .append("rc.internationalized_name_code as currencyNameCode, ")
@@ -511,7 +528,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("JOIN m_savings_product sp ON sa.product_id=sp.id ")
                     .append("LEFT JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = true ")
                     .append("LEFT JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.duedate <= :dueDate ")
-                    .append("LEFT JOIN m_currency rc on rc.`code` = sa.currency_code ");
+                    .append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = sa.currency_code ");
 
             if (isCenterCollection) {
                 sql.append("WHERE gp.parent_id = :centerId ");
@@ -680,7 +697,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final boolean checkForStaffId = staffId != null;
 
         final IndividualCollectionSheetFaltDataMapper mapper = new IndividualCollectionSheetFaltDataMapper(checkForOfficeId,
-                checkForStaffId);
+                checkForStaffId, sqlGenerator);
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
                 .addValue("officeHierarchy", officeHierarchy);
@@ -696,7 +713,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 .query(mapper.sqlSchema(), namedParameters, mapper);
 
         IndividualMandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new IndividualMandatorySavingsCollectionsheetExtractor(
-                checkForOfficeId, checkForStaffId);
+                checkForOfficeId, checkForStaffId, sqlGenerator);
         // mandatory savings data for collection sheet
         Collection<IndividualClientData> clientData = this.namedParameterjdbcTemplate
                 .query(mandatorySavingsExtractor.collectionSheetSchema(), namedParameters, mandatorySavingsExtractor);
@@ -714,15 +731,16 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private final String sql;
 
-        IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId) {
+        IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId,
+                DatabaseSpecificSQLGenerator sqlGenerator) {
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue ");
             sb.append("from (SELECT cl.display_name As clientName, ");
             sb.append("cl.id As clientId, ln.id As loanId, ln.account_no As accountId, ln.loan_status_id As accountStatusId,");
             sb.append(" pl.short_name As productShortName, ln.product_id As productId, ");
             sb.append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, ");
-            sb.append(
-                    "rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
+            sb.append("rc." + sqlGenerator.escape("name")
+                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
             sb.append("(CASE WHEN ln.loan_status_id = 200 THEN ln.principal_amount ELSE null END) As disbursementAmount, ");
             sb.append(
                     "sum(COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.principal_amount ELSE 0.0 END), 0.0) - COALESCE((CASE WHEN ln.loan_status_id = 300 THEN ls.principal_completed_derived ELSE 0.0 END), 0.0)) As principalDue, ");
@@ -737,7 +755,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
             sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
             sb.append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ");
-            sb.append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ");
+            sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = ln.currency_code ");
             sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ");
             sb.append("where ");
             if (checkForOfficeId) {
@@ -804,7 +822,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private final String sql;
 
-        IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
+        IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId,
+                DatabaseSpecificSQLGenerator sqlGenerator) {
 
             final StringBuilder sb = new StringBuilder(400);
             sb.append(
@@ -812,8 +831,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("sa.id As savingsId, sa.account_no As accountId, sa.status_enum As accountStatusId, ");
             sb.append("sp.short_name As productShortName, sp.id As productId, ");
             sb.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
-            sb.append(
-                    "rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
+            sb.append("rc." + sqlGenerator.escape("name")
+                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
             sb.append("SUM(COALESCE(mss.deposit_amount,0) - coalesce(mss.deposit_amount_completed_derived,0)) as dueAmount ");
             sb.append("FROM m_savings_account sa ");
             sb.append("JOIN m_client cl ON cl.id = sa.client_id ");
@@ -823,7 +842,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append(
                     "LEFT JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.completed_derived = 0 AND mss.duedate <= :dueDate ");
             sb.append("LEFT JOIN m_office of ON of.id = cl.office_id AND of.hierarchy like :officeHierarchy ");
-            sb.append("LEFT JOIN m_currency rc on rc.`code` = sa.currency_code ");
+            sb.append("LEFT JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = sa.currency_code ");
             sb.append("WHERE sa.status_enum=300 and sa.group_id is null and sa.deposit_type_enum in (100,300,400) ");
             sb.append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ");
             if (checkForOfficeId) {

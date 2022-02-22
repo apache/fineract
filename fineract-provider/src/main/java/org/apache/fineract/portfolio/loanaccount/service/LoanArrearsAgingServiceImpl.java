@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
@@ -58,14 +59,16 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public LoanArrearsAgingServiceImpl(final RoutingDataSource dataSource,
-            final BusinessEventNotifierService businessEventNotifierService) {
+    public LoanArrearsAgingServiceImpl(final RoutingDataSource dataSource, final BusinessEventNotifierService businessEventNotifierService,
+            DatabaseSpecificSQLGenerator sqlGenerator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.businessEventNotifierService = businessEventNotifierService;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @PostConstruct
@@ -114,7 +117,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         updateSqlBuilder.append(" left join m_product_loan_recalculation_details prd on prd.product_id = ml.product_id ");
         updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 "); // active
         updateSqlBuilder.append(" and mr.completed_derived is false ");
-        updateSqlBuilder.append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  COALESCE(ml.grace_on_arrears_ageing, 0) day) ");
+        updateSqlBuilder.append(" and mr.duedate < ")
+                .append(sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day")).append(" ");
         updateSqlBuilder.append(" and (prd.arrears_based_on_original_schedule = false or prd.arrears_based_on_original_schedule is null) ");
         updateSqlBuilder.append(" GROUP BY ml.id");
 
@@ -134,7 +138,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         int count = this.jdbcTemplate.queryForObject("select count(mla.loan_id) from m_loan_arrears_aging mla where mla.loan_id =?",
                 Integer.class, loan.getId());
         List<String> updateStatement = new ArrayList<>();
-        OriginalScheduleExtractor originalScheduleExtractor = new OriginalScheduleExtractor(loan.getId().toString());
+        OriginalScheduleExtractor originalScheduleExtractor = new OriginalScheduleExtractor(loan.getId().toString(), sqlGenerator);
         Map<Long, List<LoanSchedulePeriodData>> scheduleDate = this.jdbcTemplate.query(originalScheduleExtractor.schema,
                 originalScheduleExtractor);
         if (scheduleDate.size() > 0) {
@@ -204,13 +208,14 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         loanIdentifier.append("INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
         loanIdentifier.append(
                 "inner join m_product_loan_recalculation_details prd on prd.product_id = ml.product_id and prd.arrears_based_on_original_schedule = true  ");
-        loanIdentifier.append(
-                "WHERE ml.loan_status_id = 300  and mr.completed_derived is false  and mr.duedate < SUBDATE(CURDATE(),INTERVAL  COALESCE(ml.grace_on_arrears_ageing, 0) day) group by ml.id");
+        loanIdentifier.append("WHERE ml.loan_status_id = 300  and mr.completed_derived is false  and mr.duedate < ")
+                .append(sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day"))
+                .append(" group by ml.id");
         List<Long> loanIds = this.jdbcTemplate.queryForList(loanIdentifier.toString(), Long.class);
         if (!loanIds.isEmpty()) {
             String loanIdsAsString = loanIds.toString();
             loanIdsAsString = loanIdsAsString.substring(1, loanIdsAsString.length() - 1);
-            OriginalScheduleExtractor originalScheduleExtractor = new OriginalScheduleExtractor(loanIdsAsString);
+            OriginalScheduleExtractor originalScheduleExtractor = new OriginalScheduleExtractor(loanIdsAsString, sqlGenerator);
             Map<Long, List<LoanSchedulePeriodData>> scheduleDate = this.jdbcTemplate.query(originalScheduleExtractor.schema,
                     originalScheduleExtractor);
 
@@ -419,13 +424,14 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
         private final String schema;
 
-        OriginalScheduleExtractor(final String loanIdsAsString) {
+        OriginalScheduleExtractor(final String loanIdsAsString, DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder scheduleDetail = new StringBuilder();
             scheduleDetail.append("select ml.id as loanId, mr.duedate as dueDate, mr.principal_amount as principalAmount, ");
             scheduleDetail.append(
                     "mr.interest_amount as interestAmount, mr.fee_charges_amount as feeAmount, mr.penalty_charges_amount as penaltyAmount  ");
             scheduleDetail.append("from m_loan ml  INNER JOIN m_loan_repayment_schedule_history mr on mr.loan_id = ml.id ");
-            scheduleDetail.append("where mr.duedate  < SUBDATE(CURDATE(),INTERVAL  COALESCE(ml.grace_on_arrears_ageing, 0) day) and ");
+            scheduleDetail.append("where mr.duedate  < "
+                    + sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day") + " and ");
             scheduleDetail.append("ml.id IN(").append(loanIdsAsString).append(") and  mr.version = (");
             scheduleDetail.append("select max(lrs.version) from m_loan_repayment_schedule_history lrs where mr.loan_id = lrs.loan_id");
             scheduleDetail.append(") order by ml.id,mr.duedate");

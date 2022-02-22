@@ -18,53 +18,49 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
-import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
-
+import com.zaxxer.hikari.HikariConfig;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.DataSource;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DatabaseTypeResolver {
+public class DatabaseTypeResolver implements InitializingBean {
 
-    private final Map<String, DatabaseType> protocolMapping = Map.of("jdbc:mariadb", DatabaseType.MYSQL, "jdbc:mysql", DatabaseType.MYSQL);
+    private final Map<String, DatabaseType> driverMapping = Map.of("org.mariadb.jdbc.Driver", DatabaseType.MYSQL, "com.mysql.jdbc.Driver",
+            DatabaseType.MYSQL, "org.postgresql.Driver", DatabaseType.POSTGRESQL);
 
-    private final Map<DataSource, DatabaseType> dataSourceCache = new ConcurrentHashMap<>();
-
-    private final RoutingDataSource routingDataSource;
+    private final AtomicReference<DatabaseType> currentDatabaseType = new AtomicReference<>();
+    private final HikariConfig hikariConfig;
 
     @Autowired
-    public DatabaseTypeResolver(RoutingDataSource routingDataSource) {
-        this.routingDataSource = routingDataSource;
+    public DatabaseTypeResolver(HikariConfig hikariConfig) {
+        this.hikariConfig = hikariConfig;
     }
 
-    public boolean isMySQL() {
-        return isMySQL(routingDataSource);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        currentDatabaseType.set(determineDatabaseType(hikariConfig.getDriverClassName()));
     }
 
-    public boolean isMySQL(DataSource dataSource) {
-        return DatabaseType.MYSQL.equals(databaseType(dataSource));
+    private DatabaseType determineDatabaseType(String driverClassName) {
+        DatabaseType databaseType = driverMapping.get(driverClassName);
+        if (databaseType == null) {
+            throw new IllegalArgumentException("The driver's class is not supported " + driverClassName);
+        }
+        return databaseType;
     }
 
     public DatabaseType databaseType() {
-        return databaseType(routingDataSource);
+        return currentDatabaseType.get();
     }
 
-    public DatabaseType databaseType(DataSource dataSource) {
-        DataSource unwrappedDataSource = dataSource;
-        if (dataSource instanceof RoutingDataSource) {
-            unwrappedDataSource = ((RoutingDataSource) dataSource).determineTargetDataSource();
-        }
-        return dataSourceCache.computeIfAbsent(unwrappedDataSource, (ds) -> {
-            String protocol = toProtocol(ds);
-            DatabaseType databaseType = protocolMapping.get(protocol);
-            if (databaseType == null) {
-                throw new IllegalArgumentException("The DataSource is not supported");
-            }
-            return databaseType;
-        });
+    public boolean isPostgreSQL() {
+        return DatabaseType.POSTGRESQL.equals(currentDatabaseType.get());
+    }
+
+    public boolean isMySQL() {
+        return DatabaseType.MYSQL.equals(currentDatabaseType.get());
     }
 }

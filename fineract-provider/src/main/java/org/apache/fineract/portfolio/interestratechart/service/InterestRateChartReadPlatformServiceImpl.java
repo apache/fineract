@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformSer
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -54,21 +55,24 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final InterestRateChartMapper chartRowMapper = new InterestRateChartMapper();
-    private final InterestRateChartExtractor chartExtractor = new InterestRateChartExtractor();
+    private final InterestRateChartExtractor chartExtractor;
     private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
     public InterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource,
             InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
             final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.sqlGenerator = sqlGenerator;
+        chartExtractor = new InterestRateChartExtractor(this.sqlGenerator);
     }
 
     @Override
@@ -180,7 +184,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     private static final class InterestRateChartExtractor implements ResultSetExtractor<Collection<InterestRateChartData>> {
 
         InterestRateChartMapper chartMapper = new InterestRateChartMapper();
-        InterestRateChartSlabExtractor chartSlabsMapper = new InterestRateChartSlabExtractor();
+        InterestRateChartSlabExtractor chartSlabsMapper;
 
         private final String schemaSql;
 
@@ -188,7 +192,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             return this.schemaSql;
         }
 
-        private InterestRateChartExtractor() {
+        private InterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
+            chartSlabsMapper = new InterestRateChartSlabExtractor(sqlGenerator);
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
@@ -206,7 +211,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     .append("from ")
                     .append("m_interest_rate_chart irc left join m_interest_rate_slab ircd on irc.id=ircd.interest_rate_chart_id ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
-                    .append(" left join m_code_value code on code.id = iri.attribute_value ")
+                    .append(" left join m_code_value code on " + sqlGenerator.castChar("code.id") + " = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ")
                     .append("left join m_deposit_product_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id ")
                     .append("left join m_savings_product sp on sp.id=dpirc.deposit_product_id ");
@@ -289,7 +294,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             return this.schemaSql;
         }
 
-        private InterestRateChartSlabsMapper() {
+        private InterestRateChartSlabsMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ").append(
@@ -302,7 +307,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
                     .append("from ").append("m_interest_rate_slab ircd ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
-                    .append(" left join m_code_value code on code.id = iri.attribute_value ")
+                    .append(" left join m_code_value code on " + sqlGenerator.castChar("code.id") + " = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ");
             this.schemaSql = sqlBuilder.toString();
         }
@@ -347,7 +352,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
     private static final class InterestRateChartSlabExtractor implements ResultSetExtractor<InterestRateChartSlabData> {
 
-        InterestRateChartSlabsMapper chartSlabsMapper = new InterestRateChartSlabsMapper();
+        InterestRateChartSlabsMapper chartSlabsMapper;
         InterestIncentiveMapper incentiveMapper = new InterestIncentiveMapper();
 
         private final String schemaSql;
@@ -357,7 +362,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             return this.schemaSql;
         }
 
-        private InterestRateChartSlabExtractor() {
+        private InterestRateChartSlabExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
+            chartSlabsMapper = new InterestRateChartSlabsMapper(sqlGenerator);
             this.schemaSql = chartSlabsMapper.schema();
         }
 

@@ -183,6 +183,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             poster.setJdbcTemplate(jdbcTemplate);
             poster.setBackdatedTxnsAllowedTill(backdatedTxnsAllowedTill);
             poster.setTransactionTemplate(transactionTemplate);
+            poster.setConfigurationDomainService(configurationDomainService);
 
             posters.add(poster);
 

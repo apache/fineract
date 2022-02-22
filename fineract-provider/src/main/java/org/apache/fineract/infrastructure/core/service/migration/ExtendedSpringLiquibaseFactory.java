@@ -43,7 +43,7 @@ public class ExtendedSpringLiquibaseFactory {
     }
 
     public ExtendedSpringLiquibase create(DataSource dataSource, String... contexts) {
-        String databaseContext = databaseAwareMigrationContextProvider.provide(dataSource);
+        String databaseContext = databaseAwareMigrationContextProvider.provide();
         return new ExtendedSpringLiquibaseBuilder(liquibaseProperties).withDataSource(dataSource).withResourceLoader(resourceLoader)
                 .withContexts(contexts).withContexts(environment.getActiveProfiles()).withContext(databaseContext).build();
     }

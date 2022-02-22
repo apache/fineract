@@ -72,7 +72,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             sql.append("ec.id as id, ");
             sql.append("ec.campaign_name as campaignName, ");
             sql.append("ec.campaign_type as campaignType, ");
-            sql.append("ec.businessRule_id as businessRuleId, ");
+            sql.append("ec.business_rule_id as businessRuleId, ");
             sql.append("ec.email_subject as emailSubject, ");
             sql.append("ec.email_message as emailMessage, ");
             sql.append("ec.email_attachment_file_format as emailAttachmentFileFormat, ");

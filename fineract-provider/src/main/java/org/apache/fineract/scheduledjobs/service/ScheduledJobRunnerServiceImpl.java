@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -83,6 +84,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final JobRegisterService jobRegisterService;
     private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
     private final FineractProperties fineractProperties;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DatabaseTypeResolver databaseTypeResolver;
 
     @Autowired
@@ -95,7 +97,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final ShareAccountSchedularService shareAccountSchedularService,
             final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper, @Lazy final JobRegisterService jobRegisterService,
             final ScheduledJobDetailRepository scheduledJobDetailsRepository, final FineractProperties fineractProperties,
-            DatabaseTypeResolver databaseTypeResolver) {
+            DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -107,6 +109,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.jobRegisterService = jobRegisterService;
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
         this.fineractProperties = fineractProperties;
+        this.sqlGenerator = sqlGenerator;
         this.databaseTypeResolver = databaseTypeResolver;
     }
 
@@ -219,7 +222,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append(" FROM m_loan ml ");
         updateSqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
         updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 ");
-        updateSqlBuilder.append(" and mr.duedate >= CURDATE() ");
+        updateSqlBuilder.append(" and mr.duedate >= " + sqlGenerator.currentDate() + " ");
         updateSqlBuilder.append(" GROUP BY ml.id");
         updateSqlBuilder
                 .append(" HAVING (SUM(coalesce(mr.principal_completed_derived, 0)) + SUM(coalesce(mr.interest_completed_derived, 0)) +");
@@ -313,7 +316,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         fromPart = " (select loan.id " + " FROM m_loan_arrears_aging laa" + " INNER JOIN  m_loan loan on laa.loan_id = loan.id "
                 + " INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null "
                 + "WHERE loan.loan_status_id = 300 and " + "laa.overdue_since_date_derived < "
-                + "SUBDATE(CURDATE(),INTERVAL  COALESCE(mpl.overdue_days_for_npa, 0) day)" + " group by loan.id) as sl ";
+                + sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(mpl.overdue_days_for_npa, 0)", "day")
+                + " group by loan.id) as sl ";
         wherePart = " where ml.id=sl.id ";
         updateSqlBuilder.append("UPDATE m_loan as ml ");
         if (databaseTypeResolver.isMySQL()) {

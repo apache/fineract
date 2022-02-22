@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -63,6 +64,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final AppUserRepositoryWrapper userRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
@@ -72,9 +74,11 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public LoanAccrualWritePlatformServiceImpl(final RoutingDataSource dataSource, final LoanReadPlatformService loanReadPlatformService,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final AppUserRepositoryWrapper userRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            DatabaseSpecificSQLGenerator sqlGenerator) {
         this.loanReadPlatformService = loanReadPlatformService;
         this.dataSource = dataSource;
+        this.sqlGenerator = sqlGenerator;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
@@ -274,7 +278,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 LoanTransactionType.ACCRUAL.getValue(), Date.from(accruedTill.atStartOfDay(ZoneId.systemDefault()).toInstant()), amount,
                 interestportion, feeportion, penaltyportion, DateUtils.getDateOfTenant());
         @SuppressWarnings("deprecation")
-        final Long transactonId = this.jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        final Long transactonId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class);
 
         Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
         String chargespaidSql = "INSERT INTO m_loan_charge_paid_by (loan_transaction_id, loan_charge_id, amount,installment_number) VALUES (?,?,?,?)";
