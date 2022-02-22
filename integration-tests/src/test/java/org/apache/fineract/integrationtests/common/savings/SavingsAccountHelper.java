@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -69,6 +70,7 @@ public class SavingsAccountHelper {
     private static final String GSIM_DEPOSIT_SAVINGS_COMMAND = "gsimDeposit";
     private static final String MODIFY_TRASACTION_COMMAND = "modify";
     private static final String UNDO_TRASACTION_COMMAND = "undo";
+    private static final String REVERSE_TRASACTION_COMMAND = "reverse";
 
     private static final String BLOCK_SAVINGS_COMMAND = "block";
     private static final String UNBLOCK_SAVINGS_COMMAND = "unblock";
@@ -269,6 +271,12 @@ public class SavingsAccountHelper {
     public Integer undoSavingsAccountTransaction(final Integer savingsId, final Integer transactionId) {
         LOG.info("\n--------------------------------- UNDO SAVINGS TRANSACTION  --------------------------------");
         return (Integer) performSavingActions(createAdjustTransactionURL(UNDO_TRASACTION_COMMAND, savingsId, transactionId),
+                getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
+    public Integer reverseSavingsAccountTransaction(final Integer savingsId, final Integer transactionId) {
+        LOG.info("\n--------------------------------- REVERSE SAVINGS TRANSACTION  --------------------------------");
+        return (Integer) performSavingActions(createAdjustTransactionURL(REVERSE_TRASACTION_COMMAND, savingsId, transactionId),
                 getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
@@ -596,6 +604,12 @@ public class SavingsAccountHelper {
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
+    public List<HashMap> getSavingsTransactions(final Integer savingsID) {
+        final Object get = getSavingsCollectionAttribute(savingsID, "transactions");
+        final String json = new Gson().toJson(get);
+        return new Gson().fromJson(json, new TypeToken<ArrayList<HashMap>>() {}.getType());
     }
 
     public Object getSavingsInterest(final Integer savingsID) {

@@ -132,6 +132,12 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @JoinColumn(name = "savings_account_transaction_id", referencedColumnName = "id")
     private List<Note> notes = new ArrayList<>();
 
+    @Column(name = "is_reversal", nullable = false)
+    private boolean reversalTransaction;
+
+    @Column(name = "original_transaction_id")
+    private Long originalTxnId;
+
     SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
@@ -340,6 +346,15 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
                 SavingsAccountTransactionType.AMOUNT_RELEASE.getValue(), transactionDate, createdDate, accountTransaction.amount,
                 accountTransaction.reversed, appUser, accountTransaction.isManualTransaction);
+    }
+
+    public static SavingsAccountTransaction reversal(SavingsAccountTransaction accountTransaction) {
+        SavingsAccountTransaction sat = copyTransaction(accountTransaction);
+        sat.reversed = false;
+        sat.setReversalTransaction(true);
+        sat.originalTxnId = accountTransaction.getId();
+        return sat;
+
     }
 
     public LocalDate transactionLocalDate() {
@@ -862,5 +877,13 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean getIsManualTransaction() {
         return this.isManualTransaction;
+    }
+
+    public void setReversalTransaction(boolean reversalTransaction) {
+        this.reversalTransaction = reversalTransaction;
+    }
+
+    public boolean isReversalTransaction() {
+        return reversalTransaction;
     }
 }
