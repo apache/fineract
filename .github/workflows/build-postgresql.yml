@@ -66,4 +66,3 @@ jobs:
 
       - name: OAuth2 Build & Test
         run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast -PdbType=postgresql
-
