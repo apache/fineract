@@ -104,7 +104,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         sql.append("END");
 
         return this.jdbcTemplate.query(
-                con -> con.prepareStatement(sql.toString(), ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE),
+                con -> con.prepareStatement(sql.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE),
                 ps -> ps.setLong(1, productId), this.chartExtractor);
 
     }
