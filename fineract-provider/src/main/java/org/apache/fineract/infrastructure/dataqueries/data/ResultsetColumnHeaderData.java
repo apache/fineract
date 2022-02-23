@@ -183,7 +183,13 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     private boolean isAnyInteger() {
-        return isInt() || isInteger() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isLong();
+        return isInt() || isInteger() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isLong() || isSerial();
+    }
+
+    private boolean isSerial() {
+        return "SERIAL".equalsIgnoreCase(this.columnType) || "SERIAL4".equalsIgnoreCase(this.columnType)
+                || "SERIAL8".equalsIgnoreCase(this.columnType) || "SMALLSERIAL".equalsIgnoreCase(this.columnType)
+                || "BIGSERIAL".equalsIgnoreCase(this.columnType);
     }
 
     private boolean isInt() {
