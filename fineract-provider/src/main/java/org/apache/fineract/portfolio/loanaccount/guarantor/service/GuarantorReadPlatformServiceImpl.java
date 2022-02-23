@@ -48,8 +48,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -76,7 +78,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public List<GuarantorData> retrieveGuarantorsForLoan(final Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id, sa.id, oht.id, cv.id";
+        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id, sa.id, oht.id, cv.id order by g.id";
         String finalSql = sql;
         final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(con -> {
             PreparedStatement preparedStatement = con.prepareStatement(finalSql, ResultSet.TYPE_SCROLL_SENSITIVE,
@@ -98,7 +100,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public GuarantorData retrieveGuarantor(final Long loanId, final Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id, sa.id, oht.id, cv.id";
+        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id, sa.id, oht.id, cv.id order by g.id";
         String finalSql = sql;
         final GuarantorData guarantorData = this.jdbcTemplate.query(con -> {
             PreparedStatement preparedStatement = con.prepareStatement(finalSql, ResultSet.TYPE_SCROLL_SENSITIVE,

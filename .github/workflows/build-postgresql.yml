@@ -59,7 +59,7 @@ jobs:
             sudo apt-get install ghostscript -y
 
       - name: Basic Auth Build & Test
-        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql -PexcludeTests=org.apache.fineract.integrationtests.guarantor.GuarantorTest.testGuarantor_UNDO_DISBURSAL
+        run: ./gradlew --no-daemon -q --console=plain licenseMain licenseTest check build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
 
       - name: 2FA Build & Test
         run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast -PdbType=postgresql

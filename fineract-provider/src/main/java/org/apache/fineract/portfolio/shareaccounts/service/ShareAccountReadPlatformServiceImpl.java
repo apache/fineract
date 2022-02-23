@@ -233,10 +233,11 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             sb.append(" and sa.status_enum = ? ");
         }
         sb.append(" and saps.status_enum = ?");
+        sb.append(" order by sa.id");
         params.add(PurchasedSharesStatusType.APPROVED.getValue());
         Object[] whereClauseItems = params.toArray();
         return this.jdbcTemplate.query(con -> {
-            PreparedStatement preparedStatement = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_INSENSITIVE,
+            PreparedStatement preparedStatement = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
                     ResultSet.CONCUR_UPDATABLE);
             for (int i = 0; i < whereClauseItems.length; i++) {
                 preparedStatement.setObject(i + 1, whereClauseItems[i]);
