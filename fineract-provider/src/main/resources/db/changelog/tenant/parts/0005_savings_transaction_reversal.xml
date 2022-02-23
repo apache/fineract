@@ -25,7 +25,7 @@
     <changeSet author="fineract" id="1">
         <addColumn tableName="m_savings_account_transaction">
             <column name="original_transaction_id" type="BIGINT"/>
-            <column name="is_reversal" type="TINYINT" defaultValueNumeric="0">
+            <column name="is_reversal" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
