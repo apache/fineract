@@ -82,8 +82,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         if (serverProperties.getSsl().isEnabled()) {
             http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
-        } else {
-            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresInsecure());
         }
     }
 
