@@ -8,19 +8,23 @@ include::preface.adoc[]
 
 include::colophon.adoc[]
 
-include::01_introduction.adoc[]
+include::introduction.adoc[]
 
 include::deployment.adoc[]
 
-include::02_architecture.adoc[]
+include::architecture.adoc[]
 
-include::03_oauth.adoc[]
+include::oauth.adoc[]
 
-// include::04_api.adoc[]
+// include::api.adoc[]
 
-include::05_client.adoc[]
+include::client.adoc[]
 
-include::06_validation.adoc[]
+include::validation.adoc[]
+
+include::testing.adoc[]
+
+include::deployment.adoc[]
 
 include::glossary.adoc[]
 

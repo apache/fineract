@@ -595,7 +595,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
     }
 
-    protected LoanProduct() {
+    public LoanProduct() {
         this.loanProductRelatedDetail = null;
         this.loanProductMinMaxConstraints = null;
     }
