@@ -40,7 +40,7 @@ buildscript {
         }
     }
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
 
     dependencies {
@@ -71,11 +71,12 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id "com.google.cloud.tools.jib" version "3.2.0" apply false
+    id "com.google.cloud.tools.jib" version '3.2.0' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
-    id "org.sonarqube" version "3.3"
-    id "com.github.andygoossens.modernizer" version "1.6.2" apply false
+    id 'org.sonarqube' version '3.3'
+    id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
     id 'com.github.spotbugs' version '5.0.6' apply false
+    id 'se.thinkcode.cucumber-runner' version '0.0.10' apply false
 }
 
 description = '''\
@@ -114,6 +115,7 @@ allprojects  {
             mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.4'
             mavenBom 'org.junit:junit-bom:5.8.2'
             mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2'
+            mavenBom 'io.cucumber:cucumber-bom:7.2.3'
         }
 
         dependencies {
@@ -153,6 +155,7 @@ allprojects  {
             dependency 'org.webjars.npm:swagger-ui-dist:4.6.2'
             dependency 'org.webjars:webjars-locator-core:0.50'
             dependency 'com.icegreen:greenmail-junit5:1.6.7'
+            dependency 'com.intuit.karate:karate-junit5:1.2.0.RC4'
 
             // fineract client dependencies
             dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -204,8 +207,8 @@ allprojects  {
                 entry 'poi-ooxml'
                 entry 'poi-ooxml-schemas'
             }
-            dependencySet(group: 'io.rest-assured', version: '4.5.1')
-            {
+
+            dependencySet(group: 'io.rest-assured', version: '4.5.1') {
                 entry 'rest-assured'
                 entry 'json-path'
                 entry 'xml-path'
@@ -252,7 +255,9 @@ allprojects  {
             "**/gradlew*",
             "**/git.properties",
             "**/*.html",
-            "**/*.mustache",
+            "**/templates/**",
+            "**/features/**",
+            "**/results/**",
             "**/package-info.java",
             "**/keystore.jks",
             "**/static/swagger-ui/**",
@@ -299,8 +304,9 @@ allprojects  {
             '**/*.txt',
             '**/*.log',
             '**/fineractdev-eclipse-preferences.epf',
-            '**/template-expected.html',
-            '**/template.mustache',
+            '**/features/**',
+            '**/templates/**',
+            '**/results/**',
             '**/.classpath',
             '**/.project',
             '**/.idea/**',
@@ -375,9 +381,10 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
-    apply plugin: "net.ltgt.errorprone"
-    apply plugin: "com.github.spotbugs"
+    apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: 'se.thinkcode.cucumber-runner'
 
     /* define the valid syntax level for source files */
     sourceCompatibility = JavaVersion.VERSION_17
@@ -618,6 +625,7 @@ configure(project.fineractJavaProjects) {
 
     test {
         useJUnitPlatform()
+        dependsOn 'cucumber'
 
         if (project.hasProperty('excludeTests')) {
             filter {
@@ -628,6 +636,11 @@ configure(project.fineractJavaProjects) {
 
     testlogger {
         logLevel 'quiet'
+    }
+
+    cucumber {
+        tags = 'not @ignore'
+        main = 'io.cucumber.core.cli.Main'
     }
 
     // Configuration for spotbugs plugin

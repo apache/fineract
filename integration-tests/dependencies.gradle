@@ -29,7 +29,13 @@ dependencies {
             'com.google.truth.extensions:truth-java8-extension',
             'org.awaitility:awaitility',
             'org.bouncycastle:bcpkix-jdk15on',
-            'org.bouncycastle:bcprov-jdk15on'
+            'org.bouncycastle:bcprov-jdk15on',
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
+            'io.cucumber:cucumber-spring',
+            'com.intuit.karate:karate-junit5',
             // 'com.google.code.gson:gson',
             )
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {

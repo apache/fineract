@@ -23,7 +23,13 @@ dependencies {
     tomcat 'org.apache.tomcat:tomcat:9.0.60@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
-            'org.junit.jupiter:junit-jupiter-api'
+            'org.junit.jupiter:junit-jupiter-api',
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
+            'io.cucumber:cucumber-spring',
+            'com.intuit.karate:karate-junit5',
             )
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'

@@ -128,6 +128,11 @@ dependencies {
     testImplementation( 'org.mockito:mockito-core',
             'org.mockito:mockito-junit-jupiter',
             'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
+            'io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph'
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {

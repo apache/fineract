@@ -37,6 +37,10 @@ dependencies {
 
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api',
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
             'com.google.truth:truth',
             'com.google.truth.extensions:truth-java8-extension'
             )
