@@ -75,16 +75,18 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         this.context.authenticatedUser();
         final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
-        clientIdentifierCommand.validateForCreate();
+
+        final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
+
+        clientIdentifierCommand.validateForCreate(documentType, command);
 
         final String documentKey = clientIdentifierCommand.getDocumentKey();
+        final String documentIssueCountry = command.stringValueOfParameterNamed("documentIssueCountry");
         String documentTypeLabel = null;
         Long documentTypeId = null;
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-            final CodeValue documentType = this.codeValueRepository
-                    .findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.label();
 
@@ -99,11 +101,13 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .withEntityId(clientIdentifier.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentIssueCountry, documentKey,
+                    dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentIssueCountry, documentKey, throwable,
+                    dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -119,6 +123,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
         String documentTypeLabel = null;
         String documentKey = null;
+        String documentIssueCountry = null;
         Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
         try {
             CodeValue documentType = null;
@@ -149,6 +154,8 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             } else if (!changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
                 documentTypeId = clientIdentifierForUpdate.documentTypeId();
                 documentKey = clientIdentifierForUpdate.documentKey();
+            } else if (changes.containsKey("documentIssueCountry")) {
+                documentIssueCountry = clientIdentifierForUpdate.documentIssueCountry();
             }
 
             if (!changes.isEmpty()) {
@@ -163,11 +170,13 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .with(changes) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentIssueCountry, documentKey,
+                    dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentIssueCountry, documentKey, throwable,
+                    dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -191,11 +200,13 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
-            final String documentKey, final Throwable cause, final Exception dve) {
+            final String documentIssueCountry, final String documentKey, final Throwable cause, final Exception dve) {
         if (cause.getMessage().contains("unique_active_client_identifier")) {
             throw new DuplicateClientIdentifierException(documentTypeLabel);
         } else if (cause.getMessage().contains("unique_identifier_key")) {
             throw new DuplicateClientIdentifierException(documentTypeId, documentTypeLabel, documentKey);
+        } else if (cause.getMessage().contains("unique_identity")) {
+            throw new DuplicateClientIdentifierException(documentTypeId, documentIssueCountry, documentTypeLabel, documentKey);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);

@@ -1,0 +1,2062 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <addColumn tableName="m_client_identifier">
+            <column name="document_issue_country" type="VARCHAR(50)"/>
+        </addColumn>
+        <dropUniqueConstraint constraintName="unique_identifier_key" tableName="m_client_identifier"/>
+        <addUniqueConstraint columnNames="document_type_id, document_key, document_issue_country" constraintName="unique_identity" tableName="m_client_identifier"/>
+    </changeSet>
+    <changeSet author="fineract" id="2">
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+            <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="2"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+            <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="3"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="4"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="5"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AQ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="6"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="7"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="8"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="9"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="10"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="11"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="12"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="13"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="14"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="15"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="16"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BB"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="17"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="18"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="19"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="20"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BJ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="21"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="22"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="23"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="24"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BQ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="25"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="26"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="27"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+
+                 <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="28"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="29"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="30"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="31"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="32"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="33"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="34"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="35"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CV"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="36"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="38"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="39"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="40"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="41"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="42"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="43"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="44"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="45"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="46"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="HR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="47"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="48"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="49"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="50"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="51"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DJ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="52"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="53"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="54"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="EC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="55"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="EG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="56"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+
+                 <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SV"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="57"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GQ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="58"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="EE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="59"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ET"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="60"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="61"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="62"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FJ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="63"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="64"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="65"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="66"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="67"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="68"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="69"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="70"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="DE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="71"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="72"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="73"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="74"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="75"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="76"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GP"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="77"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="78"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="79"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="80"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="81"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="82"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="HT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="83"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="HN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="84"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="HK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="85"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="HU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="86"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="87"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="88"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ID"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="89"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="90"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IQ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="91"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="92"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="93"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="94"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="IT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="95"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="JM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="96"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="JP"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="97"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="JE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="98"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="JO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="99"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="100"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="101"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="102"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="103"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="104"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LV"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="105"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LB"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="106"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="107"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="108"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="109"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="110"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="111"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="112"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="113"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="114"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="115"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="116"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="117"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MV"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="118"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ML"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="119"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="120"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="121"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="122"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MX"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="123"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="FM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="124"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="125"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="126"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ME"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="127"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="128"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="129"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="130"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="131"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NP"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="132"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="133"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="134"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="135"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="136"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="137"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="138"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="139"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+         <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KP"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="140"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="NO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="141"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="OM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="142"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="143"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="144"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="145"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="146"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="147"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="148"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="149"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="150"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="151"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="152"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="153"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="154"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="QA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="155"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="RE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="156"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="RO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="157"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="RU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="158"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="RW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="159"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="BL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="160"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="161"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="162"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="163"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="MF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="164"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="PM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="165"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="166"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="WS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="167"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="168"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ST"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="169"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="170"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="171"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="RS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="172"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="173"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="174"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="175"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SX"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="176"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="177"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="178"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SB"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="179"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="180"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ZA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="181"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="182"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="KR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="183"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SS"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="184"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ES"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="185"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="LK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="186"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="187"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="188"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SJ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="189"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="190"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="191"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="192"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="SY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="193"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="194"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TJ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="195"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+                <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="196"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="197"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="CD"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="198"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TL"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="199"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="200"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TK"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="201"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TO"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="202"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TT"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="203"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="204"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TR"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="205"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="206"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TC"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="207"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="TV"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="208"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VI"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="209"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="UG"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="210"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="UA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="211"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="AE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="212"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="GB"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="213"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="US"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="214"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="UM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="215"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="UY"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="216"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="UZ"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="217"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VU"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="218"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VA"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="219"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="220"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="VN"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="221"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="WF"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="222"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="EH"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="223"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="YE"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="224"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ZM"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="225"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueNumeric="28"/>
+            <column name="code_value" value="ZW"/>
+            <column name="code_description" value="countries list"/>
+            <column name="order_position" valueNumeric="226"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

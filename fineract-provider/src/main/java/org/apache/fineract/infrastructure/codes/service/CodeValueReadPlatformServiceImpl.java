@@ -18,13 +18,18 @@
  */
 package org.apache.fineract.infrastructure.codes.service;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Properties;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -37,14 +42,24 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final CodeRepository codeRepository;
+    Properties prop = new Properties();
 
     @Autowired
-    public CodeValueReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public CodeValueReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+            final CodeRepository codeRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.codeRepository = codeRepository;
     }
 
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
+
+        private CodeRepository codeRepository;
+
+        CodeValueDataMapper(CodeRepository codeRepository) {
+            this.codeRepository = codeRepository;
+        }
 
         public String schema() {
             return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position,"
@@ -55,11 +70,22 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         public CodeValueData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
-            final String value = rs.getString("value");
+            final Long codeId = rs.getLong("codeId");
+            String value = rs.getString("value");
             final Integer position = rs.getInt("position");
             final String description = rs.getString("description");
             final boolean isActive = rs.getBoolean("isActive");
             final boolean mandatory = rs.getBoolean("mandatory");
+            if (ClientApiConstants.clientIdentifierCountryParamName.equals(this.codeRepository.findOneById(codeId).name())) {
+                Properties countryProperties = new Properties();
+                try {
+                    countryProperties
+                            .load(CodeValueReadPlatformServiceImpl.class.getClassLoader().getResourceAsStream("countries.properties"));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                value = countryProperties.getProperty(value);
+            }
 
             return CodeValueData.instance(id, value, position, description, isActive, mandatory);
         }
@@ -70,7 +96,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
         this.context.authenticatedUser();
 
-        final CodeValueDataMapper rm = new CodeValueDataMapper();
+        final CodeValueDataMapper rm = new CodeValueDataMapper(codeRepository);
         final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = true order by position";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { code });
@@ -82,7 +108,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
         this.context.authenticatedUser();
 
-        final CodeValueDataMapper rm = new CodeValueDataMapper();
+        final CodeValueDataMapper rm = new CodeValueDataMapper(codeRepository);
         final String sql = "select " + rm.schema() + "where cv.code_id = ? order by position";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { codeId });
@@ -94,7 +120,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         try {
             this.context.authenticatedUser();
 
-            final CodeValueDataMapper rm = new CodeValueDataMapper();
+            final CodeValueDataMapper rm = new CodeValueDataMapper(codeRepository);
             final String sql = "select " + rm.schema() + " where cv.id = ? order by position";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });

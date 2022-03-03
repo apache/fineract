@@ -48,6 +48,9 @@ public class ClientIdentifier extends AbstractAuditableCustom {
     @Column(name = "document_key", length = 1000)
     private String documentKey;
 
+    @Column(name = "document_issue_country", length = 1000)
+    private String documentIssueCountry;
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
@@ -61,17 +64,20 @@ public class ClientIdentifier extends AbstractAuditableCustom {
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
         final String status = command.stringValueOfParameterNamed("status");
-        return new ClientIdentifier(client, documentType, documentKey, status, description);
+        final String documentIssueCountry = command.stringValueOfParameterNamed("documentIssueCountry");
+
+        return new ClientIdentifier(client, documentType, documentIssueCountry, documentKey, status, description);
     }
 
     protected ClientIdentifier() {
         //
     }
 
-    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
-            String description) {
+    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentIssueCountry, final String documentKey,
+            final String statusName, String description) {
         this.client = client;
         this.documentType = documentType;
+        this.documentIssueCountry = documentIssueCountry;
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
@@ -103,6 +109,13 @@ public class ClientIdentifier extends AbstractAuditableCustom {
             this.documentKey = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        final String documentIssueCountryParamName = "documentIssueCountry";
+        if (command.isChangeInStringParameterNamed(documentIssueCountryParamName, this.documentIssueCountry)) {
+            final String newValue = command.stringValueOfParameterNamed(documentIssueCountryParamName);
+            actualChanges.put(documentIssueCountryParamName, newValue);
+            this.documentIssueCountry = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
         final String descriptionParamName = "description";
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -122,6 +135,10 @@ public class ClientIdentifier extends AbstractAuditableCustom {
 
     public String documentKey() {
         return this.documentKey;
+    }
+
+    public String documentIssueCountry() {
+        return this.documentIssueCountry;
     }
 
     public Long documentTypeId() {
