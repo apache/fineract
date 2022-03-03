@@ -85,7 +85,7 @@ public class ShareProductDividendAssembler {
                 double amountForAccount = numberOfShareDaysPerAccount * amountPerShareDay;
                 final Money accountAmount = Money.of(currency, BigDecimal.valueOf(amountForAccount));
                 ShareAccountDividendDetails dividendDetails = new ShareAccountDividendDetails(accountData.getId(),
-                        accountAmount.getAmount());
+                        accountAmount.getAmount(), productDividendPayOutDetails);
                 productDividendPayOutDetails.getAccountDividendDetails().add(dividendDetails);
             }
         }

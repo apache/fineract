@@ -89,7 +89,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
 
             final RecurringDepositProduct product = this.depositProductAssembler.assembleRecurringDepositProduct(command);
 
-            this.recurringDepositProductRepository.save(product);
+            this.recurringDepositProductRepository.saveAndFlush(product);
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
@@ -152,7 +152,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
-                this.recurringDepositProductRepository.save(product);
+                this.recurringDepositProductRepository.saveAndFlush(product);
             }
 
             return new CommandProcessingResultBuilder() //

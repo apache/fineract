@@ -40,6 +40,10 @@ import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 public class TaxGroupMappings extends AbstractAuditableCustom {
 
     @ManyToOne
+    @JoinColumn(name = "tax_group_id", nullable = false)
+    private TaxGroup taxGroup;
+
+    @ManyToOne
     @JoinColumn(name = "tax_component_id", nullable = false)
     private TaxComponent taxComponent;
 
@@ -117,5 +121,13 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
             endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return endDate;
+    }
+
+    public void setTaxGroup(TaxGroup taxGroup) {
+        this.taxGroup = taxGroup;
+    }
+
+    public TaxGroup getTaxGroup() {
+        return taxGroup;
     }
 }

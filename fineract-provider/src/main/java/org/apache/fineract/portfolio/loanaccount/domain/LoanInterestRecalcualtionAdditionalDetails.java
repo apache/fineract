@@ -24,6 +24,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,6 +35,10 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Entity
 @Table(name = "m_loan_interest_recalculation_additional_details")
 public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom {
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
+    private LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "effective_date")
@@ -58,5 +64,13 @@ public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersista
 
     public BigDecimal getAmount() {
         return this.amount;
+    }
+
+    public LoanRepaymentScheduleInstallment getLoanRepaymentScheduleInstallment() {
+        return loanRepaymentScheduleInstallment;
+    }
+
+    public void setLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        this.loanRepaymentScheduleInstallment = loanRepaymentScheduleInstallment;
     }
 }

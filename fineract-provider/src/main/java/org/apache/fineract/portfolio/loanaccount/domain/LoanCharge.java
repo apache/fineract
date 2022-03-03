@@ -543,9 +543,11 @@ public class LoanCharge extends AbstractPersistableCustom {
             for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
-                    chargePerInstallment.updateInstallment(null);
+                    chargePerInstallment.getInstallment().getInstallmentCharges().remove(chargePerInstallment);
                 } else {
-                    chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
+                    LoanInstallmentCharge newLoanInstallmentCharge = loanChargePerInstallmentArray[index++];
+                    newLoanInstallmentCharge.getInstallment().getInstallmentCharges().remove(newLoanInstallmentCharge);
+                    chargePerInstallment.copyFrom(newLoanInstallmentCharge);
                 }
             }
             this.loanInstallmentCharge.removeAll(remove);

@@ -152,7 +152,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     public CommandProcessingResult logCommand(CommandSource commandSourceResult) {
 
         commandSourceResult.markAsAwaitingApproval();
-        commandSourceResult = this.commandSourceRepository.save(commandSourceResult);
+        commandSourceResult = this.commandSourceRepository.saveAndFlush(commandSourceResult);
 
         return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
                 .withEntityId(commandSourceResult.getResourceId()).build();

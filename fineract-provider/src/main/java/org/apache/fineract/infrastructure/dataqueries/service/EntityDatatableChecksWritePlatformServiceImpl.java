@@ -182,6 +182,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
 
     }
 
+    @Transactional(readOnly = true)
     @Override
     public void runTheCheckForProduct(final Long entityId, final String entityName, final Long statusCode, String foreignKeyColumn,
             long productId) {

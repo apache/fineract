@@ -101,7 +101,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {
         try {
             ShareAccount account = this.accountDataSerializer.validateAndCreate(jsonCommand);
-            this.shareAccountRepository.save(account);
+            this.shareAccountRepository.saveAndFlush(account);
             generateAccountNumber(account);
             journalEntryWritePlatformService.createJournalEntriesForShares(
                     populateJournalEntries(account, account.getPendingForApprovalSharePurchaseTransactions()));
@@ -462,7 +462,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndRedeemShares(jsonCommand, account);
             if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
+                this.shareAccountRepository.saveAndFlush(account);
                 ShareAccountTransaction transaction = (ShareAccountTransaction) changes
                         .get(ShareAccountApiConstants.requestedshares_paramname);
                 // after saving, entity will have different object. So need to
@@ -472,7 +472,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 ShareProduct shareProduct = account.getShareProduct();
                 // remove the redeem shares from total subscribed shares
                 shareProduct.removeSubscribedShares(redeemShares);
-                this.shareProductRepository.save(shareProduct);
+                this.shareProductRepository.saveAndFlush(shareProduct);
 
                 Set<ShareAccountTransaction> transactions = new HashSet<>();
                 transactions.add(transaction);
@@ -498,7 +498,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndClose(jsonCommand, account);
             if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
+                this.shareAccountRepository.saveAndFlush(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
                     final Note note = Note.shareNote(account, noteText);

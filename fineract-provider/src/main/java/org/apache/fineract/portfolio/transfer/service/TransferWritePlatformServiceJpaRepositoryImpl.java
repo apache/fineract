@@ -211,7 +211,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             /** map all JLG loans for this client to the destinationGroup **/
             for (final CalendarInstance calendarInstance : activeLoanCalendarInstances) {
                 calendarInstance.updateCalendar(destinationGroupCalendar);
-                this.calendarInstanceRepository.save(calendarInstance);
+                this.calendarInstanceRepository.saveAndFlush(calendarInstance);
             }
             // reschedule all JLG Loans to follow new Calendar
             this.loanWritePlatformService.applyMeetingDateChanges(destinationGroupCalendar, activeLoanCalendarInstances);
@@ -282,7 +282,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
         this.clientRepositoryWrapper.saveAndFlush(client);
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -315,7 +315,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         }
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -340,7 +340,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
         validateClientAwaitingTransferAcceptance(client);
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -356,7 +356,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         validateClientAwaitingTransferAcceptanceOnHold(client);
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.WITHDRAWAL, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -370,7 +370,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.transfersDataValidator.validateForRejectClientTransfer(jsonCommand.json());
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.REJECTION, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
