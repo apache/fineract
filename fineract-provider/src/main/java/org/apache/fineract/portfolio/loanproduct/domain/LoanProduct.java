@@ -191,6 +191,18 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
+    @Column(name = "disallow_expected_disbursements", nullable = false)
+    private boolean disallowExpectedDisbursements;
+
+    @Column(name = "allow_approved_disbursed_amounts_over_applied", nullable = false)
+    private boolean allowApprovedDisbursedAmountsOverApplied;
+
+    @Column(name = "over_applied_calculation_type", nullable = true)
+    private String overAppliedCalculationType;
+
+    @Column(name = "over_applied_number", nullable = true)
+    private Integer overAppliedNumber;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
@@ -1460,5 +1472,21 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public BigDecimal getFixedPrincipalPercentagePerInstallment() {
         return fixedPrincipalPercentagePerInstallment;
+    }
+
+    public boolean isDisallowExpectedDisbursements() {
+        return disallowExpectedDisbursements;
+    }
+
+    public boolean isAllowApprovedDisbursedAmountsOverApplied() {
+        return allowApprovedDisbursedAmountsOverApplied;
+    }
+
+    public String getOverAppliedCalculationType() {
+        return overAppliedCalculationType;
+    }
+
+    public Integer getOverAppliedNumber() {
+        return overAppliedNumber;
     }
 }

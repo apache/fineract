@@ -22,9 +22,13 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <include file="parts/0003_postgresql_specific_initial_data.xml" relativeToChangelogFile="true"/>
-    <include file="parts/0004_camelcase_column_renaming.xml" relativeToChangelogFile="true"/>
-    <include file="parts/0005_savings_transaction_reversal.xml" relativeToChangelogFile="true"/>
-    <include file="parts/0006_product_loan_disallow_expected_disbursements.xml" relativeToChangelogFile="true"/>
-    <include file="parts/0007_product_loan_higher_than_applied_loan_amount_management.xml" relativeToChangelogFile="true"/>
+    <changeSet author="fineract" id="1">
+        <addColumn tableName="m_product_loan">
+            <column name="allow_approved_disbursed_amounts_over_applied" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="over_applied_calculation_type" type="VARCHAR(10)"/>
+            <column defaultValueComputed="NULL" name="over_applied_number" type="INT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
