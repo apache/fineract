@@ -173,6 +173,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursement
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -373,6 +374,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (loan.loanProduct().isDisallowExpectedDisbursements()) {
+            // create artificial 'tranche/expected disbursal' as current disburse code expects it for multi-disbursal
+            // products
+            final Date artificialExpectedDate = Date
+                    .from(loan.getExpectedDisbursedOnLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            LoanDisbursementDetails disbursementDetail = new LoanDisbursementDetails(artificialExpectedDate, null,
+                    loan.getDisbursedAmount(), null);
+            disbursementDetail.updateLoan(loan);
+            loan.getDisbursementDetails().add(disbursementDetail);
+        }
 
         // Get disbursedAmount
         final BigDecimal disbursedAmount = loan.getDisbursedAmount();
@@ -2900,17 +2911,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate) {
+    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate,
+            boolean isDisallowExpectedDisbursements) {
         final String json = command.json();
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
-        if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
-            final String errorMessage = "For this loan product, disbursement details must be provided";
-            throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+
+        if (isDisallowExpectedDisbursements) {
+            if (disbursementDataArray != null) {
+                final String errorMessage = "For this loan product, disbursement details are not allowed";
+                throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            }
+        } else {
+            if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
+                final String errorMessage = "For this loan product, disbursement details must be provided";
+                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            }
         }
+
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
 
         loanApplicationCommandFromApiJsonHelper.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate,
@@ -2952,15 +2973,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(errorMessage);
         }
-        validateMultiDisbursementData(command, expectedDisbursementDate);
+        validateMultiDisbursementData(command, expectedDisbursementDate, loan.loanProduct().isDisallowExpectedDisbursements());
 
         this.validateForAddAndDeleteTranche(loan);
 
         loan.updateDisbursementDetails(command, actualChanges);
 
-        if (loan.getDisbursementDetails().isEmpty()) {
-            final String errorMessage = "For this loan product, disbursement details must be provided";
-            throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+        if (loan.loanProduct().isDisallowExpectedDisbursements()) {
+            if (!loan.getDisbursementDetails().isEmpty()) {
+                final String errorMessage = "For this loan product, disbursement details are not allowed";
+                throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            }
+        } else {
+            if (loan.getDisbursementDetails().isEmpty()) {
+                final String errorMessage = "For this loan product, disbursement details must be provided";
+                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            }
         }
 
         if (loan.getDisbursementDetails().size() > loan.loanProduct().maxTrancheCount()) {
