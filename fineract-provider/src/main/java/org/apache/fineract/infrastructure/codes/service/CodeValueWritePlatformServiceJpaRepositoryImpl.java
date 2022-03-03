@@ -76,7 +76,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             final Long codeId = command.entityId();
             final Code code = this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId));
             final CodeValue codeValue = CodeValue.fromJson(code, command);
-            this.codeValueRepository.save(codeValue);
+            this.codeValueRepository.saveAndFlush(codeValue);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

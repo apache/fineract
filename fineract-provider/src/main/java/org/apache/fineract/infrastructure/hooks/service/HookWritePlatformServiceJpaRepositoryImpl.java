@@ -119,7 +119,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
 
             validateHookRules(template, config, allEvents);
 
-            this.hookRepository.save(hook);
+            this.hookRepository.saveAndFlush(hook);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(hook.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

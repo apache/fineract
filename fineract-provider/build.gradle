@@ -26,70 +26,21 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 
-// Custom OpenJPA enhancement
+
 compileJava.doLast {
-    def enhanceIncludes = [
-        '**/AbstractPersistableCustom.class',
-        '**/domain/*.class'
-    ]
-
-    def classesToEnhance = project.sourceSets.main.output.classesDirs.collectMany { classesDir ->
-        project.fileTree(classesDir).matching {
-            enhanceIncludes.forEach { include it }
-        }.files
+    def mainSS = sourceSets.main
+    def source = mainSS.java.classesDirectory.get()
+    copy {
+        from "src/main/resources/"
+        into source
     }
-
-    String persistenceXml = "META-INF/persistence.xml"
-    def persistenceXmlFile
-
-    // Check if persistence.xml is in the resource dirs.
-    project.sourceSets.main.resources.srcDirs.collect { resourceDir ->
-        def persistenceXmlFileCandidate = project.fileTree(resourceDir).matching {
-            include persistenceXml
-        }
-
-        if (!persistenceXmlFileCandidate.isEmpty()) {
-            if (persistenceXmlFile == null) {
-                persistenceXmlFile = persistenceXmlFileCandidate.singleFile
-            } else {
-                throw new InvalidUserDataException("Multiple persistence.xml files found in path: " +
-                persistenceXmlFile + ", " + persistenceXmlFileCandidate)
-            }
-        }
-
-        // Nothing found. Fallback to plain file.
-        if (persistenceXmlFile == null) {
-            persistenceXmlFile = project.file(persistenceXml)
-            if (!persistenceXmlFile.exists()) {
-                throw new InvalidUserDataException(
-                "Could not find valid persistence.xml in path " + this.persistenceXml)
-            }
-        }
+    javaexec {
+        description = 'Performs EclipseLink static weaving of entity classes'
+        def target = source
+        main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
+        args '-persistenceinfo', source, '-classpath', configurations.runtimeClasspath, source, target
+        classpath configurations.runtimeClasspath
     }
-
-    org.apache.openjpa.lib.util.Options options = new org.apache.openjpa.lib.util.Options([
-        "addDefaultConstructor"      : true,
-        "enforcePropertyRestrictions": true,
-        "tmpClassLoader"             : false,
-        "propertiesFile"             : persistenceXmlFile
-    ])
-
-    def classes = project.sourceSets.main.output.classesDirs.collect { it.toURI().toURL() }
-
-    def compileJars = project.configurations.compileClasspath.files.collect { jar ->
-        jar.toURI().toURL()
-    }
-
-    def resources = project.sourceSets.main.resources.srcDirs.collect { resource ->
-        resource.toURI().toURL()
-    }
-
-    def urls = (classes + compileJars + resources)
-
-    ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-    Thread.currentThread().setContextClassLoader(new URLClassLoader((URL[])urls, currentClassLoader));
-    org.apache.openjpa.enhance.PCEnhancer.run((String []) classesToEnhance, options);
-    Thread.currentThread().setContextClassLoader(currentClassLoader);
 }
 
 // Configuration for Swagger documentation generation task
@@ -151,7 +102,8 @@ apply from: 'dependencies.gradle'
 modernizer {
     ignoreClassNamePatterns = [
         '.*AbstractPersistableCustom',
-        '.*EntityTables'
+        '.*EntityTables',
+        '.*domain.*'
     ]
 }
 

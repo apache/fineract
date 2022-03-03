@@ -77,7 +77,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
             final boolean changed = permission.enableMakerChecker(isSelected);
             if (changed) {
                 changedPermissions.put(permissionCode, isSelected);
-                this.permissionRepository.save(permission);
+                this.permissionRepository.saveAndFlush(permission);
             }
         }
 

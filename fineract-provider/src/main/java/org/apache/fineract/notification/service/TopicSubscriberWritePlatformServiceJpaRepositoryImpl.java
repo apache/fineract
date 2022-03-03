@@ -35,7 +35,7 @@ public class TopicSubscriberWritePlatformServiceJpaRepositoryImpl implements Top
 
     @Override
     public Long create(TopicSubscriber topicSubscriber) {
-        topicSubscriberRepository.save(topicSubscriber);
+        topicSubscriberRepository.saveAndFlush(topicSubscriber);
         return topicSubscriber.getId();
     }
 

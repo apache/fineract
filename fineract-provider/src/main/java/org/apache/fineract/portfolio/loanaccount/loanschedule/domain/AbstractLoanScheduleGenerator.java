@@ -930,7 +930,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      * @param currency
      * @param scheduleParams
      * @param lastRestDate
-     * @param periodStartDateApplicableForInterest
      * @param detail
      */
     private void handleLatePayments(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
@@ -991,15 +990,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     /**
      * @param loanApplicationTerms
      * @param scheduleParams
-     * @param priviousScheduledDueDate
      * @param previousRepaymentDate
      * @param scheduledDueDate
      * @param interestRatesForInstallments
      * @param mc
-     * @param paymentPeriodsInOneYearCalculator
-     * @param interestRates
-     * @param periodsApplicableForGrace
-     * @param scheduleDateForReversal
      * @return
      */
     private LoanTermVariationParams applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms,
@@ -1139,7 +1133,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      *            TODO
      * @param mc
      *            TODO
-     * @param periodNumber
      * @return
      */
     private LoanTermVariationParams applyExceptionLoanTermVariations(final LoanApplicationTerms loanApplicationTerms,
@@ -1222,7 +1215,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      * @param scheduleParams
      * @param interestRates
      * @param interestRatesForInstallments
-     * @param periodsApplicableForGrace
      */
     private void applyLoanVariationsForPartialScheduleGenerate(final LoanApplicationTerms loanApplicationTerms,
             LoanScheduleParams scheduleParams, final Collection<LoanTermVariationsData> interestRates,
@@ -1316,13 +1308,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     /**
      * Method calculates interest on not paid outstanding principal and interest (if compounding is enabled) till
      * current date and adds new repayment schedule detail
-     *
-     * @param compoundingMap
-     *            TODO
-     * @param loanCharges
-     *            TODO
-     * @param principalPortioMap
-     *            TODO
      *
      */
     private Money addInterestOnlyRepaymentScheduleForCurrentdate(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
@@ -1869,8 +1854,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      *
      * @param firstRepaymentdate
      *            TODO
-     * @param boolean1
-     * @param localDate
      */
     private LocalDate calculateInterestStartDateForPeriod(final LoanApplicationTerms loanApplicationTerms, LocalDate periodStartDate,
             final LocalDate idealDisbursementDate, final LocalDate firstRepaymentdate,

@@ -33,6 +33,10 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 public class SavingsAccountTransactionTaxDetails extends AbstractPersistableCustom {
 
     @ManyToOne
+    @JoinColumn(name = "savings_transaction_id", nullable = false)
+    private SavingsAccountTransaction savingsAccountTransaction;
+
+    @ManyToOne
     @JoinColumn(name = "tax_component_id", nullable = false)
     private TaxComponent taxComponent;
 
@@ -41,7 +45,9 @@ public class SavingsAccountTransactionTaxDetails extends AbstractPersistableCust
 
     protected SavingsAccountTransactionTaxDetails() {}
 
-    public SavingsAccountTransactionTaxDetails(final TaxComponent taxComponent, final BigDecimal amount) {
+    public SavingsAccountTransactionTaxDetails(final SavingsAccountTransaction savingsAccountTransaction, final TaxComponent taxComponent,
+            final BigDecimal amount) {
+        this.savingsAccountTransaction = savingsAccountTransaction;
         this.taxComponent = taxComponent;
         this.amount = amount;
     }
@@ -58,4 +64,11 @@ public class SavingsAccountTransactionTaxDetails extends AbstractPersistableCust
         this.amount = amount.getAmount();
     }
 
+    public SavingsAccountTransaction getSavingsAccountTransaction() {
+        return savingsAccountTransaction;
+    }
+
+    public void setSavingsAccountTransaction(SavingsAccountTransaction savingsAccountTransaction) {
+        this.savingsAccountTransaction = savingsAccountTransaction;
+    }
 }

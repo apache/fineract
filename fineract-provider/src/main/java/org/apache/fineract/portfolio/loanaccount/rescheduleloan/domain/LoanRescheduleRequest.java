@@ -95,8 +95,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     @JoinColumn(name = "rejected_by_user_id")
     private AppUser rejectedByUser;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "loan_reschedule_request_id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRescheduleRequest")
     private Set<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = new HashSet<>();
 
     /**

@@ -130,7 +130,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
                 newMeeting.associateClientsAttendance(clientsAttendance);
             }
             // save meeting details
-            this.meetingRepositoryWrapper.save(newMeeting);
+            this.meetingRepositoryWrapper.saveAndFlush(newMeeting);
             final Long groupId = newMeeting.isGroupEntity() ? newMeeting.entityId() : null;
             return new CommandProcessingResultBuilder() //
                     .withEntityId(newMeeting.getId()) //
