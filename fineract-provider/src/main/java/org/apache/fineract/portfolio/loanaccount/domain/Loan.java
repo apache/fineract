@@ -121,6 +121,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureExcept
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
+import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
@@ -1330,8 +1331,12 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void updateLoanScheduleDependentDerivedFields() {
-        this.expectedMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        this.actualMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        if (this.getLoanRepaymentScheduleInstallmentsSize() > 0) {
+            this.expectedMaturityDate = Date
+                    .from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.actualMaturityDate = Date
+                    .from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        }
     }
 
     private void updateLoanSummaryDerivedFields() {
@@ -1620,9 +1625,17 @@ public class Loan extends AbstractPersistableCustom {
             }
             final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
-            if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
-                final String errorMessage = "For this loan product, disbursement details must be provided";
-                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            if (loanProduct.isDisallowExpectedDisbursements()) {
+                if (disbursementDataArray != null) {
+            	    final String errorMessage = "For this loan product, disbursement details are not allowed";
+            	    throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            	}
+            }
+            else {
+                if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
+                    final String errorMessage = "For this loan product, disbursement details must be provided";
+                    throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                }
             }
             if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
                 final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
@@ -2026,7 +2039,7 @@ public class Loan extends AbstractPersistableCustom {
         this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
         this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
 
-        updateLoanScheduleDependentDerivedFields();
+       	updateLoanScheduleDependentDerivedFields();
 
         if (submittedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
@@ -2224,31 +2237,19 @@ public class Loan extends AbstractPersistableCustom {
             LocalDate expecteddisbursementDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
 
             BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
-
             if (approvedLoanAmount != null) {
+                compareApprovedToProposedPrincipal(approvedLoanAmount);
 
-                // Approved amount has to be less than or equal to principal
-                // amount demanded
+                /*
+                 * All the calculations are done based on the principal amount, so it is necessary to set principal
+                 * amount to approved amount
+                 */
+                this.approvedPrincipal = approvedLoanAmount;
 
-                if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 0) {
-
-                    this.approvedPrincipal = approvedLoanAmount;
-
-                    /*
-                     * All the calculations are done based on the principal amount, so it is necessary to set principal
-                     * amount to approved amount
-                     */
-
-                    this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
-
-                    actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
-                    actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
-                    actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
-                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
-                    final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
-                    throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
-                            errorMessage, this.proposedPrincipal, approvedLoanAmount);
-                }
+                this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
 
                 /* Update disbursement details */
                 if (disbursementDataArray != null) {
@@ -2259,11 +2260,18 @@ public class Loan extends AbstractPersistableCustom {
             recalculateAllCharges();
 
             if (loanProduct.isMultiDisburseLoan()) {
-
-                if (this.disbursementDetails.isEmpty()) {
-                    final String errorMessage = "For this loan product, disbursement details must be provided";
-                    throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
-                }
+	            if (loanProduct.isDisallowExpectedDisbursements()) {
+	                if (!disbursementDetails.isEmpty()) {
+	                    final String errorMessage = "For this loan product, disbursement details are not allowed";
+	                    throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                }	
+	        }
+	        else {
+		            if (disbursementDetails.isEmpty()) {
+		                final String errorMessage = "For this loan product, disbursement details must be provided";
+		                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+		            }
+	            }
 
                 if (this.disbursementDetails.size() > loanProduct.maxTrancheCount()) {
                     final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
@@ -2313,6 +2321,41 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         return actualChanges;
+
+	}
+
+    private void compareApprovedToProposedPrincipal(BigDecimal approvedLoanAmount) {
+
+        if (this.loanProduct().isDisallowExpectedDisbursements() &&  this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+            BigDecimal maxApprovedLoanAmount = getOverAppliedMax();
+    	    if (approvedLoanAmount.compareTo(maxApprovedLoanAmount) > 0) {
+    	        final String errorMessage = "Loan approved amount can't be greater than maximum applied loan amount calculation.";
+                throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation",
+                    errorMessage, approvedLoanAmount, maxApprovedLoanAmount);
+            }
+        } 
+        else {
+            if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
+    		    final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
+                throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
+                    errorMessage, this.proposedPrincipal, approvedLoanAmount);
+            }
+        }
+	}
+    
+
+    private BigDecimal getOverAppliedMax() {
+        BigDecimal maxAmount = null;
+        if (this.getLoanProduct().getOverAppliedCalculationType().equals("percentage")) {
+            BigDecimal overAppliedNumber = BigDecimal.valueOf(getLoanProduct().getOverAppliedNumber());
+            BigDecimal x = overAppliedNumber.divide(BigDecimal.valueOf(100));
+            BigDecimal totalPercentage = BigDecimal.valueOf(1).add(x);
+            maxAmount = this.proposedPrincipal.multiply(totalPercentage);
+        }
+        else {
+            maxAmount = this.proposedPrincipal.add(BigDecimal.valueOf(getLoanProduct().getOverAppliedNumber()));
+        }
+        return maxAmount;
     }
 
     public Map<String, Object> undoApproval(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -2542,11 +2585,7 @@ public class Loan extends AbstractPersistableCustom {
                     totalAmount = totalAmount.add(disbursementDetails.principal());
                 }
                 this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
-                if (totalAmount.compareTo(this.approvedPrincipal) > 0) {
-                    final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
-                    throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", principalDisbursed,
-                            this.approvedPrincipal);
-                }
+                compareDisbursedToApprovedOrProposedPrincipal(disburseAmount.getAmount(), totalAmount);
             } else {
                 this.loanRepaymentScheduleDetail.setPrincipal(this.loanRepaymentScheduleDetail.getPrincipal().minus(diff).getAmount());
             }
@@ -2557,6 +2596,25 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return disburseAmount;
+    }
+
+    private void compareDisbursedToApprovedOrProposedPrincipal(BigDecimal disbursedAmount, BigDecimal totalDisbursed) {
+
+        if (this.loanProduct().isDisallowExpectedDisbursements() &&  this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+            BigDecimal maxDisbursedAmount = getOverAppliedMax();
+            if (disbursedAmount.compareTo(maxDisbursedAmount) > 0) {
+                final String errorMessage = "Loan disbursal amount can't be greater than maximum applied loan amount calculation.";
+                throw new InvalidLoanStateTransitionException("disbursal", "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation",
+                        errorMessage, disbursedAmount, maxDisbursedAmount);
+                }	
+    	} 
+        else {
+	        if (totalDisbursed.compareTo(this.approvedPrincipal) > 0) {
+	            final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+	            throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", totalDisbursed,
+	                    this.approvedPrincipal);
+	        }
+        }
     }
 
     private ChangedTransactionDetail reprocessTransactionForDisbursement() {
