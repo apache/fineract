@@ -135,7 +135,7 @@ allprojects  {
             dependency 'com.jayway.jsonpath:json-path:2.6.0'
             dependency 'org.apache.tika:tika-core:2.3.0'
             dependency 'org.apache.httpcomponents:httpclient:4.5.13'
-            dependency 'io.swagger.core.v3:swagger-annotations:2.1.11'
+            dependency 'io.swagger.core.v3:swagger-annotations:2.1.13'
             dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
             dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
