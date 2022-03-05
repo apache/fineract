@@ -44,7 +44,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.bmuschko:gradle-cargo-plugin:2.8.0'
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
         classpath 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
         classpath('com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0')
     }
