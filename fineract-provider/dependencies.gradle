@@ -66,7 +66,7 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.0',
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.4',
             'com.squareup.retrofit2:converter-gson',
             'org.apache.commons:commons-email'
             )
