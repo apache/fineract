@@ -137,7 +137,7 @@ allprojects  {
             dependency 'org.apache.httpcomponents:httpclient:4.5.13'
             dependency 'io.swagger.core.v3:swagger-annotations:2.1.11'
             dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
-            dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+            dependency 'jakarta.jms:jakarta.jms-api:3.0.0'
             dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
             dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
             dependency 'org.apache.activemq:activemq-broker:5.16.3'
