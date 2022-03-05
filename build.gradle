@@ -143,7 +143,7 @@ allprojects  {
             dependency 'org.apache.activemq:activemq-broker:5.16.3'
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
 
-            dependency 'io.github.classgraph:classgraph:4.8.129'
+            dependency 'io.github.classgraph:classgraph:4.8.141'
             dependency 'org.awaitility:awaitility:4.1.1'
             dependency 'com.github.spotbugs:spotbugs-annotations:4.5.2'
             dependency 'javax.cache:cache-api:1.1.1'
