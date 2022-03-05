@@ -9,11 +9,11 @@ updates:
       interval: "daily"
       timezone: "Europe/Zurich"
     open-pull-requests-limit: 13
-- package-ecosystem: "github-actions"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-- package-ecosystem: "docker"
+  - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
