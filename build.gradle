@@ -45,7 +45,7 @@ buildscript {
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
+        classpath 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
         classpath('com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0')
     }
 }
@@ -119,7 +119,7 @@ allprojects  {
             // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
             // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-            dependency 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated above in buildscript!
+            dependency 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated above in buildscript!
             dependency 'com.google.guava:guava:31.0.1-jre'
             dependency 'com.google.code.gson:gson:2.9.0'
             dependency 'com.google.truth:truth:1.1.3'
