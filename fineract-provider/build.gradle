@@ -257,7 +257,7 @@ bootRun {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.1.4'
+        implementation 'org.postgresql:postgresql:42.3.3'
     }
 
     classpath += files("build/generated/swagger-ui")
@@ -337,7 +337,7 @@ jib {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.1.4'
+        implementation 'org.postgresql:postgresql:42.3.3'
     }
 
     extraDirectories {
