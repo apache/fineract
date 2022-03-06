@@ -487,7 +487,7 @@ configure(project.fineractJavaProjects) {
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
         checkstyle 'com.puppycrawl.tools:checkstyle:9.1'
-        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.40.0'
+        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.41.0'
     }
 
     // Configuration for JaCoCo code coverage task
