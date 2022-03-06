@@ -22,7 +22,7 @@ version: '3.7'
 services:
   # Backend service
   fineractmysql:
-    image: mariadb:10.6
+    image: mariadb:10.8
     volumes:
       - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
