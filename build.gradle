@@ -22,7 +22,7 @@ buildscript {
         jacocoVersion = '0.8.7'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
-        oltuVersion = '1.0.1'
+        oltuVersion = '1.0.2'
         fineractJavaProjects = subprojects.findAll{
             [
                 'fineract-api',
