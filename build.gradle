@@ -486,7 +486,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:9.3'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.0'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.41.0'
     }
 
