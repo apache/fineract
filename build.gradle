@@ -138,7 +138,7 @@ allprojects  {
             dependency 'io.swagger.core.v3:swagger-annotations:2.1.13'
             dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
             dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6'
             dependency 'org.apache.activemq:activemq-broker:5.16.4'
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
