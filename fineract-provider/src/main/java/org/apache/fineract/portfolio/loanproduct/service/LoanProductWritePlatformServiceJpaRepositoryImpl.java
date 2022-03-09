@@ -252,6 +252,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (!changes.isEmpty()) {
+                product.validateLoanProductPreSave();
                 this.loanProductRepository.saveAndFlush(product);
             }
 
