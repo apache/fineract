@@ -208,7 +208,7 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.3'
         implementation 'org.postgresql:postgresql:42.3.3'
     }
 
@@ -288,7 +288,7 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.3'
         implementation 'org.postgresql:postgresql:42.3.3'
     }
 
