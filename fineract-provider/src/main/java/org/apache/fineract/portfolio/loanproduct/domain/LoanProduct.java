@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.exception.LoanProductGeneralRuleException;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 
 /**
@@ -361,6 +363,20 @@ public class LoanProduct extends AbstractPersistableCustom {
         BigDecimal fixedPrincipalPercentagePerInstallment = command
                 .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
 
+        final boolean disallowExpectedDisbursements = command.parameterExists(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS)
+                : false;
+
+        final boolean allowApprovedDisbursedAmountsOverApplied = command
+                .parameterExists(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED)
+                        ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED)
+                        : false;
+
+        final String overAppliedCalculationType = command
+                .stringValueOfParameterNamedAllowingNull(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE);
+
+        final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -375,7 +391,8 @@ public class LoanProduct extends AbstractPersistableCustom {
                 floatingRate, interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate,
                 defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed,
                 minimumGapBetweenInstallments, maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup,
-                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment);
+                isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
+                allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber);
 
     }
 
@@ -610,7 +627,9 @@ public class LoanProduct extends AbstractPersistableCustom {
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment) {
+            final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
+            final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
+            final Integer overAppliedNumber) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -689,9 +708,68 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.canUseForTopup = canUseForTopup;
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
 
+        this.disallowExpectedDisbursements = disallowExpectedDisbursements;
+        this.allowApprovedDisbursedAmountsOverApplied = allowApprovedDisbursedAmountsOverApplied;
+        this.overAppliedCalculationType = overAppliedCalculationType;
+        this.overAppliedNumber = overAppliedNumber;
+
         if (rates != null) {
             this.rates = rates;
         }
+        validateLoanProductPreSave();
+    }
+
+    public void validateLoanProductPreSave() {
+
+        if (this.disallowExpectedDisbursements) {
+            if (!this.isMultiDisburseLoan()) {
+                throw new LoanProductGeneralRuleException("allowMultipleDisbursals.not.set.disallowExpectedDisbursements.cant.be.set",
+                        "Allow Multiple Disbursals Not Set - Disallow Expected Disbursals Can't Be Set");
+            }
+        }
+
+        if (this.allowApprovedDisbursedAmountsOverApplied) {
+            if (!this.disallowExpectedDisbursements) {
+                throw new LoanProductGeneralRuleException(
+                        "disallowExpectedDisbursements.not.set.allowApprovedDisbursedAmountsOverApplied.cant.be.set",
+                        "Disallow Expected Disbursals Not Set - Allow Approved / Disbursed Amounts Over Applied Can't Be Set");
+            }
+        }
+
+        if (this.overAppliedCalculationType == null || this.overAppliedCalculationType.isEmpty()) {
+            if (this.allowApprovedDisbursedAmountsOverApplied) {
+                throw new LoanProductGeneralRuleException(
+                        "allowApprovedDisbursedAmountsOverApplied.is.set.overAppliedCalculationType.is.mandatory",
+                        "Allow Approved / Disbursed Amounts Over Applied is Set - Over Applied Calculation Type is Mandatory");
+            }
+
+        } else {
+            if (!this.allowApprovedDisbursedAmountsOverApplied) {
+                throw new LoanProductGeneralRuleException(
+                        "allowApprovedDisbursedAmountsOverApplied.is.not.set.overAppliedCalculationType.cant.be.entered",
+                        "Allow Approved / Disbursed Amounts Over Applied is Not Set - Over Applied Calculation Type Can't Be Entered");
+            }
+
+            List<String> overAppliedCalculationTypeAllowedValues = Arrays.asList("percentage", "flat");
+            if (!overAppliedCalculationTypeAllowedValues.contains(this.overAppliedCalculationType)) {
+                throw new LoanProductGeneralRuleException("overAppliedCalculationType.must.be.percentage.or.flat",
+                        "Over Applied Calculation Type Must Be 'percentage' or 'flat'");
+            }
+        }
+
+        if (this.overAppliedNumber != null) {
+            if (!this.allowApprovedDisbursedAmountsOverApplied) {
+                throw new LoanProductGeneralRuleException(
+                        "allowApprovedDisbursedAmountsOverApplied.is.not.set.overAppliedNumber.cant.be.entered",
+                        "Allow Approved / Disbursed Amounts Over Applied is Not Set - Over Applied Number Can't Be Entered");
+            }
+        } else {
+            if (this.allowApprovedDisbursedAmountsOverApplied) {
+                throw new LoanProductGeneralRuleException("allowApprovedDisbursedAmountsOverApplied.is.set.overAppliedNumber.is.mandatory",
+                        "Allow Approved / Disbursed Amounts Over Applied is Set - Over Applied Number is Mandatory");
+            }
+        }
+
     }
 
     public MonetaryCurrency getCurrency() {
@@ -1116,6 +1194,34 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.fixedPrincipalPercentagePerInstallment = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
+                this.disallowExpectedDisbursements)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS);
+            actualChanges.put(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS, newValue);
+            this.disallowExpectedDisbursements = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED,
+                this.allowApprovedDisbursedAmountsOverApplied)) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED);
+            actualChanges.put(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, newValue);
+            this.allowApprovedDisbursedAmountsOverApplied = newValue;
+        }
+
+        if (command.isChangeInStringParameterNamed(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE, this.overAppliedCalculationType)) {
+            final String newValue = command.stringValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE);
+            actualChanges.put(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE, newValue);
+            this.overAppliedCalculationType = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER, this.overAppliedNumber)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
+            actualChanges.put(LoanProductConstants.OVER_APPLIED_NUMBER, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.overAppliedNumber = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1481,4 +1587,25 @@ public class LoanProduct extends AbstractPersistableCustom {
     public Integer getOverAppliedNumber() {
         return overAppliedNumber;
     }
+
+    public void setDisallowExpectedDisbursements(boolean disallowExpectedDisbursements) {
+        this.disallowExpectedDisbursements = disallowExpectedDisbursements;
+    }
+
+    public void setAllowApprovedDisbursedAmountsOverApplied(boolean allowApprovedDisbursedAmountsOverApplied) {
+        this.allowApprovedDisbursedAmountsOverApplied = allowApprovedDisbursedAmountsOverApplied;
+    }
+
+    public void setOverAppliedCalculationType(String overAppliedCalculationType) {
+        this.overAppliedCalculationType = overAppliedCalculationType;
+    }
+
+    public void setOverAppliedNumber(Integer overAppliedNumber) {
+        this.overAppliedNumber = overAppliedNumber;
+    }
+
+    public void setLoanProducTrancheDetails(LoanProductTrancheDetails loanProducTrancheDetails) {
+        this.loanProducTrancheDetails = loanProducTrancheDetails;
+    }
+
 }

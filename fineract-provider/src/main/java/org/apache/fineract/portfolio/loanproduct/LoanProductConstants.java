@@ -109,7 +109,6 @@ public interface LoanProductConstants {
     BigDecimal DEFAULT_PRINCIPAL_THRESHOLD_FOR_SINGLE_DISBURSE_LOAN = BigDecimal.valueOf(0);
     // Fixed installment configuration related
     String canDefineEmiAmountParamName = "canDefineInstallmentAmount";
-    String installmentAmountInMultiplesOfParamName = "installmentAmountInMultiplesOf";
     String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
 
     // Loan Configurable Attributes
@@ -135,5 +134,12 @@ public interface LoanProductConstants {
     String IS_EQUAL_AMORTIZATION_PARAM = "isEqualAmortization";
 
     String RATES_PARAM_NAME = "rates";
+
+    // Multiple disbursement related
+    String installmentAmountInMultiplesOfParamName = "installmentAmountInMultiplesOf";
+    String DISALLOW_EXPECTED_DISBURSEMENTS = "disallowExpectedDisbursements";
+    String ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED = "allowApprovedDisbursedAmountsOverApplied";
+    String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
+    String OVER_APPLIED_NUMBER = "overAppliedNumber";
 
 }
