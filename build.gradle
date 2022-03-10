@@ -149,7 +149,7 @@ allprojects  {
             dependency 'com.github.spotbugs:spotbugs-annotations:4.6.0'
             dependency 'javax.cache:cache-api:1.1.1'
             dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
-            dependency 'org.webjars.npm:swagger-ui-dist:4.6.1'
+            dependency 'org.webjars.npm:swagger-ui-dist:4.6.2'
             dependency 'org.webjars:webjars-locator-core:0.50'
             dependency 'com.icegreen:greenmail-junit5:1.6.7'
 
