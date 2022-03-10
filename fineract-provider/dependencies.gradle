@@ -89,7 +89,7 @@ dependencies {
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
-    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10') {
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
     implementation ('org.quartz-scheduler:quartz') {
