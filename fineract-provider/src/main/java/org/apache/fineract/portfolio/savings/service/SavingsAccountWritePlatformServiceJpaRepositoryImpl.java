@@ -1809,7 +1809,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transacton.getTransactionLocalDate(), account);
 
-        this.savingsAccountTransactionRepository.save(transacton);
+        this.savingsAccountTransactionRepository.saveAndFlush(transacton);
 
         if (backdatedTxnsAllowedTill) {
             // Check again whether transactions are modified
@@ -1840,7 +1840,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transaction.getTransactionLocalDate(), account);
         account.releaseOnHoldAmount(transaction.getAmount());
 
-        this.savingsAccountTransactionRepository.save(transaction);
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
         holdTransaction.updateReleaseId(transaction.getId());
 
         if (backdatedTxnsAllowedTill) {
@@ -1853,6 +1853,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(account.getId()).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult blockCredits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1869,6 +1870,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult unblockCredits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1885,6 +1887,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult blockDebits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1901,6 +1904,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult unblockDebits(final Long savingsId) {
         this.context.authenticatedUser();

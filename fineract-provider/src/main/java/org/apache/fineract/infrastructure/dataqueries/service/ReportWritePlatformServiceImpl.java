@@ -92,7 +92,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
             final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
             report.update(reportParameterUsages);
 
-            this.reportRepository.save(report);
+            this.reportRepository.saveAndFlush(report);
 
             final Permission permission = new Permission("report", report.getReportName(), "READ");
             this.permissionRepository.save(permission);

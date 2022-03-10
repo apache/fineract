@@ -78,7 +78,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         }
         final Note newNote = Note.clientNoteFromJson(client, command);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -105,7 +105,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Group group = this.groupRepository.findById(resourceId).orElseThrow(() -> new GroupNotFoundException(resourceId));
         final Note newNote = Note.groupNoteFromJson(group, command);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -123,7 +123,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final String note = command.stringValueOfParameterNamed("note");
         final Note newNote = Note.loanNote(loan, note);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -145,7 +145,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final String note = command.stringValueOfParameterNamed("note");
         final Note newNote = Note.loanTransactionNote(loan, loanTransaction, note);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

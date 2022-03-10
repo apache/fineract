@@ -21,9 +21,9 @@ package org.apache.fineract.portfolio.client.domain;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
-@Repository
+@Service
 public class ClientChargeRepositoryWrapper {
 
     private final ClientChargeRepository repository;

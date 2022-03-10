@@ -113,7 +113,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final Teller teller = Teller.fromJson(tellerOffice, command);
 
             // pre save to generate id for use in office hierarchy
-            this.tellerRepositoryWrapper.save(teller);
+            this.tellerRepositoryWrapper.saveAndFlush(teller);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

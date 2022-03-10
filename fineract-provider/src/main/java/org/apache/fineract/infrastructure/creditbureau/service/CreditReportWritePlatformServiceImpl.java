@@ -110,7 +110,7 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             throw new PlatformApiDataValidationException("creditBureau.has.not.been.Integrated", "creditBureau.has.not.been.Integrated",
                     dataValidationErrors);
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTokenDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {
@@ -189,7 +189,7 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             }
 
             return new CommandProcessingResultBuilder().withEntityId(creditReport.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTokenDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {

@@ -62,7 +62,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
         final OrganisationCreditBureau organisationCreditBureau = OrganisationCreditBureau.fromJson(command, creditBureau);
 
-        this.organisationCreditBureauRepository.save(organisationCreditBureau);
+        this.organisationCreditBureauRepository.saveAndFlush(organisationCreditBureau);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(organisationCreditBureau.getId())
                 .build();

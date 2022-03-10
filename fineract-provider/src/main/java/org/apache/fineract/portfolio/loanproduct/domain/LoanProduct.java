@@ -187,9 +187,6 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "can_use_for_topup", nullable = false)
     private boolean canUseForTopup = false;
 
-    @Column(name = "is_equal_amortization", nullable = false)
-    private boolean isEqualAmortization = false;
-
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
@@ -709,7 +706,6 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
-        this.isEqualAmortization = isEqualAmortization;
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
 
         this.disallowExpectedDisbursements = disallowExpectedDisbursements;
@@ -1561,11 +1557,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public boolean isEqualAmortization() {
-        return isEqualAmortization;
-    }
-
-    public void setEqualAmortization(boolean isEqualAmortization) {
-        this.isEqualAmortization = isEqualAmortization;
+        return loanProductRelatedDetail.isEqualAmortization();
     }
 
     public List<Rate> getRates() {

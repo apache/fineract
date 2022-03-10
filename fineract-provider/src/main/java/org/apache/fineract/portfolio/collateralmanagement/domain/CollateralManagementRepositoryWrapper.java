@@ -34,7 +34,7 @@ public class CollateralManagementRepositoryWrapper {
     }
 
     public CollateralManagementDomain create(CollateralManagementDomain collateralData) {
-        return this.collateralManagementDomainRepository.save(collateralData);
+        return this.collateralManagementDomainRepository.saveAndFlush(collateralData);
     }
 
     public CollateralManagementDomain getCollateral(Long collateralId) {

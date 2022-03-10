@@ -45,7 +45,8 @@ buildscript {
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
+        classpath 'org.eclipse.persistence:eclipselink:2.7.10'
+        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
         classpath('com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0')
     }
 }
@@ -119,7 +120,7 @@ allprojects  {
             // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
             // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-            dependency 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated above in buildscript!
+            dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
             dependency 'com.google.guava:guava:31.1-jre'
             dependency 'com.google.code.gson:gson:2.9.0'
             dependency 'com.google.truth:truth:1.1.3'
@@ -129,7 +130,7 @@ allprojects  {
             dependency 'com.github.librepdf:openpdf:1.3.27'
             dependency 'org.mnode.ical4j:ical4j:3.1.3'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.174'
+            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.175'
             dependency 'org.ehcache:ehcache:3.9.9'
             dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
             dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -415,7 +416,9 @@ configure(project.fineractJavaProjects) {
             "-Xlint:varargs",
             "-Xlint:preview",
             "-Xlint:static",
-            "-Werror",
+            // -Werror needs to be disabled because EclipseLink's static weaving doesn't generate warning-free code
+            // and during an IntelliJ recompilation, it fails
+            //"-Werror",
             "-Xmaxwarns",
             1500,
             "-Xmaxerrs",
@@ -477,7 +480,7 @@ configure(project.fineractJavaProjects) {
     licenseMain.dependsOn compileJava
     processResources.dependsOn compileJava
 
-    // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+    // If we are running Gradle within Eclipse to enhance classes,
     // set the classes directory to point to Eclipse's default build directory
     if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
         sourceSets.main.java.outputDir = file("$projectDir/bin/main")
@@ -632,6 +635,7 @@ configure(project.fineractJavaProjects) {
     spotbugs {
         reportLevel = 'high'
         showProgress = false
+        excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
     }
     // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
     spotbugsMain {

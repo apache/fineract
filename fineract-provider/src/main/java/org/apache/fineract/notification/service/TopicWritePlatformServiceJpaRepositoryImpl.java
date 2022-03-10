@@ -35,7 +35,7 @@ public class TopicWritePlatformServiceJpaRepositoryImpl implements TopicWritePla
 
     @Override
     public Long create(Topic topic) {
-        topicRepository.save(topic);
+        topicRepository.saveAndFlush(topic);
         return topic.getId();
     }
 
