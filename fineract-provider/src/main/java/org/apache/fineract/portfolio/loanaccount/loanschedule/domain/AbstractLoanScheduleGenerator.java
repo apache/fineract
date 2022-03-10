@@ -132,9 +132,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             updateAmortization(mc, loanApplicationTerms, scheduleParams.getPeriodNumber(), scheduleParams.getOutstandingBalance());
 
             if (loanApplicationTerms.isMultiDisburseLoan()) {
-                // fetches the first tranche amount and also updates other
-                // tranche
-                // details to map
+                /* fetches the first tranche amount and also updates other tranche details to map */
                 BigDecimal disburseAmt = getDisbursementAmount(loanApplicationTerms, scheduleParams.getPeriodStartDate(), periods,
                         chargesDueAtTimeOfDisbursement, scheduleParams.getDisburseDetailMap(), scheduleParams.applyInterestRecalculation());
                 scheduleParams.setPrincipalToBeScheduled(Money.of(currency, disburseAmt));
@@ -1918,7 +1916,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 principal = principal.add(disbursementData.amount());
             } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
                     || !disbursementData.disbursementDate().isBefore(DateUtils.getLocalDateOfTenant())) {
-                disurseDetail.put(disbursementData.disbursementDate(), Money.of(currency, disbursementData.amount()));
+                /*
+                 * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there were
+                 * no duplicate disbursal dates and 'put' each amount into the map keyed by date
+                 */
+                Money prevsum = disurseDetail.get(disbursementData.disbursementDate());
+                BigDecimal sumToNow = BigDecimal.ZERO;
+                if (prevsum != null) {
+                    sumToNow = prevsum.getAmount();
+                }
+                sumToNow = sumToNow.add(disbursementData.amount());
+                disurseDetail.put(disbursementData.disbursementDate(), Money.of(currency, sumToNow));
             }
         }
         return principal;

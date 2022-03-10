@@ -93,7 +93,7 @@ public class LoanProductTestBuilder {
 
     private Boolean multiDisburseLoan = false;
     private final String outstandingLoanBalance = "35000";
-    private final String maxTrancheCount = "3";
+    private String maxTrancheCount = "3";
 
     private Boolean isInterestRecalculationEnabled = false;
     private String daysInYearType = "1";
@@ -513,4 +513,10 @@ public class LoanProductTestBuilder {
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         return this;
     }
+
+    public LoanProductTestBuilder withMaxTrancheCount(String maxTrancheCount) {
+        this.maxTrancheCount = maxTrancheCount;
+        return this;
+    }
+
 }
