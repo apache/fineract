@@ -93,7 +93,7 @@ public final class HookData implements Serializable {
     }
 
     public String getTemplateName() {
-        return this.name;
+        return this.templateName;
     }
 
 }

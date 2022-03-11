@@ -44,6 +44,7 @@ public class LoanRepositoryWrapper {
         this.repository = repository;
     }
 
+    @Transactional
     public Loan findOneWithNotFoundDetection(final Long id) {
         return this.findOneWithNotFoundDetection(id, false);
     }
