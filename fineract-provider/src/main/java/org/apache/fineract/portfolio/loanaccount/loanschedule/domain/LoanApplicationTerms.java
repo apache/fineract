@@ -1773,7 +1773,7 @@ public final class LoanApplicationTerms {
 
     }
 
-    public void setTotalPrincipalAccounted(Money totalPrincipalAccounted) {
+    public void setTotalPrincipalAccountedForInterestCalculation(Money totalPrincipalAccounted) {
         this.totalPrincipalAccountedForInterestCalcualtion = totalPrincipalAccounted;
     }
 

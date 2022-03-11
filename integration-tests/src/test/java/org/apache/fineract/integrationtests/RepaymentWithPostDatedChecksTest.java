@@ -137,7 +137,7 @@ public class RepaymentWithPostDatedChecksTest {
         // Repay for the installment 1 using post dated check
         HashMap postDatedCheck = this.loanTransactionHelper.getPostDatedCheck(loanID, Integer.valueOf(1));
         Assertions.assertNotNull(postDatedCheck);
-        Assertions.assertNotNull(Float.parseFloat(String.valueOf(postDatedCheck.get("amount"))));
+        Assertions.assertNotNull(Float.valueOf(String.valueOf(postDatedCheck.get("amount"))));
 
         this.loanTransactionHelper.makeRepaymentWithPDC(LOAN_REPAYMENT_DATE, firstInstallmentAmount, loanID, paymentTypeId);
     }
