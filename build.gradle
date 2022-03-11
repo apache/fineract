@@ -120,7 +120,7 @@ allprojects  {
             // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
             // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-            dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
+            dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2'
             dependency 'com.google.guava:guava:31.1-jre'
             dependency 'com.google.code.gson:gson:2.9.0'
             dependency 'com.google.truth:truth:1.1.3'
