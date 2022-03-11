@@ -56,6 +56,7 @@ public enum NoteType {
     private static final Map<Integer, NoteType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final NoteType type : NoteType.values()) {

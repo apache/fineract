@@ -36,6 +36,7 @@ public enum AdHocJsonInputParams {
     }
 
     private static final Set<String> values = new HashSet<>();
+
     static {
         for (final AdHocJsonInputParams type : AdHocJsonInputParams.values()) {
             values.add(type.value);

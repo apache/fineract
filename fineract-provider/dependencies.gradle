@@ -135,6 +135,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
+        exclude group: 'org.skyscreamer'
     }
 
 }

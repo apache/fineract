@@ -217,11 +217,10 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     }
 
     public boolean hasParentOf(final Office office) {
-        boolean isParent = false;
         if (this.parent != null) {
-            isParent = this.parent.equals(office);
+            return this.parent.equals(office);
         }
-        return isParent;
+        return false;
     }
 
     public boolean doesNotHaveAnOfficeInHierarchyWithId(final Long officeId) {
@@ -241,7 +240,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
                 final boolean result = child.hasAnOfficeInHierarchyWithId(officeId);
 
                 if (result) {
-                    match = result;
+                    match = true;
                     break;
                 }
             }

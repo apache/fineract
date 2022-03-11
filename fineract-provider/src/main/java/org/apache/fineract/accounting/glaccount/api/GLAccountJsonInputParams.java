@@ -36,6 +36,7 @@ public enum GLAccountJsonInputParams {
     }
 
     private static final Set<String> values = new HashSet<>();
+
     static {
         for (final GLAccountJsonInputParams type : GLAccountJsonInputParams.values()) {
             values.add(type.value);

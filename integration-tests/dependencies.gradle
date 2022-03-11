@@ -28,6 +28,8 @@ dependencies {
             'com.google.truth:truth',
             'com.google.truth.extensions:truth-java8-extension',
             'org.awaitility:awaitility',
+            'org.bouncycastle:bcpkix-jdk15on',
+            'org.bouncycastle:bcprov-jdk15on'
             // 'com.google.code.gson:gson',
             )
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {

@@ -36,6 +36,7 @@ public class SearchConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final SearchResponseParameters param : SearchResponseParameters.values()) {
                 values.add(param.value);
@@ -67,6 +68,7 @@ public class SearchConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final SearchSupportedParameters param : SearchSupportedParameters.values()) {
                 values.add(param.value);
@@ -98,6 +100,7 @@ public class SearchConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final SearchSupportedResources param : SearchSupportedResources.values()) {
                 values.add(param.value);
@@ -129,6 +132,7 @@ public class SearchConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final SearchLoanDate param : SearchLoanDate.values()) {
                 values.add(param.value);
