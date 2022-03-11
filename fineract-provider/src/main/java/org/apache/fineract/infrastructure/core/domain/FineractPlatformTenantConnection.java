@@ -21,6 +21,8 @@ package org.apache.fineract.infrastructure.core.domain;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.Connection;
+
 /**
  * Holds Tenant's DB server connection connection details.
  */
