@@ -529,6 +529,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
+    @Transactional
     public CommandProcessingResult postInterest(final JsonCommand command) {
 
         Long savingsId = command.getSavingsId();

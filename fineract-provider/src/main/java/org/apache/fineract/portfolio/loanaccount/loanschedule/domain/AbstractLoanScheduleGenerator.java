@@ -1024,7 +1024,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     }
                 } else {
                     Money totalInterestDueForLoan = Money.zero(loanApplicationTerms.getCurrency());
-                    loanApplicationTerms.setTotalPrincipalAccounted(scheduleParams.getTotalCumulativePrincipal());
+                    loanApplicationTerms.setTotalPrincipalAccountedForInterestCalculation(scheduleParams.getTotalCumulativePrincipal());
                     totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
                     totalInterestDueForLoan = totalInterestDueForLoan.plus(scheduleParams.getTotalCumulativeInterest());
                     loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
@@ -1147,7 +1147,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
                     adjustInstallmentOrPrincipalAmount(loanApplicationTerms, totalCumulativePrincipal, instalmentNumber, mc);
                 } else {
-                    loanApplicationTerms.setTotalPrincipalAccounted(totalCumulativePrincipal);
+                    loanApplicationTerms.setTotalPrincipalAccountedForInterestCalculation(totalCumulativePrincipal);
                     loanApplicationTerms.updateExcludePeriodsForCalculation(instalmentNumber - 1);
                 }
                 variation.setProcessed(true);
