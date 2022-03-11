@@ -231,7 +231,7 @@ public class Charge extends AbstractPersistableCustom {
             }
 
             if (enableFreeWithdrawalCharge) {
-                this.enableFreeWithdrawal = enableFreeWithdrawalCharge;
+                this.enableFreeWithdrawal = true;
                 this.freeWithdrawalFrequency = freeWithdrawalFrequency;
                 this.restartFrequency = restartFrequency;
                 this.restartFrequencyEnum = restartFrequencyEnum.getValue();
@@ -240,7 +240,7 @@ public class Charge extends AbstractPersistableCustom {
             if (enablePaymentType) {
                 if (paymentType != null) {
 
-                    this.enablePaymentType = enablePaymentType;
+                    this.enablePaymentType = true;
                     this.paymentType = paymentType;
                 }
             }

@@ -44,6 +44,7 @@ public enum GuarantorType {
     private static final Map<Integer, GuarantorType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final GuarantorType type : GuarantorType.values()) {

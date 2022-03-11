@@ -51,7 +51,7 @@ public final class EmailConfigurationValidator {
             EmailApiConstants.SMTP_PASSWORD, EmailApiConstants.SMTP_USERNAME, EmailApiConstants.SMTP_SERVER));
 
     @Autowired
-    private EmailConfigurationValidator(final FromJsonHelper fromApiJsonHelper) {
+    public EmailConfigurationValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 

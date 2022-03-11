@@ -49,7 +49,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             "professionId", "locale", "dateFormat", "familyMembers"));
 
     @Autowired
-    private ClientFamilyMemberCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    public ClientFamilyMemberCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
