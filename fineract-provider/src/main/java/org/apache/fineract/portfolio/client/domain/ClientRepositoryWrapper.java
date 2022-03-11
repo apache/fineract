@@ -44,6 +44,7 @@ public class ClientRepositoryWrapper {
         this.context = context;
     }
 
+    @Transactional
     public Client findOneWithNotFoundDetection(final Long id) {
         return this.findOneWithNotFoundDetection(id, false);
     }
@@ -77,6 +78,7 @@ public class ClientRepositoryWrapper {
         this.repository.flush();
     }
 
+    @Transactional
     public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);
         if (client.isNotActive()) {

@@ -84,7 +84,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             PreparedStatement preparedStatement = con.prepareStatement(finalSql, ResultSet.TYPE_SCROLL_SENSITIVE,
                     ResultSet.CONCUR_UPDATABLE);
             preparedStatement.setInt(1, AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue());
-            preparedStatement.setLong(2, loanId);
+            preparedStatement.setLong(2, loanId); //NOSONAR
             return preparedStatement;
         }, rm);
 
@@ -107,7 +107,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                     ResultSet.CONCUR_UPDATABLE);
             preparedStatement.setInt(1, AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue());
             preparedStatement.setLong(2, loanId);
-            preparedStatement.setLong(3, guarantorId);
+            preparedStatement.setLong(3, guarantorId);//NOSONAR
             return preparedStatement;
         }, rm).get(0);
 

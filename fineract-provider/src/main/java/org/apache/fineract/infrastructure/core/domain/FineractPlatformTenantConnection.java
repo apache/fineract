@@ -198,8 +198,8 @@ public class FineractPlatformTenantConnection {
     }
 
     public static String toProtocol(DataSource dataSource) {
-        try {
-            String url = dataSource.getConnection().getMetaData().getURL();
+        try (final Connection connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
             return url.substring(0, url.indexOf("://"));
         } catch (Exception e) {
             throw new RuntimeException(e);

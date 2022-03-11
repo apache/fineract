@@ -315,6 +315,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     }
 
     @Override
+    @Transactional
     public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
         /***
@@ -346,6 +347,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     }
 
     @Override
+    @Transactional
     public Map<String, Object> updateShareProductToGLAccountMapping(final Long shareProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
