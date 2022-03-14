@@ -1280,10 +1280,12 @@ public class Loan extends AbstractPersistableCustom {
      */
     private void applyAccurals(AppUser currentUser) {
         Collection<LoanTransaction> accruals = retreiveListOfAccrualTransactions();
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            applyPeriodicAccruals(accruals);
-        } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-            updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+        if (accruals.size() > 0) {
+            if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+                applyPeriodicAccruals(accruals);
+            } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+            }
         }
     }
 

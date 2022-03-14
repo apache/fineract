@@ -756,6 +756,8 @@ public final class LoanProductDataValidator {
                     .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
         }
 
+        final String overAppliedCalculationType = this.fromApiJsonHelper.extractStringNamed("overAppliedCalculationType", element);
+        baseDataValidator.reset().parameter("overAppliedCalculationType").value(overAppliedCalculationType).notExceedingLengthOf(10);
     }
 
     private void validateInterestRecalculationParams(final JsonElement element, final DataValidatorBuilder baseDataValidator,
