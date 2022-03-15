@@ -142,7 +142,7 @@ allprojects  {
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
             dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3' // Swagger needs exactly this version
             dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
-            dependency 'org.apache.activemq:activemq-broker:5.16.4'
+            dependency 'org.apache.activemq:activemq-broker:5.17.0'
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
 
             dependency 'io.github.classgraph:classgraph:4.8.141'
