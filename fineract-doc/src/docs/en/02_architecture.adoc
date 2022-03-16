@@ -99,10 +99,11 @@ At a higher level though we see the capabilities fall into the following categor
 ** Spring Framework
 ** Spring Boot
 ** Spring Security
-** Spring Data (JPA) backed by Hibernate
+** Spring Data (JPA) backed by EclipseLink
 * MySQL: http://www.oracle.com/us/products/mysql/overview/index.html
+* PostgreSQL
 
-=== Principals
+=== Principles
 
 ==== RESTful API
 
@@ -208,3 +209,64 @@ NOTE: if a RollbackTransactionAsCommandIsNotApprovedByCheckerException occurs at
 * Process command using handler (In transactional scope).
 * CommandSource object created/updated with all details for logging to 'm_portfolio_command_source' table.
 * In update scenario, we check to see if there where really any changes/updates. If so only JSON for changes is stored in audit log.
+
+=== Database support
+
+Fineract supports multiple databases:
+
+* MySQL compatible databases (e.g. MariaDB)
+* PostgreSQL
+
+The platform differentiates between these database types in certain cases when there's a need to use some database specific tooling. To do so, the platform examines the JDBC driver used for running the platform and tries to determine which database is being used.
+
+The currently supported JDBC driver and corresponding mappings can be found below.
+
+[cols="1,1"]
+|===
+|*JDBC driver class name*
+|*Resolved database type*
+
+|`org.mariadb.jdbc.Driver`
+|MySQL
+
+|`com.mysql.jdbc.Driver`
+|MySQL
+
+|`org.postgresql.Driver`
+|PostgreSQL
+
+|===
+
+The actual code can be found in the `DatabaseTypeResolver` class.
+
+=== Data-access layer
+
+The data-access layer of Fineract is implemented by using JPA (Java Persistence API) with the EclipseLink provider.
+Despite the fact that JPA is used quite extensively in the system, there are cases where the performance is a key element for an operation therefore you can easily find native SQLs as well.
+
+The data-access layer of Fineract is compatible with different databases. Since a lot of the native queries are using specific database functions, a wrapper class - `DatabaseSpecificSQLGenerator` -  has been introduced to handle these database specifics. Whenever there's a need to rely on new database level functions, make sure to extend this class and implement the specific functions provided by the database.
+
+Fineract has been developed for 10+ years by the community and unfortunately there are places where entity relationships are configured with `EAGER` fetching strategy. This must not confuse anybody. The long-term goal is to use the `LAZY` fetching strategy for every single relationship. If you're about to introduce a new one, make sure to use `LAZY` as a fetching strategy, otherwise your PR will be rejected.
+
+=== Database schema migration
+
+As for every system, the database structure will and need to evolve over time. Fineract is no different. Originally for Fineract, Flyway was used until Fineract 1.6.x.
+
+After 1.6.x, PostgreSQL support was added to the platform hence there was a need to make the data-access layer and the schema migration as database independent as possible. Becuase of that, from Fineract 1.7.0, Flyway is not used anymore but Liquibase is.
+
+Some of the changesets in the Liquibase changelogs have database specifics into it but they only run for the relevant databases. This is controller by Liquibase contexts.
+
+The currently available Liquibase contexts are:
+
+* `mysql` - only set when the database is a MySQL compatible database (e.g. MariaDB)
+* `postgresql` - only set when the database is a PostgreSQL database
+* configured Spring active profiles
+* `tenant_store_db` - only set when the database migration runs the Tenant Store upgrade
+* `tenant_db` - only set when the database migration runs the Tenant upgrade
+* `initial_switch` - this is a technical context and should *NOT* be used
+
+The switch from Flyway (1.6.x) to Liquibase (1.7.x) was planned to be as smooth as possible so there's no need for manual work hence the behavior is described as following:
+
+* If the database is empty, Liquibase will create the database schema from scratch
+* If the database contains the latest Fineract 1.6.x database structure which was previously migrated with Flyway. Liquibase will seamlessly upgrade it to the latest version. Note: the Flyway related 2 database tables are left as they are and are not deleted.
+* If the database contains an earlier version of the database structure than Fineract 1.6.x. Liquibase will *NOT* do anything and *will fail the application during startup*. The proper approach in this case is to first upgrade your application version to the latest Fineract 1.6.x so that the latest Flyway changes are executed and then upgrade to the newer Fineract version where Liquibase will seamlessly take over the database upgrades.

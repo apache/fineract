@@ -18,6 +18,7 @@
 
 | Michael Vorburger | mailto:mike@vorburger.ch[]
 | Aleksandar Vidakovic | mailto:aleks@apache.org[]
+| Arnold Galovics | mailto:arnold@apache.org[]
 |===
 
 //ifdef::backend-pdf[]
@@ -30,6 +31,7 @@
 ^| Authors ^| Description ^| Date ^| Version
 
 | Aleksandar Vidakovic | Initial version | 2020-10-26 | 1.4.0
+| Arnold Galovics | Database architecture section | 2022-03-11 | 1.7.0
 |===
 
 toc::[]
