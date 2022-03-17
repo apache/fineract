@@ -66,6 +66,7 @@ import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRe
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -117,6 +118,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final DataTableValidator dataTableValidator;
     private final ColumnValidator columnValidator;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final SqlInjectionPreventerService preventSqlInjectionService;
 
     // private final GlobalConfigurationWritePlatformServiceJpaRepositoryImpl
     // configurationWriteService;
@@ -126,7 +128,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper, final GenericDataService genericDataService,
             final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer, final CodeReadPlatformService codeReadPlatformService,
             final ConfigurationDomainService configurationDomainService, final DataTableValidator dataTableValidator,
-            final ColumnValidator columnValidator, DatabaseTypeResolver databaseTypeResolver, DatabaseSpecificSQLGenerator sqlGenerator) {
+            final ColumnValidator columnValidator, DatabaseTypeResolver databaseTypeResolver, DatabaseSpecificSQLGenerator sqlGenerator,
+            SqlInjectionPreventerService sqlInjectionPreventerService) {
         this.databaseTypeResolver = databaseTypeResolver;
         this.sqlGenerator = sqlGenerator;
         this.jdbcTemplate = jdbcTemplate;
@@ -141,37 +144,28 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.columnValidator = columnValidator;
         // this.configurationWriteService = configurationWriteService;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.preventSqlInjectionService = sqlInjectionPreventerService;
     }
 
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
 
-        String andClause;
-        if (appTable == null) {
-            andClause = "";
-        } else {
-            validateAppTable(appTable);
-            SQLInjectionValidator.validateSQLInput(appTable);
-            andClause = " and application_table_name = '" + appTable + "'";
-        }
-
         // PERMITTED datatables
         final String sql = "select application_table_name, registered_table_name, entity_subtype " + " from x_registered_table "
                 + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + andClause + " order by application_table_name, registered_table_name";
-
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+                + " where ur.appuser_id = ? and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat"
+                + "('READ_', registered_table_name))) "
+                + " and application_table_name like ? order by application_table_name, registered_table_name";
 
         final List<DatatableData> datatables = new ArrayList<>();
-        while (rs.next()) {
-            final String appTableName = rs.getString("application_table_name");
-            final String registeredDatatableName = rs.getString("registered_table_name");
-            final String entitySubType = rs.getString("entity_subtype");
-            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), appTable }); // NOSONAR
+        while (rowSet.next()) {
+            final String appTableName = rowSet.getString("application_table_name");
+            final String registeredDatatableName = rowSet.getString("registered_table_name");
+            final String entitySubType = rowSet.getString("entity_subtype");
+            final List<ResultsetColumnHeaderData> columnHeaderData = genericDataService.fillResultsetColumnHeaders(registeredDatatableName);
 
             datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
         }
@@ -187,17 +181,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String sql = "select application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
                 + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId() + " and registered_table_name='" + datatable + "'"
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
+                + " where ur.appuser_id = ? and registered_table_name=? and (p.code in ('ALL_FUNCTIONS', "
+                + "'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
                 + " order by application_table_name, registered_table_name";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         DatatableData datatableData = null;
-        while (rs.next()) {
-            final String appTableName = rs.getString("application_table_name");
-            final String registeredDatatableName = rs.getString("registered_table_name");
-            final String entitySubType = rs.getString("entity_subtype");
+
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), datatable }); // NOSONAR
+        if (rowSet.next()) {
+            final String appTableName = rowSet.getString("application_table_name");
+            final String registeredDatatableName = rowSet.getString("registered_table_name");
+            final String entitySubType = rowSet.getString("entity_subtype");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
                     .fillResultsetColumnHeaders(registeredDatatableName);
 
@@ -253,7 +247,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    @Transactional
     private void registerDataTable(final String applicationTableName, final String dataTableName, final String entitySubType,
             final Integer category, final String permissionsSql) {
 
@@ -354,18 +347,20 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public void deregisterDatatable(final String datatable) {
-        validateDatatableName(datatable);
-        final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
-                + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
+        String validatedDatatable = this.preventSqlInjectionService.encodeSql(datatable);
+        final String permissionList = "('CREATE_" + validatedDatatable + "', 'CREATE_" + validatedDatatable + "_CHECKER', 'READ_"
+                + validatedDatatable + "', 'UPDATE_" + validatedDatatable + "', 'UPDATE_" + validatedDatatable + "_CHECKER', 'DELETE_"
+                + validatedDatatable + "', 'DELETE_" + validatedDatatable + "_CHECKER')";
 
         final String deleteRolePermissionsSql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
                 + permissionList + ")";
 
         final String deletePermissionsSql = "delete from m_permission where code in " + permissionList;
 
-        final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
+        final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + validatedDatatable
+                + "'";
 
-        final String deleteFromConfigurationSql = "delete from c_configuration where name ='" + datatable + "'";
+        final String deleteFromConfigurationSql = "delete from c_configuration where name ='" + validatedDatatable + "'";
 
         String[] sqlArray = new String[4];
         sqlArray[0] = deleteRolePermissionsSql;
@@ -373,7 +368,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sqlArray[2] = deleteRegisteredDatatableSql;
         sqlArray[3] = deleteFromConfigurationSql;
 
-        this.jdbcTemplate.batchUpdate(sqlArray);
+        this.jdbcTemplate.batchUpdate(sqlArray); // NOSONAR
     }
 
     @Transactional
@@ -1457,18 +1452,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql) {
-
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
-        final SqlRowSetMetaData rsmd = rs.getMetaData();
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql); // NOSONAR
+        final SqlRowSetMetaData rsmd = rowSet.getMetaData();
 
-        while (rs.next()) {
+        while (rowSet.next()) {
             final List<String> columnValues = new ArrayList<>();
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
-                final String columnValue = rs.getString(columnName);
+                final String columnValue = rowSet.getString(columnName);
                 columnValues.add(columnValue);
             }
 
@@ -1481,13 +1474,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private String queryForApplicationTableName(final String datatable) {
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
+        final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = ?";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        String applicationTableName = "";
 
-        String applicationTableName = null;
-        if (rs.next()) {
-            applicationTableName = rs.getString("application_table_name");
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { datatable }); // NOSONAR
+        if (rowSet.next()) {
+            applicationTableName = rowSet.getString("application_table_name");
         } else {
             throw new DatatableNotFoundException(datatable);
         }

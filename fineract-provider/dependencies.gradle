@@ -106,6 +106,17 @@ dependencies {
         exclude group: 'com.sun.activation'
     }
 
+    implementation('org.owasp.esapi:esapi:2.2.3.1') {
+        exclude group: 'org.slf4j'
+        exclude group: 'log4j'
+        exclude group: 'commons-logging'
+        exclude group: 'commons-collections'
+        exclude group: 'commons-lang'
+        exclude group: 'spotbugs-annotations'
+        exclude group: 'xml-apis'
+    }
+
+
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }

@@ -78,7 +78,7 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         // props.put("mail.smtp.ssl.enable", "true");
 
         props.put("mail.smtp.socketFactory.port", Integer.parseInt(smtpCredentialsData.getPort()));
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");// NOSONAR
         props.put("mail.smtp.socketFactory.fallback", "true");
 
         try {

@@ -41,15 +41,15 @@ public class PaginationHelper {
 
     public <E> Page<E> fetchPage(final JdbcTemplate jt, final String sqlFetchRows, final Object[] args, final RowMapper<E> rowMapper) {
 
-        final List<E> items = jt.query(sqlFetchRows, rowMapper, args);
+        final List<E> items = jt.query(sqlFetchRows, rowMapper, args); // NOSONAR
 
         // determine how many rows are available
-        String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sqlFetchRows);
+        final String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sqlFetchRows);
         final int totalFilteredRecords;
         if (databaseTypeResolver.isMySQL()) {
-            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class);
+            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class); // NOSONAR
         } else {
-            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class, args);
+            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class, args); // NOSONAR
         }
 
         return new Page<>(items, totalFilteredRecords);

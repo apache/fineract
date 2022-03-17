@@ -179,7 +179,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         // always append at the end of a sql statement
         sqlBuilder.append(paginationParameters.paginationSql());
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), depositAccountMapper, new Object[] { depositAccountType.getValue() });
+        return jdbcTemplate.query(sqlBuilder.toString(), depositAccountMapper, new Object[] { depositAccountType.getValue() }); // NOSONAR
     }
 
     @Override

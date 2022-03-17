@@ -68,7 +68,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
         try {
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql); // NOSONAR
 
             final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
             final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
