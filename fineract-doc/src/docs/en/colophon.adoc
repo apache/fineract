@@ -32,6 +32,7 @@
 
 | Aleksandar Vidakovic | Initial version | 2020-10-26 | 1.4.0
 | Arnold Galovics | Database architecture section | 2022-03-11 | 1.7.0
+| Aleksandar Vidakovic | Module section | 2022-03-23 | 1.7.0
 |===
 
 toc::[]

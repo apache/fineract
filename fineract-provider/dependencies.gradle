@@ -135,7 +135,11 @@ dependencies {
             'io.cucumber:cucumber-java8',
             'io.cucumber:cucumber-junit-platform-engine',
             'io.cucumber:cucumber-spring',
-            'io.github.classgraph:classgraph'
+            'io.github.classgraph:classgraph',
+            project(':module:dummy:core'),
+            project(':module:dummy:service'),
+            project(':module:dummy:starter'),
+            project(':custom:foo:service'),
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

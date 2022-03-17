@@ -133,14 +133,13 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatfor
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
-import org.apache.fineract.portfolio.note.service.NoteReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -244,7 +243,7 @@ public class LoansApiResource {
     private final FromJsonHelper fromJsonHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final NoteReadPlatformServiceImpl noteReadPlatformService;
+    private final NoteReadPlatformService noteReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService;
@@ -258,7 +257,6 @@ public class LoansApiResource {
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService;
 
-    @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
@@ -272,7 +270,7 @@ public class LoansApiResource {
             final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformServiceImpl noteReadPlatformService,
+            final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformService noteReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,

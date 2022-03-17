@@ -44,11 +44,12 @@ asciidoctorj {
     version = '2.4.0'
 
     attributes = [
+        version: "$project.version",
         generated: "${buildDir}/generated/asciidoc",
         imagesdir: 'images',
         diagrams: 'diagrams',
         years: '2015-2022',
-        revnumber: "$version".toString(),
+        revnumber: "$project.version".toString(),
         rootdir: "$rootDir".toString(),
         baseurl: 'fineract.apache.org'
     ]
