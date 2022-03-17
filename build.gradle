@@ -110,7 +110,7 @@ allprojects  {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin
     dependencyManagement {
         imports {
-            mavenBom 'org.springframework:spring-framework-bom:5.3.16'
+            mavenBom 'org.springframework:spring-framework-bom:5.3.17'
             mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.4'
             mavenBom 'org.junit:junit-bom:5.8.2'
             mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2'
