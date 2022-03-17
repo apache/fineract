@@ -46,7 +46,7 @@ buildscript {
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
         classpath 'org.eclipse.persistence:eclipselink:2.7.10'
-        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.0.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0'
     }
 }
