@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.infrastructure.survey.service;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,24 +107,31 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                 + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
                 + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId() + " and registered_table_name='" + surveyName + "'"
+                + " where ur.appuser_id = ? and registered_table_name=?"
                 + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
                 + " order by application_table_name, registered_table_name";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         SurveyDataTableData datatableData = null;
-        while (rs.next()) {
-            final String appTableName = rs.getString("application_table_name");
-            final String registeredDatatableName = rs.getString("registered_table_name");
-            final String entitySubType = rs.getString("entity_subtype");
-            final boolean enabled = rs.getBoolean("enabled");
-            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, this.context.authenticatedUser().getId());
+            preparedStatement.setString(2, surveyName);
+            final ResultSet rs = preparedStatement.executeQuery();
 
-            datatableData = SurveyDataTableData
-                    .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
+            if (rs.next()) {
+                final String appTableName = rs.getString("application_table_name");
+                final String registeredDatatableName = rs.getString("registered_table_name");
+                final String entitySubType = rs.getString("entity_subtype");
+                final boolean enabled = rs.getBoolean("enabled");
+                final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
+                        .fillResultsetColumnHeaders(registeredDatatableName);
 
+                datatableData = SurveyDataTableData
+                        .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
+
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         return datatableData;

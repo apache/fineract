@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -197,7 +198,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }
         }
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            for (int i = 0;i<extraCriteria.getArguments().length;i++) {
+                preparedStatement.setObject(i+1, extraCriteria.getArguments()[i]);
+            }
+            return preparedStatement;
+        }, this.allGroupTypesDataMapper);
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where

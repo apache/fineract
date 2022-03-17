@@ -252,7 +252,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final Document document = new Document(PageSize.B0.rotate());
 
-            PdfWriter.getInstance(document, new FileOutputStream(new File(fileLocation + reportName + ".pdf")));
+            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + reportName + ".pdf")); // NOSONAR
             document.open();
 
             final PdfPTable table = new PdfPTable(chSize);

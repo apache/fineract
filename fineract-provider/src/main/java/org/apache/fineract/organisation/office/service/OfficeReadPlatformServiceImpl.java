@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.office.service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -157,12 +158,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     public Collection<OfficeData> retrieveAllOffices(final boolean includeAllOffices, final SearchParameters searchParameters) {
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = null;
-        if (includeAllOffices) {
-            hierarchySearchString = "." + "%";
-        } else {
-            hierarchySearchString = hierarchy + "%";
-        }
+        final String hierarchySearchString = includeAllOffices ? "." + "%" : hierarchy + "%";
         final OfficeMapper rm = new OfficeMapper();
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
@@ -180,7 +176,12 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
                 sqlBuilder.append("order by o.hierarchy");
             }
         }
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            preparedStatement.setString(1, hierarchySearchString);
+            return preparedStatement;
+        }, rm);
     }
 
     @Override

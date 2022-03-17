@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -71,6 +72,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.owasp.esapi.ESAPI;
+import org.owasp.esapi.codecs.MySQLCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +84,6 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -150,34 +152,31 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
 
-        String andClause;
-        if (appTable == null) {
-            andClause = "";
-        } else {
-            validateAppTable(appTable);
-            SQLInjectionValidator.validateSQLInput(appTable);
-            andClause = " and application_table_name = '" + appTable + "'";
-        }
-
         // PERMITTED datatables
         final String sql = "select application_table_name, registered_table_name, entity_subtype " + " from x_registered_table "
                 + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + andClause + " order by application_table_name, registered_table_name";
-
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+                + " where ur.appuser_id = ? and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat"
+                + "('READ_', registered_table_name))) "
+                + " and application_table_name like ? order by application_table_name, registered_table_name";
 
         final List<DatatableData> datatables = new ArrayList<>();
-        while (rs.next()) {
-            final String appTableName = rs.getString("application_table_name");
-            final String registeredDatatableName = rs.getString("registered_table_name");
-            final String entitySubType = rs.getString("entity_subtype");
-            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, this.context.authenticatedUser().getId());
+            preparedStatement.setString(2, appTable == null ? "%" : appTable);
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final String appTableName = rs.getString("application_table_name");
+                final String registeredDatatableName = rs.getString("registered_table_name");
+                final String entitySubType = rs.getString("entity_subtype");
+                final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
+                        .fillResultsetColumnHeaders(registeredDatatableName);
 
-            datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
+                datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         return datatables;
@@ -191,21 +190,27 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String sql = "select application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
                 + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = " + this.context.authenticatedUser().getId() + " and registered_table_name='" + datatable + "'"
-                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
+                + " where ur.appuser_id = ? and registered_table_name=? and (p.code in ('ALL_FUNCTIONS', "
+                + "'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
                 + " order by application_table_name, registered_table_name";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         DatatableData datatableData = null;
-        while (rs.next()) {
-            final String appTableName = rs.getString("application_table_name");
-            final String registeredDatatableName = rs.getString("registered_table_name");
-            final String entitySubType = rs.getString("entity_subtype");
-            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, this.context.authenticatedUser().getId());
+            preparedStatement.setString(2, datatable);
+            final ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                final String appTableName = rs.getString("application_table_name");
+                final String registeredDatatableName = rs.getString("registered_table_name");
+                final String entitySubType = rs.getString("entity_subtype");
+                final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
+                        .fillResultsetColumnHeaders(registeredDatatableName);
 
-            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
+                datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         return datatableData;
@@ -257,7 +262,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    @Transactional
     private void registerDataTable(final String applicationTableName, final String dataTableName, final String entitySubType,
             final Integer category, final String permissionsSql) {
 
@@ -372,10 +376,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String deleteFromConfigurationSql = "delete from c_configuration where name ='" + datatable + "'";
 
         String[] sqlArray = new String[4];
-        sqlArray[0] = deleteRolePermissionsSql;
-        sqlArray[1] = deletePermissionsSql;
-        sqlArray[2] = deleteRegisteredDatatableSql;
-        sqlArray[3] = deleteFromConfigurationSql;
+        sqlArray[0] = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), deleteRolePermissionsSql);
+        sqlArray[1] = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), deletePermissionsSql);
+        sqlArray[2] = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), deleteRegisteredDatatableSql);
+        sqlArray[3] = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), deleteFromConfigurationSql);
 
         this.jdbcTemplate.batchUpdate(sqlArray);
     }
@@ -1461,23 +1465,25 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql) {
-
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
-        final SqlRowSetMetaData rsmd = rs.getMetaData();
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            final ResultSet rs = preparedStatement.executeQuery();
+            final ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                final List<String> columnValues = new ArrayList<>();
+                for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                    final String columnName = rsmd.getColumnName(i + 1);
+                    final String columnValue = rs.getString(columnName);
+                    columnValues.add(columnValue);
+                }
 
-        while (rs.next()) {
-            final List<String> columnValues = new ArrayList<>();
-            for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                final String columnName = rsmd.getColumnName(i + 1);
-                final String columnValue = rs.getString(columnName);
-                columnValues.add(columnValue);
+                final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
+                resultsetDataRows.add(resultsetDataRow);
             }
-
-            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
-            resultsetDataRows.add(resultsetDataRow);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         return resultsetDataRows;
@@ -1485,15 +1491,20 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private String queryForApplicationTableName(final String datatable) {
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
+        final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = ?";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
-        String applicationTableName = null;
-        if (rs.next()) {
-            applicationTableName = rs.getString("application_table_name");
-        } else {
-            throw new DatatableNotFoundException(datatable);
+        String applicationTableName;
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, datatable);
+            final ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                applicationTableName = rs.getString("application_table_name");
+            } else {
+                throw new DatatableNotFoundException(datatable);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         return applicationTableName;

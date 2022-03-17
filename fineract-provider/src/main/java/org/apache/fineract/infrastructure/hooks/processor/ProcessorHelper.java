@@ -48,10 +48,10 @@ public final class ProcessorHelper {
     private static final X509TrustManager insecureX509TrustManager = new X509TrustManager() {
 
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}//NOSONAR
 
         @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}//NOSONAR
 
         @Override
         public X509Certificate[] getAcceptedIssuers() {
@@ -85,7 +85,7 @@ public final class ProcessorHelper {
 
     private void configureInsecureClient(final OkHttpClient.Builder okBuilder) {
         okBuilder.sslSocketFactory(insecureSSLContext.getSocketFactory(), insecureX509TrustManager);
-        HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;
+        HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;//NOSONAR
         okBuilder.hostnameVerifier(insecureHostnameVerifier);
     }
 

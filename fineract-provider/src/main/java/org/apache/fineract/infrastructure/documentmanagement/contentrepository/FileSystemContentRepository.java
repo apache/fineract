@@ -141,7 +141,7 @@ public class FileSystemContentRepository implements ContentRepository {
     private void writeFileToFileSystem(final String fileName, final InputStream uploadedInputStream, final String fileLocation) {
         try {
             makeDirectories(fileLocation);
-            FileUtils.copyInputStreamToFile(uploadedInputStream, new File(fileLocation));
+            FileUtils.copyInputStreamToFile(uploadedInputStream, new File(fileLocation)); // NOSONAR
         } catch (final IOException ioException) {
             LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)",
                     ioException);
