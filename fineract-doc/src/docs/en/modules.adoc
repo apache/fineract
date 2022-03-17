@@ -1,0 +1,250 @@
+== Modules
+
+Currently modules are a proof of concept feature in Fineract.
+
+=== How to create a Fineract module
+
+NOTE: At the moment the only module we have that follows these stricter guidelines is the example module we describe in detail in the next section. In the future we will try to split up Fineract's monolithic code base and move features (like loan product, accounts etc.) to separate modules as described here. Before that happens we need to do some code cleanups first.
+
+1. Create a folder under `module` and name it _mymodule_.
+1. Create a folder named _core_ under `module/mymodule`.
+1. Create a folder named _service_ under `module/mymodule`.
+1. Create a folder named _starter_ under `module/mymodule`.
+1. Setup folders and Gradle build files for a Java project under `core`, `service` and `starter`.
+1. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`.
++
+The final folder and file structure should look somewhat like this:
++
+[plantuml, format=svg]
+----
+include::diagrams/modules-folder-structure.puml[]
+----
+
+1. Make sure that your new modules are present in settings.gradle:
++
+[source,groovy]
+----
+rootProject.name='fineract'
+include ':module:mymodule:core' // <.>
+include ':module:mymodule:service'
+include ':module:mymodule:starter'
+include ':fineract-provider'
+include ':fineract-war'
+include ':integration-tests'
+include ':twofactor-tests'
+include ':oauth2-tests'
+include ':fineract-client'
+include ':fineract-doc'
+----
+<.> The `settings.gradle` file should contain something like this (and following).
+
+=== How to replace an existing Fineract service
+
+Creating customizations for Fineract services is easy. The method described here will work both with our future module guidelines (aka "clean room" modules) and with the intermediary solution we will put in place to avoid major refactorings.
+
+You can of course choose whatever folder/project structure you like for your custom modules. But we'll describe here some best practices to avoid merge conflicts when fetching updates from Fineract's upstream Git repository. For the time being we suggest to create your custom modules in the same folder as Fineract in a forked Git repo.
+
+As soon as we can publish Fineract module JARs to Maven Central you'll have more freedom to setup your projects (including to setup separate Git repos).
+
+1. Create a folder under `custom` and name it _mycustom_.
+1. Create a folder named _service_ under `custom/mycustom`.
+1. Setup folders and Gradle build files for a Java project under `service`.
+1. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`:
++
+[source,properties]
+----
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ org.apache.fineract.mymodule.starter.MyAutoConfiguration
+----
++
+The final folder and file structure should look somewhat like this:
++
+[plantuml, format=svg]
+----
+include::diagrams/custom-folder-structure.puml[]
+----
++
+Please make sure that your `service` module's build.gradle file has a unique group:
++
+[source,groovy]
+----
+description = 'My Company: Fineract My Custom Service'
+
+group = 'com.mycompany.fineract.custom.service' // <.>
+
+apply from: 'dependencies.gradle'
+----
++
+<.> The best choice here is to name it like you would name your JAR artifact on Maven Central.
+
+1. Make sure that your custom modules are present in settings.gradle: :
++
+[source,groovy]
+----
+rootProject.name='fineract'
+include ':custom:mycustom:service' // <.>
+include ':fineract-provider'
+include ':fineract-war'
+include ':integration-tests'
+include ':twofactor-tests'
+include ':oauth2-tests'
+include ':fineract-client'
+include ':fineract-doc'
+----
+<.> The `settings.gradle` file should contain something like this.
+1. The dependency.gradle file could look something like this:
+[source,groovy]
+----
+dependencies {
+    implementation(project(':module:mymodule:core'), // <.>
+            'org.springframework:spring-context')
+    compileOnly project(':fineract-provider') // <.>
+}
+----
+<.> If you are replacing a "clean room" module then you just need to include a dependency on the modules `core` library.
+<.> If you are replacing a service that is not yet extracted from `fineract-provider` then you need to add a dependency on it (only needed during compilation).
+1. When the custom module is built then you can add the JAR in your Fineract's libs folder (or in Tomcat's libs folder if you are deploying as a WAR app).
+
+IMPORTANT: Do not include your custom module in `fineract-provider`'s dependency.gradle file. This creates a circular dependency and will fail your build. Instead you have to add your JAR file e. g. to the Docker image (in Fineract's libs folder; similar like we do it with Pentaho reporting). This setup will give you the best developer experience for now with proper source references until we have separate JAR files ready on Maven Central. In the next section we describe the "clean room" (read: where we want to go) type of modules and their customization/replacement; so don't be confused if you see the dependency appearing in `fineract-provider`'s dependency.gradle, in the future you'll be able to do that.
+
+=== Example
+
+==== Dummy Module Structure
+
+We've created a demonstration how modules are supposed to be used. A module has usually at least two sub-modules:
+
+1. a _core_ module that contains mostly Java interfaces of the services and/or other components that we'd like to make replacable. The _core_ module could also contain data (DTO) or domain (entity) classes if necessary.
+2. a _service_ module
+
+IMPORTANT: Replacing parts of the existing REST API and extending it with custom endpoints is at the moment out of scope. Probably we'll need to cleanup and improve the REST layer quite a bit (remove boilerplate code as much as possible, use Jackson for JSON de-/serialization instead of the manual GSON mappers/helper everywhere) before this can happen. For now we'll concentrate primarily on service classes.
+
+Let's assume we have a service `DummyService` in our system. The service is outlined as a Java interface in module folder `module/dummy/core`.
+
+[source,java]
+----
+include::{rootdir}/module/dummy/core/src/main/java/org/apache/fineract/dummy/core/service/DummyService.java[lines=19..]
+----
+
+To make it a little bit more interesting the service's only function returns a simple data object that has one string attribute:
+
+[source,java]
+----
+include::{rootdir}/module/dummy/core/src/main/java/org/apache/fineract/dummy/core/data/DummyMessage.java[lines=19..]
+----
+
+A default implementation of `DummyService` is provided with `DummyServiceImpl`:
+
+[source,java]
+----
+include::{rootdir}/module/dummy/service/src/main/java/org/apache/fineract/dummy/service/DummyServiceImpl.java[lines=19..]
+----
+
+As you can see there are no annotations like `@Service` or `@Component`. To have full control over the instantiation and dependency injection we provide a so called _starter_ module. This module just contains one or more (auto-) configuration classes. In this case it's just one configuration class. This is basically a very simple Spring Java configuration class annotated with `@Configuration` containing one method that instantiates our default service implementation (annotated with `@Bean`):
+
+[source,java]
+----
+include::{rootdir}/module/dummy/starter/src/main/java/org/apache/fineract/dummy/starter/DummyAutoConfiguration.java[lines=19..]
+----
+
+The interesting part is this line:
+
+[source,java]
+----
+include::{rootdir}/module/dummy/starter/src/main/java/org/apache/fineract/dummy/starter/DummyAutoConfiguration.java[lines=28..28]
+----
+
+This annotation ensures that our default implementation is only instantiated if no other implementation for `DummyService` is provided. There's only one piece missing to make auto configuration work seamlessly and without any explicit configuration in `fineract-provider`:
+
+[source,properties]
+----
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ org.apache.fineract.dummy.starter.DummyAutoConfiguration
+----
+
+This means if we would only include the following dependencies in our main project (e. g. `fineract-provider`)...
+
+[source,groovy]
+----
+dependencies {
+    implementation project(':module:dummy:core')
+    implementation project(':module:dummy:service')
+    implementation project(':module:dummy:starter')
+}
+----
+
+\... then the message object would contain
+
+[source,text]
+----
+Hello: DEFAULT DUMMY!
+----
+
+==== Replace the default implementation of DummyService
+
+This is why we created module `foo` in folder `module/foo`. There's only only one sub-module that contains an implementation of `DummyService` that will replace the default implementation:
+
+[source,java]
+----
+include::{rootdir}/custom/foo/service/src/main/java/com/acmecorp/fineract/foo/service/FooDummyServiceImpl.java[lines=19..]
+----
+
+As you can see we have no other sub-modules (e. g. there's no starter module) and this implementation contains the well known `@Service` annotation. If we add this dependency to our main project...
+
+[source,groovy]
+----
+dependencies {
+    implementation project(':module:dummy:core')
+    implementation project(':module:dummy:service')
+    implementation project(':module:dummy:starter')
+    implementation project(':custom:foo:service')
+}
+----
+
+\... then the expected behavior is that we'll get the message
+
+[source,text]
+----
+Hello: Foo!
+----
+
+==== Testing
+
+There's a simple unit test in `fineract-provider` that demonstrates both scenarios (without any override of the default implementation and with an overriding alternative implementation)
+
+[source,gherkin]
+----
+include::{rootdir}/fineract-provider/src/test/resources/features/module/modules.example.feature[]
+----
+
+Here's the Spring Java configuration that does *NOT* load the `foo` module:
+
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/test/java/org/apache/fineract/module/example/TestDefaultConfiguration.java[lines=19..]
+----
+
+\... and here's the configuration that loads the `foo` module (and overrides the deefault implementation)
+
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/test/java/org/apache/fineract/module/example/TestFooConfiguration.java[lines=19..]
+----
+
+The important part in the `foo` configuration is this line:
+
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/test/java/org/apache/fineract/module/example/TestFooConfiguration.java[lines=26..26]
+----
+
+==== Deployment
+
+Modules (better: the JAR files) only need to be dropped in Fineract's `libs` folder. Dynamic loading of external JARs is provided since Fineract version 1.5.0.
+
+==== How can I start replacing services now
+
+As said the "clean room" modules will take a while to arrive. In the meanwhile we'll prepare the existing monolithic code base for pluggability. As a proof of concept the services `org.apache.fineract.portfolio.note.service.NoteReadPlatformService` and `org.apache.fineract.portfolio.note.service.NoteWritePlatformService` can be replaced/overriden by custom implementations. We'll add more shortly and will list them here.
+
+==== Outlook
+
+If this proof of concept is accepted we could refactor Fineract's services one by one and rearrange them in the proposed module structure. As discussed at ApacheCon 2021 there will be most likely some work to do to properly extract those modules (loan product, client, savings account etc.) from the monolithic code base. The main challenge are cross-dependencies between the _modules_, but there are major benefits if we split up the code like this. One - as demonstrated - is the replacement of existing default functionality. But with modules we'll also be able to finally publish Fineract JAR files to Maven Central. Those JAR files can be used to write extensions and customizations *WITHOUT* forking the whole Fineract Github repository. With modules users will also be able to create custom Fineract distributions, e. g. slimmed down to contain only the bare minimum needed in production.

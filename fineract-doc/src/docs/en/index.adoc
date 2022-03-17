@@ -4,6 +4,8 @@ include::config.adoc[]
 
 = Fineract Documentation
 
+include::license.adoc[]
+
 include::preface.adoc[]
 
 include::colophon.adoc[]
@@ -13,6 +15,8 @@ include::introduction.adoc[]
 include::deployment.adoc[]
 
 include::architecture.adoc[]
+
+include::modules.adoc[]
 
 include::oauth.adoc[]
 

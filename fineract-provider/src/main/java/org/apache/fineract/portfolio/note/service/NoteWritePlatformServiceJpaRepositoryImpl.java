@@ -42,10 +42,7 @@ import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedExce
 import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(NoteWritePlatformServiceJpaRepositoryImpl.class);
@@ -56,7 +53,6 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     private final LoanTransactionRepository loanTransactionRepository;
     private final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepositoryWrapper clientRepository,
             final GroupRepository groupRepository, final LoanRepositoryWrapper loanRepository,
             final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
