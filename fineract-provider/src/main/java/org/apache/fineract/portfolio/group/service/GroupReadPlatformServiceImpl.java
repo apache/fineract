@@ -196,7 +196,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }
         }
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments());
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments()); // NOSONAR
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
