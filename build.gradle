@@ -188,7 +188,7 @@ allprojects  {
             dependency "org.bouncycastle:bcpkix-jdk15on:1.70"
             dependency "org.bouncycastle:bcprov-jdk15on:1.70"
 
-            dependency ('org.liquibase:liquibase-core:4.8.0') {
+            dependency ('org.liquibase:liquibase-core:4.9.0') {
                 exclude 'javax.xml.bind:jaxb-api'
             }
 
