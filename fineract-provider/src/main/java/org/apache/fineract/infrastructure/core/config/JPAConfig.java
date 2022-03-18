@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilde
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Configuration
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = "org.apache.fineract.**.domain")
+@EnableConfigurationProperties(JpaProperties.class)
 public class JPAConfig extends JpaBaseConfiguration {
 
     private final DatabaseTypeResolver databaseTypeResolver;
@@ -69,8 +71,8 @@ public class JPAConfig extends JpaBaseConfiguration {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
         Map<String, Object> vendorProperties = getVendorProperties();
         customizeVendorProperties(vendorProperties);
-        return factoryBuilder.dataSource(getDataSource()).packages(getPackagesToScan()).properties(vendorProperties)
-                .persistenceUnit("jpa-pu").packages("org.apache.fineract").jta(false).build();
+        return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu")
+                .packages("org.apache.fineract").jta(false).build();
     }
 
     @Override

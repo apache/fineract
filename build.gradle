@@ -641,6 +641,7 @@ configure(project.fineractJavaProjects) {
     cucumber {
         tags = 'not @ignore'
         main = 'io.cucumber.core.cli.Main'
+        shorten = "argfile"
     }
 
     // Configuration for spotbugs plugin
