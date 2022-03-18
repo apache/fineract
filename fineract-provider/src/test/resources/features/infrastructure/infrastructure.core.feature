@@ -1,16 +1,48 @@
 Feature: Core Infrastructure
 
   @infrastructure
-  Scenario: Verify that tenant migration service is properly executed
+  Scenario: Verify that schema migration is not executed when set to disabled
     Given Liquibase is disabled with a default tenant
+    When The database migration process is executed
+    Then The database migration did not do anything
+
+  @infrastructure
+  Scenario: Verify that schema migration works from scratch
+    Given Liquibase is enabled with a default tenant
     Given Liquibase runs the very first time for the tenant store
-    Given A previously Flyway migrated tenant store database
-    Given A previously Flyway migrated tenant store database on an earlier version than 1.6
     Given Liquibase runs the very first time for the default tenant
-    Given A previously Flyway migrated default tenant database
-    Given A previously Flyway migrated default tenant database on the 1.6 version
+    When The database migration process is executed
+    Then The tenant store and the default tenant gets upgraded from scratch
+
+  @infrastructure
+  Scenario: Verify that schema migration works with the latest Flyway migrated schemas
+    Given Liquibase is enabled with a default tenant
+    Given Liquibase runs the very first time for the tenant store
+    Given A previously Flyway migrated tenant store database on the latest version
+    Given Liquibase runs the very first time for the default tenant
+    Given A previously Flyway migrated default tenant database on the latest version
+    When The database migration process is executed
+    Then The tenant store and the default tenant gets synced and then upgraded
+
+  @infrastructure
+  Scenario: Verify that schema migration fails when the tenant store is not on the latest Flyway migrated schemas
+    Given Liquibase is enabled with a default tenant
+    Given Liquibase runs the very first time for the tenant store
+    Given A previously Flyway migrated tenant store database on an earlier version
+    Given Liquibase runs the very first time for the default tenant
+    Given A previously Flyway migrated default tenant database on the latest version
     When The database migration process is executed
     Then The tenant store upgrade fails with a schema upgrade needed
+
+  @infrastructure
+  Scenario: Verify that schema migration fails when the default tenant is not on the latest Flyway migrated schemas
+    Given Liquibase is enabled with a default tenant
+    Given Liquibase runs the very first time for the tenant store
+    Given A previously Flyway migrated tenant store database on the latest version
+    Given Liquibase runs the very first time for the default tenant
+    Given A previously Flyway migrated default tenant database on an earlier version
+    When The database migration process is executed
+    Then The default tenant upgrade fails with a schema upgrade needed
 
   @infrastructure
   Scenario Outline: Verify empty multi exceptions
