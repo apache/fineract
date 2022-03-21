@@ -95,8 +95,8 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.equals("WEB-INF/web.xml") || resourcePath.equals("META-INF/web-fragment.xml")
                 || resourcePath.equals("META-INF/eclipse.inf") || resourcePath.equals("META-INF/ECLIPSE_.SF")
                 || resourcePath.equals("META-INF/ECLIPSE_.RSA") || resourcePath.equals("META-INF/BC2048KE.DSA")
-                || resourcePath.equals("META-INF/BC2048KE.SF") || resourcePath.equals("META-INF/BC1024KE.SF")
-                || resourcePath.equals("OSGI-INF/bundle.info")
+                || resourcePath.equals("META-INF/BC1024KE.DSA") || resourcePath.equals("META-INF/BC2048KE.SF")
+                || resourcePath.equals("META-INF/BC1024KE.SF") || resourcePath.equals("OSGI-INF/bundle.info")
                 // Spring Framework knows what they are do..
                 || resourcePath.startsWith("META-INF/spring") || resourcePath.startsWith("META-INF/additional-spring")
                 || resourcePath.startsWith("META-INF/terracotta")

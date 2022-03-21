@@ -27,7 +27,7 @@ jobs:
         TZ: Asia/Kolkata
     steps:
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
