@@ -24,6 +24,8 @@ dependencies {
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             'org.junit.jupiter:junit-jupiter-api',
+            'org.bouncycastle:bcpkix-jdk15to18',
+            'org.bouncycastle:bcprov-jdk15to18',
             'io.cucumber:cucumber-core',
             'io.cucumber:cucumber-java',
             'io.cucumber:cucumber-java8',
