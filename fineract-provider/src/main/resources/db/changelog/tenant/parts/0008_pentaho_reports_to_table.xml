@@ -1,0 +1,158 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+
+    <changeSet author="sheminanto" id="1">
+<insert tableName="stretchy_report">
+            <column name="report_name" value="Trial Balance - Table"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Accounting"/>
+            <column name="report_sql" value="select *&#10;from&#10;(select debits.glcode as 'glcode', &#10;debits.name as 'name',&#10;IF(debits.type = 1 or debits.type = 5, &#10;ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0),null) as 'debit', &#10;IF(debits.type = 4 or debits.type = 3 or debits.type = 2, &#10;ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0),null) as 'credit'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',&#10;name,sum(amount) as 'debitamount',&#10;acc_gl_account.classification_enum as 'type'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',&#10;name as 'name',&#10;sum(amount) as 'creditamount',&#10;acc_gl_account.classification_enum as 'type'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', &#10;credits.name as 'name',&#10;IF(credits.type = 1 or credits.type = 5, &#10;ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0),null) as 'debit', &#10;IF(credits.type = 4 or credits.type = 3 or credits.type = 2, &#10;ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0),null) as 'credit'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',&#10;name,&#10;sum(amount) as 'debitamount',&#10;acc_gl_account.classification_enum as 'type'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name as 'name',&#10;sum(amount) as 'creditamount',&#10;acc_gl_account.classification_enum as 'type'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode) as fullouterjoinresult&#10;order by glcode "/>
+            <column name="description" value="Trial Balance Report"/>
+            <column name="core_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="GeneralLedgerReport - Table"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Accounting"/>
+            <column name="report_sql" value="select&#10;details.edate entry_date,&#10;/*details.acid1,&#10;details.report_header,&#10;details.reportid,&#10;details.account_name,&#10;branch.branchname,*/&#10;sum(details.debit_amount) debit_amount,&#10;sum(details.credit_amount) credit_amount,&#10;/*details.aftertxn,*/&#10;details.description,&#10;ifnull(opb.openingbalance,0) openingbalance,&#10;/*&#10;details.transactionid,&#10;details.actype,&#10;details.manual_entry,*/&#10;if (details.manual_entry=1,details.id,'0system') transtype,&#10;if (actype in (1,5),&#10;   (sum(details.debit_amount) - sum(details.credit_amount)),&#10;   (sum(details.credit_amount) - sum(details.debit_amount))) as cumulative_sum &#10;from&#10;(&#10;select&#10;a.account_id acid1&#10;,concat(gl.gl_code,'-',gl.name) as report_header&#10;,gl.classification_enum actype&#10;,gl.gl_code as reportid&#10;,j1.entry_date edate&#10;,concat(gl1.gl_code,'-',gl1.name) as account_name&#10;,if (j1.type_enum=1, j1.amount, 0) as debit_amount&#10;,if (j1.type_enum=2, j1.amount , 0) as credit_amount&#10;,j1.id&#10;,j1.office_id&#10;,j1.transaction_id&#10;, j1.type_enum&#10;,j1.office_running_balance as aftertxn&#10;,j1.description as description&#10;,j1.transaction_id as transactionid&#10;,a.manual_entry&#10;from   acc_gl_journal_entry j1&#10;inner join (select distinct je.transaction_id tid,je.account_id,je.manual_entry &#10;from m_office o&#10;left join m_office ounder on ounder.hierarchy like concat(o.hierarchy,'%')&#10;inner join  acc_gl_journal_entry je on je.office_id = ounder.id&#10;where je.account_id =${GLAccountNO}&#10;and o.id  = ${officeId}&#10;and je.entry_date between ${startDate} and ${endDate})a on a.tid = j1.transaction_id and j1.account_id &lt;&gt; ${GLAccountNO}&#10;left join acc_gl_account gl on gl.id = a.account_id&#10;left join acc_gl_account gl1 on gl1.id = j1.account_id&#10;order by j1.entry_date, j1.id) details&#10;left join&#10;(    &#10;select je.account_id acid2,&#10;if(aga1.classification_enum in (1,5),&#10;(sum(if(je.type_enum=2,ifnull(je.amount,0),0))- sum(if(je.type_enum=1,ifnull(je.amount,0),0))),&#10;(sum(if(je.type_enum=1,ifnull(je.amount,0),0))- sum(if(je.type_enum=2,ifnull(je.amount,0),0)))) openingbalance&#10;from m_office o&#10;left join m_office ounder on ounder.hierarchy like concat(o.hierarchy,'%')&#10;left join acc_gl_journal_entry je on je.office_id = ounder.id&#10;left join acc_gl_account aga1 on aga1.id=je.account_id&#10;where je.entry_date &lt;= DATE_SUB(${startDate},INTERVAL 1 day)&#10;and je.office_running_balance is not null&#10;and (o.id=${officeId})&#10;and je.account_id = ${GLAccountNO}&#10;group by je.account_id )opb&#10;on opb.acid2=details.acid1&#10;left join&#10;(&#10;select name branchname&#10;from m_office mo&#10;where&#10;mo.id=1&#10;)branch&#10;on details.office_id=${officeId}&#10;group by&#10;details.edate,&#10;details.acid1,&#10;details.report_header,&#10;details.reportid,&#10;details.account_name,&#10;branch.branchname&#10;,transtype,&#10;details.description,&#10;openingbalance&#10;&#10;"/>
+            <column name="description"/>
+            <column name="core_report" valueBoolean="false"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Income Statement - Table"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Accounting"/>
+            <column name="report_sql" value="(select *&#10;from&#10;(&#10;select debits.glcode as 'glcode', debits.name as 'name', &#10;'Expense'as IncomeOrExpense,&#10;(ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (5)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by gl_code&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (5)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by gl_code) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', credits.name as 'name', &#10;'Expense'as IncomeOrExpense,&#10;(ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (5)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by gl_code&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name as 'name',sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (5)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by gl_code&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode)as fullouterjoinresult&#10;order by glcode)&#10;UNION &#10;(select *&#10;from&#10;(&#10;select debits.glcode as 'glcode', &#10;debits.name as 'name', &#10;'Income' as IncomeOrExpense,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',&#10;name,&#10;sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (4)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (4)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', credits.name as 'name', &#10;'Income' as IncomeOrExpense,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (4)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name as 'name',sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (4)&#10;and acc_gl_journal_entry.entry_date between date('${startDate}') and date('${endDate}')&#10;and (acc_gl_journal_entry.office_id= ${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode)as fullouterjoinresult&#10;order by glcode)"/>
+            <column name="description" value="Profit and Loss Statement"/>
+            <column name="core_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Balance Sheet - Table"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Accounting"/>
+            <column name="report_sql" value="(select debits.glcode as 'glcode', debits.name as 'name', &#10;'Assets' as BalanceType,&#10;(ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (1)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (1)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', credits.name as 'name',&#10;'Assets' as BalanceType,&#10;(ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (1)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (1)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;UNION &#10;select debits.glcode as 'glcode', debits.name as 'name', &#10;'Liability' as BalanceType,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (2)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (2)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', credits.name as 'name',&#10;'Liability' as BalanceType,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (2)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=1&#10;and acc_gl_account.classification_enum in (2)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;UNION &#10;select debits.glcode as 'glcode', debits.name as 'name',&#10;'Equity' as BalanceType,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum=2&#10;and acc_gl_account.classification_enum in (3)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;LEFT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum= 1&#10;and acc_gl_account.classification_enum in (3)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode&#10;union&#10;select credits.glcode as 'glcode', credits.name as 'name',&#10;'Equity' as BalanceType,&#10;(ifnull(credits.creditamount,0)-ifnull(debits.debitamount,0)) as 'balance'&#10;from&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum= 2&#10;and acc_gl_account.classification_enum in (3)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) debits&#10;RIGHT OUTER JOIN&#10;(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount'&#10;from acc_gl_journal_entry,acc_gl_account&#10;where acc_gl_account.id = acc_gl_journal_entry.account_id&#10;and acc_gl_journal_entry.type_enum= 1&#10;and acc_gl_account.classification_enum in (3)&#10;and acc_gl_journal_entry.entry_date &lt;= date('${endDate}')&#10;and (acc_gl_journal_entry.office_id=${officeId} or ${officeId}=1)&#10;group by glcode&#10;order by glcode) credits&#10;on debits.glcode=credits.glcode)&#10;"/>
+            <column name="description" value="Balance Sheet"/>
+            <column name="core_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+
+
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Trial Balance - Table')"/>
+            <column name="parameter_id" valueNumeric="1"/>
+            <column name="report_parameter_name" value="fromDate"/>
+        </insert>
+         <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Trial Balance - Table')"/>
+            <column name="parameter_id" valueNumeric="5"/>
+            <column name="report_parameter_name" value="branch"/>
+        </insert>
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Trial Balance - Table')"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="report_parameter_name" value="toDate"/>
+        </insert>
+
+
+
+
+
+
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='GeneralLedgerReport - Table')"/>
+            <column name="parameter_id" valueNumeric="1008"/>
+            <column name="report_parameter_name" value="GLAccountNO"/>
+        </insert>
+         <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='GeneralLedgerReport - Table')"/>
+            <column name="parameter_id" valueNumeric="5"/>
+            <column name="report_parameter_name" value="officeId"/>
+        </insert>
+         <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='GeneralLedgerReport - Table')"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="report_parameter_name" value="endDate"/>
+        </insert>
+         <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='GeneralLedgerReport - Table')"/>
+            <column name="parameter_id" valueNumeric="1"/>
+            <column name="report_parameter_name" value="startDate"/>
+        </insert>
+
+
+
+
+
+
+
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Balance Sheet - Table')"/>
+            <column name="parameter_id" valueNumeric="5"/>
+            <column name="report_parameter_name" value="branch"/>
+        </insert>
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Balance Sheet - Table')"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="report_parameter_name" value="date"/>
+        </insert>
+        
+
+
+
+
+
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Income Statement - Table')"/>
+            <column name="parameter_id" valueNumeric="5"/>
+            <column name="report_parameter_name" value="branch"/>
+        </insert>
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Income Statement - Table')"/>
+            <column name="parameter_id" valueNumeric="1"/>
+            <column name="report_parameter_name" value="fromDate"/>
+        </insert>
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Income Statement - Table')"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="report_parameter_name" value="toDate"/>
+        </insert>
+
+
+
+</changeSet>
+
+
+</databaseChangeLog>
