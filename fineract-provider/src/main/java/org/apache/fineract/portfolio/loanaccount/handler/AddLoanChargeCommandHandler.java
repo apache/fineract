@@ -22,14 +22,21 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "LOANCHARGE", action = "CREATE")
 public class AddLoanChargeCommandHandler implements NewCommandSourceHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AddLoanChargeCommandHandler.class);
 
     private final LoanWritePlatformService writePlatformService;
 
@@ -41,7 +48,30 @@ public class AddLoanChargeCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.addLoanCharge(command.getLoanId(), command);
+        try {
+            return this.writePlatformService.addLoanCharge(command.getLoanId(), command);
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }
     }
+
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+
+        if (realCause.getMessage().contains("external_id")) {
+
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            throw new PlatformDataIntegrityException("error.msg.loan.charge.duplicate.externalId",
+                    "Loan Charge with externalId `" + externalId + "` already exists", "externalId", externalId);
+        }
+
+        logAsErrorUnexpectedDataIntegrityException(dve);
+        throw new PlatformDataIntegrityException("error.msg.loan.charge.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
+
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
+        LOG.error("Error occured.", dve);
+    }
+
 }
