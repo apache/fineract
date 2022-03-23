@@ -42,6 +42,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -57,7 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
 
 @Entity
-@Table(name = "m_loan_charge")
+@Table(name = "m_loan_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
 public class LoanCharge extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
@@ -125,6 +126,9 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
+
+    @Column(name = "external_id")
+    private String externalId;
 
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanOverdueInstallmentCharge overdueInstallmentCharge;
@@ -204,8 +208,11 @@ public class LoanCharge extends AbstractPersistableCustom {
             }
         }
 
-        return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
-                chargePaymentMode, null, loanCharge);
+        LoanCharge newLoanCharge = new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation,
+                dueDate, chargePaymentMode, null, loanCharge);
+        final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        newLoanCharge.setExternalId(externalId);
+        return newLoanCharge;
     }
 
     /*
@@ -264,6 +271,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         if (chargePaymentMode != null) {
             this.chargePaymentMode = chargePaymentMode.getValue();
         }
+
         populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge);
         this.paid = determineIfFullyPaid();
     }
@@ -1070,4 +1078,13 @@ public class LoanCharge extends AbstractPersistableCustom {
     public void undoWaived() {
         this.waived = false;
     }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
 }
