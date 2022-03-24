@@ -82,6 +82,7 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
@@ -2357,5 +2358,57 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Integer retrieveNumberOfActiveLoans() {
         final String sql = "select count(*) from m_loan";
         return this.jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    @Override
+    public CollectionData retrieveLoanCollectionData(Long loanId) {
+        final CollectionDataMapper mapper = new CollectionDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema();
+        CollectionData collectionData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
+        return collectionData;
+    }
+
+    private static final class CollectionDataMapper implements RowMapper<CollectionData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        CollectionDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema() {
+            StringBuilder sqlBuilder = new StringBuilder();
+
+            sqlBuilder.append(
+                    "l.id as loanId, coalesce((l.approved_principal - l.principal_disbursed_derived), 0) as availableDisbursementAmount, ");
+            sqlBuilder.append("datediff(" + sqlGenerator.currentDate() + ", laa.overdue_since_date_derived) as pastDueDays, ");
+            sqlBuilder.append(
+                    "(select coalesce(min(lrs.duedate), null) as duedate from m_loan_repayment_schedule lrs where lrs.loan_id=1 and lrs.completed_derived is false and lrs.duedate >= "
+                            + sqlGenerator.currentDate() + ") as nextPaymentDueDate, ");
+            sqlBuilder.append("datediff(" + sqlGenerator.currentDate() + ", laa.overdue_since_date_derived) as delinquentDays, ");
+            sqlBuilder.append(
+                    sqlGenerator.currentDate() + " as delinquentDate, coalesce(laa.total_overdue_derived, 0) as delinquentAmount, ");
+            sqlBuilder.append("lre.transactionDate as lastPaymentDate, coalesce(lre.amount, 0) as lastPaymentAmount ");
+            sqlBuilder.append("from m_loan l inner join m_loan_arrears_aging laa on laa.loan_id = l.id ");
+            sqlBuilder.append(
+                    "left join (select lt.loan_id, lt.transaction_date as transactionDate, lt.amount as amount from m_loan_transaction lt where lt.is_reversed = 0 and lt.transaction_type_enum=2 order by lt.transaction_date desc limit 1) lre on lre.loan_id = l.id ");
+            sqlBuilder.append("where l.id=? ");
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public CollectionData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final LocalDate nextPaymentDueDate = JdbcSupport.getLocalDate(rs, "nextPaymentDueDate");
+            final LocalDate delinquentDate = JdbcSupport.getLocalDate(rs, "delinquentDate");
+            final LocalDate lastPaymentDate = JdbcSupport.getLocalDate(rs, "lastPaymentDate");
+            final BigDecimal availableDisbursementAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "availableDisbursementAmount");
+            final BigDecimal delinquentAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "delinquentAmount");
+            final BigDecimal lastPaymentAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "lastPaymentAmount");
+            final int pastDueDays = rs.getInt("pastDueDays");
+            final int delinquentDays = rs.getInt("delinquentDays");
+
+            return CollectionData.instance(availableDisbursementAmount, pastDueDays, nextPaymentDueDate, delinquentDays, delinquentDate,
+                    delinquentAmount, lastPaymentDate, lastPaymentAmount);
+        }
     }
 }

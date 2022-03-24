@@ -24,15 +24,14 @@ import java.time.LocalDate;
 /**
  * Immutable data object representing disbursement information.
  */
+@SuppressWarnings("unused")
 public class DisbursementData implements Comparable<DisbursementData> {
 
-    @SuppressWarnings("unused")
     private final Long id;
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
     private final BigDecimal netDisbursalAmount;
-    @SuppressWarnings("unused")
     private final String loanChargeId;
     private final BigDecimal chargeAmount;
     private final BigDecimal waivedChargeAmount;

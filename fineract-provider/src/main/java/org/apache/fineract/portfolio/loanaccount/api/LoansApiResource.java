@@ -103,6 +103,7 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
@@ -495,7 +496,6 @@ public class LoansApiResource {
     public String retrieveLoan(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
-        long start = System.currentTimeMillis();
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
@@ -543,6 +543,7 @@ public class LoansApiResource {
         Collection<LoanTermVariationsData> emiAmountVariations = null;
         Collection<LoanCollateralResponseData> loanCollateralManagements = null;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
+        CollectionData collectionData = CollectionData.template();
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -550,7 +551,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions",
-                        "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
+                        "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails", "collection"));
             }
 
             ApiParameterHelper.excludeAssociationsForResponseIfProvided(uriInfo.getQueryParameters(), associationParameters);
@@ -639,6 +640,12 @@ public class LoansApiResource {
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
 
+            if (associationParameters.contains("collection")) {
+                mandatoryResponseParameters.add("collection");
+                if (loanBasicDetails.isActive()) {
+                    collectionData = this.loanReadPlatformService.retrieveLoanCollectionData(loanId);
+                }
+            }
         }
 
         Collection<LoanProductData> productOptions = null;
@@ -741,12 +748,12 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled);
+                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled,
+                collectionData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.loanDataParameters);
-        return toReturn;
+        return this.toApiJsonSerializer.serialize(settings, loanAccount, this.loanDataParameters);
     }
 
     @GET
