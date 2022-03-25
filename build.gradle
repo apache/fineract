@@ -59,7 +59,7 @@ plugins {
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
-    id 'org.openapi.generator' version '4.3.1' apply false
+    id 'org.openapi.generator' version '5.4.0' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
     id 'org.springframework.boot' version '2.6.5' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
