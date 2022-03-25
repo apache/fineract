@@ -241,13 +241,7 @@ allprojects  {
         }
     }
 
-    // Configuration for the sonarqube plugin
-    // https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-gradle/
-    sonarqube {
-        properties {
-            property "sonar.projectKey", "apache_fineract"
-        }
-    }
+    // Configuration for the sonarqube plugin is now in GitHub Actions
 
     // Configuration for the spotless plugin
     // https://github.com/diffplug/spotless/tree/main/plugin-gradle
