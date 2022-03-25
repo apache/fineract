@@ -19,6 +19,7 @@
 package org.apache.fineract.dummy.core.data;
 
 public class DummyMessage {
+
     private String message;
 
     public DummyMessage(String message) {

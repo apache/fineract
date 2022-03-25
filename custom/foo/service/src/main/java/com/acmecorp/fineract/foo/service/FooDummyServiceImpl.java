@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FooDummyServiceImpl implements DummyService {
+
     @Override
     public DummyMessage getMessage() {
         return new DummyMessage("Hello: FOO!");

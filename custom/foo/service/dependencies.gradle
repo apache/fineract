@@ -20,4 +20,5 @@
 dependencies {
     implementation(project(':module:dummy:core'),
             'org.springframework:spring-context')
+    testImplementation('io.cucumber:cucumber-spring')
 }

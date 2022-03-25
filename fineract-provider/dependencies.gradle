@@ -51,7 +51,6 @@ dependencies {
             'commons-io:commons-io',
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
-            'org.apache.poi:poi-ooxml-schemas',
             'org.apache.tika:tika-core',
 
             'org.liquibase:liquibase-core',
@@ -125,16 +124,7 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    testImplementation( 'org.mockito:mockito-core',
-            'org.mockito:mockito-junit-jupiter',
-            'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
-            'org.bouncycastle:bcpkix-jdk15to18',
-            'org.bouncycastle:bcprov-jdk15to18',
-            'io.cucumber:cucumber-core',
-            'io.cucumber:cucumber-java',
-            'io.cucumber:cucumber-java8',
-            'io.cucumber:cucumber-junit-platform-engine',
-            'io.cucumber:cucumber-spring',
+    testImplementation( 'io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph',
             project(':module:dummy:core'),
             project(':module:dummy:service'),

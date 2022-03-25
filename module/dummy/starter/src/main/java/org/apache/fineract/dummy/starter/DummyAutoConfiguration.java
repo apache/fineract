@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnMissingBean(DummyService.class)
 public class DummyAutoConfiguration {
+
     @Bean
     public DummyService dummyService() {
         return new DummyServiceImpl();
