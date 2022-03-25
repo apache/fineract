@@ -22,6 +22,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.persistence.PersistenceException;
@@ -103,7 +104,11 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
                 CreditBureauReportData reportobj = this.thitsaWorksCreditBureauIntegrationWritePlatformService
                         .getCreditReportFromThitsaWorks(command);
 
-                return new CommandProcessingResultBuilder().withCreditReport(reportobj).build();
+                Map<String, Object> reportMap = Map.of("name", reportobj.getName(), "gender", reportobj.getGender(), "address",
+                        reportobj.getAddress(), "creditScore", reportobj.getCreditScore(), "borrowerInfo", reportobj.getBorrowerInfo(),
+                        "openAccounts", reportobj.getOpenAccounts(), "closedAccounts", reportobj.getClosedAccounts());
+
+                return new CommandProcessingResultBuilder().withCreditReport(reportMap).build();
             }
 
             baseDataValidator.reset().failWithCode("creditBureau.has.not.been.Integrated");
