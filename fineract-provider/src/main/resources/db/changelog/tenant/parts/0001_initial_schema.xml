@@ -3713,6 +3713,7 @@
             <column defaultValueBoolean="false" name="enforce_min_required_balance" type="boolean">
                 <constraints nullable="false"/>
             </column>
+
             <column defaultValueComputed="NULL" name="min_balance_for_interest_calculation" type="DECIMAL(19, 6)"/>
             <column defaultValueComputed="NULL" name="start_interest_calculation_date" type="date"/>
             <column defaultValueComputed="NULL" name="on_hold_funds_derived" type="DECIMAL(19, 6)"/>

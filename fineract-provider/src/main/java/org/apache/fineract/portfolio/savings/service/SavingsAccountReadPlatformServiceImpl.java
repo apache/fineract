@@ -332,6 +332,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sa.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sa.enforce_min_required_balance as enforceMinRequiredBalance, ");
+            sqlBuilder.append("sa.max_Allowed_Lien_Limit as maxAllowedLienLimit, ");
+            sqlBuilder.append("sa.is_lien_allowed as lienAllowed, ");
             sqlBuilder.append("sa.on_hold_funds_derived as onHoldFunds, ");
             sqlBuilder.append("sa.withhold_tax as withHoldTax, ");
             sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax, ");
@@ -575,14 +577,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                     final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
                     final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
+                    final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
+                    final boolean lienAllowed = rs.getBoolean("lienAllowed");
                     savingsAccountData = SavingsAccountData.instance(id, accountNo, depositType, externalId, null, null, null, null,
                             productId, null, null, null, status, subStatus, timeline, currency, nominalAnnualInterestRate,
                             interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                             interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                             withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance,
-                            enforceMinRequiredBalance, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
-                            minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate,
-                            isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount);
+                            enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds,
+                            nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
+                            lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat,
+                            onHoldAmount);
 
                     savingsAccountData.setClientData(clientData);
                     savingsAccountData.setGroupGeneralData(groupGeneralData);
@@ -810,6 +815,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sa.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sa.enforce_min_required_balance as enforceMinRequiredBalance, ");
+            sqlBuilder.append("sa.max_Allowed_Lien_Limit as maxAllowedLienLimit, ");
+            sqlBuilder.append("sa.is_lien_allowed as lienAllowed, ");
             sqlBuilder.append("sa.on_hold_funds_derived as onHoldFunds, ");
             sqlBuilder.append("sa.withhold_tax as withHoldTax, ");
             sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax, ");
@@ -989,6 +996,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
 
+            final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
+            final boolean lienAllowed = rs.getBoolean("lienAllowed");
+
             /*
              * final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
              *
@@ -1055,9 +1065,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualInterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
-                    lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
+                    withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy,
+                    daysToEscheat, onHoldAmount);
         }
     }
 
@@ -1504,7 +1515,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             // ");
             // sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
-            sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance ");
+            sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance, ");
+            sqlBuilder.append("sp.max_Allowed_Lien_Limit as maxAllowedLienLimit, ");
+            sqlBuilder.append("sp.is_lien_allowed as lienAllowed ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
             sqlBuilder.append("left join m_tax_group tg on tg.id = sp.tax_group_id  ");
@@ -1574,6 +1587,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
+            final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
+            final boolean lienAllowed = rs.getBoolean("lienAllowed");
             final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
                     "minBalanceForInterestCalculation");
 
@@ -1631,10 +1646,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualIterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
-                    lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat,
-                    savingsAmountOnHold);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
+                    withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy,
+                    daysToEscheat, savingsAmountOnHold);
         }
     }
 

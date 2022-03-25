@@ -30,8 +30,10 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
@@ -294,6 +296,20 @@ public class SavingsAccountAssembler {
             minRequiredBalance = product.minRequiredBalance();
         }
 
+        boolean lienAllowed = false;
+        if (command.parameterExists(lienAllowedParamName)) {
+            lienAllowed = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
+        } else {
+            lienAllowed = product.isLienAllowed();
+        }
+
+        BigDecimal maxAllowedLienLimit = BigDecimal.ZERO;
+        if (command.parameterExists(maxAllowedLienLimitParamName)) {
+            maxAllowedLienLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(maxAllowedLienLimitParamName);
+        } else {
+            maxAllowedLienLimit = product.maxAllowedLienLimit();
+        }
+
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
@@ -306,8 +322,8 @@ public class SavingsAccountAssembler {
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges, allowOverdraft,
-                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, nominalAnnualInterestRateOverdraft,
-                minOverdraftForInterestCalculation, withHoldTax);
+                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -423,8 +439,9 @@ public class SavingsAccountAssembler {
                 product.interestPostingPeriodType(), product.interestCalculationType(), product.interestCalculationDaysInYearType(),
                 product.minRequiredOpeningBalance(), product.lockinPeriodFrequency(), product.lockinPeriodFrequencyType(),
                 product.isWithdrawalFeeApplicableForTransfer(), charges, product.isAllowOverdraft(), product.overdraftLimit(),
-                product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.nominalAnnualInterestRateOverdraft(),
-                product.minOverdraftForInterestCalculation(), product.withHoldTax());
+                product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.maxAllowedLienLimit(),
+                product.isLienAllowed(), product.nominalAnnualInterestRateOverdraft(), product.minOverdraftForInterestCalculation(),
+                product.withHoldTax());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);

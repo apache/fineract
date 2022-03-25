@@ -69,7 +69,7 @@ public class ClientSavingsIntegrationTest {
     public static final String DEPOSIT_AMOUNT = "2000";
     public static final String WITHDRAW_AMOUNT = "1000";
     public static final String WITHDRAW_AMOUNT_ADJUSTED = "500";
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
+    public static final String MINIMUM_OPENING_BALANCE = "100.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
 
@@ -2017,6 +2017,68 @@ public class ClientSavingsIntegrationTest {
                 enforceMinRequiredBalance, allowOverdraft, taxGroupId, false);
     }
 
+    // LienAtProductLevel
+    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
+            final boolean allowOverDraft, final boolean lienAllowed) {
+
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH LIEN---------------------------------------");
+        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        if (lienAllowed) {
+            final String maxAllowedLienLimit = "2000.0";
+            savingsProductHelper.withLienAllowed(maxAllowedLienLimit);
+        }
+        if (enforceMinRequiredBalance) {
+            final String minRequiredBalance = "100.0";
+            savingsProductHelper.withMinRequiredBalance(minRequiredBalance);
+            savingsProductHelper.withEnforceMinRequiredBalance("true");
+        }
+        if (allowOverDraft) {
+            final String overDraftLimit = "1000.0";
+            savingsProductHelper.withOverDraft(overDraftLimit);
+        }
+        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                //
+                .withInterestPostingPeriodTypeAsMonthly()
+                //
+                .withInterestCalculationPeriodTypeAsDailyBalance()
+                //
+                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
+                //
+                .withMinimumOpenningBalance(minOpenningBalance).build();
+
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    // LienAtProductlevel with Overdraft Limit > Lien Limit
+    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
+            final boolean allowOverDraft, final String overDraftLimit, final boolean lienAllowed, final String lienAllowedLimit) {
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH LIEN---------------------------------------");
+        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        if (lienAllowed) {
+            savingsProductHelper.withLienAllowed(lienAllowedLimit);
+        }
+        if (enforceMinRequiredBalance) {
+            final String minRequiredBalance = "100.0";
+            savingsProductHelper.withMinRequiredBalance(minRequiredBalance);
+            savingsProductHelper.withEnforceMinRequiredBalance("true");
+        }
+        if (allowOverDraft) {
+            savingsProductHelper.withOverDraft(overDraftLimit);
+        }
+        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                //
+                .withInterestPostingPeriodTypeAsMonthly()
+                //
+                .withInterestCalculationPeriodTypeAsDailyBalance()
+                //
+                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
+                //
+                .withMinimumOpenningBalance(minOpenningBalance).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
             String enforceMinRequiredBalance, final boolean allowOverdraft, final String taxGroupId, boolean withDormancy) {
@@ -2174,29 +2236,25 @@ public class ClientSavingsIntegrationTest {
         assertEquals(Float.parseFloat("300"), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
 
     }
-
     @SuppressWarnings("unchecked")
     @Test
-    public void testSavingsAccountLienStatus() {
-
+    public void testSavingsAccountLienAllowedAtProductLevelWithEnforceBalance() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
                 new ResponseSpecBuilder().build());
-
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
-
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         final String minBalanceForInterestCalculation = null;
-        final String minRequiredBalance = null;
-        final String enforceMinRequiredBalance = "false";
+        final boolean enforceMinRequiredBalance = true;
         final boolean allowOverdraft = false;
+        final boolean lienAllowed = true;
+
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+                minBalanceForInterestCalculation, enforceMinRequiredBalance, allowOverdraft, lienAllowed);
         Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -2211,37 +2269,333 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "1500", false,
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR); // lien:false
-
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000", false,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
         assertEquals("validation.msg.savingsaccount.insufficient balance", error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "1500", true,
+        Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "2000", true,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Float balance = Float.parseFloat("-500");
+        Float balance = Float.parseFloat("-1900");
 
-        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -500");
+        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
+    }
 
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000",
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountLienAllowedAtProductLevelWithOverDraftLimit() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final String minBalanceForInterestCalculation = null;
+        final boolean enforceMinRequiredBalance = false;
+        final boolean allowOverdraft = true;
+        final boolean lienAllowed = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, enforceMinRequiredBalance, allowOverdraft, lienAllowed);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000", false,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.savingsaccount.insufficient balance", error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "2000", true,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        Float balance = Float.parseFloat("-1900");
+
+        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2100",
+        SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Calendar todaysDate = Calendar.getInstance();
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
+                "300", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+
+        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
+                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "200",
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        Assertions.assertNotNull(withdrawTransactionId);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountLienAllowedAtProductLevelwithNoConfig() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final String minBalanceForInterestCalculation = null;
+        final boolean enforceMinRequiredBalance = false;
+        final boolean allowOverdraft = false;
+        final boolean lienAllowed = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, enforceMinRequiredBalance, allowOverdraft, lienAllowed);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000", false,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.savingsaccount.insufficient balance", error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "2000", true,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        Float balance = Float.parseFloat("-1900");
+
+        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         Calendar todaysDate = Calendar.getInstance();
         final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
 
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
-                "1000", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+                "200", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);// withdrawable amount = 200;
 
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500", TRANSACTION_DATE,
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE,
                 CommonConstants.RESPONSE_RESOURCE_ID);
 
         Assertions.assertNotNull(withdrawTransactionId);
+
     }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountWithoutLienAllowed() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final String minBalanceForInterestCalculation = null;
+        final boolean enforceMinRequiredBalance = true;
+        final boolean allowOverdraft = true;
+        final boolean lienAllowed = false;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, enforceMinRequiredBalance, allowOverdraft, lienAllowed);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000", true,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.savingsaccount.lien is not allowed in product level",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "1000", false,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);// as per overdraft limit
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        Float balance = Float.parseFloat("-900"); //opening balance
+
+        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -900");
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000", // available to use 1100 and another 1000 on transactional hold
+
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Calendar todaysDate = Calendar.getInstance();
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
+                "1200", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);// can not withdraw: amount on transactional
+                                                                         // hold
+
+        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
+                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1100", TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+
+        Assertions.assertNotNull(withdrawTransactionId);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountLienAllowedAtProductLevelWithOverDraftLimitGreaterThanLienLimit() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final String minBalanceForInterestCalculation = null;
+        final boolean enforceMinRequiredBalance = false;
+        final boolean allowOverdraft = true;
+        final String overDraftLimit = "2000.0";
+        final boolean lienAllowed = true;
+        final String lineAllowedLimit = "1000.0";
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, enforceMinRequiredBalance, allowOverdraft, overDraftLimit, lienAllowed, lineAllowedLimit);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "1000", true,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.savingsaccount.Overdraft limit can not be greater than lien limit",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+    }
+
+     @SuppressWarnings("unchecked")
+     @Test
+     public void testSavingsAccountLienStatus() {
+
+     this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+     SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+     new ResponseSpecBuilder().build());
+
+     final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+     final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+     this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+     final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+     ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+     final String minBalanceForInterestCalculation = null;
+     final String minRequiredBalance = null;
+     final String enforceMinRequiredBalance = "false";
+     final boolean allowOverdraft = false;
+     final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
+     MINIMUM_OPENING_BALANCE,
+     minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+     Assertions.assertNotNull(savingsProductID);
+
+     final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
+     ACCOUNT_TYPE_INDIVIDUAL);
+     Assertions.assertNotNull(savingsProductID);
+
+     HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec,
+     savingsId);
+     SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+     savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+     SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+     savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+     SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+     List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "1500",
+     false,
+     SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR); // lien:false
+
+     assertEquals("validation.msg.savingsaccount.insufficient balance",
+     error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+     Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "1500",
+     true,
+     SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+     HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+     Float balance = Float.parseFloat("-500");
+
+     assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -500");
+
+     Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000",
+     SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+     DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+     Calendar todaysDate = Calendar.getInstance();
+     final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+
+     ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>)
+     validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
+     "1000", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+
+     assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
+     savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+     Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId,
+     "500", TRANSACTION_DATE,
+     CommonConstants.RESPONSE_RESOURCE_ID);
+
+     Assertions.assertNotNull(withdrawTransactionId);
+     }
 
     /**
      * incorrect savings account balance when charge transaction is reversed during an overdraft recalculate Daily
