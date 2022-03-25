@@ -6,9 +6,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
         TZ: Asia/Kolkata
-        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_ORGANIZATION: mifos
+        SONAR_PROJECT_KEY: openMF_fineract
+        SONAR_HOST_URL: https://sonarcloud.io
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:

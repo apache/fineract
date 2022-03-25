@@ -22,3 +22,4 @@ fineract-provider/out/
 fineract-provider/config/swagger/config.json
 fineract-provider/config/swagger/fineract-input.yaml
 licenses
+.github/workflows/sonarqube.yml
