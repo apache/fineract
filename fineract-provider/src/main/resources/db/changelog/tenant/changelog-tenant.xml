@@ -27,4 +27,5 @@
     <include file="parts/0005_savings_transaction_reversal.xml" relativeToChangelogFile="true"/>
     <include file="parts/0006_product_loan_disallow_expected_disbursements.xml" relativeToChangelogFile="true"/>
     <include file="parts/0007_product_loan_higher_than_applied_loan_amount_management.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0008_lien_allowed_on_savings_account_products.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

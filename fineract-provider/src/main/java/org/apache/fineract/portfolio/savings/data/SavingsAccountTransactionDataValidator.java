@@ -23,7 +23,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.activate
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.bankNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.checkNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.closedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.paymentTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.receiptNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.routingCodeParamName;
@@ -69,7 +69,7 @@ public class SavingsAccountTransactionDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
-                    transactionAmountParamName, lienParamName));
+                    transactionAmountParamName, lienAllowedParamName));
     private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
@@ -234,22 +234,36 @@ public class SavingsAccountTransactionDataValidator {
         }
         account.holdAmount(amount);
 
-        if (account.getEnforceMinRequiredBalance()) {
-            if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
-            }
-        }
 
-        Boolean lien = false;
+        Boolean enforceMinRequiredBalance = account.getEnforceMinRequiredBalance();
+        Boolean accountLienAllowed = account.isLienAllowed();
+        Boolean isOverdraftEnabled = account.isAllowOverdraft();
 
-        if (this.fromApiJsonHelper.parameterExists(lienParamName, element)) {
-            lien = this.fromApiJsonHelper.extractBooleanNamed(lienParamName, element);
-            if (!lien) {
-                if (account.getWithdrawableBalanceWithoutMinimumBalance().compareTo(BigDecimal.ZERO) < 0) {
-                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+        Boolean lienAllowed = false;
+        if (this.fromApiJsonHelper.parameterExists(lienAllowedParamName, element)) {
+            lienAllowed = this.fromApiJsonHelper.extractBooleanNamed(lienAllowedParamName, element);
+            if (lienAllowed) {
+                if (accountLienAllowed) {
+                    if (isOverdraftEnabled) {
+                        if (account.getOverdraftLimit().compareTo(account.getMaxAllowedLienLimit()) > 0) {
+                            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                        }
+                    }
+                } else {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("lien is not allowed in product", account.getId());
                 }
             }
         }
+
+//        if (accountLienAllowed) {
+//
+//        }
+
+        // accountLienAllowed && lienAllowed > lien on hold
+        // accountLienAllowed && !lienAllowed > normal hold
+        // !accountLienAllowed && lienAllowed > lien not allowed
+        // !accountLienAllowed && !lienAllowed > normal hold
+
 
         LocalDate lastTransactionDate = null;
 
