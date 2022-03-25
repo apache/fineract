@@ -51,6 +51,24 @@ public final class WorkingDaysHelper {
                 jsonAttributeToGetback);
     }
 
+    public static Object updateWorkingDaysWeekDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingWeekDaysDaysAsJson(), "");
+    }
+
+    @SuppressFBWarnings(value = {
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+    public static String updateWorkingWeekDaysDaysAsJson() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR");
+        map.put("locale", "en");
+        map.put("repaymentRescheduleType", 2);
+        map.put("extendTermForDailyRepayments", false);
+        LOG.info("map :  {}", map);
+        return new Gson().toJson(map);
+    }
+
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String updateWorkingDaysAsJson() {
