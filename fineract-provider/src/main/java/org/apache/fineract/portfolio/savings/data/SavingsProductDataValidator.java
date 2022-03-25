@@ -103,6 +103,7 @@ public class SavingsProductDataValidator {
             daysToInactiveParamName, daysToEscheatParamName, allowOverdraftParamName, overdraftLimitParamName,
             nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
             SavingsApiConstants.minRequiredBalanceParamName, SavingsApiConstants.enforceMinRequiredBalanceParamName,
+            SavingsApiConstants.maxAllowedLienLimitParamName, SavingsApiConstants.lienAllowedParamName,
             minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName));
 
     @Autowired
