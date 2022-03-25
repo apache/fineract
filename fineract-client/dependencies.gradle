@@ -34,13 +34,4 @@ dependencies {
         exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
         exclude group: 'org.slf4j'
     }
-
-    testImplementation(
-            'org.junit.jupiter:junit-jupiter-api',
-            'com.google.truth:truth',
-            'com.google.truth.extensions:truth-java8-extension'
-            )
-    testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine'
-            )
 }

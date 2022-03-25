@@ -24,16 +24,6 @@ dependencies {
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
-            'org.junit.jupiter:junit-jupiter-api',
-            'com.google.truth:truth',
-            'com.google.truth.extensions:truth-java8-extension',
-            'org.awaitility:awaitility',
-            'org.bouncycastle:bcpkix-jdk15to18',
-            'org.bouncycastle:bcprov-jdk15to18',
-            'io.cucumber:cucumber-core',
-            'io.cucumber:cucumber-java',
-            'io.cucumber:cucumber-java8',
-            'io.cucumber:cucumber-junit-platform-engine',
             'io.cucumber:cucumber-spring',
             'com.intuit.karate:karate-junit5',
             // 'com.google.code.gson:gson',
@@ -48,7 +38,4 @@ dependencies {
         exclude group: 'org.apache.sling'
         exclude group: 'com.sun.xml.bind'
     }
-    testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine'
-            )
 }

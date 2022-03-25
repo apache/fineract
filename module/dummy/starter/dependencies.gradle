@@ -21,4 +21,5 @@ dependencies {
     implementation(project(':module:dummy:core'),
             project(':module:dummy:service'),
             'org.springframework.boot:spring-boot-starter')
+    testImplementation('io.cucumber:cucumber-spring')
 }
