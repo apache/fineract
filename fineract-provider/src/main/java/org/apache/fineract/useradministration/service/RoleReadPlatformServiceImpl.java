@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.self.registration.SelfServiceApiConstants;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
@@ -39,8 +38,8 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     private final RoleMapper roleRowMapper;
 
     @Autowired
-    public RoleReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public RoleReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.roleRowMapper = new RoleMapper();
     }
 

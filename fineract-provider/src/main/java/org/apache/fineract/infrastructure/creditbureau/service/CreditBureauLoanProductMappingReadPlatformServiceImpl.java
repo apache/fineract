@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.creditbureau.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauLoanProductMappingData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +35,9 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauLoanProductMappingReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource) {
+    public CreditBureauLoanProductMappingReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class CreditBureauLoanProductMapper implements RowMapper<CreditBureauLoanProductMappingData> {

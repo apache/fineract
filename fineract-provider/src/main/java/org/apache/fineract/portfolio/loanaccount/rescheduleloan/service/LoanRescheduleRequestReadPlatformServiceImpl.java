@@ -29,7 +29,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
@@ -53,9 +52,9 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
-    public LoanRescheduleRequestReadPlatformServiceImpl(final RoutingDataSource dataSource, LoanRepositoryWrapper loanRepositoryWrapper,
+    public LoanRescheduleRequestReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, LoanRepositoryWrapper loanRepositoryWrapper,
             final CodeValueReadPlatformService codeValueReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
     }

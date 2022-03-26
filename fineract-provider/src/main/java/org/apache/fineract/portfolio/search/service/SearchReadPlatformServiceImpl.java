@@ -28,7 +28,6 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -54,17 +53,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class SearchReadPlatformServiceImpl implements SearchReadPlatformService {
 
-    private final NamedParameterJdbcTemplate namedParameterjdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final PlatformSecurityContext context;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
-    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
-        this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
     }
@@ -83,7 +82,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         } else {
             params.addValue("search", "%" + searchConditions.getSearchQuery() + "%");
         }
-        return this.namedParameterjdbcTemplate.query(rm.searchSchema(searchConditions), params, rm);
+        return this.namedParameterJdbcTemplate.query(rm.searchSchema(searchConditions), params, rm);
     }
 
     private static final class SearchMapper implements RowMapper<SearchData> {
@@ -204,7 +203,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         final AdHocQuerySearchMapper rm = new AdHocQuerySearchMapper();
         final MapSqlParameterSource params = new MapSqlParameterSource();
 
-        return this.namedParameterjdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
+        return this.namedParameterJdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
     }
 
     private static final class AdHocQuerySearchMapper implements RowMapper<AdHocSearchQueryData> {

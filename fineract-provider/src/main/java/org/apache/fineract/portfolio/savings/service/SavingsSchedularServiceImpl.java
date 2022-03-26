@@ -36,7 +36,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -73,7 +72,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final SavingsAccountReadPlatformService savingAccountReadPlatformService,
             final SavingsAccountRepositoryWrapper savingsAccountRepository, final ApplicationContext applicationContext,
-            final ConfigurationDomainService configurationDomainService, final RoutingDataSource dataSource,
+            final ConfigurationDomainService configurationDomainService, final JdbcTemplate jdbcTemplate,
             final TransactionTemplate transactionTemplate) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
@@ -81,7 +80,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         this.savingsAccountRepository = savingsAccountRepository;
         this.applicationContext = applicationContext;
         this.configurationDomainService = configurationDomainService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 

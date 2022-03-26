@@ -54,8 +54,9 @@ public class GenericDataServiceImpl implements GenericDataService {
     private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
-    public GenericDataServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator,
-            DatabaseTypeResolver databaseTypeResolver, DatabaseIndependentQueryService databaseIndependentQueryService) {
+    public GenericDataServiceImpl(final RoutingDataSource dataSource, final JdbcTemplate jdbcTemplate,
+            DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver,
+            DatabaseIndependentQueryService databaseIndependentQueryService) {
         this.dataSource = dataSource;
         this.sqlGenerator = sqlGenerator;
         this.databaseTypeResolver = databaseTypeResolver;

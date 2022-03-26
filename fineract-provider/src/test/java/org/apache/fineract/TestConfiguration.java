@@ -48,6 +48,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -135,5 +136,10 @@ public class TestConfiguration {
     public DataSource hikariTenantDataSource() {
         DataSource mockDataSource = mock(DataSource.class, Mockito.RETURNS_MOCKS);
         return mockDataSource;
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return mock(JdbcTemplate.class);
     }
 }

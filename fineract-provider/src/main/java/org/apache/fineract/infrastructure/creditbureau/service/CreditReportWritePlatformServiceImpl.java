@@ -35,7 +35,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureau;
@@ -68,9 +67,8 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             .resource("creditBureauIntegration");
 
     @Autowired
-    public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final FromJsonHelper fromApiJsonHelper, final TokenRepositoryWrapper tokenRepository,
-            final CreditBureauConfigurationRepositoryWrapper configDataRepository,
+    public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
+            final TokenRepositoryWrapper tokenRepository, final CreditBureauConfigurationRepositoryWrapper configDataRepository,
             final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CreditBureauLoanProductMappingRepository loanProductMappingRepository,
             final CreditBureauRepository creditBureauRepository, final CreditReportRepository creditReportRepository,

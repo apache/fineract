@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.data.XBRLData;
@@ -53,11 +52,11 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
-    public XBRLResultServiceImpl(final RoutingDataSource dataSource, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
+    public XBRLResultServiceImpl(final JdbcTemplate jdbcTemplate, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
             final MixTaxonomyReadPlatformService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

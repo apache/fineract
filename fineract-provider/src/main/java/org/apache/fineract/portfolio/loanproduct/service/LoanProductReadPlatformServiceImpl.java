@@ -28,7 +28,6 @@ import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -64,12 +63,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeReadPlatformService chargeReadPlatformService, final RoutingDataSource dataSource,
+            final ChargeReadPlatformService chargeReadPlatformService, final JdbcTemplate jdbcTemplate,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService,
             DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.rateReadService = rateReadService;
         this.sqlGenerator = sqlGenerator;

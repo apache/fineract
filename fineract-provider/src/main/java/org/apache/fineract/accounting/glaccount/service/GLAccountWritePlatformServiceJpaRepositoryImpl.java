@@ -44,7 +44,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +69,12 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     @Autowired
     public GLAccountWritePlatformServiceJpaRepositoryImpl(final GLAccountRepository glAccountRepository,
             final JournalEntryRepository glJournalEntryRepository, final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final RoutingDataSource dataSource) {
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final JdbcTemplate jdbcTemplate) {
         this.glAccountRepository = glAccountRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional

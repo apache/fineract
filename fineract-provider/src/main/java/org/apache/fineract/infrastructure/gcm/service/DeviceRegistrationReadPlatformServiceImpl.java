@@ -25,7 +25,6 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
 import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -43,9 +42,9 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
     private final PlatformSecurityContext context;
 
     @Autowired
-    public DeviceRegistrationReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public DeviceRegistrationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class DeviceRegistrationDataMapper implements RowMapper<DeviceRegistrationData> {

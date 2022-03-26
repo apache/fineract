@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 import org.apache.fineract.infrastructure.accountnumberformat.exception.AccountNumberFormatNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +52,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
     private final AccountNumberFormatMapper accountNumberFormatMapper = new AccountNumberFormatMapper();
 
     @Autowired
-    public AccountNumberFormatReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public AccountNumberFormatReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class AccountNumberFormatMapper implements RowMapper<AccountNumberFormatData> {

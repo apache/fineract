@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.notification.data.TopicSubscriberData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,8 +35,8 @@ public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberRe
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TopicSubscriberReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public TopicSubscriberReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class TopicSubscriberMapper implements RowMapper<TopicSubscriberData> {

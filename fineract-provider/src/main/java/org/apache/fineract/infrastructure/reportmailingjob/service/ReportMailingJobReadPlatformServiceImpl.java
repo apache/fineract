@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
@@ -54,9 +53,9 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     private final PaginationHelper paginationHelper;
 
     @Autowired
-    public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator,
+    public ReportMailingJobReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
         this.sqlGenerator = sqlGenerator;
         this.paginationHelper = paginationHelper;

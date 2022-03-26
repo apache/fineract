@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -56,12 +55,12 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     @Autowired
     public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService, final RoutingDataSource dataSource,
+            final CurrencyReadPlatformService currencyReadPlatformService, final JdbcTemplate jdbcTemplate,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.columnValidator = columnValidator;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
     }
 

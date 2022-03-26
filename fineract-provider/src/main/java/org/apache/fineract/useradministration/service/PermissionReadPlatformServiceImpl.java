@@ -21,7 +21,6 @@ package org.apache.fineract.useradministration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PermissionData;
@@ -42,10 +41,10 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     private final PlatformSecurityContext context;
 
     @Autowired
-    public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
     }
 

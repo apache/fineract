@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.EventResultSetExtractor;
 import org.apache.fineract.infrastructure.hooks.data.Field;
@@ -51,10 +50,10 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     @Autowired
     public HookReadPlatformServiceImpl(final PlatformSecurityContext context, final HookRepository hookRepository,
-            final RoutingDataSource dataSource) {
+            final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.hookRepository = hookRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

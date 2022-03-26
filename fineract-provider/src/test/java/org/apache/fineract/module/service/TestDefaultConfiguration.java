@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @EnableConfigurationProperties({ FineractProperties.class })
 public class TestDefaultConfiguration {
@@ -50,6 +51,11 @@ public class TestDefaultConfiguration {
     @Bean
     public RoutingDataSource routingDataSource() {
         return mock(RoutingDataSource.class);
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return mock(JdbcTemplate.class);
     }
 
     @Bean

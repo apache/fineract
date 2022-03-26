@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -49,8 +48,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
 
     @Autowired
-    public PortfolioAccountReadPlatformServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public PortfolioAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
+        this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountMapper = new PortfolioSavingsAccountMapper();
         this.loanAccountMapper = new PortfolioLoanAccountMapper();
         this.accountRefundByTransferMapper = new PortfolioLoanAccountRefundByTransferMapper(sqlGenerator);

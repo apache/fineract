@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -73,17 +72,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
+            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
             final DropdownReadPlatformService dropdownReadPlatformService, final FineractEntityAccessUtil fineractEntityAccessUtil,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa) {
+            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa,
+            final NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.taxReadPlatformService = taxReadPlatformService;
         this.configurationDomainServiceJpa = configurationDomainServiceJpa;
     }

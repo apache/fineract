@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +36,9 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
     private final PlatformSecurityContext context;
 
     @Autowired
-    public FieldConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public FieldConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class FieldMapper implements RowMapper<FieldConfigurationData> {

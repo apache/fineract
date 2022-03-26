@@ -25,7 +25,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCategoryCannotBeDeletedException;
@@ -52,10 +51,10 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
 
     @Autowired
     public ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl(final ProvisioningCategoryRepository provisioningCategoryRepository,
-            final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final RoutingDataSource dataSource) {
+            final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final JdbcTemplate jdbcTemplate) {
         this.provisioningCategoryRepository = provisioningCategoryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

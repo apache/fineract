@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -53,9 +52,9 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
     private final PlatformSecurityContext context;
 
     @Autowired
-    public LoanScheduleHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
+    public LoanScheduleHistoryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @SuppressWarnings("deprecation")

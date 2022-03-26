@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.exception.GroupRoleNotFoundException;
@@ -40,9 +39,9 @@ public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatform
     private final PlatformSecurityContext context;
 
     @Autowired
-    public GroupRolesReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public GroupRolesReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

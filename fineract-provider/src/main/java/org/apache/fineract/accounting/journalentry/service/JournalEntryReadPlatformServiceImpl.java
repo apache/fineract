@@ -47,7 +47,6 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
@@ -82,12 +81,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    public JournalEntryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final GLAccountReadPlatformService glAccountReadPlatformService, final ColumnValidator columnValidator,
             final OfficeReadPlatformService officeReadPlatformService,
             final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.glAccountReadPlatformService = glAccountReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;

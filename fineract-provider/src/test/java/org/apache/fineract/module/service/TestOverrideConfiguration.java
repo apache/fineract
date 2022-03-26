@@ -31,6 +31,7 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @ComponentScan("org.apache.fineract.module.service.custom")
 public class TestOverrideConfiguration {
@@ -49,6 +50,11 @@ public class TestOverrideConfiguration {
     @Bean
     public RoutingDataSource routingDataSource() {
         return mock(RoutingDataSource.class);
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return mock(JdbcTemplate.class);
     }
 
     @Bean

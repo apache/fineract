@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
-import javax.sql.DataSource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +54,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavaila
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
@@ -107,7 +105,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             "mediumblob", "mediumtext", "longblob", "longtext");
 
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PlatformSecurityContext context;
@@ -125,15 +122,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     // configurationWriteService;
 
     @Autowired(required = true)
-    public ReadWriteNonCoreDataServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
-            final FromJsonHelper fromJsonHelper, final GenericDataService genericDataService,
+    public ReadWriteNonCoreDataServiceImpl(final JdbcTemplate jdbcTemplate, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper, final GenericDataService genericDataService,
             final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer, final CodeReadPlatformService codeReadPlatformService,
             final ConfigurationDomainService configurationDomainService, final DataTableValidator dataTableValidator,
             final ColumnValidator columnValidator, DatabaseTypeResolver databaseTypeResolver, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.dataSource = dataSource;
         this.databaseTypeResolver = databaseTypeResolver;
         this.sqlGenerator = sqlGenerator;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.helper = new JsonParserHelper();
@@ -144,7 +140,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.dataTableValidator = dataTableValidator;
         this.columnValidator = columnValidator;
         // this.configurationWriteService = configurationWriteService;
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
@@ -60,7 +59,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -104,7 +102,6 @@ public class AccountingProcessorHelper {
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private static final Logger LOG = LoggerFactory.getLogger(AccountingProcessorHelper.class);
 
     @Autowired
@@ -116,9 +113,8 @@ public class AccountingProcessorHelper {
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final GLAccountRepositoryWrapper accountRepositoryWrapper,
             final ClientTransactionRepositoryWrapper clientTransactionRepositoryWrapper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoutingDataSource dataSource) {
+            final ChargeRepositoryWrapper chargeRepositoryWrapper, final JdbcTemplate jdbcTemplate) {
         this.glJournalEntryRepository = glJournalEntryRepository;
-        this.dataSource = dataSource;
         this.accountMappingRepository = accountMappingRepository;
         this.closureRepository = closureRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
@@ -129,7 +125,7 @@ public class AccountingProcessorHelper {
         this.accountRepositoryWrapper = accountRepositoryWrapper;
         this.clientTransactionRepository = clientTransactionRepositoryWrapper;
         this.chargeRepositoryWrapper = chargeRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public LoanDTO populateLoanDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,

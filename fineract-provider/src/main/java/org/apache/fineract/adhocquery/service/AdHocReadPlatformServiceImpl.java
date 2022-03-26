@@ -25,7 +25,6 @@ import java.util.Collection;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -41,8 +40,8 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     private final AdHocMapper adHocRowMapper;
 
     @Autowired
-    public AdHocReadPlatformServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public AdHocReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
+        this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
         this.adHocRowMapper = new AdHocMapper(sqlGenerator);
     }
