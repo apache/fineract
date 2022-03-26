@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.fund.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
@@ -39,9 +38,9 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
     private final PlatformSecurityContext context;
 
     @Autowired
-    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class FundMapper implements RowMapper<FundData> {

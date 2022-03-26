@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.self.client.service;
 
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -33,8 +32,8 @@ public class AppuserClientMapperReadServiceImpl implements AppuserClientMapperRe
     private final PlatformSecurityContext context;
 
     @Autowired
-    public AppuserClientMapperReadServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public AppuserClientMapperReadServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context) {
+        this.jdbcTemplate = jdbcTemplate;
         this.context = context;
     }
 

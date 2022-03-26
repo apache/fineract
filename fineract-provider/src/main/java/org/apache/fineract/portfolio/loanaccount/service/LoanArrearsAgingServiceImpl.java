@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -64,9 +63,9 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public LoanArrearsAgingServiceImpl(final RoutingDataSource dataSource, final BusinessEventNotifierService businessEventNotifierService,
+    public LoanArrearsAgingServiceImpl(final JdbcTemplate jdbcTemplate, final BusinessEventNotifierService businessEventNotifierService,
             DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.businessEventNotifierService = businessEventNotifierService;
         this.sqlGenerator = sqlGenerator;
     }

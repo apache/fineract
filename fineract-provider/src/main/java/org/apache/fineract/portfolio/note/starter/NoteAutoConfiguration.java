@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.note.starter;
 
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -32,14 +31,15 @@ import org.apache.fineract.portfolio.note.service.NoteWritePlatformServiceJpaRep
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class NoteAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public NoteReadPlatformService noteReadPlatformService(RoutingDataSource routingDataSource) {
-        return new NoteReadPlatformServiceImpl(routingDataSource);
+    public NoteReadPlatformService noteReadPlatformService(JdbcTemplate jdbcTemplate) {
+        return new NoteReadPlatformServiceImpl(jdbcTemplate);
     }
 
     @Bean

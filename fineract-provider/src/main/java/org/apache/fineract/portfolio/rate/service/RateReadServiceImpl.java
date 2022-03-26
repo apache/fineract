@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -47,9 +46,9 @@ public class RateReadServiceImpl implements RateReadService {
     private final PlatformSecurityContext context;
 
     @Autowired
-    public RateReadServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public RateReadServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

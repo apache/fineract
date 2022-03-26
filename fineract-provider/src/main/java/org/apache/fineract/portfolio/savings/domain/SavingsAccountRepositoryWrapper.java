@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +50,10 @@ public class SavingsAccountRepositoryWrapper {
 
     @Autowired
     public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository, final RoutingDataSource dataSource) {
+            final SavingsAccountTransactionRepository savingsAccountTransactionRepository, final JdbcTemplate jdbcTemplate) {
         this.repository = repository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional(readOnly = true)

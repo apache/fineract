@@ -23,9 +23,9 @@ import static org.mockito.Mockito.mock;
 
 import io.cucumber.java8.En;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.service.XBRLResultServiceImpl;
 import org.assertj.core.util.Arrays;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MixXbrlTaxonomyStepDefinitions implements En {
 
@@ -37,7 +37,7 @@ public class MixXbrlTaxonomyStepDefinitions implements En {
 
     public MixXbrlTaxonomyStepDefinitions() {
         Given("/^A XBRL template (.*)$/", (String template) -> {
-            this.readService = new XBRLResultServiceImpl(mock(RoutingDataSource.class), null, null);
+            this.readService = new XBRLResultServiceImpl(mock(JdbcTemplate.class), null, null);
             this.template = template;
         });
 

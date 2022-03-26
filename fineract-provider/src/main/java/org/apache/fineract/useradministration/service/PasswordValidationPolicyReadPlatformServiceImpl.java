@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 import org.apache.fineract.useradministration.exception.PasswordValidationPolicyNotFoundException;
@@ -40,8 +39,8 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
     private final PasswordValidationPolicyMapper passwordValidationPolicyMapper;
 
     @Autowired
-    public PasswordValidationPolicyReadPlatformServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public PasswordValidationPolicyReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
+        this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
         this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper(sqlGenerator);
     }

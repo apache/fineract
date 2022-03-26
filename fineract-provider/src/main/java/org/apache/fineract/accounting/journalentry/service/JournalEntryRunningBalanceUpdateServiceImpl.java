@@ -38,7 +38,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -68,10 +67,10 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
 
     @Autowired
-    public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource,
+    public JournalEntryRunningBalanceUpdateServiceImpl(final JdbcTemplate jdbcTemplate,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final JournalEntryDataValidator dataValidator,
             final FromJsonHelper fromApiJsonHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.dataValidator = dataValidator;
         this.fromApiJsonHelper = fromApiJsonHelper;
