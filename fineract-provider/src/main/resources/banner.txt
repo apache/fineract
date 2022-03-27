@@ -6,5 +6,7 @@
 /_/   \_\ .__/ \__,_|\___|_| |_|\___| |_|   |_|_| |_|\___|_|  \__,_|\___|\__|
         |_|
 
+${AnsiStyle.FAINT}${AnsiColor.WHITE}version ${application.version}${AnsiColor.BLACK}
+
 ${AnsiStyle.FAINT}${AnsiColor.WHITE}Powered by Spring Boot ${spring-boot.version}${AnsiColor.BLACK}
 

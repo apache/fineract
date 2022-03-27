@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -117,6 +118,8 @@ public class DocumentManagementApiResource {
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(description = "Create document", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DocumentUploadRequest.class)) })
     @Operation(summary = "Create a Document", description = "Note: A document is created using a Multi-part form upload \n" + "\n"
             + "Body Parts\n" + "\n" + "name : \n" + "Name or summary of the document\n" + "\n" + "description : \n"
             + "Description of the document\n" + "\n" + "file : \n" + "The file to be uploaded\n" + "\n" + "Mandatory Fields : \n"
@@ -137,7 +140,6 @@ public class DocumentManagementApiResource {
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
-
         return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
     }
 
@@ -145,6 +147,8 @@ public class DocumentManagementApiResource {
     @Path("{documentId}")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(description = "Update document", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DocumentUploadRequest.class)) })
     @Operation(summary = "Update a Document", description = "Note: A document is updated using a Multi-part form upload \n" + "Body Parts\n"
             + "name\n" + "Name or summary of the document\n" + "description\n" + "Description of the document\n" + "file\n"
             + "The file to be uploaded")

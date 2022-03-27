@@ -19,6 +19,7 @@
 dependencies {
     // project(':fineract-provider')
     implementation(
+            'jakarta.annotation:jakarta.annotation-api',
             'io.swagger:swagger-annotations',
             'com.squareup.retrofit2:retrofit',
             'com.squareup.retrofit2:adapter-java8',

@@ -147,7 +147,7 @@ final class ClientsApiResourceSwagger {
             }
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000002")
             public String accountNo;
             public GetClientStatus status;
@@ -297,7 +297,7 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "1")
         public Integer groupId;
         @Schema(example = "2")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "2")
         public Integer resourceId;
     }
