@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -35,6 +38,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
@@ -85,6 +89,8 @@ public class ImagesApiResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
+    @RequestBody(description = "Upload new client image", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
@@ -173,6 +179,8 @@ public class ImagesApiResource {
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
+    @RequestBody(description = "Update client image", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String updateClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {

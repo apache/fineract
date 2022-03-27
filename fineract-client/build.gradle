@@ -84,7 +84,7 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     configOptions = [
         apiModulePrefix: 'fineract',
         configurationPrefix: 'fineract',
-        ngVersion: '10.0.0',
+        ngVersion: '12.0.0',
         npmName: 'apache-fineract-client'
     ]
     dependsOn = [
@@ -96,22 +96,10 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
 compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
 
-sourceSets {
-    generated {
-        java {
-            srcDir "$buildDir/generated/java/src/main/java"
-        }
-    }
-}
-
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-compileJava {
-    source += sourceSets.generated.java
 }
 
 tasks.withType(JavaCompile) {
@@ -133,4 +121,6 @@ test {
 }
 
 // Gradle 7.x asks for explicit dependencies between tasks
-licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileGeneratedJava, compileTestJava, rat, test
+licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileTestJava, rat, test
+
+sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
