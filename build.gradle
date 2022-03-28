@@ -233,7 +233,7 @@ allprojects  {
                 entry 'poi-ooxml-schemas'
             }
 
-            dependencySet(group: 'io.rest-assured', version: '4.5.1') {
+            dependencySet(group: 'io.rest-assured', version: '5.0.0') {
                 entry 'rest-assured'
                 entry 'json-path'
                 entry 'xml-path'
