@@ -162,7 +162,7 @@ allprojects  {
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
             dependency 'joda-time:joda-time:2.10.14'
 
-            dependency 'io.github.classgraph:classgraph:4.8.141'
+            dependency 'io.github.classgraph:classgraph:4.8.143'
             dependency 'org.awaitility:awaitility:4.2.0'
             dependency 'com.github.spotbugs:spotbugs-annotations:4.6.0'
             dependency 'javax.cache:cache-api:1.1.1'
