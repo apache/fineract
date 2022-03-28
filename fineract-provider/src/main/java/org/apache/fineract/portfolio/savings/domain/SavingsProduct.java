@@ -716,10 +716,6 @@ public class SavingsProduct extends AbstractPersistableCustom {
         return this.maxAllowedLienLimit;
     }
 
-    // public boolean isMaxRequiredLienBalance() {
-    // return this.lienAllowed;
-    // }
-
     public boolean isLienAllowed() {
         return this.lienAllowed;
     }
