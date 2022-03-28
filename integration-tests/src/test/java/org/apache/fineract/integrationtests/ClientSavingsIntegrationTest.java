@@ -2061,8 +2061,8 @@ public class ClientSavingsIntegrationTest {
         }
         if (enforceMinRequiredBalance) {
             final String minRequiredBalance = "100.0";
-            savingsProductHelper.withMinRequiredBalance(minOpenningBalance);
-            savingsProductHelper.withEnforceMinRequiredBalance(minRequiredBalance);
+            savingsProductHelper.withMinRequiredBalance(minRequiredBalance);
+            savingsProductHelper.withEnforceMinRequiredBalance("true");
         }
         if (allowOverDraft) {
             savingsProductHelper.withOverDraft(overDraftLimit);
@@ -2236,80 +2236,6 @@ public class ClientSavingsIntegrationTest {
         assertEquals(Float.parseFloat("300"), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
 
     }
-
-    // @SuppressWarnings("unchecked")
-    // @Test
-    // public void testSavingsAccountLienAllowedAtProductLevelWithEnforceBalanceOverDraftLimit(){
-    // this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-    // SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec, new
-    // ResponseSpecBuilder().build());
-    // final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-    // final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
-    //
-    // final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-    // ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-    //
-    // final String minBalanceForInterestCalculation = null;
-    // final boolean enforceMinRequiredBalance = true;
-    // final boolean allowOverdraft = true;
-    // final boolean lienAllowed = true;
-    //
-    // final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
-    // MINIMUM_OPENING_BALANCE,
-    // minBalanceForInterestCalculation , enforceMinRequiredBalance, allowOverdraft, lienAllowed);
-    // Assertions.assertNotNull(savingsProductID);
-    //
-    // final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-    // ACCOUNT_TYPE_INDIVIDUAL);
-    // Assertions.assertNotNull(savingsProductID);
-    //
-    // HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec,
-    // savingsId);
-    // SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-    //
-    // savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-    // SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-    //
-    // savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-    // SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-    //
-    // List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000",
-    // false,
-    // SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-    // assertEquals("validation.msg.savingsaccount.insufficient balance",
-    // error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-    //
-    // Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "2000",
-    // true,
-    // SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-    //
-    // HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-    //
-    // Float balance = Float.parseFloat("-1900");
-    //
-    // assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
-    //
-    // Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2100",
-    // SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-    // DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-    // Calendar todaysDate = Calendar.getInstance();
-    // final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
-    //
-    // ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>)
-    // validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
-    // "200", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-    //
-    // assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
-    // savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-    //
-    // Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId,
-    // "100", TRANSACTION_DATE,
-    // CommonConstants.RESPONSE_RESOURCE_ID);
-    //
-    // Assertions.assertNotNull(withdrawTransactionId);
-    //
-    // }
-    //
     @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountLienAllowedAtProductLevelWithEnforceBalance() {
@@ -2355,24 +2281,6 @@ public class ClientSavingsIntegrationTest {
         Float balance = Float.parseFloat("-1900");
 
         assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
-
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2100",
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-        Calendar todaysDate = Calendar.getInstance();
-        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
-
-        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
-                "200", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-
-        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
-                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
-        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-
-        Assertions.assertNotNull(withdrawTransactionId);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -2421,24 +2329,19 @@ public class ClientSavingsIntegrationTest {
 
         assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
 
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2100", // available
-                                                                                                                      // bal
-                                                                                                                      // =
-                                                                                                                      // 200
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2100",
+        SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         Calendar todaysDate = Calendar.getInstance();
         final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
 
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
-                "1300", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);// can withdraw (overdraftLimit + available
-                                                                          // Bal) i.e 1200 (as lien amount of 2000
-                                                                          // credited)
+                "300", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1200",
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "200",
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
 
         Assertions.assertNotNull(withdrawTransactionId);
@@ -2490,10 +2393,7 @@ public class ClientSavingsIntegrationTest {
 
         assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -1900");
 
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000", // available
-                                                                                                                      // bal
-                                                                                                                      // =
-                                                                                                                      // 100
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         Calendar todaysDate = Calendar.getInstance();
@@ -2526,7 +2426,7 @@ public class ClientSavingsIntegrationTest {
 
         final String minBalanceForInterestCalculation = null;
         final boolean enforceMinRequiredBalance = true;
-        final boolean allowOverdraft = false;
+        final boolean allowOverdraft = true;
         final boolean lienAllowed = false;
 
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
@@ -2547,7 +2447,7 @@ public class ClientSavingsIntegrationTest {
 
         List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "2000", true,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-        assertEquals("validation.msg.savingsaccount.Lien is not allowed in product",
+        assertEquals("validation.msg.savingsaccount.lien is not allowed in product level",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "1000", false,
@@ -2555,9 +2455,9 @@ public class ClientSavingsIntegrationTest {
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Float balance = Float.parseFloat("100"); //opening balance
+        Float balance = Float.parseFloat("-900"); //opening balance
 
-        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is 100");
+        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -900");
 
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000", // available to use 1100 and another 1000 on transactional hold
 
@@ -2615,51 +2515,10 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        // List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId,
-        // "2200", false,
-        // SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-        // assertEquals("validation.msg.savingsaccount.insufficient balance",
-        // error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
-        Integer lienHoldTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, "1000", true,
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-
-        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-
-        Float balance = Float.parseFloat("-900");
-
-        assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -900");
-
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "500", // available
-                                                                                                                     // bal
-                                                                                                                     // =
-                                                                                                                     // -400
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-        Calendar todaysDate = Calendar.getInstance();
-        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
-
-        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
-                "200", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
-
-        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance", // need to credit lien amount
-                                                                                          // i.e 400 (we can not
-                                                                                          // withdraw even there is an
-                                                                                          // overdraft limit until lien
-                                                                                          // is credited)
-                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        Integer newDepositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "500", // available bal = 100
-
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        Float newBalance = Float.parseFloat("100");
-
-        assertEquals(newBalance, summary.get("availableBalance"), "Verifying available Balance is 100");
-
-        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-
-        Assertions.assertNotNull(withdrawTransactionId);
-
+        List<HashMap> error = (List) savingsAccountHelperValidationError.holdAmountInSavingsAccount(savingsId, "1000", true,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.savingsaccount.Overdraft limit can not be greater than lien limit",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
 
      @SuppressWarnings("unchecked")
