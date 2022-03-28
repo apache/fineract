@@ -43,6 +43,8 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.namePara
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
@@ -340,6 +342,18 @@ public class SavingsProductDataValidator {
                     .extractBigDecimalWithLocaleNamed(minBalanceForInterestCalculationParamName, element);
             baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
                     .ignoreIfNull().zeroOrPositiveAmount();
+        }
+        Boolean isLienAllowed=this.fromApiJsonHelper.parameterExists(lienAllowedParamName,element);
+        Boolean isOverdraftAllowed = this.fromApiJsonHelper.parameterExists(allowOverdraftParamName,element);
+
+        if(isLienAllowed){
+            if(isOverdraftAllowed){
+                BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(overdraftLimitParamName, element);
+                BigDecimal lienAllowedLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxAllowedLienLimitParamName,element);
+                if(overdraftLimit.compareTo(lienAllowedLimit)>0){
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("Overdraft limit can not be greater than lien limit");
+                }
+            }
         }
 
         validateTaxWithHoldingParams(baseDataValidator, element, true);
