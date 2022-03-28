@@ -296,17 +296,6 @@ public class SavingsAccountTransactionDataValidator {
             }
         }
         account.holdAmount(amount);
-
-//        if (accountLienAllowed) {
-//
-//        }
-
-        // accountLienAllowed && lienAllowed > lien on hold
-        // accountLienAllowed && !lienAllowed > normal hold
-        // !accountLienAllowed && lienAllowed > lien not allowed
-        // !accountLienAllowed && !lienAllowed > normal hold
-
-
         LocalDate lastTransactionDate = null;
 
         if (!backdatedTxnsAllowedTill) {
