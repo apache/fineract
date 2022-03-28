@@ -21,7 +21,6 @@ package org.apache.fineract.notification.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.notification.data.TopicData;
 import org.apache.fineract.notification.exception.TopicNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +35,8 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public TopicReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class TopicMapper implements RowMapper<TopicData> {

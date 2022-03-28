@@ -36,11 +36,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -65,16 +63,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private static final Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
 
     @Autowired
-    public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public ReadReportingServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final GenericDataService genericDataService) {
         this.context = context;
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.genericDataService = genericDataService;
     }
 

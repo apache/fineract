@@ -26,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -34,7 +35,6 @@ import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.domain.SurveyRepository;
 import org.apache.fineract.spm.domain.SurveyValidator;
 import org.apache.fineract.spm.exception.SurveyNotFoundException;
-import org.apache.openjpa.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -126,7 +126,7 @@ public class SpmService {
         final ZonedDateTime dateTime = getStartOfToday().minus(1, ChronoUnit.MILLIS);
         survey.setValidTo(Date.from(dateTime.toInstant()));
 
-        this.surveyRepository.save(survey);
+        this.surveyRepository.saveAndFlush(survey);
     }
 
     public void activateSurvey(final Long id) {
@@ -140,7 +140,7 @@ public class SpmService {
         survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         survey.setValidTo(cal.getTime());
 
-        this.surveyRepository.save(survey);
+        this.surveyRepository.saveAndFlush(survey);
     }
 
     public static ZonedDateTime getStartOfToday() {

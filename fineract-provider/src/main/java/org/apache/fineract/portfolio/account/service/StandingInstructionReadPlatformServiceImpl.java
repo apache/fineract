@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
@@ -86,12 +85,12 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     private final PaginationHelper paginationHelper;
 
     @Autowired
-    public StandingInstructionReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    public StandingInstructionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final DropdownReadPlatformService dropdownReadPlatformService, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;

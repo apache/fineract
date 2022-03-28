@@ -55,6 +55,7 @@ public final class AccountingConstants {
         }
 
         private static final Map<Integer, CashAccountsForLoan> intToEnumMap = new HashMap<>();
+
         static {
             for (final CashAccountsForLoan type : CashAccountsForLoan.values()) {
                 intToEnumMap.put(type.value, type);
@@ -92,6 +93,7 @@ public final class AccountingConstants {
         }
 
         private static final Map<Integer, AccrualAccountsForLoan> intToEnumMap = new HashMap<>();
+
         static {
             for (final AccrualAccountsForLoan type : AccrualAccountsForLoan.values()) {
                 intToEnumMap.put(type.value, type);
@@ -191,6 +193,7 @@ public final class AccountingConstants {
         }
 
         private static final Map<Integer, CashAccountsForSavings> intToEnumMap = new HashMap<>();
+
         static {
             for (final CashAccountsForSavings type : CashAccountsForSavings.values()) {
                 intToEnumMap.put(type.value, type);
@@ -278,6 +281,7 @@ public final class AccountingConstants {
         private final GLAccountType mappedGLAccountType;
 
         private static List<FinancialActivityData> financialActivities;
+
         static {
             financialActivities = new ArrayList<>();
             for (final FinancialActivity type : FinancialActivity.values()) {
@@ -314,6 +318,7 @@ public final class AccountingConstants {
         }
 
         private static final Map<Integer, FinancialActivity> intToEnumMap = new HashMap<>();
+
         static {
             for (final FinancialActivity type : FinancialActivity.values()) {
                 intToEnumMap.put(type.value, type);
@@ -363,6 +368,7 @@ public final class AccountingConstants {
         }
 
         private static final Map<Integer, CashAccountsForShares> intToEnumMap = new HashMap<>();
+
         static {
             for (final CashAccountsForShares type : CashAccountsForShares.values()) {
                 intToEnumMap.put(type.value, type);

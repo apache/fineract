@@ -36,6 +36,7 @@ public enum StorageType {
     }
 
     private static final Map<Integer, StorageType> intToEnumMap = new HashMap<>();
+
     static {
         for (final StorageType type : StorageType.values()) {
             intToEnumMap.put(type.value, type);

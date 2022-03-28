@@ -17,6 +17,10 @@
  * under the License.
  */
 rootProject.name='fineract'
+include ':module:dummy:core'
+include ':module:dummy:service'
+include ':module:dummy:starter'
+include ':custom:foo:service'
 include ':fineract-provider'
 include ':fineract-war'
 include ':integration-tests'

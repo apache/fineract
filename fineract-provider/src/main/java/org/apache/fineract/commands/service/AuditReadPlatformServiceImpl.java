@@ -42,7 +42,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
@@ -96,7 +95,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
@@ -105,7 +104,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final DepositProductReadPlatformService depositProductReadPlatformService, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.appUserReadPlatformService = appUserReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;

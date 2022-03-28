@@ -28,6 +28,9 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
+// enable when all tests are migrated
+tasks.cucumber.onlyIf {false}
+
 cargo {
     containerId "tomcat9x"
 
@@ -39,6 +42,7 @@ cargo {
 
     local {
         logLevel = 'medium'
+        // outputFile = file('build/output.log')
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")

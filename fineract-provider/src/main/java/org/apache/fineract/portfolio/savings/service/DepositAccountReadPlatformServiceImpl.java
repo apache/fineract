@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -126,7 +125,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId", "officeName"));
 
     @Autowired
-    public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final DepositAccountInterestRateChartReadPlatformService chartReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
@@ -140,7 +139,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             PaymentTypeReadPlatformService paymentTypeReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationHelper paginationHelper) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.accountChartReadPlatformService = chartReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.sqlGenerator = sqlGenerator;

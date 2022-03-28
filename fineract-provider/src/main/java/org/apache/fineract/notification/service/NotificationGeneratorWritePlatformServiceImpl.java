@@ -35,7 +35,7 @@ public class NotificationGeneratorWritePlatformServiceImpl implements Notificati
 
     @Override
     public Long create(Notification notification) {
-        this.notificationRepository.save(notification);
+        this.notificationRepository.saveAndFlush(notification);
         return notification.getId();
     }
 }

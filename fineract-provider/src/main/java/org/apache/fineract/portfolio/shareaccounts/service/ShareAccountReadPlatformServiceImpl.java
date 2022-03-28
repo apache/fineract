@@ -35,7 +35,6 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
@@ -87,7 +86,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public ShareAccountReadPlatformServiceImpl(final RoutingDataSource dataSource, final ApplicationContext applicationContext,
+    public ShareAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ApplicationContext applicationContext,
             final ChargeReadPlatformService chargeReadPlatformService,
             final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
@@ -95,7 +94,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService,
             final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.applicationContext = applicationContext;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.shareProductDropdownReadPlatformService = shareProductDropdownReadPlatformService;

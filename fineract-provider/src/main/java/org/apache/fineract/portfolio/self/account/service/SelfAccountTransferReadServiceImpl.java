@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.self.account.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.self.account.data.SelfAccountTemplateData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,8 @@ public class SelfAccountTransferReadServiceImpl implements SelfAccountTransferRe
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public SelfAccountTransferReadServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public SelfAccountTransferReadServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

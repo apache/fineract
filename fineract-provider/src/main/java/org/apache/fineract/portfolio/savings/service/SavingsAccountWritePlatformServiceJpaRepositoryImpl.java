@@ -55,7 +55,6 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -184,7 +183,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
-            final RoutingDataSource dataSource, final SavingsAccountInterestPostingService savingsAccountInterestPostingService) {
+            final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -211,7 +210,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.standingInstructionRepository = standingInstructionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.gsimRepository = gsimRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
     }
 
@@ -1810,7 +1809,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transacton.getTransactionLocalDate(), account);
 
-        this.savingsAccountTransactionRepository.save(transacton);
+        this.savingsAccountTransactionRepository.saveAndFlush(transacton);
 
         if (backdatedTxnsAllowedTill) {
             // Check again whether transactions are modified
@@ -1841,7 +1840,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transaction.getTransactionLocalDate(), account);
         account.releaseOnHoldAmount(transaction.getAmount());
 
-        this.savingsAccountTransactionRepository.save(transaction);
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
         holdTransaction.updateReleaseId(transaction.getId());
 
         if (backdatedTxnsAllowedTill) {
@@ -1854,6 +1853,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(account.getId()).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult blockCredits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1870,6 +1870,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult unblockCredits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1886,6 +1887,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult blockDebits(final Long savingsId) {
         this.context.authenticatedUser();
@@ -1902,6 +1904,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult unblockDebits(final Long savingsId) {
         this.context.authenticatedUser();

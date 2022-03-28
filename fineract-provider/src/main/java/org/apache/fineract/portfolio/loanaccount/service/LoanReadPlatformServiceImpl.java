@@ -45,7 +45,6 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -107,7 +106,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -169,9 +167,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LoanProductReadPlatformService loanProductReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final GroupReadPlatformService groupReadPlatformService, final LoanDropdownReadPlatformService loanDropdownReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final RoutingDataSource dataSource,
-            final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+            final CodeValueReadPlatformService codeValueReadPlatformService, final JdbcTemplate jdbcTemplate,
+            final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final CalendarReadPlatformService calendarReadPlatformService,
+            final StaffReadPlatformService staffReadPlatformService, final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final FloatingRatesReadPlatformService floatingRatesReadPlatformService, final LoanUtilService loanUtilService,
             final ConfigurationDomainService configurationDomainService,
@@ -189,8 +187,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
@@ -565,9 +563,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .getLoanRepaymentScheduleInstallments(loanId);
         List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallmentData = new ArrayList<>();
 
-        if (loanRepaymentScheduleInstallments == null || loanRepaymentScheduleInstallments.size() == 0) {
-            throw new LoanRepaymentScheduleNotFoundException(loanId, Integer.valueOf(0));
-        }
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loanRepaymentScheduleInstallments) {
             loanRepaymentScheduleInstallmentData.add(LoanRepaymentScheduleInstallmentData.instanceOf(
                     loanRepaymentScheduleInstallment.getId(), loanRepaymentScheduleInstallment.getInstallmentNumber(),
@@ -1162,22 +1157,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     BigDecimal principal = BigDecimal.ZERO;
                     for (final DisbursementData data : disbursementData) {
                         if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
-                            if (periods.size() == 0) {
-                                principal = principal.add(data.amount());
-                                LoanSchedulePeriodData periodData = null;
-                                if (data.getChargeAmount() == null) {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            disbursementChargeAmount, data.isDisbursed());
-                                } else {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount),
-                                            data.isDisbursed());
-                                }
-                                if (periodData != null) {
-                                    periods.add(periodData);
-                                }
-                                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                            principal = principal.add(data.amount());
+                            LoanSchedulePeriodData periodData = null;
+                            if (data.getChargeAmount() == null) {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                        disbursementChargeAmount, data.isDisbursed());
+                            } else {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                        disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount),
+                                        data.isDisbursed());
                             }
+                            if (periodData != null) {
+                                periods.add(periodData);
+                            }
+                            this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                         } else if (data.isDueForDisbursement(fromDate, dueDate)) {
                             if (!excludePastUndisbursed || (excludePastUndisbursed && (data.isDisbursed()
                                     || !data.disbursementDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))))) {

@@ -319,4 +319,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         return this.installment;
     }
 
+    public void setInstallment(LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
+    }
 }

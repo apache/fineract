@@ -120,6 +120,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements DepositAccountWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DepositAccountWritePlatformServiceJpaRepositoryImpl.class);

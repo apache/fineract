@@ -30,7 +30,10 @@ buildscript {
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
-                'fineract-client'
+                'fineract-client',
+                'core',
+                'service',
+                'starter'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -40,13 +43,14 @@ buildscript {
         }
     }
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
-        classpath('com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0')
+        classpath 'org.eclipse.persistence:eclipselink:2.7.10'
+        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+        classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.1.0'
     }
 }
 
@@ -60,7 +64,7 @@ plugins {
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
     id 'org.openapi.generator' version '4.3.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
-    id 'org.springframework.boot' version '2.6.4' apply false
+    id 'org.springframework.boot' version '2.6.5' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.1.13' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.0' apply false
@@ -70,11 +74,12 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id "com.google.cloud.tools.jib" version "3.2.0" apply false
+    id 'com.google.cloud.tools.jib' version '3.2.0' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
-    id "org.sonarqube" version "3.3"
-    id "com.github.andygoossens.modernizer" version "1.6.2" apply false
+    id 'org.sonarqube' version '3.3'
+    id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
     id 'com.github.spotbugs' version '5.0.6' apply false
+    id 'se.thinkcode.cucumber-runner' version '0.0.10' apply false
 }
 
 description = '''\
@@ -109,9 +114,15 @@ allprojects  {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin
     dependencyManagement {
         imports {
-            mavenBom 'org.springframework:spring-framework-bom:5.3.16'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.4'
+            mavenBom 'org.springframework:spring-framework-bom:5.3.17'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.5'
+            mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.10'
             mavenBom 'org.junit:junit-bom:5.8.2'
+            mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2'
+            mavenBom 'io.cucumber:cucumber-bom:7.2.3'
+            mavenBom 'io.netty:netty-bom:4.1.75.Final'
+            mavenBom 'org.mockito:mockito-bom:4.4.0'
+            mavenBom 'io.github.swagger2markup:swagger2markup-bom:1.3.4'
         }
 
         dependencies {
@@ -119,38 +130,47 @@ allprojects  {
             // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
             // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-            dependency 'org.apache.openjpa:openjpa:3.2.1' // when upgrading, also change OpenJPA version repeated above in buildscript!
+            dependency 'org.slf4j:slf4j-api:1.7.36'
+            dependency 'org.slf4j:slf4j-simple:1.7.36'
+            dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
+            dependency 'org.slf4j:jul-to-slf4j:1.7.36'
+            dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
+            dependency 'ch.qos.logback:logback-core:1.2.11'
+            dependency 'ch.qos.logback:logback-classic:1.2.11'
+
+            dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
             dependency 'com.google.guava:guava:31.1-jre'
             dependency 'com.google.code.gson:gson:2.9.0'
             dependency 'com.google.truth:truth:1.1.3'
             dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
+            dependency 'com.google.googlejavaformat:google-java-format:1.15.0'
             dependency 'org.apache.commons:commons-email:1.5'
             dependency 'commons-io:commons-io:2.11.0'
             dependency 'com.github.librepdf:openpdf:1.3.27'
-            dependency 'org.mnode.ical4j:ical4j:3.1.3'
+            dependency 'org.mnode.ical4j:ical4j:3.2.1'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.174'
-            dependency 'org.ehcache:ehcache:3.9.9'
+            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.185'
+            dependency 'org.ehcache:ehcache:3.10.0'
             dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
             dependency 'com.jayway.jsonpath:json-path:2.7.0'
             dependency 'org.apache.tika:tika-core:2.3.0'
             dependency 'org.apache.httpcomponents:httpclient:4.5.13'
-            dependency 'io.swagger.core.v3:swagger-annotations:2.1.13'
             dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
             dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-            dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6'
-            dependency 'org.apache.activemq:activemq-broker:5.16.4'
+            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3' // Swagger needs exactly this version
+            dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
             dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
+            dependency 'joda-time:joda-time:2.10.14'
 
-            dependency 'io.github.classgraph:classgraph:4.8.141'
+            dependency 'io.github.classgraph:classgraph:4.8.143'
             dependency 'org.awaitility:awaitility:4.2.0'
             dependency 'com.github.spotbugs:spotbugs-annotations:4.6.0'
             dependency 'javax.cache:cache-api:1.1.1'
-            dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
-            dependency 'org.webjars.npm:swagger-ui-dist:4.6.1'
+            dependency 'org.mock-server:mockserver-junit-jupiter:5.13.0'
+            dependency 'org.webjars.npm:swagger-ui-dist:4.9.0'
             dependency 'org.webjars:webjars-locator-core:0.50'
             dependency 'com.icegreen:greenmail-junit5:1.6.7'
+            dependency 'com.intuit.karate:karate-junit5:1.2.0.RC5'
 
             // fineract client dependencies
             dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -180,11 +200,23 @@ allprojects  {
             dependency "io.gsonfire:gson-fire:1.8.5"
             dependency "io.swagger:swagger-core:1.6.5"
             dependency "io.swagger:swagger-annotations:1.6.5"
-            dependency "javax.annotation:javax.annotation-api:1.3.2"
+            dependency "jakarta.annotation:jakarta.annotation-api:1.3.5"
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
+            dependency "org.bouncycastle:bcpkix-jdk15to18:1.70"
+            dependency "org.bouncycastle:bcprov-jdk15to18:1.70"
 
-            dependency ('org.liquibase:liquibase-core:4.8.0') {
+
+            dependency ('org.apache.activemq:activemq-broker:5.17.0') {
+                exclude 'javax.annotation:javax.annotation-api'
+            }
+
+            dependency 'io.swagger.core.v3:swagger-annotations:2.1.13'
+            dependency ('io.swagger.core.v3:swagger-jaxrs2:2.1.13') {
+                exclude 'jakarta.activation:jakarta.activation-api'
+            }
+
+            dependency ('org.liquibase:liquibase-core:4.9.0') {
                 exclude 'javax.xml.bind:jaxb-api'
             }
 
@@ -195,13 +227,13 @@ allprojects  {
                 exclude 'pull-parser:pull-parser'
             }
 
-            dependencySet(group: 'org.apache.poi', version: '4.1.2') {
+            dependencySet(group: 'org.apache.poi', version: '5.2.2') {
                 entry 'poi'
                 entry 'poi-ooxml'
                 entry 'poi-ooxml-schemas'
             }
-            dependencySet(group: 'io.rest-assured', version: '4.5.1')
-            {
+
+            dependencySet(group: 'io.rest-assured', version: '4.5.1') {
                 entry 'rest-assured'
                 entry 'json-path'
                 entry 'xml-path'
@@ -248,12 +280,16 @@ allprojects  {
             "**/gradlew*",
             "**/git.properties",
             "**/*.html",
-            "**/*.mustache",
+            "**/templates/**",
+            "**/features/**",
+            "**/results/**",
             "**/package-info.java",
             "**/keystore.jks",
             "**/static/swagger-ui/**",
             "**/api-docs/**",
             "**/banner.txt",
+            "**/build.gradle.mustache",
+            "**/pom.mustache",
         ])
         strictCheck true
     }
@@ -290,13 +326,15 @@ allprojects  {
             '**/*.puml',
             '**/*.github/**',
             '**/MANIFEST.MF',
+            '**/spring.factories',
             '**/*.json',
             '**/*.json.template',
             '**/*.txt',
             '**/*.log',
             '**/fineractdev-eclipse-preferences.epf',
-            '**/template-expected.html',
-            '**/template.mustache',
+            '**/features/**',
+            '**/templates/**',
+            '**/results/**',
             '**/.classpath',
             '**/.project',
             '**/.idea/**',
@@ -371,9 +409,10 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
-    apply plugin: "net.ltgt.errorprone"
-    apply plugin: "com.github.spotbugs"
+    apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: 'se.thinkcode.cucumber-runner'
 
     /* define the valid syntax level for source files */
     sourceCompatibility = JavaVersion.VERSION_17
@@ -415,7 +454,9 @@ configure(project.fineractJavaProjects) {
             "-Xlint:varargs",
             "-Xlint:preview",
             "-Xlint:static",
-            "-Werror",
+            // -Werror needs to be disabled because EclipseLink's static weaving doesn't generate warning-free code
+            // and during an IntelliJ recompilation, it fails
+            //"-Werror",
             "-Xmaxwarns",
             1500,
             "-Xmaxerrs",
@@ -477,7 +518,7 @@ configure(project.fineractJavaProjects) {
     licenseMain.dependsOn compileJava
     processResources.dependsOn compileJava
 
-    // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+    // If we are running Gradle within Eclipse to enhance classes,
     // set the classes directory to point to Eclipse's default build directory
     if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
         sourceSets.main.java.outputDir = file("$projectDir/bin/main")
@@ -486,7 +527,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:9.3'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.0'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.41.0'
     }
 
@@ -508,7 +549,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.10.0"
+        errorprone "com.google.errorprone:error_prone_core:2.11.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -570,7 +611,6 @@ configure(project.fineractJavaProjects) {
                     "UnsafeFinalization",
                     "JavaTimeDefaultTimeZone",
                     "JodaPlusMinusLong",
-                    "MutableMethodReturnType",
                     "SwitchDefault",
                     "VarTypeName",
                     "ArgumentSelectionDefectChecker",
@@ -611,8 +651,37 @@ configure(project.fineractJavaProjects) {
         }
     }
 
+    dependencies {
+        implementation (
+                'ch.qos.logback:logback-core',
+                'org.slf4j:slf4j-api',
+                'org.slf4j:log4j-over-slf4j',
+                'org.slf4j:jul-to-slf4j',
+                )
+        implementation ("ch.qos.logback:logback-classic") {
+            exclude(module: "slf4j-api")
+        }
+
+        testImplementation( 'org.mockito:mockito-core',
+                'org.mockito:mockito-junit-jupiter',
+                'org.junit.jupiter:junit-jupiter-api',
+                'org.junit.jupiter:junit-jupiter-engine',
+                'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+                'org.bouncycastle:bcpkix-jdk15to18',
+                'org.bouncycastle:bcprov-jdk15to18',
+                'org.awaitility:awaitility',
+                'com.google.truth:truth',
+                'com.google.truth.extensions:truth-java8-extension',
+                'io.cucumber:cucumber-core',
+                'io.cucumber:cucumber-java',
+                'io.cucumber:cucumber-java8',
+                'io.cucumber:cucumber-junit-platform-engine',
+                )
+    }
+
     test {
         useJUnitPlatform()
+        dependsOn 'cucumber'
 
         if (project.hasProperty('excludeTests')) {
             filter {
@@ -625,6 +694,12 @@ configure(project.fineractJavaProjects) {
         logLevel 'quiet'
     }
 
+    cucumber {
+        tags = 'not @ignore'
+        main = 'io.cucumber.core.cli.Main'
+        shorten = 'argfile'
+    }
+
     // Configuration for spotbugs plugin
     // https://github.com/spotbugs/spotbugs-gradle-plugin
 
@@ -632,6 +707,7 @@ configure(project.fineractJavaProjects) {
     spotbugs {
         reportLevel = 'high'
         showProgress = false
+        excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
     }
     // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
     spotbugsMain {

@@ -50,6 +50,7 @@ public final class CalendarConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final CalendarSupportedParameters param : CalendarSupportedParameters.values()) {
                 values.add(param.value);

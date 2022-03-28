@@ -93,8 +93,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
             final Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
             loanTransaction.updateComponents(principalPortion, interestWaivedPortion, feeChargesPortion, penaltyChargesPortion);
             if (interestWaivedPortion.isGreaterThanZero()) {
-                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                        interestWaivedPortion, feeChargesPortion, penaltyChargesPortion));
+                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                        principalPortion, interestWaivedPortion, feeChargesPortion, penaltyChargesPortion));
             }
         } else if (loanTransaction.isChargePayment()) {
             final Money principalPortion = Money.zero(currency);
@@ -108,8 +108,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
             }
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
             if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                        interestPortion, feeChargesPortion, penaltyChargesPortion));
+                transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                        principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
             }
         } else {
 
@@ -133,8 +133,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     final Money principalPortion = Money.zero(currency);
                     loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
                     if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-                        transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(installment, principalPortion,
-                                interestPortion, feeChargesPortion, penaltyChargesPortion));
+                        transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, installment,
+                                principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
                     }
                 }
             }
@@ -159,8 +159,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     }
                     if (!isMappingUpdated && principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)
                             .isGreaterThanZero()) {
-                        transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(installment, principalPortion,
-                                interestPortion, feeChargesPortion, penaltyChargesPortion));
+                        transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, installment,
+                                principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
                     }
                 }
             }
@@ -237,8 +237,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
     }
@@ -290,8 +290,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
     }

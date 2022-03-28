@@ -25,7 +25,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCategoryCannotBeDeletedException;
@@ -52,10 +51,10 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
 
     @Autowired
     public ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl(final ProvisioningCategoryRepository provisioningCategoryRepository,
-            final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final RoutingDataSource dataSource) {
+            final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final JdbcTemplate jdbcTemplate) {
         this.provisioningCategoryRepository = provisioningCategoryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
         try {
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             final ProvisioningCategory provisioningCategory = ProvisioningCategory.fromJson(command);
-            this.provisioningCategoryRepository.save(provisioningCategory);
+            this.provisioningCategoryRepository.saveAndFlush(provisioningCategory);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCategory.getId())
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -98,7 +97,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
                     .orElseThrow(() -> new ProvisioningCategoryNotFoundException(categoryId));
             final Map<String, Object> changes = provisioningCategoryForUpdate.update(command);
             if (!changes.isEmpty()) {
-                this.provisioningCategoryRepository.save(provisioningCategoryForUpdate);
+                this.provisioningCategoryRepository.saveAndFlush(provisioningCategoryForUpdate);
             }
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(categoryId).with(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

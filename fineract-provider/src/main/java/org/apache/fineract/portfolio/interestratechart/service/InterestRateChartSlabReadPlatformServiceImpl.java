@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -57,12 +56,12 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public InterestRateChartSlabReadPlatformServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public InterestRateChartSlabReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
             final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;

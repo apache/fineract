@@ -21,7 +21,6 @@ package org.apache.fineract.mix.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,8 +34,8 @@ public class MixTaxonomyReadPlatformServiceImpl implements MixTaxonomyReadPlatfo
     private final MixTaxonomyMapper mixTaxonomyMapper;
 
     @Autowired
-    public MixTaxonomyReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public MixTaxonomyReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.mixTaxonomyMapper = new MixTaxonomyMapper();
     }
 

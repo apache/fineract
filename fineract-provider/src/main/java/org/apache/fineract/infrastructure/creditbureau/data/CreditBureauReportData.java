@@ -54,4 +54,31 @@ public final class CreditBureauReportData implements Serializable {
         this.closedAccounts = closedAccounts;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getCreditScore() {
+        return creditScore;
+    }
+
+    public String getBorrowerInfo() {
+        return borrowerInfo;
+    }
+
+    public String[] getOpenAccounts() {
+        return openAccounts;
+    }
+
+    public String[] getClosedAccounts() {
+        return closedAccounts;
+    }
 }

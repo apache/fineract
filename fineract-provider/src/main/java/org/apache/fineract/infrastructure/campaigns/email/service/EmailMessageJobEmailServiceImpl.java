@@ -40,7 +40,7 @@ public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEma
     private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
 
     @Autowired
-    private EmailMessageJobEmailServiceImpl(ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
+    public EmailMessageJobEmailServiceImpl(ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
         this.externalServicesReadPlatformService = externalServicesReadPlatformService;
     }
 

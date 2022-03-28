@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobConfigurationData;
 import org.apache.fineract.infrastructure.reportmailingjob.exception.ReportMailingJobConfigurationNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +39,8 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
      * ReportMailingJobConfigurationReadPlatformServiceImpl constructor
      **/
     @Autowired
-    public ReportMailingJobConfigurationReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ReportMailingJobConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

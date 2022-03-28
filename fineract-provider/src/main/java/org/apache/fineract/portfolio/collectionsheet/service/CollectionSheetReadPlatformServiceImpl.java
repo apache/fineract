@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -85,7 +84,7 @@ import org.springframework.stereotype.Service;
 public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final NamedParameterJdbcTemplate namedParameterjdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final CenterReadPlatformService centerReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer;
@@ -100,8 +99,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
+    public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context,
+            final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final CenterReadPlatformService centerReadPlatformService,
+            final GroupReadPlatformService groupReadPlatformService,
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
@@ -111,7 +111,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CalendarInstanceRepository calendarInstanceRepository, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
-        this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.collectionSheetGenerateCommandFromApiJsonDeserializer = collectionSheetGenerateCommandFromApiJsonDeserializer;
         this.groupReadPlatformService = groupReadPlatformService;
         this.calendarRepositoryWrapper = calendarRepositoryWrapper;
@@ -372,14 +372,14 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)
                 .addValue("entityTypeId", entityType.getValue());
 
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterJdbcTemplate
                 .query(mapper.collectionSheetSchema(false), namedParameters, mapper);
 
         // loan data for collection sheet
         JLGCollectionSheetData collectionSheetData = buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
 
         // mandatory savings data for collection sheet
-        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterjdbcTemplate
+        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterJdbcTemplate
                 .query(mandatorySavingsExtractor.collectionSheetSchema(false), namedParameters, mandatorySavingsExtractor);
 
         // merge savings data into loan data
@@ -477,14 +477,14 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy)
                 .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());
 
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(),
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterJdbcTemplate.query(sql.toString(),
                 namedParameters, mapper);
 
         // loan data for collection sheet
         JLGCollectionSheetData collectionSheetData = buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
 
         // mandatory savings data for collection sheet
-        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterjdbcTemplate
+        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterJdbcTemplate
                 .query(mandatorySavingsExtractor.collectionSheetSchema(true), namedParameters, mandatorySavingsExtractor);
 
         // merge savings data into loan data
@@ -709,13 +709,13 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             ((MapSqlParameterSource) namedParameters).addValue("staffId", staffId);
         }
 
-        final Collection<IndividualCollectionSheetLoanFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate
+        final Collection<IndividualCollectionSheetLoanFlatData> collectionSheetFlatDatas = this.namedParameterJdbcTemplate
                 .query(mapper.sqlSchema(), namedParameters, mapper);
 
         IndividualMandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new IndividualMandatorySavingsCollectionsheetExtractor(
                 checkForOfficeId, checkForStaffId, sqlGenerator);
         // mandatory savings data for collection sheet
-        Collection<IndividualClientData> clientData = this.namedParameterjdbcTemplate
+        Collection<IndividualClientData> clientData = this.namedParameterJdbcTemplate
                 .query(mandatorySavingsExtractor.collectionSheetSchema(), namedParameters, mandatorySavingsExtractor);
 
         // merge savings data into loan data

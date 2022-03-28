@@ -69,7 +69,7 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
 
         final CreditBureauConfiguration cb_config = CreditBureauConfiguration.fromJson(command, orgcb);
 
-        this.creditBureauConfigurationRepository.save(cb_config);
+        this.creditBureauConfigurationRepository.saveAndFlush(cb_config);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_config.getId()).build();
 

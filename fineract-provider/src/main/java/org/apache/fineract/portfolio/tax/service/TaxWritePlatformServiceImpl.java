@@ -60,7 +60,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     public CommandProcessingResult createTaxComponent(final JsonCommand command) {
         this.validator.validateForTaxComponentCreate(command.json());
         TaxComponent taxComponent = this.taxAssembler.assembleTaxComponentFrom(command);
-        this.taxComponentRepository.save(taxComponent);
+        this.taxComponentRepository.saveAndFlush(taxComponent);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(taxComponent.getId()) //
@@ -74,7 +74,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         this.validator.validateStartDate(taxComponent.startDate(), command);
         Map<String, Object> changes = taxComponent.update(command);
         this.validator.validateTaxComponentForUpdate(taxComponent);
-        this.taxComponentRepository.save(taxComponent);
+        this.taxComponentRepository.saveAndFlush(taxComponent);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(id) //
                 .with(changes).build();
@@ -85,7 +85,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         this.validator.validateForTaxGroupCreate(command.json());
         final TaxGroup taxGroup = this.taxAssembler.assembleTaxGroupFrom(command);
         this.validator.validateTaxGroup(taxGroup);
-        this.taxGroupRepository.save(taxGroup);
+        this.taxGroupRepository.saveAndFlush(taxGroup);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(taxGroup.getId()) //
@@ -101,7 +101,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         this.validator.validateTaxGroupEndDateAndTaxComponent(taxGroup, groupMappings);
         Map<String, Object> changes = taxGroup.update(command, groupMappings);
         this.validator.validateTaxGroup(taxGroup);
-        this.taxGroupRepository.save(taxGroup);
+        this.taxGroupRepository.saveAndFlush(taxGroup);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(id) //
                 .with(changes).build();

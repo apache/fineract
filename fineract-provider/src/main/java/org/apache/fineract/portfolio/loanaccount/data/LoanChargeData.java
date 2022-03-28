@@ -81,6 +81,8 @@ public class LoanChargeData {
 
     private BigDecimal amountUnrecognized;
 
+    private String externalId;
+
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,
                 null, null, null);
@@ -103,7 +105,7 @@ public class LoanChargeData {
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
             final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid, final boolean waived, final Long loanId,
             final BigDecimal minCap, final BigDecimal maxCap, final BigDecimal amountOrPercentage,
-            Collection<LoanInstallmentChargeData> installmentChargeData) {
+            Collection<LoanInstallmentChargeData> installmentChargeData, final String externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -140,6 +142,7 @@ public class LoanChargeData {
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = null;
         this.amountUnrecognized = null;
+        this.externalId = externalId;
     }
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
@@ -306,6 +309,7 @@ public class LoanChargeData {
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = chargeData.amountAccrued;
         this.amountUnrecognized = chargeData.amountUnrecognized;
+        this.externalId = chargeData.externalId;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amount, final EnumOptionData chargeCalculationType,
@@ -440,4 +444,9 @@ public class LoanChargeData {
     public BigDecimal getAmountUnrecognized() {
         return this.amountUnrecognized;
     }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
 }

@@ -667,13 +667,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-            for (LoanRepaymentScheduleInstallment installment : installments) {
-                // installment.setPostDatedChecksToNull();
-                if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.save(installment);
-                }
-            }
             this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
@@ -691,12 +684,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-            for (LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.save(installment);
-                }
-            }
             this.loanRepositoryWrapper.save(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
@@ -1145,7 +1132,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (paymentDetail != null) {
                 this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
             }
-            this.loanTransactionRepository.save(newTransactionDetail);
+            this.loanTransactionRepository.saveAndFlush(newTransactionDetail);
         }
 
         /***
@@ -1252,7 +1239,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO,
                 currentUser);
 
-        this.loanTransactionRepository.save(waiveInterestTransaction);
+        this.loanTransactionRepository.saveAndFlush(waiveInterestTransaction);
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
@@ -1328,7 +1315,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ChangedTransactionDetail changedTransactionDetail = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine(),
                 changes, existingTransactionIds, existingReversedTransactionIds, currentUser, scheduleGeneratorDTO);
         LoanTransaction writeoff = changedTransactionDetail.getNewTransactionMappings().remove(0L);
-        this.loanTransactionRepository.save(writeoff);
+        this.loanTransactionRepository.saveAndFlush(writeoff);
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
             this.loanTransactionRepository.save(mapEntry.getValue());
             this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
@@ -1383,7 +1370,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO, currentUser);
         final LoanTransaction possibleClosingTransaction = changedTransactionDetail.getNewTransactionMappings().remove(0L);
         if (possibleClosingTransaction != null) {
-            this.loanTransactionRepository.save(possibleClosingTransaction);
+            this.loanTransactionRepository.saveAndFlush(possibleClosingTransaction);
         }
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
             this.loanTransactionRepository.save(mapEntry.getValue());
@@ -1682,7 +1669,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.addLoanCharge(loanCharge);
 
-        this.loanChargeRepository.save(loanCharge);
+        this.loanChargeRepository.saveAndFlush(loanCharge);
 
         /**
          * we want to apply charge transactions only for those loans charges that are applied when a loan is active and
@@ -1690,7 +1677,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          **/
         if (loan.status().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null, currentUser);
-            this.loanTransactionRepository.save(applyLoanChargeTransaction);
+            this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
         }
         boolean isAppliedOnBackDate = false;
         if (loanCharge.getDueLocalDate() == null || DateUtils.getLocalDateOfTenant().isAfter(loanCharge.getDueLocalDate())) {
@@ -1952,7 +1939,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber, scheduleGeneratorDTO, accruedCharge,
                 currentUser);
 
-        this.loanTransactionRepository.save(waiveTransaction);
+        this.loanTransactionRepository.saveAndFlush(waiveTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -2214,7 +2201,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.addLoanTransaction(newTransferTransaction);
         loan.setLoanStatus(LoanStatus.TRANSFER_IN_PROGRESS.getValue());
 
-        this.loanTransactionRepository.save(newTransferTransaction);
+        this.loanTransactionRepository.saveAndFlush(newTransferTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -2246,7 +2233,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.reassignLoanOfficer(loanOfficer, transferDate);
         }
 
-        this.loanTransactionRepository.save(newTransferAcceptanceTransaction);
+        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -2272,7 +2259,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
 
-        this.loanTransactionRepository.save(newTransferAcceptanceTransaction);
+        this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);

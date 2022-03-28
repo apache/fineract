@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
@@ -50,9 +49,9 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     private final PaginationHelper paginationHelper;
 
     @Autowired
-    public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator,
+    public SchedulerJobRunnerReadServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
         this.sqlGenerator = sqlGenerator;
         this.paginationHelper = paginationHelper;

@@ -68,7 +68,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             final Fund fund = Fund.fromJson(command);
 
-            this.fundRepository.save(fund);
+            this.fundRepository.saveAndFlush(fund);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -113,11 +113,11 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleFundDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("fund_externalid_org")) {
+        if (realCause.getMessage().contains("m_fund_external_id_key")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId",
                     "A fund with external id '" + externalId + "' already exists", "externalId", externalId);
-        } else if (realCause.getMessage().contains("fund_name_org")) {
+        } else if (realCause.getMessage().contains("m_fund_external_id_name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "A fund with name '" + name + "' already exists",
                     "name", name);

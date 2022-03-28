@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurationData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +38,9 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class CbConfigMapper implements RowMapper<CreditBureauConfigurationData> {

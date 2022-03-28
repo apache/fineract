@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.self.savings.service;
 
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,8 @@ public class AppuserSavingsMapperReadServiceImpl implements AppuserSavingsMapper
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public AppuserSavingsMapperReadServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public AppuserSavingsMapperReadServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

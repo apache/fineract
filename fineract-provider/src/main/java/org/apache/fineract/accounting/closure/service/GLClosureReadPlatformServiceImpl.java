@@ -26,7 +26,6 @@ import java.util.List;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,8 +38,8 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public GLClosureReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public GLClosureReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {

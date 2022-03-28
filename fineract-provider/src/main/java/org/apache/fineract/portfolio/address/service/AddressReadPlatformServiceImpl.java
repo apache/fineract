@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +42,10 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     private final CodeValueReadPlatformService readService;
 
     @Autowired
-    public AddressReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public AddressReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final CodeValueReadPlatformService readService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.readService = readService;
     }
 

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrl><schemaRef xmlns:link="http://www.themix.org/sites/default/files/Taxonomy2010/dct/dc-all_2010-08-31.xsd"></schemaRef><Assets contextRef="As_Of_07_17_20131" unitRef="Unit2" decimals="0">10000</Assets><context id="As_Of_07_17_20131"><entity><identifier scheme="http://www.themix.org">000000</identifier></entity><period><instant>2013-07-17</instant></period></context><unit id="Unit2"><measure>iso4217:USD</measure></unit><unit id="Unit1"><measure>xbrli:pure</measure></unit></xbrl>

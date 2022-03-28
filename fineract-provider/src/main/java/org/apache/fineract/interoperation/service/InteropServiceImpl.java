@@ -49,7 +49,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.interoperation.data.InteropAccountData;
@@ -150,7 +149,7 @@ public class InteropServiceImpl implements InteropService {
             ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
             PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, LoanRepository loanRepository,
             SavingsHelper savingsHelper, SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, final RoutingDataSource dataSource,
+            SavingsAccountDomainService savingsAccountService, final JdbcTemplate jdbcTemplate,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.securityContext = securityContext;
@@ -165,7 +164,7 @@ public class InteropServiceImpl implements InteropService {
         this.savingsHelper = savingsHelper;
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountService = savingsAccountService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.sqlGenerator = sqlGenerator;
@@ -288,7 +287,7 @@ public class InteropServiceImpl implements InteropService {
             InteropIdentifier identifier = new InteropIdentifier(savingsAccount, request.getIdType(), request.getIdValue(),
                     request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getDateOfTenant());
 
-            identifierRepository.save(identifier);
+            identifierRepository.saveAndFlush(identifier);
 
             return InteropIdentifierAccountResponseData.build(identifier.getId(), savingsAccount.getExternalId());
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

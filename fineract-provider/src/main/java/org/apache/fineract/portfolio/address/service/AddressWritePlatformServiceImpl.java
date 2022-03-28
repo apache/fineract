@@ -100,7 +100,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
 
         final ClientAddress clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
-        this.clientAddressRepository.save(clientAddressobj);
+        this.clientAddressRepository.saveAndFlush(clientAddressobj);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientAddressobj.getId()).build();
     }
@@ -152,7 +152,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 }
 
                 clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
-                this.clientAddressRepository.save(clientAddressobj);
+                this.clientAddressRepository.saveAndFlush(clientAddressobj);
 
             }
         }

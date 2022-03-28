@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -55,10 +54,10 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
 
     }

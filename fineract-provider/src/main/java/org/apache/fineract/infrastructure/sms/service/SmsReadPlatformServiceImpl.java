@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
@@ -54,9 +53,9 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public SmsReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator,
+    public SmsReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
         this.smsRowMapper = new SmsMapper();
         this.columnValidator = columnValidator;

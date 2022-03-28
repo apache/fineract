@@ -30,7 +30,6 @@ import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningE
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.slf4j.Logger;
@@ -52,9 +51,9 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public ProvisioningEntriesReadPlatformServiceImpl(final RoutingDataSource dataSource, DatabaseSpecificSQLGenerator sqlGenerator,
+    public ProvisioningEntriesReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.loanProductProvisioningEntryDataPaginationHelper = paginationHelper;
         this.provisioningEntryDataPaginationHelper = paginationHelper;
         this.sqlGenerator = sqlGenerator;

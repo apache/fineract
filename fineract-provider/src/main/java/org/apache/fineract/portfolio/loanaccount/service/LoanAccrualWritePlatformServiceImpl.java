@@ -30,10 +30,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -63,7 +61,6 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final AppUserRepositoryWrapper userRepository;
@@ -71,15 +68,14 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
     @Autowired
-    public LoanAccrualWritePlatformServiceImpl(final RoutingDataSource dataSource, final LoanReadPlatformService loanReadPlatformService,
+    public LoanAccrualWritePlatformServiceImpl(final JdbcTemplate jdbcTemplate, final LoanReadPlatformService loanReadPlatformService,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final AppUserRepositoryWrapper userRepository,
             final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             DatabaseSpecificSQLGenerator sqlGenerator) {
         this.loanReadPlatformService = loanReadPlatformService;
-        this.dataSource = dataSource;
         this.sqlGenerator = sqlGenerator;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
         this.userRepository = userRepository;

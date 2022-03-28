@@ -141,7 +141,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     this.aprCalculator, floatingRate, rates);
             loanproduct.updateLoanProductInRelatedClasses();
 
-            this.loanProductRepository.save(loanproduct);
+            this.loanProductRepository.saveAndFlush(loanproduct);
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
@@ -252,6 +252,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (!changes.isEmpty()) {
+                product.validateLoanProductPreSave();
                 this.loanProductRepository.saveAndFlush(product);
             }
 

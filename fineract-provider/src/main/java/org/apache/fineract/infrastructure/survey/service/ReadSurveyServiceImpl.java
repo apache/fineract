@@ -26,9 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -50,17 +48,15 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final GenericDataService genericDataService;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
     @Autowired
-    public ReadSurveyServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public ReadSurveyServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final GenericDataService genericDataService, final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
 
         this.context = context;
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.genericDataService = genericDataService;
         this.readWriteNonCoreDataService = readWriteNonCoreDataService;
     }

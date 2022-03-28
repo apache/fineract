@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import java.util.Map;
-import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 
 /**
  * Represents the successful result of an REST API call that results in processing a command.
@@ -39,7 +38,7 @@ public class CommandProcessingResultBuilder {
     private Long glimId;
     private String transactionId;
     private Map<String, Object> changes;
-    private CreditBureauReportData creditBureauReportData;
+    private Map<String, Object> creditBureauReportData;
     private Long productId;
     private boolean rollbackTransaction = false;
 
@@ -119,7 +118,7 @@ public class CommandProcessingResultBuilder {
         return this;
     }
 
-    public CommandProcessingResultBuilder withCreditReport(final CreditBureauReportData withCreditReport) {
+    public CommandProcessingResultBuilder withCreditReport(final Map<String, Object> withCreditReport) {
         this.creditBureauReportData = withCreditReport;
         return this;
     }

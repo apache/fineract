@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -51,9 +50,9 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     private HashMap<Long, HashMap<Long, CacheNotificationResponseHeader>> tenantNotificationResponseHeaderCache = new HashMap<>();
 
     @Autowired
-    public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
+    public NotificationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.context = context;
         this.columnValidator = columnValidator;
         this.paginationHelper = paginationHelper;
