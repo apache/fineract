@@ -185,8 +185,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
-        this.approveLoanApplication();
-        this.disburseLoan();
+        this.approveLoanApplication(this.dateString);
+        this.disburseLoan(this.dateString);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
@@ -203,10 +203,10 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     /**
      * approve the loan application
      **/
-    private void approveLoanApplication() {
+    private void approveLoanApplication(String approveDate) {
 
         if (this.loanId != null) {
-            this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
+            this.loanTransactionHelper.approveLoan(approveDate, this.loanId);
             LOG.info("Successfully approved loan (ID: {} )", this.loanId);
         }
     }
@@ -214,11 +214,11 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     /**
      * disburse the newly created loan
      **/
-    private void disburseLoan() {
+    private void disburseLoan(String disburseDate) {
 
         if (this.loanId != null) {
             String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId,
+            this.loanTransactionHelper.disburseLoan(disburseDate, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
@@ -485,8 +485,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
-        this.approveLoanApplication();
-        this.disburseLoan();
+        this.approveLoanApplication(this.dateString);
+        this.disburseLoan(this.dateString);
     }
 
     /**
@@ -529,5 +529,4 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
     }
-
 }
