@@ -3445,6 +3445,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .subtract(this.getSavingsHoldAmount());
     }
 
+    public BigDecimal getWithdrawableBalanceWithLien() {
+        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds())
+                .subtract(this.getSavingsHoldAmount());
+    }
+
     public BigDecimal getWithdrawableBalanceWithoutMinimumBalance() {
         return getAccountBalance().subtract(this.getOnHoldFunds()).subtract(this.getSavingsHoldAmount());
     }

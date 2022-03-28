@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,6 +34,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -74,7 +76,7 @@ public class SavingsAccountTransactionDataValidator {
 
     @Autowired
     public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService) {
+                                                  final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationDomainService = configurationDomainService;
     }
@@ -105,7 +107,8 @@ public class SavingsAccountTransactionDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 SavingsAccountConstant.SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
 
@@ -133,7 +136,8 @@ public class SavingsAccountTransactionDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 SavingsAccountConstant.SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS);
 
@@ -156,7 +160,8 @@ public class SavingsAccountTransactionDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 SavingsAccountConstant.SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
 
@@ -206,13 +211,14 @@ public class SavingsAccountTransactionDataValidator {
     }
 
     public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account, final AppUser createdUser,
-            final boolean backdatedTxnsAllowedTill) {
+                                                                 final boolean backdatedTxnsAllowedTill) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -232,28 +238,64 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
-        account.holdAmount(amount);
 
 
-        Boolean enforceMinRequiredBalance = account.getEnforceMinRequiredBalance();
-        Boolean accountLienAllowed = account.isLienAllowed();
+        Boolean isEnforceMinRequiredBalanceEnabled = account.getEnforceMinRequiredBalance();
+        Boolean isAccountLienEnabled = account.isLienAllowed();
         Boolean isOverdraftEnabled = account.isAllowOverdraft();
 
         Boolean lienAllowed = false;
         if (this.fromApiJsonHelper.parameterExists(lienAllowedParamName, element)) {
             lienAllowed = this.fromApiJsonHelper.extractBooleanNamed(lienAllowedParamName, element);
             if (lienAllowed) {
-                if (accountLienAllowed) {
+                if (isAccountLienEnabled) {
                     if (isOverdraftEnabled) {
                         if (account.getOverdraftLimit().compareTo(account.getMaxAllowedLienLimit()) > 0) {
-                            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("Overdraft limit can not be greater than lien limit", account.getId());
                         }
                     }
+
+                    if (amount.compareTo(account.getMaxAllowedLienLimit()) > 0) {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("lien limit exceeded", account.getId());
+                    }
                 } else {
-                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("lien is not allowed in product", account.getId());
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("lien is not allowed in product level", account.getId());
+                }
+            } else {
+                if (isOverdraftEnabled) {
+                    if (amount.compareTo(account.getWithdrawableBalance()) > 0 && amount.compareTo(account.getOverdraftLimit()) > 0) {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                    }
+                }
+                if (isEnforceMinRequiredBalanceEnabled) {
+                    if (amount.compareTo(account.getWithdrawableBalance()) > 0) {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                    }
+                }
+                if (!isOverdraftEnabled && !isEnforceMinRequiredBalanceEnabled) {
+                    if (amount.compareTo(account.getWithdrawableBalance()) > 0) {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                    }
+                }
+            }
+        } else {
+            if (isOverdraftEnabled) {
+                if (amount.compareTo(account.getWithdrawableBalance()) > 0 && amount.compareTo(account.getOverdraftLimit()) > 0) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                }
+            }
+            if (isEnforceMinRequiredBalanceEnabled) {
+                if (amount.compareTo(account.getWithdrawableBalance()) > 0) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                }
+            }
+            if (!isOverdraftEnabled && !isEnforceMinRequiredBalanceEnabled) {
+                if (amount.compareTo(account.getWithdrawableBalance()) > 0) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
                 }
             }
         }
+        account.holdAmount(amount);
 
 //        if (accountLienAllowed) {
 //
@@ -289,7 +331,7 @@ public class SavingsAccountTransactionDataValidator {
     }
 
     public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction,
-            final AppUser createdUser) {
+                                                                          final AppUser createdUser) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
