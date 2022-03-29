@@ -176,7 +176,7 @@ public final class SavingsAccountData implements Serializable {
         this.subStatus = null;
         this.timeline = null;
         this.currency = null;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate != null ? nominalAnnualInterestRate : BigDecimal.ZERO;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
@@ -530,7 +530,7 @@ public final class SavingsAccountData implements Serializable {
         this.subStatus = null;
         this.timeline = null;
         this.currency = null;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate == null ? BigDecimal.ZERO : nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
@@ -937,7 +937,7 @@ public final class SavingsAccountData implements Serializable {
         this.subStatus = subStatus;
         this.timeline = timeline;
         this.currency = currency;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate == null ? BigDecimal.ZERO : nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
