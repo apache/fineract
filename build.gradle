@@ -216,7 +216,7 @@ allprojects  {
                 exclude 'jakarta.activation:jakarta.activation-api'
             }
 
-            dependency ('org.liquibase:liquibase-core:4.9.0') {
+            dependency ('org.liquibase:liquibase-core:4.9.1') {
                 exclude 'javax.xml.bind:jaxb-api'
             }
 
