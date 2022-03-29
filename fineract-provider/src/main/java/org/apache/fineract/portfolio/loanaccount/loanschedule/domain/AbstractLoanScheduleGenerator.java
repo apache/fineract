@@ -177,6 +177,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             isFirstRepayment = false;
         }
+
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
             scheduleParams.setActualRepaymentDate(this.scheduledDateGenerator
@@ -2195,32 +2196,16 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             actualRepaymentDate = lastInstallmentDate;
                         }
                         isFirstRepayment = false;
-                        LocalDate prevLastInstDate = lastInstallmentDate;
                         lastInstallmentDate = this.scheduledDateGenerator
                                 .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
-                        LocalDate modifiedLastInstDate = null;
-                        LoanTermVariationsData variation1 = null;
                         while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
                             LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
                             if (!variation.isSpecificToInstallment()) {
-                                modifiedLastInstDate = variation.getDateValue();
-                                variation1 = variation;
+                                actualRepaymentDate = variation.getDateValue();
+                                lastInstallmentDate = actualRepaymentDate;
                             }
+                            dueDateVariationsDataList.add(variation);
                         }
-
-                        if (!lastInstallmentDate.isEqual(installment.getDueDate())
-                                && !installment.getDueDate().equals(modifiedLastInstDate)) {
-                            lastInstallmentDate = prevLastInstDate;
-                            actualRepaymentDate = lastInstallmentDate;
-                            if (modifiedLastInstDate != null) {
-                                loanApplicationTerms.getLoanTermVariations().previousDueDateVariation();
-                            }
-                        } else if (installment.getDueDate().equals(modifiedLastInstDate)) {
-                            actualRepaymentDate = modifiedLastInstDate;
-                            lastInstallmentDate = actualRepaymentDate;
-                            dueDateVariationsDataList.add(variation1);
-                        }
-
                         loanTermVariationParams = applyExceptionLoanTermVariations(loanApplicationTerms, lastInstallmentDate,
                                 exceptionDataListIterator, instalmentNumber, totalCumulativePrincipal, totalCumulativeInterest, mc);
                     } while (loanTermVariationParams != null && loanTermVariationParams.isSkipPeriod());
